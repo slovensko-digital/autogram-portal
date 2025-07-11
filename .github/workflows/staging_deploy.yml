@@ -8,7 +8,9 @@ jobs:
   staging-deploy:
     name: Deploy to STAGING environment
     runs-on: ubuntu-latest
-    environment: staging
+    environment:
+      name: staging
+      url: https://agp.dev.slovensko.digital
 
     steps:
       - name: Checkout code
