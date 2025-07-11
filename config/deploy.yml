@@ -13,8 +13,8 @@ proxy:
 
 env:
   secret:
-    - RAILS_MASTER_KEY
     - SECRET_KEY_BASE
+    - DATABASE_URL
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
