@@ -1,0 +1,19 @@
+servers:
+  web:
+    hosts:
+      - dev.slovensko.digital
+
+env:
+  clear:
+    RAILS_ENV: staging
+    RAILS_LOG_LEVEL: info
+    APP_HOST: agp.dev.slovensko.digital
+
+proxy:
+  host: agp.dev.slovensko.digital
+
+volumes:
+  - "autogram_portal_storage:/rails/storage"
+
+ssh:
+  user: kamal

@@ -1,0 +1,42 @@
+service: autogram-portal
+
+image: sd/autogram-portal
+
+servers:
+  web:
+    options:
+      "add-host": host.docker.internal:host-gateway
+
+proxy:
+  ssl: true
+  app_port: 3000
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+
+registry:
+  server: registry.dev.slovensko.digital
+  username:
+    - KAMAL_REGISTRY_USERNAME
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+  remote: ssh://kamal@dev.slovensko.digital
+  cache:
+    type: registry
+    options: mode=max,image-manifest=true,oci-mediatypes=true
+
+# Bridge fingerprinted assets, like JS and CSS, between versions to avoid
+# hitting 404 on in-flight requests. Combines all files from new and old
+# version inside the asset_path.
+#
+asset_path: /app/public/assets
