@@ -1,0 +1,30 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: postal_addresses
+#
+#  id             :bigint           not null, primary key
+#  address        :text
+#  recipient_name :string
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#  bundle_id      :bigint           not null
+#
+# Indexes
+#
+#  index_postal_addresses_on_bundle_id  (bundle_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (bundle_id => bundles.id)
+#
+one:
+  address: MyText
+  recipient_name: MyString
+  bundle: one
+
+two:
+  address: MyText
+  recipient_name: MyString
+  bundle: two

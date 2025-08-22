@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: signing_parameters
+#
+#  id                       :bigint           not null, primary key
+#  container                :string
+#  level                    :string
+#  signature_baseline_level :string
+#  signature_form           :string
+#  created_at               :datetime         not null
+#  updated_at               :datetime         not null
+#
+one:
+  level: MyString
+  signature_form: MyString
+  signature_baseline_level: MyString
+  container: MyString
+
+two:
+  level: MyString
+  signature_form: MyString
+  signature_baseline_level: MyString
+  container: MyString

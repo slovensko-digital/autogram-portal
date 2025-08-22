@@ -219,7 +219,7 @@ components:
           items:
             $ref: "#/components/schemas/SignatureMethod"
         file:
-          $ref: "#/components/schemas/File"
+          $ref: "#/components/schemas/SigningFile"
         signingParameters:
           $ref: "#/components/schemas/SigningParameters"
       required:
@@ -255,7 +255,7 @@ components:
         - notary
         - paper
 
-    File:
+    SigningFile:
       type: object
       properties:
         filename:
