@@ -1,0 +1,439 @@
+openapi: '3.0.2'
+
+info:
+  title: Autogram portal API
+  version: '0.0.1'
+
+servers:
+  - url: /api/v1
+  - url: https://agp.dev.slovensko.digital/api/v1
+
+tags:
+  - name: Integration
+
+paths:
+  /hello:
+    get:
+      tags:
+        - Integration
+      summary: Hello world endpoint
+      description: Returns a simple hello world message.
+      responses:
+        '200':
+          description: A successful response with a hello world message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Hello, world!
+
+  /documents:
+    post:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Upload a file
+      description: Uploads a file to the Autogram portal.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Document"
+            examples:
+              minimal-qes-pades:
+                summary: Minimal QES PAdES
+                value:
+                  allowedMethods: [ "qes" ]
+                  file:
+                    content: "base64-encoded-content"
+                    contentType: "application/pdf; base64"
+              minimal-qes-pdf-cades-asice-ts:
+                summary: Minimal QES PDF CAdES ASiC-E with timestamp
+                value:
+                  allowedMethods: [ "qes" ]
+                  file:
+                    content: "base64-encoded-content"
+                    contentType: "application/pdf; base64"
+                  signingParameters:
+                    level: CAdES_BASELINE_T
+                    container: ASiC-E
+              pdf-url-source:
+                summary: PDF file from URL
+                value:
+                  allowedMethods: [ "qes" ]
+                  file:
+                        url: "https://example.com/file.pdf"
+                        hash: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+                        contentType: "application/pdf"
+              allow-postal-signing:
+                summary: Allow sending notarized bundle by post
+                value:
+                  allowedMethods: [ "qes", "ades", "ses", "scan", "paper" ]
+                  file:
+                    content: "base64-encoded-content"
+                    contentType: "application/pdf; base64"
+
+      responses:
+        '200':
+          description: A successful response with the uploaded file details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: doc-1
+                  filename:
+                    type: string
+                    example: File 1
+  
+  /bundles:
+    post:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Create a new signing bundle
+      description: Creates a new signing bundle with files to be signed, users to sign, and other metadata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Bundle"
+            examples:
+              target-user:
+                summary: Target user for the signing process
+                value:
+                  documents:
+                    - allowedMethods: [ "qes" ]
+                      file:
+                        content: "base64-encoded-content"
+                        contentType: "application/pdf; base64"
+                  recipients:
+                    - name: "John Doe"
+                      email: "john.doe@example.com"
+
+              webhook:
+                summary: Webhook URL for notifications
+                value:
+                  documents:
+                    - allowedMethods: [ "qes" ]
+                      file:
+                        content: "base64-encoded-content"
+                        contentType: "application/pdf; base64"
+                  webhook:
+                    url: "https://example.com/webhook"
+
+              multiple-users-and-docs:
+                summary: Multiple users and files
+                value:
+                  documents:
+                    - allowedMethods: [ "qes", "ades", "ses", "scan", "paper" ]
+                      file:
+                        filename: "Contract.pdf"
+                        content: "base64-encoded-content"
+                        contentType: "application/pdf; base64"
+                    - allowedMethods: [ "qes", "notary" ]
+                      file:
+                        filename: "Mandate.pdf"
+                        content: "base64-encoded-content"
+                        contentType: "application/pdf; base64"
+                      signingParameters:
+                        level: PAdES_BASELINE_T
+                  postalAddress:
+                    address: "123 Main St, 81103 Bratislava, Slovakia"
+                    recipientName: "Company Name"
+                  users:
+                    - name: "Alice Smith"
+                      email: "alice.smith@example.com"
+                    - name: "Bob Johnson"
+                      email: "bob.johnson@example.com"
+                  webhook:
+                    url: "https://example.com/webhook"
+
+              postal-signing:
+                summary: Postal signing options
+                value:
+                  documents:
+                    - allowedMethods: [ "qes", "notary" ]
+                      file:
+                        content: "base64-encoded-content"
+                        contentType: "application/pdf; base64"
+                      signingParameters:
+                        level: PAdES_BASELINE_T
+                  postalAddress:
+                    address: "123 Main St, 81103 Bratislava, Slovakia"
+                    recipientName: "Company Name"
+
+      responses:
+        200:
+          description: A successful response indicating the bundle was created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: bundle-1
+
+components:
+  schemas:
+    Bundle:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: Unique identifier for the bundle. If not provided, a new UUID will be generated.
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Document"
+        postalAddress:
+          $ref: "#/components/schemas/PostalAddress"
+        webhook:
+          $ref: "#/components/schemas/Webhook"
+        recipients:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          example: document-1
+          description: Unique identifier for the signature. If not provided, a new UUID will be generated.
+        allowedMethods:
+          type: array
+          default: [ "qes" ]
+          items:
+            $ref: "#/components/schemas/SignatureMethod"
+        file:
+          $ref: "#/components/schemas/File"
+        signingParameters:
+          $ref: "#/components/schemas/SigningParameters"
+      required:
+        - file
+
+    PostalAddress:
+      type: object
+      properties:
+        address:
+          type: string
+          example: 123 Main St, 81103 Bratislava, Slovakia
+        recipientName:
+          type: string
+          example: Company Name
+    
+    Webhook:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          example: https://example.com/webhook
+          description: URL to which webhook notifications will be sent.
+
+    SignatureMethod:
+      type: string
+      enum:
+        - qes
+        - ades
+        - ses
+        - click
+        - scan
+        - notary
+        - paper
+
+    File:
+      type: object
+      properties:
+        filename:
+          type: string
+          example: File 1
+        content:
+          type: string
+          format: binary
+        contentType:
+          type: string
+          example: application/pdf
+        url:
+          type: string
+          example: https://example.com/doc-1.pdf
+        hash:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+          description: SHA-256 hash of the file content.
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: user-1
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          example: john.doe@example.com
+          format: email
+
+    SigningParameters:
+      type: object
+      description: Signing parameters same as in the Autogram API
+      properties:
+        level:
+          type: string
+          description: Signature level.
+          example: XAdES_BASELINE_B
+          enum:
+            - PAdES_BASELINE_B
+            - PAdES_BASELINE_T
+            - XAdES_BASELINE_B
+            - XAdES_BASELINE_T
+            - CAdES_BASELINE_B
+            - CAdES_BASELINE_T
+
+        signatureForm:
+          type: string
+          description: Signature form. Defaults to PAdES for PDF files, XAdES otherwise.
+          example: XAdES
+          enum:
+            - XAdES
+            - CAdES
+            - PAdES
+
+        signatureBaselineLevel:
+          type: string
+          description: Signature baseline level.
+          default: B
+          enum:
+            - B
+            - T
+            - LT
+            - LTA
+
+        container:
+          type: string
+          description: Type of Advanced Signature Container. Defaults to null - no container.
+          example: ASiC-E
+          enum:
+            - ASiC-E
+            - ASiC-S
+
+        xdcProperties:
+          $ref: "#/components/schemas/XdcProperties"
+
+    XdcProperties:
+      type: object
+      description: XML Datacontainer EForm parameters
+      properties:
+        autoLoadEform:
+          type: boolean
+          default: false
+          description:
+            Try to find XSD and XSLT for a given eForm and load them automatically. Useful for visualizing and signing eForms.
+            If true, schema, transformation, conatinerXmlns, container, packaging, and identifier parameters are ignored.
+            If resources are not found, the response is 422.
+            If provided file is an ASiC_E container conatining XML Datacontainer or it is an XML Datacontainer itself, XSLT found is used for visualiztion of signing file. Also, XSD and XSLT hashes are compared with hashes of XSD and XSLT found in XML Data Container EForm. If they differ, the response is 422.
+            If the provided file is an XML file, Autogram will try to parse xmlns from root element and find resources based on its value.
+            If successful, XML Datacontainer with xmls="http://data.gov.sk/def/container/xmldatacontainer+xml/1.1" is created, the file is validated against the XSD and visualized using the XSLT. If XSD validation fails, the response is 422.
+            The XSLT transformation is found based on transformationLanguage (defaults to user preferred), transformationMediaDestinationTypeDescription (default XHTML, then HTML, then TXT), and transformationTargetEnvironment.
+            If multiple transformations meet the criteria, the first one found is used.
+
+        containerXmlns:
+          type: string
+          enum:
+            - http://data.gov.sk/def/container/xmldatacontainer+xml/1.1
+          example: http://data.gov.sk/def/container/xmldatacontainer+xml/1.1
+          description: XML namespace for the XML Datacontainer. Specifies if xmldatacontainer should be created from XML. Doesn't create xmldatacontainer if payloadMimeType is application/vnd.gov.sk.xmldatacontainer+xml already. Accepts http://data.gov.sk/def/container/xmldatacontainer+xml/1.1 only. Defaults to null. Is ignored with autoLoadEform true.
+
+        embedUsedSchemas:
+          type: boolean
+          example: false
+          description: When creating XML Datacontainer, parameter indicates whether to embed XSD and XML or reference them. Practically this should be only used for ORSR EForms in which case (when identifier contains "justice.gov.sk/Forms") this parameter is overridden to true.
+
+        identifier:
+          type: string
+          example: https://data.gov.sk/id/egov/eform/App.GeneralAgenda/1.9
+          description: Optional identifier of the file template. Required if containerXmlns is http://data.gov.sk/def/container/xmldatacontainer+xml/1.1. Defaults to null. Is ignored with autoLoadEform true.
+
+        schema:
+          type: string
+          example: '<?xml version="1.0"?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"><xs:element name="File"><xs:complexType><xs:sequence><xs:element name="Title" type="xs:string" /></xs:sequence></xs:complexType></xs:element></xs:schema>'
+          description: Optional XML schema used to validate the signing file and to compute digest used in "UsedXSDReference" in "DigestValue" attribute inside created XML Datacontainer. Format (plaintext or base64) is dictated by `payloadMimeType`. Is ignored with autoLoadEform true.
+
+        schemaIdentifier:
+          type: string
+          example: http://schemas.gov.sk/form/App.GeneralAgenda/1.9/form.xsd
+          description: Optional identifier of the XML schema. The value is used in "UsedXSDReference" field inside created XML Datacontainer. If provided with autoLoadEform true, Autogram will try to find such schema. Default value is "http://schemas.gov.sk/form/<form-idnetifier>/<version>/form.xsd".
+
+        transformation:
+          type: string
+          example: '<?xml version="1.0"?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match = "/"><h1><xsl:value-of select="/File/Title"/></h1></xsl:template></xsl:stylesheet>'
+          description: Optional XML transformation used to present the signing file to user and to compute digest used in "UsedPresentationSchemaReference" in "DigestValue" attribute inside created XML Datacontainer. Format (plaintext or base64) is dictated by `payloadMimeType`. Is ignored with autoLoadEform true.
+
+        transformationIdentifier:
+          type: string
+          example: http://schemas.gov.sk/form/App.GeneralAgenda/1.9/form.xslt
+          description: Optional identifier of the XML transformation. If provided with autoLoadEform true, Autogram will try to find such transformation. Default value is "http://schemas.gov.sk/form/<form-idnetifier>/<version>/form.xslt".
+
+        transformationLanguage:
+          type: string
+          example: sk
+          description: Optional language of the XML transformation. If autoLoadEform is true, Autogram will try to find signing XSLT with this language. Otherwise transformation must be provided. Default value is user preferred or "sk".
+
+        transformationMediaDestinationTypeDescription:
+          type: string
+          enum:
+            - XHTML
+            - HTML
+            - TXT
+          example: HTML
+          description: Optional media destination type description of the XML transformation. If autoLoadEform is true, Autogram will try to find signing XSLT with this type. Otherwise transformation must be provided. Overrides value of the output method in provided or auto-loaded transformation which is used by default.
+
+        transformationTargetEnvironment:
+          type: string
+          example: example-value
+          description: Optional target environment of the XML transformation. If autoLoadEform is true, Autogram will try to find signing XSLT with this target. Otherwise transformation must be provided. Null and not used by default.
+   
+
+  securitySchemes:
+    JWT:
+      description: |
+        JWT token must be encoded using ES256 and device-specific key matching `sub` claim.
+        Maximum `exp` claim duration id 15 minutes.
+        `jti` claim is required and must be unique for the 15 minutes. 
+        `jti` claim must complain with regular expression: `/\A[0-9a-z\-_]{32,256}\z/i`
+
+        Example of `header` segment:
+
+              {
+                "alg": "ES256",
+              }
+
+        Example `payload` segment:
+
+              {
+                "sub": "123",
+                "exp": 1543437976,
+                "jti": "4dee8618-abbe-4dc3-83ba-e984d1396f9f"
+              }
+
+        Token must be present in either:
+        - header `Authorization: Bearer <api-token>`
+        - query parameter `?token=<api-token>`
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

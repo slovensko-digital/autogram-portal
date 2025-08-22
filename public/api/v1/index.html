@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Autogram portal API</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+</head>
+
+<body>
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+
+    <script>
+        const specPath = document.location.pathname.replace("/api/v1", "/openapi.yaml");
+        // Build a system
+        const ui = SwaggerUIBundle({
+            url: specPath,
+            dom_id: "#swagger-ui",
+            deepLinking: true,
+            presets: [SwaggerUIBundle.presets.apis],
+        });
+
+        window.ui = ui;
+    </script>
+</body>
+
+</html>
