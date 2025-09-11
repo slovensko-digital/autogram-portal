@@ -2,23 +2,24 @@
 #
 # Table name: documents
 #
-#  id              :bigint           not null, primary key
-#  allowed_methods :string           default([]), is an Array
-#  uuid            :string
-#  created_at      :datetime         not null
-#  updated_at      :datetime         not null
-#  bundle_id       :bigint           not null
-#  user_id         :bigint           not null
+#  id          :bigint           not null, primary key
+#  remote_hash :string
+#  url         :string
+#  uuid        :string
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  contract_id :bigint
+#  user_id     :bigint           not null
 #
 # Indexes
 #
-#  index_documents_on_bundle_id  (bundle_id)
-#  index_documents_on_user_id    (user_id)
-#  index_documents_on_uuid       (uuid)
+#  index_documents_on_contract_id  (contract_id)
+#  index_documents_on_user_id      (user_id)
+#  index_documents_on_uuid         (uuid)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (bundle_id => bundles.id)
+#  fk_rails_...  (contract_id => contracts.id)
 #  fk_rails_...  (user_id => users.id)
 #
 require "test_helper"

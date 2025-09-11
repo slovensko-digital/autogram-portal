@@ -1,6 +1,6 @@
-class CreateDocuments < ActiveRecord::Migration[8.0]
+class CreateContracts < ActiveRecord::Migration[8.0]
   def change
-    create_table :documents do |t|
+    create_table :contracts do |t|
       t.references :user, null: false, foreign_key: true
       t.string :uuid
       t.references :bundle, null: false, foreign_key: true
@@ -8,6 +8,6 @@ class CreateDocuments < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    add_index :documents, :uuid
+    add_index :contracts, :uuid
   end
 end

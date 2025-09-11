@@ -1,6 +1,6 @@
 # == Schema Information
 #
-# Table name: ades_xdc_properties
+# Table name: ades_xdc_parameters
 #
 #  id                                                :bigint           not null, primary key
 #  auto_load_eform                                   :boolean
@@ -16,19 +16,19 @@
 #  transformation_target_environment                 :string
 #  created_at                                        :datetime         not null
 #  updated_at                                        :datetime         not null
-#  signing_parameter_id                              :bigint           not null
+#  signature_parameter_id                              :bigint           not null
 #
 # Indexes
 #
-#  index_ades_xdc_properties_on_signing_parameter_id  (signing_parameter_id)
+#  index_ades_xdc_parameters_on_signature_parameter_id  (signature_parameter_id)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (signing_parameter_id => ades_signing_parameters.id)
+#  fk_rails_...  (signature_parameter_id => ades_signature_parameters.id)
 #
 require "test_helper"
 
-class Ades::XdcPropertiesTest < ActiveSupport::TestCase
+class Ades::XdcParametersTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

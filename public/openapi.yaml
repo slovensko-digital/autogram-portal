@@ -1,4 +1,4 @@
-openapi: '3.0.2'
+openapi: '3.1.1'
 
 info:
   title: Autogram portal API
@@ -30,7 +30,7 @@ paths:
                     type: string
                     example: Hello, world!
 
-  /documents:
+  /contracts:
     post:
       tags:
         - Integration
@@ -43,7 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Document"
+              $ref: "#/components/schemas/Contract"
             examples:
               minimal-qes-pades:
                 summary: Minimal QES PAdES
@@ -59,7 +59,7 @@ paths:
                   file:
                     content: "base64-encoded-content"
                     contentType: "application/pdf; base64"
-                  signingParameters:
+                  SignatureParameters:
                     level: CAdES_BASELINE_T
                     container: ASiC-E
               pdf-url-source:
@@ -111,7 +111,7 @@ paths:
               target-user:
                 summary: Target user for the signing process
                 value:
-                  documents:
+                  contracts:
                     - allowedMethods: [ "qes" ]
                       file:
                         content: "base64-encoded-content"
@@ -123,7 +123,7 @@ paths:
               webhook:
                 summary: Webhook URL for notifications
                 value:
-                  documents:
+                  contracts:
                     - allowedMethods: [ "qes" ]
                       file:
                         content: "base64-encoded-content"
@@ -134,7 +134,7 @@ paths:
               multiple-users-and-docs:
                 summary: Multiple users and files
                 value:
-                  documents:
+                  contracts:
                     - allowedMethods: [ "qes", "ades", "ses", "scan", "paper" ]
                       file:
                         filename: "Contract.pdf"
@@ -145,7 +145,7 @@ paths:
                         filename: "Mandate.pdf"
                         content: "base64-encoded-content"
                         contentType: "application/pdf; base64"
-                      signingParameters:
+                      SignatureParameters:
                         level: PAdES_BASELINE_T
                   postalAddress:
                     address: "123 Main St, 81103 Bratislava, Slovakia"
@@ -161,12 +161,12 @@ paths:
               postal-signing:
                 summary: Postal signing options
                 value:
-                  documents:
+                  contracts:
                     - allowedMethods: [ "qes", "notary" ]
                       file:
                         content: "base64-encoded-content"
                         contentType: "application/pdf; base64"
-                      signingParameters:
+                      SignatureParameters:
                         level: PAdES_BASELINE_T
                   postalAddress:
                     address: "123 Main St, 81103 Bratislava, Slovakia"
@@ -193,10 +193,10 @@ components:
           type: string
           example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: Unique identifier for the bundle. If not provided, a new UUID will be generated.
-        documents:
+        contracts:
           type: array
           items:
-            $ref: "#/components/schemas/Document"
+            $ref: "#/components/schemas/Contract"
         postalAddress:
           $ref: "#/components/schemas/PostalAddress"
         webhook:
@@ -206,12 +206,12 @@ components:
           items:
             $ref: "#/components/schemas/User"
 
-    Document:
+    Contract:
       type: object
       properties:
         id:
           type: string
-          example: document-1
+          example: contract-1
           description: Unique identifier for the signature. If not provided, a new UUID will be generated.
         allowedMethods:
           type: array
@@ -219,9 +219,9 @@ components:
           items:
             $ref: "#/components/schemas/SignatureMethod"
         file:
-          $ref: "#/components/schemas/SigningFile"
-        signingParameters:
-          $ref: "#/components/schemas/SigningParameters"
+          $ref: "#/components/schemas/Document"
+        SignatureParameters:
+          $ref: "#/components/schemas/SignatureParameters"
       required:
         - file
 
@@ -255,7 +255,7 @@ components:
         - notary
         - paper
 
-    SigningFile:
+    Document:
       type: object
       properties:
         filename:
@@ -289,7 +289,7 @@ components:
           example: john.doe@example.com
           format: email
 
-    SigningParameters:
+    SignatureParameters:
       type: object
       description: Signing parameters same as in the Autogram API
       properties:
@@ -332,10 +332,10 @@ components:
             - ASiC-E
             - ASiC-S
 
-        xdcProperties:
-          $ref: "#/components/schemas/XdcProperties"
+        XdcParameters:
+          $ref: "#/components/schemas/XdcParameters"
 
-    XdcProperties:
+    XdcParameters:
       type: object
       description: XML Datacontainer EForm parameters
       properties:

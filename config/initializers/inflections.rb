@@ -14,3 +14,8 @@
 # ActiveSupport::Inflector.inflections(:en) do |inflect|
 #   inflect.acronym "RESTful"
 # end
+
+# Add custom inflections for models with special pluralization needs
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.uncountable %w[ xdc_parameters ades_signature_parameters signature_parameters ]
+end

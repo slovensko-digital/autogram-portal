@@ -1,19 +1,19 @@
 # == Schema Information
 #
-# Table name: ades_signing_parameters
+# Table name: ades_signature_parameters
 #
 #  id                       :bigint           not null, primary key
+#  add_content_timestamp    :boolean
 #  container                :string
+#  en319132                 :boolean
 #  level                    :string
 #  signature_baseline_level :string
 #  signature_form           :string
 #  created_at               :datetime         not null
 #  updated_at               :datetime         not null
 #
-require "test_helper"
-
-class Ades::SigningParameterTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+module Ades
+  class SignatureParameters < ApplicationRecord
+    belongs_to :contract
+  end
 end

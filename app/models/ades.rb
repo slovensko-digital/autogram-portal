@@ -1,5 +1,5 @@
 module Ades
   def self.table_name_prefix
-    'ades_'
+    "ades_"
   end
 end

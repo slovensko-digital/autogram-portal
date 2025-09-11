@@ -1,0 +1,36 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: contracts
+#
+#  id              :bigint           not null, primary key
+#  allowed_methods :string           default([]), is an Array
+#  uuid            :string
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  bundle_id       :bigint           not null
+#  user_id         :bigint           not null
+#
+# Indexes
+#
+#  index_contracts_on_bundle_id  (bundle_id)
+#  index_contracts_on_user_id    (user_id)
+#  index_contracts_on_uuid       (uuid)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (bundle_id => bundles.id)
+#  fk_rails_...  (user_id => users.id)
+#
+one:
+  user_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  uuid: MyString
+  bundle_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  allowed_methods: ['method1', 'method2']
+
+two:
+  user_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  uuid: MyString
+  bundle_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  allowed_methods: ['method1', 'method2']

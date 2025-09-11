@@ -2,7 +2,7 @@
 
 # == Schema Information
 #
-# Table name: xdc_properties
+# Table name: xdc_parameters
 #
 #  id                                                :bigint           not null, primary key
 #  auto_load_eform                                   :boolean
@@ -18,18 +18,17 @@
 #  transformation_target_environment                 :string
 #  created_at                                        :datetime         not null
 #  updated_at                                        :datetime         not null
-#  signing_parameter_id                              :bigint           not null
+#  document_id                                       :bigint           not null
 #
 # Indexes
 #
-#  index_xdc_properties_on_signing_parameter_id  (signing_parameter_id)
+#  index_xdc_parameters_on_document_id  (document_id)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (signing_parameter_id => signing_parameters.id)
+#  fk_rails_...  (document_id => documents.id)
 #
 one:
-  auto_load_eform: false
   container_xmlns: MyString
   embed_used_schemas: false
   identifier: MyString
@@ -40,10 +39,9 @@ one:
   transformation_language: MyString
   transformation_media_destination_type_description: MyString
   transformation_target_environment: MyString
-  signing_parameter: one
+  document_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
 
 two:
-  auto_load_eform: false
   container_xmlns: MyString
   embed_used_schemas: false
   identifier: MyString
@@ -54,4 +52,4 @@ two:
   transformation_language: MyString
   transformation_media_destination_type_description: MyString
   transformation_target_environment: MyString
-  signing_parameter: two
+  document_id: <%= ActiveRecord::FixtureSet.identify(:two) %>

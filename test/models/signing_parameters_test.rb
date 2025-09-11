@@ -1,8 +1,6 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 # == Schema Information
 #
-# Table name: signing_parameters
+# Table name: ades_signature_parameters
 #
 #  id                       :bigint           not null, primary key
 #  container                :string
@@ -12,14 +10,10 @@
 #  created_at               :datetime         not null
 #  updated_at               :datetime         not null
 #
-one:
-  level: MyString
-  signature_form: MyString
-  signature_baseline_level: MyString
-  container: MyString
+require "test_helper"
 
-two:
-  level: MyString
-  signature_form: MyString
-  signature_baseline_level: MyString
-  container: MyString
+class Ades::SignatureParametersTest < ActiveSupport::TestCase
+  # test "the truth" do
+  #   assert true
+  # end
+end

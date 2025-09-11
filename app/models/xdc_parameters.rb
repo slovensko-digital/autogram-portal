@@ -1,14 +1,15 @@
 # == Schema Information
 #
-# Table name: ades_xdc_properties
+# Table name: xdc_parameters
 #
 #  id                                                :bigint           not null, primary key
-#  auto_load_eform                                   :boolean
 #  container_xmlns                                   :string
 #  embed_used_schemas                                :boolean
+#  fs_form_identifier                                :string
 #  identifier                                        :string
 #  schema                                            :text
 #  schema_identifier                                 :string
+#  schema_mime_type                                  :string
 #  transformation                                    :text
 #  transformation_identifier                         :string
 #  transformation_language                           :string
@@ -16,18 +17,16 @@
 #  transformation_target_environment                 :string
 #  created_at                                        :datetime         not null
 #  updated_at                                        :datetime         not null
-#  signing_parameter_id                              :bigint           not null
+#  document_id                                       :bigint           not null
 #
 # Indexes
 #
-#  index_ades_xdc_properties_on_signing_parameter_id  (signing_parameter_id)
+#  index_xdc_parameters_on_document_id  (document_id)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (signing_parameter_id => ades_signing_parameters.id)
+#  fk_rails_...  (document_id => documents.id)
 #
-module Ades
-  class XdcProperties < ApplicationRecord
-    belongs_to :signing_parameter, class_name: "Ades::SigningParameter"
-  end
+class XdcParameters < ApplicationRecord
+  belongs_to :document
 end

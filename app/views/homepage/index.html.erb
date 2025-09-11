@@ -1,3 +1,106 @@
-<header>
-  <h1>Hello World!</h1>
-</header>
+<head>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('fileUploader', () => ({
+        dragging: false,
+        uploading: false,
+
+        uploadFile(file) {
+          if (this.uploading) return;
+          
+          this.uploading = true;
+          
+          const formData = new FormData();
+          formData.append('document[file]', file);
+          
+          fetch('<%= documents_path %>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+          })
+          .then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+            } else {
+              throw new Error('Upload failed');
+            }
+          })
+          .catch(error => {
+            console.error('Upload error:', error);
+            alert('Nastala chyba pri nahrávaní súboru');
+            this.uploading = false;
+          });
+        },
+      }))
+    })
+  </script>
+</head>
+<main>
+  <!-- Hero section -->
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8 lg:pt-15">
+      <div
+          class="mx-auto mt-16 flex max-w-full sm:max-w-3xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-16 lg:max-w-none lg:flex-none xl:ml-32">
+        <form
+            class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[800px]"
+            x-data="fileUploader"
+        >
+          <div
+              class="
+              rounded-lg bg-white/5 ring-1 ring-white/10 h-[500px] w-full border-4
+              flex flex-col items-center justify-center text-2xl text-gray-500
+              hover:border-gray-400 hover:text-gray-700
+              "
+              x-bind:class="{
+              'border-blue-800 text-blue-800': dragging,
+              'border-solid': uploading,
+              'border-dashed cursor-pointer': !uploading,
+              }"
+              x-on:click="if (uploading) { return; } $refs.fileInput.click()"
+              x-on:drop.prevent="if (uploading) { return; } dragging = false; uploadFile($event.dataTransfer.files[0]);"
+              x-on:dragover.prevent="if (uploading) { return; } dragging = true"
+              x-on:dragleave.prevent="if (uploading) { return; } dragging = false"
+          >
+            <div x-show="uploading" class="flex flex-col items-center">
+              <svg class="animate-spin h-16 w-16" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="font-bold text-center mt-4">Nahrávam súbor ...</span>
+            </div>
+            <div x-show="!dragging && !uploading" class="flex flex-col items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-16">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"/>
+              </svg>
+              <span class="font-bold text-center mt-4">Nahrajte súbor tu</span>
+              <span
+                  class="text-center text-base mt-2">Presuňte sem myšou, alebo kliknutím vyberte súbor z disku.</span>
+            </div>
+            <div x-show="dragging" class="flex flex-col items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-16">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="m9 13.5 3 3m0 0 3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/>
+              </svg>
+            </div>
+            <input
+                type="file"
+                class="hidden"
+                x-ref="fileInput"
+                x-on:change="uploadFile($event.target.files[0]); $el.value = null;"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</main>
+

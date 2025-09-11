@@ -20,11 +20,9 @@
 #  fk_rails_...  (user_id => users.id)
 #
 one:
-  id: 
-  user: one
+  user_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
   uuid: MyString
 
 two:
-  id: 
-  user: two
+  user_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
   uuid: MyString
