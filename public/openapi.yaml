@@ -248,6 +248,8 @@ components:
       type: string
       enum:
         - qes
+        - ts-qes
+        - cts-qes
         - ades
         - ses
         - click
@@ -296,16 +298,12 @@ components:
         level:
           type: string
           description: Signature level.
-          example: XAdES_BASELINE_B
+          example: BASELINE_B
           enum:
-            - PAdES_BASELINE_B
-            - PAdES_BASELINE_T
-            - XAdES_BASELINE_B
-            - XAdES_BASELINE_T
-            - CAdES_BASELINE_B
-            - CAdES_BASELINE_T
+            - BASELINE_B
+            - BASELINE_T
 
-        signatureForm:
+        format:
           type: string
           description: Signature form. Defaults to PAdES for PDF files, XAdES otherwise.
           example: XAdES
@@ -313,16 +311,6 @@ components:
             - XAdES
             - CAdES
             - PAdES
-
-        signatureBaselineLevel:
-          type: string
-          description: Signature baseline level.
-          default: B
-          enum:
-            - B
-            - T
-            - LT
-            - LTA
 
         container:
           type: string

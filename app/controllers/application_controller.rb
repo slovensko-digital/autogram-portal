@@ -32,6 +32,22 @@ class ApplicationController < ActionController::Base
   private
 
   def set_user
-    @user = User.first_or_create!(email: "anonymous@example.com", name: "Anonymous User")
+    @current_user = User.first_or_create!(email: "anonymous@example.com", name: "Anonymous User")
+  end
+
+  def no_header
+    @no_header = true
+  end
+
+  def no_footer
+    @no_footer = true
+  end
+
+  def no_flash
+    @no_flash = true
+  end
+
+  def allow_iframe
+    response.headers.except! "X-Frame-Options"
   end
 end

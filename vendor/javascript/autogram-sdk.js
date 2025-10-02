@@ -1,0 +1,1 @@
+/Users/turtle/slovensko-digital/autogram-sdk/dist/index-all.global.js

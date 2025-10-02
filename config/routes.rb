@@ -15,10 +15,28 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root to: "homepage#index"
 
-  resources :documents, only: [ :create, :show ] do
+  resources :documents, only: [ :index, :new, :create, :show ] do
     member do
       get :validate
       get :visualize
+      get :pdf_preview
+      post 'create_contract_from_document', as: 'create_contract_from_document'
     end
   end
+
+  resources :contracts, only: [ :index, :new, :create, :show, :destroy, :edit ] do
+    member do
+      post :sign
+      post :sign_avm
+      get :validate
+      get :visualize
+      get :signed_document
+      get :iframe
+    end
+  end
+
+  resources :bundles
+
+  # add good job admin interface at /admin/good_job
+  mount GoodJob::Engine => "/admin/good_job"
 end

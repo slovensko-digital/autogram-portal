@@ -1,0 +1,19 @@
+<%= turbo_stream_from "contract_#{@contract.id}" %>
+
+<main class="w-full min-h-screen">
+  <div class="min-h-full flex flex-col lg:flex-row lg:h-screen">
+    <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50 lg:overflow-y-auto">
+      <div class="p-6">
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Podpis</h2>
+          <%= render 'signature_actions', contract: @contract %>
+        </div>
+      </div>
+    </div>
+    <div class="w-full lg:w-2/3 lg:overflow-y-auto">
+      <div class="p-6">
+        <%= render 'documents_preview' %>
+      </div>
+    </div>
+  </div>
+</main>

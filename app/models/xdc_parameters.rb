@@ -3,6 +3,7 @@
 # Table name: xdc_parameters
 #
 #  id                                                :bigint           not null, primary key
+#  auto_load_eform                                   :boolean
 #  container_xmlns                                   :string
 #  embed_used_schemas                                :boolean
 #  fs_form_identifier                                :string

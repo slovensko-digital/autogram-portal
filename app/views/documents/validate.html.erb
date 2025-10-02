@@ -1,0 +1,3 @@
+<%= turbo_frame_tag "signature_validation_#{@document.id}" do %>
+  <%= render 'shared/signature_validation', validation_result: @validation_result %>
+<% end %>

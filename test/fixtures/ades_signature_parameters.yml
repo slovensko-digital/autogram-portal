@@ -2,15 +2,25 @@
 
 # == Schema Information
 #
-# Table name: signature_parameters
+# Table name: ades_signature_parameters
 #
-#  id                       :bigint           not null, primary key
-#  container                :string
-#  level                    :string
-#  signature_baseline_level :string
-#  signature_form           :string
-#  created_at               :datetime         not null
-#  updated_at               :datetime         not null
+#  id                    :bigint           not null, primary key
+#  add_content_timestamp :boolean
+#  container             :string
+#  en319132              :boolean
+#  format                :string
+#  level                 :string
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#  contract_id           :bigint           not null
+#
+# Indexes
+#
+#  index_ades_signature_parameters_on_contract_id  (contract_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (contract_id => contracts.id)
 #
 one:
   level: MyString

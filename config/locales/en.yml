@@ -29,3 +29,12 @@
 
 en:
   hello: "Hello world"
+  
+  activerecord:
+    errors:
+      models:
+        contract:
+          attributes:
+            agree_to_policies:
+              blank: "You must agree to the policies and terms to continue"
+              acceptance: "You must agree to the policies and terms to continue"

@@ -1,0 +1,80 @@
+<main>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:px-8 lg:pt-15">
+      <div class="mx-auto max-w-full">
+        <!-- Page Header -->
+        <div class="mb-8 text-center lg:text-left">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Documents</h1>
+          <p class="text-gray-600">Manage your uploaded documents for signing and validation.</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="mb-6">
+          <%= link_to "Upload New Document", new_document_path, 
+                     class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+
+        <!-- Documents List -->
+        <% if @documents.any? %>
+          <div class="bg-white shadow overflow-hidden sm:rounded-md">
+            <ul role="list" class="divide-y divide-gray-200">
+              <% @documents.each do |document| %>
+                <li>
+                  <div class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                          <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <div class="ml-4">
+                          <div class="flex items-center">
+                            <p class="text-sm font-medium text-indigo-600 truncate">
+                              <%= link_to document.filename, document_path(document), class: "hover:text-indigo-500" %>
+                            </p>
+                          </div>
+                          <div class="mt-1 flex items-center text-sm text-gray-500">
+                            <p>
+                              Uploaded <%= time_ago_in_words(document.created_at) %> ago
+                            </p>
+                            <% if document.user %>
+                              <span class="mx-2">•</span>
+                              <p>by <%= document.user.name if document.user.respond_to?(:name) %></p>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="ml-4 flex-shrink-0 flex space-x-2">
+                        <%= link_to "View", document_path(document), 
+                                   class: "text-indigo-600 hover:text-indigo-500 text-sm font-medium" %>
+                        <%= link_to "Validate", validate_document_path(document), 
+                                   class: "text-green-600 hover:text-green-500 text-sm font-medium" %>
+                        <%= link_to "Visualize", visualize_document_path(document), 
+                                   class: "text-blue-600 hover:text-blue-500 text-sm font-medium" %>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% else %>
+          <div class="text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No documents</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by uploading a new document.</p>
+            <div class="mt-6">
+              <%= link_to "Upload Document", new_document_path, 
+                         class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<% content_for :title, "Documents" %>

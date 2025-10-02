@@ -1,0 +1,42 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: avm_sessions
+#
+#  id                 :bigint           not null, primary key
+#  completed_at       :datetime
+#  encryption_key     :string
+#  error_message      :text
+#  signing_started_at :datetime
+#  status             :string
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  contract_id        :bigint           not null
+#  document_id        :string
+#
+# Indexes
+#
+#  index_avm_sessions_on_contract_id  (contract_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (contract_id => contracts.id)
+#
+one:
+  contract: one
+  document_id: MyString
+  encryption_key: MyString
+  signing_started_at: 2025-10-01 22:50:50
+  completed_at: 2025-10-01 22:50:50
+  status: MyString
+  error_message: MyText
+
+two:
+  contract: two
+  document_id: MyString
+  encryption_key: MyString
+  signing_started_at: 2025-10-01 22:50:50
+  completed_at: 2025-10-01 22:50:50
+  status: MyString
+  error_message: MyText

@@ -3,6 +3,7 @@ class CreateXdcParameters < ActiveRecord::Migration[8.0]
     create_table :xdc_parameters do |t|
       t.string :fs_form_identifier
       t.string :identifier
+      t.boolean :auto_load_eform
       t.string :container_xmlns
       t.boolean :embed_used_schemas
       t.text :schema

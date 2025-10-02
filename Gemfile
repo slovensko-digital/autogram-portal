@@ -20,6 +20,8 @@ gem "tailwindcss-rails"
 gem "jbuilder"
 # HTTP client library [https://github.com/lostisland/faraday]
 gem "faraday"
+# Generate QR codes [https://github.com/whomwah/rqrcode]
+gem "rqrcode"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
@@ -68,3 +70,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "good_job", "~> 4.12"
+
+gem "redis", "~> 5.4"

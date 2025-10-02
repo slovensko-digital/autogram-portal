@@ -9,7 +9,7 @@
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  contract_id :bigint
-#  user_id     :bigint           not null
+#  user_id     :bigint
 #
 # Indexes
 #
@@ -23,11 +23,15 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Document < ApplicationRecord
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :contract, optional: true
 
   has_one :xdc_parameters, class_name: "XdcParameters", dependent: :destroy
   has_one_attached :blob
+
+  validates :blob, presence: { message: "A file needs to be attached" }
+  validate :acceptable_file_type
+  validates :xdc_parameters, presence: true, if: -> { blob.attached? && blob.content_type == "application/vnd.gov.sk.xmldatacontainer+xml" }
 
   def filename
     blob.attached? ? blob.filename.to_s : nil
@@ -41,8 +45,14 @@ class Document < ApplicationRecord
     blob.attached? ? blob.content_type : nil
   end
 
+  def signature_parameters
+    return contract&.signature_parameters if contract
+
+    AutogramEnvironment.autogram_service.default_signature_parameters(content_type)
+  end
+
   def validate_signatures
-    AutogramService.validate_signatures(self)
+    AutogramEnvironment.autogram_service.validate_signatures(self)
   end
 
   def has_signatures?
@@ -50,6 +60,35 @@ class Document < ApplicationRecord
   end
 
   def visualize
-    AutogramService.visualize_document(self)
+    if blob.content_type.in?(["text/plain", "image/png", "image/jpg", "image/jpeg"])
+      content_data = blob.download
+      content_data = Base64.strict_encode64(content_data)
+      return { mime_type: blob.content_type + ";base64", content: content_data }
+    end
+
+    AutogramEnvironment.autogram_service.visualize_document(self)
+  end
+
+  private
+
+  def acceptable_file_type
+    return unless blob.attached?
+
+    # .pdf,.xml,.xdcf,.txt,.png,.jpg,.jpeg,application/pdf,application/xml,text/xml,application/vnd.gov.sk.xmldatacontainer+xml,application/vnd.etsi.asic-e+zip
+    acceptable_types = [
+      "application/pdf",
+      "application/xml",
+      "text/xml",
+      "application/vnd.gov.sk.xmldatacontainer+xml",
+      "application/vnd.etsi.asic-e+zip",
+      "text/plain",
+      "image/png",
+      "image/jpg",
+      "image/jpeg"
+    ]
+
+    unless acceptable_types.include?(blob.content_type)
+      errors.add(:blob, "Tento typ súboru nie je podporovaný. Podporované sú: PDF, XML, XDCF, TXT, PNG, JPG, JPEG súbory.")
+    end
   end
 end

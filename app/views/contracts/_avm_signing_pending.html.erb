@@ -1,0 +1,56 @@
+<div id="signature_actions_<%= contract.id %>" class="space-y-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+  <div class="text-center">
+    <!-- Desktop message -->
+    <p class="text-sm text-gray-600 mb-6 hidden md:block">
+      Naskenujte QR kód mobilným telefónom alebo tablétom
+    </p>
+    <!-- Mobile message -->
+    <p class="text-sm text-gray-600 mb-6 md:hidden">
+      Kliknite na QR kód pre otvorenie AVM aplikácie
+    </p>
+  </div>
+
+  <!-- QR Code -->
+  <div class="flex justify-center">
+    <a href="<%= avm_url %>" 
+       class="block hover:opacity-80 transition-opacity duration-200 focus:ring-4 focus:ring-blue-300 focus:outline-none rounded-lg"
+       target="_blank"
+       rel="noopener noreferrer"
+       title="Kliknite pre otvorenie AVM aplikácie"
+       data-controller="qr-code-handler"
+       data-action="click->qr-code-handler#handleClick"
+       data-avm-url="<%= avm_url %>">
+      <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-dashed border-blue-300 hover:border-blue-400 transition-colors duration-200">
+        <%= qr_code_svg(avm_url, size: 200) %>
+      </div>
+    </a>
+  </div>
+
+  <!-- AVM URL for manual use -->
+  <div class="text-center">
+    <p class="text-xs text-gray-500 mb-2">Alebo skopírujte URL manuálne:</p>
+    <div class="bg-gray-100 rounded p-2 text-xs font-mono break-all">
+      <a href="<%= avm_url %>" class="text-blue-600 hover:text-blue-800" target="_blank" rel="noopener noreferrer">
+        <%= avm_url %>
+      </a>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="text-center text-xs text-gray-500 space-y-1">
+    <p class="hidden md:block">Na mobilnom zariadení: Naskenujte QR kód alebo kliknite naň</p>
+    <p class="md:hidden">Kliknite na QR kód pre priame otvorenie AVM aplikácie</p>
+    <p>Podpisovanie expiruje za 15 minút</p>
+  </div>
+
+  <!-- Cancel button -->
+  <div class="text-center">
+    <%= link_to local_assigns.fetch(:cancel_url, contract_path(contract)), 
+                class: "inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      Zrušiť podpisovanie
+    <% end %>
+  </div>
+</div>

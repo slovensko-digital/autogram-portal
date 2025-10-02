@@ -21,6 +21,12 @@ aliases:
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
 
+accessories:
+  ag_service:
+  image: sd/ag-service
+  roles:
+    - web
+
 registry:
   server: registry.dev.slovensko.digital
   username:

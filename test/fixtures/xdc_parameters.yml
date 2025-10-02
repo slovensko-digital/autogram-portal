@@ -8,9 +8,11 @@
 #  auto_load_eform                                   :boolean
 #  container_xmlns                                   :string
 #  embed_used_schemas                                :boolean
+#  fs_form_identifier                                :string
 #  identifier                                        :string
 #  schema                                            :text
 #  schema_identifier                                 :string
+#  schema_mime_type                                  :string
 #  transformation                                    :text
 #  transformation_identifier                         :string
 #  transformation_language                           :string
