@@ -23,9 +23,9 @@ aliases:
 
 accessories:
   ag_service:
-  image: sd/ag-service
-  roles:
-    - web
+    image: registry.dev.slovensko.digital/sd/ag-service
+    roles:
+      - web
 
 registry:
   server: registry.dev.slovensko.digital
