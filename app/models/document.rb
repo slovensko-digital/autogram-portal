@@ -5,7 +5,7 @@
 #  id          :bigint           not null, primary key
 #  remote_hash :string
 #  url         :string
-#  uuid        :string
+#  uuid        :string           not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  contract_id :bigint
@@ -32,6 +32,14 @@ class Document < ApplicationRecord
   validates :blob, presence: { message: "A file needs to be attached" }
   validate :acceptable_file_type
   validates :xdc_parameters, presence: true, if: -> { blob.attached? && blob.content_type == "application/vnd.gov.sk.xmldatacontainer+xml" }
+  validates :uuid, presence: true, uniqueness: true
+
+  before_validation :ensure_uuid, on: :create
+
+  # Use UUID in URLs instead of ID for security
+  def to_param
+    uuid
+  end
 
   def filename
     blob.attached? ? blob.filename.to_s : nil
@@ -70,6 +78,10 @@ class Document < ApplicationRecord
   end
 
   private
+
+  def ensure_uuid
+    self.uuid ||= SecureRandom.uuid
+  end
 
   def acceptable_file_type
     return unless blob.attached?

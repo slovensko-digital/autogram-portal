@@ -4,7 +4,7 @@
 #
 #  id              :bigint           not null, primary key
 #  allowed_methods :string           default([]), is an Array
-#  uuid            :string
+#  uuid            :string           not null
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  bundle_id       :bigint
@@ -40,6 +40,14 @@ class Contract < ApplicationRecord
   validates :signature_parameters, presence: true, if: -> { allowed_methods.present? && (allowed_methods & %w[qes qes-ts cts-qes ades]).any? }
   validate :validate_documents
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
+  validates :uuid, presence: true, uniqueness: true
+
+  before_validation :ensure_uuid, on: :create
+
+  # Use UUID in URLs instead of ID for security
+  def to_param
+    uuid
+  end
 
   def self.new_from_ui(parameters)
     contract = new(parameters)
@@ -86,15 +94,15 @@ class Contract < ApplicationRecord
 
   def broadcast_signing_success
     Turbo::StreamsChannel.broadcast_replace_to(
-      "contract_#{id}",
-      target: "signature_actions_#{id}",
+      "contract_#{uuid}",
+      target: "signature_actions_#{uuid}",
       partial: "contracts/signature_actions",
       locals: { contract: self }
     )
 
     # Also broadcast a success message
     Turbo::StreamsChannel.broadcast_prepend_to(
-      "contract_#{id}",
+      "contract_#{uuid}",
       target: "flash_messages",
       partial: "shared/flash_message",
       locals: {
@@ -105,6 +113,10 @@ class Contract < ApplicationRecord
   end
 
   private
+
+  def ensure_uuid
+    self.uuid ||= SecureRandom.uuid
+  end
 
   def generate_signed_filename
     if documents.count == 1
@@ -138,5 +150,9 @@ class Contract < ApplicationRecord
 
   def validate_signature_parameters
     signature_parameters.validate(errors)
+  end
+
+  def ensure_uuid
+    self.uuid ||= SecureRandom.uuid
   end
 end

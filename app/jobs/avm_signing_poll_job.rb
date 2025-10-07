@@ -1,12 +1,12 @@
 class AvmSigningPollJob < ApplicationJob
   retry_on StandardError, wait: :exponentially_longer, attempts: 10
 
-  def perform(avm_session)
+  def perform(avm_session, avm_service: AutogramEnvironment.avm_service)
     return avm_session.mark_expired! if avm_session.expired?
     return unless avm_session.pending?
 
     begin
-      result = AutogramEnvironment.autogram_service.check_avm_signing_status(
+      result = avm_service.check_signing_status(
         avm_session.document_id,
         avm_session.signing_started_at,
         avm_session.encryption_key
@@ -14,7 +14,7 @@ class AvmSigningPollJob < ApplicationJob
 
       case result[:status]
       when "completed"
-        signed_document = AutogramEnvironment.autogram_service.download_avm_signed_document(
+        signed_document = avm_service.download_signed_document(
           avm_session.document_id,
           avm_session.encryption_key
         )
@@ -35,7 +35,7 @@ class AvmSigningPollJob < ApplicationJob
 
     rescue => e
       if Time.current < avm_session.signing_started_at + 14.minutes
-        AvmSigningPollJob.set(wait: 5.seconds).perform_later(avm_session)
+        raise e # let the job retry
       else
         avm_session.mark_failed!("Polling failed: #{e.message}")
         avm_session.broadcast_signing_error("Polling failed: #{e.message}")

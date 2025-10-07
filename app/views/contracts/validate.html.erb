@@ -1,3 +1,3 @@
-<%= turbo_frame_tag "signature_validation_#{@contract.id}" do %>
+<%= turbo_frame_tag "signature_validation_#{@contract.uuid}" do %>
   <%= render 'shared/signature_validation', validation_result: @validation_result %>
 <% end %>

@@ -3,7 +3,7 @@
 # Table name: bundles
 #
 #  id         :bigint           not null, primary key
-#  uuid       :string
+#  uuid       :string           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  user_id    :bigint           not null
@@ -24,4 +24,18 @@ class Bundle < ApplicationRecord
   has_and_belongs_to_many :recipients, class_name: "User", join_table: "bundles_recipients", association_foreign_key: "recipient_id"
   has_one :webhook, dependent: :destroy
   has_one :postal_address, dependent: :destroy
+
+  validates :uuid, presence: true, uniqueness: true
+  before_validation :ensure_uuid, on: :create
+
+  # Use UUID in URLs instead of ID for security
+  def to_param
+    uuid
+  end
+
+  private
+
+  def ensure_uuid
+    self.uuid ||= SecureRandom.uuid
+  end
 end

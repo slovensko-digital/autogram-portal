@@ -158,7 +158,8 @@ class DocumentsController < ApplicationController
   private
 
   def set_document
-    @document = Document.find(params[:id])
+    # Find by UUID first, fallback to ID for backward compatibility during transition
+    @document = Document.find_by(uuid: params[:id]) || Document.find(params[:id])
   end
 
   def document_params

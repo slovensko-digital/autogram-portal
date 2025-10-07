@@ -41,7 +41,8 @@ class BundlesController < ApplicationController
   private
 
   def set_bundle
-    @bundle = Bundle.find(params[:id])
+    # Find by UUID first, fallback to ID for backward compatibility during transition
+    @bundle = Bundle.find_by(uuid: params[:id]) || Bundle.find(params[:id])
   end
 
   def bundle_params

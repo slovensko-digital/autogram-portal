@@ -40,8 +40,9 @@ export default class extends Controller {
       })
 
       if (response.ok) {
-        // Get the turbo stream response
-        const responseText = await response.text()
+          // Get the turbo stream response
+          const responseText = await response.text()
+          console.log("Response: ", responseText);
         
         // Extract the AVM URL from the response
         const avmUrl = this.extractAvmUrlFromResponse(responseText)
@@ -83,12 +84,21 @@ export default class extends Controller {
           url = url.split('"')[1]
         }
         if (url.startsWith('https://')) {
+          // Decode HTML entities (especially &amp; to &)
+          url = this.decodeHtmlEntities(url)
           return url
         }
       }
     }
     
     return null
+  }
+
+  decodeHtmlEntities(text) {
+    // Create a temporary DOM element to decode HTML entities
+    const tempElement = document.createElement('div')
+    tempElement.innerHTML = text
+    return tempElement.textContent || tempElement.innerText || text
   }
 
   processTurboStreamResponse(responseText) {

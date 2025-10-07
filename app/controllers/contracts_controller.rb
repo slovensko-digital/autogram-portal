@@ -1,6 +1,5 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit ]
-  before_action :set_contract_by_uuid, only: [ :iframe ]
+  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :iframe ]
   skip_before_action :verify_authenticity_token, only: [ :iframe ]
 
   before_action :allow_iframe, only: [ :iframe ]
@@ -101,7 +100,7 @@ class ContractsController < ApplicationController
       return
     end
 
-    result = AutogramEnvironment.autogram_service.initiate_avm_signing(@contract)
+    result = AutogramEnvironment.avm_service.initiate_signing(@contract)
     avm_session = @contract.avm_sessions.create!(
       document_id: result[:document_id],
       encryption_key: result[:encryption_key],
@@ -228,12 +227,7 @@ class ContractsController < ApplicationController
   private
 
   def set_contract
-    @contract = Contract.find(params[:id])
-  end
-
-  def set_contract_by_uuid
-    # TODO use only uuid everuwhere to make IDs private
-    @contract = Contract.where(uuid: params[:id]).or(Contract.where(id: params[:id])).first!
+    @contract = Contract.find_by(uuid: params[:id])
   end
 
   def contract_params
