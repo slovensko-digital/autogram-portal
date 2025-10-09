@@ -61,46 +61,134 @@
             padding: 2px 6px;
             border-radius: 3px;
         }
+        .config-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .config-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        .config-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>AGP SDK Integration Examples</h1>
-    <p>This page demonstrates how to use the updated AGP SDK with both iframe and popup modes.</p>
+    <p>This page demonstrates how to use the AGP SDK with both Contracts and Bundles in iframe and popup modes.</p>
 
-    <!-- Popup Mode Example -->
+    <!-- Configuration Section -->
     <div class="section">
-        <h2>Popup Mode</h2>
-        <p>Opens AGP portal in a modal popup overlay</p>
+        <h2>⚙️ Configuration</h2>
+        <p>Enter the Contract ID and Bundle ID you want to use for testing:</p>
+        
+        <div class="config-grid">
+            <div>
+                <label for="contract-id" class="config-label">Contract ID (UUID):</label>
+                <input 
+                    type="text" 
+                    id="contract-id" 
+                    class="config-input"
+                    value="f512e1e4-9119-4b6e-a55e-5f3c40b1ae25" 
+                    placeholder="Enter contract UUID"
+                />
+            </div>
+            <div>
+                <label for="bundle-id" class="config-label">Bundle ID (UUID):</label>
+                <input 
+                    type="text" 
+                    id="bundle-id" 
+                    class="config-input"
+                    value="your-bundle-id" 
+                    placeholder="Enter bundle UUID"
+                />
+            </div>
+        </div>
+        <p style="color: #666; font-size: 14px; margin-top: 10px;">
+            💡 <strong>Tip:</strong> The IDs you enter here will be used by all the demo buttons below.
+        </p>
+    </div>
+
+    <!-- Popup Mode Example - Contracts -->
+    <div class="section">
+        <h2>Contract Popup Mode</h2>
+        <p>Opens a contract in a modal popup overlay</p>
         
         <div class="button-group">
-            <button class="primary" onclick="openPopup()">Open Popup</button>
-            <button class="secondary" onclick="openPopupWithCallbacks()">Open Popup with Callbacks</button>
-            <button class="secondary" onclick="openPopupNoPreview()">Open Popup (Sign Only)</button>
+            <button class="primary" onclick="openContractPopup()">Open Contract Popup</button>
+            <button class="secondary" onclick="openContractPopupWithCallbacks()">Open Contract Popup with Callbacks</button>
+            <button class="secondary" onclick="openContractPopupNoPreview()">Open Contract Popup (Sign Only)</button>
         </div>
 
         <h4>Usage:</h4>
-        <pre><code>// Simple popup
-agp.initIframe('your-session-id', {
+        <pre><code>// Simple contract popup
+agp.initContractIframe('your-contract-id', {
     mode: 'popup'
 });
 
-// Popup with custom options
-agp.initIframe('your-session-id', {
+// Contract popup with custom options
+agp.initContractIframe('your-contract-id', {
     mode: 'popup',
     popupWidth: 1200,
     popupHeight: 900,
-    popupTitle: 'Custom Title',
+    popupTitle: 'Sign Contract',
     onMessage: (data, origin, iframe) => console.log('Message:', data),
     onClose: () => console.log('Popup closed')
 });
 
-// Popup with no preview (sign button only)
-agp.initIframe('your-session-id', {
+// Backward compatible (uses initIframe - same as initContractIframe)
+agp.initIframe('your-contract-id', {
+    mode: 'popup'
+});</code></pre>
+    </div>
+
+    <!-- Popup Mode Example - Bundles -->
+    <div class="section">
+        <h2>Bundle Popup Mode</h2>
+        <p>Opens a bundle (multiple contracts) in a modal popup overlay</p>
+        
+        <div class="button-group">
+            <button class="primary" onclick="openBundlePopup()">Open Bundle Popup</button>
+            <button class="secondary" onclick="openBundlePopupWithCallbacks()">Open Bundle Popup with Callbacks</button>
+            <button class="secondary" onclick="openBundlePopupNoPreview()">Open Bundle Popup (Sign Only)</button>
+        </div>
+
+        <h4>Usage:</h4>
+        <pre><code>// Simple bundle popup
+agp.initBundleIframe('your-bundle-id', {
+    mode: 'popup'
+});
+
+// Bundle popup with custom options
+agp.initBundleIframe('your-bundle-id', {
     mode: 'popup',
-    noPreview: true,
-    popupTitle: 'Sign Document',
-    popupWidth: 500,
-    popupHeight: 600
+    popupWidth: 1200,
+    popupHeight: 900,
+    popupTitle: 'Sign Bundle',
+    onMessage: (data, origin, iframe) => console.log('Message:', data),
+    onClose: () => console.log('Popup closed')
 });</code></pre>
     </div>
 
@@ -110,30 +198,32 @@ agp.initIframe('your-session-id', {
         <p>Embeds AGP portal as an iframe within a specific container</p>
         
         <div class="button-group">
-            <button class="primary" onclick="embedInContainer()">Embed in Container</button>
-            <button class="secondary" onclick="embedNoPreview()">Embed (Sign Only)</button>
+            <button class="primary" onclick="embedContractInContainer()">Embed Contract in Container</button>
+            <button class="primary" onclick="embedBundleInContainer()">Embed Bundle in Container</button>
+            <button class="secondary" onclick="embedContractNoPreview()">Embed Contract (Sign Only)</button>
+            <button class="secondary" onclick="embedBundleNoPreview()">Embed Bundle (Sign Only)</button>
             <button class="danger" onclick="clearContainer()">Clear Container</button>
         </div>
 
         <div id="agp-container" class="iframe-container">
-            <p>Container for AGP iframe - click "Embed in Container" to load</p>
+            <p>Container for AGP iframe - click a button above to load</p>
         </div>
 
         <h4>Usage:</h4>
-        <pre><code>// Embed in specific element
-agp.initIframe('your-session-id', {
+        <pre><code>// Embed contract in specific element
+agp.initContractIframe('your-contract-id', {
     mode: 'iframe',
     parentElement: '#agp-container', // or document.getElementById('agp-container')
     width: '100%',
     height: '600px'
 });
 
-// Embed with no preview (sign button only)
-agp.initIframe('your-session-id', {
+// Embed bundle in specific element
+agp.initBundleIframe('your-bundle-id', {
     mode: 'iframe',
     parentElement: '#agp-container',
-    noPreview: true,
-    height: '500px' // Smaller height for sign-only mode
+    width: '100%',
+    height: '600px'
 });</code></pre>
     </div>
 
@@ -145,8 +235,18 @@ agp.initIframe('your-session-id', {
             <button class="danger" onclick="destroyAll()">Destroy All Instances</button>
         </div>
 
+        <h4>Available Methods:</h4>
+        <pre><code>// Contract-specific method
+agp.initContractIframe(contractId, options)
+
+// Bundle-specific method
+agp.initBundleIframe(bundleId, options)
+
+// Backward compatible method (same as initContractIframe)
+agp.initIframe(contractId, options)</code></pre>
+
         <h4>Available Options:</h4>
-        <pre><code>agp.initIframe('session-id', {
+        <pre><code>agp.initContractIframe('contract-id', {
     mode: 'iframe' | 'popup',           // Integration mode
     parentElement: '#selector' | element, // Parent element for iframe mode
     noPreview: false,                   // Set to true to show only sign button
@@ -181,89 +281,187 @@ agp.initIframe('your-session-id', {
     <script>
         let currentInstance = null;
 
-        function openPopup() {
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            currentInstance = agp.initIframe(sessionId, {
-                mode: 'popup',
-                popupWidth: 1200,
-                popupHeight: 900
-            });
+        // Helper functions to get IDs from input fields
+        function getContractId() {
+            return document.getElementById('contract-id').value.trim();
         }
 
-        function openPopupWithCallbacks() {
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            currentInstance = agp.initIframe(sessionId, {
+        function getBundleId() {
+            return document.getElementById('bundle-id').value.trim();
+        }
+
+        function validateId(id, type) {
+            if (!id) {
+                alert(`Please enter a ${type} ID in the configuration section above.`);
+                return false;
+            }
+            return true;
+        }
+
+        // Contract Popup Functions
+        function openContractPopup() {
+            const contractId = getContractId();
+            if (!validateId(contractId, 'Contract')) return;
+            
+            currentInstance = agp.initContractIframe(contractId, {
                 mode: 'popup',
                 popupWidth: 1200,
                 popupHeight: 900,
-                popupTitle: 'AGP Portal - Custom',
+                popupTitle: 'Sign Contract'
+            });
+        }
+
+        function openContractPopupWithCallbacks() {
+            const contractId = getContractId();
+            if (!validateId(contractId, 'Contract')) return;
+            
+            currentInstance = agp.initContractIframe(contractId, {
+                mode: 'popup',
+                popupWidth: 1200,
+                popupHeight: 900,
+                popupTitle: 'Sign Contract - Custom',
                 onMessage: (data, origin, iframe) => {
-                    console.log('Custom message handler:', data);
-                    // You can handle specific messages here
+                    console.log('Contract message:', data);
                 },
                 onClose: () => {
-                    console.log('Popup was closed');
+                    console.log('Contract popup was closed');
                     currentInstance = null;
                 }
             });
         }
 
-        function openPopupNoPreview() {
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            currentInstance = agp.initIframe(sessionId, {
+        function openContractPopupNoPreview() {
+            const contractId = getContractId();
+            if (!validateId(contractId, 'Contract')) return;
+            
+            currentInstance = agp.initContractIframe(contractId, {
                 mode: 'popup',
                 noPreview: true,
-                popupTitle: 'Sign Document',
+                popupTitle: 'Sign Contract',
                 popupWidth: 500,
                 popupHeight: 600,
-                onMessage: (data, origin, iframe) => {
-                    console.log('Sign-only popup message:', data);
-                },
                 onClose: () => {
-                    console.log('Sign-only popup was closed');
+                    console.log('Contract sign-only popup was closed');
                     currentInstance = null;
                 }
             });
         }
 
-        function embedInContainer() {
-            clearContainer();
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            currentInstance = agp.initIframe(sessionId, {
-                mode: 'iframe',
-                parentElement: '#agp-container',
-                height: '500px',
+        // Bundle Popup Functions
+        function openBundlePopup() {
+            const bundleId = getBundleId();
+            if (!validateId(bundleId, 'Bundle')) return;
+            
+            currentInstance = agp.initBundleIframe(bundleId, {
+                mode: 'popup',
+                popupWidth: 1200,
+                popupHeight: 900,
+                popupTitle: 'Sign Bundle'
+            });
+        }
+
+        function openBundlePopupWithCallbacks() {
+            const bundleId = getBundleId();
+            if (!validateId(bundleId, 'Bundle')) return;
+            
+            currentInstance = agp.initBundleIframe(bundleId, {
+                mode: 'popup',
+                popupWidth: 1200,
+                popupHeight: 900,
+                popupTitle: 'Sign Bundle - Custom',
                 onMessage: (data, origin, iframe) => {
-                    console.log('Iframe message:', data);
+                    console.log('Bundle message:', data);
+                },
+                onClose: () => {
+                    console.log('Bundle popup was closed');
+                    currentInstance = null;
                 }
             });
         }
 
-        function embedInBody() {
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            currentInstance = agp.initIframe(sessionId, {
-                mode: 'iframe',
-                height: '600px'
+        function openBundlePopupNoPreview() {
+            const bundleId = getBundleId();
+            if (!validateId(bundleId, 'Bundle')) return;
+            
+            currentInstance = agp.initBundleIframe(bundleId, {
+                mode: 'popup',
+                noPreview: true,
+                popupTitle: 'Sign Bundle',
+                popupWidth: 500,
+                popupHeight: 600,
+                onClose: () => {
+                    console.log('Bundle sign-only popup was closed');
+                    currentInstance = null;
+                }
             });
         }
 
-        function embedNoPreview() {
+        // Iframe Embed Functions
+        function embedContractInContainer() {
+            const contractId = getContractId();
+            if (!validateId(contractId, 'Contract')) return;
+            
             clearContainer();
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            currentInstance = agp.initIframe(sessionId, {
+            currentInstance = agp.initContractIframe(contractId, {
+                mode: 'iframe',
+                parentElement: '#agp-container',
+                height: '500px',
+                onMessage: (data, origin, iframe) => {
+                    console.log('Contract iframe message:', data);
+                }
+            });
+        }
+
+        function embedBundleInContainer() {
+            const bundleId = getBundleId();
+            if (!validateId(bundleId, 'Bundle')) return;
+            
+            clearContainer();
+            currentInstance = agp.initBundleIframe(bundleId, {
+                mode: 'iframe',
+                parentElement: '#agp-container',
+                height: '500px',
+                onMessage: (data, origin, iframe) => {
+                    console.log('Bundle iframe message:', data);
+                }
+            });
+        }
+
+        function embedContractNoPreview() {
+            const contractId = getContractId();
+            if (!validateId(contractId, 'Contract')) return;
+            
+            clearContainer();
+            currentInstance = agp.initContractIframe(contractId, {
                 mode: 'iframe',
                 parentElement: '#agp-container',
                 noPreview: true,
                 height: '500px',
                 onMessage: (data, origin, iframe) => {
-                    console.log('Sign-only iframe message:', data);
+                    console.log('Contract sign-only iframe message:', data);
+                }
+            });
+        }
+
+        function embedBundleNoPreview() {
+            const bundleId = getBundleId();
+            if (!validateId(bundleId, 'Bundle')) return;
+            
+            clearContainer();
+            currentInstance = agp.initBundleIframe(bundleId, {
+                mode: 'iframe',
+                parentElement: '#agp-container',
+                noPreview: true,
+                height: '500px',
+                onMessage: (data, origin, iframe) => {
+                    console.log('Bundle sign-only iframe message:', data);
                 }
             });
         }
 
         function clearContainer() {
             const container = document.getElementById('agp-container');
-            container.innerHTML = '<p>Container for AGP iframe - click "Embed in Container" to load</p>';
+            container.innerHTML = '<p>Container for AGP iframe - click a button above to load</p>';
             if (currentInstance && currentInstance.destroy) {
                 currentInstance.destroy();
                 currentInstance = null;
@@ -273,64 +471,7 @@ agp.initIframe('your-session-id', {
         function destroyAll() {
             agp.destroyAll();
             clearContainer();
-            clearEmbeddedExamples();
             currentInstance = null;
-        }
-
-        function createCompactSignature() {
-            // Clear any existing content in the compact widget
-            const widget = document.getElementById('compact-widget');
-            const existingIframe = widget.querySelector('iframe');
-            if (existingIframe) {
-                existingIframe.remove();
-            }
-
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            agp.initIframe(sessionId, {
-                mode: 'iframe',
-                parentElement: '#compact-widget',
-                noPreview: true,
-                width: '100%',
-                height: '120px',
-                border: '1px solid #ddd',
-                onMessage: (data, origin, iframe) => {
-                    console.log('Compact signature widget message:', data);
-                }
-            });
-        }
-
-        function createInlinePreview() {
-            // Clear any existing content in the inline preview widget
-            const widget = document.getElementById('inline-preview');
-            const existingIframe = widget.querySelector('iframe');
-            if (existingIframe) {
-                existingIframe.remove();
-            }
-
-            const sessionId = "f512e1e4-9119-4b6e-a55e-5f3c40b1ae25"
-            agp.initIframe(sessionId, {
-                mode: 'iframe',
-                parentElement: '#inline-preview',
-                noPreview: false,
-                width: '100%',
-                height: '350px',
-                border: '1px solid #ddd',
-                onMessage: (data, origin, iframe) => {
-                    console.log('Inline preview widget message:', data);
-                }
-            });
-        }
-
-        function clearEmbeddedExamples() {
-            const compactWidget = document.getElementById('compact-widget');
-            const inlineWidget = document.getElementById('inline-preview');
-            
-            // Remove existing iframes and restore original content
-            const compactIframe = compactWidget.querySelector('iframe');
-            if (compactIframe) compactIframe.remove();
-            
-            const inlineIframe = inlineWidget.querySelector('iframe');
-            if (inlineIframe) inlineIframe.remove();
         }
 
         // Example of handling messages globally

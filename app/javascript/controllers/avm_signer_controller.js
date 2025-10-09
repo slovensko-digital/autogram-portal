@@ -50,7 +50,8 @@ export default class extends Controller {
         if (avmUrl) {
           console.log("Redirecting to AVM URL:", avmUrl)
           // Open the AVM URL directly - this should trigger the mobile app
-          window.location.href = avmUrl
+          // Use window.top to break out of iframe if embedded
+          this.redirectToAvmUrl(avmUrl)
         } else {
           console.log("Could not extract AVM URL, falling back to normal flow")
           // If we can't extract the URL, process the turbo stream normally
@@ -170,5 +171,41 @@ export default class extends Controller {
 
     // Consider it mobile if it matches user agent OR (has touch + small screen + mobile features)
     return isMobileUA || (isTouchDevice && isSmallScreen && hasMobileFeatures)
+  }
+
+  redirectToAvmUrl(avmUrl) {
+    // Check if we're in an iframe
+    const inIframe = window.self !== window.top
+
+    if (inIframe) {
+      try {
+        // Try to access parent window (will fail if cross-origin)
+        window.top.location.href = avmUrl
+        console.log("Redirected via window.top (iframe detected)")
+      } catch (e) {
+        // Cross-origin iframe - try alternative methods
+        console.log("Cross-origin iframe detected, attempting alternative redirect methods")
+        
+        // Method 1: Try using window.open with _blank target
+        // This might open in a new tab but should trigger the AVM app
+        const opened = window.open(avmUrl, '_blank')
+        
+        if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+          // Popup was blocked, try Method 2: Create a temporary link and click it
+          console.log("window.open blocked, trying link click method")
+          const link = document.createElement('a')
+          link.href = avmUrl
+          link.target = '_blank'
+          link.rel = 'noopener noreferrer'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        }
+      }
+    } else {
+      // Not in iframe, redirect normally
+      window.location.href = avmUrl
+      console.log("Redirected via window.location (not in iframe)")
+    }
   }
 }

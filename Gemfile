@@ -74,3 +74,5 @@ end
 gem "good_job", "~> 4.12"
 
 gem "redis", "~> 5.4"
+
+gem "jwt", "~> 3.1"

@@ -102,10 +102,13 @@ class AutogramService
       },
       parameters: {
         autoLoadEform: true,
-        level: document.content_type == "application/pdf" ? "PAdES_BASELINE_B" : "XAdES_BASELINE_B"
+        level: document.content_type == "application/pdf" ? "PAdES_BASELINE_B" : "XAdES_BASELINE_B",
+        fsFormId: document.xdc_parameters&.fs_form_identifier
       },
       payloadMimeType: determine_payload_mime_type(document)
     }
+
+    Rails.logger.debug "Autogram visualization payload: #{payload}"
 
     connection.post("/visualization", payload)
   end

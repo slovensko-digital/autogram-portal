@@ -1,7 +1,22 @@
 (function() {
     window.agp = {
-        // Initialize iframe with options
+        // Initialize contract iframe with options
+        initContractIframe: function (sessionId, options = {}) {
+            return this._initIframe('contracts', sessionId, options);
+        },
+
+        // Initialize bundle iframe with options
+        initBundleIframe: function (sessionId, options = {}) {
+            return this._initIframe('bundles', sessionId, options);
+        },
+
+        // Backward compatibility - alias to initContractIframe
         initIframe: function (sessionId, options = {}) {
+            return this.initContractIframe(sessionId, options);
+        },
+
+        // Internal method to initialize iframe with options
+        _initIframe: function (resourceType, sessionId, options = {}) {
             const config = {
                 mode: options.mode || 'iframe', // 'iframe' or 'popup'
                 parentElement: options.parentElement || null,
@@ -9,12 +24,13 @@
                 width: options.width || '100%',
                 height: options.height || '800px',
                 border: options.border || 'solid 1px #ccc',
-                baseUrl: options.baseUrl || window.location.origin,
+                baseUrl: options.baseUrl || "<%= @base_url %>",
                 popupWidth: options.popupWidth || 800,
                 popupHeight: options.popupHeight || 600,
                 popupTitle: options.popupTitle || 'AGP Portal',
                 onMessage: options.onMessage || null,
-                onClose: options.onClose || null
+                onClose: options.onClose || null,
+                resourceType: resourceType
             };
 
             if (config.mode === 'popup') {
@@ -27,7 +43,7 @@
         // Create iframe mode
         _createIframe: function (sessionId, config) {
             const iframe = document.createElement('iframe');
-            iframe.src = `${config.baseUrl}/contracts/${sessionId}/iframe` + (config.noPreview ? '?no_preview=1' : '');
+            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/iframe` + (config.noPreview ? '?no_preview=1' : '');
             iframe.style.width = config.width;
             iframe.style.height = config.height;
             iframe.style.border = config.border;
@@ -143,7 +159,7 @@
 
             // Create iframe
             const iframe = document.createElement('iframe');
-            iframe.src = `${config.baseUrl}/contracts/${sessionId}/iframe` + (config.noPreview ? '?no_preview=1' : '');
+            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/iframe` + (config.noPreview ? '?no_preview=1' : '');
             iframe.style.cssText = `
                 flex: 1;
                 border: none;

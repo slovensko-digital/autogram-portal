@@ -29,6 +29,8 @@ class Document < ApplicationRecord
   has_one :xdc_parameters, class_name: "XdcParameters", dependent: :destroy
   has_one_attached :blob
 
+  accepts_nested_attributes_for :xdc_parameters
+
   validates :blob, presence: { message: "A file needs to be attached" }
   validate :acceptable_file_type
   validates :xdc_parameters, presence: true, if: -> { blob.attached? && blob.content_type == "application/vnd.gov.sk.xmldatacontainer+xml" }

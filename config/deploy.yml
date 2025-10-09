@@ -15,6 +15,7 @@ env:
   secret:
     - SECRET_KEY_BASE
     - DATABASE_URL
+    - WEBHOOK_PRIVATE_KEY
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"

@@ -11,4 +11,5 @@
 #
 class User < ApplicationRecord
   validates :name, presence: true
+  has_many :bundles, foreign_key: "user_id", dependent: :destroy
 end

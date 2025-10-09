@@ -30,4 +30,9 @@
 #
 class XdcParameters < ApplicationRecord
   belongs_to :document
+
+  def initialize(attributes = {})
+    super
+    Rails.logger.debug "Initialized XdcParameters with attributes: #{attributes.inspect}"
+  end
 end

@@ -83,6 +83,8 @@ export default class extends Controller {
       // Get timestamp setting from Stimulus value
       const useTimestamp = this.useTimestampValue
 
+      console.log('document 0:', contract.documents[0])
+
       let signRequestSignatureParameters = this.getOldSignatureParameters(
         contract.signature_parameters, 
         contract.documents[0].xdc_parameters,
@@ -155,29 +157,35 @@ export default class extends Controller {
       container: newParams.container
     };
 
+    console.log('xdc params:', xdcParams)
     if (xdcParams) {
+      console.log('Using XDC parameters:', xdcParams)
       result.autoLoadEform = xdcParams.auto_load_eform;
       result.containerXmlns = xdcParams.container_xmlns;
       result.embedUsedSchemas = xdcParams.embed_used_schemas;
       result.identifier = xdcParams.identifier;
-      result.fsFormIdentifier = xdcParams.fs_identifier;
+      result.fsFormId = xdcParams.fs_form_identifier;
       result.packaging = xdcParams.packaging;
       result.schemaIdentifier = xdcParams.schema_identifier;
       result.transformationIdentifier = xdcParams.transformation_identifier;
 
-      if (xdcParams.schema_mime_type.includes('base64')) {
-        result.schema = xdcParams.schema;
-        result.transformation = xdcParams.transformation;
-      } else {
-        result.schema = this.stringToBase64(xdcParams.schema);
-        result.schemaMimeType = xdcParams.schema_mime_type + ';base64';
-        result.transformation = this.stringToBase64(xdcParams.transformation);
-        result.transformationMimeType = xdcParams.transformation_mime_type + ';base64';
+      if (xdcParams.schema != null) {
+        if (xdcParams.schema_mime_type && xdcParams.schema_mime_type.includes('base64')) {
+          result.schema = xdcParams.schema;
+          result.transformation = xdcParams.transformation;
+        } else {
+          result.schema = this.stringToBase64(xdcParams.schema);
+          result.schemaMimeType = xdcParams.schema_mime_type + ';base64';
+          result.transformation = this.stringToBase64(xdcParams.transformation);
+          result.transformationMimeType = xdcParams.transformation_mime_type + ';base64';
+        }
       }
     } else {
+      console.log('No XDC parameters found, using defaults')
       result.autoLoadEform = true;
     }
 
+    console.log('Final signature parameters:', result)
     return result;
   }
 

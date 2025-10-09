@@ -106,10 +106,13 @@ class Contract < ApplicationRecord
       target: "flash_messages",
       partial: "shared/flash_message",
       locals: {
-        message: "Zmluva bola úspešne podpísaná.",
+        message: "Contract signed successfully.",
         type: "notice"
       }
     )
+
+    Rails.logger.info "Broadcasted signing success for contract #{uuid}."
+    bundle.contract_signed(self) if bundle.present?
   end
 
   private

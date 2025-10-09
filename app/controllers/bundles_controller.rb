@@ -1,25 +1,15 @@
 class BundlesController < ApplicationController
-  before_action :set_bundle, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_bundle, only: [ :show, :edit, :update, :destroy, :iframe ]
+  skip_before_action :verify_authenticity_token, only: [ :iframe ]
+
+  before_action :allow_iframe, only: [ :iframe ]
 
   def index
-    @bundles = Bundle.all
+    @bundles = Bundle.includes(:contracts, :author).order(created_at: :desc)
   end
 
   def show
-  end
-
-  def new
-    @bundle = Bundle.new
-    @bundle.author = current_user
-  end
-
-  def create
-    @bundle = Bundle.new(bundle_params)
-    if @bundle.save
-      redirect_to @bundle, notice: "Bundle was successfully created."
-    else
-      render :new
-    end
+    @bundle.contracts.includes(:documents, :avm_sessions)
   end
 
   def edit
@@ -38,14 +28,19 @@ class BundlesController < ApplicationController
     redirect_to bundles_url, notice: "Bundle was successfully destroyed."
   end
 
+  def iframe
+    no_header
+    no_footer
+    no_flash
+  end
+
   private
 
   def set_bundle
-    # Find by UUID first, fallback to ID for backward compatibility during transition
-    @bundle = Bundle.find_by(uuid: params[:id]) || Bundle.find(params[:id])
+    @bundle = Bundle.find_by_uuid(params[:id])
   end
 
   def bundle_params
-    params.require(:bundle).permit(:name, :description)
+    params.require(:bundle)
   end
 end

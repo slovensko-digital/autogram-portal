@@ -19,7 +19,7 @@ paths:
       summary: Hello world endpoint
       description: Returns a simple hello world message.
       responses:
-        '200':
+        200:
           description: A successful response with a hello world message.
           content:
             application/json:
@@ -29,6 +29,28 @@ paths:
                   message:
                     type: string
                     example: Hello, world!
+
+  /hello_auth:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Authenticated hello world endpoint
+      description: Returns a hello message for authenticated users.
+      responses:
+        200:
+          description: A successful response with a hello message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Hello, 42!
+        401:
+          description: Unauthorized access.
 
   /contracts:
     post:
@@ -79,7 +101,7 @@ paths:
                     contentType: "application/pdf; base64"
 
       responses:
-        '200':
+        201:
           description: A successful response with the uploaded file details.
           content:
             application/json:
@@ -88,11 +110,144 @@ paths:
                 properties:
                   id:
                     type: string
-                    example: doc-1
+                    format: uuid
+                    example: 69393b49-c34f-438f-ad7c-4b78db3932be
+        409:
+          description: Conflict - A contract with the same ID already exists.
+        422:
+          description: Unprocessable Entity - The request body is invalid.
+
+  /contracts/{id}:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Get contract details
+      description: Retrieves details of a specific contract by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the contract.
+      responses:
+        200:
+          description: A successful response with the contract details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        404:
+          description: Contract not found.
+
+  /contracts/{id}/signed_document:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Get signed document
+      description: Retrieves the signed document associated with a specific contract by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the contract.
+      responses:
+        200:
+          description: A successful response with the signed document details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  download_url:
+                    type: string
+                    format: uri
+                    example: https://example.com/signed_document.pdf
+                  content_type:
+                    type: string
+                    example: application/pdf
                   filename:
                     type: string
-                    example: File 1
-  
+                    example: signed_document.pdf
+                  file_size:
+                    type: integer
+                    example: 204800
+                  checksum:
+                    type: string
+                    example: abcdef1234567890abcdef1234567890abcdef1234567890
+                  signed_at:
+                    type: string
+                    format: date-time
+                    example: '2023-10-01T12:34:56Z'
+        404:
+          description: Contract or signed document not found.
+
+    delete:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Delete a contract
+      description: Deletes a specific contract by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the contract.
+      responses:
+        204:
+          description: Contract successfully deleted.
+        404:
+          description: Contract not found.
+
+  /contracts/{id}/status:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Get contract signing status
+      description: Retrieves the signing status of a specific contract by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the contract.
+      responses:
+        200:
+          description: Pending
+          headers:
+            Retry-After:
+              description: Indicates how long the client should wait before making a follow-up request.
+              schema:
+                type: integer
+                example: 30
+        302:
+          description: Found
+          headers:
+            Location:
+              description: URL to the signed document.
+              schema:
+                type: string
+                format: uri
+                example: https://example.com/api/v1/contracts/69393b49-c34f-438f-ad7c-4b78db3932be
+        404:
+          description: Contract not found.
+
   /bundles:
     post:
       tags:
@@ -108,72 +263,18 @@ paths:
             schema:
               $ref: "#/components/schemas/Bundle"
             examples:
+              bundle-minimal:
+                $ref: "#/components/examples/bundle-minimal"
+              bundle-webhook:
+                $ref: "#/components/examples/bundle-webhook"
               target-user:
-                summary: Target user for the signing process
-                value:
-                  contracts:
-                    - allowedMethods: [ "qes" ]
-                      file:
-                        content: "base64-encoded-content"
-                        contentType: "application/pdf; base64"
-                  recipients:
-                    - name: "John Doe"
-                      email: "john.doe@example.com"
-
-              webhook:
-                summary: Webhook URL for notifications
-                value:
-                  contracts:
-                    - allowedMethods: [ "qes" ]
-                      file:
-                        content: "base64-encoded-content"
-                        contentType: "application/pdf; base64"
-                  webhook:
-                    url: "https://example.com/webhook"
-
+                $ref: "#/components/examples/target-user"
               multiple-users-and-docs:
-                summary: Multiple users and files
-                value:
-                  contracts:
-                    - allowedMethods: [ "qes", "ades", "ses", "scan", "paper" ]
-                      file:
-                        filename: "Contract.pdf"
-                        content: "base64-encoded-content"
-                        contentType: "application/pdf; base64"
-                    - allowedMethods: [ "qes", "notary" ]
-                      file:
-                        filename: "Mandate.pdf"
-                        content: "base64-encoded-content"
-                        contentType: "application/pdf; base64"
-                      SignatureParameters:
-                        level: PAdES_BASELINE_T
-                  postalAddress:
-                    address: "123 Main St, 81103 Bratislava, Slovakia"
-                    recipientName: "Company Name"
-                  users:
-                    - name: "Alice Smith"
-                      email: "alice.smith@example.com"
-                    - name: "Bob Johnson"
-                      email: "bob.johnson@example.com"
-                  webhook:
-                    url: "https://example.com/webhook"
-
+                $ref: "#/components/examples/multiple-users-and-docs"
               postal-signing:
-                summary: Postal signing options
-                value:
-                  contracts:
-                    - allowedMethods: [ "qes", "notary" ]
-                      file:
-                        content: "base64-encoded-content"
-                        contentType: "application/pdf; base64"
-                      SignatureParameters:
-                        level: PAdES_BASELINE_T
-                  postalAddress:
-                    address: "123 Main St, 81103 Bratislava, Slovakia"
-                    recipientName: "Company Name"
-
+                $ref: "#/components/examples/postal-signing"
       responses:
-        200:
+        201:
           description: A successful response indicating the bundle was created.
           content:
             application/json:
@@ -183,6 +284,103 @@ paths:
                   id:
                     type: string
                     example: bundle-1
+        409:
+          description: Conflict - A bundle with the same ID already exists.
+        422:
+          description: Unprocessable Entity - The request body is invalid.
+
+  /bundles/{id}:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Get bundle details
+      description: Retrieves details of a specific bundle by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the bundle.
+      responses:
+        200:
+          description: A successful response with the bundle details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+        404:
+          description: Bundle not found.
+
+    delete:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Delete a bundle
+      description: Deletes a specific bundle by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the bundle.
+      responses:
+        204:
+          description: Bundle successfully deleted.
+        404:
+          description: Bundle not found.
+
+  /bundles/{id}/status:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Get bundle signing status
+      description: Retrieves the signing status of a specific bundle by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the bundle.
+      responses:
+        200:
+          description: Pending
+          headers:
+            Retry-After:
+              description: Indicates how long the client should wait before making a follow-up request.
+              schema:
+                type: integer
+                example: 30
+        302:
+          description: Found
+          headers:
+            Location:
+              description: URL to the signed documents.
+              schema:
+                type: string
+                format: uri
+                example: https://example.com/api/v1/bundles/69393b49-c34f-438f-ad7c-4b78db3932be
+        404:
+          description: Bundle not found.
+
+webhooks:
+  notificationWebhook:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StandardWebhookRequestBody"
 
 components:
   schemas:
@@ -218,12 +416,12 @@ components:
           default: [ "qes" ]
           items:
             $ref: "#/components/schemas/SignatureMethod"
-        file:
+        documents:
           $ref: "#/components/schemas/Document"
-        SignatureParameters:
+        signatureParameters:
           $ref: "#/components/schemas/SignatureParameters"
       required:
-        - file
+        - documents
 
     PostalAddress:
       type: object
@@ -243,6 +441,13 @@ components:
           format: uri
           example: https://example.com/webhook
           description: URL to which webhook notifications will be sent.
+        method:
+          type: string
+          enum:
+            - standard
+            - get
+          example: standard
+          description: Type of webhook to use. Defaults to "standard" as described in Standard Webhooks. "get" method will send a GET request to the URL without a body.
 
     SignatureMethod:
       type: string
@@ -275,7 +480,9 @@ components:
         hash:
           type: string
           example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
-          description: SHA-256 hash of the file content.
+          description: SHA-256 hash of the file content.        
+        xdcParameters:
+          $ref: "#/components/schemas/XdcParameters"
 
     User:
       type: object
@@ -320,9 +527,6 @@ components:
             - ASiC-E
             - ASiC-S
 
-        XdcParameters:
-          $ref: "#/components/schemas/XdcParameters"
-
     XdcParameters:
       type: object
       description: XML Datacontainer EForm parameters
@@ -357,6 +561,11 @@ components:
           example: https://data.gov.sk/id/egov/eform/App.GeneralAgenda/1.9
           description: Optional identifier of the file template. Required if containerXmlns is http://data.gov.sk/def/container/xmldatacontainer+xml/1.1. Defaults to null. Is ignored with autoLoadEform true.
 
+        fsFormIdentifier:
+          type: string
+          example: "792_772"
+          description: Optional specific identifier for financnasprava.sk EForms. For example, 792_772 is an identifier of "Danove priznanie - riadne".
+
         schema:
           type: string
           example: '<?xml version="1.0"?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"><xs:element name="File"><xs:complexType><xs:sequence><xs:element name="Title" type="xs:string" /></xs:sequence></xs:complexType></xs:element></xs:schema>'
@@ -366,6 +575,11 @@ components:
           type: string
           example: http://schemas.gov.sk/form/App.GeneralAgenda/1.9/form.xsd
           description: Optional identifier of the XML schema. The value is used in "UsedXSDReference" field inside created XML Datacontainer. If provided with autoLoadEform true, Autogram will try to find such schema. Default value is "http://schemas.gov.sk/form/<form-idnetifier>/<version>/form.xsd".
+
+        schemaMimeType:
+          type: string
+          example: application/xml
+          description: Optional MIME type of the XML schema. Defaults to application/xml.
 
         transformation:
           type: string
@@ -395,7 +609,41 @@ components:
           type: string
           example: example-value
           description: Optional target environment of the XML transformation. If autoLoadEform is true, Autogram will try to find signing XSLT with this target. Otherwise transformation must be provided. Null and not used by default.
-   
+
+    StandardWebhookRequestBody:
+      description: Request body according to [Standard Webhooks](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md) specification.
+      properties:
+        type:
+          type: string
+          description: Type of the event triggering the webhook. It is in the format `[object].[event]`.
+          enum:
+            - contract.signed
+            - bundle.all_signed
+          example: contract.signed
+        timestamp:
+          type: string
+          format: date-time
+          description: Time of the event triggering the webhook in ISO 8601 format.
+          example: 2025-10-07T10:32:49.129+02:00
+        data:
+          type: object
+          description: Data about the object triggering the webhook
+          properties:
+            contract_id:
+              type: string
+              format: uuid
+              example: 69393b49-c34f-438f-ad7c-4b78db3932be
+              description: Contract identifier
+            bundle_id:
+              type: string
+              format: uuid
+              example: 69393b49-c34f-438f-ad7c-4b78db3932be
+              description: Bundle identifier
+      required:
+        - type
+        - timestamp
+        - data
+
 
   securitySchemes:
     JWT:
@@ -425,3 +673,98 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  examples:
+    bundle-minimal:
+      summary: Minimal bundle with one document
+      value:
+        contracts:
+          - allowedMethods: [ "qes" ]
+            documents:
+              - filename: "contract.txt"
+                content: "Sample text content"
+                contentType: "text/plain"
+            signatureParameters:
+              format: XAdES
+              container: ASiC_E
+
+    bundle-webhook:
+      summary: Webhook URL for notifications
+      value:
+        contracts:
+          - allowedMethods: [ "qes" ]
+            documents:
+              - filename: "contract.txt"
+                content: "Sample text content"
+                contentType: "text/plain"
+            signatureParameters:
+              format: XAdES
+              container: ASiC_E
+        webhook:
+          url: "https://example.com/webhook"
+
+    target-user:
+      summary: Target user for the signing process
+      value:
+        contracts:
+          - allowedMethods: [ "qes" ]
+            documents:
+              - filename: "contract.txt"
+                content: "Sample text content"
+                contentType: "text/plain"
+            signatureParameters:
+              format: XAdES
+              container: ASiC_E
+        recipients:
+          - name: "John Doe"
+            email: "john.doe@example.com"
+
+    multiple-users-and-docs:
+      summary: Multiple users and contracts
+      value:
+        contracts:
+          - allowedMethods: [ "qes", "ades", "ses", "scan", "paper" ]
+            documents:
+              - filename: "contract.txt"
+                content: "Sample text content"
+                contentType: "text/plain"
+            signatureParameters:
+              format: XAdES
+              container: ASiC_E
+          - allowedMethods: [ "ts-qes", "notary" ]
+            documents:
+              - filename: "mandate.txt"
+                content: "Sample mandate text content"
+                contentType: "text/plain"
+            signatureParameters:
+              level: BASELINE_T
+              format: XAdES
+              container: ASiC_E
+        postalAddress:
+          address: "123 Main St, 81103 Bratislava, Slovakia"
+          recipientName: "Company Name"
+        users:
+          - name: "Alice Smith"
+            email: "alice.smith@example.com"
+          - name: "Bob Johnson"
+            email: "bob.johnson@example.com"
+        webhook:
+          url: "https://example.com/webhook"
+          method: "get"
+
+    postal-signing:
+      summary: Postal signing options
+      value:
+        contracts:
+          - allowedMethods: [ "qes", "notary" ]
+            documents:
+              - filename: "contract.txt"
+                content: "Sample text content"
+                contentType: "text/plain"
+            signatureParameters:
+              format: XAdES
+              container: ASiC_E
+        postalAddress:
+          address: "123 Main St, 81103 Bratislava, Slovakia"
+          recipientName: "Company Name"
+

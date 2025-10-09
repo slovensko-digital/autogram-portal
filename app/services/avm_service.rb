@@ -15,8 +15,8 @@ class AvmService
           content: file_content,
           filename: document.filename
         },
-        parameters: format_signature_parameters_for_avm(contract.signature_parameters),
-        payloadMimeType: document.content_type + "; base64"
+        parameters: format_signature_parameters_for_avm(contract.signature_parameters, document),
+        payloadMimeType: document.content_type + ";base64"
       }
 
       puts "Payload for AVM initiate: #{payload.inspect}"
@@ -25,6 +25,7 @@ class AvmService
       puts "Generated secret key: #{secret_key}"
 
       response = call_avm_initiate_api(payload, secret_key)
+      Rails.logger.info "AVM initiate response status: #{response.status}, body: #{response.body}"
 
       if response.success?
         parse_avm_initiate_response(response, secret_key)
@@ -32,6 +33,7 @@ class AvmService
         { error: "Chyba komunikácie s AVM službou: #{response.status}" }
       end
     rescue StandardError => e
+      Rails.logger.error "Error initiating AVM signing: #{e.message}"
       return { error: "Chyba komunikácie s AVM službou" } if Rails.env.production?
 
       # Fallback to mock data if service is not available
@@ -148,10 +150,11 @@ class AvmService
     raise "Nepodarilo sa spracovať odpoveď z AVM služby: #{e.message}"
   end
 
-  def format_signature_parameters_for_avm(signature_parameters)
+  def format_signature_parameters_for_avm(signature_parameters, document)
     {
       level: "#{signature_parameters.format}_#{signature_parameters.level}",
       container: signature_parameters.container,
+      fsFormId: document.xdc_parameters&.fs_form_identifier,
       autoLoadEform: true
     }
   end

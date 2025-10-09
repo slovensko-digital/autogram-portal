@@ -1,0 +1,5 @@
+class AddMethodToWebhook < ActiveRecord::Migration[8.0]
+  def change
+    add_column :webhooks, :method, :integer, default: 0, null: false
+  end
+end

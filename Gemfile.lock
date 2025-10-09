@@ -145,6 +145,8 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     json (2.12.2)
+    jwt (3.1.2)
+      base64
     kamal (2.7.0)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -403,6 +405,7 @@ DEPENDENCIES
   good_job (~> 4.12)
   importmap-rails
   jbuilder
+  jwt (~> 3.1)
   kamal
   pg (~> 1.1)
   propshaft

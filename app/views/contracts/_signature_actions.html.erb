@@ -31,7 +31,7 @@
             <% contract.allowed_methods.each_with_index do |method, index| %>
               <label class="cursor-pointer block">
                 <input type="radio" 
-                        name="signature_method" 
+                        name="signature_method_<%= contract.uuid %>" 
                         value="<%= method %>"
                         data-signature-method-selector-target="methodRadio"
                         data-action="change->signature-method-selector#updateButtons"
@@ -60,7 +60,7 @@
       <!-- Hidden radio button for single method -->
       <% contract.allowed_methods.each_with_index do |method, index| %>
         <input type="radio" 
-                name="signature_method" 
+                name="signature_method_<%= contract.uuid %>" 
                 value="<%= method %>"
                 data-signature-method-selector-target="methodRadio"
                 data-action="change->signature-method-selector#updateButtons"

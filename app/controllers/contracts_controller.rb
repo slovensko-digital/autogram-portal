@@ -1,6 +1,6 @@
 class ContractsController < ApplicationController
   before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :iframe ]
-  skip_before_action :verify_authenticity_token, only: [ :iframe ]
+  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm ]
 
   before_action :allow_iframe, only: [ :iframe ]
 
@@ -47,7 +47,22 @@ class ContractsController < ApplicationController
               id: doc.id,
               filename: doc.filename,
               content_type: doc.blob.content_type,
-              download_url: rails_blob_url(doc.blob)
+              download_url: rails_blob_url(doc.blob),
+              xdc_parameters: doc.xdc_parameters ? {
+                auto_load_eform: doc.xdc_parameters.auto_load_eform,
+                container_xmlns: doc.xdc_parameters.container_xmlns,
+                embed_used_schemas: doc.xdc_parameters.embed_used_schemas,
+                fs_form_identifier: doc.xdc_parameters.fs_form_identifier,
+                identifier: doc.xdc_parameters.identifier,
+                schema: doc.xdc_parameters.schema,
+                schema_identifier: doc.xdc_parameters.schema_identifier,
+                schema_mime_type: doc.xdc_parameters.schema_mime_type,
+                transformation: doc.xdc_parameters.transformation,
+                transformation_identifier: doc.xdc_parameters.transformation_identifier,
+                transformation_language: doc.xdc_parameters.transformation_language,
+                transformation_media_destination_type_description: doc.xdc_parameters.transformation_media_destination_type_description,
+                transformation_target_environment: doc.xdc_parameters.transformation_target_environment
+              } : nil
             }
           end,
           allowed_methods: @contract.allowed_methods,
@@ -86,7 +101,7 @@ class ContractsController < ApplicationController
           end
 
           render turbo_stream: turbo_stream.replace(
-            "signature_actions_#{@contract.id}",
+            "signature_actions_#{@contract.uuid}",
             partial: "contracts/avm_signing_pending",
             locals: {
               contract: @contract,
@@ -122,7 +137,7 @@ class ContractsController < ApplicationController
         end
 
         render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.id}",
+          "signature_actions_#{@contract.uuid}",
           partial: "contracts/avm_signing_pending",
           locals: {
             contract: @contract,
@@ -137,7 +152,7 @@ class ContractsController < ApplicationController
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.id}",
+          "signature_actions_#{@contract.uuid}",
           partial: "contracts/signature_error",
           locals: { contract: @contract, error: e.message }
         )

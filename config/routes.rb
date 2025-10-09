@@ -12,6 +12,8 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  get "sdk.js" => "sdk#sdk", as: :sdk
+
   # Defines the root path route ("/")
   root to: "homepage#index"
 
@@ -20,7 +22,7 @@ Rails.application.routes.draw do
       get :validate
       get :visualize
       get :pdf_preview
-      post 'create_contract_from_document', as: 'create_contract_from_document'
+      post "create_contract_from_document", as: "create_contract_from_document"
     end
   end
 
@@ -35,7 +37,33 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :bundles
+  resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
+    member do
+      get :iframe
+    end
+  end
+
+  namespace :api do
+    namespace :v1 do
+      get "hello", to: "hello#show"
+      get "hello_auth", to: "hello#show_auth"
+
+      resources :contracts, only: [ :create, :show ] do
+        member do
+          get :signed_document
+          get :status
+        end
+      end
+
+      resources :documents, only: [ :show ]
+
+      resources :bundles, only: [ :create, :show, :destroy ] do
+        member do
+          get :status
+        end
+      end
+    end
+  end
 
   # add good job admin interface at /admin/good_job
   mount GoodJob::Engine => "/admin/good_job"

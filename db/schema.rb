@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_06_000000) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_08_085750) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -221,6 +221,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_000000) do
     t.bigint "bundle_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "method", default: 0, null: false
     t.index ["bundle_id"], name: "index_webhooks_on_bundle_id"
   end
 
