@@ -26,7 +26,15 @@
   <body>
     <%= render "layouts/header" unless @no_header %>
 
-   <%= render("layouts/flash", flash: flash) unless @no_flash %>
+    <% if current_user %>
+      <%= current_user&.email %>
+      <%= link_to 'Sign out', destroy_user_session_path, data: { turbo_method: :delete } %>
+    <% else %>
+      <%= link_to 'Sign in', new_user_session_path %>
+    <% end %>
+
+
+    <%= render("layouts/flash", flash: flash) unless @no_flash %>
 
     <%= yield %>
 
