@@ -26,7 +26,6 @@ export default class extends Controller {
     if (file) {
       this.setFile(file)
     }
-    // Don't clear the input value if we're in single mode as we want to keep the file
     if (this.modeValue === 'contract') {
       event.target.value = null
     }
@@ -97,14 +96,12 @@ export default class extends Controller {
   }
 
   updateFileInput(file) {
-    // For single file mode (documents), update the existing input
     const dt = new DataTransfer()
     dt.items.add(file)
     this.fileInputTarget.files = dt.files
   }
 
   createHiddenInput(file) {
-    // For contract mode, create a hidden input in the documents container
     if (!this.hasDocumentsContainerTarget) return
     
     const input = document.createElement('input')
@@ -112,7 +109,6 @@ export default class extends Controller {
     input.name = `${this.inputNameValue}[0][blob]`
     input.style.display = 'none'
     
-    // Create a new FileList with just this file
     const dt = new DataTransfer()
     dt.items.add(file)
     input.files = dt.files
@@ -139,7 +135,7 @@ export default class extends Controller {
   }
 
   removeFile(event) {
-    event.stopPropagation() // Prevent triggering the dropzone click
+    event.stopPropagation()
     this.clearFile()
     this.updateUI()
     this.updateSubmitButton()
@@ -177,7 +173,6 @@ export default class extends Controller {
   }
 
   updateUI() {
-    // Update dropzone classes
     if (this.dragging && !this.selectedFile) {
       this.dropzoneTarget.classList.add(...this.draggingClasses)
       this.dropzoneTarget.classList.remove("border-dashed")
@@ -185,22 +180,18 @@ export default class extends Controller {
       this.dropzoneTarget.classList.add(...this.uploadingClasses)
       this.dropzoneTarget.classList.remove("border-dashed", "cursor-pointer")
     } else if (this.selectedFile) {
-      // File is selected - show as solid border, keep cursor pointer for replacement
       this.dropzoneTarget.classList.remove(...this.draggingClasses, ...this.uploadingClasses, "border-dashed")
       this.dropzoneTarget.classList.add("border-solid", "border-gray-300", "bg-gray-50")
     } else {
-      // Default state
       this.dropzoneTarget.classList.remove(...this.draggingClasses, ...this.uploadingClasses, "border-solid", "border-gray-300", "bg-gray-50")
       this.dropzoneTarget.classList.add("border-dashed", "cursor-pointer")
     }
 
-    // Update state visibility
     const defaultState = this.dropzoneTarget.querySelector('.default-state')
     const draggingState = this.dropzoneTarget.querySelector('.dragging-state')
     const uploadingState = this.dropzoneTarget.querySelector('.uploading-state')
     const fileSelectedState = this.dropzoneTarget.querySelector('.file-selected-state')
 
-    // Hide all states first
     defaultState.classList.add('hidden')
     draggingState.classList.add('hidden')
     uploadingState.classList.add('hidden')
@@ -211,7 +202,6 @@ export default class extends Controller {
     uploadingState.classList.remove('flex')
     fileSelectedState.classList.remove('flex')
 
-    // Show appropriate state
     if (this.uploading) {
       uploadingState.classList.remove('hidden')
       uploadingState.classList.add('flex')

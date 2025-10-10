@@ -8,20 +8,12 @@ export default class extends Controller {
   }
 
   handleClick(event) {
-    // Check if we're on a mobile device
     if (this.isMobileDevice()) {
       console.log("Mobile device detected, handling AVM signing directly")
-      
-      // Prevent the default form submission
       event.preventDefault()
-      
-      // Show loading state
       this.setButtonLoading(true)
-      
-      // Submit the form to get the AVM URL, then redirect directly
       this.submitAndRedirect()
     }
-    // On desktop, let the form submit normally to show QR code
   }
 
   async submitAndRedirect() {
@@ -29,7 +21,6 @@ export default class extends Controller {
       const form = this.element
       const formData = new FormData(form)
       
-      // Submit the form using fetch
       const response = await fetch(form.action, {
         method: form.method,
         body: formData,
@@ -40,21 +31,16 @@ export default class extends Controller {
       })
 
       if (response.ok) {
-          // Get the turbo stream response
           const responseText = await response.text()
           console.log("Response: ", responseText);
         
-        // Extract the AVM URL from the response
         const avmUrl = this.extractAvmUrlFromResponse(responseText)
         
         if (avmUrl) {
           console.log("Redirecting to AVM URL:", avmUrl)
-          // Open the AVM URL directly - this should trigger the mobile app
-          // Use window.top to break out of iframe if embedded
           this.redirectToAvmUrl(avmUrl)
         } else {
           console.log("Could not extract AVM URL, falling back to normal flow")
-          // If we can't extract the URL, process the turbo stream normally
           this.processTurboStreamResponse(responseText)
         }
       } else {
@@ -68,8 +54,6 @@ export default class extends Controller {
   }
 
   extractAvmUrlFromResponse(responseText) {
-    // Look for the AVM URL in the turbo stream response
-    // The URL should be in the format: https://autogram.slovensko.digital/api/v1/qr-code?guid=...&key=...
     const patterns = [
       /https:\/\/autogram\.slovensko\.digital\/api\/v1\/qr-code\?[^"'\s>]+/g,
       /data-avm-url="([^"]+)"/g,
@@ -79,13 +63,11 @@ export default class extends Controller {
     for (const pattern of patterns) {
       const matches = responseText.match(pattern)
       if (matches && matches.length > 0) {
-        // Extract URL from the match (handle both direct matches and attribute matches)
         let url = matches[0]
         if (url.includes('="')) {
           url = url.split('"')[1]
         }
         if (url.startsWith('https://')) {
-          // Decode HTML entities (especially &amp; to &)
           url = this.decodeHtmlEntities(url)
           return url
         }
@@ -96,23 +78,18 @@ export default class extends Controller {
   }
 
   decodeHtmlEntities(text) {
-    // Create a temporary DOM element to decode HTML entities
     const tempElement = document.createElement('div')
     tempElement.innerHTML = text
     return tempElement.textContent || tempElement.innerText || text
   }
 
   processTurboStreamResponse(responseText) {
-    // Process the turbo stream response normally
-    // This will show the QR code interface
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = responseText
     const turboStreamElement = tempDiv.querySelector('turbo-stream')
     
     if (turboStreamElement) {
-      // Let Turbo handle the stream
       document.body.appendChild(turboStreamElement)
-      // Clean up
       setTimeout(() => {
         if (turboStreamElement.parentNode) {
           turboStreamElement.parentNode.removeChild(turboStreamElement)
@@ -125,7 +102,6 @@ export default class extends Controller {
 
   showError(message) {
     this.setButtonLoading(false)
-    // You could implement a toast notification here or use the existing error handling
     alert(message)
   }
 
@@ -155,43 +131,29 @@ export default class extends Controller {
   }
 
   isMobileDevice() {
-    // Check for mobile device using multiple methods
     const userAgent = navigator.userAgent || navigator.vendor || window.opera
-
-    // Method 1: User agent detection
     const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
     const isMobileUA = mobileRegex.test(userAgent)
-
-    // Method 2: Touch capability and screen size
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
     const isSmallScreen = window.innerWidth <= 768
-
-    // Method 3: Check for mobile-specific features
     const hasMobileFeatures = 'orientation' in window || 'DeviceMotionEvent' in window
 
-    // Consider it mobile if it matches user agent OR (has touch + small screen + mobile features)
     return isMobileUA || (isTouchDevice && isSmallScreen && hasMobileFeatures)
   }
 
   redirectToAvmUrl(avmUrl) {
-    // Check if we're in an iframe
     const inIframe = window.self !== window.top
 
     if (inIframe) {
       try {
-        // Try to access parent window (will fail if cross-origin)
         window.top.location.href = avmUrl
         console.log("Redirected via window.top (iframe detected)")
       } catch (e) {
-        // Cross-origin iframe - try alternative methods
         console.log("Cross-origin iframe detected, attempting alternative redirect methods")
         
-        // Method 1: Try using window.open with _blank target
-        // This might open in a new tab but should trigger the AVM app
         const opened = window.open(avmUrl, '_blank')
         
         if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-          // Popup was blocked, try Method 2: Create a temporary link and click it
           console.log("window.open blocked, trying link click method")
           const link = document.createElement('a')
           link.href = avmUrl
@@ -203,7 +165,6 @@ export default class extends Controller {
         }
       }
     } else {
-      // Not in iframe, redirect normally
       window.location.href = avmUrl
       console.log("Redirected via window.location (not in iframe)")
     }

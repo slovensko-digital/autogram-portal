@@ -4,7 +4,6 @@ export default class extends Controller {
   static targets = ["methodRadio", "buttonContainer", "signerController"]
 
   connect() {
-    // Use a small delay to ensure DOM is fully ready
     setTimeout(() => {
       this.updateButtons()
     }, 10)
@@ -15,19 +14,14 @@ export default class extends Controller {
     const buttons = this.buttonContainerTarget.querySelectorAll('button[type="submit"]')
     const signerControllers = this.signerControllerTargets
     
-    console.log('Selected method:', selectedMethod) // Debug log
-    
-    // Enable/disable buttons based on method selection
     if (selectedMethod) {
       buttons.forEach(button => {
         button.disabled = false
       })
       
-      // Update timestamp data attribute on document signer controllers
       const useTimestamp = selectedMethod === 'ts-qes'
       signerControllers.forEach(signerElement => {
         signerElement.setAttribute('data-document-signer-use-timestamp-value', useTimestamp)
-        // Notify the document signer controller about the change
         const controller = this.application.getControllerForElementAndIdentifier(signerElement, 'document-signer')
         if (controller && controller.useTimestampValueChanged) {
           controller.useTimestampValueChanged()

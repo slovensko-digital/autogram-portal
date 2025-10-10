@@ -51,7 +51,6 @@ export default class extends Controller {
         doc.contentPromise = Promise.resolve(doc.content);
         
         if (doc.download_url) {
-          // If the document has a URL, fetch it
           doc.contentPromise = fetch(doc.download_url)
             .then(response => {
               if (!response.ok) {
@@ -80,7 +79,6 @@ export default class extends Controller {
       if (contract.documents[0].filename)
         signRequestDocument.filename = contract.documents[0].filename;
 
-      // Get timestamp setting from Stimulus value
       const useTimestamp = this.useTimestampValue
 
       console.log('document 0:', contract.documents[0])
@@ -100,7 +98,6 @@ export default class extends Controller {
       );
 
       if (signResult && signResult.content) {
-        // Submit the signed document to the backend
         const formData = new FormData(this.formTarget)
         formData.append('signed_document', signResult.content)
         formData.append('signed_by', signResult.signedBy || '')
@@ -201,7 +198,6 @@ export default class extends Controller {
       reader.onloadend = () => {
         try {
           const result = reader.result;
-          // Extract base64 part from data URL (data:mime/type;base64,actualdata)
           const base64Data = result.split('base64,')[1];
           resolve(base64Data);
         } catch (error) {
