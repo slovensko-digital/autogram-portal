@@ -5,6 +5,7 @@
 # Table name: webhooks
 #
 #  id         :bigint           not null, primary key
+#  method     :integer          default("standard"), not null
 #  url        :string
 #  created_at :datetime         not null
 #  updated_at :datetime         not null

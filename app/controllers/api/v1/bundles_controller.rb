@@ -1,6 +1,3 @@
-require 'stringio'
-require 'base64'
-
 class Api::V1::BundlesController < ApiController
   before_action :set_bundle, only: [ :show, :status, :destroy ]
 
@@ -9,6 +6,15 @@ class Api::V1::BundlesController < ApiController
     if @bundle.save
       render status: :created
     else
+      if @bundle.errors.details[:uuid]&.any? { |e| e[:error] == :taken }
+        return render json: { error: "Bundle with the given ID already exists" }, status: :conflict
+      end
+
+      # contract_uuid_errors = @bundle.errors.details.select { |key, _| key.to_s.start_with?("contracts.") && key.to_s.end_with?(".uuid") }
+      # if contract_uuid_errors.any? { |_, details| details.any? { |e| e[:error] == :taken } }
+      #   return render json: { error: "One or more contracts have a duplicate ID" }, status: :conflict
+      # end
+
       render json: { errors: @bundle.errors.full_messages }, status: :unprocessable_entity
     end
   end
@@ -39,7 +45,9 @@ class Api::V1::BundlesController < ApiController
 
   def bundle_params
     permitted_params = params.permit(
+      :id,
       contracts: [
+        :id,
         { allowedMethods: [] },
         { documents: [ :filename, :content, :contentType, :url, :hash,
             xdcParameters: [
@@ -70,6 +78,7 @@ class Api::V1::BundlesController < ApiController
       author: @current_user,
       contracts_attributes: permitted_params[:contracts]&.map do |contract|
         {
+          uuid: contract[:id],
           allowed_methods: contract[:allowedMethods] || [],
           signature_parameters_attributes: contract[:signatureParameters]&.transform_keys(&:underscore) || {},
           documents_attributes: contract[:documents]&.filter_map do |document|
@@ -93,7 +102,7 @@ class Api::V1::BundlesController < ApiController
 
             doc_attributes
           end || []
-        }
+        }.compact
       end || [],
       recipients_attributes: permitted_params[:recipients] || []
     }
@@ -104,6 +113,10 @@ class Api::V1::BundlesController < ApiController
 
     if permitted_params[:postalAddress].present?
       attributes[:postal_address_attributes] = permitted_params[:postalAddress].transform_keys(&:underscore)
+    end
+
+    if permitted_params[:id].present?
+      attributes[:uuid] = permitted_params[:id]
     end
 
     attributes

@@ -216,16 +216,6 @@
         // Set up message listener
         _setupMessageListener: function (config, iframe) {
             const messageHandler = (event) => {
-                console.log('AGP: Message received from AGP Iframe:', event.data, event.origin);
-                
-                // Origin validation - adjust this based on your security requirements
-                if (event.origin !== window.location.origin && !event.origin.includes('localhost')) {
-                    return;
-                }
-                
-                console.log('AGP: Message received from AGP Iframe:', event.data);
-                
-                // Call custom message handler if provided
                 if (config.onMessage && typeof config.onMessage === 'function') {
                     config.onMessage(event.data, event.origin, iframe);
                 }

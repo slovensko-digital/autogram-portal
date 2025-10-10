@@ -32,6 +32,7 @@ class Bundle < ApplicationRecord
 
   before_validation :ensure_uuid, on: :create
   validates :uuid, presence: true, uniqueness: true
+  validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :contracts, presence: true
 
   # Use UUID in URLs instead of ID for security
@@ -44,14 +45,8 @@ class Bundle < ApplicationRecord
   end
 
   def contract_signed(contract)
-    Rails.logger.info "Contract #{contract.uuid} in bundle #{uuid} signed. Checking if bundle is completed..."
-    if completed?
-      Rails.logger.info "Bundle #{uuid} completed. Broadcasting all signed."
-      broadcast_all_signed
-    else
-      Rails.logger.info "Bundle #{uuid} not yet completed. Broadcasting contract signed."
-      broadcast_contract_signed(contract)
-    end
+    broadcast_contract_signed(contract)
+    broadcast_all_signed if completed?
   end
 
   def broadcast_all_signed
@@ -72,6 +67,8 @@ class Bundle < ApplicationRecord
   private
 
   def ensure_uuid
+    Rails.logger.info "Ensuring UUID for bundle #{id}..., uuid now: #{uuid}"
     self.uuid ||= SecureRandom.uuid
+    Rails.logger.info "UUID ensured: #{uuid}"
   end
 end

@@ -118,6 +118,7 @@ export default class extends Controller {
         if (response.redirected) {
           window.location.href = response.url
         } else if (response.ok) {
+          window.parent.postMessage({ type: 'message', status: 'document-signed' }, '*');
           console.log('Document signed and submitted successfully, reloading page.')
           window.location.reload()
         } else {

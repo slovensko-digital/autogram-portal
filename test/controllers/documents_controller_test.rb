@@ -2,9 +2,9 @@ require "test_helper"
 
 class DocumentsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
+    @current_user = users(:one)
     @document = Document.create!(
-      user: @user,
+      user: @current_user,
       uuid: SecureRandom.uuid
     )
 

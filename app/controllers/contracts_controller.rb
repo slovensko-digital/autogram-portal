@@ -1,6 +1,6 @@
 class ContractsController < ApplicationController
   before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :iframe ]
-  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm ]
+  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign ]
 
   before_action :allow_iframe, only: [ :iframe ]
 
@@ -26,7 +26,7 @@ class ContractsController < ApplicationController
     end
 
     if @contract.save
-      redirect_to edit_contract_path(@contract), notice: "The contract was successfully created. You can now review and edit it."
+      redirect_to edit_contract_path(@contract)
     else
       # Ensure signature_parameters is initialized for form re-rendering
       @contract.signature_parameters ||= Ades::SignatureParameters.new
