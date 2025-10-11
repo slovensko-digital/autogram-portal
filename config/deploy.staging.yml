@@ -17,7 +17,7 @@ env:
     SMTP_PORT: 587
     SMTP_AUTHENTICATION: login
     SMTP_ENABLE_STARTTLS_AUTO: true
-    SMTP_TLS: true
+    SMTP_TLS: false
 
 proxy:
   host: agp.dev.slovensko.digital
