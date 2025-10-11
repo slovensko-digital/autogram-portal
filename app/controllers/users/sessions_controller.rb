@@ -11,7 +11,7 @@ class Users::SessionsController < Devise::Passwordless::SessionsController
       # Create new user and send confirmation email
       self.resource = resource_class.new(create_params)
       if resource.save
-        # resource.send_confirmation_instructions
+        resource.send_confirmation_instructions
         if Devise.paranoid
           set_flash_message!(:notice, :magic_link_sent_paranoid)
         else
