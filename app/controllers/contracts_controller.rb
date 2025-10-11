@@ -5,7 +5,7 @@ class ContractsController < ApplicationController
   before_action :allow_iframe, only: [ :iframe ]
 
   def index
-    @contracts = Contract.includes(:user, :documents).order(created_at: :desc)
+    @contracts = current_user.contracts.includes(:user, :documents).order(created_at: :desc)
   end
 
   def new
@@ -17,7 +17,7 @@ class ContractsController < ApplicationController
     # TODO check agree_to_policies
 
     @contract = Contract.new_from_ui(contract_params)
-    @contract.user = @current_user
+    @contract.user = current_user
 
     # Set user and uuid for any documents
     @contract.documents.each do |document|
@@ -242,7 +242,7 @@ class ContractsController < ApplicationController
   private
 
   def set_contract
-    @contract = Contract.find_by(uuid: params[:id])
+    @contract = Contract.find_by!(uuid: params[:id])
   end
 
   def contract_params

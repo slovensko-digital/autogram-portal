@@ -34,7 +34,11 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :contracts, only: [ :index, :new, :create, :show, :destroy, :edit ] do
+  authenticate(:user) do
+    resources :contracts, only: [ :index, :new, :create, :destroy, :edit ]
+  end
+
+  resources :contracts, only: [] do
     member do
       post :sign
       post :sign_avm
