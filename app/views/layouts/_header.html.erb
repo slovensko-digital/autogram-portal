@@ -7,7 +7,7 @@
     </div>
     <div class="flex items-center gap-4">
       <% if current_user %>
-        <%= link_to 'Zmluvy', contracts_path,
+        <%= link_to 'Contracts', contracts_path,
             class: "text-sm font-semibold text-white hover:text-blue-100 transition-colors" %>
         <%= link_to current_user.email, edit_user_registration_path,
             class: "text-sm text-blue-100 hover:text-white underline decoration-blue-100 hover:decoration-white transition-colors" %>
