@@ -21,17 +21,17 @@
 #  fk_rails_...  (contract_id => contracts.id)
 #
 one:
-  level: MyString
-  signature_form: MyString
-  signature_baseline_level: MyString
-  container: MyString
+  level: BASELINE_B
+  format: PAdES
+  container: nil
   add_content_timestamp: false
   en319132: false
+  contract: one
 
 two:
-  level: MyString
-  signature_form: MyString
-  signature_baseline_level: MyString
-  container: MyString
+  level: BASELINE_T
+  format: XAdES
+  container: ASiC_E
   add_content_timestamp: false
   en319132: false
+  contract: two

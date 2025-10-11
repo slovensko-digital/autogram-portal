@@ -1,5 +1,5 @@
 class AutogramService
-  AUTOGRAM_BASE_URL = ENV.fetch("AUTOGRAM_BASE_URL", "http://localhost:7200")
+  AUTOGRAM_BASE_URL = ENV.fetch("AUTOGRAM_SERVICE_URL", "http://localhost:7200")
 
   class ValidationResult
     attr_reader :has_signatures, :signatures, :errors, :document_info

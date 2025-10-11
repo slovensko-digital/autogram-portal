@@ -87,6 +87,4 @@ class AvmSession < ApplicationRecord
       }
     )
   end
-
-
 end

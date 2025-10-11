@@ -1,5 +1,5 @@
 class Api::V1::ContractsController < ApiController
-  before_action :set_contract, only: [:show, :signed_document]
+  before_action :set_contract, only: [ :show, :signed_document ]
 
   def create
     contract = Contract.new(contract_params)

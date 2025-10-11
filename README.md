@@ -1,24 +1,67 @@
-# README
+# Autogram Portal
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Web application for managing digital signatures and document contracts.
 
-Things you may want to cover:
+**Staging:** [agp.dev.slovensko.digital](https://agp.dev.slovensko.digital)
 
-* Ruby version
+## Tech Stack
 
-* System dependencies
+- Ruby on Rails 8
+- PostgreSQL
 
-* Configuration
+## Quick Start
 
-* Database creation
+```bash
+# Setup
+cp .env.sample .env
+bundle install
+bin/rails db:setup
 
-* Database initialization
+# Run
+bin/dev
+```
 
-* How to run the test suite
+Visit `http://localhost:3000`
 
-* Services (job queues, cache servers, search engines, etc.)
+### GoodJob
 
-* Deployment instructions
+We are using GoodJob for job queue. Admin at [/admin/good_job](http://localhost:3000/admin/good_job)
 
-* ...
+## Configuration
+
+Edit `.env` file:
+- `API_SKIP_AUTH=true` - Skip auth in development
+- `AUTOGRAM_SERVICE_URL` - Autogram service URL
+- `AVM_URL` - Autogram AVM service URL
+
+## API
+
+API documentation in `public/api/v1/openapi.yaml` or Swagger served at [/api/v1](http://localhost:3000/api/v1/)
+
+## Development
+
+```bash
+# Tests
+bin/rails test
+
+# Code quality
+bin/rubocop
+bin/brakeman
+```
+
+## Deployment
+
+We are using kamal for deployment.
+
+Main branch is automatically deployed to staging at [agp.dev.slovensko.digital](https://agp.dev.slovensko.digital/)
+
+
+## License
+
+See [LICENSE](LICENSE) file.
+
+---
+
+Made by [slovensko.digital](https://slovensko.digital)
+
+

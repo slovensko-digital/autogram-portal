@@ -37,5 +37,8 @@ jobs:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+          WEBHOOK_PRIVATE_KEY: ${{ secrets.WEBHOOK_PRIVATE_KEY }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
 
         run: kamal deploy -d staging
