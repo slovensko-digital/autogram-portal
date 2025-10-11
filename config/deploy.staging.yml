@@ -14,7 +14,7 @@ env:
     MAIL_FROM: noreply@agp.dev.slovensko.digital
     SMTP_USERNAME: noreply@agp.dev.slovensko.digital
     SMTP_HOST: smtp.m1.websupport.sk
-    SMTP_PORT: 465
+    SMTP_PORT: 587
     SMTP_AUTHENTICATION: plain
     SMTP_ENABLE_STARTTLS_AUTO: true
     SMTP_TLS: true
