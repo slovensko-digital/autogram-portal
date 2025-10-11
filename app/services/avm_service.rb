@@ -1,5 +1,5 @@
 class AvmService
-  AVM_BASE_URL = "https://autogram.slovensko.digital" # Replace with actual AVM API URL
+  AVM_BASE_URL = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital")
 
   def initiate_signing(contract)
     begin
