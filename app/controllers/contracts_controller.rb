@@ -92,7 +92,7 @@ class ContractsController < ApplicationController
       respond_to do |format|
         format.turbo_stream do
           # Determine cancel URL based on referrer context
-          cancel_url = if request.referrer&.include?('/iframe')
+          cancel_url = if request.referrer&.include?("/iframe")
             iframe_params = {}
             iframe_params[:no_preview] = true if params[:no_preview].present?
             iframe_contract_path(@contract, iframe_params)
@@ -128,7 +128,7 @@ class ContractsController < ApplicationController
     respond_to do |format|
       format.turbo_stream do
         # Determine cancel URL based on referrer context
-        cancel_url = if request.referrer&.include?('/iframe')
+        cancel_url = if request.referrer&.include?("/iframe")
           iframe_params = {}
           iframe_params[:no_preview] = true if params[:no_preview].present?
           iframe_contract_path(@contract, iframe_params)
@@ -161,7 +161,7 @@ class ContractsController < ApplicationController
   end
 
   def signed_document
-    send_file @contract.signed_document
+    redirect_to rails_blob_url(@contract.signed_document, disposition: "attachment"), allow_other_host: true
   end
 
   def validate

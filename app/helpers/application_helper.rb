@@ -1,4 +1,4 @@
-require 'rqrcode'
+require "rqrcode"
 
 module ApplicationHelper
   def decode_base64_content(content, mime_type)
