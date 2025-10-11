@@ -242,7 +242,7 @@ class ContractsController < ApplicationController
   private
 
   def set_contract
-    @contract = current_user.contracts.find_by(uuid: params[:id])
+    @contract = current_user.contracts.find_by!(uuid: params[:id])
   end
 
   def contract_params
