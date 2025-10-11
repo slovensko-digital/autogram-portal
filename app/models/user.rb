@@ -33,7 +33,7 @@
 #  index_users_on_unlock_token          (unlock_token) UNIQUE
 #
 class User < ApplicationRecord
-  devise :magic_link_authenticatable, :registerable, :recoverable, :rememberable, :validatable, :lockable
+  devise :magic_link_authenticatable, :registerable, :confirmable, :recoverable, :rememberable, :validatable, :lockable
 
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
 end
