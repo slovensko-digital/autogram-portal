@@ -16,6 +16,8 @@ env:
     - SECRET_KEY_BASE
     - DATABASE_URL
     - WEBHOOK_PRIVATE_KEY
+    - GOOGLE_CLIENT_ID
+    - GOOGLE_CLIENT_SECRET
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
