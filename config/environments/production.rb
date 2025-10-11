@@ -60,7 +60,7 @@ Rails.application.configure do
 
   # Configure SMTP email delivery
   config.action_mailer.perform_deliveries = true
-  if ENV["SMTP_HOST"].presnt?
+  if ENV["SMTP_HOST"].present?
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
       address: ENV.fetch("SMTP_HOST"),
