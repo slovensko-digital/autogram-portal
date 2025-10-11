@@ -8,7 +8,8 @@ env:
     RAILS_ENV: staging
     RAILS_LOG_LEVEL: info
     APP_HOST: agp.dev.slovensko.digital
-    AUTOGRAM_BASE_URL: http://autogram-portal-ag_service:7200
+    AUTOGRAM_SERVICE_URL: http://autogram-portal-ag_service:7200
+    AVM_URL: https://autogram.slovensko.digital
     GOOD_JOB_EXECUTION_MODE: async
 
 proxy:
