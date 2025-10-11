@@ -18,6 +18,7 @@ env:
     - WEBHOOK_PRIVATE_KEY
     - GOOGLE_CLIENT_ID
     - GOOGLE_CLIENT_SECRET
+    - SMTP_PASSWORD
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
