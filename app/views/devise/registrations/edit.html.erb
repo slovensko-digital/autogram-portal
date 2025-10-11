@@ -37,7 +37,7 @@
               </div>
 
               <!-- Pending Reconfirmation Notice -->
-              <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+              <% if resource.pending_reconfirmation? %>
                 <div class="rounded-md bg-yellow-50 p-4">
                   <div class="flex">
                     <div class="flex-shrink-0">

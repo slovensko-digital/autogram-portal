@@ -20,12 +20,10 @@
               </div>
 
               <!-- Remember Me -->
-              <% if devise_mapping.rememberable? %>
-                <div class="flex items-center">
-                  <%= f.check_box :remember_me, class: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
-                  <%= f.label :remember_me, class: "ml-2 block text-sm text-gray-700" %>
-                </div>
-              <% end %>
+              <div class="flex items-center">
+                <%= f.check_box :remember_me, class: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+                <%= f.label :remember_me, class: "ml-2 block text-sm text-gray-700" %>
+              </div>
 
               <!-- Submit Button -->
               <div>
