@@ -5,5 +5,17 @@
         <span class="text-3xl leading-8 text-white">Autogram Portal</span>
       </a>
     </div>
+    <div class="flex items-center gap-4">
+      <% if current_user %>
+        <%= link_to current_user.email, edit_user_registration_path,
+            class: "text-sm text-blue-100 hover:text-white underline decoration-blue-100 hover:decoration-white transition-colors" %>
+        <%= link_to 'Sign out', destroy_user_session_path,
+            data: { turbo_method: :delete },
+            class: "rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-colors" %>
+      <% else %>
+        <%= link_to 'Sign in', new_user_session_path,
+            class: "rounded-md bg-white px-4 py-2 text-sm font-semibold text-blue-800 shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors" %>
+      <% end %>
+    </div>
   </nav>
 </header>

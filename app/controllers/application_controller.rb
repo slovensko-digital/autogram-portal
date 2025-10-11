@@ -2,8 +2,6 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
-  before_action :set_user
-
   # Chrome DevTools configuration endpoint
   def devtools_config
     config = {
@@ -30,10 +28,6 @@ class ApplicationController < ActionController::Base
   end
 
   private
-
-  def set_user
-    @current_user = User.first_or_create!(email: "anonymous@example.com", name: "Anonymous User")
-  end
 
   def no_header
     @no_header = true

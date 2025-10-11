@@ -76,3 +76,9 @@ gem "good_job", "~> 4.12"
 gem "redis", "~> 5.4"
 
 gem "jwt", "~> 3.1"
+
+gem "devise", "~> 4.9"
+gem "devise-i18n", "~> 1.15"
+gem "devise-passwordless", "~> 1.1"
+
+gem "letter_opener", "~> 1.10", group: :development
