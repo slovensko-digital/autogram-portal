@@ -47,7 +47,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :contracts, only: [:show]
+  resources :contracts, only: [ :show ]
 
   resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
     member do
