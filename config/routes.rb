@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root to: "homepage#index"
 
-  resources :documents, only: [:index, :new, :create, :show] do
+  resources :documents, only: [ :index, :new, :create, :show ] do
     member do
       get :validate
       get :visualize
@@ -35,7 +35,7 @@ Rails.application.routes.draw do
   end
 
   authenticate(:user) do
-    resources :contracts, only: [:index, :new, :create, :destroy, :edit]
+    resources :contracts, only: [ :index, :new, :create, :destroy, :edit ]
   end
 
   resources :contracts, only: [] do
@@ -49,7 +49,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :bundles, only: [:index, :show, :edit, :update, :destroy] do
+  resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
     member do
       get :iframe
     end
@@ -60,16 +60,16 @@ Rails.application.routes.draw do
       get "hello", to: "hello#show"
       get "hello_auth", to: "hello#show_auth"
 
-      resources :contracts, only: [:create, :show] do
+      resources :contracts, only: [ :create, :show ] do
         member do
           get :signed_document
           get :status
         end
       end
 
-      resources :documents, only: [:show]
+      resources :documents, only: [ :show ]
 
-      resources :bundles, only: [:create, :show, :destroy] do
+      resources :bundles, only: [ :create, :show, :destroy ] do
         member do
           get :status
         end
