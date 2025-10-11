@@ -33,7 +33,34 @@
 #  index_users_on_unlock_token          (unlock_token) UNIQUE
 #
 class User < ApplicationRecord
-  devise :magic_link_authenticatable, :registerable, :confirmable, :rememberable, :validatable, :lockable
+  devise :magic_link_authenticatable, :omniauthable, :registerable, :confirmable, :rememberable, :validatable, :lockable
 
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
+  has_many :identities, dependent: :destroy
+
+  def self.create_from_provider_data(auth)
+    # Check if identity already exists
+    identity = Identity.find_by(provider: auth.provider, uid: auth.uid)
+    return identity.user if identity
+
+    # Check if user exists with this email
+    email = auth.info.email
+    user = User.find_by(email: email)
+
+    if user
+      # Link identity to existing user and update name if blank
+      user.update!(name: auth.info.name) if user.name.blank?
+      user.identities.create!(provider: auth.provider, uid: auth.uid)
+      return user
+    end
+
+    # Create new user with identity
+    user = User.create!(
+      email: email,
+      name: auth.info.name,
+      confirmed_at: Time.current
+    )
+    user.identities.create!(provider: auth.provider, uid: auth.uid)
+    user
+  end
 end

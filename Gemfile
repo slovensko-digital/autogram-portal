@@ -82,3 +82,12 @@ gem "devise-i18n", "~> 1.15"
 gem "devise-passwordless", "~> 1.1"
 
 gem "letter_opener", "~> 1.10", group: :development
+
+gem "omniauth", "~> 2.1"
+gem "omniauth-google-oauth2", "~> 1.2"
+
+gem "omniauth-rails_csrf_protection", "~> 1.0"
+
+gem "dotenv-rails", "~> 3.1", group: :development
+
+gem "pry", "~> 0.15.2"

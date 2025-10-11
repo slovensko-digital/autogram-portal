@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_10_180616) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_11_093257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -199,6 +199,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_180616) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
+  create_table "identities", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "provider", null: false
+    t.string "uid", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_identities_on_user_id"
+  end
+
   create_table "postal_addresses", force: :cascade do |t|
     t.text "address"
     t.string "recipient_name"
@@ -276,6 +285,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_180616) do
   add_foreign_key "contracts", "users"
   add_foreign_key "documents", "contracts"
   add_foreign_key "documents", "users"
+  add_foreign_key "identities", "users"
   add_foreign_key "postal_addresses", "bundles"
   add_foreign_key "webhooks", "bundles"
   add_foreign_key "xdc_parameters", "documents"
