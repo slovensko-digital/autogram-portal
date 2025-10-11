@@ -3,7 +3,8 @@ Rails.application.routes.draw do
     controllers: {
       sessions: "users/sessions",
       registrations: "users/registrations",
-      confirmations: "users/confirmations"
+      confirmations: "users/confirmations",
+      omniauth_callbacks: "users/omniauth"
     }
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
