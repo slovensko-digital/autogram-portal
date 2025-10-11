@@ -34,14 +34,16 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :contracts, only: [ :index, :new, :create, :show, :destroy, :edit ] do
-    member do
-      post :sign
-      post :sign_avm
-      get :validate
-      get :visualize
-      get :signed_document
-      get :iframe
+  authenticate(:user) do
+    resources :contracts, only: [ :index, :new, :create, :show, :destroy, :edit ] do
+      member do
+        post :sign
+        post :sign_avm
+        get :validate
+        get :visualize
+        get :signed_document
+        get :iframe
+      end
     end
   end
 
