@@ -1,6 +1,5 @@
 class ApiController < ApplicationController
   protect_from_forgery with: :null_session
-  skip_before_action :set_user
   before_action :authenticate_user!
 
   rescue_from JWT::DecodeError do |error|
