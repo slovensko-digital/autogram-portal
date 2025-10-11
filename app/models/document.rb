@@ -70,7 +70,7 @@ class Document < ApplicationRecord
   end
 
   def visualize
-    if blob.content_type.in?(["text/plain", "image/png", "image/jpg", "image/jpeg"])
+    if blob.content_type.in?([ "text/plain", "image/png", "image/jpg", "image/jpeg" ])
       content_data = blob.download
       content_data = Base64.strict_encode64(content_data)
       return { mime_type: blob.content_type + ";base64", content: content_data }

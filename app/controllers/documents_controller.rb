@@ -88,15 +88,15 @@ class DocumentsController < ApplicationController
   def pdf_preview
     visualization_result = AutogramEnvironment.autogram_service.visualize_document(@document)
 
-    if visualization_result.is_a?(Hash) && visualization_result[:mime_type]&.include?('application/pdf')
+    if visualization_result.is_a?(Hash) && visualization_result[:mime_type]&.include?("application/pdf")
       # Decode base64 content and serve as PDF
       pdf_content = Base64.strict_decode64(visualization_result[:content])
 
       respond_to do |format|
         format.pdf do
           send_data pdf_content,
-                   type: 'application/pdf',
-                   disposition: 'inline',
+                   type: "application/pdf",
+                   disposition: "inline",
                    filename: "#{@document.filename}_preview.pdf"
         end
       end
@@ -122,19 +122,19 @@ class DocumentsController < ApplicationController
 
     # Set allowed methods based on the radio button selection
     allowed_method = params[:allowed_method]
-    if allowed_method.in?(['qes', 'ts-qes'])
-      @contract.allowed_methods = [allowed_method]
+    if allowed_method.in?([ "qes", "ts-qes" ])
+      @contract.allowed_methods = [ allowed_method ]
     else
-      @contract.allowed_methods = ['qes'] # default fallback
+      @contract.allowed_methods = [ "qes" ] # default fallback
     end
 
     # Create signature parameters
     @contract.build_signature_parameters
     format_container_combination = params[:format_container_combination]
-    if format_container_combination.in?(['PADES', 'XADES_ASICE', 'CADES_ASICE'])
+    if format_container_combination.in?([ "PADES", "XADES_ASICE", "CADES_ASICE" ])
       @contract.signature_parameters.format_container_combination = format_container_combination
     else
-      @contract.signature_parameters.format_container_combination = 'PADES' # default fallback
+      @contract.signature_parameters.format_container_combination = "PADES" # default fallback
     end
 
     # Associate the document with the contract before saving

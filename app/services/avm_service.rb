@@ -49,10 +49,10 @@ class AvmService
       if response.status < 400
         parse_avm_status_response(response)
       else
-        { status: 'failed', error: "Chyba komunikácie s AVM službou: #{response.status}" }
+        { status: "failed", error: "Chyba komunikácie s AVM službou: #{response.status}" }
       end
     rescue StandardError => e
-      return { status: 'failed', error: "Chyba komunikácie s AVM službou" } if Rails.env.production?
+      return { status: "failed", error: "Chyba komunikácie s AVM službou" } if Rails.env.production?
 
       # Mock implementation for development
       Rails.logger.warn "AVM service not available, using mock status: #{e.message}"
@@ -98,7 +98,7 @@ class AvmService
     end
 
     connection.get("api/v1/documents/#{document_id}?encryptionKey=#{encryption_key}") do |req|
-      req.headers['If-Modified-Since'] = if_modified_since.to_s if if_modified_since
+      req.headers["If-Modified-Since"] = if_modified_since.to_s if if_modified_since
     end
   end
 
@@ -119,7 +119,7 @@ class AvmService
     {
       document_id: data["guid"],
       encryption_key: secret_key,
-      signing_started_at: DateTime.parse(response.headers['Last-Modified'])
+      signing_started_at: DateTime.parse(response.headers["Last-Modified"])
     }
   rescue JSON::ParserError => e
     { error: "Nepodarilo sa spracovať odpoveď z AVM služby: #{e.message}" }
@@ -127,19 +127,19 @@ class AvmService
 
   def parse_avm_status_response(response)
     if response.status == 304
-      return { status: 'pending' }
+      return { status: "pending" }
     end
 
     if response.status == 200
-      return { status: 'completed' }
+      return { status: "completed" }
     end
 
     {
-      status: 'failed',
+      status: "failed",
       error: response.body["error"]
     }
   rescue JSON::ParserError => e
-    { status: 'failed', error: "Nepodarilo sa spracovať odpoveď z AVM služby: #{e.message}" }
+    { status: "failed", error: "Nepodarilo sa spracovať odpoveď z AVM služby: #{e.message}" }
   end
 
   def parse_avm_download_response(response_body)
@@ -169,16 +169,16 @@ class AvmService
 
   def mock_avm_status_result
     # Simulate a random status for testing
-    statuses = ['pending', 'completed', 'failed']
+    statuses = [ "pending", "completed", "failed" ]
     status = statuses.sample
 
     case status
-    when 'completed'
-      { status: 'completed' }
-    when 'failed'
-      { status: 'failed', error: 'Mock signing failed' }
+    when "completed"
+      { status: "completed" }
+    when "failed"
+      { status: "failed", error: "Mock signing failed" }
     else
-      { status: 'pending' }
+      { status: "pending" }
     end
   end
 

@@ -92,7 +92,7 @@ class ContractsController < ApplicationController
       respond_to do |format|
         format.turbo_stream do
           # Determine cancel URL based on referrer context
-          cancel_url = if request.referrer&.include?('/iframe')
+          cancel_url = if request.referrer&.include?("/iframe")
             iframe_params = {}
             iframe_params[:no_preview] = true if params[:no_preview].present?
             iframe_contract_path(@contract, iframe_params)
@@ -128,7 +128,7 @@ class ContractsController < ApplicationController
     respond_to do |format|
       format.turbo_stream do
         # Determine cancel URL based on referrer context
-        cancel_url = if request.referrer&.include?('/iframe')
+        cancel_url = if request.referrer&.include?("/iframe")
           iframe_params = {}
           iframe_params[:no_preview] = true if params[:no_preview].present?
           iframe_contract_path(@contract, iframe_params)
