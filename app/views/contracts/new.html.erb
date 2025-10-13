@@ -93,7 +93,7 @@
                                         { required: true, class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" },
                                         { checked_value: "1", unchecked_value: "0" } %>
                       <%= form.label :agree_to_policies, class: "text-sm text-gray-700" do %>
-                        I agree with <a href="#" class="text-blue-600 hover:text-blue-800 underline">policies, terms and conditions</a>
+                        I agree with <%= link_to "Terms of Service", terms_of_service_index_path, target: "_blank", class: "text-blue-600 hover:underline" %> and <%= link_to "Privacy Policy", privacy_policy_index_path, target: "_blank", class: "text-blue-600 hover:underline" %>
                         <span class="text-red-500">*</span>
                       <% end %>
                     </div>

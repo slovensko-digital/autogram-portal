@@ -25,6 +25,9 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root to: "homepage#index"
 
+  resources :privacy_policy, only: [ :index ]
+  resources :terms_of_service, only: [ :index ]
+
   resources :documents, only: [ :index, :new, :create, :show ] do
     member do
       get :validate
