@@ -1,8 +1,6 @@
-<!-- Hero Section with Upload -->
 <div class="relative isolate overflow-hidden bg-white">
   <div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-      <!-- Left Column: Text Content -->
       <div>
         <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
           Qualified Electronic Signatures <span class="text-blue-600">Made Simple</span>
@@ -20,8 +18,6 @@
           </a>
         </div>
       </div>
-
-      <!-- Right Column: Upload Form -->
       <div>
         <%= form_with model: Document.new, url: documents_path, local: true, multipart: true, 
                       class: "space-y-4", 
@@ -32,7 +28,6 @@
                         "file-upload-uploading-class": "border-solid"
                       } do |form| %>
           
-          <!-- Drop Zone -->
           <%= render 'shared/dropzone', 
                 controller_name: 'file-upload',
                 input_name: 'document[blob]',
@@ -43,14 +38,13 @@
                 drop_text: 'Drop here',
                 height: 'h-[280px]' %>
 
-          <!-- Action Bar -->
           <div class="flex flex-col gap-3">
             <div class="flex items-start space-x-3">
               <%= form.check_box :agree_to_policies, 
                                 { required: true, class: "mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" },
                                 { checked_value: "1", unchecked_value: "0" } %>
               <%= form.label :agree_to_policies, class: "text-sm text-gray-700" do %>
-                I agree with <a href="#" class="text-blue-600 hover:text-blue-800 underline">policies, terms and conditions</a>
+                I agree with <%= link_to "Terms of Service", terms_of_service_index_path, target: "_blank", class: "text-blue-600 hover:underline" %> and <%= link_to "Privacy Policy", privacy_policy_index_path, target: "_blank", class: "text-blue-600 hover:underline" %>
                 <span class="text-red-500">*</span>
               <% end %>
             </div>
@@ -65,8 +59,6 @@
     </div>
   </div>
 </div>
-
-<!-- Benefits Section -->
 <div class="bg-blue-600">
   <div class="px-6 py-16 sm:py-24 lg:px-8">
     <div class="mx-auto max-w-4xl">
@@ -78,8 +70,6 @@
           Choose how you want to work — with or without an account
         </p>
       </div>
-      
-      <!-- Benefits Grid -->
       <div class="mx-auto grid max-w-2xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-2">
         <div class="flex gap-x-4 rounded-xl bg-white/10 p-6 ring-1 ring-inset ring-white/20">
           <svg class="h-7 w-7 flex-none text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -107,8 +97,6 @@
     </div>
   </div>
 </div>
-
-<!-- Features Section -->
 <div class="py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center">
@@ -205,8 +193,6 @@
     </div>
   </div>
 </div>
-
-<!-- Ecosystem Section -->
 <div class="bg-blue-50 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center">
@@ -219,80 +205,70 @@
       </p>
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
-        <div class="flex flex-col">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-              </svg>
-            </div>
-            Autogram Desktop
-          </dt>
-          <dd class="mt-2 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto">Desktop application for Windows, macOS, and Linux that creates qualified signatures using eID cards and other qualified signature creation devices. Connects directly to the portal for seamless signing workflows.</p>
-            <p class="mt-4">
-              <a href="https://sluzby.slovensko.digital/autogram/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                Learn more <span aria-hidden="true">→</span>
-              </a>
-            </p>
-          </dd>
+      <dl class="grid max-w-xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-2">
+        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+          </svg>
+          <div class="text-left">
+            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Desktop</dt>
+            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+              <p class="flex-auto">Desktop application for Windows, macOS, and Linux that creates qualified signatures using eID cards and other qualified signature creation devices. Connects directly to the portal for seamless signing workflows.</p>
+              <p class="mt-4">
+                <a href="https://sluzby.slovensko.digital/autogram/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
+                  Learn more <span aria-hidden="true">→</span>
+                </a>
+              </p>
+            </dd>
+          </div>
         </div>
-        <div class="flex flex-col">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-              </svg>
-            </div>
-            Autogram Mobile
-          </dt>
-          <dd class="mt-2 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto">Mobile applications for iOS and Android that enable qualified signatures using mobile eID solutions and qualified signature creation devices. Sign documents on the go with full portal integration.</p>
-            <p class="mt-4">
-              <a href="https://sluzby.slovensko.digital/autogram-v-mobile/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                Learn more <span aria-hidden="true">→</span>
-              </a>
-            </p>
-          </dd>
+        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+          </svg>
+          <div class="text-left">
+            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Mobile</dt>
+            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+              <p class="flex-auto">Mobile applications for iOS and Android that enable qualified signatures using mobile eID solutions and qualified signature creation devices. Sign documents on the go with full portal integration.</p>
+              <p class="mt-4">
+                <a href="https://sluzby.slovensko.digital/autogram-v-mobile/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
+                  Learn more <span aria-hidden="true">→</span>
+                </a>
+              </p>
+            </dd>
+          </div>
         </div>
-        <div class="flex flex-col">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
-              </svg>
-            </div>
-            Autogram Extension
-          </dt>
-          <dd class="mt-2 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto">Browser extension that integrates Autogram Desktop and Mobile directly into Slovak eGovernment portals. Sign documents seamlessly without leaving government websites.</p>
-            <p class="mt-4">
-              <a href="https://sluzby.slovensko.digital/autogram/#download" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                Learn more <span aria-hidden="true">→</span>
-              </a>
-            </p>
-          </dd>
+        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
+          </svg>
+          <div class="text-left">
+            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Extension</dt>
+            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+              <p class="flex-auto">Browser extension that integrates Autogram Desktop and Mobile directly into Slovak eGovernment portals. Sign documents seamlessly without leaving government websites.</p>
+              <p class="mt-4">
+                <a href="https://sluzby.slovensko.digital/autogram/#download" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
+                  Learn more <span aria-hidden="true">→</span>
+                </a>
+              </p>
+            </dd>
+          </div>
         </div>
-        <div class="flex flex-col">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
-              </svg>
-            </div>
-            Autogram Portal
-          </dt>
-          <dd class="mt-2 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto">Web-based platform for managing the complete document signing lifecycle in commercial applications. Provides validation, workflow management, and API integration for business processes.</p>
-          </dd>
+        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+          </svg>
+          <div class="text-left">
+            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Portal</dt>
+            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+              <p class="flex-auto">Web-based platform for managing the complete document signing lifecycle in commercial applications. Provides validation, workflow management, and API integration for business processes.</p>
+            </dd>
+          </div>
         </div>
       </dl>
     </div>
   </div>
 </div>
-
-<!-- Trust & Security Section -->
 <div class="bg-gray-900 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:mx-0">
@@ -312,7 +288,7 @@
         </div>
         <h3 class="mt-6 text-xl font-semibold text-white">eIDAS Regulation</h3>
         <p class="mt-4 text-base text-gray-400">
-          Full compliance with EU eIDAS ensures qualified signatures have strong legal validity across all member states, bridging the gap between eGovernment and commercial use.
+          Qualified electronic signatures according to EU eIDAS have strong legal validity across all member states, bridging the gap between eGovernment and commercial use.
         </p>
       </div>
       <div class="bg-white/5 rounded-2xl p-8 ring-1 ring-white/10">
@@ -329,17 +305,15 @@
       <div class="bg-white/5 rounded-2xl p-8 ring-1 ring-white/10">
         <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-purple-500/10">
           <svg class="h-10 w-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
           </svg>
         </div>
-        <h3 class="mt-6 text-xl font-semibold text-white">Qualified Timestamps</h3>
+        <h3 class="mt-6 text-xl font-semibold text-white">REST API & Webhooks</h3>
         <p class="mt-4 text-base text-gray-400">
-          Qualified timestamps provide accurate proof of the time of signature creation and document integrity, ensuring long-term validity of signed documents.
+          Comprehensive REST API for seamless integration into your applications. Standard Webhooks support enables real-time notifications for signature events and workflow automation.
         </p>
       </div>
     </div>
-    
-    <!-- Final CTA -->
     <div class="mx-auto mt-16 max-w-2xl text-center">
       <h3 class="text-2xl font-bold text-white">Ready to get started?</h3>
       <p class="mt-4 text-lg text-gray-400">
