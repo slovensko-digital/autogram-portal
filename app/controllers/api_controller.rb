@@ -18,7 +18,7 @@ class ApiController < ApplicationController
   end
 
   def authenticity_token
-    (ActionController::HttpAuthentication::Token.token_and_options(request)&.first || params[:token])&.squish.presence
+    (ActionController::HttpAuthentication::Token.token_and_options(request)&.first&.gsub("Bearer ", "") || params[:token])&.squish.presence
   end
 
   def render_bad_request(exception)
