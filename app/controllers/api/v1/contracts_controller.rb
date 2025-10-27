@@ -1,5 +1,5 @@
 class Api::V1::ContractsController < ApiController
-  before_action :set_contract, only: [ :show, :signed_document ]
+  before_action :set_contract, only: [ :show, :signed_document, :status ]
 
   def create
     contract = Contract.new(contract_params)
@@ -27,7 +27,7 @@ class Api::V1::ContractsController < ApiController
       response.headers["Retry-After"] = 10
       render json: nil, status: :ok
     else
-      redirect_to api_v1_contract_path(@contract)
+      redirect_to @contract
     end
   end
 
