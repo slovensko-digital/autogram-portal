@@ -37,7 +37,7 @@ class BundlesController < ApplicationController
   private
 
   def set_bundle
-    @bundle = Bundle.find_by_uuid(params[:id])
+    @bundle = Bundle.find_by_uuid!(params[:id])
   end
 
   def bundle_params
