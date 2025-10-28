@@ -10,29 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_11_093257) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_11_093257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "active_storage_attachments", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "record_type", null: false
-    t.bigint "record_id", null: false
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
   create_table "active_storage_blobs", force: :cascade do |t|
-    t.string "key", null: false
-    t.string "filename", null: false
-    t.string "content_type"
-    t.text "metadata"
-    t.string "service_name", null: false
     t.bigint "byte_size", null: false
     t.string "checksum"
+    t.string "content_type"
     t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
@@ -43,35 +43,35 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_093257) do
   end
 
   create_table "ades_signature_parameters", force: :cascade do |t|
-    t.string "level"
-    t.string "format"
-    t.string "container"
     t.boolean "add_content_timestamp"
-    t.boolean "en319132"
+    t.string "container"
     t.bigint "contract_id", null: false
     t.datetime "created_at", null: false
+    t.boolean "en319132"
+    t.string "format"
+    t.string "level"
     t.datetime "updated_at", null: false
     t.index ["contract_id"], name: "index_ades_signature_parameters_on_contract_id"
   end
 
   create_table "avm_sessions", force: :cascade do |t|
+    t.datetime "completed_at"
     t.bigint "contract_id", null: false
+    t.datetime "created_at", null: false
     t.string "document_id"
     t.string "encryption_key"
-    t.datetime "signing_started_at"
-    t.datetime "completed_at"
-    t.string "status"
     t.text "error_message"
-    t.datetime "created_at", null: false
+    t.datetime "signing_started_at"
+    t.string "status"
     t.datetime "updated_at", null: false
     t.index ["contract_id"], name: "index_avm_sessions_on_contract_id"
   end
 
   create_table "bundles", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.string "uuid", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.string "uuid", null: false
     t.index ["user_id"], name: "index_bundles_on_user_id"
     t.index ["uuid"], name: "index_bundles_on_uuid"
   end
@@ -84,103 +84,103 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_093257) do
   end
 
   create_table "contracts", force: :cascade do |t|
-    t.bigint "user_id"
-    t.string "uuid", null: false
-    t.bigint "bundle_id"
     t.string "allowed_methods", default: [], array: true
+    t.bigint "bundle_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.string "uuid", null: false
     t.index ["bundle_id"], name: "index_contracts_on_bundle_id"
     t.index ["user_id"], name: "index_contracts_on_user_id"
     t.index ["uuid"], name: "index_contracts_on_uuid"
   end
 
   create_table "documents", force: :cascade do |t|
+    t.bigint "contract_id"
+    t.datetime "created_at", null: false
+    t.string "remote_hash"
+    t.datetime "updated_at", null: false
+    t.string "url"
     t.bigint "user_id"
     t.string "uuid", null: false
-    t.bigint "contract_id"
-    t.string "url"
-    t.string "remote_hash"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["contract_id"], name: "index_documents_on_contract_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
     t.index ["uuid"], name: "index_documents_on_uuid"
   end
 
   create_table "good_job_batches", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.text "description"
-    t.jsonb "serialized_properties"
-    t.text "on_finish"
-    t.text "on_success"
-    t.text "on_discard"
-    t.text "callback_queue_name"
     t.integer "callback_priority"
-    t.datetime "enqueued_at"
+    t.text "callback_queue_name"
+    t.datetime "created_at", null: false
+    t.text "description"
     t.datetime "discarded_at"
+    t.datetime "enqueued_at"
     t.datetime "finished_at"
     t.datetime "jobs_finished_at"
+    t.text "on_discard"
+    t.text "on_finish"
+    t.text "on_success"
+    t.jsonb "serialized_properties"
+    t.datetime "updated_at", null: false
   end
 
   create_table "good_job_executions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.uuid "active_job_id", null: false
-    t.text "job_class"
-    t.text "queue_name"
-    t.jsonb "serialized_params"
-    t.datetime "scheduled_at"
-    t.datetime "finished_at"
-    t.text "error"
-    t.integer "error_event", limit: 2
-    t.text "error_backtrace", array: true
-    t.uuid "process_id"
+    t.datetime "created_at", null: false
     t.interval "duration"
+    t.text "error"
+    t.text "error_backtrace", array: true
+    t.integer "error_event", limit: 2
+    t.datetime "finished_at"
+    t.text "job_class"
+    t.uuid "process_id"
+    t.text "queue_name"
+    t.datetime "scheduled_at"
+    t.jsonb "serialized_params"
+    t.datetime "updated_at", null: false
     t.index ["active_job_id", "created_at"], name: "index_good_job_executions_on_active_job_id_and_created_at"
     t.index ["process_id", "created_at"], name: "index_good_job_executions_on_process_id_and_created_at"
   end
 
   create_table "good_job_processes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.jsonb "state"
     t.integer "lock_type", limit: 2
+    t.jsonb "state"
+    t.datetime "updated_at", null: false
   end
 
   create_table "good_job_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.text "key"
+    t.datetime "updated_at", null: false
     t.jsonb "value"
     t.index ["key"], name: "index_good_job_settings_on_key", unique: true
   end
 
   create_table "good_jobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.text "queue_name"
-    t.integer "priority"
-    t.jsonb "serialized_params"
-    t.datetime "scheduled_at"
-    t.datetime "performed_at"
-    t.datetime "finished_at"
-    t.text "error"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.uuid "active_job_id"
-    t.text "concurrency_key"
-    t.text "cron_key"
-    t.uuid "retried_good_job_id"
-    t.datetime "cron_at"
-    t.uuid "batch_id"
     t.uuid "batch_callback_id"
-    t.boolean "is_discrete"
-    t.integer "executions_count"
-    t.text "job_class"
+    t.uuid "batch_id"
+    t.text "concurrency_key"
+    t.datetime "created_at", null: false
+    t.datetime "cron_at"
+    t.text "cron_key"
+    t.text "error"
     t.integer "error_event", limit: 2
+    t.integer "executions_count"
+    t.datetime "finished_at"
+    t.boolean "is_discrete"
+    t.text "job_class"
     t.text "labels", array: true
-    t.uuid "locked_by_id"
     t.datetime "locked_at"
+    t.uuid "locked_by_id"
+    t.datetime "performed_at"
+    t.integer "priority"
+    t.text "queue_name"
+    t.uuid "retried_good_job_id"
+    t.datetime "scheduled_at"
+    t.jsonb "serialized_params"
+    t.datetime "updated_at", null: false
     t.index ["active_job_id", "created_at"], name: "index_good_jobs_on_active_job_id_and_created_at"
     t.index ["batch_callback_id"], name: "index_good_jobs_on_batch_callback_id", where: "(batch_callback_id IS NOT NULL)"
     t.index ["batch_id"], name: "index_good_jobs_on_batch_id", where: "(batch_id IS NOT NULL)"
@@ -200,11 +200,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_093257) do
   end
 
   create_table "identities", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
     t.string "provider", null: false
     t.string "uid", null: false
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.index ["provider", "uid"], name: "index_identities_on_provider_and_uid", unique: true
     t.index ["user_id", "provider"], name: "index_identities_on_user_id_and_provider", unique: true
     t.index ["user_id"], name: "index_identities_on_user_id"
@@ -212,35 +212,35 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_093257) do
 
   create_table "postal_addresses", force: :cascade do |t|
     t.text "address"
-    t.string "recipient_name"
     t.bigint "bundle_id", null: false
     t.datetime "created_at", null: false
+    t.string "recipient_name"
     t.datetime "updated_at", null: false
     t.index ["bundle_id"], name: "index_postal_addresses_on_bundle_id"
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "name"
-    t.string "email"
     t.string "api_token_public_key"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.integer "sign_in_count", default: 0, null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip"
-    t.string "last_sign_in_ip"
+    t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
     t.datetime "confirmed_at"
-    t.datetime "confirmation_sent_at"
-    t.string "unconfirmed_email"
+    t.datetime "created_at", null: false
+    t.datetime "current_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "email"
+    t.string "encrypted_password", default: "", null: false
     t.integer "failed_attempts", default: 0, null: false
-    t.string "unlock_token"
+    t.datetime "last_sign_in_at"
+    t.string "last_sign_in_ip"
     t.datetime "locked_at"
+    t.string "name"
+    t.datetime "remember_created_at"
+    t.datetime "reset_password_sent_at"
+    t.string "reset_password_token"
+    t.integer "sign_in_count", default: 0, null: false
+    t.string "unconfirmed_email"
+    t.string "unlock_token"
+    t.datetime "updated_at", null: false
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -248,30 +248,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_093257) do
   end
 
   create_table "webhooks", force: :cascade do |t|
-    t.string "url"
     t.bigint "bundle_id", null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.integer "method", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.string "url"
     t.index ["bundle_id"], name: "index_webhooks_on_bundle_id"
   end
 
   create_table "xdc_parameters", force: :cascade do |t|
-    t.string "fs_form_identifier"
-    t.string "identifier"
     t.boolean "auto_load_eform"
     t.string "container_xmlns"
+    t.datetime "created_at", null: false
+    t.bigint "document_id", null: false
     t.boolean "embed_used_schemas"
+    t.string "fs_form_identifier"
+    t.string "identifier"
     t.text "schema"
-    t.string "schema_mime_type"
     t.string "schema_identifier"
+    t.string "schema_mime_type"
     t.text "transformation"
     t.string "transformation_identifier"
     t.string "transformation_language"
     t.string "transformation_media_destination_type_description"
     t.string "transformation_target_environment"
-    t.bigint "document_id", null: false
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["document_id"], name: "index_xdc_parameters_on_document_id"
   end
