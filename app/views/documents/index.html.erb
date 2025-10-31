@@ -2,21 +2,18 @@
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:px-8 lg:pt-15">
       <div class="mx-auto max-w-full">
-        <!-- Page Header -->
         <div class="mb-8 text-center lg:text-left">
           <h1 class="text-3xl font-bold text-gray-900 mb-2">Documents</h1>
           <p class="text-gray-600">Manage your uploaded documents for signing and validation.</p>
         </div>
 
-        <!-- Actions -->
         <div class="mb-6">
           <%= link_to "Upload New Document", new_document_path, 
-                     class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                     class: "inline-flex items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
         </div>
 
-        <!-- Documents List -->
         <% if @documents.any? %>
-          <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <div class="bg-white  overflow-hidden sm:rounded-md">
             <ul role="list" class="divide-y divide-gray-200">
               <% @documents.each do |document| %>
                 <li>
@@ -68,7 +65,7 @@
             <p class="mt-1 text-sm text-gray-500">Get started by uploading a new document.</p>
             <div class="mt-6">
               <%= link_to "Upload Document", new_document_path, 
-                         class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                         class: "inline-flex items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
             </div>
           </div>
         <% end %>

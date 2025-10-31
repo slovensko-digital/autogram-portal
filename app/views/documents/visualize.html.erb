@@ -33,7 +33,6 @@
           # Add cache-busting parameter to ensure PDF reloads when returning to the same document
           pdf_url = pdf_preview_document_path(@document, format: :pdf, t: Time.current.to_i)
         %>
-        <!-- Modern PDF viewer with fallback for Safari -->
         <object 
           data="<%= pdf_url %>" 
           type="application/pdf" 
@@ -41,14 +40,12 @@
           id="pdf-object-<%= @document.id %>"
           key="pdf-object-<%= @document.id %>-<%= Time.current.to_i %>">
           
-          <!-- Fallback: iframe for Safari -->
           <iframe 
             src="<%= pdf_url %>" 
             class="w-full h-[970px] border-0"
             id="pdf-iframe-<%= @document.id %>"
             key="pdf-iframe-<%= @document.id %>-<%= Time.current.to_i %>">
             
-            <!-- Final fallback: download link -->
             <div class="p-8 text-center">
               <p class="text-gray-600 mb-4">PDF sa nepodarilo načítať v prehliadači.</p>
               <a href="<%= pdf_url %>" 
