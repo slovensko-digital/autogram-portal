@@ -1,11 +1,11 @@
 <%= turbo_frame_tag "document_visualization_#{@document.id}" do %>
   <% mime_type = @visualization_result[:mime_type]&.gsub(';base64', '') %>
   <% if mime_type == 'text/plain' %>
-    <div class="p-4">
+    <div>
       <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-4 rounded border overflow-auto max-h-[970px]"><%= decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type]) %></pre>
     </div>
   <% elsif mime_type == 'text/html' %>
-    <div class="p-4">
+    <div>
       <div class="border rounded bg-white">
         <iframe 
           srcdoc="<%= html_escape(decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type])) %>" 
@@ -27,7 +27,7 @@
            class="max-w-full max-h-[970px] border rounded bg-white" />
     </div>
   <% elsif mime_type == 'application/pdf' %>
-    <div class="p-4">
+    <div>
       <div class="border rounded bg-white">
         <% 
           # Add cache-busting parameter to ensure PDF reloads when returning to the same document

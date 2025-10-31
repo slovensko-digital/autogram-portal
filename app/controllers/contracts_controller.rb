@@ -21,7 +21,7 @@ class ContractsController < ApplicationController
 
     # Set user and uuid for any documents
     @contract.documents.each do |document|
-      document.user = @current_user
+      document.user = current_user
       document.uuid = SecureRandom.uuid
     end
 
@@ -188,7 +188,7 @@ class ContractsController < ApplicationController
     end
 
     begin
-      validation_result = AutogramEnvironment.autogram_service.validate_signatures(document_to_validate)
+      validation_result = document_to_validate.validation_result
 
       respond_to do |format|
         format.html do

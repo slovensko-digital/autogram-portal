@@ -12,7 +12,7 @@ class ApiController < ApplicationController
   private
 
   def authenticate_user!
-    @current_user = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
+    current_user = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
   rescue JWT::VerificationError, JWT::InvalidSubError => error
     render_unauthorized(error.message)
   end

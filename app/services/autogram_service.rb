@@ -40,7 +40,6 @@ class AutogramService
     rescue StandardError => e
       return error_result("Chyba komunikácie s Autogram službou") if Rails.env.production?
 
-      # Fallback to mock data if service is not available
       Rails.logger.warn "Autogram service not available, using mock data: #{e.message}"
       mock_validation_result(document)
     end
@@ -64,7 +63,6 @@ class AutogramService
     rescue StandardError => e
       return error_result("Chyba komunikácie s Autogram službou") if Rails.env.production?
 
-      # Fallback to mock data if service is not available
       Rails.logger.warn "Autogram visualization service not available, using mock data: #{e.message}"
       mock_visualization_result(document)
     end
@@ -102,13 +100,11 @@ class AutogramService
       },
       parameters: {
         autoLoadEform: true,
-        level: document.content_type == "application/pdf" ? "PAdES_BASELINE_B" : "XAdES_BASELINE_B",
+        level: document.is_pdf? ? "PAdES_BASELINE_B" : "XAdES_BASELINE_B",
         fsFormId: document.xdc_parameters&.fs_form_identifier
       },
       payloadMimeType: determine_payload_mime_type(document)
     }
-
-    Rails.logger.debug "Autogram visualization payload: #{payload}"
 
     connection.post("/visualization", payload)
   end
@@ -236,8 +232,8 @@ class AutogramService
           }
         ],
         document_info: {
-          container_type: document.content_type == "application/pdf" ? nil : "ASiC_E",
-          signature_form: document.content_type == "application/pdf" ? "PAdES" : "XAdES",
+          container_type: document.is_pdf? ? nil : "ASiC_E",
+          signature_form: document.is_pdf? ? "PAdES" : "XAdES",
           signed_objects_count: 1,
           unsigned_objects_count: 0,
           signed_objects: [ { id: "mock-id", mimeType: document.content_type, filename: document.filename } ],
@@ -289,8 +285,8 @@ class AutogramService
         has_signatures: false,
         signatures: [],
         document_info: {
-          container_type: document.content_type == "application/pdf" ? nil : "ASiC_E",
-          signature_form: document.content_type == "application/pdf" ? "PAdES" : "XAdES",
+          container_type: document.is_pdf? ? nil : "ASiC_E",
+          signature_form: document.is_pdf? ? "PAdES" : "XAdES",
           signed_objects_count: 0,
           unsigned_objects_count: 1,
           signed_objects: [],

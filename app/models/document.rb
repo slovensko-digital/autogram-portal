@@ -38,7 +38,6 @@ class Document < ApplicationRecord
 
   before_validation :ensure_uuid, on: :create
 
-  # Use UUID in URLs instead of ID for security
   def to_param
     uuid
   end
@@ -61,22 +60,63 @@ class Document < ApplicationRecord
     AutogramEnvironment.autogram_service.default_signature_parameters(content_type)
   end
 
-  def validate_signatures
-    AutogramEnvironment.autogram_service.validate_signatures(self)
+  def validation_result(skip_cache: false)
+    return get_new_validation_result if skip_cache
+
+    cache_key = "document/#{id}/validation/#{updated_at.to_i}"
+    @validation_result ||= Rails.cache.fetch(cache_key, expires_in: 5.minutes, race_condition_ttl: 10.seconds) do
+      get_new_validation_result
+    end
+  end
+
+  def extendable_signatures?
+    return false unless has_signatures?
+    validation_result.signatures.any? { |signature| signature[:timestamp_info].nil? }
   end
 
   def has_signatures?
-    validate_signatures.has_signatures
+    validation_result.has_signatures
   end
 
-  def visualize
+  def is_pdf?
+    content_type&.include?("application/pdf")
+  end
+
+  def signature_options
+    signature_form, container_type = validation_result.document_info[:signature_form], validation_result.document_info[:container_type]
+    if has_signatures?
+      case [ signature_form, container_type ]
+      when [ "PAdES", nil ]
+        return [ Ades::SignatureParameters::PADES ]
+      when [ "XAdES", "ASiC_E" ]
+        return [ Ades::SignatureParameters::XADES_ASICE ]
+      when [ "CAdES", "ASiC_E" ]
+        return [ Ades::SignatureParameters::CADES_ASICE ]
+      else
+        raise "Unknown signature form and container type combination: #{signature_form} + #{container_type}"
+      end
+    end
+
+    [
+      is_pdf? ? Ades::SignatureParameters::PADES : nil,
+      Ades::SignatureParameters::XADES_ASICE,
+      Ades::SignatureParameters::CADES_ASICE
+    ].compact
+  end
+
+  def visualize(skip_cache: false)
     if blob.content_type.in?([ "text/plain", "image/png", "image/jpg", "image/jpeg" ])
       content_data = blob.download
       content_data = Base64.strict_encode64(content_data)
       return { mime_type: blob.content_type + ";base64", content: content_data }
     end
 
-    AutogramEnvironment.autogram_service.visualize_document(self)
+    return get_new_visualization_result if skip_cache
+
+    cache_key = "document/#{id}/visualization/#{updated_at.to_i}"
+    Rails.cache.fetch(cache_key, expires_in: 5.minutes, race_condition_ttl: 10.seconds) do
+      get_new_visualization_result
+    end
   end
 
   private
@@ -88,7 +128,6 @@ class Document < ApplicationRecord
   def acceptable_file_type
     return unless blob.attached?
 
-    # .pdf,.xml,.xdcf,.txt,.png,.jpg,.jpeg,application/pdf,application/xml,text/xml,application/vnd.gov.sk.xmldatacontainer+xml,application/vnd.etsi.asic-e+zip
     acceptable_types = [
       "application/pdf",
       "application/xml",
@@ -102,7 +141,15 @@ class Document < ApplicationRecord
     ]
 
     unless acceptable_types.include?(blob.content_type)
-      errors.add(:blob, "Tento typ súboru nie je podporovaný. Podporované sú: PDF, XML, XDCF, TXT, PNG, JPG, JPEG súbory.")
+      errors.add(:blob, "This file type is not supported. Supported types are: PDF, XML, XDCF, ASIC, TXT, PNG, JPG, JPEG.")
     end
+  end
+
+  def get_new_validation_result
+    AutogramEnvironment.autogram_service.validate_signatures(self)
+  end
+
+  def get_new_visualization_result
+    AutogramEnvironment.autogram_service.visualize_document(self)
   end
 end

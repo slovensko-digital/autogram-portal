@@ -33,7 +33,9 @@ Rails.application.routes.draw do
       get :validate
       get :visualize
       get :pdf_preview
-      post "create_contract_from_document", as: "create_contract_from_document"
+      get :actions
+      post :create_contract_from_document, as: "create_contract_from_document"
+      post :extend_signatures
     end
   end
 
