@@ -2,11 +2,11 @@
   <% mime_type = @visualization_result[:mime_type]&.gsub(';base64', '') %>
   <% if mime_type == 'text/plain' %>
     <div>
-      <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-4 rounded border overflow-auto max-h-[970px]"><%= decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type]) %></pre>
+      <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-4 rounded border border-gray-200 overflow-auto max-h-[970px]"><%= decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type]) %></pre>
     </div>
   <% elsif mime_type == 'text/html' %>
     <div>
-      <div class="border rounded bg-white">
+      <div class="border border-gray-200 rounded bg-white">
         <iframe 
           srcdoc="<%= html_escape(decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type])) %>" 
           class="w-full h-[970px] border-0"
@@ -15,20 +15,20 @@
       </div>
     </div>
   <% elsif mime_type == 'image/png' %>
-    <div class="p-4 flex justify-center">
+    <div class="flex justify-center">
       <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>" 
            alt="Náhľad obrázku" 
-           class="max-w-full max-h-[970px] border rounded bg-white" />
+           class="max-w-full max-h-[970px] border border-gray-200 rounded bg-white" />
     </div>
   <% elsif mime_type == 'image/jpg' || mime_type == 'image/jpeg' %>
-    <div class="p-4 flex justify-center">
+    <div class="flex justify-center">
       <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>" 
            alt="Náhľad obrázku" 
-           class="max-w-full max-h-[970px] border rounded bg-white" />
+           class="max-w-full max-h-[970px] border border-gray-200 rounded bg-white" />
     </div>
   <% elsif mime_type == 'application/pdf' %>
     <div>
-      <div class="border rounded bg-white">
+      <div class="border border-gray-200 rounded bg-white">
         <% 
           # Add cache-busting parameter to ensure PDF reloads when returning to the same document
           pdf_url = pdf_preview_document_path(@document, format: :pdf, t: Time.current.to_i)
@@ -68,7 +68,7 @@
           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
         </svg>
         <span class="text-gray-600">
-          Náhľad obsahu nie je podporovaný pre tento typ súboru (<%= mime_type %>)
+          Document preview is not supported for this file type (<%= mime_type %>)
         </span>
       </div>
     </div>

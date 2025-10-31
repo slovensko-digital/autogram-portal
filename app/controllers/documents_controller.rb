@@ -99,10 +99,9 @@ class DocumentsController < ApplicationController
 
     @contract.documents << @document
     ActiveRecord::Base.transaction do
-      if @contract.save!
-        @document.update!(contract: @contract)
-        redirect_to contract_path(@contract), notice: "Contract was successfully created from document."
-      end
+      @contract.save!
+      @document.update!(contract: @contract)
+      redirect_to contract_path(@contract), notice: "Contract was successfully created from document."
     end
   rescue ActiveRecord::RecordInvalid
     error_messages = []

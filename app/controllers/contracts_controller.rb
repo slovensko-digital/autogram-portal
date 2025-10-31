@@ -36,7 +36,7 @@ class ContractsController < ApplicationController
 
   def show
     respond_to do |format|
-      format.html # renders show.html.erb
+      format.html
       format.json do
         # Provide contract data for signing
         render json: {
