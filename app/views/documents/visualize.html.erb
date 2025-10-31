@@ -2,11 +2,11 @@
   <% mime_type = @visualization_result[:mime_type]&.gsub(';base64', '') %>
   <% if mime_type == 'text/plain' %>
     <div>
-      <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-4 rounded border border-gray-200 overflow-auto max-h-[970px]"><%= decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type]) %></pre>
+      <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-auto max-h-[970px]"><%= decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type]) %></pre>
     </div>
   <% elsif mime_type == 'text/html' %>
     <div>
-      <div class="border border-gray-200 rounded bg-white">
+      <div class="border border-gray-200 rounded-lg bg-white">
         <iframe 
           srcdoc="<%= html_escape(decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type])) %>" 
           class="w-full h-[970px] border-0"
@@ -18,17 +18,17 @@
     <div class="flex justify-center">
       <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>" 
            alt="Náhľad obrázku" 
-           class="max-w-full max-h-[970px] border border-gray-200 rounded bg-white" />
+           class="max-w-full max-h-[970px] border border-gray-200 rounded-lg bg-white" />
     </div>
   <% elsif mime_type == 'image/jpg' || mime_type == 'image/jpeg' %>
     <div class="flex justify-center">
       <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>" 
            alt="Náhľad obrázku" 
-           class="max-w-full max-h-[970px] border border-gray-200 rounded bg-white" />
+           class="max-w-full max-h-[970px] border border-gray-200 rounded-lg bg-white" />
     </div>
   <% elsif mime_type == 'application/pdf' %>
     <div>
-      <div class="border border-gray-200 rounded bg-white">
+      <div class="border border-gray-200 rounded-lg bg-white">
         <% 
           # Add cache-busting parameter to ensure PDF reloads when returning to the same document
           pdf_url = pdf_preview_document_path(@document, format: :pdf, t: Time.current.to_i)
@@ -47,14 +47,14 @@
             key="pdf-iframe-<%= @document.id %>-<%= Time.current.to_i %>">
             
             <div class="p-8 text-center">
-              <p class="text-gray-600 mb-4">PDF sa nepodarilo načítať v prehliadači.</p>
+              <p class="text-gray-600 mb-4">PDF could not be loaded in the browser.</p>
               <a href="<%= pdf_url %>" 
                  target="_blank"
                  class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                 </svg>
-                Stiahnuť PDF
+                Download PDF
               </a>
             </div>
           </iframe>

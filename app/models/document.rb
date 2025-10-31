@@ -82,6 +82,14 @@ class Document < ApplicationRecord
     content_type&.include?("application/pdf")
   end
 
+  def is_xml?
+    content_type&.in?([ "application/xml", "text/xml" ])
+  end
+
+  def is_asice?
+    content_type == "application/vnd.etsi.asic-e+zip"
+  end
+
   def signature_options
     signature_form, container_type = validation_result.document_info[:signature_form], validation_result.document_info[:container_type]
     if has_signatures?

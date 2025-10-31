@@ -1,35 +1,5 @@
 <%= turbo_frame_tag "document_actions_#{@document.id}" do %>
   <% unless @document.contract %>
-    <% if @document.extendable_signatures? %>
-      <div class="w-full mb-6">
-        <div class="bg-white border border-gray-200 rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
-            <% if current_user %>
-              <div class="mb-6 text-center lg:text-left">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Extend signatures</h3>
-                <p class="text-gray-600">This document contains signatures without qualified timestamps. You can extend them if needed.</p>
-              </div>
-              <%= form_with url: extend_signatures_document_path(@document), method: :post, local: true, class: "space-y-6" do |form| %>
-                <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-                  <%= submit_tag "Extend signatures with timestamp", 
-                                class: "inline-flex justify-center items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-                </div>
-              <% end %>
-            <% else %>
-              <div class="mb-6 text-center lg:text-left">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Extend signatures</h3>
-                <p class="text-gray-600">This document contains signatures without qualified timestamps. Logged in users can extend them if needed.</p>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-                <%= submit_tag "Extend signatures with timestamp", 
-                              disabled: true,
-                              class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      </div>
-    <% end %>
     <div class="w-full">
       <div class="bg-white border border-gray-200 rounded-lg">
         <div class="px-4 py-5 sm:p-6">
@@ -58,7 +28,7 @@
                 <div class="space-y-3">
                   <% [
                     ['QES', 'qes', 'Qualified Electronic Signature'],
-                    ['QES-TS', 'ts-qes', 'Qualified Electronic Signature with Timestamp']
+                    ['QES + Timestamp', 'ts-qes', 'Qualified Electronic Signature with Timestamp']
                   ].each do |label, value, description| %>
                     <%= render 'shared/radio_button_card', 
                           name: 'allowed_method',
@@ -70,7 +40,7 @@
                 </div>
               </div>
             </div>
-            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+            <div class="flex flex-col sm:flex-row gap-3">
               <%= submit_tag "Continue to document signing", 
                               class: "inline-flex justify-center items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
             </div>
@@ -78,5 +48,39 @@
         </div>
       </div>
     </div>
+    <% if @document.extendable_signatures? %>
+      <div class="w-full mt-6">
+        <div class="bg-white border border-gray-200 rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <% if current_user %>
+              <div class="mb-6 text-center lg:text-left">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Add timestamp</h3>
+                <p class="text-gray-600">This document contains signatures without qualified timestamps. You can extend them now if needed.</p>
+              </div>
+              <%= form_with url: extend_signatures_document_path(@document), method: :post, local: true, class: "space-y-6" do |form| %>
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <%= submit_tag "Add timestamp to signatures", 
+                                class: "inline-flex justify-center items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                </div>
+              <% end %>
+            <% else %>
+              <div class="mb-6 text-center lg:text-left">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Add timestamp</h3>
+                <p class="text-gray-600">This document contains signatures without qualified timestamps.</p>
+                <p class="text-gray-600">It is possible to add them now.</p>
+              </div>
+              <div class="mb-4 text-center lg:text-left">
+                <p class="block text-gray-600"><i>You need to sign in to extend them with a timestamp.</i></p>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <%= submit_tag "Add timestamp to signatures", 
+                              disabled: true,
+                              class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
   <% end %>
 <% end %>
