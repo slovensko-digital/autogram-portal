@@ -58,6 +58,7 @@ Rails.application.routes.draw do
       get :signed_document
       get :iframe
       get :autogram_parameters
+      get :autogram_signing_in_progress
     end
   end
 

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { isMobileDevice } from "utils/device_detection"
 
 export default class extends Controller {
   static targets = ["button"]
@@ -7,8 +8,8 @@ export default class extends Controller {
     console.log("AVM signer controller connected")
   }
 
-  handleClick(event) {
-    if (this.isMobileDevice()) {
+  sign(event) {
+    if (isMobileDevice()) {
       console.log("Mobile device detected, handling AVM signing directly")
       event.preventDefault()
       this.setButtonLoading(true)
@@ -128,17 +129,6 @@ export default class extends Controller {
         <span class="font-semibold">Sign with AVM</span>
       `
     }
-  }
-
-  isMobileDevice() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera
-    const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
-    const isMobileUA = mobileRegex.test(userAgent)
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-    const isSmallScreen = window.innerWidth <= 768
-    const hasMobileFeatures = 'orientation' in window || 'DeviceMotionEvent' in window
-
-    return isMobileUA || (isTouchDevice && isSmallScreen && hasMobileFeatures)
   }
 
   redirectToAvmUrl(avmUrl) {

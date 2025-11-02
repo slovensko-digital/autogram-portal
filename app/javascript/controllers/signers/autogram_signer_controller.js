@@ -3,18 +3,25 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["form", "submitButton"]
   static values = { 
-    contractParam: String
+    contractParam: String,
+    contractUuid: String,
+    noPreview: Boolean
   }
 
   connect() {
     this.signing = false
   }
 
-  async signAutogram(event) {
+  async sign(event) {
     if (this.signing) return
     
     event.preventDefault()
-    this.setSigning(true)
+    this.signing = true
+    
+    // Show the signing in progress UI
+    await this.showSigningInProgress()
+    
+    this.dispatchSigningEvent('start')
 
     try {
       if (typeof window.AutogramSDK === 'undefined') {
@@ -128,11 +135,44 @@ export default class extends Controller {
       
       if (error.message && (error.message.includes('cancel') || error.message.includes('abort'))) {
         console.log('User cancelled signing')
+        this.dispatchSigningEvent('cancel')
       } else {
         alert(`An error occurred while signing: ${error.message}`)
+        this.dispatchSigningEvent('error', { error: error.message })
       }
-    } finally {
-      this.setSigning(false)
+    }
+  }
+
+  dispatchSigningEvent(status, detail = {}) {
+    const event = new CustomEvent('autogram-signing', {
+      bubbles: true,
+      detail: { status, ...detail }
+    })
+    this.element.dispatchEvent(event)
+  }
+
+  async showSigningInProgress() {
+    try {
+      let url = `${this.contractParamValue}/autogram_signing_in_progress`
+      if (this.hasNoPreviewValue && this.noPreviewValue) {
+        url += '?no_preview=1'
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'text/vnd.turbo-stream.html',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+      })
+
+      if (response.ok) {
+        const turboStream = await response.text()
+        Turbo.renderStreamMessage(turboStream)
+      } else {
+        console.error('Failed to load signing in progress view')
+      }
+    } catch (error) {
+      console.error('Error showing signing in progress:', error)
     }
   }
 
@@ -194,39 +234,5 @@ export default class extends Controller {
       reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsDataURL(blob);
     });
-  }
-
-  setSigning(value) {
-    this.signing = value
-    
-    if (value) {
-      this.submitButtonTarget.disabled = true
-      this.submitButtonTarget.innerHTML = `
-        <div class="block">
-          <div class="w-full text-lg font-semibold">
-            <svg class="animate-spin h-5 w-5 mr-2 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Signing...
-          </div>
-        </div>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="w-12 h-12 ms-3 opacity-50">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/>
-        </svg>
-      `
-    } else {
-      this.submitButtonTarget.disabled = false
-      this.submitButtonTarget.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="w-5 h-5 mr-2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/>
-        </svg>
-        <span class="font-semibold">Autogram desktop</span>
-      `
-    }
   }
 }

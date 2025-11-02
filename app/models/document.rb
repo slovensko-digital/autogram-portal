@@ -63,8 +63,8 @@ class Document < ApplicationRecord
   def validation_result(skip_cache: false)
     return get_new_validation_result if skip_cache
 
-    cache_key = "document/#{id}/validation/#{updated_at.to_i}"
-    @validation_result ||= Rails.cache.fetch(cache_key, expires_in: 5.minutes, race_condition_ttl: 10.seconds) do
+    cache_key = "document/#{uuid}/validation/#{updated_at.to_i}"
+    Rails.cache.fetch(cache_key, expires_in: 5.minutes, race_condition_ttl: 10.seconds) do
       get_new_validation_result
     end
   end

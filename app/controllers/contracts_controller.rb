@@ -1,6 +1,6 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters ]
-  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign ]
+  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters, :autogram_signing_in_progress ]
+  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign, :autogram_parameters, :autogram_signing_in_progress ]
 
   before_action :allow_iframe, only: [ :iframe ]
 
@@ -13,6 +13,30 @@ class ContractsController < ApplicationController
 
   def autogram_parameters
     render partial: "api/v1/contracts/contract", locals: { contract: @contract }, formats: [ :json ]
+  end
+
+  def autogram_signing_in_progress
+    respond_to do |format|
+      format.turbo_stream do
+        # Determine cancel URL based on referrer context
+        cancel_url = if request.referrer&.include?("/iframe")
+          iframe_params = {}
+          iframe_params[:no_preview] = true if params[:no_preview].present?
+          iframe_contract_path(@contract, iframe_params)
+        else
+          contract_path(@contract)
+        end
+
+        render turbo_stream: turbo_stream.replace(
+          "signature_actions_#{@contract.uuid}",
+          partial: "contracts/autogram_signing_in_progress",
+          locals: {
+            contract: @contract,
+            cancel_url: cancel_url
+          }
+        )
+      end
+    end
   end
 
   def sign
