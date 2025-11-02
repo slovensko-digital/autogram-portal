@@ -57,8 +57,6 @@ class AutogramService
   end
 
   def extend_signatures(document)
-    sleep 3
-    return nil
     return nil if document.content.nil?
 
     begin
