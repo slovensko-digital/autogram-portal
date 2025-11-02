@@ -73,7 +73,7 @@ Rails.application.routes.draw do
       get "hello", to: "hello#show"
       get "hello_auth", to: "hello#show_auth"
 
-      resources :contracts, only: [ :create, :show ] do
+      resources :contracts, only: [ :create, :show, :destroy ] do
         member do
           get :signed_document
           get :status

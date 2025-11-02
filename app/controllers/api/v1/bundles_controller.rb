@@ -32,8 +32,11 @@ class Api::V1::BundlesController < ApiController
   end
 
   def destroy
-    @bundle.destroy
-    head :no_content
+    if @bundle.destroy
+      head :no_content
+    else
+      render json: { errors: @bundle.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   private

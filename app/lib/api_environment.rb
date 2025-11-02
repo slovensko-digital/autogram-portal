@@ -18,7 +18,7 @@ module ApiEnvironment
   end
 
   def self.use_dummy_authenticator?
-    Rails.env == "development" && ENV["API_SKIP_AUTH"].present?
+    Rails.env == "development" && ENV["API_SKIP_AUTH"] == "true"
   end
 
   class DummyAuthenticator
