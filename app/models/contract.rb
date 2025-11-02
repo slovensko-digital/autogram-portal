@@ -106,6 +106,10 @@ class Contract < ApplicationRecord
     bundle.contract_signed(self) if bundle.present?
   end
 
+  def short_uuid
+    uuid.first(8)
+  end
+
   private
 
   def ensure_uuid

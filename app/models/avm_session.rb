@@ -78,8 +78,8 @@ class AvmSession < ApplicationRecord
 
   def broadcast_signing_error(error_message)
     Turbo::StreamsChannel.broadcast_replace_to(
-      "contract_#{contract.id}",
-      target: "signature_actions_#{contract.id}",
+      "contract_#{contract.uuid}",
+      target: "signature_actions_#{contract.uuid}",
       partial: "contracts/signature_error",
       locals: {
         contract: contract,

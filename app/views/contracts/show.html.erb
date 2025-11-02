@@ -2,21 +2,37 @@
 
 <main>
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto max-w-7xl px-6 pb-8 pt-10 lg:flex lg:px-8 lg:pt-15">
-      <div class="mx-auto mt-8 flex max-w-full sm:max-w-3xl sm:mt-12 lg:ml-10 lg:mr-0 lg:mt-8 lg:max-w-none lg:flex-none xl:ml-32">
+    <div class="mx-auto max-w-7xl px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div class="mx-auto flex max-w-full sm:max-w-3xl lg:ml-10 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
         <div class="flex flex-col items-center max-w-full sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
+          <% if current_user && @contract.user == current_user %>
+            <div class="w-full">
+              <%= link_to contracts_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500" do %>
+                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                All contracts
+              <% end %>
+            </div>
+          <% end %>
+
           <div class="w-full mb-6">
-            <div class="flex justify-between items-start">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
               <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Contract #<%= @contract.id %></h1>
-                <% if @contract.uuid %>
-                  <p class="text-gray-600">UUID: <span class="font-mono text-sm"><%= @contract.uuid %></span></p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Contract</h1>
+                <p class="mt-2 text-sm text-gray-500">UUID: <%= @contract.uuid %></p>
+                <% if @contract.bundle %>
+                  <p class="text-gray-600">
+                    Part of
+                    <%= link_to "Bundle ##{@contract.bundle.short_uuid}", contract_path(@contract.bundle), 
+                              class: "text-blue-600 hover:text-blue-800 font-medium" %>
+                  </p>
                 <% end %>
               </div>
-              <div class="flex items-center space-x-2">
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <% if current_user %>
                   <%= link_to edit_contract_path(@contract),
-                    class: "inline-flex items-center gap-1.5 px-3 py-2 border border-gray-300  text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+                    class: "inline-flex items-center justify-center gap-1.5 px-3 py-2 border border-gray-300  text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
                     </svg>
@@ -54,4 +70,4 @@
   </div>
 </main>
 
-<% content_for :title, "Contract ##{@contract.id}" %>
+<% content_for :title, "Contract ##{@contract.short_uuid}" %>

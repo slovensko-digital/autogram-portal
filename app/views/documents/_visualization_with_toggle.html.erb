@@ -17,7 +17,7 @@
   </div>
 
   <div data-toggle-target="content" data-controller="pdf-reload">
-    <%= turbo_frame_tag "document_visualization_#{@document.id}", 
+    <%= turbo_frame_tag "document_visualization_#{@document.uuid}", 
                         src: visualize_document_path(@document, t: Time.current.to_i),
                         loading: "lazy",
                         class: "rounded-lg min-h-[300px]",

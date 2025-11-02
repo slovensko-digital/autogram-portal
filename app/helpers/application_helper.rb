@@ -5,7 +5,6 @@ module ApplicationHelper
     return content unless mime_type&.include?(";base64")
 
     if mime_type.include?("text/")
-      # For text content, handle UTF-8 encoding properly
       Base64.strict_decode64(content).force_encoding("UTF-8")
     else
       Base64.strict_decode64(content)
@@ -18,36 +17,33 @@ module ApplicationHelper
   def qr_code_svg(text, size: 200)
     qr = RQRCode::QRCode.new(text)
 
-    # Generate SVG with custom styling
     svg = qr.as_svg(
-      color: "1e40af",  # Blue color to match the design
+      color: "1e40af",
       shape_rendering: "crispEdges",
       module_size: size / qr.modules.count,
       standalone: true,
       use_path: true
     )
 
-    # Mark as html_safe so Rails doesn't escape it
     svg.html_safe
   rescue => e
     Rails.logger.error "Failed to generate QR code: #{e.message}"
-    # Return a fallback SVG
     %(<svg width="#{size}" height="#{size}" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#f3f4f6"/>
-      <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#6b7280" font-size="14">QR kód nedostupný</text>
+      <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#6b7280" font-size="14">QR code not available</text>
     </svg>).html_safe
   end
 
   def method_label(method)
     case method
     when "qes"
-      "Kvalifikovaný elektronický podpis"
+      "Qualified Electronic Signature"
     when "ts-qes"
-      "Kvalifikovaný elektronický podpis s časovou pečiatkou"
+      "Qualified Electronic Signature with Timestamp"
     when "ades"
-      "Pokročilý elektronický podpis"
+      "Advanced Electronic Signature"
     when "ses"
-      "Jednoduchý elektronický podpis"
+      "Simple Electronic Signature"
     else
       method.humanize
     end
@@ -56,13 +52,13 @@ module ApplicationHelper
   def short_method_label(method)
     case method
     when "qes"
-      "Kvalifikovaný"
+      "QES"
     when "ts-qes"
-      "Kvalifikovaný + časová pečiatka"
+      "QES + Timestamp"
     when "ades"
-      "Pokročilý"
+      "ADES"
     when "ses"
-      "Jednoduchý"
+      "SES"
     else
       method.humanize
     end

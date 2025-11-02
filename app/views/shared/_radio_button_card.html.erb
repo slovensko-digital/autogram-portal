@@ -8,18 +8,22 @@
   - description: the description text below the label
   - checked: whether this option should be checked by default (optional, defaults to false)
   - form: the form builder object (optional, for form helpers)
+  - wrapper_class: additional CSS classes for the label wrapper (optional)
+  - data_attributes: hash of data attributes for the radio input (optional)
 %>
 
 <% 
   checked ||= false 
   form ||= nil
+  wrapper_class ||= ""
+  data_attributes ||= {}
 %>
 
-<label class="relative flex items-start space-x-3 p-3 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+<label class="relative flex items-start space-x-3 p-3 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
   <% if form %>
-    <%= form.radio_button name, value, checked: checked, class: "sr-only" %>
+    <%= form.radio_button name, value, { checked: checked, class: "sr-only", data: data_attributes } %>
   <% else %>
-    <%= radio_button_tag name, value, checked, class: "sr-only" %>
+    <%= radio_button_tag name, value, checked, { class: "sr-only", data: data_attributes } %>
   <% end %>
   
   <div class="flex-1">

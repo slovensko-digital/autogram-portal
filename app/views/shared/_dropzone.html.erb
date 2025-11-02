@@ -23,12 +23,16 @@
 
 <div
   data-<%= controller_name.parameterize %>-target="dropzone"
+  tabindex="0"
+  role="button"
+  aria-label="<%= title %>. <%= subtitle %>"
   class="
   rounded-lg <%= height %> w-full border-2 border-dashed border-gray-200 cursor-pointer
   flex flex-col items-center justify-center
   hover:border-gray-300 hover:bg-gray-50/50 bg-gray-50/30 transition-all duration-200
+  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500
   "
-  data-action="click-><%= controller_name.parameterize %>#click dragover-><%= controller_name.parameterize %>#dragover dragleave-><%= controller_name.parameterize %>#dragleave drop-><%= controller_name.parameterize %>#drop"
+  data-action="click-><%= controller_name.parameterize %>#click dragover-><%= controller_name.parameterize %>#dragover dragleave-><%= controller_name.parameterize %>#dragleave drop-><%= controller_name.parameterize %>#drop keydown-><%= controller_name.parameterize %>#keydown"
 >
   <div class="uploading-state hidden flex-col items-center">
     <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

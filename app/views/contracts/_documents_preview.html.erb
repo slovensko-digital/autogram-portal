@@ -6,7 +6,7 @@
           <div class="document-item cursor-pointer p-3 rounded-lg border border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200
                       <%= 'ring-2 ring-blue-500 bg-blue-50 border-blue-300' if index == 0 %>"
                data-document-viewer-target="documentItem"
-               data-document-id="<%= document.id %>"
+               data-document-id="<%= document.uuid %>"
                data-document-index="<%= index %>"
                data-action="click->document-viewer#selectDocument">
             <div class="flex items-start">
@@ -31,9 +31,9 @@
     <% @contract.documents.each_with_index do |document, index| %>
       <div class="document-content <%= 'hidden' unless index == 0 %>" 
            data-document-viewer-target="documentContent"
-           data-document-id="<%= document.id %>">
+           data-document-id="<%= document.uuid %>">
         <div class="mb-6">
-          <%= turbo_frame_tag "document_visualization_#{document.id}", 
+          <%= turbo_frame_tag "document_visualization_#{document.uuid}", 
                               src: visualize_document_path(document),
                               loading: "lazy",
                               class: "rounded-lg min-h-[600px]" do %>

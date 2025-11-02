@@ -1,5 +1,5 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :iframe ]
+  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :update, :iframe ]
   skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign ]
 
   before_action :allow_iframe, only: [ :iframe ]
@@ -8,43 +8,16 @@ class ContractsController < ApplicationController
     @contracts = current_user.contracts.includes(:user, :documents).order(created_at: :desc)
   end
 
-  def new
-    @contract = Contract.new
-    @contract.signature_parameters = Ades::SignatureParameters.new
-  end
-
-  def create
-    # TODO check agree_to_policies
-
-    @contract = Contract.new_from_ui(contract_params)
-    @contract.user = current_user
-
-    # Set user and uuid for any documents
-    @contract.documents.each do |document|
-      document.user = current_user
-      document.uuid = SecureRandom.uuid
-    end
-
-    if @contract.save
-      redirect_to edit_contract_path(@contract)
-    else
-      # Ensure signature_parameters is initialized for form re-rendering
-      @contract.signature_parameters ||= Ades::SignatureParameters.new
-      render :new, status: :unprocessable_entity
-    end
-  end
-
   def show
     respond_to do |format|
       format.html
       format.json do
         # Provide contract data for signing
         render json: {
-          id: @contract.id,
-          uuid: @contract.uuid,
+          id: @contract.uuid,
           documents: @contract.documents.map do |doc|
             {
-              id: doc.id,
+              id: doc.uuid,
               filename: doc.filename,
               content_type: doc.blob.content_type,
               download_url: rails_blob_url(doc.blob),
@@ -222,6 +195,14 @@ class ContractsController < ApplicationController
   def edit
   end
 
+  def update
+    if @contract.update(contract_params)
+      redirect_to @contract, notice: "Contract was successfully updated."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     @contract.destroy!
     redirect_to contracts_path, notice: "The contract and all its documents were successfully deleted."
@@ -246,7 +227,12 @@ class ContractsController < ApplicationController
   end
 
   def contract_params
-    params.require(:contract).permit(:uuid, documents_attributes: [ :blob, :_destroy ], signature_parameters_attributes: [ :format_container_combination, :add_content_timestamp ])
+    params.require(:contract).permit(
+      :uuid,
+      allowed_methods: [],
+      documents_attributes: [ :id, :blob, :_destroy ],
+      signature_parameters_attributes: [ :id, :format_container_combination, :add_content_timestamp ]
+    )
   end
 
   def signed_document_param

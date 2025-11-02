@@ -1,4 +1,4 @@
-<%= turbo_frame_tag "document_visualization_#{@document.id}" do %>
+<%= turbo_frame_tag "document_visualization_#{@document.uuid}" do %>
   <% mime_type = @visualization_result[:mime_type]&.gsub(';base64', '') %>
   <% if mime_type == 'text/plain' %>
     <div>
@@ -37,14 +37,14 @@
           data="<%= pdf_url %>" 
           type="application/pdf" 
           class="w-full h-[970px]"
-          id="pdf-object-<%= @document.id %>"
-          key="pdf-object-<%= @document.id %>-<%= Time.current.to_i %>">
+          id="pdf-object-<%= @document.uuid %>"
+          key="pdf-object-<%= @document.uuid %>-<%= Time.current.to_i %>">
           
           <iframe 
             src="<%= pdf_url %>" 
             class="w-full h-[970px] border-0"
-            id="pdf-iframe-<%= @document.id %>"
-            key="pdf-iframe-<%= @document.id %>-<%= Time.current.to_i %>">
+            id="pdf-iframe-<%= @document.uuid %>"
+            key="pdf-iframe-<%= @document.uuid %>-<%= Time.current.to_i %>">
             
             <div class="p-8 text-center">
               <p class="text-gray-600 mb-4">PDF could not be loaded in the browser.</p>

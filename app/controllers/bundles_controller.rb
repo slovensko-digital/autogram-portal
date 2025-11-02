@@ -1,31 +1,15 @@
 class BundlesController < ApplicationController
-  before_action :set_bundle, only: [ :show, :edit, :update, :destroy, :iframe ]
+  before_action :set_public_bundle, only: [ :show, :iframe ]
   skip_before_action :verify_authenticity_token, only: [ :iframe ]
 
   before_action :allow_iframe, only: [ :iframe ]
 
   def index
-    @bundles = Bundle.includes(:contracts, :author).order(created_at: :desc)
+    @bundles = current_user.bundles.includes(:contracts, :author).order(created_at: :desc)
   end
 
   def show
     @bundle.contracts.includes(:documents, :avm_sessions)
-  end
-
-  def edit
-  end
-
-  def update
-    if @bundle.update(bundle_params)
-      redirect_to @bundle, notice: "Bundle was successfully updated."
-    else
-      render :edit
-    end
-  end
-
-  def destroy
-    @bundle.destroy
-    redirect_to bundles_url, notice: "Bundle was successfully destroyed."
   end
 
   def iframe
@@ -36,7 +20,7 @@ class BundlesController < ApplicationController
 
   private
 
-  def set_bundle
+  def set_public_bundle
     @bundle = Bundle.find_by_uuid!(params[:id])
   end
 

@@ -20,6 +20,13 @@ export default class extends Controller {
     this.fileInputTarget.click()
   }
 
+  keydown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      this.click()
+    }
+  }
+
   change(event) {
     if (this.uploading) return
     const file = event.target.files[0]

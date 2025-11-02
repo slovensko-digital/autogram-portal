@@ -3,7 +3,7 @@ class DocumentsController < ApplicationController
   before_action :allow_iframe, only: [ :pdf_preview ]
 
   def index
-    @documents = Document.includes(:user).order(created_at: :desc)
+    @documents = current_user.documents.includes(:user).order(created_at: :desc)
   end
 
   def new
@@ -16,7 +16,7 @@ class DocumentsController < ApplicationController
     @document.uuid = SecureRandom.uuid
 
     if @document.save
-      redirect_to document_path(@document), notice: "Document was successfully uploaded."
+      redirect_to document_path(@document)
     else
       render :new, status: :unprocessable_entity
     end
@@ -101,7 +101,7 @@ class DocumentsController < ApplicationController
     ActiveRecord::Base.transaction do
       @contract.save!
       @document.update!(contract: @contract)
-      redirect_to contract_path(@contract), notice: "Contract was successfully created from document."
+      redirect_to contract_path(@contract)
     end
   rescue ActiveRecord::RecordInvalid
     error_messages = []

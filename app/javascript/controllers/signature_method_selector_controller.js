@@ -1,39 +1,42 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["methodRadio", "buttonContainer", "signerController"]
+  static targets = ["methodRadio", "buttonContainer", "signerController", "autogramForm", "avmForm", "signButton"]
 
   connect() {
-    setTimeout(() => {
-      this.updateButtons()
-    }, 10)
+    console.log('Signature method selector connected')
   }
 
-  updateButtons() {
-    const selectedMethod = this.getSelectedMethod()
-    const buttons = this.buttonContainerTarget.querySelectorAll('button[type="submit"]')
-    const signerControllers = this.signerControllerTargets
+  triggerSign(event) {
+    event.preventDefault()
     
-    if (selectedMethod) {
-      buttons.forEach(button => {
-        button.disabled = false
-      })
+    const selectedMethod = this.getSelectedMethod()
+    console.log('Selected signing method:', selectedMethod)
+    
+    if (selectedMethod === 'autogram') {
+      // Check if desktop/mobile and show appropriate UI
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                      ('ontouchstart' in window) || 
+                      (navigator.maxTouchPoints > 0)
       
-      const useTimestamp = selectedMethod === 'ts-qes'
-      signerControllers.forEach(signerElement => {
-        signerElement.setAttribute('data-document-signer-use-timestamp-value', useTimestamp)
-        const controller = this.application.getControllerForElementAndIdentifier(signerElement, 'document-signer')
-        if (controller && controller.useTimestampValueChanged) {
-          controller.useTimestampValueChanged()
+      if (isMobile) {
+        alert('Autogram Desktop is not available on mobile devices. Please use AVM Mobile instead.')
+        return
+      }
+      
+      if (this.hasAutogramFormTarget) {
+        const submitButton = this.autogramFormTarget.querySelector('button[type="submit"]')
+        if (submitButton) {
+          submitButton.click()
         }
-      })
-      
-      console.log('Buttons enabled, timestamp:', useTimestamp) // Debug log
-    } else {
-      buttons.forEach(button => {
-        button.disabled = true
-      })
-      console.log('No method selected, buttons disabled') // Debug log
+      }
+    } else if (selectedMethod === 'avm') {
+      if (this.hasAvmFormTarget) {
+        const submitButton = this.avmFormTarget.querySelector('button[type="submit"]')
+        if (submitButton) {
+          submitButton.click()
+        }
+      }
     }
   }
 

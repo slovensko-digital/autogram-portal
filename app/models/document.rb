@@ -127,6 +127,10 @@ class Document < ApplicationRecord
     end
   end
 
+  def short_uuid
+    uuid.first(8)
+  end
+
   private
 
   def ensure_uuid

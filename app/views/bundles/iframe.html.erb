@@ -13,7 +13,7 @@
             Please sign all contracts in the bundle
           </p>
         </div>
-        <div id="bundle_<%= @bundle.id %>_status">
+        <div id="bundle_<%= @bundle.uuid %>_status">
           <%= render 'status', bundle: @bundle %>
         </div>
       </div>
@@ -26,7 +26,7 @@
             <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-600 text-white text-xs font-medium">
+                  <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-medium">
                     <%= index + 1 %>
                   </span>
                   <h2 class="ml-2 text-base font-semibold text-gray-900">
