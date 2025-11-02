@@ -43,6 +43,7 @@ class Contract < ApplicationRecord
   validates :uuid, presence: true, uniqueness: true
 
   before_validation :ensure_uuid, on: :create
+  before_validation :set_signature_level_for_ts_qes
 
   def to_param
     uuid
@@ -152,5 +153,16 @@ class Contract < ApplicationRecord
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
+  end
+
+  def set_signature_level_for_ts_qes
+    return unless allowed_methods.present?
+    return unless signature_parameters.present?
+
+    if allowed_methods.include?("ts-qes")
+      signature_parameters.level = "BASELINE_T"
+    elsif allowed_methods.include?("qes") && allowed_methods.exclude?("ts-qes")
+      signature_parameters.level = "BASELINE_B"
+    end
   end
 end

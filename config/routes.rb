@@ -57,6 +57,7 @@ Rails.application.routes.draw do
       get :visualize
       get :signed_document
       get :iframe
+      get :autogram_parameters
     end
   end
 

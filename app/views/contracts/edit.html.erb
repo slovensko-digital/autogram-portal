@@ -16,7 +16,6 @@
 
           <%= form_with model: @contract, url: contract_path(@contract), method: :patch, local: true, class: "w-full" do |form| %>
             <div class="space-y-6">
-              <!-- Signature Parameters Section -->
               <div class="bg-white border border-gray-200 rounded-lg">
                 <div class="px-4 py-5 sm:p-6">
                   <div class="mb-6">
@@ -25,29 +24,25 @@
                   </div>
 
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Signature Format -->
                     <%= form.fields_for :signature_parameters do |sp_form| %>
                       <div>
                         <%= sp_form.label :format_container_combination, "Signature Format", class: "block text-sm font-medium text-gray-700 mb-3" %>
                         <div class="space-y-3">
-                          <% [
-                            ['PAdES', 'PADES', 'Portable Document Format Advanced Electronic Signatures'],
-                            ['XAdES + ASiC-E', 'XADES_ASICE', 'XML Advanced Electronic Signatures with Associated Signature Container'],
-                            ['CAdES + ASiC-E', 'CADES_ASICE', 'CMS Advanced Electronic Signatures with Associated Signature Container']
-                          ].each do |label, value, description| %>
-                            <%= render 'shared/radio_button_card', 
-                                  form: sp_form,
-                                  name: :format_container_combination,
-                                  value: value,
-                                  label: label,
-                                  description: description,
-                                  checked: value == @contract.signature_parameters.format_container_combination %>
+                          <%# TODO: edit this when multiple documents are supported %>
+                          <% signature_options = @contract.documents.first.signature_options %>
+                          <% signature_options.each do |label, value, description| %>
+                          <%= render 'shared/radio_button_card', 
+                                form: sp_form,
+                                name: :format_container_combination,
+                                value: value,
+                                label: label,
+                                description: description,
+                                checked: value == @contract.signature_parameters.format_container_combination %>
                           <% end %>
                         </div>
                       </div>
                     <% end %>
 
-                    <!-- Signature Method -->
                     <div>
                       <%= label_tag "allowed_methods", "Signature Method", class: "block text-sm font-medium text-gray-700 mb-3" %>
                       <div class="space-y-3">
@@ -68,7 +63,6 @@
                 </div>
               </div>
 
-              <!-- Documents Section -->
               <div class="bg-white border border-gray-200 rounded-lg">
                 <div class="px-4 py-5 sm:p-6">
                   <div class="mb-6">
@@ -103,7 +97,6 @@
                 </div>
               </div>
 
-              <!-- Submit Button -->
               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <%= link_to contract_path(@contract), 
                            data: { 

@@ -1,5 +1,5 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :update, :iframe ]
+  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters ]
   skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign ]
 
   before_action :allow_iframe, only: [ :iframe ]
@@ -9,40 +9,10 @@ class ContractsController < ApplicationController
   end
 
   def show
-    respond_to do |format|
-      format.html
-      format.json do
-        # Provide contract data for signing
-        render json: {
-          id: @contract.uuid,
-          documents: @contract.documents.map do |doc|
-            {
-              id: doc.uuid,
-              filename: doc.filename,
-              content_type: doc.blob.content_type,
-              download_url: rails_blob_url(doc.blob),
-              xdc_parameters: doc.xdc_parameters ? {
-                auto_load_eform: doc.xdc_parameters.auto_load_eform,
-                container_xmlns: doc.xdc_parameters.container_xmlns,
-                embed_used_schemas: doc.xdc_parameters.embed_used_schemas,
-                fs_form_identifier: doc.xdc_parameters.fs_form_identifier,
-                identifier: doc.xdc_parameters.identifier,
-                schema: doc.xdc_parameters.schema,
-                schema_identifier: doc.xdc_parameters.schema_identifier,
-                schema_mime_type: doc.xdc_parameters.schema_mime_type,
-                transformation: doc.xdc_parameters.transformation,
-                transformation_identifier: doc.xdc_parameters.transformation_identifier,
-                transformation_language: doc.xdc_parameters.transformation_language,
-                transformation_media_destination_type_description: doc.xdc_parameters.transformation_media_destination_type_description,
-                transformation_target_environment: doc.xdc_parameters.transformation_target_environment
-              } : nil
-            }
-          end,
-          allowed_methods: @contract.allowed_methods,
-          signature_parameters: @contract.signature_parameters
-        }
-      end
-    end
+  end
+
+  def autogram_parameters
+    render partial: "api/v1/contracts/contract", locals: { contract: @contract }, formats: [:json]
   end
 
   def sign

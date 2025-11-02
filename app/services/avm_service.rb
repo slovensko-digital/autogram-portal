@@ -3,11 +3,9 @@ class AvmService
 
   def initiate_signing(contract)
     begin
-      # Get the first document from the contract for signing
       document = contract.documents.first
       return { error: "Žiadny dokument na podpísanie" } unless document&.blob&.attached?
 
-      # Prepare document data for AVM service
       file_content = Base64.strict_encode64(document.content)
 
       payload = {
@@ -15,17 +13,17 @@ class AvmService
           content: file_content,
           filename: document.filename
         },
-        parameters: format_signature_parameters_for_avm(contract.signature_parameters, document),
+        parameters: {
+          level: "#{contract.signature_parameters.format}_#{contract.signature_parameters.level}",
+          container: contract.signature_parameters.container,
+          fsFormId: document.xdc_parameters&.fs_form_identifier,
+          autoLoadEform: true
+        },
         payloadMimeType: document.content_type + ";base64"
       }
 
-      puts "Payload for AVM initiate: #{payload.inspect}"
-
       secret_key = CGI.escape(Base64.strict_encode64(SecureRandom.random_bytes(32)))
-      puts "Generated secret key: #{secret_key}"
-
       response = call_avm_initiate_api(payload, secret_key)
-      Rails.logger.info "AVM initiate response status: #{response.status}, body: #{response.body}"
 
       if response.success?
         parse_avm_initiate_response(response, secret_key)
@@ -148,15 +146,6 @@ class AvmService
 
   rescue JSON::ParserError => e
     raise "Nepodarilo sa spracovať odpoveď z AVM služby: #{e.message}"
-  end
-
-  def format_signature_parameters_for_avm(signature_parameters, document)
-    {
-      level: "#{signature_parameters.format}_#{signature_parameters.level}",
-      container: signature_parameters.container,
-      fsFormId: document.xdc_parameters&.fs_form_identifier,
-      autoLoadEform: true
-    }
   end
 
   # Mock methods for development

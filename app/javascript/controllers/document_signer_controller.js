@@ -3,16 +3,11 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["form", "submitButton"]
   static values = { 
-    contractParam: String,
-    useTimestamp: Boolean 
+    contractParam: String
   }
 
   connect() {
     this.signing = false
-  }
-
-  useTimestampValueChanged() {
-    console.log('Timestamp value changed to:', this.useTimestampValue)
   }
 
   async signAutogram(event) {
@@ -34,20 +29,20 @@ export default class extends Controller {
         throw new Error('No suitable Autogram client found. Available properties: ' + Object.keys(window.AutogramSDK).join(', '))
       }
 
-      const contractResponse = await fetch(this.contractParamValue, {
+      const autogramParametersResponse = await fetch(this.contractParamValue + '/autogram_parameters', {
         headers: {
           'Accept': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
       })
       
-      if (!contractResponse.ok) {
+      if (!autogramParametersResponse.ok) {
         throw new Error('Failed to load contract data from server.')
       }
       
-      const contract = await contractResponse.json()
+      const autogramParameters = await autogramParametersResponse.json()
 
-      for (let doc of contract.documents) {
+      for (let doc of autogramParameters.documents) {
         doc.contentPromise = Promise.resolve(doc.content);
         
         if (doc.download_url) {
@@ -61,7 +56,7 @@ export default class extends Controller {
         }
       }
 
-      for (let doc of contract.documents) {
+      for (let doc of autogramParameters.documents) {
         let content = await doc.contentPromise;
 
         if (doc.content_type.includes('base64')) {
@@ -73,28 +68,23 @@ export default class extends Controller {
       }
 
       let signRequestDocument = {
-        content: contract.documents[0].content
+        content: autogramParameters.documents[0].content
       }
 
-      if (contract.documents[0].filename)
-        signRequestDocument.filename = contract.documents[0].filename;
-
-      const useTimestamp = this.useTimestampValue
-
-      console.log('document 0:', contract.documents[0])
+      if (autogramParameters.documents[0].filename)
+        signRequestDocument.filename = autogramParameters.documents[0].filename;
 
       let signRequestSignatureParameters = this.getOldSignatureParameters(
-        contract.signature_parameters, 
-        contract.documents[0].xdc_parameters,
-        useTimestamp
+        autogramParameters.signature_parameters, 
+        autogramParameters.documents[0].xdc_parameters
       );
 
-      console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, contract.documents[0].content_type)
+      console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, autogramParameters.documents[0].content_type)
 
       const signResult = await client.signOnDesktop(
         signRequestDocument,
         signRequestSignatureParameters,
-        contract.documents[0].content_type
+        autogramParameters.documents[0].content_type
       );
 
       if (signResult && signResult.content) {
@@ -146,10 +136,7 @@ export default class extends Controller {
     }
   }
 
-  getOldSignatureParameters(newParams, xdcParams, useTimestamp = false) {
-    if (useTimestamp)
-      newParams.level = "BASELINE_T";
-
+  getOldSignatureParameters(newParams, xdcParams) {
     let result = {
       level: newParams.format + "_" + newParams.level,
       container: newParams.container

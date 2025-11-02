@@ -47,7 +47,7 @@ class AvmSession < ApplicationRecord
 
   def expired?
     return false unless signing_started_at
-    Time.current > signing_started_at + 1.minutes # 1 minute timeout
+    Time.current > signing_started_at + 5.minutes # 5 minute timeout
   end
 
   def mark_completed!
