@@ -1,5 +1,5 @@
 class Api::V1::ContractsController < ApiController
-  before_action :set_contract, only: [ :show, :signed_document, :status ]
+  before_action :set_contract, only: [ :show, :signed_document, :status, :destroy ]
 
   def create
     contract = Contract.new(contract_params)
@@ -12,6 +12,14 @@ class Api::V1::ContractsController < ApiController
 
   def show
     render partial: "api/v1/contracts/contract", locals: { contract: @contract }
+  end
+
+  def destroy
+    if @contract.destroy
+      render head :no_content
+    else
+      render json: { errors: @contract.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def signed_document

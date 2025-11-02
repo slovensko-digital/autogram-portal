@@ -143,6 +143,27 @@ paths:
         404:
           description: Contract not found.
 
+    delete:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Delete a contract
+      description: Deletes a specific contract by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the contract.
+      responses:
+        204:
+          description: Contract successfully deleted.
+        404:
+          description: Contract not found.
+
   /contracts/{id}/signed_document:
     get:
       tags:
@@ -189,27 +210,6 @@ paths:
                     example: '2023-10-01T12:34:56Z'
         404:
           description: Contract or signed document not found.
-
-    delete:
-      tags:
-        - Integration
-      security:
-        - JWT: []
-      summary: Delete a contract
-      description: Deletes a specific contract by its ID.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            example: 69393b49-c34f-438f-ad7c-4b78db3932be
-          description: The unique identifier of the contract.
-      responses:
-        204:
-          description: Contract successfully deleted.
-        404:
-          description: Contract not found.
 
   /contracts/{id}/status:
     get:

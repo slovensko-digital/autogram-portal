@@ -9,10 +9,14 @@ class ApiController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
 
+  def current_user
+    @current_user
+  end
+
   private
 
   def authenticate_user!
-    current_user = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
+    @current_user = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
   rescue JWT::VerificationError, JWT::InvalidSubError => error
     render_unauthorized(error.message)
   end
