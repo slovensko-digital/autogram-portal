@@ -24,10 +24,7 @@ class AutogramService
     return error_result("Súbor nie je pripojený") unless document.blob.attached?
 
     begin
-      # Prepare the file data for the API call
       file_content = Base64.strict_encode64(document.content)
-
-      # Call the Autogram service
       response = call_autogram_validate_api(file_content)
 
       if response.success?
@@ -49,10 +46,7 @@ class AutogramService
     return error_result("Súbor nie je pripojený") unless document.blob.attached?
 
     begin
-      # Prepare the file data for the API call
       file_content = Base64.strict_encode64(document.content)
-
-      # Call the Autogram visualization service
       response = call_autogram_visualization_api(file_content, document)
 
       if response.success?
@@ -65,6 +59,24 @@ class AutogramService
 
       Rails.logger.warn "Autogram visualization service not available, using mock data: #{e.message}"
       mock_visualization_result(document)
+    end
+  end
+
+  def extend_signatures(document)
+    return nil if document.content.nil?
+
+    begin
+      file_content = Base64.strict_encode64(document.content)
+      response = call_autogram_extend_api(file_content)
+
+      raise "Chyba komunikácie s Autogram službou: #{response.status}" unless response.success?
+
+      data = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
+      Base64.decode64(data["content"])
+
+    rescue StandardError => e
+      Rails.logger.warn "Autogram extend signatures service not available: #{e.message}"
+      nil
     end
   end
 
@@ -107,6 +119,24 @@ class AutogramService
     }
 
     connection.post("/visualization", payload)
+  end
+
+  def call_autogram_extend_api(file_content)
+    connection = Faraday.new(url: AUTOGRAM_BASE_URL) do |faraday|
+      faraday.request :json
+      faraday.response :json
+      faraday.adapter Faraday.default_adapter
+      faraday.options.timeout = 30
+    end
+
+    payload = {
+      targetLevel: "T",
+      document: {
+        content: file_content
+      }
+    }
+
+    connection.post("/extend", payload)
   end
 
   def parse_validation_response(response_body)

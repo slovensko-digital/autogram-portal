@@ -44,6 +44,7 @@ Rails.application.routes.draw do
       get :visualize
       get :pdf_preview
       get :actions
+      get :download
       post :create_contract_from_document, as: "create_contract_from_document"
     end
   end

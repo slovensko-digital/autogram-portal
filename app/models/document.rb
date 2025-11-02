@@ -131,6 +131,19 @@ class Document < ApplicationRecord
     uuid.first(8)
   end
 
+  def extend_signatures!
+    extended_content = AutogramEnvironment.autogram_service.extend_signatures(self)
+
+    raise "No extended content received from Autogram service" if extended_content.nil?
+
+    blob.attach(
+      io: StringIO.new(extended_content),
+      filename: filename,
+      content_type: content_type
+    )
+    save!
+  end
+
   private
 
   def ensure_uuid

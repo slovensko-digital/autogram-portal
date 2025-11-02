@@ -4,15 +4,28 @@
       <div class="mx-auto flex max-w-full sm:max-w-3xl lg:ml-10 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
         <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
           <div class="w-full mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Document</h1>
-            <p class="mt-2 text-sm text-gray-500">Filename: <%= @document.filename %></p>
-            <% if @document.contract %>
-              <p class="text-gray-600">
-                Part of
-                <%= link_to "Contract ##{@document.contract.short_uuid}", contract_path(@document.contract), 
-                           class: "text-blue-600 hover:text-blue-800 font-medium" %>
-              </p>
-            <% end %>
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Document</h1>
+                <p class="mt-2 text-sm text-gray-500">Filename: <%= @document.filename %></p>
+                <% if @document.contract %>
+                  <p class="text-gray-600">
+                    Part of
+                    <%= link_to "Contract ##{@document.contract.short_uuid}", contract_path(@document.contract), 
+                               class: "text-blue-600 hover:text-blue-800 font-medium" %>
+                  </p>
+                <% end %>
+              </div>
+              <div class="flex-shrink-0">
+                <%= link_to download_document_path(@document), 
+                           class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download
+                <% end %>
+              </div>
+            </div>
           </div>
 
           <%= turbo_frame_tag "signature_validation_#{@document.uuid}", 

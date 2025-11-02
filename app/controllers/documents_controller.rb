@@ -54,7 +54,7 @@ class DocumentsController < ApplicationController
   end
 
   def pdf_preview
-    visualization_result = AutogramEnvironment.autogram_service.visualize_document(@document)
+    visualization_result = @document.visualize
     if visualization_result.is_a?(Hash) && visualization_result[:mime_type]&.include?("application/pdf")
       pdf_content = Base64.strict_decode64(visualization_result[:content])
       respond_to do |format|
@@ -70,6 +70,14 @@ class DocumentsController < ApplicationController
     end
   rescue StandardError
     head :unprocessable_entity
+  end
+
+  def download
+    if @document.blob.attached?
+      redirect_to rails_blob_path(@document.blob, disposition: "attachment"), allow_other_host: false
+    else
+      redirect_to document_path(@document), alert: "No file attached to this document."
+    end
   end
 
   def create_contract_from_document
@@ -116,7 +124,12 @@ class DocumentsController < ApplicationController
     return redirect_to document_path(@document), alert: "This document is already part of a contract." if @document.contract.present?
     return redirect_to document_path(@document), alert: "All signatures already have qualified timestamps." unless @document.extendable_signatures?
 
-    # TODO: extend signatures implementation
+    begin
+      @document.extend_signatures!
+      redirect_to document_path(@document), notice: "Signature extended successfully."
+    rescue => e
+      redirect_to document_path(@document), alert: "Failed to extend signatures: #{e.message}"
+    end
   end
 
   private
