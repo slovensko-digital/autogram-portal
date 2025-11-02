@@ -18,7 +18,7 @@ export default class extends Controller {
 
     try {
       if (typeof window.AutogramSDK === 'undefined') {
-        throw new Error('Autogram SDK nie je dostupné. Uistite sa, že je nainštalovaný.')
+        throw new Error('An error occurred while loading the Autogram SDK. Please ensure it is properly included in the page.')
       }
 
       let client
@@ -110,7 +110,7 @@ export default class extends Controller {
           window.location.reload()
         } else {
           const errorText = await response.text()
-          let errorMessage = 'Nastala chyba pri spracovaní podpísaného dokumentu.'
+          let errorMessage = 'An error occurred while submitting the signed document.'
           
           try {
             const errorData = JSON.parse(errorText)
@@ -129,7 +129,7 @@ export default class extends Controller {
       if (error.message && (error.message.includes('cancel') || error.message.includes('abort'))) {
         console.log('User cancelled signing')
       } else {
-        alert(`Nastala chyba pri podpisovaní: ${error.message}`)
+        alert(`An error occurred while signing: ${error.message}`)
       }
     } finally {
       this.setSigning(false)
@@ -208,7 +208,7 @@ export default class extends Controller {
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Prebieha podpisovanie...
+            Signing...
           </div>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -225,7 +225,7 @@ export default class extends Controller {
           <path stroke-linecap="round" stroke-linejoin="round"
                 d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/>
         </svg>
-        <span class="font-semibold">Podpísať v Autogram</span>
+        <span class="font-semibold">Autogram desktop</span>
       `
     }
   }

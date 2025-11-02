@@ -16,7 +16,7 @@ json.signatures @validation_result.signatures.flatten.map do |signature|
     json.timestamps signature.dig(:timestamp_info, :timestamps)&.map do |ts|
       json.type ts[:type]
       json.time ts[:time]&.iso8601
-      json.authority ts[:authority]
+      json.subject ts[:subject]
       json.qualification ts[:qualification]
     end
   end if signature[:timestamp_info].present?

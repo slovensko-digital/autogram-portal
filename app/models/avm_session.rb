@@ -41,8 +41,8 @@ class AvmSession < ApplicationRecord
   after_update_commit :broadcast_status_change
 
   def avm_url
-    # TODO: do not hardcode the base URL
-    "https://autogram.slovensko.digital/api/v1/qr-code?guid=#{document_id}&key=#{encryption_key}"
+    base_url = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital").chomp("/")
+    "#{base_url}/api/v1/qr-code?guid=#{document_id}&key=#{encryption_key}"
   end
 
   def expired?

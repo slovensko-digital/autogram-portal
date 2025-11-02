@@ -40,7 +40,7 @@
                 <div class="font-medium text-gray-900"><%= signature[:signer_name] %></div>
                 <div class="text-sm text-gray-600">
                   <% if signature[:timestamp_info] && signature[:timestamp_info][:qualified] %>
-                    <span> • Qualified Timestamp</span>
+                    <span>Qualified Timestamp</span>
                   <% else %>
                     <span><i>No timestamp</i></span>
                   <% end %>
@@ -65,7 +65,7 @@
               </div>
             </div>
             <details class="mt-2">
-              <summary class="text-sm text-blue-600 cursor-pointer hover:text-blue-800">Certificate details</summary>
+              <summary class="text-sm text-blue-600 cursor-pointer hover:text-blue-800">Signature details</summary>
               <div class="mt-2 text-sm text-gray-600 space-y-1">
                 <div><strong>Subject:</strong> <%= signature[:certificate_info][:subject] %></div>
                 <div><strong>Issuer:</strong> <%= signature[:certificate_info][:issuer] %></div>
@@ -79,10 +79,10 @@
                   <% signature[:timestamp_info][:timestamps].each do |timestamp| %>
                     <div class="ml-2 mt-1 text-sm text-gray-600">
                       <div>
-                        <strong><%= timestamp[:type] == 'SIGNATURE_TIMESTAMP' ? 'Podpis:' : 'Archív:' %></strong> 
+                        <strong><%= timestamp[:type] == 'SIGNATURE_TIMESTAMP' ? 'Time:' : 'Archived:' %></strong> 
                         <%= timestamp[:time]&.strftime('%d. %b %Y o %H:%M') %>
                       </div>
-                      <div><strong>Authority:</strong> <%= timestamp[:authority] %></div>
+                      <div><strong>Subject:</strong> <%= timestamp[:subject] %></div>
                       <% if timestamp[:qualification] %>
                         <div><strong>Qualification:</strong> <%= timestamp[:qualification] %></div>
                       <% end %>

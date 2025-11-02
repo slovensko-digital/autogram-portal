@@ -4,8 +4,8 @@ export default class extends Controller {
   static targets = ["dropzone", "fileInput", "documentsContainer", "submitButton", "fileName", "fileSize"]
   static classes = ["dragging", "uploading"]
   static values = { 
-    mode: String,  // 'single' for documents, 'contract' for contracts with hidden inputs
-    inputName: String  // for contract mode: base name like 'contract[documents_attributes]'
+    mode: String,
+    inputName: String
   }
 
   connect() {
@@ -79,7 +79,7 @@ export default class extends Controller {
       this.updateUI()
       this.updateSubmitButton()
     } else {
-      alert(`Súbor "${file.name}" nie je podporovaný. Povolené sú len PDF, XML a iné súbory.`)
+      alert(`File "${file.name}" is not supported. Allowed formats are PDF, XML, and other files.`)
     }
   }
 

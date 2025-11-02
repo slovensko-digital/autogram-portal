@@ -228,7 +228,7 @@ class ContractsController < ApplicationController
           {
             type: ts[:type],
             time: ts[:time]&.iso8601,
-            authority: ts[:authority],
+            subject: ts[:subject],
             qualification: ts[:qualification]
           }
         end
