@@ -12,7 +12,7 @@ class ContractsController < ApplicationController
   end
 
   def autogram_parameters
-    render partial: "api/v1/contracts/contract", locals: { contract: @contract }, formats: [:json]
+    render partial: "api/v1/contracts/contract", locals: { contract: @contract }, formats: [ :json ]
   end
 
   def sign
