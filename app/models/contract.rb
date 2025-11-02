@@ -87,21 +87,10 @@ class Contract < ApplicationRecord
   end
 
   def broadcast_signing_success
-    Turbo::StreamsChannel.broadcast_replace_to(
+    # Reload the entire page to update all elements after signing
+    Turbo::StreamsChannel.broadcast_action_to(
       "contract_#{uuid}",
-      target: "signature_actions_#{uuid}",
-      partial: "contracts/signature_actions",
-      locals: { contract: self }
-    )
-
-    Turbo::StreamsChannel.broadcast_prepend_to(
-      "contract_#{uuid}",
-      target: "flash_messages",
-      partial: "shared/flash_message",
-      locals: {
-        message: "Contract signed successfully.",
-        type: "notice"
-      }
+      action: :refresh
     )
 
     bundle.contract_signed(self) if bundle.present?
