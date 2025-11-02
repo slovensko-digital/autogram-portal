@@ -8,18 +8,22 @@
   - description: the description text below the label
   - checked: whether this option should be checked by default (optional, defaults to false)
   - form: the form builder object (optional, for form helpers)
+  - wrapper_class: additional CSS classes for the label wrapper (optional)
+  - data_attributes: hash of data attributes for the radio input (optional)
 %>
 
 <% 
   checked ||= false 
   form ||= nil
+  wrapper_class ||= ""
+  data_attributes ||= {}
 %>
 
-<label class="relative flex items-start space-x-3 p-3 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+<label class="relative flex items-start space-x-3 p-3 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
   <% if form %>
-    <%= form.radio_button name, value, checked: checked, class: "sr-only" %>
+    <%= form.radio_button name, value, { checked: checked, class: "sr-only", data: data_attributes } %>
   <% else %>
-    <%= radio_button_tag name, value, checked, class: "sr-only" %>
+    <%= radio_button_tag name, value, checked, { class: "sr-only", data: data_attributes } %>
   <% end %>
   
   <div class="flex-1">
@@ -27,7 +31,6 @@
     <div class="text-xs text-gray-500 mt-1"><%= description %></div>
   </div>
   
-  <!-- Checkmark icon for selected state -->
   <div class="hidden has-[:checked]:block absolute top-3 right-3">
     <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />

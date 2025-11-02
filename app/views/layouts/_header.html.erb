@@ -1,23 +1,60 @@
-<header class="bg-blue-800">
+<header class="bg-blue-800" x-data="{ mobileMenuOpen: false }">
   <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
     <div class="flex lg:flex-1">
       <a href="/" class="-m-1.5 p-1.5">
         <span class="text-3xl leading-8 font-bold text-white">Autogram Portal</span>
       </a>
     </div>
-    <div class="flex items-center gap-4">
+    <div class="hidden lg:flex items-center gap-4">
       <% if current_user %>
         <%= link_to 'Contracts', contracts_path,
             class: "text-sm font-semibold text-white hover:text-blue-100 transition-colors" %>
         <%= link_to current_user.email, edit_user_registration_path,
-            class: "text-sm text-blue-100 hover:text-white underline decoration-blue-100 hover:decoration-white transition-colors" %>
+            class: "text-sm text-white hover:text-white underline decoration-blue-100 hover:decoration-white transition-colors" %>
         <%= link_to 'Sign out', destroy_user_session_path,
             data: { turbo_method: :delete },
-            class: "rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-colors" %>
+            class: "rounded-md px-4 py-2 text-sm font-semibold bg-white text-blue-800 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors" %>
       <% else %>
         <%= link_to 'Sign in', new_user_session_path,
-            class: "rounded-md bg-white px-4 py-2 text-sm font-semibold text-blue-800 shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors" %>
+            class: "rounded-md px-4 py-2 text-sm font-semibold bg-white text-blue-800 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors" %>
       <% end %>
     </div>
+    <div class="flex lg:hidden">
+      <button type="button" 
+              @click="mobileMenuOpen = !mobileMenuOpen"
+              class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white">
+        <span class="sr-only">Toggle menu</span>
+        <svg x-show="!mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <svg x-show="mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display: none;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
   </nav>
+  <div x-show="mobileMenuOpen" 
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 -translate-y-1"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100 translate-y-0"
+       x-transition:leave-end="opacity-0 -translate-y-1"
+       class="lg:hidden"
+       style="display: none;">
+    <div class="space-y-4 px-6 pb-6 pt-2">
+      <% if current_user %>
+        <%= link_to 'Contracts', contracts_path,
+            class: "block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-blue-700 transition-colors" %>
+        <%= link_to current_user.email, edit_user_registration_path,
+            class: "block rounded-lg px-3 py-2 text-base text-white underline hover:bg-blue-700 transition-colors" %>
+        <%= link_to 'Sign out', destroy_user_session_path,
+            data: { turbo_method: :delete },
+            class: "block rounded-lg px-3 py-2 text-base font-semibold bg-white text-blue-800 hover:bg-blue-50 transition-colors" %>
+      <% else %>
+        <%= link_to 'Sign in', new_user_session_path,
+            class: "block rounded-lg px-3 py-2 text-base font-semibold bg-white text-blue-800 hover:bg-blue-50 transition-colors" %>
+      <% end %>
+    </div>
+  </div>
 </header>

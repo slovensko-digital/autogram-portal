@@ -1,22 +1,14 @@
 <main>
-  <div class="relative isolate overflow-hidden">
-    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:px-8 lg:pt-15">
-      <div class="mx-auto max-w-full">
-        <!-- Page Header -->
-        <div class="mb-8 text-center lg:text-left">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Documents</h1>
-          <p class="text-gray-600">Manage your uploaded documents for signing and validation.</p>
-        </div>
-
-        <!-- Actions -->
-        <div class="mb-6">
-          <%= link_to "Upload New Document", new_document_path, 
-                     class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-        </div>
-
-        <!-- Documents List -->
+  <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8">
+    <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
+      <div class="w-full mb-6 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-900">Documents</h1>
+        <%= link_to "Upload New Document", new_document_path, 
+                  class: "inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all duration-200" %>
+      </div>
+      <div class="w-full">
         <% if @documents.any? %>
-          <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <div class="bg-white  overflow-hidden sm:rounded-md">
             <ul role="list" class="divide-y divide-gray-200">
               <% @documents.each do |document| %>
                 <li>
@@ -30,8 +22,8 @@
                         </div>
                         <div class="ml-4">
                           <div class="flex items-center">
-                            <p class="text-sm font-medium text-indigo-600 truncate">
-                              <%= link_to document.filename, document_path(document), class: "hover:text-indigo-500" %>
+                            <p class="text-sm font-medium text-blue-600 truncate">
+                              <%= link_to document.filename, document_path(document), class: "hover:text-blue-500" %>
                             </p>
                           </div>
                           <div class="mt-1 flex items-center text-sm text-gray-500">
@@ -46,12 +38,10 @@
                         </div>
                       </div>
                       <div class="ml-4 flex-shrink-0 flex space-x-2">
-                        <%= link_to "View", document_path(document), 
-                                   class: "text-indigo-600 hover:text-indigo-500 text-sm font-medium" %>
-                        <%= link_to "Validate", validate_document_path(document), 
-                                   class: "text-green-600 hover:text-green-500 text-sm font-medium" %>
-                        <%= link_to "Visualize", visualize_document_path(document), 
-                                   class: "text-blue-600 hover:text-blue-500 text-sm font-medium" %>
+                        <%= link_to document_path(document), 
+                                  class: "inline-flex items-center px-3 py-2 border border-gray-300  text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+                          View
+                        <% end %>
                       </div>
                     </div>
                   </div>
@@ -68,7 +58,7 @@
             <p class="mt-1 text-sm text-gray-500">Get started by uploading a new document.</p>
             <div class="mt-6">
               <%= link_to "Upload Document", new_document_path, 
-                         class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                          class: "inline-flex items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
             </div>
           </div>
         <% end %>

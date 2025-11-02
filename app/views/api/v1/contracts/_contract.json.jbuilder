@@ -4,6 +4,8 @@ json.signature_parameters do
   json.container contract.signature_parameters&.container
   json.format contract.signature_parameters&.format
   json.level contract.signature_parameters&.level
+  json.en319132 contract.signature_parameters&.en319132
+  json.add_content_timestamp contract.signature_parameters&.add_content_timestamp
 end
 json.documents contract.documents, partial: "api/v1/documents/document", as: :document
 json.signed_document contract.signed_document, partial: "api/v1/contracts/signed_document", as: :signed_document unless contract.awaiting_signature?

@@ -6,6 +6,6 @@ class Api::V1::HelloController < ApiController
   end
 
   def show_auth
-    render json: { message: "Hello, #{ @current_user.id }!" }
+    render json: { message: "Hello, #{ current_user.id }!" }
   end
 end

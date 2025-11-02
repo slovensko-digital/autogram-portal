@@ -1,45 +1,37 @@
 <main>
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8 lg:pt-15">
+    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8">
       <div class="mx-auto flex max-w-full sm:max-w-3xl lg:ml-10 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
         <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
-          <!-- File Title -->
           <div class="w-full mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @document.filename %></h1>
-            <% if @document.contract %>
-              <p class="text-gray-600">
-                Part of contract: 
-                <%= link_to "Contract ##{@document.contract.id}", contract_path(@document.contract), 
-                           class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
-              </p>
-            <% end %>
-          </div>
-          <!-- Document Visualization -->
-          <div class="w-full" data-controller="pdf-reload">
-            <!-- Visualization content (Turbo Frame) -->
-            <%= turbo_frame_tag "document_visualization_#{@document.id}", 
-                                src: visualize_document_path(@document, t: Time.current.to_i),
-                                loading: "lazy",
-                                class: "rounded-lg min-h-[1000px]",
-                                data: { pdf_reload_target: "frame" } do %>
-              <!-- Loading state while Turbo Frame loads -->
-              <div class="p-4 h-[1000px] flex items-center justify-center">
-                <div class="flex items-center">
-                  <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span class="text-gray-600">Načítavam obsah dokumentu...</span>
-                </div>
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Document</h1>
+                <p class="mt-2 text-sm text-gray-500">Filename: <%= @document.filename %></p>
+                <% if @document.contract %>
+                  <p class="text-gray-600">
+                    Part of
+                    <%= link_to "Contract ##{@document.contract.short_uuid}", contract_path(@document.contract), 
+                               class: "text-blue-600 hover:text-blue-800 font-medium" %>
+                  </p>
+                <% end %>
               </div>
-            <% end %>
+              <div class="flex-shrink-0">
+                <%= link_to download_document_path(@document), 
+                           class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download
+                <% end %>
+              </div>
+            </div>
           </div>
-          <!-- Signature Validation Status -->
-          <%= turbo_frame_tag "signature_validation_#{@document.id}", 
+
+          <%= turbo_frame_tag "signature_validation_#{@document.uuid}", 
                               src: validate_document_path(@document),
                               loading: "lazy",
-                              class: "w-full" do %>
-            <!-- Loading state while Turbo Frame loads -->
+                              class: "w-full mb-6" do %>
             <div class="w-full">
               <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
                 <div class="flex items-center">
@@ -47,79 +39,26 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span class="text-gray-600">Overujem elektronické podpisy...</span>
+                  <span class="text-gray-600">Validating electronic signatures...</span>
                 </div>
               </div>
             </div>
           <% end %>
 
-          <!-- Create Contract from Document -->
-          <% unless @document.contract %>
+          <%= render 'visualization_with_toggle' %>
+          
+          <%= turbo_frame_tag "document_actions_#{@document.uuid}", 
+                              src: actions_document_path(@document),
+                              loading: "lazy",
+                              class: "w-full" do %>
             <div class="w-full mt-8">
-              <div class="bg-white shadow sm:rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                  <div class="mb-6 text-center lg:text-left">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Sign document</h3>
-                    <p class="text-gray-600">Choose signature format and method to create a contract and sign the document in the next step.</p>
-                  </div>
-
-                  <%= form_with url: create_contract_from_document_document_path(@document), method: :post, local: true, class: "space-y-6" do |form| %>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      <!-- Signature Format -->
-                      <div>
-                        <%= label_tag "format_container_combination", "Signature Format", class: "block text-sm font-medium text-gray-700 mb-3" %>
-                        <div class="space-y-3">
-                          <% 
-                            # Show PAdES only for PDF documents
-                            is_pdf = @document.content_type&.include?('application/pdf')
-                            signature_options = []
-                            
-                            if is_pdf
-                              signature_options << ['PAdES', 'PADES', 'Portable Document Format Advanced Electronic Signatures']
-                            end
-                            
-                            # Always show XAdES and CAdES options
-                            signature_options << ['XAdES + ASiC-E', 'XADES_ASICE', 'XML Advanced Electronic Signatures with Associated Signature Container']
-                            signature_options << ['CAdES + ASiC-E', 'CADES_ASICE', 'CMS Advanced Electronic Signatures with Associated Signature Container']
-                            
-                            default_value = is_pdf ? 'PADES' : 'XADES_ASICE'
-                          %>
-                          <% signature_options.each do |label, value, description| %>
-                            <%= render 'shared/radio_button_card', 
-                                  name: 'format_container_combination',
-                                  value: value,
-                                  label: label,
-                                  description: description,
-                                  checked: value == default_value %>
-                          <% end %>
-                        </div>
-                      </div>
-
-                      <!-- Allowed Signature Methods -->
-                      <div>
-                        <%= label_tag "allowed_method", "Allowed Signature Method", class: "block text-sm font-medium text-gray-700 mb-3" %>
-                        <div class="space-y-3">
-                          <% [
-                            ['QES', 'qes', 'Qualified Electronic Signature'],
-                            ['QES-TS', 'ts-qes', 'Qualified Electronic Signature with Timestamp']
-                          ].each do |label, value, description| %>
-                            <%= render 'shared/radio_button_card', 
-                                  name: 'allowed_method',
-                                  value: value,
-                                  label: label,
-                                  description: description,
-                                  checked: value == 'qes' %>
-                          <% end %>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-                      <%= submit_tag "Continue to document signing", 
-                                     class: "inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-                    </div>
-                  <% end %>
+              <div class="bg-white  sm:rounded-lg p-4">
+                <div class="flex items-center justify-center py-8">
+                  <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span class="text-gray-600">Loading document actions...</span>
                 </div>
               </div>
             </div>

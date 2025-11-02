@@ -43,8 +43,8 @@ class Contract < ApplicationRecord
   validates :uuid, presence: true, uniqueness: true
 
   before_validation :ensure_uuid, on: :create
+  before_validation :set_signature_level_for_ts_qes
 
-  # Use UUID in URLs instead of ID for security
   def to_param
     uuid
   end
@@ -57,26 +57,20 @@ class Contract < ApplicationRecord
   end
 
   def accept_signed_file(signed_file)
-    # Check if signed_file is a signed version of the original documents
+    # TODO: Check if signed_file is a signed version of the original documents
     # AutogramEnvironment.autogram_service.validate_signed_file(signed_file, documents.map(&:blob))
 
-    # Validate the signatures in the signed file
+    # TODO: Validate the signatures in the signed file
     # AutogramEnvironment.autogram_service.validate_signatures(signed_file, signature_parameters)
 
-    # If validation passes, attach the signed document
-    Rails.logger.info "Attaching signed document..."
     signed_document.attach(
       io: StringIO.new(Base64.decode64(signed_file)),
       filename: generate_signed_filename,
       content_type: generate_signed_conentent_type
     )
     save!
-    Rails.logger.info "Signed document attached successfully."
 
-    # Mark any active AVM sessions as completed
     avm_sessions.active.each(&:mark_completed!)
-
-    # Broadcast signing success for any signing method
     broadcast_signing_success
   end
 
@@ -100,7 +94,6 @@ class Contract < ApplicationRecord
       locals: { contract: self }
     )
 
-    # Also broadcast a success message
     Turbo::StreamsChannel.broadcast_prepend_to(
       "contract_#{uuid}",
       target: "flash_messages",
@@ -111,8 +104,11 @@ class Contract < ApplicationRecord
       }
     )
 
-    Rails.logger.info "Broadcasted signing success for contract #{uuid}."
     bundle.contract_signed(self) if bundle.present?
+  end
+
+  def short_uuid
+    uuid.first(8)
   end
 
   private
@@ -157,5 +153,16 @@ class Contract < ApplicationRecord
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
+  end
+
+  def set_signature_level_for_ts_qes
+    return unless allowed_methods.present?
+    return unless signature_parameters.present?
+
+    if allowed_methods.include?("ts-qes")
+      signature_parameters.level = "BASELINE_T"
+    elsif allowed_methods.include?("qes") && allowed_methods.exclude?("ts-qes")
+      signature_parameters.level = "BASELINE_B"
+    end
   end
 end

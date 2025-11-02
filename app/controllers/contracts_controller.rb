@@ -1,5 +1,5 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :iframe ]
+  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters ]
   skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign ]
 
   before_action :allow_iframe, only: [ :iframe ]
@@ -8,68 +8,11 @@ class ContractsController < ApplicationController
     @contracts = current_user.contracts.includes(:user, :documents).order(created_at: :desc)
   end
 
-  def new
-    @contract = Contract.new
-    @contract.signature_parameters = Ades::SignatureParameters.new
-  end
-
-  def create
-    # TODO check agree_to_policies
-
-    @contract = Contract.new_from_ui(contract_params)
-    @contract.user = current_user
-
-    # Set user and uuid for any documents
-    @contract.documents.each do |document|
-      document.user = @current_user
-      document.uuid = SecureRandom.uuid
-    end
-
-    if @contract.save
-      redirect_to edit_contract_path(@contract)
-    else
-      # Ensure signature_parameters is initialized for form re-rendering
-      @contract.signature_parameters ||= Ades::SignatureParameters.new
-      render :new, status: :unprocessable_entity
-    end
-  end
-
   def show
-    respond_to do |format|
-      format.html # renders show.html.erb
-      format.json do
-        # Provide contract data for signing
-        render json: {
-          id: @contract.id,
-          uuid: @contract.uuid,
-          documents: @contract.documents.map do |doc|
-            {
-              id: doc.id,
-              filename: doc.filename,
-              content_type: doc.blob.content_type,
-              download_url: rails_blob_url(doc.blob),
-              xdc_parameters: doc.xdc_parameters ? {
-                auto_load_eform: doc.xdc_parameters.auto_load_eform,
-                container_xmlns: doc.xdc_parameters.container_xmlns,
-                embed_used_schemas: doc.xdc_parameters.embed_used_schemas,
-                fs_form_identifier: doc.xdc_parameters.fs_form_identifier,
-                identifier: doc.xdc_parameters.identifier,
-                schema: doc.xdc_parameters.schema,
-                schema_identifier: doc.xdc_parameters.schema_identifier,
-                schema_mime_type: doc.xdc_parameters.schema_mime_type,
-                transformation: doc.xdc_parameters.transformation,
-                transformation_identifier: doc.xdc_parameters.transformation_identifier,
-                transformation_language: doc.xdc_parameters.transformation_language,
-                transformation_media_destination_type_description: doc.xdc_parameters.transformation_media_destination_type_description,
-                transformation_target_environment: doc.xdc_parameters.transformation_target_environment
-              } : nil
-            }
-          end,
-          allowed_methods: @contract.allowed_methods,
-          signature_parameters: @contract.signature_parameters
-        }
-      end
-    end
+  end
+
+  def autogram_parameters
+    render partial: "api/v1/contracts/contract", locals: { contract: @contract }, formats: [ :json ]
   end
 
   def sign
@@ -188,7 +131,7 @@ class ContractsController < ApplicationController
     end
 
     begin
-      validation_result = AutogramEnvironment.autogram_service.validate_signatures(document_to_validate)
+      validation_result = document_to_validate.validation_result
 
       respond_to do |format|
         format.html do
@@ -222,6 +165,14 @@ class ContractsController < ApplicationController
   def edit
   end
 
+  def update
+    if @contract.update(contract_params)
+      redirect_to @contract, notice: "Contract was successfully updated."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     @contract.destroy!
     redirect_to contracts_path, notice: "The contract and all its documents were successfully deleted."
@@ -246,7 +197,12 @@ class ContractsController < ApplicationController
   end
 
   def contract_params
-    params.require(:contract).permit(:uuid, documents_attributes: [ :blob, :_destroy ], signature_parameters_attributes: [ :format_container_combination, :add_content_timestamp ])
+    params.require(:contract).permit(
+      :uuid,
+      allowed_methods: [],
+      documents_attributes: [ :id, :blob, :_destroy ],
+      signature_parameters_attributes: [ :id, :format_container_combination, :add_content_timestamp ]
+    )
   end
 
   def signed_document_param
@@ -272,7 +228,7 @@ class ContractsController < ApplicationController
           {
             type: ts[:type],
             time: ts[:time]&.iso8601,
-            authority: ts[:authority],
+            subject: ts[:subject],
             qualification: ts[:qualification]
           }
         end

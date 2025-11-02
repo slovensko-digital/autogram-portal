@@ -38,6 +38,7 @@ class User < ApplicationRecord
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
   has_many :identities, dependent: :destroy
   has_many :contracts
+  has_many :documents
 
   def self.create_from_provider_data(auth)
     # Check if identity already exists

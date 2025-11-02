@@ -41,13 +41,13 @@ class AvmSession < ApplicationRecord
   after_update_commit :broadcast_status_change
 
   def avm_url
-    # TODO: do not hardcode the base URL
-    "https://autogram.slovensko.digital/api/v1/qr-code?guid=#{document_id}&key=#{encryption_key}"
+    base_url = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital").chomp("/")
+    "#{base_url}/api/v1/qr-code?guid=#{document_id}&key=#{encryption_key}"
   end
 
   def expired?
     return false unless signing_started_at
-    Time.current > signing_started_at + 1.minutes # 1 minute timeout
+    Time.current > signing_started_at + 5.minutes # 5 minute timeout
   end
 
   def mark_completed!
@@ -78,8 +78,8 @@ class AvmSession < ApplicationRecord
 
   def broadcast_signing_error(error_message)
     Turbo::StreamsChannel.broadcast_replace_to(
-      "contract_#{contract.id}",
-      target: "signature_actions_#{contract.id}",
+      "contract_#{contract.uuid}",
+      target: "signature_actions_#{contract.uuid}",
       partial: "contracts/signature_error",
       locals: {
         contract: contract,

@@ -39,7 +39,7 @@ class Api::V1::BundlesController < ApiController
   private
 
   def set_bundle
-    @bundle = @current_user.bundles.find_by(uuid: params[:id])
+    @bundle = current_user.bundles.find_by(uuid: params[:id])
     render json: { error: "Bundle not found" }, status: :not_found unless @bundle
   end
 
@@ -75,7 +75,7 @@ class Api::V1::BundlesController < ApiController
     )
 
     attributes = {
-      author: @current_user,
+      author: current_user,
       contracts_attributes: permitted_params[:contracts]&.map do |contract|
         {
           uuid: contract[:id],

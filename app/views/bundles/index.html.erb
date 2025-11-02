@@ -1,88 +1,76 @@
 <main>
-  <div class="relative isolate overflow-hidden">
-    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8 lg:pt-15">
-      <div class="mx-auto mt-16 flex max-w-full sm:max-w-3xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-16 lg:max-w-none lg:flex-none xl:ml-32">
-        <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
-          <!-- Page Header -->
-          <div class="w-full mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Contract Bundles</h1>
-          </div>
-
-          <!-- Bundles List -->
-          <div class="w-full">
-            <% if @bundles.any? %>
-              <div class="bg-white shadow overflow-hidden sm:rounded-md">
-                <ul role="list" class="divide-y divide-gray-200">
-                  <% @bundles.each do |bundle| %>
-                    <li>
-                      <div class="px-4 py-4 flex items-center justify-between">
-                        <div class="flex items-center min-w-0 flex-1">
-                          <div class="flex-shrink-0">
-                            <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                            </svg>
-                          </div>
-                          <div class="ml-4 flex-1 min-w-0">
-                            <div class="flex items-center">
-                              <%= link_to bundle_path(bundle), class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" do %>
-                                Bundle #<%= bundle.id %>
-                              <% end %>
-                              <% if bundle.uuid %>
-                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                  <%= bundle.uuid.first(8) %>
-                                </span>
-                              <% end %>
-                              <% if bundle.completed? %>
-                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  Completed
-                                </span>
-                              <% else %>
-                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  Awaiting Signature
-                                </span>
-                              <% end %>
-                            </div>
-                            <div class="mt-1 flex items-center">
-                              <p class="text-sm text-gray-500">
-                                <% if bundle.contracts.any? %>
-                                  <%= bundle.contracts.count %> <%= bundle.contracts.count == 1 ? 'contract' : 'contracts' %>
-                                <% else %>
-                                  No contracts
-                                <% end %>
-                                <% if bundle.author %>
-                                  • <%= bundle.author.email rescue 'Unknown user' %>
-                                <% end %>
-                              </p>
-                            </div>
-                            <div class="mt-1">
-                              <p class="text-xs text-gray-400">
-                                Created: <%= bundle.created_at.strftime("%d.%m.%Y %H:%M") %>
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                          <%= link_to bundle_path(bundle), 
-                                      class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-                            View
+  <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8">
+    <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
+      <div class="w-full mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Contract Bundles</h1>
+      </div>
+      <div class="w-full">
+        <% if @bundles.any? %>
+          <div class="bg-white overflow-hidden sm:rounded-md">
+            <ul role="list" class="divide-y divide-gray-200">
+              <% @bundles.each do |bundle| %>
+                <li>
+                  <div class="px-4 py-4 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <div class="flex-shrink-0">
+                        <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                      </div>
+                      <div class="ml-4 flex-1 min-w-0">
+                        <div class="flex items-center">
+                          <%= link_to bundle_path(bundle), class: "text-sm font-medium text-blue-600 hover:text-blue-500" do %>
+                            <%= bundle.uuid %>
+                          <% end %>
+                          <% if bundle.completed? %>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Completed
+                            </span>
+                          <% else %>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Awaiting Signature
+                            </span>
                           <% end %>
                         </div>
+                        <div class="mt-1 flex items-center">
+                          <p class="text-sm text-gray-500">
+                            <% if bundle.contracts.any? %>
+                              <%= bundle.contracts.count %> <%= bundle.contracts.count == 1 ? 'contract' : 'contracts' %>
+                            <% else %>
+                              No contracts
+                            <% end %>
+                            <% if bundle.author %>
+                              • <%= bundle.author.email rescue 'Unknown user' %>
+                            <% end %>
+                          </p>
+                        </div>
+                        <div class="mt-1">
+                          <p class="text-xs text-gray-400">
+                            Created: <%= bundle.created_at.strftime("%d.%m.%Y %H:%M") %>
+                          </p>
+                        </div>
                       </div>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
-            <% else %>
-              <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No bundles</h3>
-                <p class="mt-1 text-sm text-gray-500">Bundles are created via API.</p>
-              </div>
-            <% end %>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <%= link_to bundle_path(bundle), 
+                                  class: "inline-flex items-center px-3 py-2 border border-gray-300  text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+                        View
+                      <% end %>
+                    </div>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
           </div>
-        </div>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No bundles</h3>
+            <p class="mt-1 text-sm text-gray-500">Bundles are created via API.</p>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

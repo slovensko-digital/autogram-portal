@@ -33,6 +33,10 @@ module Ades
     validates :add_content_timestamp, inclusion: { in: [ true, false ] }
     validate :validate_parameters_combination
 
+    PADES = [ "PAdES", "PADES", "Portable Document Format Advanced Electronic Signatures" ]
+    XADES_ASICE = [ "XAdES + ASiC-E", "XADES_ASICE", "XML Advanced Electronic Signatures with Associated Signature Container" ]
+    CADES_ASICE = [ "CAdES + ASiC-E", "CADES_ASICE", "CMS Advanced Electronic Signatures with Associated Signature Container" ]
+
     def format_container_combination
       case [ format, container ]
       when [ "PAdES", nil ]
@@ -73,7 +77,7 @@ module Ades
 
       if format == "PAdES"
         errors.add(:format, "must not be PAdES when signing multiuple documents (container ASiC_E is required)") if contract.documents.size > 1
-        errors.add(:format, "must not be PAdES when document is not PDF") if contract.documents.any? { |d| !d.blob.content_type.include?("application/pdf") }
+        errors.add(:format, "must not be PAdES when document is not PDF") if contract.documents.any? { |d| !d.is_pdf? }
       end
     end
 

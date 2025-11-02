@@ -28,17 +28,25 @@ Rails.application.routes.draw do
   resources :privacy_policy, only: [ :index ]
   resources :terms_of_service, only: [ :index ]
 
-  resources :documents, only: [ :index, :new, :create, :show ] do
+  authenticate(:user) do
+    resources :contracts, only: [ :index, :destroy, :edit, :update ]
+    resources :documents, only: [ :index ] do
+      member do
+        post :extend_signatures
+      end
+    end
+    resources :bundles, only: [ :index, :edit, :update, :destroy ]
+  end
+
+  resources :documents, only: [ :new, :create, :show ] do
     member do
       get :validate
       get :visualize
       get :pdf_preview
-      post "create_contract_from_document", as: "create_contract_from_document"
+      get :actions
+      get :download
+      post :create_contract_from_document, as: "create_contract_from_document"
     end
-  end
-
-  authenticate(:user) do
-    resources :contracts, only: [ :index, :new, :create, :destroy, :edit ]
   end
 
   resources :contracts, only: [ :show ] do
@@ -49,10 +57,11 @@ Rails.application.routes.draw do
       get :visualize
       get :signed_document
       get :iframe
+      get :autogram_parameters
     end
   end
 
-  resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
+  resources :bundles, only: [ :show ] do
     member do
       get :iframe
     end

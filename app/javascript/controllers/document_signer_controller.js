@@ -3,16 +3,11 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["form", "submitButton"]
   static values = { 
-    contractParam: String,
-    useTimestamp: Boolean 
+    contractParam: String
   }
 
   connect() {
     this.signing = false
-  }
-
-  useTimestampValueChanged() {
-    console.log('Timestamp value changed to:', this.useTimestampValue)
   }
 
   async signAutogram(event) {
@@ -23,7 +18,7 @@ export default class extends Controller {
 
     try {
       if (typeof window.AutogramSDK === 'undefined') {
-        throw new Error('Autogram SDK nie je dostupné. Uistite sa, že je nainštalovaný.')
+        throw new Error('An error occurred while loading the Autogram SDK. Please ensure it is properly included in the page.')
       }
 
       let client
@@ -34,20 +29,20 @@ export default class extends Controller {
         throw new Error('No suitable Autogram client found. Available properties: ' + Object.keys(window.AutogramSDK).join(', '))
       }
 
-      const contractResponse = await fetch(this.contractParamValue, {
+      const autogramParametersResponse = await fetch(this.contractParamValue + '/autogram_parameters', {
         headers: {
           'Accept': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
       })
       
-      if (!contractResponse.ok) {
+      if (!autogramParametersResponse.ok) {
         throw new Error('Failed to load contract data from server.')
       }
       
-      const contract = await contractResponse.json()
+      const autogramParameters = await autogramParametersResponse.json()
 
-      for (let doc of contract.documents) {
+      for (let doc of autogramParameters.documents) {
         doc.contentPromise = Promise.resolve(doc.content);
         
         if (doc.download_url) {
@@ -61,7 +56,7 @@ export default class extends Controller {
         }
       }
 
-      for (let doc of contract.documents) {
+      for (let doc of autogramParameters.documents) {
         let content = await doc.contentPromise;
 
         if (doc.content_type.includes('base64')) {
@@ -73,28 +68,23 @@ export default class extends Controller {
       }
 
       let signRequestDocument = {
-        content: contract.documents[0].content
+        content: autogramParameters.documents[0].content
       }
 
-      if (contract.documents[0].filename)
-        signRequestDocument.filename = contract.documents[0].filename;
-
-      const useTimestamp = this.useTimestampValue
-
-      console.log('document 0:', contract.documents[0])
+      if (autogramParameters.documents[0].filename)
+        signRequestDocument.filename = autogramParameters.documents[0].filename;
 
       let signRequestSignatureParameters = this.getOldSignatureParameters(
-        contract.signature_parameters, 
-        contract.documents[0].xdc_parameters,
-        useTimestamp
+        autogramParameters.signature_parameters, 
+        autogramParameters.documents[0].xdc_parameters
       );
 
-      console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, contract.documents[0].content_type)
+      console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, autogramParameters.documents[0].content_type)
 
       const signResult = await client.signOnDesktop(
         signRequestDocument,
         signRequestSignatureParameters,
-        contract.documents[0].content_type
+        autogramParameters.documents[0].content_type
       );
 
       if (signResult && signResult.content) {
@@ -120,7 +110,7 @@ export default class extends Controller {
           window.location.reload()
         } else {
           const errorText = await response.text()
-          let errorMessage = 'Nastala chyba pri spracovaní podpísaného dokumentu.'
+          let errorMessage = 'An error occurred while submitting the signed document.'
           
           try {
             const errorData = JSON.parse(errorText)
@@ -139,17 +129,14 @@ export default class extends Controller {
       if (error.message && (error.message.includes('cancel') || error.message.includes('abort'))) {
         console.log('User cancelled signing')
       } else {
-        alert(`Nastala chyba pri podpisovaní: ${error.message}`)
+        alert(`An error occurred while signing: ${error.message}`)
       }
     } finally {
       this.setSigning(false)
     }
   }
 
-  getOldSignatureParameters(newParams, xdcParams, useTimestamp = false) {
-    if (useTimestamp)
-      newParams.level = "BASELINE_T";
-
+  getOldSignatureParameters(newParams, xdcParams) {
     let result = {
       level: newParams.format + "_" + newParams.level,
       container: newParams.container
@@ -221,7 +208,7 @@ export default class extends Controller {
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Prebieha podpisovanie...
+            Signing...
           </div>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -238,7 +225,7 @@ export default class extends Controller {
           <path stroke-linecap="round" stroke-linejoin="round"
                 d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/>
         </svg>
-        <span class="font-semibold">Podpísať v Autogram</span>
+        <span class="font-semibold">Autogram desktop</span>
       `
     }
   }

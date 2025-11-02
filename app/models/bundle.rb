@@ -64,6 +64,10 @@ class Bundle < ApplicationRecord
     webhook.fire_contract_signed(contract) if webhook.present?
   end
 
+  def short_uuid
+    uuid.first(8)
+  end
+
   private
 
   def ensure_uuid
