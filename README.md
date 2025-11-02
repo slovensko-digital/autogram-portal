@@ -1,8 +1,37 @@
 # Autogram Portal
 
-Web application for managing digital signatures and document contracts.
+Web application for managing digital signatures.
 
-**Staging:** [agp.dev.slovensko.digital](https://agp.dev.slovensko.digital)
+Other electronic document signing platforms often lack support for advanced or qualified electronic signatures available under the EU's eIDAS standard, relying instead on simpler signatures without stronger legal validity. Our eIDAS-compatible signing portal addresses this gap by providing an open-source user-friendly platform for creating qualified electronic signatures using government-issued eID cards and other qualified signature creation devices.
+
+Unlike existing alternatives, our project will integrate seamlessly with desktop and mobile signer applications, both open-source and commercial, enabling intuitive qualified document signing, validation, archiving, and API integration with third-party systems. Instances are planned to behave federatively and exchange documents simplifying the adoption of qualified electronic signatures across Europe, reducing reliance on proprietary solutions, and improving digital administrative workflows.
+
+
+**Demo:** [agp.dev.slovensko.digital](https://agp.dev.slovensko.digital)
+
+## What It Does
+
+Autogram Portal provides comprehensive electronic signature management for individuals, organizations, and integrators:
+
+### For Unregistered Users
+- **Sign Documents** - Upload and sign documents using Autogram Desktop or Mobile
+- **Verify Signatures** - Validate existing electronic signatures
+- **View Document Contents** - Visualize ASiC-E containers and Slovak XML Datacontainers (special XML format for eGovernment)
+- **Share for Signing** - Generate shareable URLs for others to sign your documents
+
+### For Registered Users
+Sign in via **Google OAuth2** or **email magic link** to access:
+- **Manage Contracts** - Store and organize contracts in your profile
+- **Track Signature Status** - Monitor pending and completed signatures
+- **Extend Signatures** - Add timestamps to existing signatures for long-term validity
+- **Email Notifications** *(coming soon)* - Send contracts for signature via email
+
+### For Integrators (API)
+- **Create Bundles** - Programmatically create bundles of contracts via API
+- **Embed Signing** - Integrate signing UI into your app using JavaScript SDK
+- **Webhook Notifications** - Receive real-time updates when documents are signed
+- **Manage Documents** - Upload, track, download, and delete signed documents
+
 
 ## Tech Stack
 
