@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { isMobileDevice } from "utils/device_detection"
 
 export default class extends Controller {
-  static targets = ["button"]
+  static targets = ["submitButton"]
 
   connect() {
     console.log("AVM signer controller connected")
@@ -107,7 +107,7 @@ export default class extends Controller {
   }
 
   setButtonLoading(loading) {
-    const button = this.buttonTarget
+    const button = this.submitButtonTarget
     if (loading) {
       button.disabled = true
       button.innerHTML = `
