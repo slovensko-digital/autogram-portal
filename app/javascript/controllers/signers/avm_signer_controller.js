@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { isMobileDevice } from "utils/device_detection"
+import { isActualMobileDevice } from "utils/device_detection"
 
 export default class extends Controller {
   static targets = ["submitButton"]
@@ -10,7 +10,7 @@ export default class extends Controller {
 
   sign(event) {
     event.preventDefault()
-    if (isMobileDevice()) {
+    if (isActualMobileDevice()) {
       this.setButtonLoading(true)
       this.submitAndRedirect()
     } else {
