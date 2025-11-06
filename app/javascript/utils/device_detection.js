@@ -8,3 +8,12 @@ export function isMobileDevice() {
 
   return isMobileUA || (isTouchDevice && isSmallScreen && hasMobileFeatures)
 }
+
+export function isActualMobileDevice() {
+  // Check only user agent to determine if it's truly a mobile device
+  // This is useful for features that should behave differently on desktop vs mobile
+  // regardless of screen size (e.g., in narrow iframes)
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera
+  const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+  return mobileRegex.test(userAgent)
+}
