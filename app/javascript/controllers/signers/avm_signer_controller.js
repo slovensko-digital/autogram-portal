@@ -9,10 +9,11 @@ export default class extends Controller {
   }
 
   sign(event) {
+    event.preventDefault()
     if (isMobileDevice()) {
-      console.log("Mobile device detected, handling AVM signing directly")
-      event.preventDefault()
       this.setButtonLoading(true)
+      this.submitAndRedirect()
+    } else {
       this.submitAndRedirect()
     }
   }
@@ -103,7 +104,21 @@ export default class extends Controller {
 
   showError(message) {
     this.setButtonLoading(false)
+    this.resetParentSignButton()
     alert(message)
+  }
+
+  resetParentSignButton() {
+    const parentElement = this.element.closest('[data-controller*="signature-method-selector"]')
+    if (parentElement) {
+      const controller = this.application.getControllerForElementAndIdentifier(
+        parentElement, 
+        'signature-method-selector'
+      )
+      if (controller && typeof controller.setSignButtonLoading === 'function') {
+        controller.setSignButtonLoading(false)
+      }
+    }
   }
 
   setButtonLoading(loading) {
