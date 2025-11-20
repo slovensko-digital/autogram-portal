@@ -25,28 +25,5 @@ module AutogramPortal
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.active_job.queue_adapter = :good_job
-
-    # CORS configuration for iframe embedding
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        origins "https://" + ENV.fetch("APP_HOST", "example.com")
-        resource "*",
-          headers: :any,
-          methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
-          credentials: true,
-          expose: [ "Authorization" ]
-      end
-
-      # Allow localhost for development
-      if Rails.env.development?
-        allow do
-          origins "*"
-          resource "*",
-            headers: :any,
-            methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
-            credentials: true
-        end
-      end
-    end
   end
 end
