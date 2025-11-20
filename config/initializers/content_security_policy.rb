@@ -12,7 +12,8 @@ Rails.application.configure do
     policy.object_src  :none
     policy.script_src  :self, :https
     policy.style_src   :self, :https, :unsafe_inline
-    policy.connect_src :self, :https, "http://localhost:37200" if Rails.env.development?
+    # Allow connections to Autogram desktop app running on client machines
+    policy.connect_src :self, :https, "http://localhost:37200"
 
     # Allow framing from specific origins
     app_host = ENV["APP_HOST"]
