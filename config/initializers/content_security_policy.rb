@@ -10,7 +10,8 @@ Rails.application.configure do
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data, :blob
     policy.object_src  :none
-    policy.script_src  :self, :https
+    # Allow unsafe-eval for Alpine.js and unsafe-inline for inline scripts/event handlers
+    policy.script_src  :self, :https, :unsafe_eval, :unsafe_inline
     policy.style_src   :self, :https, :unsafe_inline
     # Allow connections to Autogram desktop app running on client machines
     policy.connect_src :self, :https, "http://localhost:37200"
