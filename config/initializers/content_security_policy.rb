@@ -9,7 +9,8 @@ Rails.application.configure do
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data, :blob
-    policy.object_src  :none
+    # Allow object/embed tags for PDF previews
+    policy.object_src  :self
     # Allow unsafe-eval for Alpine.js and unsafe-inline for inline scripts/event handlers
     policy.script_src  :self, :https, :unsafe_eval, :unsafe_inline
     policy.style_src   :self, :https, :unsafe_inline
@@ -29,7 +30,8 @@ Rails.application.configure do
 
   # Generate session nonces for permitted importmap, inline scripts, and inline styles.
   config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
-  config.content_security_policy_nonce_directives = %w(script-src style-src)
+  # Only use nonce for script-src since we're using unsafe-inline for styles
+  config.content_security_policy_nonce_directives = %w(script-src)
 
   # Report violations without enforcing the policy in development.
   config.content_security_policy_report_only = true if Rails.env.development?
