@@ -25,6 +25,49 @@ sk:
         remember_me: "Zapamätať si ma"
         or_continue_with: "Alebo pokračovať s"
         sign_in_with_google: "Prihlásiť sa cez Google"
+    registrations:
+      new:
+        sign_up: "Registrovať sa"
+        subtitle: "Vytvorte si nový účet."
+      edit:
+        title: "Upraviť %{resource}"
+        subtitle: "Aktualizujte informácie o svojom účte."
+        name: "Meno"
+        email: "Email"
+        api_token_public_key: "Verejný kľúč API tokenu"
+        api_token_help: "Toto je váš verejný kľúč API tokenu pre autentifikáciu."
+        currently_waiting_confirmation_for_email: "Momentálne čakáme na potvrdenie pre: %{email}"
+        update: "Aktualizovať"
+        cancel_my_account: "Zrušiť môj účet"
+        unhappy: "Nespokojný?"
+        are_you_sure: "Ste si istý?"
+    confirmations:
+      new:
+        resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"
+        subtitle: "Nedostali ste potvrdzovací e-mail? Pošleme ho znova."
+    unlocks:
+      new:
+        resend_unlock_instructions: "Znovu poslať inštrukcie na odomknutie"
+        subtitle: "Požiadajte o inštrukcie na odomknutie, aby ste získali prístup k svojmu účtu."
+    mailer:
+      unlock_instructions:
+        greeting: "Dobrý deň %{recipient}!"
+        message: "Váš účet bol uzamknutý kvôli nadmernému počtu neúspešných pokusov o prihlásenie."
+        instruction: "Kliknutím na odkaz nižšie odomknete svoj účet:"
+        action: "Odomknúť môj účet"
+      email_changed:
+        greeting: "Dobrý deň %{recipient}!"
+        message: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail bol zmenený na %{email}."
+        message_unconfirmed: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail sa mení na %{email}."
+      confirmation_instructions:
+        greeting: "Vitajte %{recipient}!"
+        instruction: "Svoj e-mail môžete potvrdiť kliknutím na odkaz nižšie:"
+        action: "Potvrdiť môj účet"
+      magic_link:
+        greeting: "Dobrý deň %{recipient}!"
+        instruction: "Prihlásiť sa môžete pomocou odkazu nižšie:"
+        action: "Prihlásiť sa do môjho účtu"
+        expiry_notice: "Upozorňujeme, že platnosť odkazu vyprší za %{expiry}."
     shared:
       links:
         sign_in: "Prihlásiť sa"
@@ -43,6 +86,292 @@ sk:
       ades: "ADES"
       ses: "SES"
   
+  documents:
+    index:
+      title: "Dokumenty"
+      upload_new: "Nahrať nový dokument"
+      uploaded_ago: "Nahraté pred %{time}"
+      by: "užívateľom %{name}"
+      view: "Zobraziť"
+      no_documents_title: "Žiadne dokumenty"
+      no_documents_message: "Začnite nahratím nového dokumentu."
+      upload_document: "Nahrať dokument"
+    new:
+      title: "Nový dokument"
+      subtitle: "Nahrajte dokument na podpísanie alebo overenie."
+      help_text: "Môžete nahrať PDF, XML alebo iné súbory a podpísať ich v ďalšom kroku."
+      errors_title: "Pri vytváraní dokumentu sa vyskytli chyby:"
+      document_details_title: "Podrobnosti dokumentu"
+      document_details_text: "Nahrajte jeden dokument, s ktorým chcete pracovať. Môžete overiť podpisy, vizualizovať obsah alebo ho použiť na podpisovanie."
+      agree_to_policies: "Súhlasím s %{link}"
+      policies_link: "zásadami, pravidlami a podmienkami"
+      upload_document: "Nahrať dokument"
+      cancel: "Zrušiť"
+    show:
+      title: "Dokument"
+      filename: "Názov súboru: %{filename}"
+      part_of_contract: "Súčasť zmluvy"
+      download: "Stiahnuť"
+      validating_signatures: "Overovanie elektronických podpisov..."
+      loading_actions: "Načítavam akcie dokumentu..."
+    actions:
+      sign_title: "Podpísať dokument"
+      sign_subtitle: "Vyberte formát podpisu a metódu na vytvorenie zmluvy a podpísanie dokumentu v ďalšom kroku."
+      signature_format: "Formát podpisu"
+      allowed_method: "Povolená metóda podpisu"
+      continue_signing: "Pokračovať na podpisovanie dokumentu"
+      add_timestamp_title: "Pridať časovú pečiatku"
+      add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
+      add_timestamp_button: "Pridať časovú pečiatku k podpisom"
+    actions_error:
+      title: "Chyba pri načítavaní akcií dokumentu"
+    visualize:
+      image_preview: "Náhľad obrázka"
+      pdf_load_error: "PDF sa nepodarilo načítať v prehliadači."
+      download_pdf: "Stiahnuť PDF"
+      preview_not_supported: "Náhľad dokumentu nie je podporovaný pre tento typ súboru (%{type})"
+    visualize_error:
+      title: "Nepodarilo sa načítať obsah dokumentu"
+      trust_warning: "Pred pokračovaním sa uistite, že dôverujete zdroju tohto dokumentu."
+    visualization_with_toggle:
+      hide_preview: "Skryť náhľad dokumentu"
+      show_preview: "Zobraziť náhľad dokumentu"
+      loading_content: "Načítavam obsah dokumentu..."
+  
+  bundles:
+    index:
+      title: "Balíky zmlúv"
+      completed: "Dokončené"
+      awaiting_signature: "Čaká na podpis"
+      contract: "zmluva"
+      contracts: "zmluvy"
+      no_contracts: "Žiadne zmluvy"
+      unknown_user: "Neznámy používateľ"
+      created: "Vytvorené"
+      view: "Zobraziť"
+      no_bundles_title: "Žiadne balíky"
+      no_bundles_message: "Balíky sa vytvárajú cez API."
+    show:
+      all_bundles: "Všetky balíky"
+      title: "Balík"
+      uuid: "UUID: %{uuid}"
+      contract_number: "Zmluva %{current} z %{total}"
+      signed: "Podpísané"
+      open_separately: "Otvoriť samostatne →"
+    iframe:
+      title: "Balík zmlúv"
+      subtitle: "Prosím, podpíšte všetky zmluvy v balíku"
+      contract_number: "Zmluva %{current} z %{total}"
+      signed: "Podpísané"
+    status:
+      all_signed: "Všetky zmluvy podpísané"
+      signed_count: "Podpísaných %{signed} z %{total}"
+  
+  contracts:
+    index:
+      title: "Zmluvy"
+      upload_document: "Nahrať dokument"
+      signed: "Podpísané"
+      no_documents: "Žiadne dokumenty"
+      unknown_user: "Neznámy používateľ"
+      created_at: "Vytvorené"
+      download: "Stiahnuť"
+      view: "Zobraziť"
+      no_contracts_title: "Zatiaľ žiadne zmluvy"
+      no_contracts_message: "Začnite nahratím dokumentu."
+    show:
+      all_contracts: "Všetky zmluvy"
+      title: "Zmluva"
+      uuid: "UUID: %{uuid}"
+      part_of_bundle: "Súčasť %{link}"
+      download: "Stiahnuť"
+      edit_contract: "Upraviť zmluvu"
+    edit:
+      title: "Upraviť zmluvu"
+      uuid: "UUID: %{uuid}"
+      signature_parameters_title: "Parametre podpisu"
+      signature_parameters_subtitle: "Nakonfigurujte formát podpisu a povolené metódy podpisu pre túto zmluvu."
+      signature_format_label: "Formát podpisu"
+      signature_method_label: "Metóda podpisu"
+      documents_title: "Dokumenty"
+      documents_subtitle: "Dokumenty priradené k tejto zmluve."
+      no_documents: "Žiadne dokumenty priradené k tejto zmluve."
+      destroy_contract: "Zmazať zmluvu"
+      destroy_confirm: "Ste si istý, že chcete vymazať túto zmluvu? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tejto zmluve."
+      cancel: "Zrušiť"
+      update_contract: "Aktualizovať zmluvu"
+    signature_actions:
+      select_signing_app: "Vyberte aplikáciu na podpisovanie"
+      autogram_desktop_label: "Autogram Desktop"
+      autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronick podpisov pomocou eID kariet a iných zariadení"
+      autogram_mobile_label: "Autogram v Mobile"
+      autogram_mobile_description: "Mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
+      sign: "Podpísať"
+      signed_title: "Dokumenty boli podpísané"
+      signed_message: "Táto zmluva bola podpísaná a je dokončená. Nie je potrebný žiadny ďalší podpis."
+    autogram_signing_in_progress:
+      title: "Podpisovanie s Autogram Desktop"
+      subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram Desktop"
+      step1: "Aplikácia Autogram Desktop by sa mala automaticky otvoriť"
+      step2: "Postupujte podľa pokynov v aplikácii, aby ste dokončili podpisovanie"
+      step3: "Táto stránka sa automaticky aktualizuje po dokončení podpisovania"
+      note: "Uistite sa, že je aplikácia Autogram Desktop nainštalovaná a spustená"
+      cancel: "Zrušiť"
+    avm_signing_pending:
+      scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
+      scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
+      copy_url: "Alebo skopírujte URL manuálne:"
+      note_desktop: "Na mobile: Naskenujte QR kód alebo naň klepnite"
+      note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
+      expiry: "Platnosť podpisovania vyprší o 10 minút"
+      cancel: "Zrušiť operáciu"
+    signature_error:
+      title: "Chyba pri podpisovaní dokumentu"
+      close: "Zavrieť"
+    download_actions:
+      message: "Tento dokument bol podpísaný a je pripravený na stiahnutie."
+      download_button: "Stiahnuť podpísaný dokument"
+    documents_preview:
+      loading: "Načítavam obsah dokumentu..."
+    signature_validation:
+      validating: "Overovanie elektronických podpisov..."
+  
+  homepage:
+    index:
+      hero:
+        title: "Kvalifikované elektronické podpisy"
+        title_highlight: "jednoducho"
+        description_html: "<span class=\"font-semibold text-gray-900\">Open-source platforma</span> pre správu <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-kompatibilných</span> elektronických podpisov. <span class=\"font-semibold text-gray-900\">Posielajte dokumenty</span> na podpis, <span class=\"font-semibold text-gray-900\">integrujte pracovné postupy</span> cez <span class=\"font-semibold text-gray-900\">API alebo vložený iframe</span> a <span class=\"font-semibold text-gray-900\">bezproblémovo sa pripojte</span> k viacerým podpisovacím aplikáciám."
+        view_on_github: "Zobraziť na GitHube"
+      upload_form:
+        title: "Nahrajte svoj dokument"
+        subtitle: "Presuňte a pusťte alebo kliknite pre výber"
+        file_types_hint: "Podporované sú formáty PDF, XML, ASiC-E a iné"
+        uploading_text: "Nahrávanie..."
+        drop_text: "Pustiť sem"
+        agree_to_policies_html: "Súhlasím s %{terms_link} a %{privacy_link}"
+        terms_of_service: "Obchodnými podmienkami"
+        privacy_policy: "Zásadami ochrany osobných údajov"
+        submit: "Nahrať a pokračovať"
+      start_using:
+        title: "Začnite používať Autogram Portal dnes"
+        subtitle: "Vyberte si, ako chcete pracovať — s účtom alebo bez neho"
+        no_account:
+          title: "Na začatie nie je potrebný účet"
+          description: "Nahrávajte dokumenty, prezerajte obsah, overujte podpisy a zdieľajte odkazy na podpisovanie — všetko bez registrácie. Ideálne pre rýchle, jednorazové podpisovanie."
+        with_account:
+          title: "Viac s účtom"
+          description: "Prístup k histórii dokumentov, posielanie žiadostí o podpis e-mailom, prijímanie notifikácií a webhookov, keď ostatní podpisujú, integrácia cez REST API a iframe a správa všetkých vašich dokumentov na jednom mieste."
+      features:
+        subtitle: "eIDAS-kompatibilná platforma"
+        title: "Kompletný pracovný tok podpisovania dokumentov"
+        description: "Preklenieme priepasť medzi eGovernment a komerčným podpisovaním dokumentov. Posielajte dokumenty na podpisovanie, integrujte podpisovanie do existujúcich aplikácií a využívajte kvalifikované zariadenia na vytváranie podpisov pre právne platné elektronické podpisy."
+        send_documents:
+          title: "Posielajte dokumenty na podpísanie"
+          description: "Požiadajte o podpisy od iných ľudí cez e-mail alebo zdieľanie odkazu. Príjemcovia môžu podpisovať dokumenty pomocou svojich kvalifikovaných zariadení na vytváranie podpisov bez potreby vytvárať účet."
+        api_integration:
+          title: "API a iframe integrácia"
+          description: "Vložte pracovné toky podpisovania priamo do svojich aplikácií pomocou jednoduchej iframe integrácie alebo komplexného REST API. Automatizujte procesy podpisovania dokumentov vo vašich obchodných systémoch."
+        qualified_signatures:
+          title: "Kvalifikované eIDAS podpisy"
+          description: "Vytvárajte kvalifikované elektronické podpisy pomocou vládou vydaných eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Bezproblémová integrácia s aplikáciami Autogram Desktop a Mobile."
+        validation:
+          title: "Overovanie dokumentov"
+          description: "Okamžite overujte platnosť a integritu podpísaných dokumentov. Systém automaticky kontroluje certifikáty, podpisy a časové pečiatky, aby zabezpečil súlad."
+        multi_party:
+          title: "Viacstranné pracovné toky"
+          description: "Spravujte zložité scenáre podpisovania s viacerými účastníkmi. Sledujte stav podpisov, posielajte pripomienky a koordinujte sekvenčné alebo paralelné pracovné toky podpisovania."
+        visualization:
+          title: "Vizualizácia dokumentov"
+          description: "Prezerajte a prechádzajte obsah ASiC kontajnerov a slovenské elektronické formuláre vo formáte XML priamo v prehliadači. Náhľad dokumentov pred podpísaním s jasným, užívateľsky prívetivým zobrazením."
+      ecosystem:
+        subtitle: "Ekosystém Autogram"
+        title: "Kompletná infraštruktúra na podpisovanie"
+        description: "Autogram Portal je súčasťou komplexného open-source portfólia pre kvalifikované elektronické podpisy, ktoré bezproblémovo funguje s podpisovacími aplikáciami Autogram."
+        desktop:
+          title: "Autogram Desktop"
+          description: "Desktopová aplikácia pre Windows, macOS a Linux, ktorá vytvára kvalifikované podpisy pomocou eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Pripája sa priamo k portálu pre bezproblémové pracovné toky podpisovania."
+          learn_more: "Dozvedieť sa viac"
+        mobile:
+          title: "Autogram v Mobile"
+          description: "Mobilné aplikácie pre iOS a Android, ktoré umožňujú kvalifikované podpisy pomocou mobilných eID riešení a kvalifikovaných zariadení na vytváranie podpisov. Podpisujte dokumenty na cestách s plnou integráciou portálu."
+        extension:
+          title: "Autogram Extension"
+          description: "Rozšírenie prehliadača, ktoré integruje Autogram Desktop a Mobile priamo do slovenských eGovernment portálov. Podpisujte dokumenty bezproblémovo bez opustenia vládnych webových stránok."
+        portal:
+          title: "Autogram Portal"
+          description: "Webová platforma na správu kompletného životného cyklu podpisovania dokumentov v komerčných aplikáciách. Poskytuje overovanie, správu pracovných tokov a API integráciu pre obchodné procesy."
+      standards:
+        title: "Postavené na otvorených štandardoch"
+        description: "Autogram Portal je plne open-source a postavený na overených technológiách, spĺňa najvyššie bezpečnostné štandardy a umožňuje transparentnosť a spoluprácu s komunitou."
+        eidas:
+          title: "Nariadenie eIDAS"
+          description: "Kvalifikované elektronické podpisy podľa nariadenia EÚ eIDAS majú silnú právnu platnosť vo všetkých členských štátoch a preklenujú priepasť medzi eGovernment a komerčným použitím."
+        open_source:
+          title: "Open Source"
+          description: "Plne open-source platforma podporovaná organizáciou NLNet. Transparentný, auditovateľný a komunitou riadený vývoj zabezpečujúci dôveru a neustále zlepšovanie."
+        api:
+          title: "REST API a Webhooky"
+          description: "Komplexné REST API pre bezproblémovú integráciu do vašich aplikácií. Štandardná podpora Webhookov umožňuje notifikácie v reálnom čase pre udalosti podpisovania a automatizáciu pracovných tokov."
+      cta:
+        title: "Pripravení začať?"
+        subtitle: "Vyskúšajte Autogram Portal teraz alebo preskúmajte zdrojový kód na GitHube."
+        start_signing: "Začať podpisovať dokumenty"
+        view_github: "Zobraziť na GitHube"
+  
+  terms_of_service:
+    index:
+      title: "Obchodné podmienky"
+      not_production_title: "Toto nie je produkčné prostredie"
+      not_production_message: "Toto je zástupná stránka. Kompletné obchodné podmienky s podrobnými informáciami o právach používania, zodpovednostiach a podmienkach služby budú pridané v budúcnosti."
+      work_in_progress: "Pracujeme na komplexných obchodných podmienkach, ktoré jasne vymedzujú práva a povinnosti všetkých strán používajúcich túto platformu."
+  
+  privacy_policy:
+    index:
+      title: "Zásady ochrany osobných údajov"
+      not_production_title: "Toto nie je produkčné prostredie"
+      not_production_message: "Toto je zástupná stránka. Kompletné zásady ochrany osobných údajov s podrobnými informáciami o spracovaní údajov, právach používateľov a bezpečnostných opatreniach budú pridané v budúcnosti."
+      work_in_progress: "Zaviazali sme sa chrániť vaše súkromie a čoskoro poskytneme komplexné podrobnosti o našich postupoch pri spracovaní údajov."
+  
+  footer:
+    heading: "Päta"
+    by: "od Slovensko.Digital"
+    view_on_github: "Zobraziť na GitHube"
+    service_provider: "Poskytovateľ služby"
+    support: "Podpora"
+    privacy_policy: "Zásady ochrany osobných údajov"
+  
+  shared:
+    signature_validation:
+      error_title: "Chyba pri overovaní podpisov"
+      error_message: "Nepodarilo sa overiť elektronické podpisy tohto dokumentu."
+      no_signatures_title: "Zatiaľ žiadne elektronické podpisy"
+      no_signatures_message: "Tento dokument zatiaľ neobsahuje žiadne elektronické podpisy. Môžete ho podpísať nižšie."
+      signatures_found_title: "Nájdené elektronické podpisy"
+      qualified_timestamp: "Kvalifikovaná časová pečiatka"
+      no_timestamp: "Žiadna časová pečiatka"
+      timestamps_count: "(%{count} časových pečiatok)"
+      valid: "Platný"
+      invalid: "Neplatný"
+      signature_details: "Podrobnosti podpisu"
+      subject: "Predmet"
+      issuer: "Vydavateľ"
+      qualification: "Kvalifikácia"
+      timestamps: "Časové pečiatky"
+      time: "Čas"
+      archived: "Archivované"
+    signature_validation_error:
+      title: "Chyba pri overovaní podpisov"
+      message: "Nepodarilo sa overiť elektronické podpisy tohto dokumentu."
+    dropzone:
+      title: "Nahrajte dokument sem"
+      subtitle: "Presuňte a pusťte sem, alebo kliknite pre výber súboru z disku."
+      file_types_hint: "PDF, XML alebo iný súbor"
+      uploading_text: "Pridávanie dokumentu..."
+      drop_text: "Pustiť dokument sem"
+      remove_file: "Odstrániť súbor"
+      select_another: "Kliknite pre výber iného súboru"
+  
   javascript:
     errors:
       file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty jsou PDF, XML a iné súbory."
@@ -53,6 +382,9 @@ sk:
       signing_error: "Pri podpisovaní sa vyskytla chyba: %{message}"
       autogram_connection_failed: "Nepodarilo sa pripojiť k Autogram Desktop. Uistite sa, že je nainštalovaný a spustený."
       file_read_failed: "Nepodarilo sa prečítať súbor"
+    signature:
+      preparing: "Pripravujem podpis..."
+      sign: "Podpísať"
 
   activerecord:
     errors:
