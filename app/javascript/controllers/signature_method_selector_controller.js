@@ -3,7 +3,7 @@ import { isMobileDevice } from "utils/device_detection"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["methodRadio", "buttonContainer", "autogramForm", "avmForm", "signButton", "desktopElement"]
+  static targets = ["methodRadio", "buttonContainer", "autogramForm", "avmForm", "eidentitaForm", "signButton", "desktopElement"]
 
   connect() {
     console.log('Signature method selector connected')
@@ -72,6 +72,16 @@ export default class extends Controller {
       
       if (this.hasAvmFormTarget) {
         const submitButton = this.avmFormTarget.querySelector('button[type="submit"]')
+        if (submitButton) {
+          submitButton.click()
+        }
+      }
+    } else if (selectedMethod === 'eidentita') {
+      // Show loading state on the main Sign button
+      this.setSignButtonLoading(true)
+      
+      if (this.hasEidentitaFormTarget) {
+        const submitButton = this.eidentitaFormTarget.querySelector('button[type="submit"]')
         if (submitButton) {
           submitButton.click()
         }

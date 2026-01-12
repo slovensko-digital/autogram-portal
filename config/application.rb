@@ -28,5 +28,13 @@ module AutogramPortal
     config.i18n.default_locale = :en
 
     config.active_job.queue_adapter = :good_job
+    config.good_job.enable_cron = true
+
+    config.good_job.cron = {
+      delete_old_eidentita_sessions: {
+        cron: "every 2 hours",
+        class: "Eidentita::SessionCleanupJob"
+      }
+    }
   end
 end

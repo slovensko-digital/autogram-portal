@@ -234,7 +234,9 @@ en:
       autogram_desktop_label: "Autogram Desktop"
       autogram_desktop_description: "Desktop application with qualified electronic seal or chip ID card"
       autogram_mobile_label: "Autogram Mobile"
-      autogram_mobile_description: "Mobile app or web interface - scan QR code or open AVM app directly"
+      autogram_mobile_description: "Open-source mobile app - scan QR code or open AVM app directly"
+      eidentita_label: "eIdentita"
+      eidentita_description: "Slovak mobile app for qualified electronic signatures - scan QR code or open eIdentita app directly"
       sign: "Sign"
       signed_title: "Documents have been signed"
       signed_message: "This contract has been signed and is complete. No further signature is required."
@@ -252,6 +254,14 @@ en:
       copy_url: "Or copy the URL manually:"
       note_desktop: "On mobile: Scan the QR code or tap it"
       note_mobile: "Tap the QR code to open the Autogram mobile application"
+      expiry: "Signing will expire in 10 minutes"
+      cancel: "Cancel operation"
+    eidentita_signing_pending:
+      scan_qr_desktop: "Scan the QR code with your mobile device using eIdentita app"
+      scan_qr_mobile: "Tap the QR code to open the eIdentita mobile application"
+      copy_url: "Or copy the URL manually:"
+      note_desktop: "On mobile: Scan the QR code with eIdentita app or tap it"
+      note_mobile: "Tap the QR code to open the eIdentita mobile application"
       expiry: "Signing will expire in 10 minutes"
       cancel: "Cancel operation"
     signature_error:
@@ -414,6 +424,10 @@ en:
     signature:
       preparing: "Preparing signature..."
       sign: "Sign"
+      opening_avm: "Opening AVM..."
+      sign_with_avm: "Sign with AVM"
+      opening_eidentita: "Opening eIdentita..."
+      sign_with_eidentita: "Sign with eIdentita"
   
   activerecord:
     errors:
