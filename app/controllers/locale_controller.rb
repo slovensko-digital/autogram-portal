@@ -3,6 +3,7 @@ class LocaleController < ApplicationController
     locale = params[:locale]&.to_sym
 
     if I18n.available_locales.include?(locale)
+      current_user.update(locale: locale) if user_signed_in?
       session[:locale] = locale
       I18n.locale = locale
     end

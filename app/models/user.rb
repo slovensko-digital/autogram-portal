@@ -14,6 +14,7 @@
 #  failed_attempts        :integer          default(0), not null
 #  last_sign_in_at        :datetime
 #  last_sign_in_ip        :string
+#  locale                 :string           default("sk")
 #  locked_at              :datetime
 #  name                   :string
 #  remember_created_at    :datetime
@@ -40,7 +41,9 @@ class User < ApplicationRecord
   has_many :contracts
   has_many :documents
 
-  def self.create_from_provider_data(auth)
+  validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
+
+  def self.create_from_provider_data(auth, locale: nil)
     # Check if identity already exists
     identity = Identity.find_by(provider: auth.provider, uid: auth.uid)
     return identity.user if identity
@@ -60,7 +63,8 @@ class User < ApplicationRecord
     user = User.create!(
       email: email,
       name: auth.info.name,
-      confirmed_at: Time.current
+      confirmed_at: Time.current,
+      locale: locale || I18n.default_locale.to_s
     )
     user.identities.create!(provider: auth.provider, uid: auth.uid)
     user

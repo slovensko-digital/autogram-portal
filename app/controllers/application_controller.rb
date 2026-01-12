@@ -42,7 +42,7 @@ class ApplicationController < ActionController::Base
   private
 
   def set_locale
-    I18n.locale = session[:locale] || I18n.default_locale
+    I18n.locale = current_user.try(:locale) || session[:locale] || I18n.default_locale
   end
 
   def no_header

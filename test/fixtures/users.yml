@@ -16,6 +16,7 @@
 #  failed_attempts        :integer          default(0), not null
 #  last_sign_in_at        :datetime
 #  last_sign_in_ip        :string
+#  locale                 :string           default("sk")
 #  locked_at              :datetime
 #  name                   :string
 #  remember_created_at    :datetime
