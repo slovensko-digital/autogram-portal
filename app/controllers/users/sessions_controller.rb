@@ -8,8 +8,9 @@ class Users::SessionsController < Devise::Passwordless::SessionsController
         set_flash_message!(:notice, :magic_link_sent)
       end
     else
-      # Create new user and send confirmation email
       self.resource = resource_class.new(create_params)
+      resource.locale = session[:locale] if session[:locale].present?
+
       if resource.save
         resource.send_confirmation_instructions
         if Devise.paranoid
