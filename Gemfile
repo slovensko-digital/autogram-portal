@@ -91,3 +91,5 @@ gem "omniauth-rails_csrf_protection", "~> 1.0"
 gem "dotenv-rails", "~> 3.1", group: :development
 
 gem "pry", "~> 0.15.2"
+
+gem "rack-cors", "~> 2.0"

@@ -12,15 +12,35 @@ export default class extends Controller {
     this.signing = false
   }
 
+  isInIframe() {
+    try {
+      return window.self !== window.top
+    } catch (e) {
+      return true
+    }
+  }
+
+  createIframeCompatibleDesktopClient() {
+    if (!window.AutogramSDK || !window.AutogramSDK.desktopApiClient) {
+      return null
+    }
+
+    return window.AutogramSDK.desktopApiClient({
+      serverProtocol: 'http',
+      serverHost: 'localhost',
+      disableSecurity: true,
+      requestsOrigin: '*'
+    })
+  }
+
   async sign(event) {
     if (this.signing) return
-    
+
     event.preventDefault()
     this.signing = true
-    
-    // Show the signing in progress UI
+
     await this.showSigningInProgress()
-    
+
     this.dispatchSigningEvent('start')
 
     try {
@@ -29,7 +49,14 @@ export default class extends Controller {
       }
 
       let client
-      if (window.AutogramSDK.CombinedClient) {
+      const inIframe = this.isInIframe()
+
+      if (inIframe) {
+        client = this.createIframeCompatibleDesktopClient()
+        if (!client) {
+          throw new Error('Could not create iframe-compatible Autogram client')
+        }
+      } else if (window.AutogramSDK.CombinedClient) {
         console.log('Using CombinedClient')
         client = await window.AutogramSDK.CombinedClient.init()
       } else {
@@ -88,11 +115,22 @@ export default class extends Controller {
 
       console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, autogramParameters.documents[0].content_type)
 
-      const signResult = await client.signOnDesktop(
-        signRequestDocument,
-        signRequestSignatureParameters,
-        autogramParameters.documents[0].content_type
-      );
+      let signResult
+
+      if (inIframe) {
+        signResult = await this.signWithDesktopClient(
+          client,
+          signRequestDocument,
+          signRequestSignatureParameters,
+          autogramParameters.documents[0].content_type
+        )
+      } else {
+        signResult = await client.signOnDesktop(
+          signRequestDocument,
+          signRequestSignatureParameters,
+          autogramParameters.documents[0].content_type
+        )
+      }
 
       if (signResult && signResult.content) {
         const formData = new FormData(this.formTarget)
@@ -174,6 +212,51 @@ export default class extends Controller {
     } catch (error) {
       console.error('Error showing signing in progress:', error)
     }
+  }
+
+  async signWithDesktopClient(client, document, parameters, mimeType) {
+    console.log('Signing with desktop client in iframe mode')
+
+    try {
+      const info = await client.info()
+      console.log('Autogram Desktop is ready:', info)
+    } catch (error) {
+      console.log('Autogram Desktop not running, launching...')
+      const launchUrl = await client.getLaunchURL('listen')
+      console.log('Opening launch URL:', launchUrl)
+
+      try {
+        const opened = window.open(launchUrl, '_self')
+        if (!opened) {
+          const link = document.createElement ? document.createElement('a') : null
+          if (link) {
+            link.href = launchUrl
+            link.style.display = 'none'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }
+        }
+      } catch (e) {
+        console.log('Could not open launch URL:', e)
+        window.location.assign(launchUrl)
+      }
+
+      console.log('Waiting for Autogram Desktop to become ready...')
+      try {
+        await client.waitForStatus('READY', 60, 2)
+        console.log('Autogram Desktop is now ready')
+      } catch (waitError) {
+        console.error('Timeout waiting for Autogram Desktop:', waitError)
+        throw new Error('Could not connect to Autogram Desktop. Please make sure it is installed and running.')
+      }
+    }
+
+    console.log('Sending sign request to Autogram Desktop')
+    const result = await client.sign(document, parameters, mimeType)
+    console.log('Sign result:', result)
+
+    return result
   }
 
   getOldSignatureParameters(newParams, xdcParams) {
