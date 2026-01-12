@@ -2,6 +2,10 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import Alpine from "alpinejs"
+import i18n from "i18n"
+
+// Make i18n available globally
+window.i18n = i18n
 
 // Start Alpine.js
 window.Alpine = Alpine

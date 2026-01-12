@@ -8,6 +8,12 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# I18n for JavaScript %>
+    <meta name="i18n-locale" content="<%= I18n.locale %>">
+    <meta name="i18n-translations" content="<%= {
+      I18n.locale => I18n.t('javascript', default: {})
+    }.to_json %>">
+
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>

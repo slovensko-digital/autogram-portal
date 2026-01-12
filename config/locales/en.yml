@@ -30,6 +30,388 @@
 en:
   hello: "Hello world"
   
+  header:
+    navigation:
+      global: "Global"
+      toggle_menu: "Toggle menu"
+    links:
+      contracts: "Contracts"
+      sign_in: "Sign in"
+      sign_out: "Sign out"
+  
+  language_switcher:
+    language: "Language"
+    languages:
+      en: "English"
+      sk: "Slovenčina"
+  
+  devise:
+    sessions:
+      new:
+        sign_in: "Sign in"
+        sign_in_subtitle: "Sign in to your account to continue."
+        email: "Email"
+        remember_me: "Remember me"
+        or_continue_with: "Or continue with"
+        sign_in_with_google: "Sign in with Google"
+    registrations:
+      new:
+        sign_up: "Sign up"
+        subtitle: "Create a new account to get started."
+      edit:
+        title: "Edit %{resource}"
+        subtitle: "Update your account information."
+        name: "Name"
+        email: "Email"
+        api_token_public_key: "API Token Public Key"
+        api_token_help: "This is your public API token key for authentication."
+        currently_waiting_confirmation_for_email: "Currently waiting confirmation for: %{email}"
+        update: "Update"
+        cancel_my_account: "Cancel my account"
+        unhappy: "Unhappy?"
+        are_you_sure: "Are you sure?"
+    confirmations:
+      new:
+        resend_confirmation_instructions: "Resend confirmation instructions"
+        subtitle: "Didn't receive the confirmation email? We'll send it again."
+    unlocks:
+      new:
+        resend_unlock_instructions: "Resend unlock instructions"
+        subtitle: "Request unlock instructions to regain access to your account."
+    mailer:
+      unlock_instructions:
+        greeting: "Hello %{recipient}!"
+        message: "Your account has been locked due to an excessive number of unsuccessful sign in attempts."
+        instruction: "Click the link below to unlock your account:"
+        action: "Unlock my account"
+      email_changed:
+        greeting: "Hello %{recipient}!"
+        message: "We're contacting you to notify you that your email has been changed to %{email}."
+        message_unconfirmed: "We're contacting you to notify you that your email is being changed to %{email}."
+      confirmation_instructions:
+        greeting: "Welcome %{recipient}!"
+        instruction: "You can confirm your account email through the link below:"
+        action: "Confirm my account"
+      magic_link:
+        greeting: "Hello %{recipient}!"
+        instruction: "You can login using the link below:"
+        action: "Log in to my account"
+        expiry_notice: "Note that the link will expire in %{expiry}."
+    shared:
+      links:
+        sign_in: "Sign in"
+        sign_up: "Sign up"
+        didn_t_receive_confirmation_instructions: "Didn't receive confirmation instructions?"
+        didn_t_receive_unlock_instructions: "Didn't receive unlock instructions?"
+  
+  documents:
+    index:
+      title: "Documents"
+      upload_new: "Upload New Document"
+      uploaded_ago: "Uploaded %{time} ago"
+      by: "by %{name}"
+      view: "View"
+      no_documents_title: "No documents"
+      no_documents_message: "Get started by uploading a new document."
+      upload_document: "Upload Document"
+    new:
+      title: "New document"
+      subtitle: "Upload a document for signing or validation."
+      help_text: "You can upload PDF, XML or other files, and sign them in the next step."
+      errors_title: "Errors occurred while creating the document:"
+      document_details_title: "Document Details"
+      document_details_text: "Upload a single document that you want to work with. You can validate signatures, visualize content, or use it for signing."
+      agree_to_policies: "I agree with %{link}"
+      policies_link: "policies, terms and conditions"
+      upload_document: "Upload Document"
+      cancel: "Cancel"
+    show:
+      title: "Document"
+      filename: "Filename: %{filename}"
+      part_of_contract: "Part of Contract"
+      download: "Download"
+      validating_signatures: "Validating electronic signatures..."
+      loading_actions: "Loading document actions..."
+    actions:
+      sign_title: "Sign document"
+      sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+      signature_format: "Signature Format"
+      allowed_method: "Allowed Signature Method"
+      continue_signing: "Continue to document signing"
+      add_timestamp_title: "Add timestamp"
+      add_timestamp_subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
+      add_timestamp_button: "Add timestamp to signatures"
+    actions_error:
+      title: "Error loading document actions"
+    visualize:
+      image_preview: "Image preview"
+      pdf_load_error: "PDF could not be loaded in the browser."
+      download_pdf: "Download PDF"
+      preview_not_supported: "Document preview is not supported for this file type (%{type})"
+    visualize_error:
+      title: "Could not load document content"
+      trust_warning: "Make sure you trust the source of this document before proceeding."
+    visualization_with_toggle:
+      hide_preview: "Hide document preview"
+      show_preview: "Show document preview"
+      loading_content: "Loading document content..."
+  
+  signature_methods:
+    qes: "Qualified Electronic Signature"
+    ts_qes: "Qualified Electronic Signature with Timestamp"
+    ades: "Advanced Electronic Signature"
+    ses: "Simple Electronic Signature"
+    short:
+      qes: "QES"
+      ts_qes: "QES + Timestamp"
+      ades: "ADES"
+      ses: "SES"
+  
+  bundles:
+    index:
+      title: "Contract Bundles"
+      completed: "Completed"
+      awaiting_signature: "Awaiting Signature"
+      contract: "contract"
+      contracts: "contracts"
+      no_contracts: "No contracts"
+      unknown_user: "Unknown user"
+      created: "Created"
+      view: "View"
+      no_bundles_title: "No bundles"
+      no_bundles_message: "Bundles are created via API."
+    show:
+      all_bundles: "All bundles"
+      title: "Bundle"
+      uuid: "UUID: %{uuid}"
+      contract_number: "Contract %{current} of %{total}"
+      signed: "Signed"
+      open_separately: "Open separately →"
+    iframe:
+      title: "Contract Bundle"
+      subtitle: "Please sign all contracts in the bundle"
+      contract_number: "Contract %{current} of %{total}"
+      signed: "Signed"
+    status:
+      all_signed: "All contracts signed"
+      signed_count: "Signed %{signed} of %{total}"
+  
+  contracts:
+    index:
+      title: "Contracts"
+      upload_document: "Upload document"
+      signed: "Signed"
+      no_documents: "No documents"
+      unknown_user: "Unknown user"
+      created_at: "Created at"
+      download: "Download"
+      view: "View"
+      no_contracts_title: "No contracts yet"
+      no_contracts_message: "Start by uploading a document."
+    show:
+      all_contracts: "All contracts"
+      title: "Contract"
+      uuid: "UUID: %{uuid}"
+      part_of_bundle: "Part of %{link}"
+      download: "Download"
+      edit_contract: "Edit contract"
+    edit:
+      title: "Edit Contract"
+      uuid: "UUID: %{uuid}"
+      signature_parameters_title: "Signature Parameters"
+      signature_parameters_subtitle: "Configure signature format and allowed signature methods for this contract."
+      signature_format_label: "Signature Format"
+      signature_method_label: "Signature Method"
+      documents_title: "Documents"
+      documents_subtitle: "Documents associated with this contract."
+      no_documents: "No documents associated with this contract."
+      destroy_contract: "Destroy contract"
+      destroy_confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
+      cancel: "Cancel"
+      update_contract: "Update Contract"
+    signature_actions:
+      select_signing_app: "Select signing application"
+      autogram_desktop_label: "Autogram Desktop"
+      autogram_desktop_description: "Desktop application with qualified electronic seal or chip ID card"
+      autogram_mobile_label: "Autogram Mobile"
+      autogram_mobile_description: "Mobile app or web interface - scan QR code or open AVM app directly"
+      sign: "Sign"
+      signed_title: "Documents have been signed"
+      signed_message: "This contract has been signed and is complete. No further signature is required."
+    autogram_signing_in_progress:
+      title: "Signing with Autogram Desktop"
+      subtitle: "Please complete the signing process in the Autogram Desktop application"
+      step1: "The Autogram Desktop application should have opened automatically"
+      step2: "Follow the instructions in the application to complete the signing"
+      step3: "This page will automatically update once signing is complete"
+      note: "Make sure the Autogram Desktop application is installed and running"
+      cancel: "Cancel"
+    avm_signing_pending:
+      scan_qr_desktop: "Scan the QR code with your mobile device"
+      scan_qr_mobile: "Tap the QR code to open the Autogram mobile application"
+      copy_url: "Or copy the URL manually:"
+      note_desktop: "On mobile: Scan the QR code or tap it"
+      note_mobile: "Tap the QR code to open the Autogram mobile application"
+      expiry: "Signing will expire in 10 minutes"
+      cancel: "Cancel operation"
+    signature_error:
+      title: "Error signing the document"
+      close: "Close"
+    download_actions:
+      message: "This document has been signed and is ready for download."
+      download_button: "Download Signed Document"
+    documents_preview:
+      loading: "Loading document content..."
+    signature_validation:
+      validating: "Validating electronic signatures..."
+  
+  homepage:
+    index:
+      hero:
+        title: "Qualified Electronic Signatures"
+        title_highlight: "Made Simple"
+        description_html: "<span class=\"font-semibold text-gray-900\">Open-source platform</span> for managing up to <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-compliant</span> electronic signatures. <span class=\"font-semibold text-gray-900\">Send documents</span> for signing, <span class=\"font-semibold text-gray-900\">integrate workflows</span> via <span class=\"font-semibold text-gray-900\">API or embedded iframe</span>, and <span class=\"font-semibold text-gray-900\">connect seamlessly</span> with multiple signing apps."
+        view_on_github: "View on GitHub"
+      upload_form:
+        title: "Upload your document"
+        subtitle: "Drag and drop or click to browse"
+        file_types_hint: "PDF, XML, ASiC-E and other formats supported"
+        uploading_text: "Uploading..."
+        drop_text: "Drop here"
+        agree_to_policies_html: "I agree with %{terms_link} and %{privacy_link}"
+        terms_of_service: "Terms of Service"
+        privacy_policy: "Privacy Policy"
+        submit: "Upload & Continue"
+      start_using:
+        title: "Start using Autogram Portal today"
+        subtitle: "Choose how you want to work — with or without an account"
+        no_account:
+          title: "No account needed to start"
+          description: "Upload documents, view content, validate signatures, and share signing links — all without registration. Perfect for quick, one-time signing tasks."
+        with_account:
+          title: "More with an account"
+          description: "Access document history, send signature requests via email, receive notifications and webhooks when others sign, integrate via REST API and iframes, and manage all your documents in one place."
+      features:
+        subtitle: "eIDAS-Compatible Platform"
+        title: "Complete document signing workflow"
+        description: "Bridging the gap between eGovernment and commercial document signing. Send documents for signature requests, integrate signing into your existing applications, and leverage qualified signature creation devices for legally valid electronic signatures."
+        send_documents:
+          title: "Send Documents for Signing"
+          description: "Request signatures from other people via email or link sharing. Recipients can sign documents using their qualified signature creation devices without needing to create an account."
+        api_integration:
+          title: "API & Iframe Integration"
+          description: "Embed signing workflows directly into your applications using simple iframe integration or comprehensive REST API. Automate document signing processes in your business systems."
+        qualified_signatures:
+          title: "Qualified eIDAS Signatures"
+          description: "Create qualified electronic signatures using government-issued eID cards and other qualified signature creation devices. Seamless integration with Autogram Desktop and Mobile apps."
+        validation:
+          title: "Document Validation"
+          description: "Instantly verify the validity and integrity of signed documents. The system automatically checks certificates, signatures, and timestamps to ensure compliance."
+        multi_party:
+          title: "Multi-Party Workflows"
+          description: "Manage complex signing scenarios with multiple participants. Track signature status, send reminders, and coordinate sequential or parallel signing workflows."
+        visualization:
+          title: "Document Visualization"
+          description: "View and navigate ASiC container contents and Slovak electronic forms in XML format directly in the browser. Preview documents before signing with clear, user-friendly rendering."
+      ecosystem:
+        subtitle: "The Autogram Ecosystem"
+        title: "Complete signing infrastructure"
+        description: "Autogram Portal is part of a comprehensive open-source portfolio for qualified electronic signatures, working seamlessly with Autogram signing applications."
+        desktop:
+          title: "Autogram Desktop"
+          description: "Desktop application for Windows, macOS, and Linux that creates qualified signatures using eID cards and other qualified signature creation devices. Connects directly to the portal for seamless signing workflows."
+          learn_more: "Learn more"
+        mobile:
+          title: "Autogram Mobile"
+          description: "Mobile applications for iOS and Android that enable qualified signatures using mobile eID solutions and qualified signature creation devices. Sign documents on the go with full portal integration."
+        extension:
+          title: "Autogram Extension"
+          description: "Browser extension that integrates Autogram Desktop and Mobile directly into Slovak eGovernment portals. Sign documents seamlessly without leaving government websites."
+        portal:
+          title: "Autogram Portal"
+          description: "Web-based platform for managing the complete document signing lifecycle in commercial applications. Provides validation, workflow management, and API integration for business processes."
+      standards:
+        title: "Built on Open Standards"
+        description: "Autogram Portal is fully open-source and built on proven technologies, meeting the highest security standards while enabling transparency and community collaboration."
+        eidas:
+          title: "eIDAS Regulation"
+          description: "Qualified electronic signatures according to EU eIDAS have strong legal validity across all member states, bridging the gap between eGovernment and commercial use."
+        open_source:
+          title: "Open Source"
+          description: "Fully open-source platform supported by NLNet organization. Transparent, auditable, and community-driven development ensuring trust and continuous improvement."
+        api:
+          title: "REST API & Webhooks"
+          description: "Comprehensive REST API for seamless integration into your applications. Standard Webhooks support enables real-time notifications for signature events and workflow automation."
+      cta:
+        title: "Ready to get started?"
+        subtitle: "Try Autogram Portal now or explore the source code on GitHub."
+        start_signing: "Start signing documents"
+        view_github: "View on GitHub"
+  
+  terms_of_service:
+    index:
+      title: "Terms of Service"
+      not_production_title: "This is not a production environment"
+      not_production_message: "This is a placeholder page. The complete terms of service with detailed information about usage rights, responsibilities, and service conditions will be added in the future."
+      work_in_progress: "We are working on comprehensive terms of service that will clearly outline the rights and obligations of all parties using this platform."
+  
+  privacy_policy:
+    index:
+      title: "Privacy Policy"
+      not_production_title: "This is not a production environment"
+      not_production_message: "This is a placeholder page. The complete privacy policy with detailed information about data processing, user rights, and security measures will be added in the future."
+      work_in_progress: "We are committed to protecting your privacy and will provide comprehensive details about our data handling practices soon."
+  
+  footer:
+    heading: "Footer"
+    by: "by Slovensko.Digital"
+    view_on_github: "View on GitHub"
+    service_provider: "Service provider"
+    support: "Support"
+    privacy_policy: "Privacy Policy"
+  
+  shared:
+    signature_validation:
+      error_title: "Error validating signatures"
+      error_message: "Failed to validate the electronic signatures of this document."
+      no_signatures_title: "No electronic signatures yet"
+      no_signatures_message: "This document does not contain any electronic signatures yet. You can sign it below."
+      signatures_found_title: "Electronic signatures found"
+      qualified_timestamp: "Qualified Timestamp"
+      no_timestamp: "No timestamp"
+      timestamps_count: "(%{count} timestamps)"
+      valid: "Valid"
+      invalid: "Invalid"
+      signature_details: "Signature details"
+      subject: "Subject"
+      issuer: "Issuer"
+      qualification: "Qualification"
+      timestamps: "Timestamps"
+      time: "Time"
+      archived: "Archived"
+    signature_validation_error:
+      title: "Error validating signatures"
+      message: "Failed to validate the electronic signatures of this document."
+    dropzone:
+      title: "Upload document here"
+      subtitle: "Drag and drop here, or click to select a file from disk."
+      file_types_hint: "PDF, XML or other file"
+      uploading_text: "Adding document..."
+      drop_text: "Drop document here"
+      remove_file: "Remove file"
+      select_another: "Click to select another file"
+  
+  javascript:
+    errors:
+      file_not_supported: "File \"%{filename}\" is not supported. Allowed formats are PDF, XML, and other files."
+      signing_failed: "Failed to initiate signing. Please try again."
+      network_error: "Network error occurred. Please check your connection and try again."
+      iframe_client_error: "Could not create iframe-compatible Autogram client"
+      contract_load_failed: "Failed to load contract data from server."
+      signing_error: "An error occurred while signing: %{message}"
+      autogram_connection_failed: "Could not connect to Autogram Desktop. Please make sure it is installed and running."
+      file_read_failed: "Failed to read file"
+  
   activerecord:
     errors:
       models:

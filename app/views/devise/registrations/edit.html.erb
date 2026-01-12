@@ -4,7 +4,7 @@
       <div class="mx-auto max-w-2xl">
         <div class="mb-8 text-center">
           <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title', resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: 'registrations.edit.title')) %></h1>
-          <p class="text-gray-600">Update your account information.</p>
+          <p class="text-gray-600"><%= t('.subtitle') %></p>
         </div>
 
         <div class="bg-white  sm:rounded-lg">
@@ -25,10 +25,10 @@
               </div>
 
               <div>
-                <%= f.label :api_token_public_key, "API Token Public Key", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.label :api_token_public_key, t('.api_token_public_key'), class: "block text-sm font-medium text-gray-700 mb-2" %>
                 <%= f.text_field :api_token_public_key, readonly: true,
                   class: "block w-full rounded-md border-gray-300 bg-gray-50  sm:text-sm py-2 px-3 border text-gray-500 cursor-not-allowed" %>
-                <p class="mt-1 text-xs text-gray-500">This is your public API token key for authentication.</p>
+                <p class="mt-1 text-xs text-gray-500"><%= t('.api_token_help') %></p>
               </div>
 
               <% if resource.pending_reconfirmation? %>

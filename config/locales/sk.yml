@@ -1,0 +1,64 @@
+sk:
+  hello: "Ahoj svet"
+  
+  header:
+    navigation:
+      global: "Globálne"
+      toggle_menu: "Otvoriť menu"
+    links:
+      contracts: "Zmluvy"
+      sign_in: "Prihlásiť sa"
+      sign_out: "Odhlásiť sa"
+  
+  language_switcher:
+    language: "Jazyk"
+    languages:
+      en: "English"
+      sk: "Slovenčina"
+  
+  devise:
+    sessions:
+      new:
+        sign_in: "Prihlásiť sa"
+        sign_in_subtitle: "Prihláste sa do svojho účtu."
+        email: "Email"
+        remember_me: "Zapamätať si ma"
+        or_continue_with: "Alebo pokračovať s"
+        sign_in_with_google: "Prihlásiť sa cez Google"
+    shared:
+      links:
+        sign_in: "Prihlásiť sa"
+        sign_up: "Registrovať sa"
+        didn_t_receive_confirmation_instructions: "Nedostali ste potvrdzovací e-mail?"
+        didn_t_receive_unlock_instructions: "Nedostali ste e-mail na odomknutie?"
+  
+  signature_methods:
+    qes: "Kvalifikovaný elektronický podpis"
+    ts_qes: "Kvalifikovaný elektronický podpis s časovou pečiatkou"
+    ades: "Pokročilý elektronický podpis"
+    ses: "Jednoduchý elektronický podpis"
+    short:
+      qes: "KEP"
+      ts_qes: "KEP + Časová pečiatka"
+      ades: "ADES"
+      ses: "SES"
+  
+  javascript:
+    errors:
+      file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty jsou PDF, XML a iné súbory."
+      signing_failed: "Nepodarilo sa iniciovať podpisovanie. Skúste to prosím znova."
+      network_error: "Vyskytla sa sieťová chyba. Skontrolujte prosím pripojenie a skúste to znova."
+      iframe_client_error: "Nepodarilo sa vytvoriť Autogram klienta kompatibilného s iframe"
+      contract_load_failed: "Nepodarilo sa načítať údaje zmluvy zo servera."
+      signing_error: "Pri podpisovaní sa vyskytla chyba: %{message}"
+      autogram_connection_failed: "Nepodarilo sa pripojiť k Autogram Desktop. Uistite sa, že je nainštalovaný a spustený."
+      file_read_failed: "Nepodarilo sa prečítať súbor"
+
+  activerecord:
+    errors:
+      models:
+        contract:
+          attributes:
+            agree_to_policies:
+              blank: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
+              acceptance: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"

@@ -1,6 +1,6 @@
 <div class="bg-white rounded-lg p-4  border border-gray-200">
   <div class="text-center">
-    <p class="text-sm text-gray-600 mb-6">This document has been signed and is ready for download.</p>
+    <p class="text-sm text-gray-600 mb-6"><%= t('contracts.download_actions.message') %></p>
     
     <a href="<%= url_for(@contract.signed_document) %>"
        class="inline-flex items-center justify-center w-full p-4 text-white bg-green-600 border border-transparent rounded-lg cursor-pointer hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-colors duration-200"
@@ -10,7 +10,7 @@
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
       </svg>
-      <span class="font-semibold">Download Signed Document</span>
+      <span class="font-semibold"><%= t('contracts.download_actions.download_button') %></span>
     </a>
   </div>
 </div>

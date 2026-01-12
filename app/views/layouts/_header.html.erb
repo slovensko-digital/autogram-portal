@@ -1,5 +1,5 @@
 <header class="bg-blue-800" x-data="{ mobileMenuOpen: false }">
-  <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
+  <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="<%= t('header.navigation.global') %>">
     <div class="flex lg:flex-1">
       <a href="/" class="-m-1.5 p-1.5">
         <span class="text-3xl leading-8 font-bold text-white">Autogram Portal</span>
@@ -7,23 +7,53 @@
     </div>
     <div class="hidden lg:flex items-center gap-4">
       <% if current_user %>
-        <%= link_to 'Contracts', contracts_path,
+        <%= link_to t('header.links.contracts'), contracts_path,
             class: "text-sm font-semibold text-white hover:text-blue-100 transition-colors" %>
         <%= link_to current_user.email, edit_user_registration_path,
             class: "text-sm text-white hover:text-white underline decoration-blue-100 hover:decoration-white transition-colors" %>
-        <%= link_to 'Sign out', destroy_user_session_path,
+        <%= link_to t('header.links.sign_out'), destroy_user_session_path,
             data: { turbo_method: :delete },
             class: "rounded-md px-4 py-2 text-sm font-semibold bg-white text-blue-800 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors" %>
       <% else %>
-        <%= link_to 'Sign in', new_user_session_path,
+        <%= link_to t('header.links.sign_in'), new_user_session_path,
             class: "rounded-md px-4 py-2 text-sm font-semibold bg-white text-blue-800 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors" %>
       <% end %>
+      <!-- Language Dropdown -->
+      <div class="relative" x-data="{ langOpen: false }" @click.away="langOpen = false">
+        <button @click="langOpen = !langOpen" 
+                type="button"
+                class="flex items-center gap-1.5 text-sm text-white hover:text-blue-100 transition-colors px-2 py-1 rounded cursor-pointer">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+          </svg>
+          <%= t("language_switcher.languages.#{I18n.locale}") %>
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </button>
+        <div x-show="langOpen"
+             x-transition:enter="transition ease-out duration-100"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="transform opacity-100 scale-100"
+             x-transition:leave-end="transform opacity-0 scale-95"
+             class="absolute right-0 z-10 mt-2 w-44 origin-top-right rounded-lg bg-white border border-gray-200"
+             style="display: none;">
+          <div class="py-1">
+            <% I18n.available_locales.each do |locale| %>
+              <%= button_to t("language_switcher.languages.#{locale}"), switch_locale_path(locale: locale),
+                  class: "block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors cursor-pointer #{'font-semibold bg-blue-50 text-blue-700' if I18n.locale == locale} #{locale == I18n.available_locales.first ? 'rounded-t-lg' : ''} #{locale == I18n.available_locales.last ? 'rounded-b-lg' : ''}" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="flex lg:hidden">
       <button type="button" 
               @click="mobileMenuOpen = !mobileMenuOpen"
               class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white">
-        <span class="sr-only">Toggle menu</span>
+        <span class="sr-only"><%= t('header.navigation.toggle_menu') %></span>
         <svg x-show="!mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
@@ -44,17 +74,27 @@
        style="display: none;">
     <div class="space-y-4 px-6 pb-6 pt-2">
       <% if current_user %>
-        <%= link_to 'Contracts', contracts_path,
+        <%= link_to t('header.links.contracts'), contracts_path,
             class: "block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-blue-700 transition-colors" %>
         <%= link_to current_user.email, edit_user_registration_path,
             class: "block rounded-lg px-3 py-2 text-base text-white underline hover:bg-blue-700 transition-colors" %>
-        <%= link_to 'Sign out', destroy_user_session_path,
+        <%= link_to t('header.links.sign_out'), destroy_user_session_path,
             data: { turbo_method: :delete },
             class: "block rounded-lg px-3 py-2 text-base font-semibold bg-white text-blue-800 hover:bg-blue-50 transition-colors" %>
       <% else %>
-        <%= link_to 'Sign in', new_user_session_path,
+        <%= link_to t('header.links.sign_in'), new_user_session_path,
             class: "block rounded-lg px-3 py-2 text-base font-semibold bg-white text-blue-800 hover:bg-blue-50 transition-colors" %>
       <% end %>
+      <!-- Mobile Language Switcher -->
+      <div class="border-t border-blue-700 pt-4 mt-4">
+        <div class="text-xs font-semibold text-blue-200 uppercase tracking-wide mb-2 px-3"><%= t('language_switcher.language') %></div>
+        <div class="space-y-1">
+          <% I18n.available_locales.each do |locale| %>
+            <%= button_to t("language_switcher.languages.#{locale}"), switch_locale_path(locale: locale),
+                class: "block w-full text-left rounded-lg px-3 py-2 text-base text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if I18n.locale == locale}" %>
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
 </header>

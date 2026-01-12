@@ -14,7 +14,7 @@
                 <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
-                All bundles
+                <%= t('.all_bundles') %>
               <% end %>
             </div>
           <% end %>
@@ -22,8 +22,8 @@
           <div class="w-full mb-6">
             <div class="flex items-center justify-between">
               <div>
-                <h1 class="text-3xl font-bold text-gray-900">Bundle</h1>
-                <p class="mt-2 text-sm text-gray-500">UUID: <%= @bundle.uuid %></p>
+                <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+                <p class="mt-2 text-sm text-gray-500"><%= t('.uuid', uuid: @bundle.uuid) %></p>
               </div>
               <div id="bundle_<%= @bundle.uuid %>_status">
                 <%= render 'status', bundle: @bundle %>
@@ -41,19 +41,19 @@
                         <%= index + 1 %>
                       </span>
                       <h2 class="ml-3 text-lg font-semibold text-gray-900">
-                        Contract <%= index + 1 %> of <%= @bundle.contracts.count %>
+                        <%= t('.contract_number', current: index + 1, total: @bundle.contracts.count) %>
                       </h2>
                       <% if !contract.awaiting_signature? %>
                         <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                           </svg>
-                          Signed
+                          <%= t('.signed') %>
                         </span>
                       <% end %>
                     </div>
                     <a href="<%= contract_path(contract) %>" target="_blank" class="text-sm text-blue-600 hover:text-blue-500">
-                      Open separately →
+                      <%= t('.open_separately') %>
                     </a>
                   </div>
                 </div>

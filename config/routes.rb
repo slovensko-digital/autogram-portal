@@ -22,6 +22,8 @@ Rails.application.routes.draw do
 
   get "sdk.js" => "sdk#sdk", as: :sdk
 
+  post "locale/switch" => "locale#switch", as: :switch_locale
+
   # Defines the root path route ("/")
   root to: "homepage#index"
 
