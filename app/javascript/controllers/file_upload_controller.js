@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import i18n from "i18n"
 
 export default class extends Controller {
   static targets = ["dropzone", "fileInput", "documentsContainer", "submitButton", "fileName", "fileSize"]
@@ -79,7 +80,7 @@ export default class extends Controller {
       this.updateUI()
       this.updateSubmitButton()
     } else {
-      alert(`File "${file.name}" is not supported. Allowed formats are PDF, XML, and other files.`)
+      alert(i18n.t('javascript.errors.file_not_supported', { filename: file.name }))
     }
   }
 

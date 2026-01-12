@@ -43,6 +43,17 @@ sk:
       ades: "ADES"
       ses: "SES"
   
+  javascript:
+    errors:
+      file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty jsou PDF, XML a iné súbory."
+      signing_failed: "Nepodarilo sa iniciovať podpisovanie. Skúste to prosím znova."
+      network_error: "Vyskytla sa sieťová chyba. Skontrolujte prosím pripojenie a skúste to znova."
+      iframe_client_error: "Nepodarilo sa vytvoriť Autogram klienta kompatibilného s iframe"
+      contract_load_failed: "Nepodarilo sa načítať údaje zmluvy zo servera."
+      signing_error: "Pri podpisovaní sa vyskytla chyba: %{message}"
+      autogram_connection_failed: "Nepodarilo sa pripojiť k Autogram Desktop. Uistite sa, že je nainštalovaný a spustený."
+      file_read_failed: "Nepodarilo sa prečítať súbor"
+
   activerecord:
     errors:
       models:

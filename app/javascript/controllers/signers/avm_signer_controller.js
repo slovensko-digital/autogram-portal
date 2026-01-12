@@ -45,11 +45,11 @@ export default class extends Controller {
         }
       } else {
         console.error("Form submission failed:", response.status, response.statusText)
-        this.showError("Failed to initiate signing. Please try again.")
+        this.showError(i18n.t('javascript.errors.signing_failed'))
       }
     } catch (error) {
       console.error("Error submitting form:", error)
-      this.showError("Network error occurred. Please check your connection and try again.")
+      this.showError(i18n.t('javascript.errors.network_error'))
     }
   }
 
