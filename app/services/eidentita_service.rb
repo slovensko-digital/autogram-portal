@@ -11,11 +11,13 @@ class EidentitaService
   end
 
   def build_json_payload(contract, eidentita_session)
-    source_url = Rails.application.routes.url_helpers.document_contract_eidentita_session_url(contract, eidentita_session)
+    url_options = Rails.application.config.action_controller.default_url_options || {}
 
-    callback_url = Rails.application.routes.url_helpers.contract_url(contract)
+    source_url = Rails.application.routes.url_helpers.document_contract_eidentita_session_url(contract, eidentita_session, **url_options)
 
-    destination_url = Rails.application.routes.url_helpers.upload_contract_eidentita_session_url(contract, eidentita_session)
+    callback_url = Rails.application.routes.url_helpers.contract_url(contract, **url_options)
+
+    destination_url = Rails.application.routes.url_helpers.upload_contract_eidentita_session_url(contract, eidentita_session, **url_options)
 
     signature_format = case contract.signature_parameters&.format
     when "XAdES"

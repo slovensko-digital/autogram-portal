@@ -37,12 +37,14 @@ class EidentitaSession < ApplicationRecord
   after_update_commit :broadcast_status_change
 
   def eidentita_url
-    link_url = Rails.application.routes.url_helpers.json_contract_eidentita_session_url(contract, self)
+    url_options = Rails.application.config.action_controller.default_url_options || {}
+    link_url = Rails.application.routes.url_helpers.json_contract_eidentita_session_url(contract, self, **url_options)
     "sk.minv.sca://sign?qr=true&linkUrl=#{CGI.escape(link_url)}"
   end
 
   def eidentita_url_mobile
-    link_url = Rails.application.routes.url_helpers.json_contract_eidentita_session_url(contract, self)
+    url_options = Rails.application.config.action_controller.default_url_options || {}
+    link_url = Rails.application.routes.url_helpers.json_contract_eidentita_session_url(contract, self, **url_options)
     "sk.minv.sca://sign?qr=false&linkUrl=#{CGI.escape(link_url)}"
   end
 
