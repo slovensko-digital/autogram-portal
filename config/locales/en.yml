@@ -411,6 +411,9 @@ en:
       signing_error: "An error occurred while signing: %{message}"
       autogram_connection_failed: "Could not connect to Autogram Desktop. Please make sure it is installed and running."
       file_read_failed: "Failed to read file"
+    signature:
+      preparing: "Preparing signature..."
+      sign: "Sign"
   
   activerecord:
     errors:

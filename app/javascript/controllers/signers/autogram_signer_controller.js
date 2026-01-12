@@ -55,7 +55,7 @@ export default class extends Controller {
       if (inIframe) {
         client = this.createIframeCompatibleDesktopClient()
         if (!client) {
-          throw new Error(i18n.t('javascript.errors.iframe_client_error'))
+          throw new Error(i18n.t('errors.iframe_client_error'))
         }
       } else if (window.AutogramSDK.CombinedClient) {
         console.log('Using CombinedClient')
@@ -72,7 +72,7 @@ export default class extends Controller {
       })
       
       if (!autogramParametersResponse.ok) {
-        throw new Error(i18n.t('javascript.errors.contract_load_failed'))
+        throw new Error(i18n.t('errors.contract_load_failed'))
       }
       
       const autogramParameters = await autogramParametersResponse.json()
@@ -176,7 +176,7 @@ export default class extends Controller {
         console.log('User cancelled signing')
         this.dispatchSigningEvent('cancel')
       } else {
-        alert(i18n.t('javascript.errors.signing_error', { message: error.message }))
+        alert(i18n.t('errors.signing_error', { message: error.message }))
         this.dispatchSigningEvent('error', { error: error.message })
       }
     }
@@ -249,7 +249,7 @@ export default class extends Controller {
         console.log('Autogram Desktop is now ready')
       } catch (waitError) {
         console.error('Timeout waiting for Autogram Desktop:', waitError)
-        throw new Error(i18n.t('javascript.errors.autogram_connection_failed'))
+        throw new Error(i18n.t('errors.autogram_connection_failed'))
       }
     }
 
@@ -315,7 +315,7 @@ export default class extends Controller {
           reject(error);
         }
       };
-      reader.onerror = () => reject(new Error(i18n.t('javascript.errors.file_read_failed')));
+      reader.onerror = () => reject(new Error(i18n.t('errors.file_read_failed')));
       reader.readAsDataURL(blob);
     });
   }

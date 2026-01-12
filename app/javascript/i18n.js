@@ -5,7 +5,13 @@ class I18n {
   constructor() {
     this.translations = {}
     this.locale = 'en'
-    this.loadTranslations()
+    
+    // Load translations when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.loadTranslations())
+    } else {
+      this.loadTranslations()
+    }
   }
 
   loadTranslations() {
@@ -13,9 +19,12 @@ class I18n {
     if (metaTag) {
       try {
         this.translations = JSON.parse(metaTag.content)
+        console.log('i18n translations loaded:', this.translations)
       } catch (e) {
         console.error('Failed to parse i18n translations:', e)
       }
+    } else {
+      console.warn('i18n-translations meta tag not found')
     }
 
     const localeMeta = document.querySelector('meta[name="i18n-locale"]')

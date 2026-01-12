@@ -80,7 +80,7 @@ export default class extends Controller {
       this.updateUI()
       this.updateSubmitButton()
     } else {
-      alert(i18n.t('javascript.errors.file_not_supported', { filename: file.name }))
+      alert(i18n.t('errors.file_not_supported', { filename: file.name }))
     }
   }
 
