@@ -15,7 +15,7 @@ Rails.application.configure do
     policy.script_src  :self, :https, :unsafe_eval, :unsafe_inline
     policy.style_src   :self, :https, :unsafe_inline
     # Allow connections to Autogram desktop app running on client machines
-    policy.connect_src :self, :https, "http://localhost:37200"
+    policy.connect_src :self, :https, "http://localhost:37200", "https://loopback.autogram.slovensko.digital"
 
     # Allow framing from specific origins
     app_host = ENV["APP_HOST"]
