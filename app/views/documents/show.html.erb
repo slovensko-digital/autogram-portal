@@ -10,8 +10,8 @@
                 <p class="mt-2 text-sm text-gray-500"><%= t('.filename', filename: @document.filename) %></p>
                 <% if @document.contract %>
                   <p class="text-gray-600">
-                    <%= t('.part_of_contract', uuid: @document.contract.short_uuid).html_safe %>
-                    <%= link_to "##{@document.contract.short_uuid}", contract_path(@document.contract), 
+                    <%= t('.part_of_contract') %>
+                    <%= link_to "##{h(@document.contract.short_uuid)}", contract_path(@document.contract), 
                                class: "text-blue-600 hover:text-blue-800 font-medium" %>
                   </p>
                 <% end %>

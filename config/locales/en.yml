@@ -128,7 +128,7 @@ en:
     show:
       title: "Document"
       filename: "Filename: %{filename}"
-      part_of_contract: "Part of Contract #%{uuid}"
+      part_of_contract: "Part of Contract"
       download: "Download"
       validating_signatures: "Validating electronic signatures..."
       loading_actions: "Loading document actions..."
