@@ -35,32 +35,12 @@ module ApplicationHelper
   end
 
   def method_label(method)
-    case method
-    when "qes"
-      "Qualified Electronic Signature"
-    when "ts-qes"
-      "Qualified Electronic Signature with Timestamp"
-    when "ades"
-      "Advanced Electronic Signature"
-    when "ses"
-      "Simple Electronic Signature"
-    else
-      method.humanize
-    end
+    key = method.gsub("-", "_")
+    I18n.t("signature_methods.#{key}", default: method.humanize)
   end
 
   def short_method_label(method)
-    case method
-    when "qes"
-      "QES"
-    when "ts-qes"
-      "QES + Timestamp"
-    when "ades"
-      "ADES"
-    when "ses"
-      "SES"
-    else
-      method.humanize
-    end
+    key = method.gsub("-", "_")
+    I18n.t("signature_methods.short.#{key}", default: method.humanize)
   end
 end
