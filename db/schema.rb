@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_12_145124) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_12_152857) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -106,6 +106,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_12_145124) do
     t.index ["contract_id"], name: "index_documents_on_contract_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
     t.index ["uuid"], name: "index_documents_on_uuid"
+  end
+
+  create_table "eidentita_sessions", force: :cascade do |t|
+    t.datetime "completed_at"
+    t.bigint "contract_id", null: false
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.datetime "signing_started_at"
+    t.string "status"
+    t.datetime "updated_at", null: false
+    t.index ["contract_id"], name: "index_eidentita_sessions_on_contract_id"
   end
 
   create_table "good_job_batches", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -288,6 +299,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_12_145124) do
   add_foreign_key "contracts", "users"
   add_foreign_key "documents", "contracts"
   add_foreign_key "documents", "users"
+  add_foreign_key "eidentita_sessions", "contracts"
   add_foreign_key "identities", "users"
   add_foreign_key "postal_addresses", "bundles"
   add_foreign_key "webhooks", "bundles"

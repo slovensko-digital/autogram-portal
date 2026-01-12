@@ -205,7 +205,9 @@ sk:
       autogram_desktop_label: "Autogram Desktop"
       autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronick podpisov pomocou eID kariet a iných zariadení"
       autogram_mobile_label: "Autogram v Mobile"
-      autogram_mobile_description: "Mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
+      autogram_mobile_description: "Open-source mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
+      eidentita_label: "eIdentita"
+      eidentita_description: "Štátna mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
       sign: "Podpísať"
       signed_title: "Dokumenty boli podpísané"
       signed_message: "Táto zmluva bola podpísaná a je dokončená. Nie je potrebný žiadny ďalší podpis."
@@ -223,6 +225,14 @@ sk:
       copy_url: "Alebo skopírujte URL manuálne:"
       note_desktop: "Na mobile: Naskenujte QR kód alebo naň klepnite"
       note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
+      expiry: "Platnosť podpisovania vyprší o 10 minút"
+      cancel: "Zrušiť operáciu"
+    eidentita_signing_pending:
+      scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
+      scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
+      copy_url: "Alebo skopírujte URL manuálne:"
+      note_desktop: "Na mobile: Naskenujte QR kód aplikáciou eIdentita alebo naň klepnite"
+      note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
       expiry: "Platnosť podpisovania vyprší o 10 minút"
       cancel: "Zrušiť operáciu"
     signature_error:
@@ -385,6 +395,10 @@ sk:
     signature:
       preparing: "Pripravujem podpis..."
       sign: "Podpísať"
+      opening_avm: "Otváram AVM..."
+      sign_with_avm: "Podpísať cez AVM"
+      opening_eidentita: "Otváram eIdentitu..."
+      sign_with_eidentita: "Podpísať cez eIdentitu"
 
   activerecord:
     errors:

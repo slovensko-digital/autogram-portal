@@ -28,6 +28,7 @@ class Contract < ApplicationRecord
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
   has_many :avm_sessions, dependent: :destroy
+  has_many :eidentita_sessions, dependent: :destroy
   has_one_attached :signed_document
 
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
@@ -84,6 +85,14 @@ class Contract < ApplicationRecord
 
   def has_active_avm_session?
     current_avm_session.present? && !current_avm_session.expired?
+  end
+
+  def current_eidentita_session
+    eidentita_sessions.active.recent.first
+  end
+
+  def has_active_eidentita_session?
+    current_eidentita_session.present?
   end
 
   def broadcast_signing_success

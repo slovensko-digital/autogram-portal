@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ["submitButton"]
 
   connect() {
-    console.log("AVM signer controller connected")
+    console.log("Eidentita signer controller connected")
   }
 
   sign(event) {
@@ -31,16 +31,14 @@ export default class extends Controller {
       })
 
       if (response.ok) {
-          const responseText = await response.text()
-          console.log("Response: ", responseText);
+        const responseText = await response.text()
+        const eidentitaUrl = this.extractEidentitaUrlFromResponse(responseText)
         
-        const avmUrl = this.extractAvmUrlFromResponse(responseText)
-        
-        if (avmUrl) {
-          console.log("Redirecting to AVM URL:", avmUrl)
-          this.redirectToAvmUrl(avmUrl)
+        if (eidentitaUrl) {
+          console.log("Redirecting to Eidentita URL:", eidentitaUrl)
+          this.redirectToEidentitaUrl(eidentitaUrl)
         } else {
-          console.log("Could not extract AVM URL, falling back to normal flow")
+          console.log("Could not extract Eidentita URL, falling back to normal flow")
           this.processTurboStreamResponse(responseText)
         }
       } else {
@@ -53,17 +51,22 @@ export default class extends Controller {
     }
   }
 
-  extractAvmUrlFromResponse(responseText) {
-    const matches = responseText.match(/href="(https:\/\/autogram\.slovensko\.digital\/api\/v1\/qr-code\?[^"]+)"/g)
+  extractEidentitaUrlFromResponse(responseText) {
+    const matches = responseText.match(/href="(sk\.minv\.sca:\/\/sign\?[^"]+)"/g)
     if (matches && matches.length > 0) {
-      let url = matches[0]
-      if (url.includes('="')) {
+    let url = matches[0]
+    
+    if (url.includes('="')) {
         url = url.split('"')[1]
-      }
-      if (url.startsWith('https://')) {
+    } else if (url.includes("='")) {
+        url = url.split("'")[1]
+    }
+    
+    if (url.startsWith('sk.minv.sca://')) {
         url = this.decodeHtmlEntities(url)
+        console.log("Extracted eIdentita URL:", url)
         return url
-      }
+    }
     }
     
     return null
@@ -115,7 +118,7 @@ export default class extends Controller {
     const button = this.submitButtonTarget
     if (loading) {
       button.disabled = true
-      const openingText = i18n.t('signature.opening_avm')
+      const openingText = i18n.t('signature.opening_eidentita')
       button.innerHTML = `
         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -125,35 +128,34 @@ export default class extends Controller {
       `
     } else {
       button.disabled = false
-      const signText = i18n.t('signature.sign_with_avm')
+      const signText = i18n.t('signature.sign_with_eidentita')
       button.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="w-5 h-5 mr-2">
           <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h4.5v4.5h-4.5v-4.5Z"/>
+                d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
         </svg>
         <span class="font-semibold">${signText}</span>
       `
     }
   }
 
-  redirectToAvmUrl(avmUrl) {
+  redirectToEidentitaUrl(eidentitaUrl) {
     const inIframe = window.self !== window.top
 
     if (inIframe) {
       try {
-        window.top.location.href = avmUrl
+        window.top.location.href = eidentitaUrl
         console.log("Redirected via window.top (iframe detected)")
       } catch (e) {
         console.log("Cross-origin iframe detected, attempting alternative redirect methods")
         
-        const opened = window.open(avmUrl, '_blank')
+        const opened = window.open(eidentitaUrl, '_blank')
         
         if (!opened || opened.closed || typeof opened.closed === 'undefined') {
           console.log("window.open blocked, trying link click method")
           const link = document.createElement('a')
-          link.href = avmUrl
+          link.href = eidentitaUrl
           link.target = '_blank'
           link.rel = 'noopener noreferrer'
           document.body.appendChild(link)
@@ -162,7 +164,7 @@ export default class extends Controller {
         }
       }
     } else {
-      window.location.href = avmUrl
+      window.location.href = eidentitaUrl
       console.log("Redirected via window.location (not in iframe)")
     }
   }

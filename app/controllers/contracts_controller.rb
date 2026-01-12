@@ -1,6 +1,6 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters, :autogram_signing_in_progress ]
-  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign, :autogram_parameters, :autogram_signing_in_progress ]
+  before_action :set_contract, only: [ :show, :sign, :sign_avm, :sign_eidentita, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters, :autogram_signing_in_progress ]
+  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign_eidentita, :sign, :autogram_parameters, :autogram_signing_in_progress ]
 
   before_action :allow_iframe, only: [ :iframe ]
 
@@ -127,6 +127,48 @@ class ContractsController < ApplicationController
     end
   end
 
+  def sign_eidentita
+    unless @contract.has_active_eidentita_session?
+      eidentita_service = EidentitaService.new
+      result = eidentita_service.initiate_signing(@contract)
+
+      raise result[:error] if result[:error]
+
+      @contract.eidentita_sessions.create!(
+        signing_started_at: result[:signing_started_at],
+        status: "pending"
+        )
+    end
+
+    eidentita_session = @contract.current_eidentita_session
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "signature_actions_#{@contract.uuid}",
+          partial: "contracts/eidentita_signing_pending",
+          locals: {
+            contract: @contract,
+            eidentita_session: eidentita_session,
+            eidentita_url: eidentita_session.eidentita_url,
+            eidentita_url_mobile: eidentita_session.eidentita_url_mobile,
+            cancel_url: determine_cancel_url
+          }
+        )
+      end
+    end
+  rescue => e
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "signature_actions_#{@contract.uuid}",
+          partial: "contracts/signature_error",
+          locals: { contract: @contract, error: e.message }
+        )
+      end
+    end
+  end
+
   def signed_document
     redirect_to rails_blob_url(@contract.signed_document, disposition: "attachment"), allow_other_host: true
   end
@@ -215,6 +257,16 @@ class ContractsController < ApplicationController
   end
 
   private
+
+  def determine_cancel_url
+    if request.referrer&.include?("/iframe")
+      iframe_params = {}
+      iframe_params[:no_preview] = true if params[:no_preview].present?
+      iframe_contract_path(@contract, iframe_params)
+    else
+      contract_path(@contract)
+    end
+  end
 
   def set_contract
     @contract = Contract.find_by!(uuid: params[:id])

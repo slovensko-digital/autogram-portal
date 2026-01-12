@@ -33,6 +33,16 @@
                 data_attributes: { 
                   signature_method_selector_target: 'methodRadio'
                 } %>
+
+          <%= render 'shared/radio_button_card',
+                name: "signature_method_#{contract.uuid}",
+                value: 'eidentita',
+                label: t('contracts.signature_actions.eidentita_label'),
+                description: t('contracts.signature_actions.eidentita_description'),
+                checked: false,
+                data_attributes: { 
+                  signature_method_selector_target: 'methodRadio'
+                } %>
         </div>
       </div>
     </div>
@@ -77,6 +87,27 @@
           <% end %>
           <button type="submit" 
                   data-signers--avm-signer-target="submitButton"
+                  style="display: none;">
+          </button>
+        <% end %>
+      </div>
+
+      <div data-signature-method-selector-target="eidentitaForm" 
+          class="hidden">
+        <%= form_with url: sign_eidentita_contract_path(contract), 
+                      method: :post, 
+                      class: "w-full",
+                      local: false,
+                      data: { 
+                        controller: "signers--eidentita-signer",
+                        "signers--eidentita-signer-target": "form",
+                        action: "submit->signers--eidentita-signer#sign"
+                      } do |form| %>
+          <% if no_preview %>
+            <%= form.hidden_field :no_preview, value: "1" %>
+          <% end %>
+          <button type="submit" 
+                  data-signers--eidentita-signer-target="submitButton"
                   style="display: none;">
           </button>
         <% end %>

@@ -55,12 +55,21 @@ Rails.application.routes.draw do
     member do
       post :sign
       post :sign_avm
+      post :sign_eidentita
       get :validate
       get :visualize
       get :signed_document
       get :iframe
       get :autogram_parameters
       get :autogram_signing_in_progress
+    end
+
+    resources :eidentita_sessions, only: [ :show ] do
+      member do
+        get :json
+        get :document
+        post :upload
+      end
     end
   end
 
