@@ -2,8 +2,8 @@
   <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8">
     <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
       <div class="w-full mb-6 flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900">Documents</h1>
-        <%= link_to "Upload New Document", new_document_path, 
+        <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+        <%= link_to t('.upload_new'), new_document_path, 
                   class: "inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all duration-200" %>
       </div>
       <div class="w-full">
@@ -28,11 +28,11 @@
                           </div>
                           <div class="mt-1 flex items-center text-sm text-gray-500">
                             <p>
-                              Uploaded <%= time_ago_in_words(document.created_at) %> ago
+                              <%= t('.uploaded_ago', time: time_ago_in_words(document.created_at)) %>
                             </p>
                             <% if document.user %>
                               <span class="mx-2">•</span>
-                              <p>by <%= document.user.name if document.user.respond_to?(:name) %></p>
+                              <p><%= t('.by', name: document.user.name) if document.user.respond_to?(:name) %></p>
                             <% end %>
                           </div>
                         </div>
@@ -40,7 +40,7 @@
                       <div class="ml-4 flex-shrink-0 flex space-x-2">
                         <%= link_to document_path(document), 
                                   class: "inline-flex items-center px-3 py-2 border border-gray-300  text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-                          View
+                          <%= t('.view') %>
                         <% end %>
                       </div>
                     </div>
@@ -54,10 +54,10 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
               <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No documents</h3>
-            <p class="mt-1 text-sm text-gray-500">Get started by uploading a new document.</p>
+            <h3 class="mt-2 text-sm font-medium text-gray-900"><%= t('.no_documents_title') %></h3>
+            <p class="mt-1 text-sm text-gray-500"><%= t('.no_documents_message') %></p>
             <div class="mt-6">
-              <%= link_to "Upload Document", new_document_path, 
+              <%= link_to t('.upload_document'), new_document_path, 
                           class: "inline-flex items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
             </div>
           </div>
@@ -67,4 +67,4 @@
   </div>
 </main>
 
-<% content_for :title, "Documents" %>
+<% content_for :title, t('.title') %>

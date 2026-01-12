@@ -8,9 +8,9 @@
     <div class="bg-gray-50 border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900">Contract Bundle</h1>
+          <h1 class="text-xl font-semibold text-gray-900"><%= t('.title') %></h1>
           <p class="text-sm text-gray-500 mt-1">
-            Please sign all contracts in the bundle
+            <%= t('.subtitle') %>
           </p>
         </div>
         <div id="bundle_<%= @bundle.uuid %>_status">
@@ -30,14 +30,14 @@
                     <%= index + 1 %>
                   </span>
                   <h2 class="ml-2 text-base font-semibold text-gray-900">
-                    Contract <%= index + 1 %> of <%= @bundle.contracts.count %>
+                    <%= t('.contract_number', current: index + 1, total: @bundle.contracts.count) %>
                   </h2>
                   <% if !contract.awaiting_signature? %>
                     <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                       </svg>
-                      Signed
+                      <%= t('.signed') %>
                     </span>
                   <% end %>
                 </div>

@@ -6,12 +6,12 @@
           <div class="w-full mb-6">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Document</h1>
-                <p class="mt-2 text-sm text-gray-500">Filename: <%= @document.filename %></p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+                <p class="mt-2 text-sm text-gray-500"><%= t('.filename', filename: @document.filename) %></p>
                 <% if @document.contract %>
                   <p class="text-gray-600">
-                    Part of
-                    <%= link_to "Contract ##{@document.contract.short_uuid}", contract_path(@document.contract), 
+                    <%= t('.part_of_contract', uuid: @document.contract.short_uuid).html_safe %>
+                    <%= link_to "##{@document.contract.short_uuid}", contract_path(@document.contract), 
                                class: "text-blue-600 hover:text-blue-800 font-medium" %>
                   </p>
                 <% end %>
@@ -22,7 +22,7 @@
                   <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                   </svg>
-                  Download
+                  <%= t('.download') %>
                 <% end %>
               </div>
             </div>
@@ -39,7 +39,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span class="text-gray-600">Validating electronic signatures...</span>
+                  <span class="text-gray-600"><%= t('.validating_signatures') %></span>
                 </div>
               </div>
             </div>
@@ -58,7 +58,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span class="text-gray-600">Loading document actions...</span>
+                  <span class="text-gray-600"><%= t('.loading_actions') %></span>
                 </div>
               </div>
             </div>

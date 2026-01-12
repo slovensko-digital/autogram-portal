@@ -11,7 +11,7 @@
                 <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
-                All contracts
+                <%= t('.all_contracts') %>
               <% end %>
             </div>
           <% end %>
@@ -19,13 +19,11 @@
           <div class="w-full mb-6">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
               <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Contract</h1>
-                <p class="mt-2 text-sm text-gray-500">UUID: <%= @contract.uuid %></p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+                <p class="mt-2 text-sm text-gray-500"><%= t('.uuid', uuid: @contract.uuid) %></p>
                 <% if @contract.bundle %>
                   <p class="text-gray-600">
-                    Part of
-                    <%= link_to "Bundle ##{@contract.bundle.short_uuid}", contract_path(@contract.bundle), 
-                              class: "text-blue-600 hover:text-blue-800 font-medium" %>
+                    <%= t('.part_of_bundle', link: link_to("Bundle ##{@contract.bundle.short_uuid}", bundle_path(@contract.bundle), class: "text-blue-600 hover:text-blue-800 font-medium")).html_safe %>
                   </p>
                 <% end %>
               </div>
@@ -37,7 +35,7 @@
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
                     </svg>
-                    Download
+                    <%= t('.download') %>
                   <% end %>
                 <% end %>
                 <% if current_user %>
@@ -46,7 +44,7 @@
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
                     </svg>
-                    Edit contract
+                    <%= t('.edit_contract') %>
                   <% end %>
                 <% end %>
               </div>

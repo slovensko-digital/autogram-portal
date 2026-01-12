@@ -3,18 +3,17 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <div>
         <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
-          Qualified Electronic Signatures <span class="text-blue-600">Made Simple</span>
+          <%= t('.hero.title') %> <span class="text-blue-600"><%= t('.hero.title_highlight') %></span>
         </h1>
         <p class="mt-6 text-lg leading-8 text-gray-600">
-          <span class="font-semibold text-gray-900">Open-source platform</span> for managing up to <span class="inline-flex items-center font-semibold text-gray-900">eIDAS-compliant</span> electronic signatures. 
-          <span class="font-semibold text-gray-900">Send documents</span> for signing, <span class="font-semibold text-gray-900">integrate workflows</span> via <span class="font-semibold text-gray-900">API or embedded iframe</span>, and <span class="font-semibold text-gray-900">connect seamlessly</span> with multiple signing apps.
+          <%= t('.hero.description_html').html_safe %>
         </p>
         <div class="mt-8">
           <a href="https://github.com/slovensko-digital/autogram-portal" class="inline-flex items-center text-base font-semibold leading-6 text-blue-600 hover:text-blue-500">
             <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
               <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
             </svg>
-            View on GitHub <span aria-hidden="true" class="ml-1">→</span>
+            <%= t('.hero.view_on_github') %> <span aria-hidden="true" class="ml-1">→</span>
           </a>
         </div>
       </div>
@@ -31,11 +30,11 @@
           <%= render 'shared/dropzone', 
                 controller_name: 'file-upload',
                 input_name: 'document[blob]',
-                title: 'Upload your document',
-                subtitle: 'Drag and drop or click to browse',
-                file_types_hint: 'PDF, XML, ASiC-E and other formats supported',
-                uploading_text: 'Uploading...',
-                drop_text: 'Drop here',
+                title: t('.upload_form.title'),
+                subtitle: t('.upload_form.subtitle'),
+                file_types_hint: t('.upload_form.file_types_hint'),
+                uploading_text: t('.upload_form.uploading_text'),
+                drop_text: t('.upload_form.drop_text'),
                 height: 'h-[280px]' %>
 
           <div class="flex flex-col gap-3">
@@ -44,12 +43,14 @@
                                 { required: true, class: "mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" },
                                 { checked_value: "1", unchecked_value: "0" } %>
               <%= form.label :agree_to_policies, class: "text-sm text-gray-700" do %>
-                I agree with <%= link_to "Terms of Service", terms_of_service_index_path, target: "_blank", class: "text-blue-600 hover:underline" %> and <%= link_to "Privacy Policy", privacy_policy_index_path, target: "_blank", class: "text-blue-600 hover:underline" %>
+                <%= t('.upload_form.agree_to_policies_html', 
+                      terms_link: link_to(t('.upload_form.terms_of_service'), terms_of_service_index_path, target: "_blank", class: "text-blue-600 hover:underline"),
+                      privacy_link: link_to(t('.upload_form.privacy_policy'), privacy_policy_index_path, target: "_blank", class: "text-blue-600 hover:underline")).html_safe %>
                 <span class="text-red-500">*</span>
               <% end %>
             </div>
 
-            <%= form.submit "Upload & Continue", 
+            <%= form.submit t('.upload_form.submit'), 
                            class: "w-full rounded-md bg-blue-600 px-6 py-3 text-base font-semibold text-white  hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 opacity-50 cursor-not-allowed transition-all duration-200",
                            disabled: true,
                            data: { "file-upload-target": "submitButton" } %>
@@ -64,10 +65,10 @@
     <div class="mx-auto max-w-4xl">
       <div class="text-center mb-12">
         <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          Start using Autogram Portal today
+          <%= t('.start_using.title') %>
         </h2>
         <p class="mt-4 text-lg text-blue-100">
-          Choose how you want to work — with or without an account
+          <%= t('.start_using.subtitle') %>
         </p>
       </div>
       <div class="mx-auto grid max-w-2xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-2">
@@ -76,9 +77,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
           <div class="text-left">
-            <h3 class="text-base font-semibold leading-7 text-white">No account needed to start</h3>
+            <h3 class="text-base font-semibold leading-7 text-white"><%= t('.start_using.no_account.title') %></h3>
             <p class="mt-2 text-sm leading-6 text-blue-100">
-              Upload documents, view content, validate signatures, and share signing links — all without registration. Perfect for quick, one-time signing tasks.
+              <%= t('.start_using.no_account.description') %>
             </p>
           </div>
         </div>
@@ -87,9 +88,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
           </svg>
           <div class="text-left">
-            <h3 class="text-base font-semibold leading-7 text-white">More with an account</h3>
+            <h3 class="text-base font-semibold leading-7 text-white"><%= t('.start_using.with_account.title') %></h3>
             <p class="mt-2 text-sm leading-6 text-blue-100">
-              Access document history, send signature requests via email, receive notifications and webhooks when others sign, integrate via REST API and iframes, and manage all your documents in one place.
+              <%= t('.start_using.with_account.description') %>
             </p>
           </div>
         </div>
@@ -100,12 +101,12 @@
 <div class="py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-blue-600">eIDAS-Compatible Platform</h2>
+      <h2 class="text-base font-semibold leading-7 text-blue-600"><%= t('.features.subtitle') %></h2>
       <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-        Complete document signing workflow
+        <%= t('.features.title') %>
       </p>
       <p class="mt-6 text-lg leading-8 text-gray-600">
-        Bridging the gap between eGovernment and commercial document signing. Send documents for signature requests, integrate signing into your existing applications, and leverage qualified signature creation devices for legally valid electronic signatures.
+        <%= t('.features.description') %>
       </p>
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
@@ -117,10 +118,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
               </svg>
             </div>
-            Send Documents for Signing
+            <%= t('.features.send_documents.title') %>
           </dt>
           <dd class="mt-2 text-base leading-7 text-gray-600">
-            Request signatures from other people via email or link sharing. Recipients can sign documents using their qualified signature creation devices without needing to create an account.
+            <%= t('.features.send_documents.description') %>
           </dd>
         </div>
         <div class="relative pl-16">
@@ -130,10 +131,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
               </svg>
             </div>
-            API & Iframe Integration
+            <%= t('.features.api_integration.title') %>
           </dt>
           <dd class="mt-2 text-base leading-7 text-gray-600">
-            Embed signing workflows directly into your applications using simple iframe integration or comprehensive REST API. Automate document signing processes in your business systems.
+            <%= t('.features.api_integration.description') %>
           </dd>
         </div>
         <div class="relative pl-16">
@@ -143,10 +144,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
               </svg>
             </div>
-            Qualified eIDAS Signatures
+            <%= t('.features.qualified_signatures.title') %>
           </dt>
           <dd class="mt-2 text-base leading-7 text-gray-600">
-            Create qualified electronic signatures using government-issued eID cards and other qualified signature creation devices. Seamless integration with Autogram Desktop and Mobile apps.
+            <%= t('.features.qualified_signatures.description') %>
           </dd>
         </div>
         <div class="relative pl-16">
@@ -156,10 +157,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            Document Validation
+            <%= t('.features.validation.title') %>
           </dt>
           <dd class="mt-2 text-base leading-7 text-gray-600">
-            Instantly verify the validity and integrity of signed documents. The system automatically checks certificates, signatures, and timestamps to ensure compliance.
+            <%= t('.features.validation.description') %>
           </dd>
         </div>
         <div class="relative pl-16">
@@ -169,10 +170,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
               </svg>
             </div>
-            Multi-Party Workflows
+            <%= t('.features.multi_party.title') %>
           </dt>
           <dd class="mt-2 text-base leading-7 text-gray-600">
-            Manage complex signing scenarios with multiple participants. Track signature status, send reminders, and coordinate sequential or parallel signing workflows.
+            <%= t('.features.multi_party.description') %>
           </dd>
         </div>
         <div class="relative pl-16">
@@ -183,10 +184,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            Document Visualization
+            <%= t('.features.visualization.title') %>
           </dt>
           <dd class="mt-2 text-base leading-7 text-gray-600">
-            View and navigate ASiC container contents and Slovak electronic forms in XML format directly in the browser. Preview documents before signing with clear, user-friendly rendering.
+            <%= t('.features.visualization.description') %>
           </dd>
         </div>
       </dl>
@@ -196,12 +197,12 @@
 <div class="bg-blue-50 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-blue-600">The Autogram Ecosystem</h2>
+      <h2 class="text-base font-semibold leading-7 text-blue-600"><%= t('.ecosystem.subtitle') %></h2>
       <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-        Complete signing infrastructure
+        <%= t('.ecosystem.title') %>
       </p>
       <p class="mt-6 text-lg leading-8 text-gray-600">
-        Autogram Portal is part of a comprehensive open-source portfolio for qualified electronic signatures, working seamlessly with Autogram signing applications.
+        <%= t('.ecosystem.description') %>
       </p>
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
@@ -211,12 +212,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Desktop</dt>
+            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.desktop.title') %></dt>
             <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
-              <p class="flex-auto">Desktop application for Windows, macOS, and Linux that creates qualified signatures using eID cards and other qualified signature creation devices. Connects directly to the portal for seamless signing workflows.</p>
+              <p class="flex-auto"><%= t('.ecosystem.desktop.description') %></p>
               <p class="mt-4">
                 <a href="https://sluzby.slovensko.digital/autogram/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                  Learn more <span aria-hidden="true">→</span>
+                  <%= t('.ecosystem.desktop.learn_more') %> <span aria-hidden="true">→</span>
                 </a>
               </p>
             </dd>
@@ -227,12 +228,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Mobile</dt>
+            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.mobile.title') %></dt>
             <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
-              <p class="flex-auto">Mobile applications for iOS and Android that enable qualified signatures using mobile eID solutions and qualified signature creation devices. Sign documents on the go with full portal integration.</p>
+              <p class="flex-auto"><%= t('.ecosystem.mobile.description') %></p>
               <p class="mt-4">
                 <a href="https://sluzby.slovensko.digital/autogram-v-mobile/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                  Learn more <span aria-hidden="true">→</span>
+                  <%= t('.ecosystem.mobile.learn_more') %> <span aria-hidden="true">→</span>
                 </a>
               </p>
             </dd>
@@ -243,12 +244,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Extension</dt>
+            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.extension.title') %></dt>
             <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
-              <p class="flex-auto">Browser extension that integrates Autogram Desktop and Mobile directly into Slovak eGovernment portals. Sign documents seamlessly without leaving government websites.</p>
+              <p class="flex-auto"><%= t('.ecosystem.extension.description') %></p>
               <p class="mt-4">
                 <a href="https://sluzby.slovensko.digital/autogram/#download" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                  Learn more <span aria-hidden="true">→</span>
+                  <%= t('.ecosystem.extension.learn_more') %> <span aria-hidden="true">→</span>
                 </a>
               </p>
             </dd>
@@ -259,9 +260,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900">Autogram Portal</dt>
+            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.portal.title') %></dt>
             <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
-              <p class="flex-auto">Web-based platform for managing the complete document signing lifecycle in commercial applications. Provides validation, workflow management, and API integration for business processes.</p>
+              <p class="flex-auto"><%= t('.ecosystem.portal.description') %></p>
             </dd>
           </div>
         </div>
@@ -273,10 +274,10 @@
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:mx-0">
       <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-        Built on Open Standards
+        <%= t('.standards.title') %>
       </h2>
       <p class="mt-6 text-lg leading-8 text-gray-300">
-        Autogram Portal is fully open-source and built on proven technologies, meeting the highest security standards while enabling transparency and community collaboration.
+        <%= t('.standards.description') %>
       </p>
     </div>
     <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-center lg:mx-0 lg:max-w-none lg:grid-cols-3">
@@ -286,9 +287,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
         </div>
-        <h3 class="mt-6 text-xl font-semibold text-white">eIDAS Regulation</h3>
+        <h3 class="mt-6 text-xl font-semibold text-white"><%= t('.standards.eidas.title') %></h3>
         <p class="mt-4 text-base text-gray-400">
-          Qualified electronic signatures according to EU eIDAS have strong legal validity across all member states, bridging the gap between eGovernment and commercial use.
+          <%= t('.standards.eidas.description') %>
         </p>
       </div>
       <div class="bg-white/5 rounded-2xl p-8 ring-1 ring-white/10">
@@ -297,9 +298,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
           </svg>
         </div>
-        <h3 class="mt-6 text-xl font-semibold text-white">Open Source</h3>
+        <h3 class="mt-6 text-xl font-semibold text-white"><%= t('.standards.open_source.title') %></h3>
         <p class="mt-4 text-base text-gray-400">
-          Fully open-source platform supported by NLNet organization. Transparent, auditable, and community-driven development ensuring trust and continuous improvement.
+          <%= t('.standards.open_source.description') %>
         </p>
       </div>
       <div class="bg-white/5 rounded-2xl p-8 ring-1 ring-white/10">
@@ -308,24 +309,22 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
           </svg>
         </div>
-        <h3 class="mt-6 text-xl font-semibold text-white">REST API & Webhooks</h3>
+        <h3 class="mt-6 text-xl font-semibold text-white"><%= t('.standards.api.title') %></h3>
         <p class="mt-4 text-base text-gray-400">
-          Comprehensive REST API for seamless integration into your applications. Standard Webhooks support enables real-time notifications for signature events and workflow automation.
+          <%= t('.standards.api.description') %>
         </p>
       </div>
     </div>
     <div class="mx-auto mt-16 max-w-2xl text-center">
-      <h3 class="text-2xl font-bold text-white">Ready to get started?</h3>
+      <h3 class="text-2xl font-bold text-white"><%= t('.cta.title') %></h3>
       <p class="mt-4 text-lg text-gray-400">
-        Try Autogram Portal now or explore the source code on GitHub.
+        <%= t('.cta.subtitle') %>
       </p>
       <div class="mt-8 flex items-center justify-center gap-x-6">
-        <%= link_to new_document_path, 
-            class: "rounded-md bg-blue-600 px-4 py-3 text-base font-semibold text-white  hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" do %>
-          Start signing documents
-        <% end %>
+        <%= link_to t('.cta.start_signing'), new_document_path, 
+            class: "rounded-md bg-blue-600 px-4 py-3 text-base font-semibold text-white  hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" %>
         <a href="https://github.com/slovensko-digital/autogram-portal" class="text-base font-semibold leading-6 text-white hover:text-gray-300">
-          View on GitHub <span aria-hidden="true">→</span>
+          <%= t('.cta.view_github') %> <span aria-hidden="true">→</span>
         </a>
       </div>
     </div>

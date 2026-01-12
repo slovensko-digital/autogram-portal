@@ -2,8 +2,8 @@
   <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8">
     <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
       <div class="w-full mb-6 flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900">Contracts</h1>
-        <%= link_to "Upload document", new_document_path, 
+        <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+        <%= link_to t('.upload_document'), new_document_path, 
                     class: "inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all duration-200" %>
       </div>
       <div class="w-full">
@@ -29,7 +29,7 @@
                               <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                               </svg>
-                              Signed
+                              <%= t('.signed') %>
                             </span>
                           <% end %>
                           <% if contract.allowed_methods.any? %>
@@ -51,16 +51,16 @@
                             <% if contract.documents.any? %>
                               <%= pluralize(contract.documents.count, 'document', 'documents') %>
                             <% else %>
-                              No documents
+                              <%= t('.no_documents') %>
                             <% end %>
                             <% if contract.user %>
-                              • <%= contract.user.email rescue 'Unknown user' %>
+                              • <%= contract.user.email rescue t('.unknown_user') %>
                             <% end %>
                           </p>
                         </div>
                         <div class="mt-1">
                           <p class="text-xs text-gray-400">
-                            Created at: <%= contract.created_at.strftime("%d.%m.%Y %H:%M") %>
+                            <%= t('.created_at') %>: <%= contract.created_at.strftime("%d.%m.%Y %H:%M") %>
                           </p>
                         </div>
                       </div>
@@ -73,12 +73,12 @@
                           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                           </svg>
-                          Download
+                          <%= t('.download') %>
                         <% end %>
                       <% end %>
                       <%= link_to contract_path(contract), 
                                   class: "inline-flex items-center px-3 py-2 border border-gray-300  text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-                        View
+                        <%= t('.view') %>
                       <% end %>
                     </div>
                   </div>
@@ -91,10 +91,10 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No contracts yet</h3>
-            <p class="mt-1 text-sm text-gray-500">Start by uploading a document.</p>
+            <h3 class="mt-2 text-sm font-medium text-gray-900"><%= t('.no_contracts_title') %></h3>
+            <p class="mt-1 text-sm text-gray-500"><%= t('.no_contracts_message') %></p>
             <div class="mt-6">
-              <%= link_to "Upload document", new_document_path, 
+              <%= link_to t('.upload_document'), new_document_path, 
                           class: "inline-flex items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
             </div>
           </div>

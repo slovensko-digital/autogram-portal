@@ -4,21 +4,21 @@
   # - input_name: Name attribute for the file input (required)
   # - accept_types: File accept attribute (default: PDF, XML, etc.)
   # - height: Height class (default: 'h-[400px]')
-  # - title: Upload area title (default: 'Upload document here')
-  # - subtitle: Upload area subtitle (default: 'Drag and drop here, or click to select a file from disk.')
-  # - file_types_hint: File types hint (default: 'PDF, XML or other file')
-  # - uploading_text: Text shown during upload (default: 'Adding document...')
-  # - drop_text: Text shown when dragging (default: 'Drop document here')
+  # - title: Upload area title (default from i18n)
+  # - subtitle: Upload area subtitle (default from i18n)
+  # - file_types_hint: File types hint (default from i18n)
+  # - uploading_text: Text shown during upload (default from i18n)
+  # - drop_text: Text shown when dragging (default from i18n)
 
   controller_name = local_assigns.fetch(:controller_name, 'file-upload')
   input_name = local_assigns.fetch(:input_name) { raise ArgumentError, "input_name is required" }
   accept_types = local_assigns.fetch(:accept_types, '.pdf,.xml,.xdcf,.asice,.txt,.png,.jpg,.jpeg,application/pdf,application/xml,text/xml,application/vnd.gov.sk.xmldatacontainer+xml,application/vnd.etsi.asic-e+zip')
   height = local_assigns.fetch(:height, 'h-[400px]')
-  title = local_assigns.fetch(:title, 'Upload document here')
-  subtitle = local_assigns.fetch(:subtitle, 'Drag and drop here, or click to select a file from disk.')
-  file_types_hint = local_assigns.fetch(:file_types_hint, 'PDF, XML or other file')
-  uploading_text = local_assigns.fetch(:uploading_text, 'Adding document...')
-  drop_text = local_assigns.fetch(:drop_text, 'Drop document here')
+  title = local_assigns.fetch(:title, t('shared.dropzone.title'))
+  subtitle = local_assigns.fetch(:subtitle, t('shared.dropzone.subtitle'))
+  file_types_hint = local_assigns.fetch(:file_types_hint, t('shared.dropzone.file_types_hint'))
+  uploading_text = local_assigns.fetch(:uploading_text, t('shared.dropzone.uploading_text'))
+  drop_text = local_assigns.fetch(:drop_text, t('shared.dropzone.drop_text'))
 %>
 
 <div
@@ -72,13 +72,13 @@
       <button type="button" 
               class="flex-shrink-0 text-red-600 hover:text-red-800 p-1" 
               data-action="click-><%= controller_name.parameterize %>#removeFile"
-              title="Remove file">
+              title="<%= t('shared.dropzone.remove_file') %>">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
-    <p class="text-sm text-gray-500 mt-4 text-center">Click to select another file</p>
+    <p class="text-sm text-gray-500 mt-4 text-center"><%= t('shared.dropzone.select_another') %></p>
   </div>
   
   <input type="file" 
