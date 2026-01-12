@@ -46,11 +46,6 @@ class EidentitaSession < ApplicationRecord
     "sk.minv.sca://sign?qr=false&linkUrl=#{CGI.escape(link_url)}"
   end
 
-  def expired?
-    return false unless signing_started_at
-    Time.current > signing_started_at + 10.minutes
-  end
-
   def mark_completed!
     update!(status: :completed, completed_at: Time.current)
   end

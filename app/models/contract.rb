@@ -92,7 +92,7 @@ class Contract < ApplicationRecord
   end
 
   def has_active_eidentita_session?
-    current_eidentita_session.present? && !current_eidentita_session.expired?
+    current_eidentita_session.present?
   end
 
   def broadcast_signing_success
