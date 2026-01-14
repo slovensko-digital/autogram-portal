@@ -4,7 +4,7 @@ class DeviseMailerPreview < ActionMailer::Preview
     user = User.first || User.new(email: "user@example.com")
     token = "sample_magic_link_token_12345"
 
-    DeviseMailer.magic_link(user, token, {remember_me: false})
+    DeviseMailer.magic_link(user, token, { remember_me: false })
   end
 
   def confirmation_instructions
