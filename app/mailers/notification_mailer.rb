@@ -14,6 +14,11 @@ class NotificationMailer < ApplicationMailer
     mail(subject: I18n.t("notification_mailer.bundle_completed.subject"))
   end
 
+  def bundle_created(bundle)
+    @bundle = bundle
+    mail(subject: I18n.t("notification_mailer.bundle_created.subject"))
+  end
+
   private
 
   def set_locale

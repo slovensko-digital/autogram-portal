@@ -77,6 +77,12 @@ class Bundle < ApplicationRecord
     NotificationMailer.with(user: author).bundle_completed(self).deliver_later
   end
 
+  def notify_recipients
+    recipients.each do |recipient|
+      NotificationMailer.with(user: recipient).bundle_created(self).deliver_later
+    end
+  end
+
   def short_uuid
     uuid.first(8)
   end

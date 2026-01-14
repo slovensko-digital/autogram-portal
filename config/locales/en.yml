@@ -445,6 +445,12 @@ en:
       message: "Your bundle with %{bundle_count} contract(s) has been completed."
       details_title: "Completed contracts:"
       view_bundle: "View bundle"
+    bundle_created:
+      subject: "Documents need your signature"
+      greeting: "Hello,"
+      message: "User %{author_name} expects your signature on %{bundle_count} documents(s)."
+      details_title: "Documents in the bundle:"
+      view_bundle: "View bundle"
   
   activerecord:
     errors:

@@ -413,8 +413,14 @@ sk:
     bundle_completed:
       subject: "Váš balík zmlúv bol podpísaný"
       greeting: "Dobrý deň,"
-      message: "Váš balík s %{bundle_count} zmluvou/zmluvami bol dokončený."
+      message: "Váš balík so zmluvami bol dokončený."
       details_title: "Dokončené zmluvy:"
+      view_bundle: "Zobraziť balík"
+    bundle_created:
+      subject: "Dokumenty na podpis"
+      greeting: "Dobrý deň,"
+      message: "Používateľ %{author_name} vás požiadal o podpis balíka dokumentov v systémem Autogram Portal."
+      details_title: "Dokumenty na podpis:"
       view_bundle: "Zobraziť balík"
 
   activerecord:

@@ -11,4 +11,10 @@ class NotificationMailerPreview < ActionMailer::Preview
     user = bundle.author
     NotificationMailer.with(user: user).bundle_completed(bundle)
   end
+
+  def bundle_created
+    bundle = Bundle.joins(:recipients).where.not(users: { id: nil }).first
+    user = bundle.recipients.first
+    NotificationMailer.with(user: user).bundle_created(bundle)
+  end
 end
