@@ -402,6 +402,7 @@ sk:
 
   notification_mailer:
     contract_signed:
+      subject: "Vaše dokumenty boli podpísané"
       greeting: "Dobrý deň,"
       message: "dokument %{filename} bol podpísaný."
       details_title: "Detaily podpisu:"
@@ -409,6 +410,12 @@ sk:
       timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
       timestamp_non_qualified: "Negarantovný dátum a čas (bez časovej pečiatky): %{signing_time}"
       view_contract: "Zobraziť podpísaný dokument"
+    bundle_completed:
+      subject: "Váš balík zmlúv bol podpísaný"
+      greeting: "Dobrý deň,"
+      message: "Váš balík s %{bundle_count} zmluvou/zmluvami bol dokončený."
+      details_title: "Dokončené zmluvy:"
+      view_bundle: "Zobraziť balík"
 
   activerecord:
     errors:

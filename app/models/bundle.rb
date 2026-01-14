@@ -46,7 +46,12 @@ class Bundle < ApplicationRecord
 
   def contract_signed(contract)
     broadcast_contract_signed(contract)
-    broadcast_all_signed if completed?
+
+    return unless completed?
+
+    broadcast_all_signed
+    webhook.fire_all_signed()&& webhook.present?
+    notify_author if should_notify_author?
   end
 
   def broadcast_all_signed
@@ -56,12 +61,20 @@ class Bundle < ApplicationRecord
       partial: "bundles/status",
       locals: { bundle: self }
     )
-
-    webhook.fire_all_signed() if webhook.present?
   end
 
   def broadcast_contract_signed(contract)
+    # TODO: broadcast also to turbo stream for the contract itself
     webhook.fire_contract_signed(contract) if webhook.present?
+  end
+
+  def should_notify_author?
+    # TODO: do not notify if author is the one that signed the bundle
+    true
+  end
+
+  def notify_author
+    NotificationMailer.with(user: author).bundle_completed(self).deliver_later
   end
 
   def short_uuid

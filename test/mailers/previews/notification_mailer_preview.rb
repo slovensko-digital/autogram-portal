@@ -5,4 +5,10 @@ class NotificationMailerPreview < ActionMailer::Preview
     user = contract.user
     NotificationMailer.with(user: user).contract_signed(contract)
   end
+
+  def bundle_completed
+    bundle = Bundle.first
+    user = bundle.author
+    NotificationMailer.with(user: user).bundle_completed(bundle)
+  end
 end

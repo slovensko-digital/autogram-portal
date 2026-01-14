@@ -431,6 +431,7 @@ en:
 
   notification_mailer:
     contract_signed:
+      subject: "Your contract has been signed"
       greeting: "Hello,"
       message: "contract %{filename} has been signed."
       details_title: "Signature details:"
@@ -438,6 +439,12 @@ en:
       timestamp_qualified: "Timestamp date and time: %{signing_time}"
       timestamp_non_qualified: "Non-guaranteed date and time (without timestamp): %{signing_time}"
       view_contract: "View signed contract"
+    bundle_completed:
+      subject: "Your contract bundle has been signed"
+      greeting: "Hello,"
+      message: "Your bundle with %{bundle_count} contract(s) has been completed."
+      details_title: "Completed contracts:"
+      view_bundle: "View bundle"
   
   activerecord:
     errors:
