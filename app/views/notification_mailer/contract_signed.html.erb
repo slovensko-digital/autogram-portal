@@ -1,21 +1,17 @@
-<p class="greeting">Dobrý deň,</p>
+<p class="greeting"><%= t('.greeting') %></p>
 
-<p class="message">používateľ <strong>{{signer_name}}</strong> podpísal dokument, ktorý ste odoslali na podpis.</p>
+<p class="message"><%= t('.message', filename: @contract.display_name) %></p>
 
 <div class="details">
-  <div class="details-title">Detaily podpisu:</div>
+  <div class="details-title"><%= t('.details_title') %></div>
   <div class="details-list">
-    <div>Dokument: {{document_name}}</div>
-    <div>Podpísal: {{signer_name}}</div>
-    <div>Dátum a čas: {{signed_at}}</div>
+    <div><%= t('.signed_by', signer_name: @signature[:signer_name]) %></div>
+    <% if @signature[:timestamp_info] && @signature[:timestamp_info][:qualified] %>
+      <div><%= t('.timestamp_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+    <% else %>
+      <div><%= t('.timestamp_non_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+    <% end %>
   </div>
 </div>
 
-<a href="{{document_url}}" class="button">Stiahnuť podpísaný dokument</a>
-
-<p class="warning">Ak ste tento podpis nečakali, odporúčame overiť detaily dokumentu alebo kontaktovať odosielateľa.</p>
-
-<p class="signature">
-  S pozdravom,<br>
-  Tím Autogram Portal
-</p>
+<%= link_to t('.view_contract'), url_for(@contract), class: "button" %>

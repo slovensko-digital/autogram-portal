@@ -3,6 +3,6 @@ class NotificationMailerPreview < ActionMailer::Preview
   def contract_signed
     contract = Contract.where.not(user: nil).first
     user = contract.user
-    NotificationMailer.contract_signed(contract, user)
+    NotificationMailer.with(user: user).contract_signed(contract)
   end
 end
