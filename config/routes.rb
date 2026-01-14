@@ -103,4 +103,6 @@ Rails.application.routes.draw do
 
   # add good job admin interface at /admin/good_job
   mount GoodJob::Engine => "/admin/good_job"
+
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 end
