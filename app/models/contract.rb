@@ -134,7 +134,7 @@ class Contract < ApplicationRecord
   private
 
   def notify_user
-    NotificationMailer.contract_signed(self, user).deliver_later
+    NotificationMailer.with(user: user).contract_signed(self).deliver_later
   end
 
   def ensure_uuid
