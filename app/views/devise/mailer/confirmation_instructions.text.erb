@@ -1,0 +1,5 @@
+<%= t('.greeting', recipient: @email) %>
+
+<%= t('.instruction') %>
+
+<%= t('.action') %>: <%= confirmation_url(@resource, confirmation_token: @token) %>
