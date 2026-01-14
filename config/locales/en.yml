@@ -428,6 +428,16 @@ en:
       sign_with_avm: "Sign with AVM"
       opening_eidentita: "Opening eIdentita..."
       sign_with_eidentita: "Sign with eIdentita"
+
+  notification_mailer:
+    contract_signed:
+      greeting: "Hello,"
+      message: "contract %{filename} has been signed."
+      details_title: "Signature details:"
+      signed_by: "Signed by: %{signer_name}"
+      timestamp_qualified: "Timestamp date and time: %{signing_time}"
+      timestamp_non_qualified: "Non-guaranteed date and time (without timestamp): %{signing_time}"
+      view_contract: "View signed contract"
   
   activerecord:
     errors:

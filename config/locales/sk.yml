@@ -400,6 +400,16 @@ sk:
       opening_eidentita: "Otváram eIdentitu..."
       sign_with_eidentita: "Podpísať cez eIdentitu"
 
+  notification_mailer:
+    contract_signed:
+      greeting: "Dobrý deň,"
+      message: "dokument %{filename} bol podpísaný."
+      details_title: "Detaily podpisu:"
+      signed_by: "Podpísal: %{signer_name}"
+      timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
+      timestamp_non_qualified: "Negarantovný dátum a čas (bez časovej pečiatky): %{signing_time}"
+      view_contract: "Zobraziť podpísaný dokument"
+
   activerecord:
     errors:
       models:
