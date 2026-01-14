@@ -419,7 +419,7 @@ sk:
     bundle_created:
       subject: "Dokumenty na podpis"
       greeting: "Dobrý deň,"
-      message: "Používateľ %{author_name} vás požiadal o podpis balíka dokumentov v systémem Autogram Portal."
+      message: "%{author_name} vás požiadal o podpis balíka dokumentov v systémem Autogram Portal."
       details_title: "Dokumenty na podpis:"
       view_bundle: "Zobraziť balík"
 

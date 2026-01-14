@@ -448,7 +448,7 @@ en:
     bundle_created:
       subject: "Documents need your signature"
       greeting: "Hello,"
-      message: "User %{author_name} expects your signature on %{bundle_count} documents(s)."
+      message: "%{author_name} expects your signature on %{bundle_count} documents(s)."
       details_title: "Documents in the bundle:"
       view_bundle: "View bundle"
   
