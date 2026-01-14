@@ -72,10 +72,14 @@ class Contract < ApplicationRecord
     save!
 
     avm_sessions.active.each(&:mark_completed!)
+    bundle.contract_signed(self) if bundle.present?
     broadcast_signing_success
+
+    notify_user if should_notify_user?
   end
 
   def awaiting_signature?
+    # TODO: Improve logic to consider multiple expected signatures
     signed_document.blank?
   end
 
@@ -95,14 +99,16 @@ class Contract < ApplicationRecord
     current_eidentita_session.present?
   end
 
+  def should_notify_user?
+    # TODO: Improve logic to not notify "self sign" by user
+    user.present? && awaiting_signature? == false
+  end
+
   def broadcast_signing_success
-    # Reload the entire page to update all elements after signing
     Turbo::StreamsChannel.broadcast_action_to(
       "contract_#{uuid}",
       action: :refresh
     )
-
-    bundle.contract_signed(self) if bundle.present?
   end
 
   def short_uuid
@@ -110,6 +116,10 @@ class Contract < ApplicationRecord
   end
 
   private
+
+  def notify_user
+    NotificationMailer.contract_signed(self, user).deliver_later
+  end
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
