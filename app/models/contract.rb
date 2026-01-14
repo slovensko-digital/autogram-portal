@@ -115,6 +115,22 @@ class Contract < ApplicationRecord
     uuid.first(8)
   end
 
+  def display_name
+    documents.first.blob.filename
+  end
+
+  def validation_result
+    document_to_validate = if signed_document.attached?
+      Document.new(blob: signed_document.blob)
+    elsif documents.size == 1
+      documents.first
+    else
+      nil
+    end
+
+    document_to_validate&.validation_result
+  end
+
   private
 
   def notify_user
