@@ -1,0 +1,10 @@
+<%= t('.greeting') %>
+
+<%= t('.message', bundle_count: @bundle.contracts.count, author_name: @bundle.author.name) %>
+
+<%= t('.details_title') %>
+<% @bundle.contracts.each do |contract| %>
+- <%= contract.display_name %>
+<% end %>
+
+<%= t('.view_bundle') %>: <%= url_for(@bundle) %>

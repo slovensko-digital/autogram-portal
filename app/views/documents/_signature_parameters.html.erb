@@ -1,0 +1,55 @@
+<%= turbo_frame_tag "document_actions_#{@document.uuid}" do %>
+  <div class="w-full">
+    <div class="bg-white border border-gray-200 rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="mb-6 text-center lg:text-left">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.actions.sign_title') %></h3>
+          <p class="text-gray-600"><%= t('documents.actions.sign_subtitle') %></p>
+        </div>
+        <%= form_with url: create_contract_from_document_document_path(@document), 
+                      method: :post, 
+                      local: true, 
+                      data: { turbo_frame: "_top", controller: "form-submit", action: "submit->form-submit#handleSubmit" }, 
+                      class: "space-y-6" do |form| %>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <%= label_tag "format_container_combination", t('documents.actions.signature_format'), class: "block text-sm font-medium text-gray-700 mb-3" %>
+              <div class="space-y-3">
+                <% signature_options = @document.signature_options %>
+                <% signature_options.each do |value| %>
+                  <%= render 'shared/radio_button_card', 
+                        name: 'format_container_combination',
+                        value: value,
+                        label: t("signature_formats.short.#{value}"),
+                        description: t("signature_formats.#{value}"),
+                        checked: value == signature_options.first %>
+                <% end %>
+              </div>
+            </div>
+            <div>
+              <%= label_tag "allowed_method", t('documents.actions.allowed_method'), class: "block text-sm font-medium text-gray-700 mb-3" %>
+              <div class="space-y-3">
+                <% [ 'qes', 'ts-qes' ].each do |value| %>
+                  <%= render 'shared/radio_button_card', 
+                        name: 'allowed_method',
+                        value: value,
+                        label: t("signature_methods.short.#{value.gsub('-', '_')}"),
+                        description: t("signature_methods.#{value.gsub('-', '_')}"),
+                        checked: value == 'qes' %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-8">
+            <%= link_to actions_document_path(@document), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <%= t('documents.new.actions.back') %>
+            <% end %>
+            <%= submit_tag t('documents.actions.continue_signing'), 
+                            class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                            data: { "form-submit-target": "submitButton" } %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

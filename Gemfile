@@ -63,6 +63,8 @@ group :development do
 
   # Annotate models with database schema information
   gem "web-console"
+
+  gem "letter_opener_web"
 end
 
 group :test do

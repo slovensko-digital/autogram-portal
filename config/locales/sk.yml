@@ -67,25 +67,37 @@ sk:
         greeting: "Dobrý deň %{recipient}!"
         instruction: "Prihlásiť sa môžete pomocou odkazu nižšie:"
         action: "Prihlásiť sa do môjho účtu"
-        expiry_notice: "Upozorňujeme, že platnosť odkazu vyprší za %{expiry}."
+        expiry_notice: "Odkaz je platný %{expiry} minút."
     shared:
       links:
         sign_in: "Prihlásiť sa"
         sign_up: "Registrovať sa"
         didn_t_receive_confirmation_instructions: "Nedostali ste potvrdzovací e-mail?"
         didn_t_receive_unlock_instructions: "Nedostali ste e-mail na odomknutie?"
-  
+    passwordless:
+      user:
+        signed_up_but_unconfirmed: "Úspešne ste sa zaregistrovali. Váš účet ešte nie je aktivovaný, skontrolujte si prosím email a kliknite na odkaz na potvrdenie vášho účtu."
+
   signature_methods:
     qes: "Kvalifikovaný elektronický podpis"
     ts_qes: "Kvalifikovaný elektronický podpis s časovou pečiatkou"
     ades: "Pokročilý elektronický podpis"
     ses: "Jednoduchý elektronický podpis"
     short:
-      qes: "KEP"
-      ts_qes: "KEP + Časová pečiatka"
-      ades: "ADES"
-      ses: "SES"
+      qes: "Vlastnoručný podpis"
+      ts_qes: "Osvedčený podpis"
+      ades: "Zdokonalený elektronický podpis"
+      ses: "Jednoduchý elektronický podpis"
   
+  signature_formats:
+    pades: "PDF Advanced Electronic Signature (PAdES)"
+    xades_asice: "XML Advanced Electronic Signature (XAdES) in ASiC-E container"
+    cades_asice: "CMS Advanced Electronic Signature (CAdES) in ASiC-E container"
+    short:
+      pades: "PAdES"
+      xades_asice: "XAdES + ASiC-E"
+      cades_asice: "CAdES + ASiC-E"
+
   documents:
     index:
       title: "Dokumenty"
@@ -107,6 +119,19 @@ sk:
       policies_link: "zásadami, pravidlami a podmienkami"
       upload_document: "Nahrať dokument"
       cancel: "Zrušiť"
+      actions:
+        continue: "Pokračovať"
+        back: "Späť"
+        header: "Vyberte akciu"
+        sign:
+          title: "Podpísať dokument"
+          subtitle: "Vyberte formát podpisu a typ podpisu a podpíšte tento dokument."
+        request_signature:
+          title: "Poslať na podpis"
+          subtitle: "Pošlite tento dokument iným na podpisovanie cez e-mail alebo zdieľaný odkaz."
+        add_timestamp:
+          title: "Pridať časovú pečiatku"
+          subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
     show:
       title: "Dokument"
       filename: "Názov súboru: %{filename}"
@@ -116,9 +141,9 @@ sk:
       loading_actions: "Načítavam akcie dokumentu..."
     actions:
       sign_title: "Podpísať dokument"
-      sign_subtitle: "Vyberte formát podpisu a metódu na vytvorenie zmluvy a podpísanie dokumentu v ďalšom kroku."
+      sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
       signature_format: "Formát podpisu"
-      allowed_method: "Povolená metóda podpisu"
+      allowed_method: "Typ podpisu"
       continue_signing: "Pokračovať na podpisovanie dokumentu"
       add_timestamp_title: "Pridať časovú pečiatku"
       add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
@@ -137,6 +162,13 @@ sk:
       hide_preview: "Skryť náhľad dokumentu"
       show_preview: "Zobraziť náhľad dokumentu"
       loading_content: "Načítavam obsah dokumentu..."
+    alerts:
+      no_file_attached: "K tomuto dokumentu nie je pripojený žiadny súbor."
+      already_part_of_contract: "Tento dokument je už súčasťou zmluvy."
+      failed_to_create_contract: "Nepodarilo sa vytvoriť zmluvu: %{errors}"
+      all_signatures_have_timestamps: "Všetky podpisy už majú kvalifikované časové pečiatky."
+      failed_to_extend_signatures: "Nepodarilo sa rozšíriť podpisy: %{error}"
+      signature_extended_successfully: "Podpis bol úspešne rozšírený."
   
   bundles:
     index:
@@ -399,6 +431,29 @@ sk:
       sign_with_avm: "Podpísať cez AVM"
       opening_eidentita: "Otváram eIdentitu..."
       sign_with_eidentita: "Podpísať cez eIdentitu"
+
+  notification_mailer:
+    contract_signed:
+      subject: "Vaše dokumenty boli podpísané"
+      greeting: "Dobrý deň,"
+      message: "dokument %{filename} bol podpísaný."
+      details_title: "Detaily podpisu:"
+      signed_by: "Podpísal: %{signer_name}"
+      timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
+      timestamp_non_qualified: "Negarantovný dátum a čas (bez časovej pečiatky): %{signing_time}"
+      view_contract: "Zobraziť podpísaný dokument"
+    bundle_completed:
+      subject: "Váš balík zmlúv bol podpísaný"
+      greeting: "Dobrý deň,"
+      message: "Váš balík so zmluvami bol dokončený."
+      details_title: "Dokončené zmluvy:"
+      view_bundle: "Zobraziť balík"
+    bundle_created:
+      subject: "Dokumenty na podpis"
+      greeting: "Dobrý deň,"
+      message: "%{author_name} vás požiadal o podpis balíka dokumentov v systémem Autogram Portal."
+      details_title: "Dokumenty na podpis:"
+      view_bundle: "Zobraziť balík"
 
   activerecord:
     errors:

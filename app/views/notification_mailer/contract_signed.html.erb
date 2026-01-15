@@ -1,0 +1,17 @@
+<p class="greeting"><%= t('.greeting') %></p>
+
+<p class="message"><%= t('.message', filename: @contract.display_name) %></p>
+
+<div class="details">
+  <div class="details-title"><%= t('.details_title') %></div>
+  <div class="details-list">
+    <div><%= t('.signed_by', signer_name: @signature[:signer_name]) %></div>
+    <% if @signature[:timestamp_info] && @signature[:timestamp_info][:qualified] %>
+      <div><%= t('.timestamp_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+    <% else %>
+      <div><%= t('.timestamp_non_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+    <% end %>
+  </div>
+</div>
+
+<%= link_to t('.view_contract'), url_for(@contract), class: "button" %>

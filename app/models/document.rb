@@ -95,21 +95,17 @@ class Document < ApplicationRecord
     if has_signatures?
       case [ signature_form, container_type ]
       when [ "PAdES", nil ]
-        return [ Ades::SignatureParameters::PADES ]
+        return [ "pades" ]
       when [ "XAdES", "ASiC_E" ]
-        return [ Ades::SignatureParameters::XADES_ASICE ]
+        return [ "xades_asice" ]
       when [ "CAdES", "ASiC_E" ]
-        return [ Ades::SignatureParameters::CADES_ASICE ]
+        return [ "cades_asice" ]
       else
         raise "Unknown signature form and container type combination: #{signature_form} + #{container_type}"
       end
     end
 
-    [
-      is_pdf? ? Ades::SignatureParameters::PADES : nil,
-      Ades::SignatureParameters::XADES_ASICE,
-      Ades::SignatureParameters::CADES_ASICE
-    ].compact
+    [ is_pdf? ? "pades" : nil, "xades_asice", "cades_asice" ].compact
   end
 
   def visualize(skip_cache: false)

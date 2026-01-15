@@ -42,6 +42,7 @@ class Contract < ApplicationRecord
   validate :validate_documents
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
   validates :uuid, presence: true, uniqueness: true
+  validates_associated :signature_parameters
 
   before_validation :ensure_uuid, on: :create
   before_validation :set_signature_level_for_ts_qes
@@ -72,10 +73,14 @@ class Contract < ApplicationRecord
     save!
 
     avm_sessions.active.each(&:mark_completed!)
+    bundle.contract_signed(self) if bundle.present?
     broadcast_signing_success
+
+    Notification::ContractSignedJob.perform_later(self)
   end
 
   def awaiting_signature?
+    # TODO: Improve logic to consider multiple expected signatures
     signed_document.blank?
   end
 
@@ -95,18 +100,36 @@ class Contract < ApplicationRecord
     current_eidentita_session.present?
   end
 
+  def should_notify_user?
+    # TODO: Improve logic to not notify "self sign" by user
+    user.present? && awaiting_signature? == false
+  end
+
   def broadcast_signing_success
-    # Reload the entire page to update all elements after signing
     Turbo::StreamsChannel.broadcast_action_to(
       "contract_#{uuid}",
       action: :refresh
     )
-
-    bundle.contract_signed(self) if bundle.present?
   end
 
   def short_uuid
     uuid.first(8)
+  end
+
+  def display_name
+    documents.first.blob.filename
+  end
+
+  def validation_result
+    document_to_validate = if signed_document.attached?
+      Document.new(blob: signed_document.blob)
+    elsif documents.size == 1
+      documents.first
+    else
+      nil
+    end
+
+    document_to_validate&.validation_result
   end
 
   private

@@ -11,7 +11,7 @@ env:
     AUTOGRAM_SERVICE_URL: http://autogram-portal-ag_service:7200
     AVM_URL: https://autogram.slovensko.digital
     GOOD_JOB_EXECUTION_MODE: async
-    MAIL_FROM: noreply@agp.dev.slovensko.digital
+    MAIL_FROM: "Autogram Portal DEV <noreply@agp.dev.slovensko.digital>"
     SMTP_USERNAME: noreply@agp.dev.slovensko.digital
     SMTP_HOST: smtp.m1.websupport.sk
     SMTP_PORT: 587

@@ -174,17 +174,8 @@ class ContractsController < ApplicationController
   end
 
   def validate
-    document_to_validate = if @contract.signed_document.attached?
-      temp_doc = Document.new(user: @contract.user, uuid: SecureRandom.uuid)
-      temp_doc.blob.attach(@contract.signed_document.blob)
-      temp_doc
-    elsif @contract.documents.size == 1
-      @contract.documents.first
-    else
-      nil
-    end
-
-    if document_to_validate.nil?
+    @validation_result = @contract.validation_result
+    if @validation_result.nil?
       respond_to do |format|
         format.html do
           render "validate_error", locals: { errors: [ "It is not possible to validate signatures for a contract with multiple documents." ] }
@@ -197,22 +188,18 @@ class ContractsController < ApplicationController
     end
 
     begin
-      validation_result = document_to_validate.validation_result
-
       respond_to do |format|
         format.html do
-          @validation_result = validation_result
-          @document = document_to_validate
           render "validate"
         end
         format.json do
-          signatures = validation_result.signatures.flatten
+          signatures = @validation_result.signatures.flatten
 
           render json: {
-            hasSignatures: validation_result.has_signatures,
+            hasSignatures: @validation_result.has_signatures,
             signatures: signatures.map { |sig| format_signature_for_json(sig) },
-            documentInfo: validation_result.document_info,
-            errors: validation_result.errors
+            documentInfo: @validation_result.document_info,
+            errors: @validation_result.errors
           }
         end
       end

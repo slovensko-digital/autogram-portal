@@ -1,0 +1,71 @@
+---
+sk:
+  devise:
+    confirmations:
+      confirmed: "Vaša emailová adresa bola úspešne potvrdená."
+      send_instructions: "O niekoľko minút dostanete email s inštrukcami na potvrdenie vašej emailovej adresy."
+      send_paranoid_instructions: "Ak vaša emailová adresa existuje v našej databáze, o niekoľko minút dostanete email s inštrukcami na potvrdenie vašej emailovej adresy."
+    failure:
+      already_authenticated: "Už ste prihlásený."
+      inactive: "Váš účet ešte nie je aktivovaný."
+      invalid: "Neplatný %{authentication_keys} alebo heslo."
+      locked: "Váš účet je uzamknutý."
+      last_attempt: "Máte ešte jeden pokus, než bude váš účet uzamknutý."
+      not_found_in_database: "Neplatný %{authentication_keys} alebo heslo."
+      timeout: "Vaša relácia vypršala. Prosím, prihláste sa znova."
+      unauthenticated: "Pred pokračovaním sa musíte prihlásiť alebo zaregistrovať."
+      unconfirmed: "Pred pokračovaním musíte potvrdiť svoju emailovú adresu."
+      magic_link_invalid: "Neplatný alebo vypršaný prihlasovacie odkaz."
+    mailer:
+      confirmation_instructions:
+        subject: "Potvrdenie registrácie"
+      reset_password_instructions:
+        subject: "Inštrukcie na obnovenie hesla"
+      unlock_instructions:
+        subject: "Inštrukcie na odomknutie"
+      email_changed:
+        subject: "Email bol zmenený"
+      password_change:
+        subject: "Heslo bolo zmenené"
+      magic_link:
+        subject: "Tu je váš prihlasovací odkaz ✨"
+    omniauth_callbacks:
+      failure: "Nepodarilo sa vás autentifikovať z %{kind}, pretože \"%{reason}\"."
+      success: "Úspešne autentifikovaný z účtu %{kind}."
+    passwords:
+      no_token: "Nemôžete pristúpiť na túto stránku bez emailu na obnovenie hesla. Ak prichádzate z emailu na obnovenie hesla, uistite sa, že ste použili celú poskytnutú URL adresu."
+      send_instructions: "O niekoľko minút dostanete email s inštrukcami na obnovenie hesla."
+      send_paranoid_instructions: "Ak vaša emailová adresa existuje v našej databáze, o niekoľko minút dostanete odkaz na obnovenie hesla."
+      updated: "Vaše heslo bolo úspešne zmenené. Teraz ste prihlásený."
+      updated_not_active: "Vaše heslo bolo úspešne zmenené."
+    registrations:
+      destroyed: "Váš účet bol úspešne zrušený. Dúfame, že sa onedlho opäť uvidíme."
+      signed_up: "Vitajte! Úspešne ste sa zaregistrovali."
+      signed_up_but_inactive: "Úspešne ste sa zaregistrovali. Nemohli sme vás však prihlásiť, pretože váš účet ešte nie je aktivovaný."
+      signed_up_but_locked: "Úspešne ste sa zaregistrovali. Nemohli sme vás však prihlásiť, pretože váš účet je uzamknutý."
+      signed_up_but_unconfirmed: "Správa s odkazom na potvrdenie bola odoslaná na vašu emailovú adresu. Prosím, kliknite na odkaz a aktivujte svoj účet."
+      update_needs_confirmation: "Váš účet bol úspešne aktualizovaný, ale musíme overiť vašu novú emailovú adresu. Prosím, skontrolujte si email a kliknite na odkaz na potvrdenie novej emailovej adresy."
+      updated: "Váš účet bol úspešne aktualizovaný."
+      updated_but_not_signed_in: "Váš účet bol úspešne aktualizovaný, ale keďže bolo zmenené heslo, musíte sa znova prihlásiť."
+    sessions:
+      signed_in: "Úspešne prihlásený."
+      signed_out: "Úspešne odhlásený."
+      already_signed_out: "Úspešne odhlásený."
+    unlocks:
+      send_instructions: "O niekoľko minút dostanete email s inštrukcami na odomknutie účtu."
+      send_paranoid_instructions: "Ak váš účet existuje, o niekoľko minút dostanete email s inštrukcami na jeho odomknutie."
+      unlocked: "Váš účet bol úspešne odomknutý. Prosím, prihláste sa."
+    passwordless:
+      not_found_in_database: "Nepodarilo sa nájsť používateľa s touto emailovou adresou"
+      magic_link_sent: "Prihlasovací odkaz bol odoslaný na vašu emailovú adresu. Prosím, kliknite na odkaz a prihláste sa do svojho účtu."
+      magic_link_sent_paranoid: "Ak váš účet existuje, dostanete email s prihlasovacím odkazom. Prosím, kliknite na odkaz a prihláste sa do svojho účtu."
+  errors:
+    messages:
+      already_confirmed: "už bolo potvrdené, skúste sa prihlásiť"
+      confirmation_period_expired: "musí byť potvrdené do %{period}, prosím požiadajte o nové"
+      expired: "vypršalo, prosím požiadajte o nové"
+      not_found: "nenájdené"
+      not_locked: "nebolo uzamknuté"
+      not_saved:
+        one: "1 chyba zabránila uloženiu %{resource}:"
+        other: "%{count} chýb zabránilo uloženiu %{resource}:"

@@ -21,7 +21,7 @@ class Bundle < ApplicationRecord
   belongs_to :author, class_name: "User", foreign_key: "user_id"
 
   has_many :contracts, dependent: :destroy
-  has_and_belongs_to_many :recipients, class_name: "User", join_table: "bundles_recipients", association_foreign_key: "recipient_id"
+  has_many :recipients
   has_one :webhook, dependent: :destroy
   has_one :postal_address, dependent: :destroy
 
@@ -35,7 +35,8 @@ class Bundle < ApplicationRecord
   validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :contracts, presence: true
 
-  # Use UUID in URLs instead of ID for security
+  after_create :notify_recipients
+
   def to_param
     uuid
   end
@@ -45,8 +46,11 @@ class Bundle < ApplicationRecord
   end
 
   def contract_signed(contract)
-    broadcast_contract_signed(contract)
-    broadcast_all_signed if completed?
+    Notification::BundleContractSignedJob.perform_later(self, contract)
+    return unless completed?
+
+    Notification::BundleCompletedJob.perform_later(self)
+    broadcast_all_signed
   end
 
   def broadcast_all_signed
@@ -56,12 +60,15 @@ class Bundle < ApplicationRecord
       partial: "bundles/status",
       locals: { bundle: self }
     )
-
-    webhook.fire_all_signed() if webhook.present?
   end
 
-  def broadcast_contract_signed(contract)
-    webhook.fire_contract_signed(contract) if webhook.present?
+  def should_notify_author?
+    # TODO: do not notify if author is the one that signed the bundle
+    true
+  end
+
+  def notify_recipients
+    Notification::BundleCreatedJob.perform_later(self)
   end
 
   def short_uuid
