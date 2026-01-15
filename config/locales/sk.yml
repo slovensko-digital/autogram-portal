@@ -67,14 +67,17 @@ sk:
         greeting: "Dobrý deň %{recipient}!"
         instruction: "Prihlásiť sa môžete pomocou odkazu nižšie:"
         action: "Prihlásiť sa do môjho účtu"
-        expiry_notice: "Upozorňujeme, že platnosť odkazu vyprší za %{expiry}."
+        expiry_notice: "Odkaz je platný %{expiry} minút."
     shared:
       links:
         sign_in: "Prihlásiť sa"
         sign_up: "Registrovať sa"
         didn_t_receive_confirmation_instructions: "Nedostali ste potvrdzovací e-mail?"
         didn_t_receive_unlock_instructions: "Nedostali ste e-mail na odomknutie?"
-  
+    passwordless:
+      user:
+        signed_up_but_unconfirmed: "Úspešne ste sa zaregistrovali. Váš účet ešte nie je aktivovaný, skontrolujte si prosím email a kliknite na odkaz na potvrdenie vášho účtu."
+
   signature_methods:
     qes: "Kvalifikovaný elektronický podpis"
     ts_qes: "Kvalifikovaný elektronický podpis s časovou pečiatkou"
