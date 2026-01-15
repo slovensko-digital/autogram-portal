@@ -35,7 +35,8 @@ class Bundle < ApplicationRecord
   validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :contracts, presence: true
 
-  # Use UUID in URLs instead of ID for security
+  after_create :notify_recipients
+
   def to_param
     uuid
   end
@@ -45,13 +46,11 @@ class Bundle < ApplicationRecord
   end
 
   def contract_signed(contract)
-    broadcast_contract_signed(contract)
-
+    Notification::BundleContractSignedJob.perform_later(self, contract)
     return unless completed?
 
+    Notification::BundleCompletedJob.perform_later(self)
     broadcast_all_signed
-    webhook.fire_all_signed() if webhook.present?
-    notify_author if should_notify_author?
   end
 
   def broadcast_all_signed
@@ -63,24 +62,13 @@ class Bundle < ApplicationRecord
     )
   end
 
-  def broadcast_contract_signed(contract)
-    # TODO: broadcast also to turbo stream for the contract itself
-    webhook.fire_contract_signed(contract) if webhook.present?
-  end
-
   def should_notify_author?
     # TODO: do not notify if author is the one that signed the bundle
     true
   end
 
-  def notify_author
-    NotificationMailer.with(user: author).bundle_completed(self).deliver_later
-  end
-
   def notify_recipients
-    recipients.each do |recipient|
-      NotificationMailer.with(user: recipient).bundle_created(self).deliver_later
-    end
+    Notification::BundleCreatedJob.perform_later(self)
   end
 
   def short_uuid

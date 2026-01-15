@@ -1,5 +1,5 @@
 class NotificationMailer < ApplicationMailer
-  before_action { @user = params[:user] }
+  before_action { @user = params[:user] || params[:recipient] }
   before_action :set_locale
   default to: -> { @user.email }
 
