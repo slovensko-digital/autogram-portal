@@ -47,6 +47,9 @@ Rails.application.routes.draw do
       get :pdf_preview
       get :actions
       get :download
+      get :signature_parameters
+      get :signature_extension
+      post :extend_signatures
       post :create_contract_from_document, as: "create_contract_from_document"
     end
   end

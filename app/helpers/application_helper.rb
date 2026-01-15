@@ -33,14 +33,4 @@ module ApplicationHelper
       <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#6b7280" font-size="14">QR code not available</text>
     </svg>).html_safe
   end
-
-  def method_label(method)
-    key = method.gsub("-", "_")
-    I18n.t("signature_methods.#{key}", default: method.humanize)
-  end
-
-  def short_method_label(method)
-    key = method.gsub("-", "_")
-    I18n.t("signature_methods.short.#{key}", default: method.humanize)
-  end
 end

@@ -24,6 +24,9 @@ module Ades
   class SignatureParameters < ApplicationRecord
     belongs_to :contract
 
+    attr_accessor :combined_format
+
+    after_initialize :parse_combined_format
     after_initialize :set_defaults, if: :new_record?
 
     validates :format, presence: true, inclusion: { in: %w[PAdES XAdES CAdES] }
@@ -33,40 +36,36 @@ module Ades
     validates :add_content_timestamp, inclusion: { in: [ true, false ] }
     validate :validate_parameters_combination
 
-    PADES = [ "PAdES", "PADES", "Portable Document Format Advanced Electronic Signatures" ]
-    XADES_ASICE = [ "XAdES + ASiC-E", "XADES_ASICE", "XML Advanced Electronic Signatures with Associated Signature Container" ]
-    CADES_ASICE = [ "CAdES + ASiC-E", "CADES_ASICE", "CMS Advanced Electronic Signatures with Associated Signature Container" ]
-
     def format_container_combination
       case [ format, container ]
       when [ "PAdES", nil ]
-        "PADES"
+        "pades"
       when [ "XAdES", "ASiC_E" ]
-        "XADES_ASICE"
+        "xades_asice"
       when [ "CAdES", "ASiC_E" ]
-        "CADES_ASICE"
-      else
-        throw "Invalid format/container combination: #{format}/#{container}"
-      end
-    end
-
-    def format_container_combination=(value)
-      case value
-      when "PADES"
-        self.format = "PAdES"
-        self.container = nil
-      when "XADES_ASICE"
-        self.format = "XAdES"
-        self.container = "ASiC_E"
-      when "CADES_ASICE"
-        self.format = "CAdES"
-        self.container = "ASiC_E"
+        "cades_asice"
       else
         throw "Invalid format/container combination: #{format}/#{container}"
       end
     end
 
     private
+
+    def parse_combined_format
+      return if combined_format.nil?
+
+      case combined_format
+      when "pades"
+        self.format = "PAdES"
+        self.container = nil
+      when "xades_asice"
+        self.format = "XAdES"
+        self.container = "ASiC_E"
+      when "cades_asice"
+        self.format = "CAdES"
+        self.container = "ASiC_E"
+      end
+    end
 
     def validate_parameters_combination
       if container

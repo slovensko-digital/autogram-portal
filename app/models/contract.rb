@@ -42,6 +42,7 @@ class Contract < ApplicationRecord
   validate :validate_documents
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
   validates :uuid, presence: true, uniqueness: true
+  validates_associated :signature_parameters
 
   before_validation :ensure_uuid, on: :create
   before_validation :set_signature_level_for_ts_qes

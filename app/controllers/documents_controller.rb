@@ -76,59 +76,50 @@ class DocumentsController < ApplicationController
     if @document.blob.attached?
       redirect_to rails_blob_path(@document.blob, disposition: "attachment"), allow_other_host: false
     else
-      redirect_to document_path(@document), alert: "No file attached to this document."
+      redirect_to document_path(@document), alert: t("documents.alerts.no_file_attached")
     end
   end
 
+  def signature_parameters
+    render partial: "signature_parameters"
+  end
+
   def create_contract_from_document
-    if @document.contract.present?
-      redirect_to document_path(@document), alert: "This document is already part of a contract."
-      return
-    end
+    return redirect_to document_path(@document), alert: t("documents.alerts.already_part_of_contract") if @document.contract.present?
 
-    @contract = Contract.new
-    @contract.user = current_user
-    @contract.uuid = SecureRandom.uuid
-
-    allowed_method = params[:allowed_method]
-    if allowed_method.in?([ "qes", "ts-qes" ])
-      @contract.allowed_methods = [ allowed_method ]
-    else
-      @contract.allowed_methods = [ "qes" ]
-    end
-
-    @contract.build_signature_parameters
-    format_container_combination = params[:format_container_combination]
-    if format_container_combination.in?([ "PADES", "XADES_ASICE", "CADES_ASICE" ])
-      @contract.signature_parameters.format_container_combination = format_container_combination
-    else
-      @contract.signature_parameters.format_container_combination = "PADES"
-    end
-
-    @contract.documents << @document
     ActiveRecord::Base.transaction do
-      @contract.save!
-      @document.update!(contract: @contract)
-      redirect_to contract_path(@contract)
+      contract = Contract.create!(
+        user: current_user,
+        allowed_methods: [ params[:allowed_method] ],
+        signature_parameters_attributes: { combined_format: params[:format_container_combination] },
+        documents: [ @document ]
+      )
+
+      @document.update!(contract: contract)
+      redirect_to contract_path(contract)
     end
   rescue ActiveRecord::RecordInvalid
     error_messages = []
-    error_messages.concat(@contract.errors.full_messages) if @contract.errors.any?
+    error_messages.concat(contract.errors.full_messages) if contract.errors.any?
     error_messages.concat(@document.errors.full_messages) if @document.errors.any?
 
-    redirect_to document_path(@document), alert: "Failed to create contract: #{error_messages.join(', ')}"
+    redirect_to document_path(@document), alert: t("documents.alerts.failed_to_create_contract", errors: error_messages.join(", "))
+  end
+
+  def signature_extension
+    render partial: "signature_extension"
   end
 
   def extend_signatures
     return head :unauthorized unless current_user
-    return redirect_to document_path(@document), alert: "This document is already part of a contract." if @document.contract.present?
-    return redirect_to document_path(@document), alert: "All signatures already have qualified timestamps." unless @document.extendable_signatures?
+    return redirect_to document_path(@document), alert: t("documents.alerts.already_part_of_contract") if @document.contract.present?
+    return redirect_to document_path(@document), alert: t("documents.alerts.all_signatures_have_timestamps") unless @document.extendable_signatures?
 
     begin
       @document.extend_signatures!
-      redirect_to document_path(@document), notice: "Signature extended successfully."
+      redirect_to document_path(@document), notice: t("documents.alerts.signature_extended_successfully")
     rescue => e
-      redirect_to document_path(@document), alert: "Failed to extend signatures: #{e.message}"
+      redirect_to document_path(@document), alert: t("documents.alerts.failed_to_extend_signatures", error: e.message)
     end
   end
 

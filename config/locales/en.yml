@@ -125,6 +125,19 @@ en:
       policies_link: "policies, terms and conditions"
       upload_document: "Upload Document"
       cancel: "Cancel"
+      actions:
+        continue: "Continue"
+        back: "Back"
+        header: "Choose action"
+        sign:
+          title: "Sign the document"
+          subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+        request_signature:
+          title: "Request a signature"
+          subtitle: "Send document for signing to someone else via email or shared link."
+        add_timestamp:
+          title: "Add timestamp"
+          subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
     show:
       title: "Document"
       filename: "Filename: %{filename}"
@@ -155,6 +168,13 @@ en:
       hide_preview: "Hide document preview"
       show_preview: "Show document preview"
       loading_content: "Loading document content..."
+    alerts:
+      no_file_attached: "No file attached to this document."
+      already_part_of_contract: "This document is already part of a contract."
+      failed_to_create_contract: "Failed to create contract: %{errors}"
+      all_signatures_have_timestamps: "All signatures already have qualified timestamps."
+      failed_to_extend_signatures: "Failed to extend signatures: %{error}"
+      signature_extended_successfully: "Signature extended successfully."
   
   signature_methods:
     qes: "Qualified Electronic Signature"
@@ -164,9 +184,18 @@ en:
     short:
       qes: "QES"
       ts_qes: "QES + Timestamp"
-      ades: "ADES"
+      ades: "AdES"
       ses: "SES"
-  
+
+  signature_formats:
+    pades: "PDF Advanced Electronic Signature (PAdES)"
+    xades_asice: "XML Advanced Electronic Signature (XAdES) in Associated Signature Container (ASiC-E)"
+    cades_asice: "CMS Advanced Electronic Signature (CAdES) in Associated Signature Container (ASiC-E)"
+    short:
+      pades: "PAdES"
+      xades_asice: "XAdES + ASiC-E"
+      cades_asice: "CAdES + ASiC-E"
+
   bundles:
     index:
       title: "Contract Bundles"

@@ -41,7 +41,7 @@
                                               when 'server' then 'bg-purple-100 text-purple-800'
                                               else 'bg-gray-100 text-gray-800'
                                               end %>">
-                                <%= short_method_label(method) %>
+                                <%= t("signature_methods.short.#{method.gsub('-', '_')}") %>
                               </span>
                             <% end %>
                           <% end %>
