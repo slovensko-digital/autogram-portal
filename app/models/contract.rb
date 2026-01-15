@@ -75,7 +75,7 @@ class Contract < ApplicationRecord
     bundle.contract_signed(self) if bundle.present?
     broadcast_signing_success
 
-    notify_user if should_notify_user?
+    Notification::ContractSignedJob.perform_later(self)
   end
 
   def awaiting_signature?
@@ -132,10 +132,6 @@ class Contract < ApplicationRecord
   end
 
   private
-
-  def notify_user
-    NotificationMailer.with(user: user).contract_signed(self).deliver_later
-  end
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
