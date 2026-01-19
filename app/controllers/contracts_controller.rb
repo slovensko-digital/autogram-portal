@@ -1,14 +1,82 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :sign_eidentita, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters, :autogram_signing_in_progress ]
+  before_action :set_contract, except: [ :new, :index, :create ]
   skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign_eidentita, :sign, :autogram_parameters, :autogram_signing_in_progress ]
-
   before_action :allow_iframe, only: [ :iframe ]
 
   def index
     @contracts = current_user.contracts.includes(:user, :documents).order(created_at: :desc)
   end
 
+  def new
+    @contract = Contract.new
+  end
+
+  # def create
+  #   @document = Document.new(params.require(:document).permit(:blob))
+  #   @document.user = current_user
+  #   @document.uuid = SecureRandom.uuid
+
+  #   if @document.save
+  #     redirect_to document_path(@document)
+  #   else
+  #     render :new, status: :unprocessable_entity
+  #   end
+  # end
+
+  def create
+    @contract = Contract.new(
+      user: current_user,
+      documents: [ Document.new(params.require(:document).permit(:blob)) ]
+    )
+
+    @contract.save!
+
+    redirect_to contract_path(@contract)
+
+  rescue ActiveRecord::RecordInvalid
+    render :new, locals: { errors: @contract.errors }, status: :unprocessable_entity
+  end
+
+  #     raise ActiveRecord::RecordInvalid.new unless @contract.valid?
+
+  #     if params[:next_step] == "request_signature"
+  #       render partial: "request_signature"
+  #     else
+  #       @contract.save!
+  #       @contract.documents.first.update!(contract: @contract)
+  #       redirect_to contract_path(@contract)
+  #     end
+  #   end
+  # rescue ActiveRecord::RecordInvalid
+  #   render :new, locals: { errors: @contract.errors }, status: :unprocessable_entity
+  # end
+
   def show
+  end
+
+  def actions
+    render partial: "actions", locals: { previous_page: params[:previous_page] }
+  end
+
+  def signature_extension
+    render partial: "signature_extension"
+  end
+
+  def signature_parameters
+    @next_step = params[:target_step]
+    render partial: "signature_parameters"
+  end
+
+  def extend_signatures
+    return head :unauthorized unless current_user
+    return redirect_to @contract, alert: t("documents.alerts.all_signatures_have_timestamps") unless @contract.extendable_signatures?
+
+    begin
+      @contract.extend_signatures!
+      redirect_to @contract, notice: t("documents.alerts.signature_extended_successfully")
+    rescue => e
+      redirect_to @contract, alert: t("documents.alerts.failed_to_extend_signatures", error: e.message)
+    end
   end
 
   def autogram_parameters
@@ -40,6 +108,9 @@ class ContractsController < ApplicationController
   end
 
   def sign
+  end
+
+  def sign_autogram
     @contract.accept_signed_file(signed_document_param)
 
     respond_to do |format|
@@ -216,14 +287,24 @@ class ContractsController < ApplicationController
   end
 
   def edit
+    @previous_page = request.referrer
   end
 
   def update
     if @contract.update(contract_params)
-      redirect_to @contract, notice: "Contract was successfully updated."
+      @contract.save!
+      if params[:next_step] == "request_signature"
+        render partial: "request_signature"
+      elsif params[:next_step] == "sign"
+        redirect_to sign_contract_path(@contract)
+      else
+        redirect_to @contract
+      end
     else
       render :edit, status: :unprocessable_entity
     end
+  rescue ActiveRecord::RecordInvalid
+    render :edit, locals: { errors: @contract.errors }, status: :unprocessable_entity
   end
 
   def destroy
@@ -262,7 +343,7 @@ class ContractsController < ApplicationController
   def contract_params
     params.require(:contract).permit(
       :uuid,
-      allowed_methods: [],
+      :allowed_method,
       documents_attributes: [ :id, :blob, :_destroy ],
       signature_parameters_attributes: [ :id, :format_container_combination, :add_content_timestamp ]
     )

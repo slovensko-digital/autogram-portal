@@ -40,23 +40,18 @@ Rails.application.routes.draw do
     resources :bundles, only: [ :index, :edit, :update, :destroy ]
   end
 
-  resources :documents, only: [ :new, :create, :show ] do
+  resources :documents, only: [] do
     member do
-      get :validate
       get :visualize
       get :pdf_preview
-      get :actions
       get :download
-      get :signature_parameters
-      get :signature_extension
-      post :extend_signatures
-      post :create_contract_from_document, as: "create_contract_from_document"
     end
   end
 
-  resources :contracts, only: [ :show ] do
+  resources :contracts do
     member do
-      post :sign
+      get :sign
+      post :sign_autogram
       post :sign_avm
       post :sign_eidentita
       get :validate
@@ -65,6 +60,11 @@ Rails.application.routes.draw do
       get :iframe
       get :autogram_parameters
       get :autogram_signing_in_progress
+      get :signature_parameters
+      get :request_signature
+      get :signature_extension
+      post :extend_signatures
+      get :actions
     end
 
     resources :eidentita_sessions, only: [ :show ] do

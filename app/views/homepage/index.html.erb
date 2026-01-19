@@ -18,7 +18,7 @@
         </div>
       </div>
       <div>
-        <%= form_with model: Document.new, url: documents_path, local: true, multipart: true, 
+        <%= form_with model: Contract.new, url: contracts_path, local: true, multipart: true, 
                       class: "space-y-4", 
                       data: { 
                         controller: "file-upload",
@@ -27,16 +27,7 @@
                         "file-upload-uploading-class": "border-solid"
                       } do |form| %>
 
-          <%= render 'shared/dropzone', 
-                controller_name: 'file-upload',
-                input_name: 'document[blob]',
-                title: t('.upload_form.title'),
-                subtitle: t('.upload_form.subtitle'),
-                file_types_hint: t('.upload_form.file_types_hint'),
-                uploading_text: t('.upload_form.uploading_text'),
-                drop_text: t('.upload_form.drop_text'),
-                height: 'h-[280px]' %>
-
+          <%= render 'shared/dropzone', input_name: 'document[blob]', height: 'h-[280px]' %>
           <div class="flex flex-col gap-3">
             <div class="flex items-start space-x-3">
               <%= form.check_box :agree_to_policies, 
@@ -321,7 +312,7 @@
         <%= t('.cta.subtitle') %>
       </p>
       <div class="mt-8 flex items-center justify-center gap-x-6">
-        <%= link_to t('.cta.start_signing'), new_document_path, 
+        <%= link_to t('.cta.start_signing'), new_contract_path, 
             class: "rounded-md bg-blue-600 px-4 py-3 text-base font-semibold text-white  hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" %>
         <a href="https://github.com/slovensko-digital/autogram-portal" class="text-base font-semibold leading-6 text-white hover:text-gray-300">
           <%= t('.cta.view_github') %> <span aria-hidden="true">→</span>

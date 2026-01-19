@@ -24,9 +24,6 @@ module Ades
   class SignatureParameters < ApplicationRecord
     belongs_to :contract
 
-    attr_accessor :combined_format
-
-    after_initialize :parse_combined_format
     after_initialize :set_defaults, if: :new_record?
 
     validates :format, presence: true, inclusion: { in: %w[PAdES XAdES CAdES] }
@@ -49,9 +46,7 @@ module Ades
       end
     end
 
-    private
-
-    def parse_combined_format
+    def format_container_combination=(combined_format)
       return if combined_format.nil?
 
       case combined_format
@@ -66,6 +61,8 @@ module Ades
         self.container = "ASiC_E"
       end
     end
+
+    private
 
     def validate_parameters_combination
       if container

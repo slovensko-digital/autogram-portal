@@ -10,6 +10,7 @@ export default class extends Controller {
   updateLink() {
     const checkedRadio = this.element.querySelector('input[type="radio"]:checked')
     if (checkedRadio && checkedRadio.dataset.url) {
+      console.log("Updating link to:", checkedRadio.dataset.url)
       this.linkTarget.href = checkedRadio.dataset.url
     }
   }

@@ -36,6 +36,7 @@ class Contract < ApplicationRecord
 
   # ALLOWED_METHODS = %w[qes ts-qes cts-qes ades ses click scan notary paper].freeze
   ALLOWED_METHODS = %w[qes ts-qes].freeze
+  attribute :allowed_methods, default: [ "qes" ]
 
   validate :validate_allowed_methods
   validates :signature_parameters, presence: true, if: -> { allowed_methods.present? && (allowed_methods & %w[qes qes-ts cts-qes ades]).any? }
@@ -45,6 +46,7 @@ class Contract < ApplicationRecord
   validates_associated :signature_parameters
 
   before_validation :ensure_uuid, on: :create
+  before_validation :initialize_signature_parameters
   before_validation :set_signature_level_for_ts_qes
 
   def to_param
@@ -82,6 +84,31 @@ class Contract < ApplicationRecord
   def awaiting_signature?
     # TODO: Improve logic to consider multiple expected signatures
     signed_document.blank?
+  end
+
+  def extendable_signatures?
+    return Document.new(blob: signed_document.blob).extendable_signatures? if signed_document.attached?
+
+    return false unless documents.count == 1
+    documents.first.extendable_signatures?
+  end
+
+  def extend_signatures!
+    return unless extendable_signatures?
+
+    if signed_document.attached?
+      document = Document.new(blob: signed_document.blob)
+      document.extend_signatures!
+      signed_document.purge
+      signed_document.attach(
+        io: StringIO.new(document.content),
+        filename: document.filename,
+        content_type: document.content_type
+      )
+      save!
+    else
+      documents.first.extend_signatures!
+    end
   end
 
   def current_avm_session
@@ -130,6 +157,11 @@ class Contract < ApplicationRecord
     end
 
     document_to_validate&.validation_result
+  end
+
+  # Custom setter to convert singular allowed_method to plural allowed_methods array
+  def allowed_method=(method)
+    self.allowed_methods = [ method ].compact
   end
 
   private
@@ -185,5 +217,15 @@ class Contract < ApplicationRecord
     elsif allowed_methods.include?("qes") && allowed_methods.exclude?("ts-qes")
       signature_parameters.level = "BASELINE_B"
     end
+  end
+
+  def initialize_signature_parameters
+    return if signature_parameters.present?
+
+    self.signature_parameters = Ades::SignatureParameters.new(
+      level: allowed_methods.include?("ts-qes") ? "BASELINE_T" : "BASELINE_B",
+      format: "CAdES",
+      container: "ASiC_E"
+    )
   end
 end
