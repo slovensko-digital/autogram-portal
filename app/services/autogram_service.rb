@@ -88,6 +88,8 @@ class AutogramService
       content: file_content
     }
 
+    puts payload
+
     connection.post("/validate", payload)
   end
 

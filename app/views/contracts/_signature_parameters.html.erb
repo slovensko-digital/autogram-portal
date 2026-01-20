@@ -7,7 +7,7 @@
     <%= form_with url: contract_path(@contract, next_step: @next_step), 
                   method: :put, 
                   local: true, 
-                  data: { turbo_frame: (@next_step == "request_signature" ? "_self" : "_top"), controller: "form-submit", action: "submit->form-submit#handleSubmit" }, 
+                  data: { turbo_frame: "_top", controller: "form-submit", action: "submit->form-submit#handleSubmit" }, 
                   class: "space-y-6" do |form| %>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>

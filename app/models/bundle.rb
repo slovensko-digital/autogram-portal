@@ -3,6 +3,7 @@
 # Table name: bundles
 #
 #  id         :bigint           not null, primary key
+#  note       :text
 #  uuid       :string           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -68,7 +69,7 @@ class Bundle < ApplicationRecord
   end
 
   def notify_recipients
-    Notification::BundleCreatedJob.perform_later(self)
+    recipients.each(&:notify!)
   end
 
   def short_uuid

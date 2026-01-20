@@ -38,6 +38,15 @@ class Recipient < ApplicationRecord
   before_create :check_blocks
   before_create :set_default_locale
 
+  def display_name
+    name.presence || user&.display_name || email
+  end
+
+  def notify!
+    return unless pending?
+    Notification::RecipientBundleCreatedJob.perform_later(self)
+  end
+
   private
 
   def link_user_by_email

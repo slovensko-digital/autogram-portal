@@ -1,4 +1,4 @@
-<div data-controller="toggle" data-toggle-collapsed-value="<%= !(@contract.documents.first.is_xml? || @contract.documents.first.is_asice?) %>" class="w-full mb-6">
+<div data-controller="toggle" data-toggle-collapsed-value="<%= !(contract.documents.first.is_xml? || contract.documents.first.is_asice?) || contract.bundle.present? %>" class="w-full mb-6">
   <div class="mb-2">
     <button 
       type="button"
@@ -6,9 +6,9 @@
       data-toggle-target="button"
       class="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
       <div class="flex flex-col items-start">
-        <span data-toggle-target="textExpanded"><%= t('documents.visualization_with_toggle.hide_document') %></span>
-        <span data-toggle-target="textCollapsed" class="hidden"><%= t('documents.visualization_with_toggle.show_document') %></span>
-        <span class="text-xs text-gray-500 mt-0.5"><%= @contract.documents.first.filename %></span>
+        <span data-toggle-target="textExpanded"><%= t('.hide_document') %></span>
+        <span data-toggle-target="textCollapsed" class="hidden"><%= t('.show_document') %></span>
+        <span class="text-xs text-gray-500 mt-0.5"><%= contract.documents.first.filename %></span>
       </div>
       <div class="ml-2 flex-shrink-0">
         <svg data-toggle-target="iconExpanded" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -22,8 +22,8 @@
   </div>
 
   <div data-toggle-target="content" data-controller="pdf-reload">
-    <%= turbo_frame_tag "document_visualization_#{@contract.documents.first.uuid}", 
-                        src: visualize_document_path(@contract.documents.first, t: Time.current.to_i),
+    <%= turbo_frame_tag "document_visualization_#{contract.documents.first.uuid}", 
+                        src: visualize_document_path(contract.documents.first, t: Time.current.to_i),
                         loading: "lazy",
                         class: "rounded-lg min-h-[300px]",
                         data: { pdf_reload_target: "frame" } do %>
@@ -33,7 +33,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span class="text-gray-600"><%= t('documents.visualization_with_toggle.loading_content') %></span>
+          <span class="text-gray-600"><%= t('.loading_content') %></span>
         </div>
       </div>
     <% end %>

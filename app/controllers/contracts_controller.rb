@@ -11,18 +11,6 @@ class ContractsController < ApplicationController
     @contract = Contract.new
   end
 
-  # def create
-  #   @document = Document.new(params.require(:document).permit(:blob))
-  #   @document.user = current_user
-  #   @document.uuid = SecureRandom.uuid
-
-  #   if @document.save
-  #     redirect_to document_path(@document)
-  #   else
-  #     render :new, status: :unprocessable_entity
-  #   end
-  # end
-
   def create
     @contract = Contract.new(
       user: current_user,
@@ -31,25 +19,11 @@ class ContractsController < ApplicationController
 
     @contract.save!
 
-    redirect_to contract_path(@contract)
+    redirect_to edit_contract_path(@contract)
 
   rescue ActiveRecord::RecordInvalid
     render :new, locals: { errors: @contract.errors }, status: :unprocessable_entity
   end
-
-  #     raise ActiveRecord::RecordInvalid.new unless @contract.valid?
-
-  #     if params[:next_step] == "request_signature"
-  #       render partial: "request_signature"
-  #     else
-  #       @contract.save!
-  #       @contract.documents.first.update!(contract: @contract)
-  #       redirect_to contract_path(@contract)
-  #     end
-  #   end
-  # rescue ActiveRecord::RecordInvalid
-  #   render :new, locals: { errors: @contract.errors }, status: :unprocessable_entity
-  # end
 
   def show
   end
@@ -291,17 +265,24 @@ class ContractsController < ApplicationController
   end
 
   def update
-    if @contract.update(contract_params)
-      @contract.save!
-      if params[:next_step] == "request_signature"
-        render partial: "request_signature"
-      elsif params[:next_step] == "sign"
-        redirect_to sign_contract_path(@contract)
+    ActiveRecord::Base.transaction do
+      if @contract.update(contract_params)
+        @contract.save!
+        if params[:next_step] == "request_signature"
+          bundle = Bundle.new(contracts: [ @contract ], author: current_user)
+          if bundle.save
+            return redirect_to edit_bundle_path(bundle)
+          else
+            return render :edit, status: :unprocessable_entity
+          end
+        elsif params[:next_step] == "sign"
+          redirect_to sign_contract_path(@contract)
+        else
+          redirect_to @contract
+        end
       else
-        redirect_to @contract
+        render :edit, status: :unprocessable_entity
       end
-    else
-      render :edit, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordInvalid
     render :edit, locals: { errors: @contract.errors }, status: :unprocessable_entity

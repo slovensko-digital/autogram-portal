@@ -61,7 +61,6 @@ Rails.application.routes.draw do
       get :autogram_parameters
       get :autogram_signing_in_progress
       get :signature_parameters
-      get :request_signature
       get :signature_extension
       post :extend_signatures
       get :actions
@@ -76,9 +75,18 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :bundles, only: [ :show ] do
+  resources :bundles, only: [ :show, :edit, :update ] do
     member do
       get :iframe
+      get :signatures
+      post :add_recipient
+      post :notify_recipients
+      get :sign
+    end
+    resources :recipients, only: [ :destroy ] do
+      member do
+        post :notify
+      end
     end
   end
 

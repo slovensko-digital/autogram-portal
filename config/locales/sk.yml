@@ -1,12 +1,19 @@
 sk:
   hello: "Ahoj svet"
   
+  actions:
+    back: "Späť"
+    continue: "Pokračovať"
+    download: "Stiahnuť"
+    cancel: "Zrušiť"
+
   header:
     navigation:
       global: "Globálne"
       toggle_menu: "Otvoriť menu"
     links:
-      contracts: "Zmluvy"
+      contracts: "Dokumenty"
+      bundles: "Balíky"
       sign_in: "Prihlásiť sa"
       sign_out: "Odhlásiť sa"
   
@@ -15,7 +22,16 @@ sk:
     languages:
       en: "English"
       sk: "Slovenčina"
-  
+
+  helpers:
+    bundles:
+      recipients:
+        status:
+          pending: "Čaká na odoslanie"
+          notified: "Čaká na podpis"
+          signed: "Podpísané"
+          declined: "Odmietnuté"
+
   devise:
     sessions:
       new:
@@ -136,13 +152,6 @@ sk:
         add_timestamp:
           title: "Pridať časovú pečiatku"
           subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
-    show:
-      title: "Dokument"
-      filename: "Názov súboru: %{filename}"
-      part_of_contract: "Súčasť zmluvy"
-      download: "Stiahnuť"
-      validating_signatures: "Overovanie elektronických podpisov..."
-      loading_actions: "Načítavam akcie dokumentu..."
     actions:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
@@ -153,14 +162,6 @@ sk:
       add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
       add_timestamp_button: "Pridať časovú pečiatku k podpisom"
       continue: "Pokračovať"
-      request_signature:
-        title: "Poslať na podpis"
-        subtitle: "Pošlite tento dokument iným na podpisovanie cez e-mail alebo zdieľaný odkaz."
-        recipient_email: "Email príjemcu *"
-        recipient_email_placeholder: "jan.novak@example.com"
-        recipient_email_help: "Príjemca dostane email s odkazom na podpísanie dokumentu"
-        message: "Správa pre príjemcu (voliteľné)"
-        message_placeholder: "Dobrý deň, prosím o podpísanie priloženého dokumentu..."
     actions_error:
       title: "Chyba pri načítavaní akcií dokumentu"
     visualize:
@@ -171,50 +172,81 @@ sk:
     visualize_error:
       title: "Nepodarilo sa načítať obsah dokumentu"
       trust_warning: "Pred pokračovaním sa uistite, že dôverujete zdroju tohto dokumentu."
-    visualization_with_toggle:
-      hide_document: "Skryť dokument"
-      show_document: "Zobraziť dokument"
-      loading_content: "Načítavam obsah dokumentu..."
     alerts:
       no_file_attached: "K tomuto dokumentu nie je pripojený žiadny súbor."
-      already_part_of_contract: "Tento dokument je už súčasťou zmluvy."
-      failed_to_create_contract: "Nepodarilo sa vytvoriť zmluvu: %{errors}"
       all_signatures_have_timestamps: "Všetky podpisy už majú kvalifikované časové pečiatky."
       failed_to_extend_signatures: "Nepodarilo sa rozšíriť podpisy: %{error}"
       signature_extended_successfully: "Podpis bol úspešne rozšírený."
   
   bundles:
     index:
-      title: "Balíky zmlúv"
+      title: "Balíky dokumentov"
       completed: "Dokončené"
       awaiting_signature: "Čaká na podpis"
-      contract: "zmluva"
-      contracts: "zmluvy"
-      no_contracts: "Žiadne zmluvy"
+      contract: "dokument"
+      contracts: "dokumenty"
+      no_contracts: "Žiadne dokumenty"
       unknown_user: "Neznámy používateľ"
       created: "Vytvorené"
       view: "Zobraziť"
       no_bundles_title: "Žiadne balíky"
       no_bundles_message: "Balíky sa vytvárajú cez API."
     show:
-      all_bundles: "Všetky balíky"
-      title: "Balík"
+      title: "Balík dokumentov"
+      edit_bundle: "Upraviť balík"
       uuid: "UUID: %{uuid}"
-      contract_number: "Zmluva %{current} z %{total}"
-      signed: "Podpísané"
+      contracts_title: "Dokumenty v balíku"
       open_separately: "Otvoriť samostatne →"
+      document_title: "Dokument"
+      signed_by_title: "Balík už podpísali (%{count}/%{total})"
+      notify_recipient: "Odoslať notifikáciu"
+      status:
+        pending: "Čaká na odoslanie"
+        notified: "Odoslaný"
+        signed: "Podpísané"
+        declined: "Odmietnuté"
+      note_title: "Poznámka"
+      no_note: "Žiadna poznámka"
+    edit:
+      title: "Upraviť balík"
+      uuid: "UUID: %{uuid}"
+      request_signature_title: "Požiadať o podpisy"
+      contracts_title: "Dokumenty v balíku"
+      open_separately: "Otvoriť samostatne →"
+      document_title: "Dokument"
+      note_title: "Poznámka"
+      note_placeholder: "Voliteľná správa pre adresátov"
+      note_label: "Správa pre adresátov"
+      signed: "Podpísané"
+      recipients_title: "Poslať na podpis"
+      recipients_subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
+    recipients_form:
+      recipient_email: "Email adresáta"
+      recipient_email_placeholder: "jan.novak@example.com"
+      remove: "Odstrániť"
+      add_recipient: "Pridať"
+      recipient_email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
+    sign:
+      title: "Podpíšte balík dokumentov"
+      title_requested_singular: "Dostali ste dokument na podpis"
+      title_requested_plural: "Dostali ste balík %{count} dokumentov na podpis"
+      subtitle_requested: "Skontrolujte odosielateľa a dokumenty v balíku, potom vyberte spôsob podpisu."
+      note_title: "Poznámka od odosielateľa"
+      awaiting_recipients: "Čaká na podpis od"
     iframe:
-      title: "Balík zmlúv"
-      subtitle: "Prosím, podpíšte všetky zmluvy v balíku"
-      contract_number: "Zmluva %{current} z %{total}"
+      title: "Balík dokumentov"
+      subtitle: "Prosím, podpíšte všetky dokument v balíku"
+      contract_number: "Dokument %{current} z %{total}"
       signed: "Podpísané"
     status:
-      all_signed: "Všetky zmluvy podpísané"
+      all_signed: "Všetky dokument podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
+    sender:
+      sender: "Odosielateľ"
   
   contracts:
     index:
-      title: "Zmluvy"
+      title: "Dokumenty"
       upload_document: "Nahrať dokument"
       signed: "Podpísané"
       no_documents: "Žiadne dokumenty"
@@ -222,7 +254,7 @@ sk:
       created_at: "Vytvorené"
       download: "Stiahnuť"
       view: "Zobraziť"
-      no_contracts_title: "Zatiaľ žiadne zmluvy"
+      no_contracts_title: "Zatiaľ žiadne dokumenty"
       no_contracts_message: "Začnite nahratím dokumentu."
     new:
       page_title: "Podpíšte dokumenty elektronicky, jednoducho a bezpečne"
@@ -232,14 +264,14 @@ sk:
       submit_button: "Nahrať a pokračovať"
       errors_title: "Pri vytváraní dokumentu sa vyskytli chyby:"
     show:
-      all_contracts: "Všetky zmluvy"
-      title: "Zmluva"
+      all_contracts: "Všetky dokumenty"
+      title: "Dokument"
       uuid: "UUID: %{uuid}"
       part_of_bundle: "Súčasť %{link}"
       download: "Stiahnuť"
       edit_contract: "Upraviť"
     sign:
-      all_contracts: "Všetky zmluvy"
+      all_contracts: "Všetky dokumenty"
       title: "Podpíšte dokument"
       subtitle: "Skontrolujte dokument, potom vyberte spôsob podpisu."
       title_requested: "Dostali ste dokument na podpis"
@@ -265,19 +297,19 @@ sk:
         title: "Dokument bol podpísaný"
         message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
     edit:
-      title: "Upraviť zmluvu"
+      title: "Upraviť dokument"
       uuid: "UUID: %{uuid}"
       signature_parameters_title: "Parametre podpisu"
-      signature_parameters_subtitle: "Nakonfigurujte formát podpisu a povolené metódy podpisu pre túto zmluvu."
+      signature_parameters_subtitle: "Nakonfigurujte formát podpisu a povolené metódy podpisu pre tento dokument."
       signature_format_label: "Formát podpisu"
       signature_method_label: "Metóda podpisu"
       documents_title: "Dokumenty"
-      documents_subtitle: "Dokumenty priradené k tejto zmluve."
-      no_documents: "Žiadne dokumenty priradené k tejto zmluve."
-      destroy_contract: "Zmazať zmluvu"
-      destroy_confirm: "Ste si istý, že chcete vymazať túto zmluvu? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tejto zmluve."
+      documents_subtitle: "Dokumenty priradené k tomuto dokumentu."
+      no_documents: "Žiadne dokumenty priradené k tomuto dokumentu."
+      destroy_contract: "Zmazať dokument"
+      destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
       cancel: "Zrušiť"
-      update_contract: "Aktualizovať zmluvu"
+      update_contract: "Aktualizovať dokument"
     signature_actions:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       autogram_desktop_label: "Autogram Desktop"
@@ -293,7 +325,7 @@ sk:
       learn_more_text: "Pozrite si návod"
       how_signing_works: "Ako funguje podpisovanie"
       signed_title: "Dokumenty boli podpísané"
-      signed_message: "Táto zmluva bola podpísaná a je dokončená. Nie je potrebný žiadny ďalší podpis."
+      signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
     autogram_signing_in_progress:
       title: "Podpisovanie s Autogram Desktop"
       subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram Desktop"
@@ -328,6 +360,10 @@ sk:
       loading: "Načítavam obsah dokumentu..."
     signature_validation:
       validating: "Overovanie elektronických podpisov..."
+    visualization_with_toggle:
+      hide_document: "Skryť dokument"
+      show_document: "Zobraziť dokument"
+      loading_content: "Načítavam obsah dokumentu..."
   
   homepage:
     index:
@@ -471,7 +507,7 @@ sk:
       signing_failed: "Nepodarilo sa iniciovať podpisovanie. Skúste to prosím znova."
       network_error: "Vyskytla sa sieťová chyba. Skontrolujte prosím pripojenie a skúste to znova."
       iframe_client_error: "Nepodarilo sa vytvoriť Autogram klienta kompatibilného s iframe"
-      contract_load_failed: "Nepodarilo sa načítať údaje zmluvy zo servera."
+      contract_load_failed: "Nepodarilo sa načítať údaje dokumentu zo servera."
       signing_error: "Pri podpisovaní sa vyskytla chyba: %{message}"
       autogram_connection_failed: "Nepodarilo sa pripojiť k Autogram Desktop. Uistite sa, že je nainštalovaný a spustený."
       file_read_failed: "Nepodarilo sa prečítať súbor"
@@ -494,10 +530,10 @@ sk:
       timestamp_non_qualified: "Negarantovný dátum a čas (bez časovej pečiatky): %{signing_time}"
       view_contract: "Zobraziť podpísaný dokument"
     bundle_completed:
-      subject: "Váš balík zmlúv bol podpísaný"
+      subject: "Váš balík dokumentov bol podpísaný"
       greeting: "Dobrý deň,"
-      message: "Váš balík so zmluvami bol dokončený."
-      details_title: "Dokončené zmluvy:"
+      message: "Váš balík so dokumentmi bol dokončený."
+      details_title: "Dokončené dokumenty:"
       view_bundle: "Zobraziť balík"
     bundle_created:
       subject: "Dokumenty na podpis"

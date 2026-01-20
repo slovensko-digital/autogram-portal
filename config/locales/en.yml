@@ -29,6 +29,12 @@
 
 en:
   hello: "Hello world"
+
+  actions:
+    back: "Back"
+    continue: "Continue"
+    cancel: "Cancel"
+    download: "Download"
   
   header:
     navigation:
@@ -36,6 +42,7 @@ en:
       toggle_menu: "Toggle menu"
     links:
       contracts: "Contracts"
+      bundles: "Bundles"
       sign_in: "Sign in"
       sign_out: "Sign out"
   
@@ -228,12 +235,45 @@ en:
       no_bundles_title: "No bundles"
       no_bundles_message: "Bundles are created via API."
     show:
-      all_bundles: "All bundles"
       title: "Bundle"
+      edit_bundle: "Edit Bundle"
       uuid: "UUID: %{uuid}"
-      contract_number: "Contract %{current} of %{total}"
-      signed: "Signed"
+      contracts_title: "Documents in Bundle"
       open_separately: "Open separately →"
+      document_title: "Document"
+      signed_by_title: "Signed by (%{count}/%{total})"
+      notify_recipient: "Notify Recipient"
+      status:
+        pending: "Not Sent"
+        notified: "Notified"
+        signed: "Signed"
+        declined: "Declined"
+      note_title: "Note"
+      no_note: "No note for recipients"
+    edit:
+      title: "Edit Bundle"
+      uuid: "UUID: %{uuid}"
+      request_signature_title: "Request Signatures"
+      contracts_title: "Documents in Bundle"
+      open_separately: "Open separately →"
+      document_title: "Document"
+      note_title: "Note"
+      note_placeholder: "Optional message for recipients"
+      note_label: "Message for recipients"
+      signed: "Signed"
+      recipients_title: "Send for Signature"
+      recipients_subtitle: "Send this bundle to others for signing via email."
+    recipients_form:
+      recipient_email: "Recipient Email"
+      recipient_email_placeholder: "jan.novak@example.com"
+      remove: "Remove"
+      add_recipient: "Add Recipient"
+      recipient_email_help: "Recipient will receive an email with a link to sign the documents"
+      status:
+        pending: "Not Sent"
+        notified: "Notified"
+        signed: "Signed"
+        declined: "Declined"
     iframe:
       title: "Contract Bundle"
       subtitle: "Please sign all contracts in the bundle"

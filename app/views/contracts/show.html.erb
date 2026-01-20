@@ -1,58 +1,52 @@
 <main>
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8">
-      <div class="mx-auto flex max-w-full sm:max-w-3xl lg:ml-10 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
-        <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
-          <div class="w-full mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
-                <p class="mt-2 text-sm text-gray-500"><%= t('.filename', filename: @contract.documents.first.filename) %></p>
-              </div>
-              <div class="flex-shrink-0">
-                <%= link_to download_document_path(@contract.documents.first), 
-                           class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-                  <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                  <%= t('.download') %>
-                <% end %>
-              </div>
+    <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div class="w-full mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+            <p class="mt-2 text-sm text-gray-500"><%= t('.filename', filename: @contract.documents.first.filename) %></p>
+          </div>
+          <div class="flex-shrink-0">
+            <%= link_to download_document_path(@contract.documents.first), 
+                        class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              <%= t('.download') %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%= turbo_frame_tag "signature_validation_#{@contract.uuid}", 
+                          src: validate_contract_path(@contract),
+                          loading: "lazy",
+                          class: "w-full mb-6" do %>
+        <div class="w-full">
+          <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
+            <div class="flex items-center">
+              <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
             </div>
           </div>
-
-          <%= turbo_frame_tag "signature_validation_#{@contract.uuid}", 
-                              src: validate_contract_path(@contract),
-                              loading: "lazy",
-                              class: "w-full mb-6" do %>
-            <div class="w-full">
-              <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
-                <div class="flex items-center">
-                  <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span class="text-gray-600"><%= t('.validating_signatures') %></span>
-                </div>
-              </div>
-            </div>
-          <% end %>
-
-          <%= render 'visualization_with_toggle' %>
-
-  <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
-
-      <div class="py-4">
-        <div class="flex flex-col sm:flex-row gap-8">
-          <%= link_to edit_contract_path(@contract), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: {turbo_frame: "_top"} do %>
-            <%= t('contracts.show.edit_contract') %>
-          <% end %>
         </div>
-      </div>
-        </div>
-      </div>
+      <% end %>
 
-      </div>
+      <%= render 'visualization_with_toggle', contract: @contract %>
+
+      <% if current_user == @contract.user %>
+        <div class="w-full py-4">
+          <div class="flex flex-col sm:flex-row gap-8">
+            <%= link_to edit_contract_path(@contract), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: {turbo_frame: "_top"} do %>
+              <%= t('contracts.show.edit_contract') %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 </main>

@@ -3,7 +3,7 @@
 # Table name: contracts
 #
 #  id              :bigint           not null, primary key
-#  allowed_methods :string           default([]), is an Array
+#  allowed_methods :string           default(["qes"]), is an Array
 #  uuid            :string           not null
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
