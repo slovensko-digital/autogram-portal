@@ -142,10 +142,6 @@
     <div class="my-6 border-b border-gray-200"></div>
 
     <div class="flex gap-4">
-      <%= link_to root_path, class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-        <%= t('contracts.signature_actions.cancel') %>
-      <% end %>
-
       <button type="button"
               data-signature-method-selector-target="signButton"
               data-action="click->signature-method-selector#triggerSign"
