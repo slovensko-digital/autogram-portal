@@ -1,6 +1,6 @@
 class BundlesController < ApplicationController
-  before_action :set_public_bundle, only: [ :show, :iframe, :signatures, :sign ]
-  before_action :set_bundle, only: [ :edit, :update, :add_recipient, :notify_recipients ]
+  before_action :set_public_bundle, only: [ :iframe, :signatures, :sign ]
+  before_action :set_bundle, only: [ :show, :edit, :update, :add_recipient, :notify_recipients ]
   skip_before_action :verify_authenticity_token, only: [ :iframe ]
 
   before_action :allow_iframe, only: [ :iframe ]
@@ -28,22 +28,31 @@ class BundlesController < ApplicationController
     @recipient = @bundle.recipients.build(recipient_params)
 
     if @recipient.save
-      render turbo_stream: turbo_stream.replace(
-        "bundle_recipients_form",
-        partial: "bundles/recipients_form",
-        locals: { bundle: @bundle }
-      )
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "bundle_recipients_form",
+            partial: "bundles/recipients_form",
+            locals: { bundle: @bundle }
+          )
+        end
+      end
     else
-      render turbo_stream: turbo_stream.replace(
-        "bundle_recipients_form",
-        partial: "bundles/recipients_form",
-        locals: { bundle: @bundle, recipient_error: @recipient.errors.full_messages.join(", ") }
-      )
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "bundle_recipients_form",
+            partial: "bundles/recipients_form",
+            locals: { bundle: @bundle, recipient_error: @recipient.errors.full_messages.join(", ") }
+          )
+        end
+      end
     end
   end
 
   def notify_recipients
     @bundle.notify_recipients
+    head :ok
   end
 
   def iframe
@@ -63,7 +72,7 @@ class BundlesController < ApplicationController
   end
 
   def set_bundle
-    @bundle = current_user.bundles.find_by_uuid!(params[:id])
+    @bundle = Bundle.find_by!(uuid: params[:id], author: current_user)
   end
 
   def bundle_params

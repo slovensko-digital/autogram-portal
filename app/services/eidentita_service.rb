@@ -1,6 +1,6 @@
 class EidentitaService
   def initiate_signing(contract)
-    document = contract.documents.first
+    document = contract.documents_to_sign.first
     return { error: "No document to sign" } unless document&.blob&.attached?
 
     {

@@ -67,23 +67,35 @@ class Contract < ApplicationRecord
     # TODO: Validate the signatures in the signed file
     # AutogramEnvironment.autogram_service.validate_signatures(signed_file, signature_parameters)
 
-    signed_document.attach(
-      io: StringIO.new(Base64.decode64(signed_file)),
-      filename: generate_signed_filename,
-      content_type: generate_signed_conentent_type
-    )
-    save!
+    # TODO: version signed document attachment to avoid overwriting in concurrent scenarios
+
+    ActiveRecord::Base.transaction do
+      signed_document.purge if signed_document.attached?
+      signed_document.attach(
+        io: StringIO.new(Base64.decode64(signed_file)),
+        filename: generate_signed_filename,
+        content_type: generate_signed_conentent_type
+      )
+      save!
+    end
 
     avm_sessions.active.each(&:mark_completed!)
+    eidentita_sessions.active.each(&:mark_completed!)
     bundle.contract_signed(self) if bundle.present?
     broadcast_signing_success
 
     Notification::ContractSignedJob.perform_later(self)
   end
 
+  def documents_to_sign
+    return documents unless signed_document.attached?
+
+    [ Document.new(blob: signed_document.blob) ]
+  end
+
   def awaiting_signature?
     # TODO: Improve logic to consider multiple expected signatures
-    signed_document.blank?
+    signed_document.blank? || bundle&.awaiting_recipients?(contract: self)
   end
 
   def extendable_signatures?

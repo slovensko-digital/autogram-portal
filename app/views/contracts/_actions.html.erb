@@ -2,7 +2,7 @@
   # Configuration options:
   # - previous_page: Path for the back button
 
-  previous_page = local_assigns.fetch(:previous_page, contracts_path)
+  previous_page = local_assigns.fetch(:previous_page, root_path)
 %>
 
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
@@ -21,17 +21,19 @@
               url: signature_parameters_contract_path(@contract, target_step: 'sign')
             } %>
 
-      <%= render 'shared/radio_button_card',
-            name: 'document_action',
-            value: 'request_signature',
-            label: t('documents.new.actions.request_signature.title'),
-            description: t('documents.new.actions.request_signature.subtitle'),
-            checked: false,
-            data_attributes: { 
-              url: signature_parameters_contract_path(@contract, target_step: 'request_signature')
-            } %>
+      <% if current_user&.signature_request_allowed? && @contract.bundle.nil? %>
+        <%= render 'shared/radio_button_card',
+              name: 'document_action',
+              value: 'request_signature',
+              label: t('documents.new.actions.request_signature.title'),
+              description: t('documents.new.actions.request_signature.subtitle'),
+              checked: false,
+              data_attributes: { 
+                url: signature_parameters_contract_path(@contract, target_step: 'request_signature')
+              } %>
+      <% end %>
 
-      <% if @contract.extendable_signatures? %>
+      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures? %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',

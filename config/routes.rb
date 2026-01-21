@@ -31,13 +31,13 @@ Rails.application.routes.draw do
   resources :terms_of_service, only: [ :index ]
 
   authenticate(:user) do
-    resources :contracts, only: [ :index, :destroy, :edit, :update ]
-    resources :documents, only: [ :index ] do
+    resources :contracts, only: [ :index, :destroy ]
+    resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
       member do
-        post :extend_signatures
+        post :add_recipient
+        post :notify_recipients
       end
     end
-    resources :bundles, only: [ :index, :edit, :update, :destroy ]
   end
 
   resources :documents, only: [] do
@@ -48,7 +48,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :contracts do
+  resources :contracts, except: [ :index ] do
     member do
       get :sign
       post :sign_autogram
@@ -75,12 +75,10 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :bundles, only: [ :show, :edit, :update ] do
+  resources :bundles, only: [] do
     member do
       get :iframe
       get :signatures
-      post :add_recipient
-      post :notify_recipients
       get :sign
     end
     resources :recipients, only: [ :destroy ] do

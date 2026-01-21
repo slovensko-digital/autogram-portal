@@ -6,19 +6,21 @@
           <div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           </div>
-          <div class="flex-shrink-0">
-            <%= link_to download_document_path(@contract.documents.first), 
-                        class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-              <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-              </svg>
-              <%= t('actions.download') %>
-            <% end %>
-          </div>
+          <% if @contract.signed_document.attached? %>
+            <div class="flex-shrink-0">
+              <%= link_to signed_document_contract_path(@contract), 
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                <%= t('actions.download') %>
+              <% end %>
+            </div>
+          <% end %>
         </div>
       </div>
 
-      <%= render 'visualization_with_toggle', contract: @contract %>
+      <%= render 'visualization_with_toggle', contract: @contract, default_collapsed: !(@contract.documents.first.is_xml? || @contract.documents.first.is_asice?) %>
 
       <%= turbo_frame_tag "signature_validation_#{@contract.uuid}", 
                           src: validate_contract_path(@contract),
@@ -37,12 +39,39 @@
         </div>
       <% end %>
 
-      <% if current_user == @contract.user %>
-        <div class="w-full py-4">
-          <div class="flex flex-col sm:flex-row gap-8">
-            <%= link_to edit_contract_path(@contract), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: {turbo_frame: "_top"} do %>
-              <%= t('contracts.show.edit_contract') %>
-            <% end %>
+      <% if @contract.bundle %>
+        <div class="w-full mb-6">
+          <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="text-sm text-blue-800 ml-3">
+                <p>
+                  <%= t('.part_of_bundle') %>:
+                  <%= link_to t('.bundle_link'), bundle_path(@contract.bundle), class: "font-semibold underline" %>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= turbo_frame_tag "contract_actions_#{@contract.uuid}", 
+                          src: actions_contract_path(@contract, previous_page: @previous_page || root_path),
+                          loading: "lazy",
+                          class: "w-full" do %>
+        <div class="w-full mt-8">
+          <div class="bg-white  sm:rounded-lg p-4">
+            <div class="flex items-center justify-center py-8">
+              <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-gray-600"><%= t('.loading_actions') %></span>
+            </div>
           </div>
         </div>
       <% end %>

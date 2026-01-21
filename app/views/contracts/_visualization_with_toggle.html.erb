@@ -1,4 +1,6 @@
-<div data-controller="toggle" data-toggle-collapsed-value="<%= !(contract.documents.first.is_xml? || contract.documents.first.is_asice?) || contract.bundle.present? %>" class="w-full mb-6">
+<%# locals: (contract:, default_collapsed: true) %>
+
+<div data-controller="toggle" data-toggle-collapsed-value="<%= default_collapsed %>" class="w-full mb-6">
   <div class="w-full bg-white border border-gray-200 rounded-md">  
     <div 
       data-action="click->toggle#toggle"

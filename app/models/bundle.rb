@@ -43,10 +43,19 @@ class Bundle < ApplicationRecord
   end
 
   def completed?
-    contracts.all? { |c| !c.awaiting_signature? }
+     return recipients.signed.count == recipients.count if recipients.count.positive?
+     contracts.all? { !it.awaiting_signature? }
+  end
+
+  def awaiting_recipients?(contract: nil)
+    # TODO: consider recipients per contract scenario
+    recipients.notified.count.positive?
   end
 
   def contract_signed(contract)
+    # TODO: add logic to handle multiple recipients signing their respective contracts
+    recipients.notified.first.update(status: :signed) if recipients.notified.any?
+
     Notification::BundleContractSignedJob.perform_later(self, contract)
     return unless completed?
 
@@ -79,8 +88,6 @@ class Bundle < ApplicationRecord
   private
 
   def ensure_uuid
-    Rails.logger.info "Ensuring UUID for bundle #{id}..., uuid now: #{uuid}"
     self.uuid ||= SecureRandom.uuid
-    Rails.logger.info "UUID ensured: #{uuid}"
   end
 end

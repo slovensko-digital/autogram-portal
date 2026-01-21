@@ -60,10 +60,7 @@
             </div>
           </div>
         <% end %>
-
-        <% if @contract.awaiting_signature? %>
-              <%= render 'signature_actions', contract: @contract %>
-        <% else %>
+        <% unless @contract.awaiting_signature? %>
           <div class="w-full bg-green-50 border-l-4 border-green-400 p-4 mb-6">
             <div class="flex items-start">
               <div class="flex-shrink-0">
@@ -82,6 +79,10 @@
               <%= link_to t('actions.download'), signed_document_contract_path(@contract), class: "mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
             </div>
           </div>
+        <% end %>
+
+        <% if @contract.awaiting_signature? || current_user == @contract.user %>
+          <%= render 'signature_actions', contract: @contract %>
         <% end %>
       </div>
     </div>

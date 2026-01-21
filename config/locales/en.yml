@@ -276,14 +276,7 @@ en:
         declined: "Declined"
       note_title: "Note"
       no_note: "No note for recipients"
-    edit:
-      title: "Edit Bundle"
-      uuid: "UUID: %{uuid}"
       request_signature_title: "Request Signatures"
-      contracts_title: "Documents in Bundle"
-      open_separately: "Open separately →"
-      document_title: "Document"
-      note_title: "Note"
       note_placeholder: "Optional message for recipients"
       note_label: "Message for recipients"
       signed: "Signed"
@@ -319,6 +312,8 @@ en:
       sender: "Sender"
   
   contracts:
+    alerts:
+      unauthorized_edit_attempt: "You are not authorized to edit this contract."
     index:
       title: "Contracts"
       upload_document: "Upload document"
@@ -340,10 +335,21 @@ en:
     show:
       all_contracts: "All contracts"
       title: "Document"
-      uuid: "UUID: %{uuid}"
-      part_of_bundle: "Part of %{link}"
+      part_of_bundle: "Part of bundle"
+      bundle_link: "View bundle →"
       download: "Download"
-      edit_contract: "Edit"
+      uuid: "UUID: %{uuid}"
+      signature_parameters_title: "Signature Parameters"
+      signature_parameters_subtitle: "Configure signature format and allowed signature methods for this contract."
+      signature_format_label: "Signature Format"
+      signature_method_label: "Signature Method"
+      documents_title: "Documents"
+      documents_subtitle: "Documents associated with this contract."
+      no_documents: "No documents associated with this contract."
+      destroy_contract: "Destroy contract"
+      destroy_confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
+      cancel: "Cancel"
+      update_contract: "Update Contract"
     sign:
       all_contracts: "All contracts"
       title: "Sign document"
@@ -370,22 +376,9 @@ en:
       already_signed:
         title: "Document has been signed"
         message: "This document has been signed and is complete. No further signature is required."
-    edit:
-      title: "Edit Document"
-      uuid: "UUID: %{uuid}"
-      signature_parameters_title: "Signature Parameters"
-      signature_parameters_subtitle: "Configure signature format and allowed signature methods for this contract."
-      signature_format_label: "Signature Format"
-      signature_method_label: "Signature Method"
-      documents_title: "Documents"
-      documents_subtitle: "Documents associated with this contract."
-      no_documents: "No documents associated with this contract."
-      destroy_contract: "Destroy contract"
-      destroy_confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
-      cancel: "Cancel"
-      update_contract: "Update Contract"
     signature_actions:
       select_signing_app: "Select signing application"
+      add_another_signature: "Add another signature"
       autogram_desktop_label: "Autogram Desktop"
       autogram_desktop_description: "Desktop application with qualified electronic seal or chip ID card"
       autogram_mobile_label: "Autogram Mobile"

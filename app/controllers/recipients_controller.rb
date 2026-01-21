@@ -3,7 +3,7 @@ class RecipientsController < ApplicationController
   before_action :set_recipient
 
   def destroy
-    unless @recipient.signed?
+    unless @recipient.signed? || @recipient.notified?
       @recipient.destroy
     end
 

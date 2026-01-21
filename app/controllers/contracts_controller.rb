@@ -1,10 +1,11 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
+  before_action :verify_author, only: [ :show, :update, :destroy ]
   skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign_eidentita, :sign, :autogram_parameters, :autogram_signing_in_progress ]
   before_action :allow_iframe, only: [ :iframe ]
 
   def index
-    @contracts = current_user.contracts.includes(:user, :documents).order(created_at: :desc)
+    @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
   end
 
   def new
@@ -19,13 +20,14 @@ class ContractsController < ApplicationController
 
     @contract.save!
 
-    redirect_to edit_contract_path(@contract)
+    redirect_to @contract
 
   rescue ActiveRecord::RecordInvalid
     render :new, locals: { errors: @contract.errors }, status: :unprocessable_entity
   end
 
   def show
+    @previous_page = request.referrer
   end
 
   def actions
@@ -54,27 +56,18 @@ class ContractsController < ApplicationController
   end
 
   def autogram_parameters
-    render partial: "api/v1/contracts/contract", locals: { contract: @contract }, formats: [ :json ]
+    render formats: [ :json ]
   end
 
   def autogram_signing_in_progress
     respond_to do |format|
       format.turbo_stream do
-        # Determine cancel URL based on referrer context
-        cancel_url = if request.referrer&.include?("/iframe")
-          iframe_params = {}
-          iframe_params[:no_preview] = true if params[:no_preview].present?
-          iframe_contract_path(@contract, iframe_params)
-        else
-          contract_path(@contract)
-        end
-
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
           partial: "contracts/autogram_signing_in_progress",
           locals: {
             contract: @contract,
-            cancel_url: cancel_url
+            cancel_url: determine_cancel_url
           }
         )
       end
@@ -97,35 +90,20 @@ class ContractsController < ApplicationController
   end
 
   def sign_avm
-    if @contract.has_active_avm_session?
-      existing_session = @contract.current_avm_session
-      avm_url = existing_session.avm_url
-
-      respond_to do |format|
-        format.turbo_stream do
-          # Determine cancel URL based on referrer context
-          cancel_url = if request.referrer&.include?("/iframe")
-            iframe_params = {}
-            iframe_params[:no_preview] = true if params[:no_preview].present?
-            iframe_contract_path(@contract, iframe_params)
-          else
-            contract_path(@contract)
-          end
-
-          render turbo_stream: turbo_stream.replace(
-            "signature_actions_#{@contract.uuid}",
-            partial: "contracts/avm_signing_pending",
-            locals: {
-              contract: @contract,
-              avm_session: existing_session,
-              avm_url: avm_url,
-              cancel_url: cancel_url
-            }
-          )
-        end
+    return respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "signature_actions_#{@contract.uuid}",
+          partial: "contracts/avm_signing_pending",
+          locals: {
+            contract: @contract,
+            avm_session: @contract.current_avm_session,
+            avm_url: @contract.current_avm_session.avm_url,
+            cancel_url: determine_cancel_url
+          }
+        )
       end
-      return
-    end
+    end if @contract.has_active_avm_session?
 
     result = AutogramEnvironment.avm_service.initiate_signing(@contract)
     avm_session = @contract.avm_sessions.create!(
@@ -139,15 +117,6 @@ class ContractsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        # Determine cancel URL based on referrer context
-        cancel_url = if request.referrer&.include?("/iframe")
-          iframe_params = {}
-          iframe_params[:no_preview] = true if params[:no_preview].present?
-          iframe_contract_path(@contract, iframe_params)
-        else
-          contract_path(@contract)
-        end
-
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
           partial: "contracts/avm_signing_pending",
@@ -155,7 +124,7 @@ class ContractsController < ApplicationController
             contract: @contract,
             avm_session: avm_session,
             avm_url: avm_session.avm_url,
-            cancel_url: cancel_url
+            cancel_url: determine_cancel_url
           }
         )
       end
@@ -174,8 +143,7 @@ class ContractsController < ApplicationController
 
   def sign_eidentita
     unless @contract.has_active_eidentita_session?
-      eidentita_service = EidentitaService.new
-      result = eidentita_service.initiate_signing(@contract)
+      result = AutogramEnvironment.eidentita_service.initiate_signing(@contract)
 
       raise result[:error] if result[:error]
 
@@ -260,37 +228,32 @@ class ContractsController < ApplicationController
     end
   end
 
-  def edit
-    @previous_page = request.referrer
-  end
-
   def update
-    ActiveRecord::Base.transaction do
-      if @contract.update(contract_params)
-        @contract.save!
-        if params[:next_step] == "request_signature"
-          bundle = Bundle.new(contracts: [ @contract ], author: current_user)
-          if bundle.save
-            return redirect_to edit_bundle_path(bundle)
-          else
-            return render :edit, status: :unprocessable_entity
-          end
-        elsif params[:next_step] == "sign"
-          redirect_to sign_contract_path(@contract)
-        else
-          redirect_to @contract
-        end
+    if @contract.update(contract_params)
+      @contract.save!
+      if params[:next_step] == "request_signature"
+        bundle = Bundle.create!(contracts: [ @contract ], author: current_user)
+        redirect_to bundle
+      elsif params[:next_step] == "sign"
+        redirect_to sign_contract_path(@contract)
       else
-        render :edit, status: :unprocessable_entity
+        redirect_to @contract
       end
+    else
+      render :show, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordInvalid
-    render :edit, locals: { errors: @contract.errors }, status: :unprocessable_entity
+    puts "Errors: #{@contract.errors.full_messages}"
+    render :show, locals: { flash: @contract.errors }, status: :unprocessable_entity
   end
 
   def destroy
     @contract.destroy!
-    redirect_to contracts_path, notice: "The contract and all its documents were successfully deleted."
+    if current_user
+      redirect_to contracts_path, notice: "The contract and all its documents were successfully deleted."
+    else
+      redirect_to root_path, notice: "The contract and all its documents were successfully deleted."
+    end
   rescue StandardError => e
     redirect_to contract_path(@contract), alert: "An error occurred while deleting the contract: #{e.message}"
   end
@@ -313,7 +276,13 @@ class ContractsController < ApplicationController
       iframe_params[:no_preview] = true if params[:no_preview].present?
       iframe_contract_path(@contract, iframe_params)
     else
-      contract_path(@contract)
+       request.referrer || contract_path(@contract)
+    end
+  end
+
+  def verify_author
+    if @contract.user && @contract.user != current_user
+      redirect_to root_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
     end
   end
 

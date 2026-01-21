@@ -121,8 +121,8 @@ sk:
   
   signature_formats:
     pades: "PDF Advanced Electronic Signature (PAdES)"
-    xades_asice: "XML Advanced Electronic Signature (XAdES) in ASiC-E container"
-    cades_asice: "CMS Advanced Electronic Signature (CAdES) in ASiC-E container"
+    xades_asice: "XML Pokročilý elektronický podpis v ASiC-E kontajneri"
+    cades_asice: "CMS Pokročilý elektronický podpis v ASiC-E kontajneri"
     short:
       pades: "PAdES"
       xades_asice: "XAdES + ASiC-E"
@@ -221,14 +221,7 @@ sk:
         declined: "Odmietnuté"
       note_title: "Poznámka"
       no_note: "Žiadna poznámka"
-    edit:
-      title: "Upraviť balík"
-      uuid: "UUID: %{uuid}"
       request_signature_title: "Požiadať o podpisy"
-      contracts_title: "Dokumenty v balíku"
-      open_separately: "Otvoriť samostatne →"
-      document_title: "Dokument"
-      note_title: "Poznámka"
       note_placeholder: "Voliteľná správa pre adresátov"
       note_label: "Správa pre adresátov"
       signed: "Podpísané"
@@ -241,6 +234,7 @@ sk:
       add_recipient: "Pridať"
       recipient_email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
     sign:
+      all_bundles: "Všetky balíky dokumentov"
       title: "Podpíšte balík dokumentov"
       title_requested_singular: "Dostali ste dokument na podpis"
       title_requested_plural: "Dostali ste balík %{count} dokumentov na podpis"
@@ -249,16 +243,18 @@ sk:
       awaiting_recipients: "Čaká na podpis od"
     iframe:
       title: "Balík dokumentov"
-      subtitle: "Prosím, podpíšte všetky dokument v balíku"
+      subtitle: "Prosím, podpíšte všetky dokumenty v balíku"
       contract_number: "Dokument %{current} z %{total}"
       signed: "Podpísané"
     status:
-      all_signed: "Všetky dokument podpísané"
+      all_signed: "Všetky dokumenty podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
     sender:
       sender: "Odosielateľ"
   
   contracts:
+    alerts:
+      unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
     index:
       title: "Dokumenty"
       upload_document: "Nahrať dokument"
@@ -281,9 +277,20 @@ sk:
       all_contracts: "Všetky dokumenty"
       title: "Dokument"
       uuid: "UUID: %{uuid}"
-      part_of_bundle: "Súčasť %{link}"
+      part_of_bundle: "Súčasť balíka"
+      bundle_link: "Zobraziť balík dokumentov"
       download: "Stiahnuť"
-      edit_contract: "Upraviť"
+      signature_parameters_title: "Parametre podpisu"
+      signature_parameters_subtitle: "Nakonfigurujte formát podpisu a povolené metódy podpisu pre tento dokument."
+      signature_format_label: "Formát podpisu"
+      signature_method_label: "Metóda podpisu"
+      documents_title: "Dokumenty"
+      documents_subtitle: "Dokumenty priradené k tomuto dokumentu."
+      no_documents: "Žiadne dokumenty priradené k tomuto dokumentu."
+      destroy_contract: "Zmazať dokument"
+      destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
+      cancel: "Zrušiť"
+      update_contract: "Aktualizovať dokument"
     sign:
       all_contracts: "Všetky dokumenty"
       title: "Podpíšte dokument"
@@ -310,22 +317,9 @@ sk:
       already_signed:
         title: "Dokument bol podpísaný"
         message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
-    edit:
-      title: "Upraviť dokument"
-      uuid: "UUID: %{uuid}"
-      signature_parameters_title: "Parametre podpisu"
-      signature_parameters_subtitle: "Nakonfigurujte formát podpisu a povolené metódy podpisu pre tento dokument."
-      signature_format_label: "Formát podpisu"
-      signature_method_label: "Metóda podpisu"
-      documents_title: "Dokumenty"
-      documents_subtitle: "Dokumenty priradené k tomuto dokumentu."
-      no_documents: "Žiadne dokumenty priradené k tomuto dokumentu."
-      destroy_contract: "Zmazať dokument"
-      destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
-      cancel: "Zrušiť"
-      update_contract: "Aktualizovať dokument"
     signature_actions:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
+      add_another_signature: "Pridajte ďalší podpis"
       autogram_desktop_label: "Autogram Desktop"
       autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronick podpisov pomocou eID kariet a iných zariadení"
       autogram_mobile_label: "Autogram v Mobile"
@@ -497,7 +491,7 @@ sk:
       qualification: "Kvalifikácia"
       timestamps: "Časové pečiatky"
       timestamp: "Časová pečiatka"
-      wo_timestmap: "Bez časovej pečiatky"
+      wo_timestamp: "Bez časovej pečiatky"
       time: "Čas"
       format: "Formát"
       open_details: "Zobraziť detaily"
