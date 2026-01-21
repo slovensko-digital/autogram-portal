@@ -5,7 +5,6 @@
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
-            <p class="mt-2 text-sm text-gray-500"><%= t('.filename', filename: @contract.documents.first.filename) %></p>
           </div>
           <div class="flex-shrink-0">
             <%= link_to download_document_path(@contract.documents.first), 
@@ -13,11 +12,13 @@
               <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
-              <%= t('.download') %>
+              <%= t('actions.download') %>
             <% end %>
           </div>
         </div>
       </div>
+
+      <%= render 'visualization_with_toggle', contract: @contract %>
 
       <%= turbo_frame_tag "signature_validation_#{@contract.uuid}", 
                           src: validate_contract_path(@contract),
@@ -36,8 +37,6 @@
         </div>
       <% end %>
 
-      <%= render 'visualization_with_toggle', contract: @contract %>
-      
       <%= turbo_frame_tag "contract_actions_#{@contract.uuid}", 
                           src: actions_contract_path(@contract, previous_page: @previous_page || contracts_path),
                           loading: "lazy",

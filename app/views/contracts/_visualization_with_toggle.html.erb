@@ -1,41 +1,38 @@
 <div data-controller="toggle" data-toggle-collapsed-value="<%= !(contract.documents.first.is_xml? || contract.documents.first.is_asice?) || contract.bundle.present? %>" class="w-full mb-6">
-  <div class="mb-2">
-    <button 
-      type="button"
+  <div class="w-full bg-white border border-gray-200 rounded-md">  
+    <div 
       data-action="click->toggle#toggle"
-      data-toggle-target="button"
-      class="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      class="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
       <div class="flex flex-col items-start">
-        <span data-toggle-target="textExpanded"><%= t('.hide_document') %></span>
-        <span data-toggle-target="textCollapsed" class="hidden"><%= t('.show_document') %></span>
-        <span class="text-xs text-gray-500 mt-0.5"><%= contract.documents.first.filename %></span>
+        <span class="text-s text-gray-800"><%= contract.documents.first.filename %></span>
       </div>
-      <div class="ml-2 flex-shrink-0">
-        <svg data-toggle-target="iconExpanded" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-        </svg>
-        <svg data-toggle-target="iconCollapsed" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-        </svg>
-      </div>
-    </button>
-  </div>
-
-  <div data-toggle-target="content" data-controller="pdf-reload">
-    <%= turbo_frame_tag "document_visualization_#{contract.documents.first.uuid}", 
-                        src: visualize_document_path(contract.documents.first, t: Time.current.to_i),
-                        loading: "lazy",
-                        class: "rounded-lg min-h-[300px]",
-                        data: { pdf_reload_target: "frame" } do %>
-      <div class="p-4 h-[300px] flex items-center justify-center">
-        <div class="flex items-center">
-          <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      <div data-action="click->toggle#toggle">
+        <button data-action="click->toggle#toggle" class="ml-2 flex-shrink-0 inline-flex items-center cursor-pointer">
+          <span data-toggle-target="textCollapsed"><%= t('.show_document') %></span>
+          <span data-toggle-target="textExpanded" class="hidden"><%= t('.hide_document') %></span>
+          <svg data-toggle-target="icon" class="w-4 h-4 ml-1 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
           </svg>
-          <span class="text-gray-600"><%= t('.loading_content') %></span>
-        </div>
+        </button>
       </div>
-    <% end %>
+    </div>
+
+    <div data-toggle-target="content" data-controller="pdf-reload" class="p-2">
+      <%= turbo_frame_tag "document_visualization_#{contract.documents.first.uuid}", 
+                          src: visualize_document_path(contract.documents.first, t: Time.current.to_i),
+                          loading: "lazy",
+                          class: "min-h-[300px]",
+                          data: { pdf_reload_target: "frame" } do %>
+        <div class="p-4 h-[300px] flex items-center justify-center">
+          <div class="flex items-center">
+            <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-gray-600"><%= t('.loading_content') %></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>

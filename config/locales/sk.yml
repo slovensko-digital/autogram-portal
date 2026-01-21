@@ -31,6 +31,20 @@ sk:
           notified: "Čaká na podpis"
           signed: "Podpísané"
           declined: "Odmietnuté"
+    application:
+      signature_levels:
+        pades: "PAdES"
+        xades_asice: "XAdES v ASiC-E kontajneri"
+        cades_asice: "CAdES v ASiC-E kontajneri"
+        unknown: "Neznámy formát podpisu"
+      signature_qualifications:
+        qesig: "Vlastnoručný podpis"
+        qesig_ts: "Osvečený podpis"
+        qeseal: "Kvalifikovaná elektronická pečať"
+        qeseal_ts: "Kvalifikovaná elektronická pečať s časovou pečiatkou"
+        adesig_qc_qc: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte"
+        adesig_qc_qc_ts: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte s kvalifikovanou časovou pečiatkou"
+        unknown: "Neznámy podpisu"
 
   devise:
     sessions:
@@ -482,13 +496,16 @@ sk:
       issuer: "Vydavateľ"
       qualification: "Kvalifikácia"
       timestamps: "Časové pečiatky"
+      timestamp: "Časová pečiatka"
+      wo_timestmap: "Bez časovej pečiatky"
       time: "Čas"
-      archived: "Archivované"
-      open_details: "Otvoriť detail"
-      operation_description: "Popis operácie"
-      container_type: "Typ kontajnera"
+      format: "Formát"
+      open_details: "Zobraziť detaily"
+      collapse_details: "Zbaliť detaily"
+      open_technical_details: "Zobraziť technické detaily"
+      collapse_technical_details: "Zbaliť technické detaily"
       signature_type: "Typ podpisu"
-      standard_signing: "Štandardné podpisovanie jedného dokumentu"
+      certificate: "Certifikát"
     signature_validation_error:
       title: "Chyba pri overovaní podpisov"
       message: "Nepodarilo sa overiť elektronické podpisy tohto dokumentu."

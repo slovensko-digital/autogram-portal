@@ -52,6 +52,29 @@ en:
       en: "English"
       sk: "Slovenčina"
   
+  helpers:
+    bundles:
+      recipients:
+        status:
+          pending: "Awaiting send"
+          notified: "Awaiting signature"
+          signed: "Signed"
+          declined: "Declined"
+    application:
+      signature_levels:
+        pades: "PAdES"
+        xades_asice: "XAdES in ASiC-E container"
+        cades_asice: "CAdES in ASiC-E container"
+        unknown: "Unknown signature format"
+      signature_qualifications:
+        qesig: "Qualified electronic signature"
+        qesig_ts: "Qualified electronic signature with timestamp"
+        qeseal: "Qualified electronic seal"
+        qeseal_ts: "Qualified electronic seal with timestamp"
+        adesig_qc_qc: "Advanced electronic signature based on qualified certificate"
+        adesig_qc_qc_ts: "Advanced electronic signature based on qualified certificate with qualified timestamp"
+        unknown: "Unknown signature"
+  
   devise:
     sessions:
       new:
@@ -110,6 +133,9 @@ en:
         sign_up: "Sign up"
         didn_t_receive_confirmation_instructions: "Didn't receive confirmation instructions?"
         didn_t_receive_unlock_instructions: "Didn't receive unlock instructions?"
+    passwordless:
+      user:
+        signed_up_but_unconfirmed: "You have successfully registered. Your account is not yet activated, please check your email and click the link to confirm your account."
   
   documents:
     index:
@@ -245,7 +271,7 @@ en:
       notify_recipient: "Notify Recipient"
       status:
         pending: "Not Sent"
-        notified: "Notified"
+        notified: "Sent"
         signed: "Signed"
         declined: "Declined"
       note_title: "Note"
@@ -267,13 +293,20 @@ en:
       recipient_email: "Recipient Email"
       recipient_email_placeholder: "jan.novak@example.com"
       remove: "Remove"
-      add_recipient: "Add Recipient"
+      add_recipient: "Add"
       recipient_email_help: "Recipient will receive an email with a link to sign the documents"
       status:
         pending: "Not Sent"
         notified: "Notified"
         signed: "Signed"
         declined: "Declined"
+    sign:
+      title: "Sign contract bundle"
+      title_requested_singular: "You received a document to sign"
+      title_requested_plural: "You received a bundle of %{count} documents to sign"
+      subtitle_requested: "Check the sender and documents in the bundle, then select the signing method."
+      note_title: "Note from sender"
+      awaiting_recipients: "Awaiting signature from"
     iframe:
       title: "Contract Bundle"
       subtitle: "Please sign all contracts in the bundle"
@@ -282,6 +315,8 @@ en:
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
+    sender:
+      sender: "Sender"
   
   contracts:
     index:
@@ -293,7 +328,7 @@ en:
       created_at: "Created at"
       download: "Download"
       view: "View"
-      no_contracts_title: "No contracts yet"
+      no_contracts_title: "No documents yet"
       no_contracts_message: "Start by uploading a document."
     new:
       page_title: "Sign documents electronically, simply and securely"
@@ -304,7 +339,7 @@ en:
       errors_title: "Errors occurred while creating the document:"
     show:
       all_contracts: "All contracts"
-      title: "Contract"
+      title: "Document"
       uuid: "UUID: %{uuid}"
       part_of_bundle: "Part of %{link}"
       download: "Download"
@@ -336,7 +371,7 @@ en:
         title: "Document has been signed"
         message: "This document has been signed and is complete. No further signature is required."
     edit:
-      title: "Edit Contract"
+      title: "Edit Document"
       uuid: "UUID: %{uuid}"
       signature_parameters_title: "Signature Parameters"
       signature_parameters_subtitle: "Configure signature format and allowed signature methods for this contract."
@@ -517,13 +552,17 @@ en:
       issuer: "Issuer"
       qualification: "Qualification"
       timestamps: "Timestamps"
+      timestamp: "Timestamp"
+      wo_timestamp: "Without timestamp"
       time: "Time"
-      archived: "Archived"
-      open_details: "Open detail"
-      operation_description: "Operation description"
-      container_type: "Container type"
+      format: "Format"
+      open_details: "Show details"
+      collapse_details: "Collapse details"
+      open_technical_details: "Show technical details"
+      collapse_technical_details: "Collapse technical details"
       signature_type: "Signature type"
-      standard_signing: "Standard signing of a single document"
+      certificate: "Certificate"
+      timestamp_type: "Timestamp type"
     signature_validation_error:
       title: "Error validating signatures"
       message: "Failed to validate the electronic signatures of this document."
@@ -567,14 +606,14 @@ en:
     bundle_completed:
       subject: "Your contract bundle has been signed"
       greeting: "Hello,"
-      message: "Your bundle with %{bundle_count} contract(s) has been completed."
-      details_title: "Completed contracts:"
+      message: "Your bundle of documents has been completed."
+      details_title: "Completed documents:"
       view_bundle: "View bundle"
     bundle_created:
       subject: "Documents need your signature"
       greeting: "Hello,"
-      message: "%{author_name} expects your signature on %{bundle_count} documents(s)."
-      details_title: "Documents in the bundle:"
+      message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
+      details_title: "Documents to sign:"
       view_bundle: "View bundle"
   
   activerecord:

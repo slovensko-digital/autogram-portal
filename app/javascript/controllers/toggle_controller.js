@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="toggle"
 export default class extends Controller {
-  static targets = ["content", "button", "iconExpanded", "iconCollapsed", "textExpanded", "textCollapsed"]
+  static targets = ["content", "icon", "textExpanded", "textCollapsed"]
   static values = {
     collapsed: { type: Boolean, default: false }
   }
@@ -23,8 +23,7 @@ export default class extends Controller {
 
   show() {
     this.contentTarget.classList.remove("hidden")
-    this.iconExpandedTarget.classList.remove("hidden")
-    this.iconCollapsedTarget.classList.add("hidden")
+    this.iconTarget.classList.add('rotate-180')
     this.textExpandedTarget.classList.remove("hidden")
     this.textCollapsedTarget.classList.add("hidden")
     this.collapsedValue = false
@@ -32,8 +31,7 @@ export default class extends Controller {
 
   hide() {
     this.contentTarget.classList.add("hidden")
-    this.iconExpandedTarget.classList.add("hidden")
-    this.iconCollapsedTarget.classList.remove("hidden")
+    this.iconTarget.classList.remove('rotate-180')
     this.textExpandedTarget.classList.add("hidden")
     this.textCollapsedTarget.classList.remove("hidden")
     this.collapsedValue = true
