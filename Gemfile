@@ -94,4 +94,4 @@ gem "dotenv-rails", "~> 3.1", group: :development
 
 gem "pry", "~> 0.15.2"
 
-gem "rack-cors", "~> 2.0"
+gem "rack-cors", "~> 3.0"
