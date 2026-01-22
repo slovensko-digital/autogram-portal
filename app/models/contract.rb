@@ -3,7 +3,7 @@
 # Table name: contracts
 #
 #  id              :bigint           not null, primary key
-#  allowed_methods :string           default([]), is an Array
+#  allowed_methods :string           default(["qes"]), is an Array
 #  uuid            :string           not null
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
@@ -36,14 +36,17 @@ class Contract < ApplicationRecord
 
   # ALLOWED_METHODS = %w[qes ts-qes cts-qes ades ses click scan notary paper].freeze
   ALLOWED_METHODS = %w[qes ts-qes].freeze
+  attribute :allowed_methods, default: [ "qes" ]
 
   validate :validate_allowed_methods
   validates :signature_parameters, presence: true, if: -> { allowed_methods.present? && (allowed_methods & %w[qes qes-ts cts-qes ades]).any? }
   validate :validate_documents
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
   validates :uuid, presence: true, uniqueness: true
+  validates_associated :signature_parameters
 
   before_validation :ensure_uuid, on: :create
+  before_validation :initialize_signature_parameters
   before_validation :set_signature_level_for_ts_qes
 
   def to_param
@@ -64,19 +67,60 @@ class Contract < ApplicationRecord
     # TODO: Validate the signatures in the signed file
     # AutogramEnvironment.autogram_service.validate_signatures(signed_file, signature_parameters)
 
-    signed_document.attach(
-      io: StringIO.new(Base64.decode64(signed_file)),
-      filename: generate_signed_filename,
-      content_type: generate_signed_conentent_type
-    )
-    save!
+    # TODO: version signed document attachment to avoid overwriting in concurrent scenarios
+
+    ActiveRecord::Base.transaction do
+      signed_document.purge if signed_document.attached?
+      signed_document.attach(
+        io: StringIO.new(Base64.decode64(signed_file)),
+        filename: generate_signed_filename,
+        content_type: generate_signed_conentent_type
+      )
+      save!
+    end
 
     avm_sessions.active.each(&:mark_completed!)
+    eidentita_sessions.active.each(&:mark_completed!)
+    bundle.contract_signed(self) if bundle.present?
     broadcast_signing_success
+
+    Notification::ContractSignedJob.perform_later(self)
+  end
+
+  def documents_to_sign
+    return documents unless signed_document.attached?
+
+    [ Document.new(blob: signed_document.blob) ]
   end
 
   def awaiting_signature?
-    signed_document.blank?
+    # TODO: Improve logic to consider multiple expected signatures
+    signed_document.blank? || bundle&.awaiting_recipients?(contract: self)
+  end
+
+  def extendable_signatures?
+    return Document.new(blob: signed_document.blob).extendable_signatures? if signed_document.attached?
+
+    return false unless documents.count == 1
+    documents.first.extendable_signatures?
+  end
+
+  def extend_signatures!
+    return unless extendable_signatures?
+
+    if signed_document.attached?
+      document = Document.new(blob: signed_document.blob)
+      document.extend_signatures!
+      signed_document.purge
+      signed_document.attach(
+        io: StringIO.new(document.content),
+        filename: document.filename,
+        content_type: document.content_type
+      )
+      save!
+    else
+      documents.first.extend_signatures!
+    end
   end
 
   def current_avm_session
@@ -95,18 +139,41 @@ class Contract < ApplicationRecord
     current_eidentita_session.present?
   end
 
+  def should_notify_user?
+    # TODO: Improve logic to not notify "self sign" by user
+    user.present? && awaiting_signature? == false
+  end
+
   def broadcast_signing_success
-    # Reload the entire page to update all elements after signing
     Turbo::StreamsChannel.broadcast_action_to(
       "contract_#{uuid}",
       action: :refresh
     )
-
-    bundle.contract_signed(self) if bundle.present?
   end
 
   def short_uuid
     uuid.first(8)
+  end
+
+  def display_name
+    documents.first.blob.filename
+  end
+
+  def validation_result
+    document_to_validate = if signed_document.attached?
+      Document.new(blob: signed_document.blob)
+    elsif documents.size == 1
+      documents.first
+    else
+      nil
+    end
+
+    document_to_validate&.validation_result
+  end
+
+  # Custom setter to convert singular allowed_method to plural allowed_methods array
+  def allowed_method=(method)
+    self.allowed_methods = [ method ].compact
   end
 
   private
@@ -162,5 +229,15 @@ class Contract < ApplicationRecord
     elsif allowed_methods.include?("qes") && allowed_methods.exclude?("ts-qes")
       signature_parameters.level = "BASELINE_B"
     end
+  end
+
+  def initialize_signature_parameters
+    return if signature_parameters.present?
+
+    self.signature_parameters = Ades::SignatureParameters.new(
+      level: allowed_methods.include?("ts-qes") ? "BASELINE_T" : "BASELINE_B",
+      format: "CAdES",
+      container: "ASiC_E"
+    )
   end
 end

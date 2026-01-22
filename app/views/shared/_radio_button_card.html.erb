@@ -10,6 +10,7 @@
   - form: the form builder object (optional, for form helpers)
   - wrapper_class: additional CSS classes for the label wrapper (optional)
   - data_attributes: hash of data attributes for the radio input (optional)
+  - icon: the icon type to display (optional, 'mobile' or 'desktop')
 %>
 
 <% 
@@ -17,13 +18,28 @@
   form ||= nil
   wrapper_class ||= ""
   data_attributes ||= {}
+  icon ||= nil
 %>
 
-<label class="relative flex items-start space-x-3 p-3 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
+<label class="relative flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
   <% if form %>
     <%= form.radio_button name, value, { checked: checked, class: "sr-only", data: data_attributes } %>
   <% else %>
     <%= radio_button_tag name, value, checked, { class: "sr-only", data: data_attributes } %>
+  <% end %>
+  
+  <% if icon.present? %>
+    <div class="flex-shrink-0 mt-0.5">
+      <% if icon == 'desktop' %>
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+      <% elsif icon == 'mobile' %>
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
+      <% end %>
+    </div>
   <% end %>
   
   <div class="flex-1">
@@ -31,7 +47,7 @@
     <div class="text-xs text-gray-500 mt-1"><%= description %></div>
   </div>
   
-  <div class="hidden has-[:checked]:block absolute top-3 right-3">
+  <div class="hidden has-[:checked]:block absolute top-4 right-4">
     <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
     </svg>

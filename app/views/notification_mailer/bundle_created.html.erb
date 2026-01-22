@@ -1,0 +1,14 @@
+<p class="greeting"><%= t('.greeting') %></p>
+
+<p class="message"><%= t('.message', bundle_count: @bundle.contracts.count, author_name: @bundle.author.name) %></p>
+
+<div class="details">
+  <div class="details-title"><%= t('.details_title') %></div>
+  <div class="details-list">
+    <% @bundle.contracts.each do |contract| %>
+      <div><%= contract.display_name %></div>
+    <% end %>
+  </div>
+</div>
+
+<%= link_to t('.view_bundle'), sign_bundle_url(@bundle), class: "button" %>

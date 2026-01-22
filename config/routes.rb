@@ -31,29 +31,27 @@ Rails.application.routes.draw do
   resources :terms_of_service, only: [ :index ]
 
   authenticate(:user) do
-    resources :contracts, only: [ :index, :destroy, :edit, :update ]
-    resources :documents, only: [ :index ] do
+    resources :contracts, only: [ :index, :destroy ]
+    resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
       member do
-        post :extend_signatures
+        post :add_recipient
+        post :notify_recipients
       end
     end
-    resources :bundles, only: [ :index, :edit, :update, :destroy ]
   end
 
-  resources :documents, only: [ :new, :create, :show ] do
+  resources :documents, only: [] do
     member do
-      get :validate
       get :visualize
       get :pdf_preview
-      get :actions
       get :download
-      post :create_contract_from_document, as: "create_contract_from_document"
     end
   end
 
-  resources :contracts, only: [ :show ] do
+  resources :contracts, except: [ :index ] do
     member do
-      post :sign
+      get :sign
+      post :sign_autogram
       post :sign_avm
       post :sign_eidentita
       get :validate
@@ -62,6 +60,10 @@ Rails.application.routes.draw do
       get :iframe
       get :autogram_parameters
       get :autogram_signing_in_progress
+      get :signature_parameters
+      get :signature_extension
+      post :extend_signatures
+      get :actions
     end
 
     resources :eidentita_sessions, only: [ :show ] do
@@ -73,9 +75,16 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :bundles, only: [ :show ] do
+  resources :bundles, only: [] do
     member do
       get :iframe
+      get :signatures
+      get :sign
+    end
+    resources :recipients, only: [ :destroy ] do
+      member do
+        post :notify
+      end
     end
   end
 
@@ -103,4 +112,6 @@ Rails.application.routes.draw do
 
   # add good job admin interface at /admin/good_job
   mount GoodJob::Engine => "/admin/good_job"
+
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 end

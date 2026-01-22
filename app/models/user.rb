@@ -69,4 +69,13 @@ class User < ApplicationRecord
     user.identities.create!(provider: auth.provider, uid: auth.uid)
     user
   end
+
+  def signature_request_allowed?
+    # TODO: verify user first before allowing them to send signature requests
+    true
+  end
+
+  def signature_extension_allowed?
+    true
+  end
 end

@@ -74,7 +74,7 @@ class Api::V1::BundlesController < ApiController
       ],
       webhook: [ :url, :method ],
       postalAddress: [ :address, :recipientName ],
-      recipients: [ :name, :email, :phone ]
+      recipients: [ :name, :email, :locale ]
     )
 
     attributes = {

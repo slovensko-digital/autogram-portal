@@ -3,6 +3,7 @@
 # Table name: bundles
 #
 #  id         :bigint           not null, primary key
+#  note       :text
 #  uuid       :string           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -21,7 +22,7 @@ class Bundle < ApplicationRecord
   belongs_to :author, class_name: "User", foreign_key: "user_id"
 
   has_many :contracts, dependent: :destroy
-  has_and_belongs_to_many :recipients, class_name: "User", join_table: "bundles_recipients", association_foreign_key: "recipient_id"
+  has_many :recipients
   has_one :webhook, dependent: :destroy
   has_one :postal_address, dependent: :destroy
 
@@ -35,18 +36,31 @@ class Bundle < ApplicationRecord
   validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :contracts, presence: true
 
-  # Use UUID in URLs instead of ID for security
+  after_create :notify_recipients
+
   def to_param
     uuid
   end
 
   def completed?
-    contracts.all? { |c| !c.awaiting_signature? }
+     return recipients.signed.count == recipients.count if recipients.count.positive?
+     contracts.all? { !it.awaiting_signature? }
+  end
+
+  def awaiting_recipients?(contract: nil)
+    # TODO: consider recipients per contract scenario
+    recipients.notified.count.positive?
   end
 
   def contract_signed(contract)
-    broadcast_contract_signed(contract)
-    broadcast_all_signed if completed?
+    # TODO: add logic to handle multiple recipients signing their respective contracts
+    recipients.notified.first.update(status: :signed) if recipients.notified.any?
+
+    Notification::BundleContractSignedJob.perform_later(self, contract)
+    return unless completed?
+
+    Notification::BundleCompletedJob.perform_later(self)
+    broadcast_all_signed
   end
 
   def broadcast_all_signed
@@ -56,12 +70,15 @@ class Bundle < ApplicationRecord
       partial: "bundles/status",
       locals: { bundle: self }
     )
-
-    webhook.fire_all_signed() if webhook.present?
   end
 
-  def broadcast_contract_signed(contract)
-    webhook.fire_contract_signed(contract) if webhook.present?
+  def should_notify_author?
+    # TODO: do not notify if author is the one that signed the bundle
+    true
+  end
+
+  def notify_recipients
+    recipients.each(&:notify!)
   end
 
   def short_uuid
@@ -71,8 +88,6 @@ class Bundle < ApplicationRecord
   private
 
   def ensure_uuid
-    Rails.logger.info "Ensuring UUID for bundle #{id}..., uuid now: #{uuid}"
     self.uuid ||= SecureRandom.uuid
-    Rails.logger.info "UUID ensured: #{uuid}"
   end
 end

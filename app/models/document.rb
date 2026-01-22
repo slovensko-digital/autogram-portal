@@ -63,7 +63,8 @@ class Document < ApplicationRecord
   def validation_result(skip_cache: false)
     return get_new_validation_result if skip_cache
 
-    cache_key = "document/#{uuid}/validation/#{updated_at.to_i}"
+    blob_key = blob&.checksum || "no-blob"
+    cache_key = "document/validation/#{blob_key}"
     Rails.cache.fetch(cache_key, expires_in: 5.minutes, race_condition_ttl: 10.seconds) do
       get_new_validation_result
     end
@@ -95,21 +96,17 @@ class Document < ApplicationRecord
     if has_signatures?
       case [ signature_form, container_type ]
       when [ "PAdES", nil ]
-        return [ Ades::SignatureParameters::PADES ]
+        return [ "pades" ]
       when [ "XAdES", "ASiC_E" ]
-        return [ Ades::SignatureParameters::XADES_ASICE ]
+        return [ "xades_asice" ]
       when [ "CAdES", "ASiC_E" ]
-        return [ Ades::SignatureParameters::CADES_ASICE ]
+        return [ "cades_asice" ]
       else
         raise "Unknown signature form and container type combination: #{signature_form} + #{container_type}"
       end
     end
 
-    [
-      is_pdf? ? Ades::SignatureParameters::PADES : nil,
-      Ades::SignatureParameters::XADES_ASICE,
-      Ades::SignatureParameters::CADES_ASICE
-    ].compact
+    [ is_pdf? ? "pades" : nil, "xades_asice", "cades_asice" ].compact
   end
 
   def visualize(skip_cache: false)

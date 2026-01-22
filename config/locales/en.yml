@@ -29,6 +29,12 @@
 
 en:
   hello: "Hello world"
+
+  actions:
+    back: "Back"
+    continue: "Continue"
+    cancel: "Cancel"
+    download: "Download"
   
   header:
     navigation:
@@ -36,6 +42,7 @@ en:
       toggle_menu: "Toggle menu"
     links:
       contracts: "Contracts"
+      bundles: "Bundles"
       sign_in: "Sign in"
       sign_out: "Sign out"
   
@@ -44,6 +51,29 @@ en:
     languages:
       en: "English"
       sk: "Slovenčina"
+  
+  helpers:
+    bundles:
+      recipients:
+        status:
+          pending: "Awaiting send"
+          notified: "Awaiting signature"
+          signed: "Signed"
+          declined: "Declined"
+    application:
+      signature_levels:
+        pades: "PAdES"
+        xades_asice: "XAdES in ASiC-E container"
+        cades_asice: "CAdES in ASiC-E container"
+        unknown: "Unknown signature format"
+      signature_qualifications:
+        qesig: "Qualified electronic signature"
+        qesig_ts: "Qualified electronic signature with timestamp"
+        qeseal: "Qualified electronic seal"
+        qeseal_ts: "Qualified electronic seal with timestamp"
+        adesig_qc_qc: "Advanced electronic signature based on qualified certificate"
+        adesig_qc_qc_ts: "Advanced electronic signature based on qualified certificate with qualified timestamp"
+        unknown: "Unknown signature"
   
   devise:
     sessions:
@@ -103,6 +133,9 @@ en:
         sign_up: "Sign up"
         didn_t_receive_confirmation_instructions: "Didn't receive confirmation instructions?"
         didn_t_receive_unlock_instructions: "Didn't receive unlock instructions?"
+    passwordless:
+      user:
+        signed_up_but_unconfirmed: "You have successfully registered. Your account is not yet activated, please check your email and click the link to confirm your account."
   
   documents:
     index:
@@ -118,13 +151,35 @@ en:
       title: "New document"
       subtitle: "Upload a document for signing or validation."
       help_text: "You can upload PDF, XML or other files, and sign them in the next step."
+      page_title: "Sign documents electronically, simply and securely"
+      page_subtitle: "Upload the document you want to work with."
+      page_help_text: "If you're not sure how signing works, click here: View signing instructions"
       errors_title: "Errors occurred while creating the document:"
       document_details_title: "Document Details"
       document_details_text: "Upload a single document that you want to work with. You can validate signatures, visualize content, or use it for signing."
       agree_to_policies: "I agree with %{link}"
       policies_link: "policies, terms and conditions"
       upload_document: "Upload Document"
+      submit_button: "Upload & Continue"
       cancel: "Cancel"
+      actions:
+        continue: "Continue"
+        back: "Back"
+        header: "Choose action"
+        sign:
+          title: "Sign the document"
+          subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+        request_signature:
+          title: "Request a signature"
+          subtitle: "Send document for signing to someone else via email or shared link."
+          recipient_email: "Recipient email *"
+          recipient_email_placeholder: "john.doe@example.com"
+          recipient_email_help: "Recipient will receive an email with a link to sign the document"
+          message: "Message for recipient (optional)"
+          message_placeholder: "Hello, please sign the attached document..."
+        add_timestamp:
+          title: "Add timestamp"
+          subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
     show:
       title: "Document"
       filename: "Filename: %{filename}"
@@ -141,6 +196,15 @@ en:
       add_timestamp_title: "Add timestamp"
       add_timestamp_subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
       add_timestamp_button: "Add timestamp to signatures"
+      continue: "Continue"
+      request_signature:
+        title: "Request a signature"
+        subtitle: "Send document for signing to someone else via email or shared link."
+        recipient_email: "Recipient Email *"
+        recipient_email_placeholder: "john.doe@example.com"
+        recipient_email_help: "Recipient will receive an email with a link to sign the document"
+        message: "Message for recipient (optional)"
+        message_placeholder: "Hello, please sign the attached document..."
     actions_error:
       title: "Error loading document actions"
     visualize:
@@ -152,9 +216,16 @@ en:
       title: "Could not load document content"
       trust_warning: "Make sure you trust the source of this document before proceeding."
     visualization_with_toggle:
-      hide_preview: "Hide document preview"
-      show_preview: "Show document preview"
+      hide_document: "Hide document"
+      show_document: "Show document"
       loading_content: "Loading document content..."
+    alerts:
+      no_file_attached: "No file attached to this document."
+      already_part_of_contract: "This document is already part of a contract."
+      failed_to_create_contract: "Failed to create contract: %{errors}"
+      all_signatures_have_timestamps: "All signatures already have qualified timestamps."
+      failed_to_extend_signatures: "Failed to extend signatures: %{error}"
+      signature_extended_successfully: "Signature extended successfully."
   
   signature_methods:
     qes: "Qualified Electronic Signature"
@@ -164,9 +235,18 @@ en:
     short:
       qes: "QES"
       ts_qes: "QES + Timestamp"
-      ades: "ADES"
+      ades: "AdES"
       ses: "SES"
-  
+
+  signature_formats:
+    pades: "PDF Advanced Electronic Signature (PAdES)"
+    xades_asice: "XML Advanced Electronic Signature (XAdES) in Associated Signature Container (ASiC-E)"
+    cades_asice: "CMS Advanced Electronic Signature (CAdES) in Associated Signature Container (ASiC-E)"
+    short:
+      pades: "PAdES"
+      xades_asice: "XAdES + ASiC-E"
+      cades_asice: "CAdES + ASiC-E"
+
   bundles:
     index:
       title: "Contract Bundles"
@@ -181,12 +261,45 @@ en:
       no_bundles_title: "No bundles"
       no_bundles_message: "Bundles are created via API."
     show:
-      all_bundles: "All bundles"
       title: "Bundle"
+      edit_bundle: "Edit Bundle"
       uuid: "UUID: %{uuid}"
-      contract_number: "Contract %{current} of %{total}"
-      signed: "Signed"
+      contracts_title: "Documents in Bundle"
       open_separately: "Open separately →"
+      document_title: "Document"
+      signed_by_title: "Signed by (%{count}/%{total})"
+      notify_recipient: "Notify Recipient"
+      status:
+        pending: "Not Sent"
+        notified: "Sent"
+        signed: "Signed"
+        declined: "Declined"
+      note_title: "Note"
+      no_note: "No note for recipients"
+      request_signature_title: "Request Signatures"
+      note_placeholder: "Optional message for recipients"
+      note_label: "Message for recipients"
+      signed: "Signed"
+      recipients_title: "Send for Signature"
+      recipients_subtitle: "Send this bundle to others for signing via email."
+    recipients_form:
+      recipient_email: "Recipient Email"
+      recipient_email_placeholder: "jan.novak@example.com"
+      remove: "Remove"
+      add_recipient: "Add"
+      recipient_email_help: "Recipient will receive an email with a link to sign the documents"
+      status:
+        pending: "Not Sent"
+        notified: "Notified"
+        signed: "Signed"
+        declined: "Declined"
+    sign:
+      title: "Sign contract bundle"
+      title_requested_singular: "You received a document to sign"
+      title_requested_plural: "You received a bundle of %{count} documents to sign"
+      subtitle_requested: "Check the sender and documents in the bundle, then select the signing method."
+      note_title: "Note from sender"
+      awaiting_recipients: "Awaiting signature from"
     iframe:
       title: "Contract Bundle"
       subtitle: "Please sign all contracts in the bundle"
@@ -195,8 +308,12 @@ en:
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
+    sender:
+      sender: "Sender"
   
   contracts:
+    alerts:
+      unauthorized_edit_attempt: "You are not authorized to edit this contract."
     index:
       title: "Contracts"
       upload_document: "Upload document"
@@ -206,17 +323,21 @@ en:
       created_at: "Created at"
       download: "Download"
       view: "View"
-      no_contracts_title: "No contracts yet"
+      no_contracts_title: "No documents yet"
       no_contracts_message: "Start by uploading a document."
+    new:
+      page_title: "Sign documents electronically, simply and securely"
+      page_subtitle: "Upload the document you want to work with."
+      page_help_text_html: "If you're not sure how signing works, click here: %{link}"
+      signing_guide_link: "View signing instructions"
+      submit_button: "Upload & Continue"
+      errors_title: "Errors occurred while creating the document:"
     show:
       all_contracts: "All contracts"
-      title: "Contract"
-      uuid: "UUID: %{uuid}"
-      part_of_bundle: "Part of %{link}"
+      title: "Document"
+      part_of_bundle: "Part of bundle"
+      bundle_link: "View bundle →"
       download: "Download"
-      edit_contract: "Edit contract"
-    edit:
-      title: "Edit Contract"
       uuid: "UUID: %{uuid}"
       signature_parameters_title: "Signature Parameters"
       signature_parameters_subtitle: "Configure signature format and allowed signature methods for this contract."
@@ -229,8 +350,35 @@ en:
       destroy_confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
       cancel: "Cancel"
       update_contract: "Update Contract"
+    sign:
+      all_contracts: "All contracts"
+      title: "Sign document"
+      subtitle: "Check the document, then select the signing method."
+      title_requested: "You received a document to sign"
+      subtitle_requested: "Check the sender and document, then select the signing method."
+      sender: "Sender"
+      view_document: "View document"
+      signatures_status: "Document already signed by (2 of 3)"
+      signed: "Signed"
+      invalid: "Invalid"
+      awaiting_signature: "Awaiting signature"
+      signature_operation: "Operation description"
+      container_type: "Container type"
+      signature_type: "Signature type"
+      view_details: "View details"
+      standard_signing: "Standard signing of single document"
+      unknown_signer: "Unknown signer"
+      select_signing_method: "Select signing method"
+      first_time_signing: "Signing for the first time?"
+      learn_more_text: "View guide"
+      how_signing_works: "How signing works"
+      cancel: "Cancel process"
+      already_signed:
+        title: "Document has been signed"
+        message: "This document has been signed and is complete. No further signature is required."
     signature_actions:
       select_signing_app: "Select signing application"
+      add_another_signature: "Add another signature"
       autogram_desktop_label: "Autogram Desktop"
       autogram_desktop_description: "Desktop application with qualified electronic seal or chip ID card"
       autogram_mobile_label: "Autogram Mobile"
@@ -238,6 +386,11 @@ en:
       eidentita_label: "eIdentita"
       eidentita_description: "Slovak mobile app for qualified electronic signatures - scan QR code or open eIdentita app directly"
       sign: "Sign"
+      continue_to_sign: "Continue to signing"
+      cancel: "Cancel process"
+      first_time_signing: "Signing for the first time?"
+      learn_more_text: "View guide"
+      how_signing_works: "How signing works"
       signed_title: "Documents have been signed"
       signed_message: "This contract has been signed and is complete. No further signature is required."
     autogram_signing_in_progress:
@@ -283,11 +436,6 @@ en:
         description_html: "<span class=\"font-semibold text-gray-900\">Open-source platform</span> for managing up to <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-compliant</span> electronic signatures. <span class=\"font-semibold text-gray-900\">Send documents</span> for signing, <span class=\"font-semibold text-gray-900\">integrate workflows</span> via <span class=\"font-semibold text-gray-900\">API or embedded iframe</span>, and <span class=\"font-semibold text-gray-900\">connect seamlessly</span> with multiple signing apps."
         view_on_github: "View on GitHub"
       upload_form:
-        title: "Upload your document"
-        subtitle: "Drag and drop or click to browse"
-        file_types_hint: "PDF, XML, ASiC-E and other formats supported"
-        uploading_text: "Uploading..."
-        drop_text: "Drop here"
         agree_to_policies_html: "I agree with %{terms_link} and %{privacy_link}"
         terms_of_service: "Terms of Service"
         privacy_policy: "Privacy Policy"
@@ -386,28 +534,37 @@ en:
       error_message: "Failed to validate the electronic signatures of this document."
       no_signatures_title: "No electronic signatures yet"
       no_signatures_message: "This document does not contain any electronic signatures yet. You can sign it below."
-      signatures_found_title: "Electronic signatures found"
+      signatures_found_title: "Document already signed by"
       qualified_timestamp: "Qualified Timestamp"
       no_timestamp: "No timestamp"
       timestamps_count: "(%{count} timestamps)"
-      valid: "Valid"
+      valid: "Signed"
       invalid: "Invalid"
       signature_details: "Signature details"
       subject: "Subject"
       issuer: "Issuer"
       qualification: "Qualification"
       timestamps: "Timestamps"
+      timestamp: "Timestamp"
+      wo_timestamp: "Without timestamp"
       time: "Time"
-      archived: "Archived"
+      format: "Format"
+      open_details: "Show details"
+      collapse_details: "Collapse details"
+      open_technical_details: "Show technical details"
+      collapse_technical_details: "Collapse technical details"
+      signature_type: "Signature type"
+      certificate: "Certificate"
+      timestamp_type: "Timestamp type"
     signature_validation_error:
       title: "Error validating signatures"
       message: "Failed to validate the electronic signatures of this document."
     dropzone:
-      title: "Upload document here"
-      subtitle: "Drag and drop here, or click to select a file from disk."
-      file_types_hint: "PDF, XML or other file"
-      uploading_text: "Adding document..."
-      drop_text: "Drop document here"
+      title: "Upload your document"
+      subtitle: "Drag and drop or click to browse"
+      file_types_hint: "PDF, XML, ASiC-E and other formats supported"
+      uploading_text: "Uploading..."
+      drop_text: "Drop here"
       remove_file: "Remove file"
       select_another: "Click to select another file"
   
@@ -428,6 +585,29 @@ en:
       sign_with_avm: "Sign with AVM"
       opening_eidentita: "Opening eIdentita..."
       sign_with_eidentita: "Sign with eIdentita"
+
+  notification_mailer:
+    contract_signed:
+      subject: "Your contract has been signed"
+      greeting: "Hello,"
+      message: "contract %{filename} has been signed."
+      details_title: "Signature details:"
+      signed_by: "Signed by: %{signer_name}"
+      timestamp_qualified: "Timestamp date and time: %{signing_time}"
+      timestamp_non_qualified: "Non-guaranteed date and time (without timestamp): %{signing_time}"
+      view_contract: "View signed contract"
+    bundle_completed:
+      subject: "Your contract bundle has been signed"
+      greeting: "Hello,"
+      message: "Your bundle of documents has been completed."
+      details_title: "Completed documents:"
+      view_bundle: "View bundle"
+    bundle_created:
+      subject: "Documents need your signature"
+      greeting: "Hello,"
+      message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
+      details_title: "Documents to sign:"
+      view_bundle: "View bundle"
   
   activerecord:
     errors:

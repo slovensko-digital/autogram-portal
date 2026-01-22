@@ -139,7 +139,7 @@ export default class extends Controller {
         formData.append('signed_by', signResult.signedBy || '')
         formData.append('issued_by', signResult.issuedBy || '')
         
-        const response = await fetch(this.formTarget.action, {
+        const response = await fetch(`${this.contractParamValue}/sign_autogram`, {
           method: 'POST',
           body: formData,
           headers: {

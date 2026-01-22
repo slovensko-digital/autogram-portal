@@ -10,7 +10,7 @@ class EidentitaSessionsController < ApplicationController
   end
 
   def document
-    document = @contract.documents.first
+    document = @contract.documents_to_sign.first
     unless document&.blob&.attached?
       render plain: "Document not found", status: :not_found
       return
@@ -25,7 +25,6 @@ class EidentitaSessionsController < ApplicationController
   def upload
     if params[:file].present?
       @contract.accept_signed_file(Base64.encode64(params[:file].tempfile.read))
-      @eidentita_session.mark_completed!
       render json: { success: true }
     else
       render json: { error: "No file provided" }, status: :bad_request

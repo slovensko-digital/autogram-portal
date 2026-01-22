@@ -1,38 +1,73 @@
 class ContractsController < ApplicationController
-  before_action :set_contract, only: [ :show, :sign, :sign_avm, :sign_eidentita, :destroy, :signed_document, :validate, :edit, :update, :iframe, :autogram_parameters, :autogram_signing_in_progress ]
+  before_action :set_contract, except: [ :new, :index, :create ]
+  before_action :verify_author, only: [ :show, :update, :destroy ]
   skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign_eidentita, :sign, :autogram_parameters, :autogram_signing_in_progress ]
-
   before_action :allow_iframe, only: [ :iframe ]
 
   def index
-    @contracts = current_user.contracts.includes(:user, :documents).order(created_at: :desc)
+    @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
+  end
+
+  def new
+    @contract = Contract.new
+  end
+
+  def create
+    @contract = Contract.new(
+      user: current_user,
+      documents: [ Document.new(params.require(:document).permit(:blob)) ]
+    )
+
+    @contract.save!
+
+    redirect_to @contract
+
+  rescue ActiveRecord::RecordInvalid
+    render :new, locals: { errors: @contract.errors }, status: :unprocessable_entity
   end
 
   def show
+    @previous_page = request.referrer
+  end
+
+  def actions
+    render partial: "actions", locals: { previous_page: params[:previous_page] }
+  end
+
+  def signature_extension
+    render partial: "signature_extension"
+  end
+
+  def signature_parameters
+    @next_step = params[:target_step]
+    render partial: "signature_parameters"
+  end
+
+  def extend_signatures
+    return head :unauthorized unless current_user
+    return redirect_to @contract, alert: t("documents.alerts.all_signatures_have_timestamps") unless @contract.extendable_signatures?
+
+    begin
+      @contract.extend_signatures!
+      redirect_to @contract, notice: t("documents.alerts.signature_extended_successfully")
+    rescue => e
+      redirect_to @contract, alert: t("documents.alerts.failed_to_extend_signatures", error: e.message)
+    end
   end
 
   def autogram_parameters
-    render partial: "api/v1/contracts/contract", locals: { contract: @contract }, formats: [ :json ]
+    render formats: [ :json ]
   end
 
   def autogram_signing_in_progress
     respond_to do |format|
       format.turbo_stream do
-        # Determine cancel URL based on referrer context
-        cancel_url = if request.referrer&.include?("/iframe")
-          iframe_params = {}
-          iframe_params[:no_preview] = true if params[:no_preview].present?
-          iframe_contract_path(@contract, iframe_params)
-        else
-          contract_path(@contract)
-        end
-
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
           partial: "contracts/autogram_signing_in_progress",
           locals: {
             contract: @contract,
-            cancel_url: cancel_url
+            cancel_url: determine_cancel_url
           }
         )
       end
@@ -40,6 +75,9 @@ class ContractsController < ApplicationController
   end
 
   def sign
+  end
+
+  def sign_autogram
     @contract.accept_signed_file(signed_document_param)
 
     respond_to do |format|
@@ -52,35 +90,20 @@ class ContractsController < ApplicationController
   end
 
   def sign_avm
-    if @contract.has_active_avm_session?
-      existing_session = @contract.current_avm_session
-      avm_url = existing_session.avm_url
-
-      respond_to do |format|
-        format.turbo_stream do
-          # Determine cancel URL based on referrer context
-          cancel_url = if request.referrer&.include?("/iframe")
-            iframe_params = {}
-            iframe_params[:no_preview] = true if params[:no_preview].present?
-            iframe_contract_path(@contract, iframe_params)
-          else
-            contract_path(@contract)
-          end
-
-          render turbo_stream: turbo_stream.replace(
-            "signature_actions_#{@contract.uuid}",
-            partial: "contracts/avm_signing_pending",
-            locals: {
-              contract: @contract,
-              avm_session: existing_session,
-              avm_url: avm_url,
-              cancel_url: cancel_url
-            }
-          )
-        end
+    return respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "signature_actions_#{@contract.uuid}",
+          partial: "contracts/avm_signing_pending",
+          locals: {
+            contract: @contract,
+            avm_session: @contract.current_avm_session,
+            avm_url: @contract.current_avm_session.avm_url,
+            cancel_url: determine_cancel_url
+          }
+        )
       end
-      return
-    end
+    end if @contract.has_active_avm_session?
 
     result = AutogramEnvironment.avm_service.initiate_signing(@contract)
     avm_session = @contract.avm_sessions.create!(
@@ -94,15 +117,6 @@ class ContractsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        # Determine cancel URL based on referrer context
-        cancel_url = if request.referrer&.include?("/iframe")
-          iframe_params = {}
-          iframe_params[:no_preview] = true if params[:no_preview].present?
-          iframe_contract_path(@contract, iframe_params)
-        else
-          contract_path(@contract)
-        end
-
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
           partial: "contracts/avm_signing_pending",
@@ -110,7 +124,7 @@ class ContractsController < ApplicationController
             contract: @contract,
             avm_session: avm_session,
             avm_url: avm_session.avm_url,
-            cancel_url: cancel_url
+            cancel_url: determine_cancel_url
           }
         )
       end
@@ -129,8 +143,7 @@ class ContractsController < ApplicationController
 
   def sign_eidentita
     unless @contract.has_active_eidentita_session?
-      eidentita_service = EidentitaService.new
-      result = eidentita_service.initiate_signing(@contract)
+      result = AutogramEnvironment.eidentita_service.initiate_signing(@contract)
 
       raise result[:error] if result[:error]
 
@@ -174,17 +187,8 @@ class ContractsController < ApplicationController
   end
 
   def validate
-    document_to_validate = if @contract.signed_document.attached?
-      temp_doc = Document.new(user: @contract.user, uuid: SecureRandom.uuid)
-      temp_doc.blob.attach(@contract.signed_document.blob)
-      temp_doc
-    elsif @contract.documents.size == 1
-      @contract.documents.first
-    else
-      nil
-    end
-
-    if document_to_validate.nil?
+    @validation_result = @contract.validation_result
+    if @validation_result.nil?
       respond_to do |format|
         format.html do
           render "validate_error", locals: { errors: [ "It is not possible to validate signatures for a contract with multiple documents." ] }
@@ -197,22 +201,18 @@ class ContractsController < ApplicationController
     end
 
     begin
-      validation_result = document_to_validate.validation_result
-
       respond_to do |format|
         format.html do
-          @validation_result = validation_result
-          @document = document_to_validate
           render "validate"
         end
         format.json do
-          signatures = validation_result.signatures.flatten
+          signatures = @validation_result.signatures.flatten
 
           render json: {
-            hasSignatures: validation_result.has_signatures,
+            hasSignatures: @validation_result.has_signatures,
             signatures: signatures.map { |sig| format_signature_for_json(sig) },
-            documentInfo: validation_result.document_info,
-            errors: validation_result.errors
+            documentInfo: @validation_result.document_info,
+            errors: @validation_result.errors
           }
         end
       end
@@ -228,20 +228,32 @@ class ContractsController < ApplicationController
     end
   end
 
-  def edit
-  end
-
   def update
     if @contract.update(contract_params)
-      redirect_to @contract, notice: "Contract was successfully updated."
+      @contract.save!
+      if params[:next_step] == "request_signature"
+        bundle = Bundle.create!(contracts: [ @contract ], author: current_user)
+        redirect_to bundle
+      elsif params[:next_step] == "sign"
+        redirect_to sign_contract_path(@contract)
+      else
+        redirect_to @contract
+      end
     else
-      render :edit, status: :unprocessable_entity
+      render :show, status: :unprocessable_entity
     end
+  rescue ActiveRecord::RecordInvalid
+    puts "Errors: #{@contract.errors.full_messages}"
+    render :show, locals: { flash: @contract.errors }, status: :unprocessable_entity
   end
 
   def destroy
     @contract.destroy!
-    redirect_to contracts_path, notice: "The contract and all its documents were successfully deleted."
+    if current_user
+      redirect_to contracts_path, notice: "The contract and all its documents were successfully deleted."
+    else
+      redirect_to root_path, notice: "The contract and all its documents were successfully deleted."
+    end
   rescue StandardError => e
     redirect_to contract_path(@contract), alert: "An error occurred while deleting the contract: #{e.message}"
   end
@@ -264,7 +276,13 @@ class ContractsController < ApplicationController
       iframe_params[:no_preview] = true if params[:no_preview].present?
       iframe_contract_path(@contract, iframe_params)
     else
-      contract_path(@contract)
+       request.referrer || contract_path(@contract)
+    end
+  end
+
+  def verify_author
+    if @contract.user && @contract.user != current_user
+      redirect_to root_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
     end
   end
 
@@ -275,7 +293,7 @@ class ContractsController < ApplicationController
   def contract_params
     params.require(:contract).permit(
       :uuid,
-      allowed_methods: [],
+      :allowed_method,
       documents_attributes: [ :id, :blob, :_destroy ],
       signature_parameters_attributes: [ :id, :format_container_combination, :add_content_timestamp ]
     )

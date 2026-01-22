@@ -9,6 +9,8 @@
       <% if current_user %>
         <%= link_to t('header.links.contracts'), contracts_path,
             class: "text-sm font-semibold text-white hover:text-blue-100 transition-colors" %>
+        <%= link_to t('header.links.bundles'), bundles_path,
+            class: "text-sm font-semibold text-white hover:text-blue-100 transition-colors" %>
         <%= link_to current_user.email, edit_user_registration_path,
             class: "text-sm text-white hover:text-white underline decoration-blue-100 hover:decoration-white transition-colors" %>
         <%= link_to t('header.links.sign_out'), destroy_user_session_path,
@@ -18,7 +20,6 @@
         <%= link_to t('header.links.sign_in'), new_user_session_path,
             class: "rounded-md px-4 py-2 text-sm font-semibold bg-white text-blue-800 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors" %>
       <% end %>
-      <!-- Language Dropdown -->
       <div class="relative" x-data="{ langOpen: false }" @click.away="langOpen = false">
         <button @click="langOpen = !langOpen" 
                 type="button"

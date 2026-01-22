@@ -5,85 +5,95 @@
 
 <main>
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto max-w-7xl px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <div class="mx-auto flex max-w-full sm:max-w-3xl lg:ml-10 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
-        <div class="flex flex-col items-center max-w-full sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
-          <% if @bundle.author == current_user %>
-            <div class="w-full">
-              <%= link_to bundles_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500" do %>
-                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-                <%= t('.all_bundles') %>
-              <% end %>
-            </div>
-          <% end %>
-
-          <div class="w-full mb-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
-                <p class="mt-2 text-sm text-gray-500"><%= t('.uuid', uuid: @bundle.uuid) %></p>
-              </div>
-              <div id="bundle_<%= @bundle.uuid %>_status">
-                <%= render 'status', bundle: @bundle %>
-              </div>
-            </div>
-          </div>
-
-          <div class="w-full space-y-6">
-            <% @bundle.contracts.order(:updated_at).each_with_index do |contract, index| %>
-              <div class="bg-white  rounded-lg overflow-hidden border border-gray-200">
-                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-600 text-white text-sm font-medium">
-                        <%= index + 1 %>
-                      </span>
-                      <h2 class="ml-3 text-lg font-semibold text-gray-900">
-                        <%= t('.contract_number', current: index + 1, total: @bundle.contracts.count) %>
-                      </h2>
-                      <% if !contract.awaiting_signature? %>
-                        <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                          </svg>
-                          <%= t('.signed') %>
-                        </span>
-                      <% end %>
-                    </div>
-                    <a href="<%= contract_path(contract) %>" target="_blank" class="text-sm text-blue-600 hover:text-blue-500">
-                      <%= t('.open_separately') %>
-                    </a>
-                  </div>
-                </div>
-
-                <div class="flex flex-col lg:flex-row">
-                  <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50 lg:flex-shrink-0">
-                    <div class="p-6">
-                      <div class="mb-6">
-                        <%= render 'contracts/signature_actions', contract: contract %>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="w-full lg:w-2/3 lg:flex-shrink-0 lg:min-w-0">
-                    <div class="p-6">
-                      <% # The documents_preview partial expects @contract, so we need to set it temporarily %>
-                      <% old_contract = @contract %>
-                      <% @contract = contract %>
-                      <%= render 'contracts/documents_preview' %>
-                      <% @contract = old_contract %>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            <% end %>
+    <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div class="w-full mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           </div>
         </div>
+      </div>
+      <div class="w-full mb-6">
+        <% @bundle.contracts.each do |contract| %>
+          <div class="border border-gray-200 p-6 mb-6 rounded-lg bg-white">
+            <div class="flex flex-col sm:flex-row gap-x-8 justify-between">
+              <div class="flex items-center">
+                <h2 class="text-lg font-semibold text-gray-900">
+                  <%= t('.document_title') %> <%= contract.documents.first.filename %>
+                </h2>
+              </div>
+              <a href="<%= contract_path(contract) %>" class="text-sm text-blue-600 hover:text-blue-500">
+                <%= t('.open_separately') %>
+              </a>
+            </div>
+            <div class="w-full pt-6">
+              <%= turbo_frame_tag "signature_validation_#{contract.uuid}", 
+                        src: validate_contract_path(contract),
+                        loading: "lazy",
+                        class: "w-full mb-6" do %>
+                <div class="w-full">
+                  <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
+                    <div class="flex items-center">
+                      <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <div class="w-full">
+        <div class="md:flex items-center justify-between gap-4">
+          <div class="flex-1 mb-6 text-center md:text-left">
+            <h3 class="text-xl font-semibold text-gray-900 mb-2"><%= t('.recipients_title') %></h3>
+            <p class="text-gray-600"><%= t('.recipients_subtitle') %></p>
+          </div>
+          <% if  @bundle.recipients.pending.any? %>
+            <%= button_to notify_recipients_bundle_path(@bundle), 
+                  method: :post,
+                  form: { onsubmit: "this.style.display='none'; return true;" },
+                  class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <%= t('.notify_recipient') %>
+            <% end %>
+          <% end %>
+        </div>
+        <div class="mb-8">
+          <%= render "bundles/recipients_form", bundle: @bundle %>
+        </div>
+
+        <%= form_with model: @bundle, method: :put, local: true do |form| %>
+          <div class="space-y-6">
+            <div class="mb-6 text-center lg:text-left">
+              <h3 class="text-xl font-semibold text-gray-900 mb-2"><%= t('.note_title') %></h3>
+              <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                </svg>
+                <%= t('.note_label') %>
+              </label>
+              <%= form.text_area :note,
+                    placeholder: t('.note_placeholder'),
+                    rows: 6,
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-8">
+            <%= link_to bundle_path(@bundle), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <%= t('actions.back') %>
+            <% end %>
+            <%= form.submit t('actions.continue'), 
+                            class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                            data: { "form-submit-target": "submitButton" } %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
 </main>
 
-<% content_for :title, "Bundle ##{@bundle.short_uuid}" %>
+<% content_for :title, t(".title") + " ##{@bundle.short_uuid}" %>

@@ -34,13 +34,43 @@ module ApplicationHelper
     </svg>).html_safe
   end
 
-  def method_label(method)
-    key = method.gsub("-", "_")
-    I18n.t("signature_methods.#{key}", default: method.humanize)
+  def signature_format(level, container)
+    return t("helpers.application.signature_levels.pades") if level == "PAdES"
+
+    return t("helpers.application.signature_levels.unknown") unless container.include? "ASiC"
+
+    if level == "XAdES"
+      t("helpers.application.signature_levels.xades_asice")
+    elsif level == "CAdES"
+      t("helpers.application.signature_levels.cades_asice")
+    else
+      t("helpers.application.signature_levels.unknown")
+    end
   end
 
-  def short_method_label(method)
-    key = method.gsub("-", "_")
-    I18n.t("signature_methods.short.#{key}", default: method.humanize)
+  def signature_qualification(qualification, timestamp)
+    if timestamp
+      case qualification
+      when "QESIG"
+        t("helpers.application.signature_qualifications.qesig_ts")
+      when "QESEAL"
+        t("helpers.application.signature_qualifications.qeseal_ts")
+      when "ADESIG_QC-QC"
+        t("helpers.application.signature_qualifications.adesig_qc_qc_ts")
+      else
+        t("helpers.application.signature_qualifications.unknown")
+      end
+    else
+      case qualification
+      when "QESIG"
+        t("helpers.application.signature_qualifications.qesig")
+      when "QESEAL"
+        t("helpers.application.signature_qualifications.qeseal")
+      when "ADESIG_QC-QC"
+        t("helpers.application.signature_qualifications.adesig_qc_qc")
+      else
+        t("helpers.application.signature_qualifications.unknown")
+      end
+    end
   end
 end

@@ -5,7 +5,7 @@
         <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
         </svg>
-        <h3 class="text-red-800 font-semibold"><%= t('shared.signature_validation.error_title') %></h3>
+        <h3 class="text-red-800 font-semibold"><%= t('.error_title') %></h3>
       </div>
       <ul class="text-red-700 text-sm space-y-1">
         <% validation_result.errors.each do |error| %>
@@ -14,86 +14,140 @@
       </ul>
     </div>
   <% elsif !validation_result.has_signatures %>
-    <div class="rounded-lg bg-blue-50 border border-blue-200 p-4">
-      <div class="flex items-center mb-2">
-        <svg class="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-        </svg>
-        <h3 class="text-blue-800 font-semibold"><%= t('shared.signature_validation.no_signatures_title') %></h3>
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="ml-3 flex-1">
+          <h4 class="text-sm font-semibold text-blue-900 mb-1"><%= t('.no_signatures_title') %></h4>
+          <p class="text-sm text-blue-800">
+            <%= t('.no_signatures_message') %>
+          </p>
+        </div>
       </div>
-      <p class="text-blue-700 text-sm"><%= t('shared.signature_validation.no_signatures_message') %></p>
     </div>
   <% else %>
-    <div class="rounded-lg bg-green-50 border border-green-200 p-4">
-      <div class="flex items-center mb-3">
-        <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-        </svg>
-        <h3 class="text-green-800 font-semibold"><%= t('shared.signature_validation.signatures_found_title') %></h3>
-        <span class="text-green-600 ml-1">(<%= validation_result.signatures.length %>)</span>
-      </div>
-      <div class="space-y-3">
-        <% validation_result.signatures.each do |signature| %>
-          <div class="bg-white rounded border border-green-200 p-3">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="font-medium text-gray-900"><%= signature[:signer_name] %></div>
-                <div class="text-sm text-gray-600">
-                  <% if signature[:timestamp_info] && signature[:timestamp_info][:qualified] %>
-                    <span><%= t('shared.signature_validation.qualified_timestamp') %></span>
-                  <% else %>
-                    <span><i><%= t('shared.signature_validation.no_timestamp') %></i></span>
-                  <% end %>
-                  <% if signature[:timestamp_info] && signature[:timestamp_info][:count] > 1 %>
-                    <span><%= t('shared.signature_validation.timestamps_count', count: signature[:timestamp_info][:count]) %></span>
-                  <% end %>
-                </div>
-                <div class="text-sm text-gray-500">
-                  <%= signature[:signing_time]&.strftime('%d. %B %Y o %H:%M') %>
-                </div>
-              </div>
-              <div class="flex items-center">
+    <div class="space-y-3">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">
+        <%= t('.signatures_found_title') %> (<%= validation_result.signatures.length %>)
+      </h3>
+      <% validation_result.signatures.each do |signature| %>
+        <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full mb-6">
+          <div class="w-full bg-white border border-gray-200 rounded-md">
+            <div data-action="click->toggle#toggle"
+              class="flex items-center justify-between space-x-4 px-4 py-3 text-sm rounded-md font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
+              <div class="text-base font-semibold text-gray-900"><%= signature[:signer_name] %></div>
+              <div class="flex-2">
                 <% if signature[:valid] %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <%= t('shared.signature_validation.valid') %>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <%= t('.valid') %>
                   </span>
                 <% else %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    <%= t('shared.signature_validation.invalid') %>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <%= t('.invalid') %>
                   </span>
                 <% end %>
               </div>
-            </div>
-            <details class="mt-2">
-              <summary class="text-sm text-blue-600 cursor-pointer hover:text-blue-800"><%= t('shared.signature_validation.signature_details') %></summary>
-              <div class="mt-2 text-sm text-gray-600 space-y-1">
-                <div><strong><%= t('shared.signature_validation.subject') %>:</strong> <%= signature[:certificate_info][:subject] %></div>
-                <div><strong><%= t('shared.signature_validation.issuer') %>:</strong> <%= signature[:certificate_info][:issuer] %></div>
-                <% if signature[:certificate_info][:qualification] %>
-                  <div><strong><%= t('shared.signature_validation.qualification') %>:</strong> <%= signature[:certificate_info][:qualification] %></div>
-                <% end %>
+              <div data-action="click->toggle#toggle">
+                <button data-action="click->toggle#toggle"
+                  class="cursor-pointer flex-shrink-0 inline-flex items-center">
+                  <span data-toggle-target="textCollapsed"><%= t('.open_details') %></span>
+                  <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_details') %></span>
+                  <svg data-toggle-target="icon" class="w-4 h-4 ml-1 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
               </div>
-              <% if signature[:timestamp_info] && signature[:timestamp_info][:timestamps] %>
-                <div class="mt-3">
-                  <strong class="text-sm text-gray-800"><%= t('shared.signature_validation.timestamps') %>:</strong>
-                  <% signature[:timestamp_info][:timestamps].each do |timestamp| %>
-                    <div class="ml-2 mt-1 text-sm text-gray-600">
-                      <div>
-                        <strong><%= timestamp[:type] == 'SIGNATURE_TIMESTAMP' ? t('shared.signature_validation.time') : t('shared.signature_validation.archived') %>:</strong> 
-                        <%= timestamp[:time]&.strftime('%d. %b %Y o %H:%M') %>
+            </div>
+            <div data-toggle-target="content" class="hidden px-4 py-3">
+              <div data-controller="toggle" data-toggle-collapsed-value="true" class="space-y-2 text-sm">
+                <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+                  <div class="text-gray-600"><%= t('.qualification') %>:</div>
+                  <div class="text-gray-900">
+                    <%= signature_qualification(signature[:certificate_info][:qualification], signature.dig(:timestamp_info, :qualified) == true) %>
+                  </div>
+
+                  <div class="text-gray-600"><%= t('.time') %>:</div>
+                  <div class="text-gray-900">
+                    <% if signature.dig(:timestamp_info, :qualified) == true %>
+                      <%= signature.dig(:timestamp_info, :timestamps)&.first&.dig(:time)&.strftime('%d. %b %Y %H:%M:%S') %>
+                      (<%= t('.timestamp') %>)
+                    <% else %>
+                      <%= signature[:signing_time]&.strftime('%d. %b %Y %H:%M:%S') %>
+                      (<%= t('.wo_timestamp') %>)
+                    <% end %>
+                  </div>
+
+                  <div class="text-gray-600"><%= t('.format') %>:</div>
+                  <div class="text-gray-900 flex items-center justify-between">
+                    <span><%= signature_format(validation_result.document_info[:signature_form], validation_result.document_info[:container_type]) %></span>
+                    <button data-action="click->toggle#toggle" data-toggle-target="button"
+                      class="inline-flex items-center ml-4 cursor-pointer text-gray-900 hover:text-black hover:underline">
+                      <span data-toggle-target="textCollapsed"><%= t('.open_technical_details') %></span>
+                      <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_technical_details') %></span>
+                      <div data-toggle-target="icon" class="hidden"></div>
+                    </button>
+                  </div>
+                </div>
+                <div data-toggle-target="content" class="hidden">
+                  <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-gray-200">
+                    <div class="text-gray-600"><%= t('.certificate') %>:</div>
+                    <div class="text-gray-900">
+                      <%= signature.dig(:certificate_info, :subject) %>
+                    </div>
+
+                    <div class="text-gray-600"><%= t('.issuer') %>:</div>
+                    <div class="text-gray-900">
+                      <%= signature.dig(:certificate_info, :issuer) %>
+                    </div>
+
+                    <div class="text-gray-600"><%= t('.qualification') %>:</div>
+                    <div class="text-gray-900">
+                      <%= signature.dig(:certificate_info, :qualification) %>
+                    </div>
+                  </div>
+                  <% if signature.dig(:timestamp_info, :timestamps) %>
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                      <div class="font-medium text-gray-700"><%= t('.timestamps') %>:</div>
+                      <div class="ml-2 text-gray-600 space-y-4">
+                        <% signature[:timestamp_info][:timestamps].each do |timestamp| %>
+                          <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 mt-3 pt-3">
+                            <div class="text-gray-600"><%= t('.time') %>:</div>
+                            <div class="text-gray-900">
+                              <%= timestamp[:time]&.strftime('%d. %b %Y %H:%M:%S') %>
+                            </div>
+                            <div class="text-gray-600"><%= t('.timestamp_type') %>:</div>
+                            <div class="text-gray-900">
+                              <%= timestamp[:type] %>
+                            </div>
+                            <div class="text-gray-600"><%= t('.qualification') %>:</div>
+                            <div class="text-gray-900">
+                              <%= timestamp[:qualification] %>
+                            </div>
+                            <div class="text-gray-600"><%= t('.certificate') %>:</div>
+                            <div class="text-gray-900">
+                              <%= timestamp[:subject] %>
+                            </div>
+                          </div>
+                        <% end %>
                       </div>
-                      <div><strong><%= t('shared.signature_validation.subject') %>:</strong> <%= timestamp[:subject] %></div>
-                      <% if timestamp[:qualification] %>
-                        <div><strong><%= t('shared.signature_validation.qualification') %>:</strong> <%= timestamp[:qualification] %></div>
-                      <% end %>
                     </div>
                   <% end %>
                 </div>
-              <% end %>
-            </details>
+              </div>
+            </div>
           </div>
-        <% end %>
-      </div>
+        </div>
+      <% end %>
     </div>
   <% end %>
 </div>

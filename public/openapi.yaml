@@ -402,7 +402,7 @@ components:
         recipients:
           type: array
           items:
-            $ref: "#/components/schemas/User"
+            $ref: "#/components/schemas/Recipient"
 
     Contract:
       type: object
@@ -484,12 +484,9 @@ components:
         xdcParameters:
           $ref: "#/components/schemas/XdcParameters"
 
-    User:
+    Recipient:
       type: object
       properties:
-        id:
-          type: string
-          example: user-1
         name:
           type: string
           example: John Doe
@@ -497,6 +494,13 @@ components:
           type: string
           example: john.doe@example.com
           format: email
+        locale:
+          type: string
+          default: sk
+          description: Preferred locale for the recipient. Defaults to "sk".
+      required:
+        - name
+        - email
 
     SignatureParameters:
       type: object
@@ -743,7 +747,7 @@ components:
         postalAddress:
           address: "123 Main St, 81103 Bratislava, Slovakia"
           recipientName: "Company Name"
-        users:
+        recipients:
           - name: "Alice Smith"
             email: "alice.smith@example.com"
           - name: "Bob Johnson"

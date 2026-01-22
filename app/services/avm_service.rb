@@ -2,7 +2,7 @@ class AvmService
   AVM_BASE_URL = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital")
 
   def initiate_signing(contract)
-    document = contract.documents.first
+    document = contract.documents_to_sign.first
     return { error: "No document to sign" } unless document&.blob&.attached?
 
     file_content = Base64.strict_encode64(document.content)

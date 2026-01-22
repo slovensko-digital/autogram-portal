@@ -20,7 +20,6 @@ class AvmSigningPollJob < ApplicationJob
         )
 
         avm_session.contract.accept_signed_file(signed_document)
-        avm_session.mark_completed!
 
       when "failed"
         avm_session.mark_failed!

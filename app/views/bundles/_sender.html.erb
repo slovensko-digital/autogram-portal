@@ -1,0 +1,16 @@
+<% if current_user != @bundle.author %>
+  <div class="w-full bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-yellow-800">
+          <span class="font-semibold"><%= t('.sender') %>:</span> <%= @bundle.author.email %>
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>
