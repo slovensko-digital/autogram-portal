@@ -37,7 +37,7 @@ class AvmSession < ApplicationRecord
     update!(completed_at: Time.current)
   end
 
-  def mark_failed!(message=nil)
+  def mark_failed!(message = nil)
     session.update!(status: :failed)
     update!(error_message: message || "Signing failed", completed_at: Time.current)
   end

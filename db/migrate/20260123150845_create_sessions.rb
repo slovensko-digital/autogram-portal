@@ -9,6 +9,6 @@ class CreateSessions < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :sessions, [:contract_id, :sessionable_type, :sessionable_id], name: 'index_sessions_on_contract_and_sessionable'
+    add_index :sessions, [ :contract_id, :sessionable_type, :sessionable_id ], name: 'index_sessions_on_contract_and_sessionable'
   end
 end

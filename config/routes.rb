@@ -71,9 +71,9 @@ Rails.application.routes.draw do
         post :standard_webhook
       end
 
-      get :autogram, on: :collection, to: "contracts/sessions#create", defaults: { type: 'autogram' }
-      get :eidentita, on: :collection, to: "contracts/sessions#create", defaults: { type: 'eidentita' }
-      get :avm, on: :collection, to: "contracts/sessions#create", defaults: { type: 'avm' }
+      get :autogram, on: :collection, to: "contracts/sessions#create", defaults: { type: "autogram" }
+      get :eidentita, on: :collection, to: "contracts/sessions#create", defaults: { type: "eidentita" }
+      get :avm, on: :collection, to: "contracts/sessions#create", defaults: { type: "avm" }
     end
   end
 
