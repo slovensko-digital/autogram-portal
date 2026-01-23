@@ -12,6 +12,7 @@
 #  email                  :string
 #  encrypted_password     :string           default(""), not null
 #  failed_attempts        :integer          default(0), not null
+#  features               :text             default([]), is an Array
 #  last_sign_in_at        :datetime
 #  last_sign_in_ip        :string
 #  locale                 :string           default("sk")
