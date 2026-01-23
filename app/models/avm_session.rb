@@ -7,36 +7,18 @@
 #  encryption_key     :string
 #  error_message      :text
 #  signing_started_at :datetime
-#  status             :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
-#  contract_id        :bigint           not null
 #  document_id        :string
-#
-# Indexes
-#
-#  index_avm_sessions_on_contract_id  (contract_id)
-#
-# Foreign Keys
-#
-#  fk_rails_...  (contract_id => contracts.id)
 #
 class AvmSession < ApplicationRecord
   # TODO encrypt sensitive fields
 
-  belongs_to :contract
+  has_one :session, as: :sessionable, dependent: :destroy
 
-  enum :status, {
-    pending: "pending",
-    completed: "completed",
-    failed: "failed",
-    expired: "expired"
-  }
+  delegate :contract, :status, :status=, :pending?, :completed?, to: :session
 
   validates :document_id, :encryption_key, :signing_started_at, presence: true
-
-  scope :active, -> { where(status: :pending) }
-  scope :recent, -> { order(created_at: :desc) }
 
   after_update_commit :broadcast_status_change
 
@@ -47,24 +29,30 @@ class AvmSession < ApplicationRecord
 
   def expired?
     return false unless signing_started_at
-    # Time.current > signing_started_at + 5.minutes # 5 minute timeout
-    Time.current > signing_started_at + 5.seconds # 5 second timeout
+    Time.current > signing_started_at + 10.minutes # 10 minute timeout
   end
 
   def mark_completed!
-    update!(status: :completed, completed_at: Time.current)
+    session.update!(status: :completed)
+    update!(completed_at: Time.current)
   end
 
-  def mark_failed!
-    update!(status: :failed, error_message: "Signing failed", completed_at: Time.current)
+  def mark_failed!(message=nil)
+    session.update!(status: :failed)
+    update!(error_message: message || "Signing failed", completed_at: Time.current)
   end
 
   def mark_expired!
-    update!(status: :expired, completed_at: Time.current)
+    session.update!(status: :expired)
+    update!(completed_at: Time.current)
+  end
+
+  def process_webhook(_)
+    Avm::DownloadSignedFileJob.perform_later(self)
   end
 
   def broadcast_status_change
-    return unless saved_change_to_status?
+    return unless session.saved_change_to_status?
 
     case status
     when "completed"
@@ -81,7 +69,7 @@ class AvmSession < ApplicationRecord
     Turbo::StreamsChannel.broadcast_replace_to(
       "contract_#{contract.uuid}",
       target: "signature_actions_#{contract.uuid}",
-      partial: "contracts/signers/error",
+      partial: "contracts/sessions/error",
       locals: {
         contract: contract,
         error: error_message

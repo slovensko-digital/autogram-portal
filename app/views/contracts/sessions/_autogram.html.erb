@@ -1,12 +1,11 @@
-<%# locals: (contract:, cancel_url:) %>
+<%# locals: (contract:, session:, cancel_url:) %>
 
 <%= turbo_frame_tag "signature_actions_#{contract.uuid}" do %>
   <div
     data-controller="signers--autogram"
-    data-signers--autogram-autogram-parameters-path-value="<%= autogram_parameters_contract_path(contract) %>"
-    data-signers--autogram-signed-document-path-value="<%= receive_autogram_signed_document_contract_path(contract) %>"
+    data-signers--autogram-autogram-parameters-path-value="<%= parameters_contract_session_path(contract, session) %>"
+    data-signers--autogram-signed-document-path-value="<%= upload_contract_session_path(contract, session) %>"
     data-signers--autogram-sdk-path-value="<%= javascript_path('autogram-sdk') %>"
-    data-action="turbo:frame-load@window->signers--autogram#sign"
   >
   </div>
 
@@ -19,9 +18,9 @@
         </svg>
       </div>
       
-      <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('contracts.autogram_pending.title') %></h3>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
       <p class="text-sm text-gray-600 mb-4">
-        <%= t('contracts.autogram_pending.subtitle') %>
+        <%= t('.subtitle') %>
       </p>
     </div>
 
@@ -31,25 +30,25 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0 mt-0.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span><%= t('contracts.autogram_pending.step1') %></span>
+          <span><%= t('.step1') %></span>
         </div>
         <div class="flex items-start">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0 mt-0.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
           </svg>
-          <span><%= t('contracts.autogram_pending.step2') %></span>
+          <span><%= t('.step2') %></span>
         </div>
         <div class="flex items-start">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0 mt-0.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
-          <span><%= t('contracts.autogram_pending.step3') %></span>
+          <span><%= t('.step3') %></span>
         </div>
       </div>
     </div>
 
     <div class="text-center text-xs text-gray-500">
-      <p><%= t('contracts.autogram_pending.note') %></p>
+      <p><%= t('.note') %></p>
     </div>
 
     <% if cancel_url.present? %>
@@ -60,7 +59,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          <%= t('contracts.autogram_pending.cancel') %>
+          <%= t('.cancel') %>
         <% end %>
       </div>
     <% end %>

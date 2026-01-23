@@ -345,8 +345,8 @@ sk:
       hide_document: "Skryť dokument"
       show_document: "Zobraziť dokument"
       loading_content: "Načítavam obsah dokumentu..."
-    signers:
-      autogram_pending:
+    sessions:
+      autogram:
         title: "Podpisovanie s Autogram Desktop"
         subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram Desktop"
         step1: "Aplikácia Autogram Desktop by sa mala automaticky otvoriť"
@@ -354,7 +354,7 @@ sk:
         step3: "Táto stránka sa automaticky aktualizuje po dokončení podpisovania"
         note: "Uistite sa, že je aplikácia Autogram Desktop nainštalovaná a spustená"
         cancel: "Zrušiť"
-      avm_pending:
+      avm:
         scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
         scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
         copy_url: "Alebo skopírujte URL manuálne:"
@@ -362,7 +362,7 @@ sk:
         note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
         expiry: "Platnosť podpisovania vyprší o 10 minút"
         cancel: "Zrušiť operáciu"
-      eidentita_pending:
+      eidentita:
         scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
         scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
         copy_url: "Alebo skopírujte URL manuálne:"

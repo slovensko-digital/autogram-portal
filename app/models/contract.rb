@@ -27,8 +27,7 @@ class Contract < ApplicationRecord
 
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
-  has_many :avm_sessions, dependent: :destroy
-  has_many :eidentita_sessions, dependent: :destroy
+  has_many :sessions, dependent: :destroy
   has_one_attached :signed_document
 
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
@@ -79,8 +78,7 @@ class Contract < ApplicationRecord
       save!
     end
 
-    avm_sessions.active.each(&:mark_completed!)
-    eidentita_sessions.active.each(&:mark_completed!)
+    sessions.active.each { |s| s.sessionable.mark_completed! }
     bundle.contract_signed(self) if bundle.present?
     broadcast_signing_success
 
@@ -124,7 +122,8 @@ class Contract < ApplicationRecord
   end
 
   def current_avm_session
-    avm_sessions.active.recent.first
+    sessions.where(sessionable_type: "AvmSession", status: :pending)
+            .order(created_at: :desc).first&.sessionable
   end
 
   def has_active_avm_session?
@@ -132,11 +131,17 @@ class Contract < ApplicationRecord
   end
 
   def current_eidentita_session
-    eidentita_sessions.active.recent.first
+    sessions.where(sessionable_type: "EidentitaSession", status: :pending)
+            .order(created_at: :desc).first&.sessionable
   end
 
   def has_active_eidentita_session?
     current_eidentita_session.present?
+  end
+
+  # Generic method to get current active session
+  def current_session
+    sessions.where(status: :pending).order(created_at: :desc).first
   end
 
   def should_notify_user?

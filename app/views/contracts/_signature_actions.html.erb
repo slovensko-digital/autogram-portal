@@ -48,9 +48,9 @@
     </div>
 
     <div class="hidden">
-      <%= link_to "", sign_autogram_contract_path(contract), data: { signature_method_selector_target: 'autogramSubmitButton' } %>
+      <%= link_to "", autogram_contract_sessions_path(contract), data: { signature_method_selector_target: 'autogramSubmitButton' } %>
 
-      <%= form_with url: sign_avm_contract_path(contract), 
+      <%= form_with url: avm_contract_sessions_path(contract), 
                     method: :get, 
                     local: false,
                     data: { 
@@ -61,7 +61,7 @@
         <button type="submit" data-signers--avm-target="submitButton"></button>
       <% end %>
 
-      <%= form_with url: sign_eidentita_contract_path(contract), 
+      <%= form_with url: eidentita_contract_sessions_path(contract), 
                     method: :get, 
                     local: false,
                     data: { 

@@ -11,19 +11,33 @@ export default class extends Controller {
 
   connect() {
     console.log('Autogram signer controller connected')
-    this.loadSDKScript()
+    this.loadSDKScript().then(() => {
+      this.sign()
+    })
   }
 
   loadSDKScript() {
-    if (typeof window.AutogramSDK !== 'undefined' || document.querySelector('script[src*="autogram-sdk"]')) {
-      return
-    }
+    return new Promise((resolve) => {
+      if (typeof window.AutogramSDK !== 'undefined') {
+        resolve()
+        return
+      }
 
-    const script = document.createElement('script')
-    script.src = this.sdkPathValue
-    script.async = true
-    document.head.appendChild(script)
-    console.log('Loading Autogram SDK script from:', this.sdkPathValue)
+      const existingScript = document.querySelector('script[src*="autogram-sdk"]')
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve())
+        existingScript.addEventListener('error', () => resolve())
+        return
+      }
+
+      const script = document.createElement('script')
+      script.src = this.sdkPathValue
+      script.async = true
+      script.addEventListener('load', () => resolve())
+      script.addEventListener('error', () => resolve())
+      document.head.appendChild(script)
+      console.log('Loading Autogram SDK script from:', this.sdkPathValue)
+    })
   }
 
   waitForSDK(maxWaitTime = 5000) {

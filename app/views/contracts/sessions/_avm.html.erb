@@ -1,4 +1,4 @@
-<%# locals: (contract:, cancel_url:, avm_session:) %>
+<%# locals: (contract:, cancel_url:, session:) %>
 
 <%= turbo_frame_tag "signature_actions_#{contract.uuid}" do %>
   <div class="space-y-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -12,13 +12,13 @@
     </div>
 
     <div class="flex justify-center">
-      <a href="<%= avm_session.avm_url %>" 
+      <a href="<%= session.avm_url %>" 
         class="block hover:opacity-80 transition-opacity duration-200 focus:ring-4 focus:ring-blue-300 focus:outline-none rounded-lg"
         target="_blank"
         rel="noopener noreferrer"
         title="Kliknite pre otvorenie AVM aplikácie">
         <div class="bg-white p-4 rounded-lg  border-2 border-dashed border-blue-300 hover:border-blue-400 transition-colors duration-200">
-          <%= qr_code_svg(avm_session.avm_url, size: 200) %>
+          <%= qr_code_svg(session.avm_url, size: 200) %>
         </div>
       </a>
     </div>
@@ -26,8 +26,8 @@
     <div class="text-center">
       <p class="text-xs text-gray-500 mb-2"><%= t('.copy_url') %></p>
       <div class="bg-gray-100 rounded p-2 text-xs font-mono break-all">
-        <a href="<%= avm_session.avm_url %>" class="text-blue-600 hover:text-blue-800" target="_blank" rel="noopener noreferrer">
-          <%= avm_session.avm_url %>
+        <a href="<%= session.avm_url %>" class="text-blue-600 hover:text-blue-800" target="_blank" rel="noopener noreferrer">
+          <%= session.avm_url %>
         </a>
       </div>
     </div>

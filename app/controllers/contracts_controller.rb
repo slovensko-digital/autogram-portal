@@ -1,7 +1,6 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
-  skip_before_action :verify_authenticity_token, only: [ :receive_autogram_signed_document ]
   before_action :allow_iframe, only: [ :iframe ]
 
   def index
@@ -55,120 +54,11 @@ class ContractsController < ApplicationController
     end
   end
 
-  def autogram_parameters
-    render formats: [ :json ]
-  end
-
   def signature_actions
     render partial: "signature_actions", locals: { contract: @contract }
   end
 
   def sign
-  end
-
-  def receive_autogram_signed_document
-    @contract.accept_signed_file(signed_document_param)
-
-    respond_to do |format|
-      format.json { render json: { success: true, message: "The contract was successfully signed." } }
-    end
-  end
-
-  def sign_autogram
-    render partial: "contracts/signers/autogram_pending",
-           locals: {
-             contract: @contract,
-             cancel_url: determine_cancel_url
-           }
-  end
-
-  def sign_avm
-    return respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.uuid}",
-          partial: "contracts/signers/avm_pending",
-          locals: {
-            contract: @contract,
-            avm_session: @contract.current_avm_session,
-            cancel_url: determine_cancel_url
-          }
-        )
-      end
-    end if @contract.has_active_avm_session?
-
-    result = AutogramEnvironment.avm_service.initiate_signing(@contract)
-    avm_session = @contract.avm_sessions.create!(
-      document_id: result[:document_id],
-      encryption_key: result[:encryption_key],
-      signing_started_at: result[:signing_started_at],
-      status: "pending"
-    )
-
-    AvmSigningPollJob.perform_later(avm_session)
-
-    respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.uuid}",
-          partial: "contracts/signers/avm_pending",
-          locals: {
-            contract: @contract,
-            avm_session: avm_session,
-            cancel_url: determine_cancel_url
-          }
-        )
-      end
-    end
-  rescue => e
-    respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.uuid}",
-          partial: "contracts/signers/error",
-          locals: { contract: @contract, error: e.message }
-        )
-      end
-    end
-  end
-
-  def sign_eidentita
-    unless @contract.has_active_eidentita_session?
-      result = AutogramEnvironment.eidentita_service.initiate_signing(@contract)
-
-      raise result[:error] if result[:error]
-
-      @contract.eidentita_sessions.create!(
-        signing_started_at: result[:signing_started_at],
-        status: "pending"
-        )
-    end
-
-    eidentita_session = @contract.current_eidentita_session
-
-    respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.uuid}",
-          partial: "contracts/signers/eidentita_pending",
-          locals: {
-            contract: @contract,
-            eidentita_session: eidentita_session,
-            cancel_url: determine_cancel_url
-          }
-        )
-      end
-    end
-  rescue => e
-    respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.uuid}",
-          partial: "contracts/signers/error",
-          locals: { contract: @contract, error: e.message }
-        )
-      end
-    end
   end
 
   def signed_document
@@ -232,7 +122,6 @@ class ContractsController < ApplicationController
       render :show, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordInvalid
-    puts "Errors: #{@contract.errors.full_messages}"
     render :show, locals: { flash: @contract.errors }, status: :unprocessable_entity
   end
 
