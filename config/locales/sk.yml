@@ -334,33 +334,6 @@ sk:
       how_signing_works: "Ako funguje podpisovanie"
       signed_title: "Dokumenty boli podpísané"
       signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
-    autogram_signing_in_progress:
-      title: "Podpisovanie s Autogram Desktop"
-      subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram Desktop"
-      step1: "Aplikácia Autogram Desktop by sa mala automaticky otvoriť"
-      step2: "Postupujte podľa pokynov v aplikácii, aby ste dokončili podpisovanie"
-      step3: "Táto stránka sa automaticky aktualizuje po dokončení podpisovania"
-      note: "Uistite sa, že je aplikácia Autogram Desktop nainštalovaná a spustená"
-      cancel: "Zrušiť"
-    avm_signing_pending:
-      scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
-      scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
-      copy_url: "Alebo skopírujte URL manuálne:"
-      note_desktop: "Na mobile: Naskenujte QR kód alebo naň klepnite"
-      note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
-      expiry: "Platnosť podpisovania vyprší o 10 minút"
-      cancel: "Zrušiť operáciu"
-    eidentita_signing_pending:
-      scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
-      scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
-      copy_url: "Alebo skopírujte URL manuálne:"
-      note_desktop: "Na mobile: Naskenujte QR kód aplikáciou eIdentita alebo naň klepnite"
-      note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
-      expiry: "Platnosť podpisovania vyprší o 10 minút"
-      cancel: "Zrušiť operáciu"
-    signature_error:
-      title: "Chyba pri podpisovaní dokumentu"
-      close: "Zavrieť"
     download_actions:
       message: "Tento dokument bol podpísaný a je pripravený na stiahnutie."
       download_button: "Stiahnuť podpísaný dokument"
@@ -372,6 +345,34 @@ sk:
       hide_document: "Skryť dokument"
       show_document: "Zobraziť dokument"
       loading_content: "Načítavam obsah dokumentu..."
+    sessions:
+      autogram:
+        title: "Podpisovanie s Autogram Desktop"
+        subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram Desktop"
+        step1: "Aplikácia Autogram Desktop by sa mala automaticky otvoriť"
+        step2: "Postupujte podľa pokynov v aplikácii, aby ste dokončili podpisovanie"
+        step3: "Táto stránka sa automaticky aktualizuje po dokončení podpisovania"
+        note: "Uistite sa, že je aplikácia Autogram Desktop nainštalovaná a spustená"
+        cancel: "Zrušiť"
+      avm:
+        scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
+        scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
+        copy_url: "Alebo skopírujte URL manuálne:"
+        note_desktop: "Na mobile: Naskenujte QR kód alebo naň klepnite"
+        note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
+        expiry: "Platnosť podpisovania vyprší o 10 minút"
+        cancel: "Zrušiť operáciu"
+      eidentita:
+        scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
+        scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
+        copy_url: "Alebo skopírujte URL manuálne:"
+        note_desktop: "Na mobile: Naskenujte QR kód aplikáciou eIdentita alebo naň klepnite"
+        note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
+        expiry: "Platnosť podpisovania vyprší o 10 minút"
+        cancel: "Zrušiť operáciu"
+      error:
+        title: "Chyba pri podpisovaní dokumentu"
+        close: "Zavrieť"
   
   homepage:
     index:

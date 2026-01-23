@@ -10,20 +10,13 @@ export default class extends Controller {
 
   sign(event) {
     this.setButtonLoading(true)
-    if (isMobileDevice()) {
-      event.preventDefault()
-      this.submitAndRedirect()
-    }
+    event.preventDefault()
+    this.submitAndRedirect()
   }
 
   async submitAndRedirect() {
     try {
-      const form = this.element
-      const formData = new FormData(form)
-      
-      const response = await fetch(form.action, {
-        method: form.method,
-        body: formData,
+      const response = await fetch(this.element.action, {
         headers: {
           'Accept': 'text/vnd.turbo-stream.html',
           'X-Requested-With': 'XMLHttpRequest'
@@ -32,14 +25,18 @@ export default class extends Controller {
 
       if (response.ok) {
         const responseText = await response.text()
-        const eidentitaUrl = this.extractEidentitaUrlFromResponse(responseText)
         
-        if (eidentitaUrl) {
-          console.log("Redirecting to Eidentita URL:", eidentitaUrl)
-          this.redirectToEidentitaUrl(eidentitaUrl)
+        if (isMobileDevice()) {
+          const eidentitaUrl = this.extractEidentitaUrlFromResponse(responseText)
+          if (eidentitaUrl) {
+            console.log("Redirecting to Eidentita URL:", eidentitaUrl)
+            this.redirectToEidentitaUrl(eidentitaUrl)
+          } else {
+            console.log("Could not extract Eidentita URL, falling back to normal flow")
+            Turbo.renderStreamMessage(responseText)
+          }
         } else {
-          console.log("Could not extract Eidentita URL, falling back to normal flow")
-          this.processTurboStreamResponse(responseText)
+          Turbo.renderStreamMessage(responseText)
         }
       } else {
         console.error("Form submission failed:", response.status, response.statusText)
@@ -76,23 +73,6 @@ export default class extends Controller {
     const tempElement = document.createElement('div')
     tempElement.innerHTML = text
     return tempElement.textContent || tempElement.innerText || text
-  }
-
-  processTurboStreamResponse(responseText) {
-    const tempDiv = document.createElement('div')
-    tempDiv.innerHTML = responseText
-    const turboStreamElement = tempDiv.querySelector('turbo-stream')
-    
-    if (turboStreamElement) {
-      document.body.appendChild(turboStreamElement)
-      setTimeout(() => {
-        if (turboStreamElement.parentNode) {
-          turboStreamElement.parentNode.removeChild(turboStreamElement)
-        }
-      }, 100)
-    }
-    
-    this.setButtonLoading(false)
   }
 
   showError(message) {

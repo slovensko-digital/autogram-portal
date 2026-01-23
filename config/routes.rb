@@ -50,28 +50,30 @@ Rails.application.routes.draw do
 
   resources :contracts, except: [ :index ] do
     member do
+      get :signature_actions
       get :sign
-      post :sign_autogram
-      post :sign_avm
-      post :sign_eidentita
       get :validate
       get :visualize
       get :signed_document
       get :iframe
-      get :autogram_parameters
-      get :autogram_signing_in_progress
       get :signature_parameters
       get :signature_extension
       post :extend_signatures
       get :actions
     end
 
-    resources :eidentita_sessions, only: [ :show ] do
+    resources :sessions, only: [ :show, :destroy ], controller: "contracts/sessions" do
       member do
-        get :json
-        get :document
+        get :parameters
+        get :download
         post :upload
+        get :get_webhook
+        post :standard_webhook
       end
+
+      get :autogram, on: :collection, to: "contracts/sessions#create", defaults: { type: "autogram" }
+      get :eidentita, on: :collection, to: "contracts/sessions#create", defaults: { type: "eidentita" }
+      get :avm, on: :collection, to: "contracts/sessions#create", defaults: { type: "avm" }
     end
   end
 

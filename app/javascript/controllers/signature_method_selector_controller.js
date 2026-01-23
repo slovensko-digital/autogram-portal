@@ -3,16 +3,11 @@ import { isMobileDevice } from "utils/device_detection"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["methodRadio", "buttonContainer", "autogramForm", "avmForm", "eidentitaForm", "signButton", "desktopElement"]
+  static targets = ["methodRadio", "autogramSubmitButton", "avmForm", "eidentitaForm", "signButton", "desktopElement"]
 
   connect() {
     console.log('Signature method selector connected')
     this.handleDeviceDetection()
-    this.element.addEventListener('autogram-signing', this.handleSigningEvent.bind(this))
-  }
-
-  disconnect() {
-    this.element.removeEventListener('autogram-signing', this.handleSigningEvent.bind(this))
   }
 
   handleSigningEvent(event) {
@@ -20,10 +15,8 @@ export default class extends Controller {
     console.log('Autogram signing event:', status)
     
     if (status === 'cancel' || status === 'error') {
-      // Reload the page to restore the original form
       window.location.reload()
     }
-    // Note: on success, the page reloads so no need to reset
   }
 
   handleDeviceDetection() {
@@ -58,31 +51,23 @@ export default class extends Controller {
         return
       }
 
-      // Trigger the autogram form submission
-      // The autogram signer controller will handle showing the "signing in progress" UI
-      if (this.hasAutogramFormTarget) {
-        const submitButton = this.autogramFormTarget.querySelector('button[type="submit"]')
-        if (submitButton) {
-          submitButton.click()
-        }
+      if (this.hasAutogramSubmitButtonTarget) {
+        this.setSignButtonLoading(true)
+        this.autogramSubmitButtonTarget.click()
       }
     } else if (selectedMethod === 'avm') {
-      // Show loading state on the main Sign button
-      this.setSignButtonLoading(true)
-      
       if (this.hasAvmFormTarget) {
         const submitButton = this.avmFormTarget.querySelector('button[type="submit"]')
         if (submitButton) {
+          this.setSignButtonLoading(true)
           submitButton.click()
         }
       }
     } else if (selectedMethod === 'eidentita') {
-      // Show loading state on the main Sign button
-      this.setSignButtonLoading(true)
-      
       if (this.hasEidentitaFormTarget) {
         const submitButton = this.eidentitaFormTarget.querySelector('button[type="submit"]')
         if (submitButton) {
+          this.setSignButtonLoading(true)
           submitButton.click()
         }
       }
