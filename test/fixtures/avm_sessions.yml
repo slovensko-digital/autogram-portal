@@ -14,19 +14,15 @@
 #  document_id        :string
 #
 one:
-  contract: one
   document_id: MyString
   encryption_key: MyString
   signing_started_at: 2025-10-01 22:50:50
   completed_at: 2025-10-01 22:50:50
-  status: MyString
   error_message: MyText
 
 two:
-  contract: two
   document_id: MyString
   encryption_key: MyString
   signing_started_at: 2025-10-01 22:50:50
   completed_at: 2025-10-01 22:50:50
-  status: MyString
   error_message: MyText
