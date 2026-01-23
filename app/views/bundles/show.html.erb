@@ -53,7 +53,7 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-2"><%= t('.recipients_title') %></h3>
             <p class="text-gray-600"><%= t('.recipients_subtitle') %></p>
           </div>
-          <% if  @bundle.recipients.pending.any? %>
+          <% if  @bundle.recipients.pending.any? && @bundle.author.real_emails_allowed? %>
             <%= button_to notify_recipients_bundle_path(@bundle), 
                   method: :post,
                   form: { onsubmit: "this.style.display='none'; return true;" },

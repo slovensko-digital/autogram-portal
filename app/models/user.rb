@@ -12,6 +12,7 @@
 #  email                  :string
 #  encrypted_password     :string           default(""), not null
 #  failed_attempts        :integer          default(0), not null
+#  features               :text             default([]), is an Array
 #  last_sign_in_at        :datetime
 #  last_sign_in_ip        :string
 #  locale                 :string           default("sk")
@@ -36,10 +37,12 @@
 class User < ApplicationRecord
   devise :magic_link_authenticatable, :omniauthable, :registerable, :confirmable, :rememberable, :validatable, :lockable
 
+  attribute :features, :string, array: true, default: []
+
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
   has_many :identities, dependent: :destroy
-  has_many :contracts
-  has_many :documents
+  has_many :contracts, dependent: :destroy
+  has_many :documents, dependent: :destroy
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
@@ -68,6 +71,14 @@ class User < ApplicationRecord
     )
     user.identities.create!(provider: auth.provider, uid: auth.uid)
     user
+  end
+
+  def display_name
+    name.presence || email
+  end
+
+  def real_emails_allowed?
+    features.include? "real_emails"
   end
 
   def signature_request_allowed?
