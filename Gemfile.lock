@@ -288,9 +288,10 @@ GEM
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
       rack
-    pry (0.15.2)
+    pry (0.16.0)
       coderay (~> 1.1)
       method_source (~> 1.0)
+      reline (>= 0.6.0)
     psych (5.3.1)
       date
       stringio
@@ -300,8 +301,9 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.4)
-    rack-cors (2.0.2)
-      rack (>= 2.0.0)
+    rack-cors (3.0.0)
+      logger
+      rack (>= 3.0.14)
     rack-protection (4.2.1)
       base64 (>= 0.1.0)
       logger (>= 1.6.0)
@@ -511,9 +513,9 @@ DEPENDENCIES
   omniauth-rails_csrf_protection (~> 2.0)
   pg (~> 1.1)
   propshaft
-  pry (~> 0.15.2)
+  pry (~> 0.16)
   puma (>= 5.0)
-  rack-cors (~> 2.0)
+  rack-cors (~> 3.0)
   rails
   redis (~> 5.4)
   rqrcode

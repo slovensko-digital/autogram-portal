@@ -1,6 +1,4 @@
 class AvmSigningPollJob < ApplicationJob
-  retry_on StandardError, wait: :exponentially_longer, attempts: 10
-
   def perform(avm_session, avm_service: AutogramEnvironment.avm_service)
     return avm_session.mark_expired! if avm_session.expired?
     return unless avm_session.pending?

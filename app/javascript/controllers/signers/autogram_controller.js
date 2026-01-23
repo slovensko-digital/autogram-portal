@@ -2,15 +2,48 @@ import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["form", "submitButton"]
+  static targets = ["form"]
   static values = { 
-    contractParam: String,
-    contractUuid: String,
-    noPreview: Boolean
+    autogramParametersPath: String,
+    signedDocumentPath: String,
+    sdkPath: String
   }
 
   connect() {
-    this.signing = false
+    console.log('Autogram signer controller connected')
+    this.loadSDKScript()
+  }
+
+  loadSDKScript() {
+    if (typeof window.AutogramSDK !== 'undefined' || document.querySelector('script[src*="autogram-sdk"]')) {
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = this.sdkPathValue
+    script.async = true
+    document.head.appendChild(script)
+    console.log('Loading Autogram SDK script from:', this.sdkPathValue)
+  }
+
+  waitForSDK(maxWaitTime = 5000) {
+    return new Promise((resolve, _) => {
+      if (typeof window.AutogramSDK !== 'undefined') {
+        resolve()
+        return
+      }
+
+      const startTime = Date.now()
+      const checkInterval = setInterval(() => {
+        if (typeof window.AutogramSDK !== 'undefined') {
+          clearInterval(checkInterval)
+          resolve()
+        } else if (Date.now() - startTime > maxWaitTime) {
+          clearInterval(checkInterval)
+          resolve()
+        }
+      }, 100)
+    })
   }
 
   isInIframe() {
@@ -34,17 +67,12 @@ export default class extends Controller {
     })
   }
 
-  async sign(event) {
-    if (this.signing) return
-
-    event.preventDefault()
-    this.signing = true
-
-    await this.showSigningInProgress()
-
-    this.dispatchSigningEvent('start')
+  async sign() {
+    console.log('Starting Autogram Desktop signing process')
 
     try {
+      await this.waitForSDK()
+      
       if (typeof window.AutogramSDK === 'undefined') {
         throw new Error('An error occurred while loading the Autogram SDK. Please ensure it is properly included in the page.')
       }
@@ -63,8 +91,8 @@ export default class extends Controller {
       } else {
         throw new Error('No suitable Autogram client found. Available properties: ' + Object.keys(window.AutogramSDK).join(', '))
       }
-
-      const autogramParametersResponse = await fetch(this.contractParamValue + '/autogram_parameters', {
+      
+      const autogramParametersResponse = await fetch(this.autogramParametersPathValue, {
         headers: {
           'Accept': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -134,12 +162,12 @@ export default class extends Controller {
       }
 
       if (signResult && signResult.content) {
-        const formData = new FormData(this.formTarget)
+        const formData = new FormData()
         formData.append('signed_document', signResult.content)
         formData.append('signed_by', signResult.signedBy || '')
         formData.append('issued_by', signResult.issuedBy || '')
         
-        const response = await fetch(`${this.contractParamValue}/sign_autogram`, {
+        const response = await fetch(this.signedDocumentPathValue, {
           method: 'POST',
           body: formData,
           headers: {
@@ -170,34 +198,20 @@ export default class extends Controller {
         console.log('Signing was cancelled or failed:', signResult)
       }
     } catch (error) {
-      console.error('Signing error:', error)
-      
       if (error.message && (error.message.includes('cancel') || error.message.includes('abort'))) {
         console.log('User cancelled signing')
-        this.dispatchSigningEvent('cancel')
+        window.location.reload()
       } else {
+        console.error('Signing error:', error)
         alert(i18n.t('errors.signing_error', { message: error.message }))
-        this.dispatchSigningEvent('error', { error: error.message })
+        window.location.reload()
       }
     }
   }
 
-  dispatchSigningEvent(status, detail = {}) {
-    const event = new CustomEvent('autogram-signing', {
-      bubbles: true,
-      detail: { status, ...detail }
-    })
-    this.element.dispatchEvent(event)
-  }
-
   async showSigningInProgress() {
     try {
-      let url = `${this.contractParamValue}/autogram_signing_in_progress`
-      if (this.hasNoPreviewValue && this.noPreviewValue) {
-        url += '?no_preview=1'
-      }
-
-      const response = await fetch(url, {
+      const response =  await fetch(this.element.action, {
         headers: {
           'Accept': 'text/vnd.turbo-stream.html',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')

@@ -1,128 +1,79 @@
-<%# locals: (info_hidden: false, no_preview: false, contract:) %>
+<%# locals: (info_hidden: false, contract:) %>
 
-<% content_for :head do %>
-  <script src="<%= asset_path('autogram-sdk.js') %>"></script>
-<% end %>
-
-<div id="signature_actions_<%= contract.uuid %>" 
-      data-controller="signature-method-selector"
-      class="w-full">
-  <div class="mb-4">
-    <div>
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">
-        <% if contract.awaiting_signature? %>
-          <%= t('contracts.signature_actions.select_signing_app') %>
-        <% else %>
-          <%= t('contracts.signature_actions.add_another_signature') %>
-        <% end %>
-      </h3>
-      <div class="space-y-3">
-        <div data-signature-method-selector-target="desktopElement">
-          <%= render 'shared/radio_button_card',
-                name: "signature_method_#{contract.uuid}",
-                value: 'autogram',
-                label: t('contracts.signature_actions.autogram_desktop_label'),
-                description: t('contracts.signature_actions.autogram_desktop_description'),
-                checked: true,
-                icon: 'desktop',
-                wrapper_class: 'desktop-signing-element',
-                data_attributes: { 
-                  signature_method_selector_target: 'methodRadio'
-                } %>
-        </div>
-
+<%= turbo_frame_tag "signature_actions_#{contract.uuid}" do %>
+  <div data-controller="signature-method-selector" class="w-full space-y-4">
+    <h3 class="text-lg font-semibold text-gray-900">
+      <% if contract.awaiting_signature? %>
+        <%= t('contracts.signature_actions.select_signing_app') %>
+      <% else %>
+        <%= t('contracts.signature_actions.add_another_signature') %>
+      <% end %>
+    </h3>
+    <div class="space-y-3">
+      <div data-signature-method-selector-target="desktopElement">
         <%= render 'shared/radio_button_card',
               name: "signature_method_#{contract.uuid}",
-              value: 'avm',
-              label: t('contracts.signature_actions.autogram_mobile_label'),
-              description: t('contracts.signature_actions.autogram_mobile_description'),
-              checked: false,
-              icon: 'mobile',
-              data_attributes: { 
-                signature_method_selector_target: 'methodRadio'
-              } %>
-
-        <%= render 'shared/radio_button_card',
-              name: "signature_method_#{contract.uuid}",
-              value: 'eidentita',
-              label: t('contracts.signature_actions.eidentita_label'),
-              description: t('contracts.signature_actions.eidentita_description'),
-              checked: false,
-              icon: 'mobile',
+              value: 'autogram',
+              label: t('contracts.signature_actions.autogram_desktop_label'),
+              description: t('contracts.signature_actions.autogram_desktop_description'),
+              checked: true,
+              icon: 'desktop',
+              wrapper_class: 'desktop-signing-element',
               data_attributes: { 
                 signature_method_selector_target: 'methodRadio'
               } %>
       </div>
-    </div>
-  </div>
 
-  <div class="space-y-3" data-signature-method-selector-target="buttonContainer">
-    <div data-signature-method-selector-target="autogramForm"
-        class="hidden">
-      <%= form_with url: sign_contract_path(contract), 
-                    method: :post, 
-                    class: "w-full",
-                    data: { 
-                      controller: "signers--autogram-signer",
-                      "signers--autogram-signer-contract-param-value": contract_path(contract),
-                      "signers--autogram-signer-contract-uuid-value": contract.uuid,
-                      "signers--autogram-signer-no-preview-value": no_preview,
-                      "signers--autogram-signer-target": "form",
-                      action: "submit->signers--autogram-signer#sign"
-                    } do |form| %>
-        <% if no_preview %>
-          <%= form.hidden_field :no_preview, value: "1" %>
-        <% end %>
-        <button type="submit" 
-                data-signers--autogram-signer-target="submitButton"
-                style="display: none;">
-        </button>
-      <% end %>
+      <%= render 'shared/radio_button_card',
+            name: "signature_method_#{contract.uuid}",
+            value: 'avm',
+            label: t('contracts.signature_actions.autogram_mobile_label'),
+            description: t('contracts.signature_actions.autogram_mobile_description'),
+            checked: false,
+            icon: 'mobile',
+            data_attributes: { 
+              signature_method_selector_target: 'methodRadio'
+            } %>
+
+      <%= render 'shared/radio_button_card',
+            name: "signature_method_#{contract.uuid}",
+            value: 'eidentita',
+            label: t('contracts.signature_actions.eidentita_label'),
+            description: t('contracts.signature_actions.eidentita_description'),
+            checked: false,
+            icon: 'mobile',
+            data_attributes: { 
+              signature_method_selector_target: 'methodRadio'
+            } %>
     </div>
 
-    <div data-signature-method-selector-target="avmForm" 
-        class="hidden">
+    <div class="hidden">
+      <%= link_to "", sign_autogram_contract_path(contract), data: { signature_method_selector_target: 'autogramSubmitButton' } %>
+
       <%= form_with url: sign_avm_contract_path(contract), 
-                    method: :post, 
-                    class: "w-full",
+                    method: :get, 
                     local: false,
                     data: { 
-                      controller: "signers--avm-signer",
-                      "signers--avm-signer-target": "form",
-                      action: "submit->signers--avm-signer#sign"
+                      controller: "signers--avm",
+                      action: "submit->signers--avm#sign",
+                      signature_method_selector_target: "avmForm"
                     } do |form| %>
-        <% if no_preview %>
-          <%= form.hidden_field :no_preview, value: "1" %>
-        <% end %>
-        <button type="submit" 
-                data-signers--avm-signer-target="submitButton"
-                style="display: none;">
-        </button>
+        <button type="submit" data-signers--avm-target="submitButton"></button>
       <% end %>
-    </div>
 
-    <div data-signature-method-selector-target="eidentitaForm" 
-        class="hidden">
       <%= form_with url: sign_eidentita_contract_path(contract), 
-                    method: :post, 
-                    class: "w-full",
+                    method: :get, 
                     local: false,
                     data: { 
-                      controller: "signers--eidentita-signer",
-                      "signers--eidentita-signer-target": "form",
-                      action: "submit->signers--eidentita-signer#sign"
+                      controller: "signers--eidentita",
+                      action: "submit->signers--eidentita#sign",
+                      signature_method_selector_target: "eidentitaForm"
                     } do |form| %>
-        <% if no_preview %>
-          <%= form.hidden_field :no_preview, value: "1" %>
-        <% end %>
-        <button type="submit" 
-                data-signers--eidentita-signer-target="submitButton"
-                style="display: none;">
-        </button>
+        <button type="submit" data-signers--eidentita-target="submitButton"></button>
       <% end %>
     </div>
 
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
       <div class="flex items-start">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,15 +90,15 @@
       </div>
     </div>
 
-    <div class="my-6 border-b border-gray-200"></div>
+    <div class="border-b border-gray-200"></div>
 
     <div class="flex gap-4">
       <button type="button"
               data-signature-method-selector-target="signButton"
               data-action="click->signature-method-selector#triggerSign"
-              class="flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              class="flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
         <%= t('contracts.signature_actions.continue_to_sign') %>
       </button>
     </div>
   </div>
-</div>
+<% end %>

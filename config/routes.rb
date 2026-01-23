@@ -50,16 +50,18 @@ Rails.application.routes.draw do
 
   resources :contracts, except: [ :index ] do
     member do
+      get :signature_actions
       get :sign
-      post :sign_autogram
-      post :sign_avm
-      post :sign_eidentita
+      get :sign_autogram
+      post :receive_autogram_signed_document
+      get :sign_avm
+      get :sign_eidentita
       get :validate
       get :visualize
       get :signed_document
       get :iframe
       get :autogram_parameters
-      get :autogram_signing_in_progress
+      get :autogram_pending
       get :signature_parameters
       get :signature_extension
       post :extend_signatures

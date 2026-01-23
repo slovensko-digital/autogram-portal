@@ -47,7 +47,8 @@ class AvmSession < ApplicationRecord
 
   def expired?
     return false unless signing_started_at
-    Time.current > signing_started_at + 5.minutes # 5 minute timeout
+    # Time.current > signing_started_at + 5.minutes # 5 minute timeout
+    Time.current > signing_started_at + 5.seconds # 5 second timeout
   end
 
   def mark_completed!
@@ -80,7 +81,7 @@ class AvmSession < ApplicationRecord
     Turbo::StreamsChannel.broadcast_replace_to(
       "contract_#{contract.uuid}",
       target: "signature_actions_#{contract.uuid}",
-      partial: "contracts/signature_error",
+      partial: "contracts/signers/error",
       locals: {
         contract: contract,
         error: error_message

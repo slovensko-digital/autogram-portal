@@ -1,7 +1,7 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
-  skip_before_action :verify_authenticity_token, only: [ :iframe, :sign_avm, :sign_eidentita, :sign, :autogram_parameters, :autogram_signing_in_progress ]
+  skip_before_action :verify_authenticity_token, only: [ :receive_autogram_signed_document ]
   before_action :allow_iframe, only: [ :iframe ]
 
   def index
@@ -59,34 +59,27 @@ class ContractsController < ApplicationController
     render formats: [ :json ]
   end
 
-  def autogram_signing_in_progress
-    respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "signature_actions_#{@contract.uuid}",
-          partial: "contracts/autogram_signing_in_progress",
-          locals: {
-            contract: @contract,
-            cancel_url: determine_cancel_url
-          }
-        )
-      end
-    end
+  def signature_actions
+    render partial: "signature_actions", locals: { contract: @contract }
   end
 
   def sign
   end
 
-  def sign_autogram
+  def receive_autogram_signed_document
     @contract.accept_signed_file(signed_document_param)
 
     respond_to do |format|
-      format.html {
-        flash[:notice] = "The contract was successfully signed."
-        redirect_to @contract
-      }
       format.json { render json: { success: true, message: "The contract was successfully signed." } }
     end
+  end
+
+  def sign_autogram
+    render partial: "contracts/signers/autogram_pending",
+           locals: {
+             contract: @contract,
+             cancel_url: determine_cancel_url
+           }
   end
 
   def sign_avm
@@ -94,11 +87,10 @@ class ContractsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
-          partial: "contracts/avm_signing_pending",
+          partial: "contracts/signers/avm_pending",
           locals: {
             contract: @contract,
             avm_session: @contract.current_avm_session,
-            avm_url: @contract.current_avm_session.avm_url,
             cancel_url: determine_cancel_url
           }
         )
@@ -119,11 +111,10 @@ class ContractsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
-          partial: "contracts/avm_signing_pending",
+          partial: "contracts/signers/avm_pending",
           locals: {
             contract: @contract,
             avm_session: avm_session,
-            avm_url: avm_session.avm_url,
             cancel_url: determine_cancel_url
           }
         )
@@ -134,7 +125,7 @@ class ContractsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
-          partial: "contracts/signature_error",
+          partial: "contracts/signers/error",
           locals: { contract: @contract, error: e.message }
         )
       end
@@ -159,12 +150,10 @@ class ContractsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
-          partial: "contracts/eidentita_signing_pending",
+          partial: "contracts/signers/eidentita_pending",
           locals: {
             contract: @contract,
             eidentita_session: eidentita_session,
-            eidentita_url: eidentita_session.eidentita_url,
-            eidentita_url_mobile: eidentita_session.eidentita_url_mobile,
             cancel_url: determine_cancel_url
           }
         )
@@ -175,7 +164,7 @@ class ContractsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "signature_actions_#{@contract.uuid}",
-          partial: "contracts/signature_error",
+          partial: "contracts/signers/error",
           locals: { contract: @contract, error: e.message }
         )
       end
@@ -271,13 +260,7 @@ class ContractsController < ApplicationController
   private
 
   def determine_cancel_url
-    if request.referrer&.include?("/iframe")
-      iframe_params = {}
-      iframe_params[:no_preview] = true if params[:no_preview].present?
-      iframe_contract_path(@contract, iframe_params)
-    else
-       request.referrer || contract_path(@contract)
-    end
+    signature_actions_contract_path(@contract)
   end
 
   def verify_author

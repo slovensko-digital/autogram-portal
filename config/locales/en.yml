@@ -393,33 +393,6 @@ en:
       how_signing_works: "How signing works"
       signed_title: "Documents have been signed"
       signed_message: "This contract has been signed and is complete. No further signature is required."
-    autogram_signing_in_progress:
-      title: "Signing with Autogram Desktop"
-      subtitle: "Please complete the signing process in the Autogram Desktop application"
-      step1: "The Autogram Desktop application should have opened automatically"
-      step2: "Follow the instructions in the application to complete the signing"
-      step3: "This page will automatically update once signing is complete"
-      note: "Make sure the Autogram Desktop application is installed and running"
-      cancel: "Cancel"
-    avm_signing_pending:
-      scan_qr_desktop: "Scan the QR code with your mobile device"
-      scan_qr_mobile: "Tap the QR code to open the Autogram mobile application"
-      copy_url: "Or copy the URL manually:"
-      note_desktop: "On mobile: Scan the QR code or tap it"
-      note_mobile: "Tap the QR code to open the Autogram mobile application"
-      expiry: "Signing will expire in 10 minutes"
-      cancel: "Cancel operation"
-    eidentita_signing_pending:
-      scan_qr_desktop: "Scan the QR code with your mobile device using eIdentita app"
-      scan_qr_mobile: "Tap the QR code to open the eIdentita mobile application"
-      copy_url: "Or copy the URL manually:"
-      note_desktop: "On mobile: Scan the QR code with eIdentita app or tap it"
-      note_mobile: "Tap the QR code to open the eIdentita mobile application"
-      expiry: "Signing will expire in 10 minutes"
-      cancel: "Cancel operation"
-    signature_error:
-      title: "Error signing the document"
-      close: "Close"
     download_actions:
       message: "This document has been signed and is ready for download."
       download_button: "Download Signed Document"
@@ -427,6 +400,34 @@ en:
       loading: "Loading document content..."
     signature_validation:
       validating: "Validating electronic signatures..."
+    signers:
+      autogram_pending:
+        title: "Signing with Autogram Desktop"
+        subtitle: "Please complete the signing process in the Autogram Desktop application"
+        step1: "The Autogram Desktop application should have opened automatically"
+        step2: "Follow the instructions in the application to complete the signing"
+        step3: "This page will automatically update once signing is complete"
+        note: "Make sure the Autogram Desktop application is installed and running"
+        cancel: "Cancel"
+      avm_pending:
+        scan_qr_desktop: "Scan the QR code with your mobile device"
+        scan_qr_mobile: "Tap the QR code to open the Autogram mobile application"
+        copy_url: "Or copy the URL manually:"
+        note_desktop: "On mobile: Scan the QR code or tap it"
+        note_mobile: "Tap the QR code to open the Autogram mobile application"
+        expiry: "Signing will expire in 10 minutes"
+        cancel: "Cancel operation"
+      eidentita_pending:
+        scan_qr_desktop: "Scan the QR code with your mobile device using eIdentita app"
+        scan_qr_mobile: "Tap the QR code to open the eIdentita mobile application"
+        copy_url: "Or copy the URL manually:"
+        note_desktop: "On mobile: Scan the QR code with eIdentita app or tap it"
+        note_mobile: "Tap the QR code to open the eIdentita mobile application"
+        expiry: "Signing will expire in 10 minutes"
+        cancel: "Cancel operation"
+      error:
+        title: "Error signing the document"
+        close: "Close"
   
   homepage:
     index:

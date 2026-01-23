@@ -652,15 +652,15 @@ components:
   securitySchemes:
     JWT:
       description: |
-        JWT token must be encoded using ES256 and device-specific key matching `sub` claim.
-        Maximum `exp` claim duration id 15 minutes.
+        JWT token must be encoded using RS256 and client-specific key matching `sub` claim.
+        Maximum `exp` claim duration is 15 minutes.
         `jti` claim is required and must be unique for the 15 minutes. 
         `jti` claim must complain with regular expression: `/\A[0-9a-z\-_]{32,256}\z/i`
 
         Example of `header` segment:
 
               {
-                "alg": "ES256",
+                "alg": "RS256",
               }
 
         Example `payload` segment:

@@ -4,7 +4,6 @@ class SdkController < ActionController::Base
   skip_before_action :verify_authenticity_token
 
   def sdk
-    @base_url = request.base_url
     respond_to do |format|
       format.js { render "sdk/sdk", content_type: "application/javascript" }
     end

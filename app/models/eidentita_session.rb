@@ -77,7 +77,7 @@ class EidentitaSession < ApplicationRecord
     Turbo::StreamsChannel.broadcast_replace_to(
       "contract_#{contract.uuid}",
       target: "signature_actions_#{contract.uuid}",
-      partial: "contracts/signature_error",
+      partial: "contracts/signers/error",
       locals: {
         contract: contract,
         error: error_message

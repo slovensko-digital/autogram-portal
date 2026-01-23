@@ -24,7 +24,7 @@
                 width: options.width || '100%',
                 height: options.height || '800px',
                 border: options.border || 'solid 1px #ccc',
-                baseUrl: options.baseUrl || "<%= @base_url %>",
+                baseUrl: options.baseUrl || "<%= root_url.chomp('/') %>",
                 popupWidth: options.popupWidth || 800,
                 popupHeight: options.popupHeight || 600,
                 popupTitle: options.popupTitle || 'AGP Portal',

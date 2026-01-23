@@ -1,0 +1,29 @@
+<%= turbo_frame_tag "signature_actions_#{contract.uuid}" do %>
+  <div class="space-y-4 bg-red-50 border border-red-200 rounded-lg p-6">
+    <div class="text-center">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+        <svg class="h-8 w-8 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
+      </div>
+      
+      <h3 class="text-lg font-semibold text-red-900 mb-2">
+        <%= t('.title') %>
+      </h3>
+      
+      <p class="text-sm text-red-700 mb-4">
+        <%= error %>
+      </p>
+    </div>
+
+    <div class="text-center">
+      <%= link_to signature_actions_contract_path(contract), 
+                  class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+        </svg>
+        <%= t('.close') %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
