@@ -44,6 +44,8 @@ class Recipient < ApplicationRecord
 
   def notify!
     return unless pending?
+    return unless bundle.author.feature_enabled?(:real_emails)
+
     update(status: :sending)
     Notification::RecipientBundleCreatedJob.perform_later(self)
   end
