@@ -8,7 +8,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :name ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, :api_token_public_key ])
   end
 
   def update_resource(resource, params)

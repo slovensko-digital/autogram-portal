@@ -77,8 +77,8 @@ class User < ApplicationRecord
     name.presence || email
   end
 
-  def real_emails_allowed?
-    features.include? "real_emails"
+  def feature_enabled?(feature)
+    features.include? feature.to_s
   end
 
   def signature_request_allowed?
