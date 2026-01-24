@@ -32,10 +32,17 @@ Rails.application.routes.draw do
 
   authenticate(:user) do
     resources :contracts, only: [ :index, :destroy ]
+
     resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
       member do
         post :add_recipient
         post :notify_recipients
+      end
+
+      resources :recipients, only: [ :destroy ] do
+        member do
+          post :notify
+        end
       end
     end
   end
@@ -82,11 +89,6 @@ Rails.application.routes.draw do
       get :iframe
       get :signatures
       get :sign
-    end
-    resources :recipients, only: [ :destroy ] do
-      member do
-        post :notify
-      end
     end
   end
 
