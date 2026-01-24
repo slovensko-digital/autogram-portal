@@ -79,7 +79,7 @@ gem "redis", "~> 5.4"
 
 gem "jwt", "~> 3.1"
 
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0"
 gem "devise-i18n", "~> 1.15"
 gem "devise-passwordless", "~> 1.1"
 
