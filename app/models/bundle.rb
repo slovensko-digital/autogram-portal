@@ -22,7 +22,7 @@ class Bundle < ApplicationRecord
   belongs_to :author, class_name: "User", foreign_key: "user_id"
 
   has_many :contracts, dependent: :destroy
-  has_many :recipients
+  has_many :recipients, dependent: :destroy
   has_one :webhook, dependent: :destroy
   has_one :postal_address, dependent: :destroy
 

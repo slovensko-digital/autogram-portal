@@ -126,14 +126,17 @@ class ContractsController < ApplicationController
   end
 
   def destroy
-    @contract.destroy!
-    if current_user
-      redirect_to contracts_path, notice: "The contract and all its documents were successfully deleted."
+    return redirect_to @contract, alert: I18n.t("contracts.destroy.failure_bundle_attached") if @contract.bundle.present?
+
+    if @contract.destroy
+      if current_user
+        redirect_to contracts_path, notice: I18n.t("contracts.destroy.success")
+      else
+        redirect_to root_path, notice: I18n.t("contracts.destroy.success")
+      end
     else
-      redirect_to root_path, notice: "The contract and all its documents were successfully deleted."
+      redirect_to @contract, alert: I18n.t("contracts.destroy.failure", error: e.message)
     end
-  rescue StandardError => e
-    redirect_to contract_path(@contract), alert: "An error occurred while deleting the contract: #{e.message}"
   end
 
   def iframe

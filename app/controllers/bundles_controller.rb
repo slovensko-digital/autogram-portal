@@ -1,6 +1,6 @@
 class BundlesController < ApplicationController
   before_action :set_public_bundle, only: [ :iframe, :signatures, :sign ]
-  before_action :set_bundle, only: [ :show, :edit, :update, :add_recipient, :notify_recipients ]
+  before_action :set_bundle, only: [ :show, :edit, :update, :destroy, :add_recipient, :notify_recipients ]
   skip_before_action :verify_authenticity_token, only: [ :iframe ]
 
   before_action :allow_iframe, only: [ :iframe ]
@@ -21,6 +21,14 @@ class BundlesController < ApplicationController
       redirect_to @bundle
     else
       render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    if @bundle.destroy
+      redirect_to bundles_path, notice: I18n.t("bundles.destroy.success")
+    else
+      redirect_to @bundle, alert: I18n.t("bundles.destroy.failure")
     end
   end
 

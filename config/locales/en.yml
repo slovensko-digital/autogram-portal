@@ -35,6 +35,7 @@ en:
     continue: "Continue"
     cancel: "Cancel"
     download: "Download"
+    delete: "Delete"
   
   header:
     navigation:
@@ -282,6 +283,10 @@ en:
       signed: "Signed"
       recipients_title: "Send for Signature"
       recipients_subtitle: "Send this bundle to others for signing via email."
+    destroy:
+      success: "Contract bundle was successfully deleted."
+      failure: "Failed to delete contract bundle."
+      confirm: "Are you sure you want to delete this contract bundle? This action is irreversible."
     recipients_form:
       recipient_email: "Recipient Email"
       recipient_email_placeholder: "jan.novak@example.com"
@@ -350,6 +355,11 @@ en:
       destroy_confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
       cancel: "Cancel"
       update_contract: "Update Contract"
+    destroy:
+      success: "Contract was successfully deleted."
+      failure: "Failed to delete contract."
+      confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
+      failure_bundle_attached: "Cannot delete contract because it is part of a bundle."
     sign:
       all_contracts: "All contracts"
       title: "Sign document"

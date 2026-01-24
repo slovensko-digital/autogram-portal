@@ -6,6 +6,7 @@ sk:
     continue: "Pokračovať"
     download: "Stiahnuť"
     cancel: "Zrušiť"
+    delete: "Zmazať"
 
   header:
     navigation:
@@ -227,6 +228,10 @@ sk:
       signed: "Podpísané"
       recipients_title: "Poslať na podpis"
       recipients_subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
+    destroy:
+      success: "Balík dokumentov bol úspešne zmazaný."
+      failure: "Nepodarilo sa zmazať balík dokumentov."
+      confirm: "Ste si istý, že chcete zmazať tento balík dokumentov? Táto akcia je nezvratná."
     recipients_form:
       recipient_email: "Email adresáta"
       recipient_email_placeholder: "jan.novak@example.com"
@@ -291,6 +296,11 @@ sk:
       destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
       cancel: "Zrušiť"
       update_contract: "Aktualizovať dokument"
+    destroy:
+      success: "Dokument bol úspešne zmazaný."
+      failure: "Nepodarilo sa zmazať dokument."
+      confirm: "Ste si istý, že chcete zmazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
+      failure_bundle_attached: "Dokument nemôže byť zmazaný, pretože je súčasťou balíka dokumentov."
     sign:
       all_contracts: "Všetky dokumenty"
       title: "Podpíšte dokument"
