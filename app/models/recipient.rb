@@ -29,7 +29,7 @@ class Recipient < ApplicationRecord
   belongs_to :bundle
   belongs_to :user, optional: true
 
-  enum :status, { pending: 0, notified: 1, signed: 2, declined: 3 }
+  enum :status, { pending: 0, notified: 1, signed: 2, declined: 3, sending: 4 }
 
   validates :email, presence: true, uniqueness: { scope: :bundle_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
@@ -44,7 +44,12 @@ class Recipient < ApplicationRecord
 
   def notify!
     return unless pending?
+    update(status: :sending)
     Notification::RecipientBundleCreatedJob.perform_later(self)
+  end
+
+  def removable?
+    pending? || declined?
   end
 
   private

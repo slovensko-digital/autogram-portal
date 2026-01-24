@@ -7,6 +7,11 @@ sk:
     download: "Stiahnuť"
     cancel: "Zrušiť"
     delete: "Zmazať"
+    remove: "Odstrániť"
+    save: "Uložiť"
+    add: "Pridať"
+    edit: "Upraviť"
+    sign: "Podpísať"
 
   header:
     navigation:
@@ -25,13 +30,13 @@ sk:
       sk: "Slovenčina"
 
   helpers:
-    bundles:
-      recipients:
-        status:
-          pending: "Čaká na odoslanie"
-          notified: "Čaká na podpis"
-          signed: "Podpísané"
-          declined: "Odmietnuté"
+    recipients:
+      status:
+        pending: "Čaká na odoslanie"
+        sending: "Prebieha odosielanie"
+        notified: "Čaká na podpis"
+        signed: "Podpísané"
+        declined: "Odmietnuté"
     application:
       signature_levels:
         pades: "PAdES"
@@ -208,6 +213,7 @@ sk:
       no_bundles_title: "Žiadne balíky"
       no_bundles_message: "Balíky sa vytvárajú cez API."
     show:
+      all_bundles: "Všetky balíky dokumentov"
       title: "Balík dokumentov"
       edit_bundle: "Upraviť balík"
       uuid: "UUID: %{uuid}"
@@ -227,20 +233,11 @@ sk:
       note_placeholder: "Voliteľná správa pre adresátov"
       note_label: "Správa pre adresátov"
       signed: "Podpísané"
-      recipients_title: "Poslať na podpis"
-      recipients_subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
     destroy:
       success: "Balík dokumentov bol úspešne zmazaný."
       failure: "Nepodarilo sa zmazať balík dokumentov."
       confirm: "Ste si istý, že chcete zmazať tento balík dokumentov? Táto akcia je nezvratná."
-    recipients_form:
-      recipient_email: "Email adresáta"
-      recipient_email_placeholder: "jan.novak@example.com"
-      remove: "Odstrániť"
-      add_recipient: "Pridať"
-      recipient_email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
     sign:
-      all_bundles: "Všetky balíky dokumentov"
       title: "Podpíšte balík dokumentov"
       title_requested_singular: "Dostali ste dokument na podpis"
       title_requested_plural: "Dostali ste balík %{count} dokumentov na podpis"
@@ -257,7 +254,16 @@ sk:
       signed_count: "Podpísaných %{signed} z %{total}"
     sender:
       sender: "Odosielateľ"
-  
+
+  recipients:
+    index:
+      title: "Poslať na podpis"
+      subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
+      send_invitation: "Odoslať email"
+      email_label: "Email adresáta"
+      email_placeholder: "jan.novak@example.com"
+      email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
+
   contracts:
     alerts:
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."

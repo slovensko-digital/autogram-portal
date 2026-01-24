@@ -1,21 +1,31 @@
 class RecipientsController < ApplicationController
   before_action :set_bundle
-  before_action :set_recipient
+  before_action :set_recipient, except: [ :create, :index ]
+
+  def index
+  end
+
+  def create
+    @recipient = @bundle.recipients.build(recipient_params)
+
+    if @recipient.save
+      render "index"
+    else
+      render "index", locals: { recipient_error: @recipient.errors.full_messages.join(", ") }
+    end
+  end
 
   def destroy
     unless @recipient.signed? || @recipient.notified?
       @recipient.destroy
     end
 
-    render turbo_stream: turbo_stream.replace(
-      "bundle_recipients_form",
-      partial: "bundles/recipients_form",
-      locals: { bundle: @bundle }
-    )
+    redirect_to bundle_recipients_path(@bundle)
   end
 
   def notify
     @recipient.notify!
+    render "index"
   end
 
   private
@@ -26,5 +36,9 @@ class RecipientsController < ApplicationController
 
   def set_recipient
     @recipient = @bundle.recipients.find(params[:id])
+  end
+
+  def recipient_params
+    params.require(:recipient).permit(:email)
   end
 end

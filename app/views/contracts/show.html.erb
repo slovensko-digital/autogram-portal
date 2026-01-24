@@ -1,9 +1,19 @@
 <main>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <div class="w-full mb-6">
+      <div class="w-full">
+        <% if current_user && @contract.user == current_user %>
+          <div class="w-full mb-6">
+            <%= link_to contracts_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500" do %>
+              <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              <%= t('.all_contracts') %>
+            <% end %>
+          </div>
+        <% end %>
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
+          <div class="flex-1">
             <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           </div>
           <% if @contract.signed_document.attached? %>
@@ -16,6 +26,10 @@
                 <%= t('actions.download') %>
               <% end %>
             </div>
+          <% end %>
+          <%= link_to sign_contract_path(@contract),
+                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <%= t('actions.sign') %>
           <% end %>
           <% unless @contract.bundle %>
             <div class="flex-shrink-0">
