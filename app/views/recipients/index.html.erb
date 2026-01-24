@@ -1,0 +1,69 @@
+<%= turbo_frame_tag "bundle_recipients_#{@bundle.uuid}" do %>
+  <div class="space-y-6">
+    <div class="md:flex items-center justify-between gap-4">
+      <div class="flex-1 text-center md:text-left">
+        <h3 class="text-xl font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
+        <p class="text-gray-600"><%= t('.subtitle') %></p>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <% @bundle.recipients.order(:created_at).select(&:persisted?).each do |recipient| %>
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div class="px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="text-base font-semibold text-gray-900">
+                <%= recipient.display_name %>
+              </div>
+              <div class="flex-2">
+                <%= recipient_status_badge(recipient) %>
+              </div>
+              <% if recipient.pending? %>
+                  <%= button_to notify_bundle_recipient_path(@bundle, recipient), 
+                        method: :post,
+                        class: "text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-sm font-medium",
+                        form: { data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } } do %>
+                    <%= t('.send_invitation') %>
+                  <% end %>
+              <% end %>
+              <% if recipient.removable? %>
+                <%= button_to bundle_recipient_path(@bundle, recipient), 
+                      method: :delete,
+                      class: "text-red-600 hover:text-red-800 hover:underline cursor-pointer text-sm font-medium",
+                      form: { data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } } do %>
+                  <%= t('actions.remove') %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%= form_with model: @bundle.recipients.build,
+          url: bundle_recipients_path(@bundle),
+          method: :post,
+          data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } do |form| %>
+      <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        <%= t('.email_label') %>
+      </label>
+      <% if local_assigns[:recipient_error].present? %>
+        <div class="p-3 mb-4 bg-red-50 border border-red-200 rounded-md">
+          <p class="text-sm text-red-600"><%= recipient_error %></p>
+        </div>
+      <% end %>
+      <div class="flex items-center gap-2">
+
+        <%= form.email_field :email,
+              placeholder: t('.email_placeholder'),
+              class: "flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+              required: true %>
+        <%= form.submit t('actions.add'),
+              class: "inline-flex items-center px-4 py-2 border border-transparent cursor-pointer text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      </div>
+      <p class="mt-2 text-sm text-gray-500"><%= t('.email_help') %></p>
+    <% end %>
+  </div>
+<% end %>

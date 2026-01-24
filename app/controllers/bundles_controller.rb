@@ -1,6 +1,6 @@
 class BundlesController < ApplicationController
   before_action :set_public_bundle, only: [ :iframe, :signatures, :sign ]
-  before_action :set_bundle, only: [ :show, :edit, :update, :destroy, :add_recipient, :notify_recipients ]
+  before_action :set_bundle, only: [ :show, :edit, :update, :destroy ]
   skip_before_action :verify_authenticity_token, only: [ :iframe ]
 
   before_action :allow_iframe, only: [ :iframe ]
@@ -10,7 +10,6 @@ class BundlesController < ApplicationController
   end
 
   def show
-    @bundle.contracts.includes(:documents, :avm_sessions)
   end
 
   def edit
@@ -30,37 +29,6 @@ class BundlesController < ApplicationController
     else
       redirect_to @bundle, alert: I18n.t("bundles.destroy.failure")
     end
-  end
-
-  def add_recipient
-    @recipient = @bundle.recipients.build(recipient_params)
-
-    if @recipient.save
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "bundle_recipients_form",
-            partial: "bundles/recipients_form",
-            locals: { bundle: @bundle }
-          )
-        end
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "bundle_recipients_form",
-            partial: "bundles/recipients_form",
-            locals: { bundle: @bundle, recipient_error: @recipient.errors.full_messages.join(", ") }
-          )
-        end
-      end
-    end
-  end
-
-  def notify_recipients
-    @bundle.notify_recipients
-    head :ok
   end
 
   def iframe
@@ -88,9 +56,5 @@ class BundlesController < ApplicationController
       :note,
       recipients_attributes: [ :id, :email, :_destroy ]
     )
-  end
-
-  def recipient_params
-    params.require(:recipient).permit(:email)
   end
 end

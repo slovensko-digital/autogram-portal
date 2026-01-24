@@ -6,20 +6,9 @@
 <main>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <% if @bundle.author == current_user %>
-        <div class="w-full">
-          <%= link_to bundles_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500" do %>
-            <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
-            <%= t('.all_bundles') %>
-          <% end %>
-        </div>
-      <% end %>
-
       <div class="w-full mb-6">
         <div class="flex items-center justify-between">
-          <div>
+          <div class="flex-1">
             <% if current_user == @bundle.author %>
               <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
             <% else %>
@@ -33,6 +22,12 @@
               <p class="text-gray-600"><%= t('.subtitle_requested') %></p>
             <% end %>
           </div>
+          <% if current_user == @bundle.author %>
+            <%=link_to bundle_path(@bundle),
+                  class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <%=  t('actions.edit') %>
+            <% end %>
+          <% end %>
           <div id="bundle_<%= @bundle.uuid %>_status">
             <%= render 'status', bundle: @bundle %>
           </div>

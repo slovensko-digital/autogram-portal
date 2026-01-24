@@ -5,32 +5,44 @@
 
 <main>
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <div class="w-full mb-6">
+    <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <% if @bundle.author == current_user %>
+        <div class="w-full">
+          <%= link_to bundles_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline" do %>
+            <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            <%= t('.all_bundles') %>
+          <% end %>
+        </div>
+      <% end %>
+      <div class="w-full">
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
+          <div class="flex-1">
             <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           </div>
-          <div class="flex-shrink-0">
-            <%= button_to bundle_path(@bundle),
-                  method: :delete,
-                  form: { data: { turbo_confirm: t('bundles.destroy.confirm') } },
-                  class: "inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
-              <%= t('actions.delete') %>
-            <% end %>
-          </div>
+          <%= link_to sign_bundle_path(@bundle),
+                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <%= t('actions.sign') %>
+          <% end %>
+          <%= button_to bundle_path(@bundle),
+                method: :delete,
+                form: { data: { turbo_confirm: t('bundles.destroy.confirm') } },
+                class: "w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+            <%= t('actions.delete') %>
+          <% end %>
         </div>
       </div>
-      <div class="w-full mb-6">
+      <div class="w-full">
         <% @bundle.contracts.each do |contract| %>
-          <div class="border border-gray-200 p-6 mb-6 rounded-lg bg-white">
+          <div class="border border-gray-200 p-6 rounded-lg bg-white">
             <div class="flex flex-col sm:flex-row gap-x-8 justify-between">
               <div class="flex items-center">
                 <h2 class="text-lg font-semibold text-gray-900">
                   <%= t('.document_title') %> <%= contract.documents.first.filename %>
                 </h2>
               </div>
-              <a href="<%= contract_path(contract) %>" class="text-sm text-blue-600 hover:text-blue-500">
+              <a href="<%= contract_path(contract) %>" class="text-sm text-blue-600 hover:text-blue-500 hover:underline">
                 <%= t('.open_separately') %>
               </a>
             </div>
@@ -38,7 +50,7 @@
               <%= turbo_frame_tag "signature_validation_#{contract.uuid}", 
                         src: validate_contract_path(contract),
                         loading: "lazy",
-                        class: "w-full mb-6" do %>
+                        class: "w-full" do %>
                 <div class="w-full">
                   <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
                     <div class="flex items-center">
@@ -55,28 +67,29 @@
           </div>
         <% end %>
       </div>
-      <div class="w-full">
-        <div class="md:flex items-center justify-between gap-4">
-          <div class="flex-1 mb-6 text-center md:text-left">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2"><%= t('.recipients_title') %></h3>
-            <p class="text-gray-600"><%= t('.recipients_subtitle') %></p>
-          </div>
-          <% if  @bundle.recipients.pending.any? && @bundle.author.feature_enabled?(:real_emails) %>
-            <%= button_to notify_recipients_bundle_path(@bundle), 
-                  method: :post,
-                  form: { onsubmit: "this.style.display='none'; return true;" },
-                  class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-              <%= t('.notify_recipient') %>
-            <% end %>
-          <% end %>
-        </div>
-        <div class="mb-8">
-          <%= render "bundles/recipients_form", bundle: @bundle %>
-        </div>
 
+      <%= turbo_frame_tag "bundle_recipients_#{@bundle.uuid}",
+                          src: bundle_recipients_path(@bundle),
+                          loading: "lazy",
+                          class: "w-full" do %>
+        <div class="w-full">
+          <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
+            <div class="flex items-center">
+              <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-gray-600"><%= t('bundles.recipients.loading') %></span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+
+      <div class="w-full">
         <%= form_with model: @bundle, method: :put, local: true do |form| %>
           <div class="space-y-6">
-            <div class="mb-6 text-center lg:text-left">
+            <div class="text-center lg:text-left">
               <h3 class="text-xl font-semibold text-gray-900 mb-2"><%= t('.note_title') %></h3>
               <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,14 +102,14 @@
                     rows: 6,
                     class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
             </div>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-8">
-            <%= link_to bundle_path(@bundle), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-              <%= t('actions.back') %>
-            <% end %>
-            <%= form.submit t('actions.continue'), 
-                            class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-                            data: { "form-submit-target": "submitButton" } %>
+            <div class="flex flex-col sm:flex-row gap-8">
+              <%= link_to bundle_path(@bundle), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <%= t('actions.back') %>
+              <% end %>
+              <%= form.submit t('actions.save'), 
+                              class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                              data: { "form-submit-target": "submitButton" } %>
+            </div>
           </div>
         <% end %>
       </div>
