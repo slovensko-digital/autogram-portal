@@ -1,6 +1,6 @@
 <main>
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
+    <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div class="w-full mb-6">
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
@@ -8,7 +8,7 @@
           </div>
           <% if @contract.signed_document.attached? %>
             <div class="flex-shrink-0">
-              <%= link_to signed_document_contract_path(@contract), 
+              <%= link_to signed_document_contract_path(@contract),
                           class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
                 <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -17,30 +17,21 @@
               <% end %>
             </div>
           <% end %>
+          <% unless @contract.bundle %>
+            <div class="flex-shrink-0">
+              <%= button_to contract_path(@contract),
+                    method: :delete,
+                    form: { data: { turbo_confirm: t('contracts.destroy.confirm') } },
+                    class: "inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+                <%= t('actions.delete') %>
+              <% end %>
+            </div>
+          <% end %>
         </div>
       </div>
 
-      <%= render 'visualization_with_toggle', contract: @contract, default_collapsed: !(@contract.documents.first.is_xml? || @contract.documents.first.is_asice?) %>
-
-      <%= turbo_frame_tag "signature_validation_#{@contract.uuid}", 
-                          src: validate_contract_path(@contract),
-                          loading: "lazy",
-                          class: "w-full mb-6" do %>
-        <div class="w-full">
-          <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
-            <div class="flex items-center">
-              <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
-            </div>
-          </div>
-        </div>
-      <% end %>
-
       <% if @contract.bundle %>
-        <div class="w-full mb-6">
+        <div class="w-full">
           <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
             <div class="flex items-start">
               <div class="flex-shrink-0">
@@ -54,6 +45,25 @@
                   <%= link_to t('.bundle_link'), bundle_path(@contract.bundle), class: "font-semibold underline" %>
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= render 'visualization_with_toggle', contract: @contract, default_collapsed: !(@contract.documents.first.is_xml? || @contract.documents.first.is_asice?) %>
+
+      <%= turbo_frame_tag "signature_validation_#{@contract.uuid}",
+                          src: validate_contract_path(@contract),
+                          loading: "lazy",
+                          class: "w-full" do %>
+        <div class="w-full">
+          <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
+            <div class="flex items-center">
+              <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
             </div>
           </div>
         </div>
