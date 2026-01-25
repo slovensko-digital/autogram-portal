@@ -33,12 +33,19 @@ class Recipient < ApplicationRecord
 
   enum :status, { pending: 0, notified: 1, signed: 2, declined: 3, sending: 4 }
 
+  before_validation :ensure_uuid, on: :create
+  validates :uuid, presence: true, uniqueness: true
+  validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :email, presence: true, uniqueness: { scope: :bundle_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
   before_create :link_user_by_email
   before_create :check_blocks
   before_create :set_default_locale
+
+  def to_param
+    uuid
+  end
 
   def display_name
     name.presence || user&.display_name || email
@@ -71,5 +78,9 @@ class Recipient < ApplicationRecord
 
   def set_default_locale
     self.locale ||= user&.locale || I18n.default_locale.to_s
+  end
+
+  def ensure_uuid
+    self.uuid ||= SecureRandom.uuid
   end
 end
