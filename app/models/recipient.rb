@@ -7,6 +7,7 @@
 #  locale     :string           default("sk"), not null
 #  name       :string
 #  status     :integer          default("pending"), not null
+#  uuid       :uuid             not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  bundle_id  :bigint           not null
@@ -19,6 +20,7 @@
 #  index_recipients_on_email                (email)
 #  index_recipients_on_status               (status)
 #  index_recipients_on_user_id              (user_id)
+#  index_recipients_on_uuid                 (uuid) UNIQUE
 #
 # Foreign Keys
 #

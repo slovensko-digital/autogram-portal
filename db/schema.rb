@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_23_180421) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_25_153538) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -242,11 +242,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_23_180421) do
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["bundle_id", "email"], name: "index_recipients_on_bundle_id_and_email", unique: true
     t.index ["bundle_id"], name: "index_recipients_on_bundle_id"
     t.index ["email"], name: "index_recipients_on_email"
     t.index ["status"], name: "index_recipients_on_status"
     t.index ["user_id"], name: "index_recipients_on_user_id"
+    t.index ["uuid"], name: "index_recipients_on_uuid", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
