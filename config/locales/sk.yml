@@ -227,12 +227,19 @@ sk:
         notified: "Odoslaný"
         signed: "Podpísané"
         declined: "Odmietnuté"
-      note_title: "Poznámka"
       no_note: "Žiadna poznámka"
       request_signature_title: "Požiadať o podpisy"
-      note_placeholder: "Voliteľná správa pre adresátov"
-      note_label: "Správa pre adresátov"
       signed: "Podpísané"
+    public_link_form:
+      title: "Verejný odkaz na balík dokumentov"
+      subtitle: "Zdieľajte priamo tento odkaz s príjemcami, aby mohli podpísať dokumenty v balíku."
+      label: "Kopírovať odkaz do schránky"
+      turn_on: "Zapnúť verejný odkaz"
+      turn_off: "Vypnúť verejný odkaz"
+    note_form:
+      title: "Poznámka"
+      placeholder: "Voliteľná správa pre adresátov"
+      label: "Správa pre adresátov"
     destroy:
       success: "Balík dokumentov bol úspešne zmazaný."
       failure: "Nepodarilo sa zmazať balík dokumentov."

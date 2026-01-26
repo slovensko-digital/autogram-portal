@@ -285,9 +285,11 @@ en:
       note_title: "Note"
       no_note: "No note for recipients"
       request_signature_title: "Request Signatures"
+      signed: "Signed"
+    form:
+      note_title: "Note"
       note_placeholder: "Optional message for recipients"
       note_label: "Message for recipients"
-      signed: "Signed"
     destroy:
       success: "Contract bundle was successfully deleted."
       failure: "Failed to delete contract bundle."
