@@ -1,0 +1,9 @@
+<%= turbo_frame_tag "signature_actions_#{@contract.uuid}" do %>
+  <% if @session.eidentita? %>
+    <%= render "eidentita" %>
+  <% elsif @session.avm? %>
+    <%= render "avm" %>
+  <% elsif @session.autogram? %>
+    <%= render "autogram" %>
+  <% end %>
+<% end %>

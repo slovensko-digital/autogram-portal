@@ -50,27 +50,19 @@
     <div class="hidden">
       <%= link_to "", autogram_contract_sessions_path(contract), data: { signature_method_selector_target: 'autogramSubmitButton' } %>
 
-      <%= form_with url: avm_contract_sessions_path(contract), 
-                    method: :get, 
-                    local: false,
-                    data: { 
-                      controller: "signers--avm",
-                      action: "submit->signers--avm#sign",
-                      signature_method_selector_target: "avmForm"
-                    } do |form| %>
-        <button type="submit" data-signers--avm-target="submitButton"></button>
-      <% end %>
+      <%= link_to "", avm_contract_sessions_path(contract), 
+            data: { 
+              controller: "signers--avm",
+              action: "submit->signers--avm#sign",
+              signature_method_selector_target: "avmSubmitButton"
+            } %>
 
-      <%= form_with url: eidentita_contract_sessions_path(contract), 
-                    method: :get, 
-                    local: false,
-                    data: { 
-                      controller: "signers--eidentita",
-                      action: "submit->signers--eidentita#sign",
-                      signature_method_selector_target: "eidentitaForm"
-                    } do |form| %>
-        <button type="submit" data-signers--eidentita-target="submitButton"></button>
-      <% end %>
+      <%= link_to "", eidentita_contract_sessions_path(contract), 
+            data: { 
+              controller: "signers--eidentita",
+              action: "submit->signers--eidentita#sign",
+              signature_method_selector_target: "eidentitaSubmitButton"
+            } %>
     </div>
 
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">

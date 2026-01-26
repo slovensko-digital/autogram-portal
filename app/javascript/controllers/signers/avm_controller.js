@@ -10,33 +10,30 @@ export default class extends Controller {
 
   sign(event) {
     this.setButtonLoading(true)
-    event.preventDefault()
-    this.submitAndRedirect()
+    if (isMobileDevice()) {
+      event.preventDefault()
+      this.submitAndRedirect()
+    }
   }
 
   async submitAndRedirect() {
     try {
       const response = await fetch(this.element.action, {
         headers: {
-          'Accept': 'text/vnd.turbo-stream.html',
           'X-Requested-With': 'XMLHttpRequest'
         }
       })
 
       if (response.ok) {
         const responseText = await response.text()
-
-        if (isMobileDevice()) {
-          const avmUrl = this.extractAvmUrlFromResponse(responseText)
-          if (avmUrl) {
-            console.log("Redirecting to AVM URL:", avmUrl)
-            this.redirectToAvmUrl(avmUrl)
-          } else {
-            console.log("Could not extract AVM URL, falling back to normal flow")
-            Turbo.renderStreamMessage(responseText)
-          }
+        const avmUrl = this.extractAvmUrlFromResponse(responseText)
+        if (avmUrl) {
+          console.log("Redirecting to AVM URL:", avmUrl)
+          this.redirectToAvmUrl(avmUrl)
         } else {
-          Turbo.renderStreamMessage(responseText)
+          console.log("Could not extract AVM URL, falling back to normal flow")
+          this.showError(i18n.t('errors.signing_failed'))
+          window.location.reload()
         }
       } else {
         console.error("Form submission failed:", response.status, response.statusText)

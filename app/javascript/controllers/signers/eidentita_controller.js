@@ -10,33 +10,30 @@ export default class extends Controller {
 
   sign(event) {
     this.setButtonLoading(true)
-    event.preventDefault()
-    this.submitAndRedirect()
+    if (isMobileDevice()) {
+      event.preventDefault()
+      this.submitAndRedirect()
+    }
   }
 
   async submitAndRedirect() {
     try {
       const response = await fetch(this.element.action, {
         headers: {
-          'Accept': 'text/vnd.turbo-stream.html',
           'X-Requested-With': 'XMLHttpRequest'
         }
       })
 
       if (response.ok) {
-        const responseText = await response.text()
-        
-        if (isMobileDevice()) {
-          const eidentitaUrl = this.extractEidentitaUrlFromResponse(responseText)
-          if (eidentitaUrl) {
-            console.log("Redirecting to Eidentita URL:", eidentitaUrl)
-            this.redirectToEidentitaUrl(eidentitaUrl)
-          } else {
-            console.log("Could not extract Eidentita URL, falling back to normal flow")
-            Turbo.renderStreamMessage(responseText)
-          }
+        const responseText = await response.text()      
+        const eidentitaUrl = this.extractEidentitaUrlFromResponse(responseText)
+        if (eidentitaUrl) {
+          console.log("Redirecting to Eidentita URL:", eidentitaUrl)
+          this.redirectToEidentitaUrl(eidentitaUrl)
         } else {
-          Turbo.renderStreamMessage(responseText)
+          console.log("Could not extract Eidentita URL, falling back to normal flow")
+          this.showError(i18n.t('errors.signing_failed'))
+          window.location.reload()
         }
       } else {
         console.error("Form submission failed:", response.status, response.statusText)
@@ -122,11 +119,16 @@ export default class extends Controller {
 
   redirectToEidentitaUrl(eidentitaUrl) {
     const inIframe = window.self !== window.top
+    this.setupAppOpenDetection()
 
-    if (inIframe) {
-      try {
-        window.top.location.href = eidentitaUrl
-        console.log("Redirected via window.top (iframe detected)")
+    try {
+        if (inIframe) {
+          window.top.location.href = eidentitaUrl
+          console.log("Redirected via window.top (iframe detected)")
+        } else {
+          window.location.href = eidentitaUrl
+          console.log("Redirected via window.location (not in iframe)")
+        }
       } catch (e) {
         console.log("Cross-origin iframe detected, attempting alternative redirect methods")
         
@@ -143,9 +145,58 @@ export default class extends Controller {
           document.body.removeChild(link)
         }
       }
+  }
+
+  setupAppOpenDetection() {
+    let appOpened = false
+    let blurTimeout = null
+
+    const onBlur = () => {
+      appOpened = true
+      clearTimeout(blurTimeout)
+    }
+
+    window.addEventListener('blur', onBlur)
+    blurTimeout = setTimeout(() => {
+      window.removeEventListener('blur', onBlur)
+      if (!appOpened) {
+        console.log("eIdentita app did not open - showing install instructions")
+        this.showAppNotInstalledError()
+      }
+    }, 2000)
+
+    const onFocus = () => {
+      window.removeEventListener('blur', onBlur)
+      window.removeEventListener('focus', onFocus)
+      clearTimeout(blurTimeout)
+      appOpened = true
+    }
+
+    window.addEventListener('focus', onFocus)
+  }
+
+  showAppNotInstalledError() {
+    this.setButtonLoading(false)
+    this.resetParentSignButton()
+
+    const message = i18n.t('signature.eidentita_not_installed')
+    const installIosText = i18n.t('signature.eidentita_install_ios')
+    const installAndroidText = i18n.t('signature.eidentita_install_android')
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+    const isAndroid = /Android/.test(navigator.userAgent)
+    const iosAppStoreUrl = 'https://apps.apple.com/sk/app/eidentita/id1628291994'
+    const androidPlayStoreUrl = 'https://play.google.com/store/apps/details?id=sk.minv.eidentita'
+
+    if (isIOS) {
+      if (confirm(message + '\n\n' + installIosText)) {
+        window.open(iosAppStoreUrl, '_blank')
+      }
+    } else if (isAndroid) {
+      if (confirm(message + '\n\n' + installAndroidText)) {
+        window.open(androidPlayStoreUrl, '_blank')
+      }
     } else {
-      window.location.href = eidentitaUrl
-      console.log("Redirected via window.location (not in iframe)")
+      alert(message)
     }
   }
 }

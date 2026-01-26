@@ -554,6 +554,9 @@ sk:
       sign_with_avm: "Podpísať cez AVM"
       opening_eidentita: "Otváram eIdentitu..."
       sign_with_eidentita: "Podpísať cez eIdentitu"
+      eidentita_not_installed: "Aplikácia eIdentita nie je nainštalovaná. Nainštalujte si ju z App Store (iOS) alebo Google Play (Android) a skúste to znova."
+      eidentita_install_ios: "Inštalovať z App Store"
+      eidentita_install_android: "Inštalovať z Google Play"
 
   notification_mailer:
     contract_signed:

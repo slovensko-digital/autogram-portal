@@ -600,6 +600,9 @@ en:
       sign_with_avm: "Sign with AVM"
       opening_eidentita: "Opening eIdentita..."
       sign_with_eidentita: "Sign with eIdentita"
+      eidentita_not_installed: "eIdentita app is not installed. Please install it from the App Store (iOS) or Google Play (Android) and try again."
+      eidentita_install_ios: "Install from App Store"
+      eidentita_install_android: "Install from Google Play"
 
   notification_mailer:
     contract_signed:
