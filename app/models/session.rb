@@ -2,31 +2,36 @@
 #
 # Table name: sessions
 #
-#  id               :bigint           not null, primary key
-#  sessionable_type :string           not null
-#  status           :integer          default("pending"), not null
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
-#  contract_id      :bigint           not null
-#  sessionable_id   :bigint           not null
-#  user_id          :bigint
+#  id                 :bigint           not null, primary key
+#  completed_at       :datetime
+#  error_message      :text
+#  options            :jsonb
+#  signing_started_at :datetime
+#  status             :integer          default("pending"), not null
+#  type               :string
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  contract_id        :bigint           not null
+#  recipient_id       :bigint
+#  user_id            :bigint
 #
 # Indexes
 #
-#  index_sessions_on_contract_and_sessionable  (contract_id,sessionable_type,sessionable_id)
-#  index_sessions_on_contract_id               (contract_id)
-#  index_sessions_on_sessionable               (sessionable_type,sessionable_id)
-#  index_sessions_on_user_id                   (user_id)
+#  index_sessions_on_contract_id   (contract_id)
+#  index_sessions_on_recipient_id  (recipient_id)
+#  index_sessions_on_type          (type)
+#  index_sessions_on_user_id       (user_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (contract_id => contracts.id)
+#  fk_rails_...  (recipient_id => recipients.id)
 #  fk_rails_...  (user_id => users.id)
 #
 class Session < ApplicationRecord
   belongs_to :contract
-  belongs_to :sessionable, polymorphic: true
   belongs_to :user, optional: true
+  belongs_to :recipient, optional: true
 
   enum :status, {
     pending: 0,
@@ -35,24 +40,97 @@ class Session < ApplicationRecord
     expired: 3
   }
 
-  delegate :signing_started_at, :completed_at, :error_message, to: :sessionable
+  validates :signing_started_at, presence: true
 
   scope :active, -> { where(status: :pending) }
   scope :recent, -> { order(created_at: :desc) }
 
+  after_update_commit :broadcast_status_change
+
   def eidentita?
-    sessionable_type == "EidentitaSession"
+    is_a?(EidentitaSession)
   end
 
   def avm?
-    sessionable_type == "AvmSession"
+    is_a?(AvmSession)
   end
 
   def autogram?
-    sessionable_type == "AutogramSession"
+    is_a?(AutogramSession)
   end
 
-  def sync_status!
-    update!(status: sessionable.status)
+  def mark_completed!
+    update!(status: :completed, completed_at: Time.current)
+  end
+
+  def mark_failed!(message = nil)
+    update!(status: :failed, error_message: message || "Signing failed", completed_at: Time.current)
+  end
+
+  def mark_expired!
+    update!(status: :expired, completed_at: Time.current)
+  end
+
+  def accept_signed_file(signed_file)
+    # TODO: Check if signed_file is a signed version of the original documents
+    # AutogramEnvironment.autogram_service.validate_signed_file(signed_file, documents.map(&:blob))
+
+    # TODO: Validate the signatures in the signed file
+    # AutogramEnvironment.autogram_service.validate_signatures(signed_file, signature_parameters)
+
+    # TODO: version signed document attachment to avoid overwriting in concurrent scenarios
+
+    ActiveRecord::Base.transaction do
+      new_filename = generate_signed_filename
+      new_content_type = new_filename.ends_with?(".asice") ? "application/vnd.etsi.asic-e+zip" : "application/pdf"
+      contract.signed_document.purge if contract.signed_document.attached?
+      contract.signed_document.attach(
+        io: StringIO.new(Base64.decode64(signed_file)),
+        filename: new_filename,
+        content_type: new_content_type
+      )
+      save!
+    end
+
+    contract.sessions.active.each(&:mark_completed!)
+    contract.accept_signed_file(signed_file)
+    contract.bundle.notify_contract_signed(contract, recipient) if contract.bundle.present?
+  end
+
+  def generate_signed_filename
+    if contract.documents.count == 1
+      original_filename = contract.documents.first.blob.filename.base
+      return "#{original_filename}-signed.#{contract.signature_parameters.container.present? ? 'asice' : 'pdf'}"
+    end
+
+    "contract-#{id}-signed.#{contract.signature_parameters.container.present? ? 'asice' : 'pdf'}"
+  end
+
+
+  protected
+
+  def broadcast_status_change
+    return unless saved_change_to_status?
+
+    case status
+    when "completed"
+      # Signing success is handled by Contract.accept_signed_file
+    when "failed"
+      broadcast_signing_error(error_message || "Signing failed")
+    when "expired"
+      broadcast_signing_error("Signing expired")
+    end
+  end
+
+  def broadcast_signing_error(error_message)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "contract_#{contract.uuid}",
+      target: "signature_actions_#{contract.uuid}",
+      partial: "contracts/sessions/error",
+      locals: {
+        contract: contract,
+        error: error_message
+      }
+    )
   end
 end

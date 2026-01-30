@@ -46,7 +46,7 @@ class Bundle < ApplicationRecord
   end
 
   def completed?
-     return recipients.signed.count == recipients.count if recipients.count.positive?
+     return awaiting_recipients? if recipients.count.positive?
      contracts.all? { !it.awaiting_signature? }
   end
 
@@ -55,28 +55,25 @@ class Bundle < ApplicationRecord
     recipients.notified.count.positive?
   end
 
-  def contract_signed(contract)
-    # TODO: add logic to handle multiple recipients signing their respective contracts
-    recipients.notified.first.update(status: :signed) if recipients.notified.any?
-
-    Notification::BundleContractSignedJob.perform_later(self, contract)
+  def notify_contract_signed(contract, recipient)
+    Notification::BundleContractSignedJob.perform_later(self, contract, signer: recipient)
     return unless completed?
 
     Notification::BundleCompletedJob.perform_later(self)
-    broadcast_all_signed
-  end
 
-  def broadcast_all_signed
     Turbo::StreamsChannel.broadcast_replace_to(
       self,
-      target: "bundle_#{id}_status",
+      target: "bundle_#{uuid}_status",
       partial: "bundles/status",
       locals: { bundle: self }
     )
   end
 
-  def should_notify_author?
-    # TODO: do not notify if author is the one that signed the bundle
+  def should_notify_author?(contract: nil, signer: nil)
+    if signer
+      return false if author == signer.user
+    end
+
     true
   end
 

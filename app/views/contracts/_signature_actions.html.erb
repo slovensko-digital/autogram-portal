@@ -1,4 +1,4 @@
-<%# locals: (info_hidden: false, contract:) %>
+<%# locals: (info_hidden: false, contract:, recipient: nil) %>
 
 <%= turbo_frame_tag "signature_actions_#{contract.uuid}" do %>
   <div data-controller="signature-method-selector" class="w-full space-y-4">
@@ -48,16 +48,16 @@
     </div>
 
     <div class="hidden">
-      <%= link_to "", autogram_contract_sessions_path(contract), data: { signature_method_selector_target: 'autogramSubmitButton' } %>
+      <%= link_to "", autogram_contract_sessions_path(contract, recipient: recipient), data: { signature_method_selector_target: 'autogramSubmitButton' } %>
 
-      <%= link_to "", avm_contract_sessions_path(contract), 
+      <%= link_to "", avm_contract_sessions_path(contract, recipient: recipient), 
             data: { 
               controller: "signers--avm",
               action: "submit->signers--avm#sign",
               signature_method_selector_target: "avmSubmitButton"
             } %>
 
-      <%= link_to "", eidentita_contract_sessions_path(contract), 
+      <%= link_to "", eidentita_contract_sessions_path(contract, recipient: recipient), 
             data: { 
               controller: "signers--eidentita",
               action: "submit->signers--eidentita#sign",

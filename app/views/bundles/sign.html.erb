@@ -76,8 +76,8 @@
                 <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.not_signed.count %>)
               </h3>
               <% @bundle.recipients.not_signed.each do |recipient| %>
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <div class="px-4 py-3 flex items-center justify-between">
+                <% if recipient == @recipient %>
+                  <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border-2 border-blue-500 overflow-hidden">
                     <div class="flex items-center gap-3 flex-1">
                       <div class="text-base font-semibold text-gray-900">
                         <%= recipient.display_name %>
@@ -87,13 +87,24 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                <% else %>
+                  <div class="px-4 py-3 flex items-center justify-between bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="flex items-center gap-3 flex-1">
+                      <div class="text-base font-semibold text-gray-900">
+                        <%= recipient.display_name %>
+                      </div>
+                      <div class="flex-2">
+                        <%= recipient_status_badge(recipient) %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
               <% end %>
             </div>
           <% end %>
           <% if contract.awaiting_signature? %>
             <div class="w-full pt-4 mb-6">
-              <%= render 'contracts/signature_actions', contract: contract %>
+              <%= render 'contracts/signature_actions', contract: contract, recipient: @recipient %>
             </div>
           <% else %>
             <div class="w-full bg-green-50 border-l-4 border-green-400 p-4 mb-6">

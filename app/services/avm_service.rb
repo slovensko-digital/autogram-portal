@@ -33,8 +33,8 @@ class AvmService
     { error: "Error communicating with AVM service: #{e.message}" }
   end
 
-  def check_signing_status(document_id, if_modified_since, encryption_key)
-    response = call_avm_status_api(document_id, if_modified_since, encryption_key)
+  def check_signing_status(document_identifier, if_modified_since, encryption_key)
+    response = call_avm_status_api(document_identifier, if_modified_since, encryption_key)
 
     if response.status < 400
       parse_avm_status_response(response)
@@ -45,8 +45,8 @@ class AvmService
     { status: "failed", error: "Error communicating with AVM service: #{e.message}" }
   end
 
-  def download_signed_document(document_id, encryption_key)
-    response = call_avm_download_api(document_id, encryption_key)
+  def download_signed_document(document_identifier, encryption_key)
+    response = call_avm_download_api(document_identifier, encryption_key)
 
     if response.success?
       parse_avm_download_response(response.body)
@@ -70,33 +70,33 @@ class AvmService
     connection.post("api/v1/documents?encryptionKey=#{secret_key}", payload)
   end
 
-  def call_avm_status_api(document_id, if_modified_since, encryption_key)
+  def call_avm_status_api(document_identifier, if_modified_since, encryption_key)
     connection = Faraday.new(url: AVM_BASE_URL) do |faraday|
       faraday.response :json
       faraday.adapter Faraday.default_adapter
       faraday.options.timeout = 10
     end
 
-    connection.get("api/v1/documents/#{document_id}?encryptionKey=#{encryption_key}") do |req|
+    connection.get("api/v1/documents/#{document_identifier}?encryptionKey=#{encryption_key}") do |req|
       req.headers["If-Modified-Since"] = if_modified_since.to_s if if_modified_since
     end
   end
 
-  def call_avm_download_api(document_id, encryption_key)
+  def call_avm_download_api(document_identifier, encryption_key)
     connection = Faraday.new(url: AVM_BASE_URL) do |faraday|
       faraday.response :json
       faraday.adapter Faraday.default_adapter
       faraday.options.timeout = 30
     end
 
-    connection.get("api/v1/documents/#{document_id}?encryptionKey=#{encryption_key}")
+    connection.get("api/v1/documents/#{document_identifier}?encryptionKey=#{encryption_key}")
   end
 
   def parse_avm_initiate_response(response, secret_key)
     data = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
 
     {
-      document_id: data["guid"],
+      document_identifier: data["guid"],
       encryption_key: secret_key,
       signing_started_at: DateTime.parse(response.headers["Last-Modified"])
     }

@@ -46,7 +46,13 @@ class BundlesController < ApplicationController
   end
 
   def sign
-    @bundle = Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
+    if params[:recipient]
+      @recipient = Recipient.find_by_uuid!(params[:recipient])
+      @bundle = @recipient.bundle
+    else
+      @bundle = Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
+    end
+
     raise ActiveRecord::RecordNotFound unless @bundle
   end
 

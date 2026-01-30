@@ -6,7 +6,7 @@ module Avm
 
       begin
         result = avm_service.check_signing_status(
-          avm_session.document_id,
+          avm_session.document_identifier,
           avm_session.signing_started_at,
           avm_session.encryption_key
         )

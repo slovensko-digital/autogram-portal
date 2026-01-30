@@ -60,29 +60,12 @@ class Contract < ApplicationRecord
   end
 
   def accept_signed_file(signed_file)
-    # TODO: Check if signed_file is a signed version of the original documents
-    # AutogramEnvironment.autogram_service.validate_signed_file(signed_file, documents.map(&:blob))
+    Notification::ContractSignedJob.perform_later(self) unless should_notify_user?
 
-    # TODO: Validate the signatures in the signed file
-    # AutogramEnvironment.autogram_service.validate_signatures(signed_file, signature_parameters)
-
-    # TODO: version signed document attachment to avoid overwriting in concurrent scenarios
-
-    ActiveRecord::Base.transaction do
-      signed_document.purge if signed_document.attached?
-      signed_document.attach(
-        io: StringIO.new(Base64.decode64(signed_file)),
-        filename: generate_signed_filename,
-        content_type: generate_signed_conentent_type
-      )
-      save!
-    end
-
-    sessions.active.each { |s| s.sessionable.mark_completed! }
-    bundle.contract_signed(self) if bundle.present?
-    broadcast_signing_success
-
-    Notification::ContractSignedJob.perform_later(self)
+    Turbo::StreamsChannel.broadcast_action_to(
+      "contract_#{uuid}",
+      action: :refresh
+    )
   end
 
   def documents_to_sign
@@ -122,8 +105,8 @@ class Contract < ApplicationRecord
   end
 
   def current_avm_session
-    sessions.where(sessionable_type: "AvmSession", status: :pending)
-            .order(created_at: :desc).first&.sessionable
+    sessions.where(type: "AvmSession", status: :pending)
+            .order(created_at: :desc).first
   end
 
   def has_active_avm_session?
@@ -131,29 +114,26 @@ class Contract < ApplicationRecord
   end
 
   def current_eidentita_session
-    sessions.where(sessionable_type: "EidentitaSession", status: :pending)
-            .order(created_at: :desc).first&.sessionable
+    sessions.where(type: "EidentitaSession", status: :pending)
+            .order(created_at: :desc).first
   end
 
   def has_active_eidentita_session?
     current_eidentita_session.present?
   end
 
-  # Generic method to get current active session
-  def current_session
-    sessions.where(status: :pending).order(created_at: :desc).first
+  def current_autogram_session
+    sessions.where(type: "AutogramSession", status: :pending)
+            .order(created_at: :desc).first
+  end
+
+  def has_active_autogram_session?
+    current_autogram_session.present?
   end
 
   def should_notify_user?
     # TODO: Improve logic to not notify "self sign" by user
-    user.present? && awaiting_signature? == false
-  end
-
-  def broadcast_signing_success
-    Turbo::StreamsChannel.broadcast_action_to(
-      "contract_#{uuid}",
-      action: :refresh
-    )
+    user.present? && bundle.nil? && awaiting_signature? == false
   end
 
   def short_uuid
@@ -185,15 +165,6 @@ class Contract < ApplicationRecord
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
-  end
-
-  def generate_signed_filename
-    if documents.count == 1
-      original_filename = documents.first.blob.filename.base
-      return "#{original_filename}-signed.#{signature_parameters.container.present? ? 'asice' : 'pdf'}"
-    end
-
-    "contract-#{id}-signed.#{signature_parameters.container.present? ? '.asice' : 'pdf'}"
   end
 
   def generate_signed_conentent_type

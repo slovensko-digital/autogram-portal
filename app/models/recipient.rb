@@ -30,6 +30,7 @@
 class Recipient < ApplicationRecord
   belongs_to :bundle
   belongs_to :user, optional: true
+  has_many :sessions, dependent: :destroy
 
   enum :status, { pending: 0, notified: 1, signed: 2, declined: 3, sending: 4 }
 
@@ -56,7 +57,7 @@ class Recipient < ApplicationRecord
     return unless bundle.author.feature_enabled?(:real_emails)
 
     update(status: :sending)
-    Notification::RecipientBundleCreatedJob.perform_later(self)
+    Notification::RecipientSignatureRequestedJob.perform_later(self)
   end
 
   def removable?

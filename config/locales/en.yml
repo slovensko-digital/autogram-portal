@@ -614,19 +614,38 @@ en:
       timestamp_qualified: "Timestamp date and time: %{signing_time}"
       timestamp_non_qualified: "Non-guaranteed date and time (without timestamp): %{signing_time}"
       view_contract: "View signed contract"
+    bundle_contract_signed:
+      subject: "A document in your contract bundle has been signed"
+      greeting: "Hello,"
+      message: "document %{filename} in the bundle has been signed by %{signer_name}."
+      details_title: "Signature details:"
+      signed_by: "Signed by: %{signer_name}"
+      timestamp_qualified: "Timestamp date and time: %{signing_time}"
+      timestamp_non_qualified: "Non-guaranteed date and time (without timestamp): %{signing_time}"
+      view_bundle: "View bundle"
     bundle_completed:
       subject: "Your contract bundle has been signed"
       greeting: "Hello,"
       message: "Your bundle of documents has been completed."
       details_title: "Completed documents:"
       view_bundle: "View bundle"
-    bundle_created:
+    signature_requested:
       subject: "Documents need your signature"
       greeting: "Hello,"
       message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
+      how_to_sign: "How to sign the documents?"
+      signing_is_simple: "If you are unsure, the signing process is simple. After clicking the link, the system will guide you through the steps:"
+      signing_step_1: "You will be asked to select a signing method (e.g., eID card or another available method)."
+      signing_step_2: "The system will show you what needs to be done."
+      signing_step_3: "The signed version of the document will be displayed to you after completion."
+      contact_support: "If you have any questions or concerns, you can contact the sender."
       details_title: "Documents to sign:"
-      view_bundle: "View bundle"
-  
+      note: "Note from the author:"
+      view_bundle: "Sign documents"
+    footer:
+      regards: "Best regards,"
+      team: "The Autogram Portal Team"
+
   activerecord:
     errors:
       models:

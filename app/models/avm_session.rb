@@ -1,30 +1,47 @@
 # == Schema Information
 #
-# Table name: avm_sessions
+# Table name: sessions
 #
 #  id                 :bigint           not null, primary key
 #  completed_at       :datetime
-#  encryption_key     :string
 #  error_message      :text
+#  options            :jsonb
 #  signing_started_at :datetime
+#  status             :integer          default("pending"), not null
+#  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
-#  document_id        :string
+#  contract_id        :bigint           not null
+#  recipient_id       :bigint
+#  user_id            :bigint
 #
-class AvmSession < ApplicationRecord
+# Indexes
+#
+#  index_sessions_on_contract_id   (contract_id)
+#  index_sessions_on_recipient_id  (recipient_id)
+#  index_sessions_on_type          (type)
+#  index_sessions_on_user_id       (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (contract_id => contracts.id)
+#  fk_rails_...  (recipient_id => recipients.id)
+#  fk_rails_...  (user_id => users.id)
+#
+class AvmSession < Session
   # TODO encrypt sensitive fields
 
-  has_one :session, as: :sessionable, dependent: :destroy
+  store_accessor :options, :encryption_key, :document_identifier
 
-  delegate :contract, :status, :status=, :pending?, :completed?, to: :session
+  validates :document_identifier, :encryption_key, presence: true
 
-  validates :document_id, :encryption_key, :signing_started_at, presence: true
-
-  after_update_commit :broadcast_status_change
+  def self.model_name
+    Session.model_name
+  end
 
   def avm_url
     base_url = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital").chomp("/")
-    "#{base_url}/api/v1/qr-code?guid=#{document_id}&key=#{encryption_key}"
+    "#{base_url}/api/v1/qr-code?guid=#{document_identifier}&key=#{encryption_key}"
   end
 
   def expired?
@@ -32,48 +49,11 @@ class AvmSession < ApplicationRecord
     Time.current > signing_started_at + 10.minutes # 10 minute timeout
   end
 
-  def mark_completed!
-    session.update!(status: :completed)
-    update!(completed_at: Time.current)
-  end
-
   def mark_failed!(message = nil)
-    session.update!(status: :failed)
-    update!(error_message: message || "Signing failed", completed_at: Time.current)
-  end
-
-  def mark_expired!
-    session.update!(status: :expired)
-    update!(completed_at: Time.current)
+    super(message)
   end
 
   def process_webhook(_)
     Avm::DownloadSignedFileJob.perform_later(self)
-  end
-
-  def broadcast_status_change
-    return unless session.saved_change_to_status?
-
-    case status
-    when "completed"
-      # Signing success is now handled by Contract.accept_signed_file
-      # which is called before this status change occurs
-    when "failed"
-      broadcast_signing_error("Signing failed")
-    when "expired"
-      broadcast_signing_error("Signing expired")
-    end
-  end
-
-  def broadcast_signing_error(error_message)
-    Turbo::StreamsChannel.broadcast_replace_to(
-      self,
-      target: "signature_actions_#{contract.uuid}",
-      partial: "contracts/sessions/error",
-      locals: {
-        contract: contract,
-        error: error_message
-      }
-    )
   end
 end

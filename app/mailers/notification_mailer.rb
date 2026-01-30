@@ -3,10 +3,17 @@ class NotificationMailer < ApplicationMailer
   before_action :set_locale
   default to: -> { @user.email }
 
-  def contract_signed(contract)
+  def contract_signed(contract, signer)
     @contract = contract
     @signature = contract.validation_result.signatures.last
+    @signer = signer
     mail(subject: I18n.t("notification_mailer.contract_signed.subject"))
+  end
+
+  def bundle_contract_signed(bundle, contract, signer)
+    @bundle = bundle
+    @contract = contract
+    mail(subject: I18n.t("notification_mailer.bundle_contract_signed.subject"))
   end
 
   def bundle_completed(bundle)
@@ -14,9 +21,9 @@ class NotificationMailer < ApplicationMailer
     mail(subject: I18n.t("notification_mailer.bundle_completed.subject"))
   end
 
-  def bundle_created(bundle)
+  def signature_requested(bundle)
     @bundle = bundle
-    mail(subject: I18n.t("notification_mailer.bundle_created.subject"))
+    mail(subject: I18n.t("notification_mailer.signature_requested.subject"))
   end
 
   private
