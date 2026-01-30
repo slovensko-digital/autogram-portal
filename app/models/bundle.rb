@@ -46,13 +46,16 @@ class Bundle < ApplicationRecord
   end
 
   def completed?
-     return awaiting_recipients? if recipients.count.positive?
+     return !awaiting_recipients? if recipients.count.positive?
      contracts.all? { !it.awaiting_signature? }
   end
 
   def awaiting_recipients?(contract: nil)
-    # TODO: consider recipients per contract scenario
-    recipients.notified.count.positive?
+    if contract
+      return contract.recipients.any? { !it.signed_contract?(contract) }
+    end
+
+    recipients.any? { it.unsigned_contracts.any? }
   end
 
   def notify_contract_signed(contract, recipient)

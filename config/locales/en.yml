@@ -61,9 +61,7 @@ en:
   helpers:
     recipients:
       status:
-        pending: "Awaiting send"
-        sending: "Sending email"
-        notified: "Awaiting signature"
+        pending: "Awaiting signature"
         signed: "Signed"
         declined: "Declined"
     application:

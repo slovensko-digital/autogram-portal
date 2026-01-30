@@ -91,13 +91,14 @@ class Contracts::SessionsController < ApplicationController
 
   def set_recipient
     if params[:recipient]
-      @recipient = Recipient.find_by_uuid!(params[:recipient])
+      @recipient = @contract.recipients.find_by_uuid!(params[:recipient])
+      raise ActiveRecord::RecordNotFound if @recipient.signed_contract?(@contract)
     end
   end
 
   def create_eidentita_session
     if @recipient
-      session = @recipient.sessions.where(contract: @contract, type: "EidentitaSession").active.first
+      session = @recipient.sessions.where(contract: @contract, type: "EidentitaSession").pending.first
       return session if session
     else
       return @contract.current_eidentita_session if @contract.has_active_eidentita_session?
@@ -109,13 +110,14 @@ class Contracts::SessionsController < ApplicationController
     @contract.sessions.create!(
       type: "EidentitaSession",
       signing_started_at: result[:signing_started_at],
+      user: current_user,
       recipient: @recipient
     )
   end
 
   def create_avm_session
     if @recipient
-      session = @recipient.sessions.where(contract: @contract, type: "AvmSession").active.first
+      session = @recipient.sessions.where(contract: @contract, type: "AvmSession").pending.first
       return session if session
     else
       return @contract.current_avm_session if @contract.has_active_avm_session?
@@ -128,6 +130,7 @@ class Contracts::SessionsController < ApplicationController
       document_identifier: result[:document_identifier],
       encryption_key: result[:encryption_key],
       signing_started_at: result[:signing_started_at],
+      user: current_user,
       recipient: @recipient
     )
 
@@ -138,7 +141,7 @@ class Contracts::SessionsController < ApplicationController
 
   def create_autogram_session
     if @recipient
-      session = @recipient.sessions.where(contract: @contract, type: "AutogramSession").active.first
+      session = @recipient.sessions.where(contract: @contract, type: "AutogramSession").pending.first
       return session if session
     else
       return @contract.current_autogram_session if @contract.has_active_autogram_session?
@@ -147,6 +150,7 @@ class Contracts::SessionsController < ApplicationController
     @contract.sessions.create!(
       type: "AutogramSession",
       signing_started_at: Time.current,
+      user: current_user,
       recipient: @recipient
     )
   end

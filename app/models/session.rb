@@ -35,17 +35,18 @@ class Session < ApplicationRecord
 
   enum :status, {
     pending: 0,
-    completed: 1,
+    signed: 1,
     failed: 2,
-    expired: 3
+    expired: 3,
+    canceled: 4
   }
 
   validates :signing_started_at, presence: true
 
-  scope :active, -> { where(status: :pending) }
   scope :recent, -> { order(created_at: :desc) }
 
-  after_update_commit :broadcast_status_change
+  after_update_commit :broadcast_status_change, if: :saved_change_to_status?
+  after_update_commit -> { touch(:completed_at) }, if: -> { saved_change_to_status? && !pending? }
 
   def eidentita?
     is_a?(EidentitaSession)
@@ -59,16 +60,9 @@ class Session < ApplicationRecord
     is_a?(AutogramSession)
   end
 
-  def mark_completed!
-    update!(status: :completed, completed_at: Time.current)
-  end
-
   def mark_failed!(message = nil)
-    update!(status: :failed, error_message: message || "Signing failed", completed_at: Time.current)
-  end
-
-  def mark_expired!
-    update!(status: :expired, completed_at: Time.current)
+    failed!
+    update!(error_message: message || "Signing failed")
   end
 
   def accept_signed_file(signed_file)
@@ -90,11 +84,16 @@ class Session < ApplicationRecord
         content_type: new_content_type
       )
       save!
+
+      if recipient.nil? && user.present? && contract.bundle.present?
+        update!(recipient: contract.bundle.recipients.where(user: user).first)
+      end
+
+      signed!
     end
 
-    contract.sessions.active.each(&:mark_completed!)
-    contract.accept_signed_file(signed_file)
-    contract.bundle.notify_contract_signed(contract, recipient) if contract.bundle.present?
+    contract.sessions.pending.each(&:canceled!)
+    contract.notify_signed!(recipient: recipient, signer: user)
   end
 
   def generate_signed_filename
@@ -110,11 +109,7 @@ class Session < ApplicationRecord
   protected
 
   def broadcast_status_change
-    return unless saved_change_to_status?
-
     case status
-    when "completed"
-      # Signing success is handled by Contract.accept_signed_file
     when "failed"
       broadcast_signing_error(error_message || "Signing failed")
     when "expired"

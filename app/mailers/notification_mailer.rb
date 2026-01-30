@@ -13,6 +13,7 @@ class NotificationMailer < ApplicationMailer
   def bundle_contract_signed(bundle, contract, signer)
     @bundle = bundle
     @contract = contract
+    @signer = signer
     mail(subject: I18n.t("notification_mailer.bundle_contract_signed.subject"))
   end
 

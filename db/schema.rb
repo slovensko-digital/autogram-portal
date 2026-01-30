@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_28_115301) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_30_172925) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,6 +75,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_115301) do
     t.index ["bundle_id"], name: "index_contracts_on_bundle_id"
     t.index ["user_id"], name: "index_contracts_on_user_id"
     t.index ["uuid"], name: "index_contracts_on_uuid"
+  end
+
+  create_table "contracts_recipients", id: false, force: :cascade do |t|
+    t.bigint "contract_id", null: false
+    t.bigint "recipient_id", null: false
+    t.index ["contract_id", "recipient_id"], name: "index_contracts_recipients_on_contract_id_and_recipient_id", unique: true
+    t.index ["contract_id"], name: "index_contracts_recipients_on_contract_id"
+    t.index ["recipient_id"], name: "index_contracts_recipients_on_recipient_id"
   end
 
   create_table "documents", force: :cascade do |t|
@@ -214,6 +222,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_115301) do
     t.string "email", null: false
     t.string "locale", default: "sk", null: false
     t.string "name"
+    t.integer "notification_status", default: 0, null: false
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
@@ -309,6 +318,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_115301) do
   add_foreign_key "bundles", "users"
   add_foreign_key "contracts", "bundles"
   add_foreign_key "contracts", "users"
+  add_foreign_key "contracts_recipients", "contracts"
+  add_foreign_key "contracts_recipients", "recipients"
   add_foreign_key "documents", "contracts"
   add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"

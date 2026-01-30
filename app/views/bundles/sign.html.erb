@@ -70,12 +70,12 @@
               </div>
             <% end %>
           </div>
-          <% if @bundle.recipients.not_signed.any? %>
+          <% if @bundle.awaiting_recipients? %>
             <div class="space-y-3">
               <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.not_signed.count %>)
+                <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
               </h3>
-              <% @bundle.recipients.not_signed.each do |recipient| %>
+              <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
                 <% if recipient == @recipient %>
                   <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border-2 border-blue-500 overflow-hidden">
                     <div class="flex items-center gap-3 flex-1">
@@ -102,12 +102,8 @@
               <% end %>
             </div>
           <% end %>
-          <% if contract.awaiting_signature? %>
-            <div class="w-full pt-4 mb-6">
-              <%= render 'contracts/signature_actions', contract: contract, recipient: @recipient %>
-            </div>
-          <% else %>
-            <div class="w-full bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+          <% unless contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
+            <div class="w-full  bg-green-50 border border-green-200 rounded-lg p-4">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,9 +118,14 @@
                 </div>
               </div>
               <div>
-                <%= link_to t('actions.download'), signed_document_contract_path(contract), class: "mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                <%= link_to t('actions.download'),
+                      signed_document_contract_path(contract),
+                      class: "mt-4 inline-flex justify-center items-center px-6 py-3 w-full sm:w-auto border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
               </div>
             </div>
+          <% end %>
+          <% if current_user == @bundle.author || contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
+            <%= render 'contracts/signature_actions', contract: contract, recipient: @recipient %>
           <% end %>
         <% end %>
       </div>

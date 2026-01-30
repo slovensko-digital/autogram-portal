@@ -4,7 +4,7 @@ module Notification
 
     def perform(recipient)
       NotificationMailer.with(recipient: recipient).signature_requested(recipient.bundle).deliver_now
-      recipient.update!(status: :notified)
+      recipient.notified!
     end
   end
 end

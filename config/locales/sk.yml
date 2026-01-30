@@ -32,9 +32,7 @@ sk:
   helpers:
     recipients:
       status:
-        pending: "Čaká na odoslanie"
-        sending: "Prebieha odosielanie"
-        notified: "Čaká na podpis"
+        pending: "Čaká na podpis"
         signed: "Podpísané"
         declined: "Odmietnuté"
     application:
@@ -270,6 +268,7 @@ sk:
       email_label: "Email adresáta"
       email_placeholder: "jan.novak@example.com"
       email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
+      copy_to_clipboard: "Kopírovať odkaz na podpisovanie"
 
   contracts:
     alerts:
@@ -339,8 +338,8 @@ sk:
       how_signing_works: "Ako funguje podpisovanie"
       cancel: "Zrušiť proces"
       already_signed:
-        title: "Dokument bol podpísaný"
-        message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
+        title: "Dokument je podpísaný"
+        message: "Tento dokument je už podpísaný. Nie je od vás potrebný ďalší podpis."
     signature_actions:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       add_another_signature: "Pridajte ďalší podpis"
@@ -557,6 +556,9 @@ sk:
       eidentita_not_installed: "Aplikácia eIdentita nie je nainštalovaná. Nainštalujte si ju z App Store (iOS) alebo Google Play (Android) a skúste to znova."
       eidentita_install_ios: "Inštalovať z App Store"
       eidentita_install_android: "Inštalovať z Google Play"
+    clipboard:
+      copy_success: "Odkaz skopírovaný do schránky"
+      copy_failure: "Nepodarilo sa skopírovať odkaz"
 
   notification_mailer:
     contract_signed:

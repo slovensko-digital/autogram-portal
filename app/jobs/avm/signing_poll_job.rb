@@ -1,7 +1,7 @@
 module Avm
   class SigningPollJob < ApplicationJob
     def perform(avm_session, avm_service: AutogramEnvironment.avm_service)
-      return avm_session.mark_expired! if avm_session.expired?
+      return avm_session.expired! if avm_session.expired?
       return unless avm_session.pending?
 
       begin

@@ -2,16 +2,17 @@
 #
 # Table name: recipients
 #
-#  id         :bigint           not null, primary key
-#  email      :string           not null
-#  locale     :string           default("sk"), not null
-#  name       :string
-#  status     :integer          default("pending"), not null
-#  uuid       :uuid             not null
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
-#  bundle_id  :bigint           not null
-#  user_id    :bigint
+#  id                  :bigint           not null, primary key
+#  email               :string           not null
+#  locale              :string           default("sk"), not null
+#  name                :string
+#  notification_status :integer          default("notifiable"), not null
+#  status              :integer          default("pending"), not null
+#  uuid                :uuid             not null
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
+#  bundle_id           :bigint           not null
+#  user_id             :bigint
 #
 # Indexes
 #
@@ -28,11 +29,22 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Recipient < ApplicationRecord
+  has_and_belongs_to_many :contracts
   belongs_to :bundle
   belongs_to :user, optional: true
   has_many :sessions, dependent: :destroy
 
-  enum :status, { pending: 0, notified: 1, signed: 2, declined: 3, sending: 4 }
+  enum :status, { pending: 0, declined: 3 }
+  enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }
+
+  scope :signed_contract, ->(contract) {
+    joins(:sessions)
+      .where(sessions: { status: :signed, contract_id: contract.id })
+      .distinct
+  }
+  scope :awaiting_contract, ->(contract) {
+    where.not(id: signed_contract(contract).select(:id))
+  }
 
   before_validation :ensure_uuid, on: :create
   validates :uuid, presence: true, uniqueness: true
@@ -43,6 +55,7 @@ class Recipient < ApplicationRecord
   before_create :link_user_by_email
   before_create :check_blocks
   before_create :set_default_locale
+  after_create :associate_with_bundle_contracts
 
   def to_param
     uuid
@@ -52,16 +65,34 @@ class Recipient < ApplicationRecord
     name.presence || user&.display_name || email
   end
 
+  def signed_contract?(contract)
+    sessions.signed.where(contract: contract).exists?
+  end
+
+  def signed_contracts
+    contracts.joins(:sessions).where(sessions: { recipient: self, status: :signed }).distinct
+  end
+
+  def unsigned_contracts
+    contracts.where.not(id: signed_contracts.select(:id))
+  end
+
+  def notifiable?
+    return false if signed_contracts.exists?
+    not_notified?
+  end
+
   def notify!
-    return unless pending?
+    return unless notifiable?
     return unless bundle.author.feature_enabled?(:real_emails)
 
-    update(status: :sending)
+    sending!
     Notification::RecipientSignatureRequestedJob.perform_later(self)
   end
 
   def removable?
-    pending? || declined?
+    return false if signed_contracts.exists?
+    notifiable? || declined?
   end
 
   private
@@ -83,5 +114,9 @@ class Recipient < ApplicationRecord
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
+  end
+
+  def associate_with_bundle_contracts
+    self.contracts = bundle.contracts if bundle.present?
   end
 end

@@ -53,14 +53,14 @@
       <%= link_to "", avm_contract_sessions_path(contract, recipient: recipient), 
             data: { 
               controller: "signers--avm",
-              action: "submit->signers--avm#sign",
+              action: "click->signers--avm#sign",
               signature_method_selector_target: "avmSubmitButton"
             } %>
 
       <%= link_to "", eidentita_contract_sessions_path(contract, recipient: recipient), 
             data: { 
               controller: "signers--eidentita",
-              action: "submit->signers--eidentita#sign",
+              action: "click->signers--eidentita#sign",
               signature_method_selector_target: "eidentitaSubmitButton"
             } %>
     </div>

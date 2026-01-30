@@ -25,6 +25,7 @@ class Contract < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :bundle, optional: true
 
+  has_and_belongs_to_many :recipients
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
   has_many :sessions, dependent: :destroy
@@ -47,20 +48,16 @@ class Contract < ApplicationRecord
   before_validation :ensure_uuid, on: :create
   before_validation :initialize_signature_parameters
   before_validation :set_signature_level_for_ts_qes
+  after_create :associate_with_bundle_recipients
 
   def to_param
     uuid
   end
 
-  def self.new_from_ui(parameters)
-    contract = new(parameters)
-    contract.uuid ||= SecureRandom.uuid
-    contract.allowed_methods = %w[qes ts-qes] unless contract.allowed_methods.present?
-    contract
-  end
+  def notify_signed!(recipient: nil, signer: nil)
+    Notification::ContractSignedJob.perform_later(self) unless should_notify_user?(signer: signer)
 
-  def accept_signed_file(signed_file)
-    Notification::ContractSignedJob.perform_later(self) unless should_notify_user?
+    bundle.notify_contract_signed(self, recipient) if bundle.present?
 
     Turbo::StreamsChannel.broadcast_action_to(
       "contract_#{uuid}",
@@ -75,7 +72,6 @@ class Contract < ApplicationRecord
   end
 
   def awaiting_signature?
-    # TODO: Improve logic to consider multiple expected signatures
     signed_document.blank? || bundle&.awaiting_recipients?(contract: self)
   end
 
@@ -131,9 +127,9 @@ class Contract < ApplicationRecord
     current_autogram_session.present?
   end
 
-  def should_notify_user?
+  def should_notify_user?(signer: nil)
     # TODO: Improve logic to not notify "self sign" by user
-    user.present? && bundle.nil? && awaiting_signature? == false
+    user.present? && bundle.nil? && !awaiting_signature? && user != signer
   end
 
   def short_uuid
@@ -165,14 +161,6 @@ class Contract < ApplicationRecord
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
-  end
-
-  def generate_signed_conentent_type
-    if signature_parameters.container.present?
-      "application/vnd.etsi.asic-e+zip"
-    else
-      "application/pdf"
-    end
   end
 
   def validate_allowed_methods
@@ -215,5 +203,9 @@ class Contract < ApplicationRecord
       format: "CAdES",
       container: "ASiC_E"
     )
+  end
+
+  def associate_with_bundle_recipients
+    self.recipients = bundle.recipients if bundle.present?
   end
 end

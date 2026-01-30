@@ -23,8 +23,8 @@ class NotificationMailerPreview < ActionMailer::Preview
   end
 
   def signature_requested
-    bundle = Bundle.joins(:recipients).where(recipients: { status: "notified" }).first
-    user = bundle.recipients.find_by(status: "notified")
+    bundle = Bundle.joins(:recipients).where(recipients: { notification_status: "notified" }).first
+    user = bundle.recipients.find_by(notification_status: "notified")
     NotificationMailer.with(user: user).signature_requested(bundle)
   end
 end
