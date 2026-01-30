@@ -2,12 +2,13 @@
 #
 # Table name: bundles
 #
-#  id         :bigint           not null, primary key
-#  note       :text
-#  uuid       :string           not null
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
-#  user_id    :bigint           not null
+#  id               :bigint           not null, primary key
+#  note             :text
+#  publicly_visible :boolean          default(FALSE), not null
+#  uuid             :string           not null
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  user_id          :bigint           not null
 #
 # Indexes
 #

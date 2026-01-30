@@ -1,0 +1,5 @@
+<p class="greeting"><%= t('.greeting') %></p>
+
+<p class="message"><%= t('.message', filename: @contract.display_name, signer_name: @signer.display_name) %></p>
+
+<%= link_to t('.view_bundle'), url_for(@bundle), class: "button" %>

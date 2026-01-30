@@ -1,0 +1,28 @@
+<%= turbo_frame_tag "bundle_public_link_#{@bundle.uuid}", class: "w-full" do %>
+  <%= form_with model: @bundle, method: :put, local: true do |form| %>
+    <%= form.hidden_field :step, value: "public_link" %>
+    <%= form.hidden_field :publicly_visible, value: !@bundle.publicly_visible? %>
+    <h3 class="text-xl font-semibold text-gray-900 mb-4"><%= t('.title') %></h3>
+    <p class="text-gray-600 mb-4"><%= t('.subtitle') %></p>
+    <% if @bundle.publicly_visible? %>
+      <div class="flex gap-x-4 items-center mt-4">
+        <%= form.submit t('.turn_off'),
+                        class: "items-center w-full sm:w-auto sm:flex-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                        data: { "form-submit-target": "submitButton" } %>
+        <div class="bg-gray-50 flex-1 border border-gray-300 rounded-md flex items-center justify-between">
+          <input type="text"
+                  readonly
+                  value="<%= sign_bundle_url(@bundle) %>"
+                  class="w-full bg-transparent border-0 focus:ring-0 p-2 text-sm text-gray-200"
+                  onclick="this.select();" />
+          </button>
+        </div>
+      </div>
+    <% else %>
+            <%= form.submit t('.turn_on'),
+                        class: "items-center w-full sm:w-auto px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                        data: { "form-submit-target": "submitButton" } %>
+
+    <% end %>
+  <% end %>
+<% end %>

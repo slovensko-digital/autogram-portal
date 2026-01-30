@@ -1,14 +1,16 @@
 module RecipientsHelper
   def recipient_status_badge(recipient)
     colors = {
-      pending: { bg: "bg-blue-100", text: "text-blue-800" },
-      sending: { bg: "bg-blue-100", text: "text-blue-800" },
-      notified: { bg: "bg-yellow-100", text: "text-yellow-800" },
+      pending: { bg: "bg-yellow-100", text: "text-yellow-800" },
       signed: { bg: "bg-green-100", text: "text-green-800" },
       declined: { bg: "bg-red-100", text: "text-red-800" }
     }
 
     status = recipient.status.to_sym
+    if status == :pending && recipient.unsigned_contracts.empty?
+      status = :signed
+    end
+
     color = colors[status]
 
     content_tag :span,

@@ -151,10 +151,6 @@ class ContractsController < ApplicationController
 
   private
 
-  def determine_cancel_url
-    signature_actions_contract_path(@contract)
-  end
-
   def verify_author
     if @contract.user && @contract.user != current_user
       redirect_to root_path, alert: t("contracts.alerts.unauthorized_edit_attempt")

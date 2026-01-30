@@ -2,12 +2,13 @@
 #
 # Table name: bundles
 #
-#  id         :bigint           not null, primary key
-#  note       :text
-#  uuid       :string           not null
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
-#  user_id    :bigint           not null
+#  id               :bigint           not null, primary key
+#  note             :text
+#  publicly_visible :boolean          default(FALSE), not null
+#  uuid             :string           not null
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  user_id          :bigint           not null
 #
 # Indexes
 #
@@ -38,42 +39,44 @@ class Bundle < ApplicationRecord
 
   after_create :notify_recipients
 
+  scope :publicly_visible, -> { where(publicly_visible: true) }
+
   def to_param
     uuid
   end
 
   def completed?
-     return recipients.signed.count == recipients.count if recipients.count.positive?
+     return !awaiting_recipients? if recipients.count.positive?
      contracts.all? { !it.awaiting_signature? }
   end
 
   def awaiting_recipients?(contract: nil)
-    # TODO: consider recipients per contract scenario
-    recipients.notified.count.positive?
+    if contract
+      return contract.recipients.any? { !it.signed_contract?(contract) }
+    end
+
+    recipients.any? { it.unsigned_contracts.any? }
   end
 
-  def contract_signed(contract)
-    # TODO: add logic to handle multiple recipients signing their respective contracts
-    recipients.notified.first.update(status: :signed) if recipients.notified.any?
-
-    Notification::BundleContractSignedJob.perform_later(self, contract)
+  def notify_contract_signed(contract, recipient)
+    Notification::BundleContractSignedJob.perform_later(self, contract, signer: recipient)
     return unless completed?
 
     Notification::BundleCompletedJob.perform_later(self)
-    broadcast_all_signed
-  end
 
-  def broadcast_all_signed
     Turbo::StreamsChannel.broadcast_replace_to(
       self,
-      target: "bundle_#{id}_status",
+      target: "bundle_#{uuid}_status",
       partial: "bundles/status",
       locals: { bundle: self }
     )
   end
 
-  def should_notify_author?
-    # TODO: do not notify if author is the one that signed the bundle
+  def should_notify_author?(contract: nil, signer: nil)
+    if signer
+      return false if author == signer.user
+    end
+
     true
   end
 

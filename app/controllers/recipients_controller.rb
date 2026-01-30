@@ -16,11 +16,11 @@ class RecipientsController < ApplicationController
   end
 
   def destroy
-    unless @recipient.signed? || @recipient.notified?
+    if @recipient.removable?
       @recipient.destroy
     end
 
-    redirect_to bundle_recipients_path(@bundle)
+    render "index"
   end
 
   def notify
@@ -35,7 +35,7 @@ class RecipientsController < ApplicationController
   end
 
   def set_recipient
-    @recipient = @bundle.recipients.find(params[:id])
+    @recipient = @bundle.recipients.find_by_uuid(params[:id])
   end
 
   def recipient_params

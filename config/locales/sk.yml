@@ -32,9 +32,7 @@ sk:
   helpers:
     recipients:
       status:
-        pending: "Čaká na odoslanie"
-        sending: "Prebieha odosielanie"
-        notified: "Čaká na podpis"
+        pending: "Čaká na podpis"
         signed: "Podpísané"
         declined: "Odmietnuté"
     application:
@@ -227,12 +225,19 @@ sk:
         notified: "Odoslaný"
         signed: "Podpísané"
         declined: "Odmietnuté"
-      note_title: "Poznámka"
       no_note: "Žiadna poznámka"
       request_signature_title: "Požiadať o podpisy"
-      note_placeholder: "Voliteľná správa pre adresátov"
-      note_label: "Správa pre adresátov"
       signed: "Podpísané"
+    public_link_form:
+      title: "Verejný odkaz na balík dokumentov"
+      subtitle: "Zdieľajte priamo tento odkaz s príjemcami, aby mohli podpísať dokumenty v balíku."
+      label: "Kopírovať odkaz do schránky"
+      turn_on: "Zapnúť verejný odkaz"
+      turn_off: "Vypnúť verejný odkaz"
+    note_form:
+      title: "Poznámka"
+      placeholder: "Voliteľná správa pre adresátov"
+      label: "Správa pre adresátov"
     destroy:
       success: "Balík dokumentov bol úspešne zmazaný."
       failure: "Nepodarilo sa zmazať balík dokumentov."
@@ -263,6 +268,7 @@ sk:
       email_label: "Email adresáta"
       email_placeholder: "jan.novak@example.com"
       email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
+      copy_to_clipboard: "Kopírovať odkaz na podpisovanie"
 
   contracts:
     alerts:
@@ -332,8 +338,8 @@ sk:
       how_signing_works: "Ako funguje podpisovanie"
       cancel: "Zrušiť proces"
       already_signed:
-        title: "Dokument bol podpísaný"
-        message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
+        title: "Dokument je podpísaný"
+        message: "Tento dokument je už podpísaný. Nie je od vás potrebný ďalší podpis."
     signature_actions:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       add_another_signature: "Pridajte ďalší podpis"
@@ -547,6 +553,12 @@ sk:
       sign_with_avm: "Podpísať cez AVM"
       opening_eidentita: "Otváram eIdentitu..."
       sign_with_eidentita: "Podpísať cez eIdentitu"
+      eidentita_not_installed: "Aplikácia eIdentita nie je nainštalovaná. Nainštalujte si ju z App Store (iOS) alebo Google Play (Android) a skúste to znova."
+      eidentita_install_ios: "Inštalovať z App Store"
+      eidentita_install_android: "Inštalovať z Google Play"
+    clipboard:
+      copy_success: "Odkaz skopírovaný do schránky"
+      copy_failure: "Nepodarilo sa skopírovať odkaz"
 
   notification_mailer:
     contract_signed:
@@ -558,18 +570,37 @@ sk:
       timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
       timestamp_non_qualified: "Negarantovný dátum a čas (bez časovej pečiatky): %{signing_time}"
       view_contract: "Zobraziť podpísaný dokument"
+    bundle_contract_signed:
+      subject: "Dokument v balíku bol podpísaný"
+      greeting: "Dobrý deň,"
+      message: "dokument %{filename} v balíku bol podpísaný adresátom %{signer_name}."
+      details_title: "Detaily podpisu:"
+      signed_by: "Podpísal: %{signer_name}"
+      timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
+      timestamp_non_qualified: "Negarantovný dátum a čas (bez časovej pečiatky): %{signing_time}"
+      view_bundle: "Zobraziť balík dokumentov"
     bundle_completed:
       subject: "Váš balík dokumentov bol podpísaný"
       greeting: "Dobrý deň,"
-      message: "Váš balík so dokumentmi bol dokončený."
+      message: "Váš balík s dokumentami bol dokončený."
       details_title: "Dokončené dokumenty:"
       view_bundle: "Zobraziť balík"
-    bundle_created:
+    signature_requested:
       subject: "Dokumenty na podpis"
       greeting: "Dobrý deň,"
-      message: "%{author_name} vás požiadal o podpis balíka dokumentov v systémem Autogram Portal."
+      message: "%{author_name} vás požiadal o podpis dokumentov v systémem Autogram Portal."
+      how_to_sign: "Ako podpísať dokumenty?"
+      signing_is_simple: "Ak si nie ste istý, proces podpisu je jednoduchý. Po kliknutí na odkaz vás systém prevedie krokmi:"
+      signing_step_1: "Budete požiadaný o výber spôsobu podpisu (napr. eID karta alebo iný dostupný spôsob)."
+      signing_step_2: "Systém vám zobrazí, čo je potrebné urobiť."
+      signing_step_3: "Podpísaná verzia dokumentu sa vám zobrazí po dokončení."
+      contact_support: "V prípade otázok alebo nejasností môžete kontaktovať odosielateľa."
       details_title: "Dokumenty na podpis:"
-      view_bundle: "Zobraziť balík"
+      note: "Poznámka od autora:"
+      view_bundle: "Podpísať dokumenty"
+    footer:
+      regards: "S pozdravom,"
+      team: "Tím Autogram Portal"
 
   activerecord:
     errors:

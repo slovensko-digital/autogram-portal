@@ -7,4 +7,4 @@
 - <%= contract.display_name %>
 <% end %>
 
-<%= t('.view_bundle') %>: <%= sign_bundle_url(@bundle) %>
+<%= t('.view_bundle') %>: <%= sign_bundle_url(@bundle, recipient: @user) %>

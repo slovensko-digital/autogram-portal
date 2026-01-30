@@ -61,9 +61,7 @@ en:
   helpers:
     recipients:
       status:
-        pending: "Awaiting send"
-        sending: "Sending email"
-        notified: "Awaiting signature"
+        pending: "Awaiting signature"
         signed: "Signed"
         declined: "Declined"
     application:
@@ -285,9 +283,11 @@ en:
       note_title: "Note"
       no_note: "No note for recipients"
       request_signature_title: "Request Signatures"
+      signed: "Signed"
+    form:
+      note_title: "Note"
       note_placeholder: "Optional message for recipients"
       note_label: "Message for recipients"
-      signed: "Signed"
     destroy:
       success: "Contract bundle was successfully deleted."
       failure: "Failed to delete contract bundle."
@@ -598,6 +598,9 @@ en:
       sign_with_avm: "Sign with AVM"
       opening_eidentita: "Opening eIdentita..."
       sign_with_eidentita: "Sign with eIdentita"
+      eidentita_not_installed: "eIdentita app is not installed. Please install it from the App Store (iOS) or Google Play (Android) and try again."
+      eidentita_install_ios: "Install from App Store"
+      eidentita_install_android: "Install from Google Play"
 
   notification_mailer:
     contract_signed:
@@ -609,19 +612,38 @@ en:
       timestamp_qualified: "Timestamp date and time: %{signing_time}"
       timestamp_non_qualified: "Non-guaranteed date and time (without timestamp): %{signing_time}"
       view_contract: "View signed contract"
+    bundle_contract_signed:
+      subject: "A document in your contract bundle has been signed"
+      greeting: "Hello,"
+      message: "document %{filename} in the bundle has been signed by %{signer_name}."
+      details_title: "Signature details:"
+      signed_by: "Signed by: %{signer_name}"
+      timestamp_qualified: "Timestamp date and time: %{signing_time}"
+      timestamp_non_qualified: "Non-guaranteed date and time (without timestamp): %{signing_time}"
+      view_bundle: "View bundle"
     bundle_completed:
       subject: "Your contract bundle has been signed"
       greeting: "Hello,"
       message: "Your bundle of documents has been completed."
       details_title: "Completed documents:"
       view_bundle: "View bundle"
-    bundle_created:
+    signature_requested:
       subject: "Documents need your signature"
       greeting: "Hello,"
       message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
+      how_to_sign: "How to sign the documents?"
+      signing_is_simple: "If you are unsure, the signing process is simple. After clicking the link, the system will guide you through the steps:"
+      signing_step_1: "You will be asked to select a signing method (e.g., eID card or another available method)."
+      signing_step_2: "The system will show you what needs to be done."
+      signing_step_3: "The signed version of the document will be displayed to you after completion."
+      contact_support: "If you have any questions or concerns, you can contact the sender."
       details_title: "Documents to sign:"
-      view_bundle: "View bundle"
-  
+      note: "Note from the author:"
+      view_bundle: "Sign documents"
+    footer:
+      regards: "Best regards,"
+      team: "The Autogram Portal Team"
+
   activerecord:
     errors:
       models:

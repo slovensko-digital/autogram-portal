@@ -25,6 +25,7 @@ class Contract < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :bundle, optional: true
 
+  has_and_belongs_to_many :recipients
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
   has_many :sessions, dependent: :destroy
@@ -47,42 +48,21 @@ class Contract < ApplicationRecord
   before_validation :ensure_uuid, on: :create
   before_validation :initialize_signature_parameters
   before_validation :set_signature_level_for_ts_qes
+  after_create :associate_with_bundle_recipients
 
   def to_param
     uuid
   end
 
-  def self.new_from_ui(parameters)
-    contract = new(parameters)
-    contract.uuid ||= SecureRandom.uuid
-    contract.allowed_methods = %w[qes ts-qes] unless contract.allowed_methods.present?
-    contract
-  end
+  def notify_signed!(recipient: nil, signer: nil)
+    Notification::ContractSignedJob.perform_later(self) unless should_notify_user?(signer: signer)
 
-  def accept_signed_file(signed_file)
-    # TODO: Check if signed_file is a signed version of the original documents
-    # AutogramEnvironment.autogram_service.validate_signed_file(signed_file, documents.map(&:blob))
+    bundle.notify_contract_signed(self, recipient) if bundle.present?
 
-    # TODO: Validate the signatures in the signed file
-    # AutogramEnvironment.autogram_service.validate_signatures(signed_file, signature_parameters)
-
-    # TODO: version signed document attachment to avoid overwriting in concurrent scenarios
-
-    ActiveRecord::Base.transaction do
-      signed_document.purge if signed_document.attached?
-      signed_document.attach(
-        io: StringIO.new(Base64.decode64(signed_file)),
-        filename: generate_signed_filename,
-        content_type: generate_signed_conentent_type
-      )
-      save!
-    end
-
-    sessions.active.each { |s| s.sessionable.mark_completed! }
-    bundle.contract_signed(self) if bundle.present?
-    broadcast_signing_success
-
-    Notification::ContractSignedJob.perform_later(self)
+    Turbo::StreamsChannel.broadcast_action_to(
+      "contract_#{uuid}",
+      action: :refresh
+    )
   end
 
   def documents_to_sign
@@ -92,7 +72,6 @@ class Contract < ApplicationRecord
   end
 
   def awaiting_signature?
-    # TODO: Improve logic to consider multiple expected signatures
     signed_document.blank? || bundle&.awaiting_recipients?(contract: self)
   end
 
@@ -122,8 +101,8 @@ class Contract < ApplicationRecord
   end
 
   def current_avm_session
-    sessions.where(sessionable_type: "AvmSession", status: :pending)
-            .order(created_at: :desc).first&.sessionable
+    sessions.where(type: "AvmSession", status: :pending)
+            .order(created_at: :desc).first
   end
 
   def has_active_avm_session?
@@ -131,29 +110,26 @@ class Contract < ApplicationRecord
   end
 
   def current_eidentita_session
-    sessions.where(sessionable_type: "EidentitaSession", status: :pending)
-            .order(created_at: :desc).first&.sessionable
+    sessions.where(type: "EidentitaSession", status: :pending)
+            .order(created_at: :desc).first
   end
 
   def has_active_eidentita_session?
     current_eidentita_session.present?
   end
 
-  # Generic method to get current active session
-  def current_session
-    sessions.where(status: :pending).order(created_at: :desc).first
+  def current_autogram_session
+    sessions.where(type: "AutogramSession", status: :pending)
+            .order(created_at: :desc).first
   end
 
-  def should_notify_user?
+  def has_active_autogram_session?
+    current_autogram_session.present?
+  end
+
+  def should_notify_user?(signer: nil)
     # TODO: Improve logic to not notify "self sign" by user
-    user.present? && awaiting_signature? == false
-  end
-
-  def broadcast_signing_success
-    Turbo::StreamsChannel.broadcast_action_to(
-      "contract_#{uuid}",
-      action: :refresh
-    )
+    user.present? && bundle.nil? && !awaiting_signature? && user != signer
   end
 
   def short_uuid
@@ -185,23 +161,6 @@ class Contract < ApplicationRecord
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
-  end
-
-  def generate_signed_filename
-    if documents.count == 1
-      original_filename = documents.first.blob.filename.base
-      return "#{original_filename}-signed.#{signature_parameters.container.present? ? 'asice' : 'pdf'}"
-    end
-
-    "contract-#{id}-signed.#{signature_parameters.container.present? ? '.asice' : 'pdf'}"
-  end
-
-  def generate_signed_conentent_type
-    if signature_parameters.container.present?
-      "application/vnd.etsi.asic-e+zip"
-    else
-      "application/pdf"
-    end
   end
 
   def validate_allowed_methods
@@ -244,5 +203,9 @@ class Contract < ApplicationRecord
       format: "CAdES",
       container: "ASiC_E"
     )
+  end
+
+  def associate_with_bundle_recipients
+    self.recipients = bundle.recipients if bundle.present?
   end
 end

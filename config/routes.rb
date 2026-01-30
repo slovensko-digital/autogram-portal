@@ -82,7 +82,6 @@ Rails.application.routes.draw do
   resources :bundles, only: [] do
     member do
       get :iframe
-      get :signatures
       get :sign
     end
   end

@@ -1,72 +1,47 @@
 # == Schema Information
 #
-# Table name: eidentita_sessions
+# Table name: sessions
 #
 #  id                 :bigint           not null, primary key
 #  completed_at       :datetime
 #  error_message      :text
+#  options            :jsonb
 #  signing_started_at :datetime
+#  status             :integer          default("pending"), not null
+#  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
+#  contract_id        :bigint           not null
+#  recipient_id       :bigint
+#  user_id            :bigint
 #
-class EidentitaSession < ApplicationRecord
-  has_one :session, as: :sessionable, dependent: :destroy
-
-  delegate :contract, :status, :status=, to: :session
-
-  validates :signing_started_at, presence: true
-
-  after_update_commit :broadcast_status_change
+# Indexes
+#
+#  index_sessions_on_contract_id   (contract_id)
+#  index_sessions_on_recipient_id  (recipient_id)
+#  index_sessions_on_type          (type)
+#  index_sessions_on_user_id       (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (contract_id => contracts.id)
+#  fk_rails_...  (recipient_id => recipients.id)
+#  fk_rails_...  (user_id => users.id)
+#
+class EidentitaSession < Session
+  def self.model_name
+    Session.model_name
+  end
 
   def eidentita_url
     url_options = Rails.application.config.action_controller.default_url_options || {}
-    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(contract, session, **url_options)
+    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(contract, self, **url_options)
     "sk.minv.sca://sign?qr=true&linkUrl=#{CGI.escape(link_url)}.json"
   end
 
   def eidentita_url_mobile
     url_options = Rails.application.config.action_controller.default_url_options || {}
-    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(contract, session, **url_options)
+    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(contract, self, **url_options)
     "sk.minv.sca://sign?qr=false&linkUrl=#{CGI.escape(link_url)}.json"
-  end
-
-  def mark_completed!
-    session.update!(status: :completed)
-    update!(completed_at: Time.current)
-  end
-
-  def mark_failed!(error = nil)
-    session.update!(status: :failed)
-    update!(error_message: error || "Signing failed", completed_at: Time.current)
-  end
-
-  def mark_expired!
-    session.update!(status: :expired)
-    update!(completed_at: Time.current)
-  end
-
-  def broadcast_status_change
-    return unless session.saved_change_to_status?
-
-    case status
-    when "completed"
-      # Signing success is handled by Contract.accept_signed_file
-    when "failed"
-      broadcast_signing_error("Signing failed")
-    when "expired"
-      broadcast_signing_error("Signing expired")
-    end
-  end
-
-  def broadcast_signing_error(error_message)
-    Turbo::StreamsChannel.broadcast_replace_to(
-      "contract_#{contract.uuid}",
-      target: "signature_actions_#{contract.uuid}",
-      partial: "contracts/sessions/error",
-      locals: {
-        contract: contract,
-        error: error_message
-      }
-    )
   end
 end

@@ -1,0 +1,39 @@
+<p class="greeting"><%= t('.greeting') %></p>
+
+<p class="message"><%= t('.message', bundle_count: @bundle.contracts.count, author_name: @bundle.author.name) %></p>
+
+<div class="details">
+  <h4><%= t('.details_title') %></h4>
+  <div class="details-list">
+    <% @bundle.contracts.each do |contract| %>
+      <div><%= contract.display_name %></div>
+    <% end %>
+  </div>
+</div>
+
+<% if @bundle.note.present? %>
+  <h4><%= t('.note') %></h4>
+  <div class="note-content">
+    <%= @bundle.note.gsub("\n", "<br>").html_safe %>
+  </div>
+<% end %>
+
+<%= link_to t('.view_bundle'), sign_bundle_url(@bundle, recipient: @user), class: "button", target: "_blank" %>
+
+<div class="instructions">
+  <h4><%= t('.how_to_sign') %></h4>
+  
+  <p><%= t('.signing_is_simple') %></p>
+  
+  <ul>
+    <li><%= t('.signing_step_1') %></li>
+    <li><%= t('.signing_step_2') %></li>
+    <li><%= t('.signing_step_3') %></li>
+  </ul>
+  
+  <p><%= t('.contact_support') %></p>
+</div>
+
+<div class></div>
+
+<%= render "footer" %>

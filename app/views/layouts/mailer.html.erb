@@ -8,15 +8,15 @@
         margin: 0;
         padding: 0;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-        background-color: #f5f5f5;
+        background-color: #F9FAFB;
       }
       .email-container {
-        max-width: 563px;
+        max-width: 600px;
         margin: 0 auto;
         background-color: #ffffff;
       }
       .header {
-        padding: 32px 48px;
+        padding: 40px 32px;
         text-align: center;
         background-color: #ffffff;
       }
@@ -24,72 +24,140 @@
         display: inline-block;
       }
       .logo-text {
-        font-size: 23px;
+        font-size: 28px;
         font-weight: 700;
-        line-height: 150%;
-        color: #000000;
+        line-height: 1.2;
+        color: #111827;
         text-decoration: none;
       }
       .logo-highlight {
-        background: linear-gradient(to bottom, transparent 90%, #FFD700 60%);
+        background: linear-gradient(to bottom, transparent 90%, #FCD34D 65%);
         padding: 0 2px;
       }
       .body {
-        padding: 0 48px 24px 48px;
+        padding: 0 32px 32px 32px;
         background-color: #ffffff;
       }
       .card {
-        background-color: #F3FAFF;
-        border-radius: 16px;
-        padding: 24px;
+        background: linear-gradient(to bottom, #EFF6FF 0%, #F0F9FF 100%);
+        border-radius: 12px;
+        padding: 32px;
+        border: 1px solid #DBEAFE;
       }
       .greeting {
-        font-size: 14px;
         font-weight: 400;
-        line-height: 150%;
-        color: #111928;
-        margin: 0 0 20px 0;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #374151;
+        margin: 0 0 16px 0;
       }
       .message {
-        font-size: 14px;
         font-weight: 400;
-        line-height: 150%;
-        color: #111928;
-        margin: 0 0 20px 0;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #111827;
+        margin: 0 0 24px 0;
       }
       .details {
-        font-size: 14px;
-        line-height: 150%;
-        color: #111928;
-        margin: 0 0 20px 0;
+        line-height: 1.6;
+        color: #111827;
+        margin: 0 0 24px 0;
+      }
+      .details h4 {
+        font-weight: 600;
+        font-size: 15px;
+        line-height: 1.5;
+        color: #111827;
+        margin: 0 0 12px 0;
       }
       .details-title {
-        font-weight: 700;
-        margin: 0 0 8px 0;
+        font-weight: 600;
+        font-size: 15px;
+        color: #111827;
+        margin: 0 0 12px 0;
       }
       .details-list {
         margin: 0;
         padding: 0;
         list-style: none;
         font-weight: 400;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
       }
       .details-list div {
-        margin-bottom: 4px;
+        margin-bottom: 0;
+        padding: 12px 16px;
+        border-bottom: 1px solid #F3F4F6;
+        color: #374151;
+        font-size: 14px;
+      }
+      .details-list div:last-child {
+        border-bottom: none;
+      }
+      .note-content {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 16px;
+        color: #374151;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .instructions {
+        background: linear-gradient(135deg, #DBEAFE 0%, #EFF6FF 100%);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 24px 0;
+        border-left: 4px solid #3B82F6;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      }
+      .instructions h4 {
+        font-weight: 600;
+        font-size: 17px;
+        line-height: 1.5;
+        color: #1E3A8A;
+        margin: 0 0 12px 0;
+      }
+      .instructions p {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #1E40AF;
+        margin: 0 0 12px 0;
+      }
+      .instructions ul {
+        margin: 12px 0;
+        padding-left: 20px;
+      }
+      .instructions li {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #1E40AF;
+        margin-bottom: 8px;
+      }
+      h4 {
+        font-weight: 600;
+        font-size: 15px;
+        line-height: 1.5;
+        color: #111827;
+        margin: 24px 0 12px 0;
       }
       .button {
         display: block;
         width: 100%;
-        padding: 10px 20px;
-        background-color: #3E4DB8;
+        padding: 14px 24px;
+        background: linear-gradient(to bottom, #4F46E5 0%, #4338CA 100%);
         color: #ffffff !important;
         text-align: center;
         text-decoration: none;
         border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 150%;
-        margin: 20px 0;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.5;
+        margin: 24px 0;
         box-sizing: border-box;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
       }
       a.button {
         color: #ffffff !important;
@@ -102,31 +170,53 @@
         text-decoration: none !important;
       }
       .warning {
-        font-size: 14px;
         font-weight: 400;
-        line-height: 150%;
-        color: #000000;
+        line-height: 1.6;
+        color: #374151;
         margin: 20px 0;
+        font-size: 14px;
       }
       .signature {
-        font-size: 14px;
         font-weight: 400;
-        line-height: 150%;
-        color: #111928;
-        margin: 20px 0 0 0;
+        line-height: 1.6;
+        color: #6B7280;
+        margin: 24px 0 0 0;
+        font-size: 15px;
+      }
+      .footer-regards {
+        font-weight: 400;
+        line-height: 1.5;
+        color: #6B7280;
+        margin: 0 0 4px 0;
+        font-size: 15px;
+      }
+      .footer-team {
+        font-weight: 600;
+        line-height: 1.5;
+        color: #111827;
+        margin: 0;
+        font-size: 15px;
       }
       .footer {
-        padding: 24px 48px;
+        padding: 24px 32px;
         text-align: center;
-        background-color: #ffffff;
-        border-top: 1px solid #f0f0f0;
+        background-color: #F9FAFB;
+        border-top: 1px solid #E5E7EB;
       }
       .footer-text {
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 400;
-        line-height: 150%;
-        color: #000000;
+        line-height: 1.5;
+        color: #6B7280;
         margin: 0;
+      }
+      .footer-copyright {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #9CA3AF;
+        text-align: center;
+        margin: 16px 0 0 0;
       }
     </style>
   </head>
@@ -142,6 +232,9 @@
       <div class="body">
         <div class="card">
           <%= yield %>
+        </div>
+        <div class="footer-copyright">
+          <p>&copy; 2025 Autogram portal</p>
         </div>
       </div>
     </div>
