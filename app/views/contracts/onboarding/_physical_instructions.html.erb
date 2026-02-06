@@ -20,7 +20,7 @@
   </div>
 
   <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
-    <%= hidden_field_tag :recipient_uuid, @recipient&.uuid if @recipient %>
+    <%= hidden_field_tag :recipient, @recipient&.uuid if @recipient %>
     <%= hidden_field_tag :method, @method %>
     <%= hidden_field_tag :review, params[:review] if params[:review] %>
     
@@ -28,9 +28,9 @@
       <% 
         # If contract is part of a bundle, back goes to bundle sign; otherwise to contract sign
         back_path = if @contract.bundle
-          sign_bundle_path(@contract.bundle, recipient: params[:recipient_uuid])
+          sign_bundle_path(@contract.bundle, recipient: params[:recipient])
         else
-          sign_contract_path(@contract, recipient_uuid: params[:recipient_uuid])
+          sign_contract_path(@contract, recipient: params[:recipient])
         end
       %>
       <%= link_to back_path, 

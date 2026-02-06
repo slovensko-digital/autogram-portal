@@ -2,6 +2,7 @@ class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
   before_action :allow_iframe, only: [ :iframe ]
+  before_action :set_recipient, only: [ :signature_apps, :physical_signing, :create_physical_session ]
 
   def index
     @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
@@ -58,57 +59,24 @@ class ContractsController < ApplicationController
   end
 
   def signature_apps
-    # Load recipient from URL parameter (magic link) OR derive from current user
-    if params[:recipient_uuid]
-      @recipient = @contract.recipients.find_by(uuid: params[:recipient_uuid])
-    elsif current_user
-      # Logged-in user: find their recipient by email match
-      @recipient = @contract.recipients.find_by(email: current_user.email)
-    end
-
-    # Get eID card generation from params (if just redirected from onboarding), user, or session
-    @eid_card_generation = params[:eid_card_generation]&.to_i || current_user&.eid_card_generation || session[:eid_card_generation]
   end
 
   def physical_signing
-    # Load recipient from URL parameter (magic link) OR derive from current user
-    if params[:recipient_uuid]
-      @recipient = @contract.recipients.find_by(uuid: params[:recipient_uuid])
-    elsif current_user
-      # Logged-in user: find their recipient by email match
-      @recipient = @contract.recipients.find_by(email: current_user.email)
-    end
-
-    # Redirect if recipient already signed
-    if @recipient&.signed_contract?(@contract)
-      redirect_path = if @contract.bundle
-        sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
-      else
-        sign_contract_path(@contract, recipient_uuid: @recipient&.uuid)
-      end
-      redirect_to redirect_path
-    end
   end
 
   def create_physical_session
-    recipient_uuid = params[:recipient_uuid]
-    @recipient = @contract.recipients.find_by(uuid: recipient_uuid) if recipient_uuid
-
-    submitted_date = params[:submitted_date]
-
-    # Create physical session
     physical_session = PhysicalSession.create!(
       contract: @contract,
       user: current_user,
       recipient: @recipient,
       status: :pending
     )
-    physical_session.submitted_date = submitted_date
+    physical_session.submitted_date = params[:submitted_date]
     physical_session.save!
 
-    redirect_to sign_contract_path(@contract), notice: 'Physical signing information submitted successfully.'
+    redirect_to sign_contract_path(@contract, recipient: @recipient&.uuid)
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to physical_signing_contract_path(@contract, recipient_uuid: recipient_uuid),
+    redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid),
                 alert: "Failed to submit: #{e.message}"
   end
 
@@ -210,6 +178,25 @@ class ContractsController < ApplicationController
 
   def set_contract
     @contract = Contract.includes(:bundle).find_by!(uuid: params[:id])
+  end
+
+  def set_recipient
+    if params[:recipient]
+      @recipient = @contract.recipients.find_by(uuid: params[:recipient])
+    elsif current_user
+      @recipient = @contract.recipients.find_by(email: current_user.email)
+    end
+
+    @eid_card_generation = params[:eid_card_generation]&.to_i || current_user&.eid_card_generation || session[:eid_card_generation]
+
+    if @recipient&.signed_contract?(@contract)
+      redirect_path = if @contract.bundle
+        sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+      else
+        sign_contract_path(@contract, recipient: @recipient&.uuid)
+      end
+      redirect_to redirect_path
+    end
   end
 
   def contract_params

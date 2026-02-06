@@ -54,7 +54,7 @@ export default class extends Controller {
     let url = `/contracts/${this.contractIdValue}/onboarding/${firstStep}?method=${method}`
     
     if (this.recipientUuidValue) {
-      url += `&recipient_uuid=${this.recipientUuidValue}`
+      url += `&recipient=${this.recipientUuidValue}`
     }
     
     if (this.bundleIdValue) {
@@ -70,7 +70,7 @@ export default class extends Controller {
       const params = []
       
       if (this.recipientUuidValue) {
-        params.push(`recipient_uuid=${this.recipientUuidValue}`)
+        params.push(`recipient=${this.recipientUuidValue}`)
       }
       
       if (this.bundleIdValue) {
@@ -87,7 +87,7 @@ export default class extends Controller {
       const params = []
       
       if (this.recipientUuidValue) {
-        params.push(`recipient_uuid=${this.recipientUuidValue}`)
+        params.push(`recipient=${this.recipientUuidValue}`)
       }
       
       if (this.bundleIdValue) {

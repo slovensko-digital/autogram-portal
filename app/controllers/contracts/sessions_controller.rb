@@ -109,7 +109,7 @@ class Contracts::SessionsController < ApplicationController
     redirect_path = if @contract.bundle
       sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
     else
-      sign_contract_path(@contract, recipient_uuid: @recipient&.uuid)
+      sign_contract_path(@contract, recipient: @recipient&.uuid)
     end
 
     redirect_to redirect_path

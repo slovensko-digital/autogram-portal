@@ -6,7 +6,7 @@
         back_path = if @contract.bundle
           sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
         else
-          sign_contract_path(@contract, recipient_uuid: @recipient&.uuid)
+          sign_contract_path(@contract, recipient: @recipient&.uuid)
         end
       %>
       <%= link_to back_path, 
@@ -144,7 +144,7 @@
                 <p class="text-sm text-blue-800">
                   <%= t('contracts.signature_actions.learn_more_text') %> → 
                   <%= link_to t('contracts.signature_actions.how_signing_works'), 
-                      contract_onboarding_path(@contract, 'eid_card_generation', method: 'electronic', review: 'true', recipient_uuid: @recipient&.uuid), 
+                      contract_onboarding_path(@contract, 'eid_card_generation', method: 'electronic', review: 'true', recipient: @recipient&.uuid),
                       class: "font-medium underline hover:text-blue-600",
                       data: { turbo: false } %>
                 </p>

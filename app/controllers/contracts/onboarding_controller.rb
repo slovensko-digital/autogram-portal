@@ -42,8 +42,8 @@ module Contracts
     def set_recipient
       # Priority: URL param (magic link) > current user email match
       # NEVER use session for recipient - it's identity, not navigation state
-      if params[:recipient_uuid]
-        @recipient = @contract.recipients.find_by(uuid: params[:recipient_uuid])
+      if params[:recipient]
+        @recipient = @contract.recipients.find_by(uuid: params[:recipient])
       elsif current_user
         # Logged-in user: find their recipient by email match
         @recipient = @contract.recipients.find_by(email: current_user.email)
@@ -87,16 +87,16 @@ module Contracts
         end
 
         # Move to next step
-        redirect_to contract_onboarding_path(@contract, step: 'pin_check', method: @method, review: params[:review], recipient_uuid: @recipient&.uuid)
+        redirect_to contract_onboarding_path(@contract, step: 'pin_check', method: @method, review: params[:review], recipient: @recipient&.uuid)
       else
-        redirect_to contract_onboarding_path(@contract, step: 'eid_card_generation', method: @method, recipient_uuid: @recipient&.uuid),
+        redirect_to contract_onboarding_path(@contract, step: 'eid_card_generation', method: @method, recipient: @recipient&.uuid),
                     alert: 'Please select your eID card generation'
       end
     end
 
     def handle_pin_check
       # User confirms they know their PIN
-      redirect_to contract_onboarding_path(@contract, step: 'certificate_check', method: @method, review: params[:review], recipient_uuid: @recipient&.uuid)
+      redirect_to contract_onboarding_path(@contract, step: 'certificate_check', method: @method, review: params[:review], recipient: @recipient&.uuid)
     end
 
     def handle_certificate_check
@@ -129,9 +129,9 @@ module Contracts
       when 'electronic'
         # Pass eid_card_generation to ensure it's available
         generation = current_user&.eid_card_generation || session[:eid_card_generation]
-        redirect_to signature_apps_contract_path(@contract, recipient_uuid: @recipient&.uuid, eid_card_generation: generation)
+        redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, eid_card_generation: generation)
       when 'physical'
-        redirect_to physical_signing_contract_path(@contract, recipient_uuid: @recipient&.uuid)
+        redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid)
       end
     end
 

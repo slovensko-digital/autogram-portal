@@ -17,7 +17,7 @@
           </div>
 
           <%= form_with url: physical_signing_contract_path(@contract), method: :post, local: true, class: "space-y-6" do |f| %>
-            <%= hidden_field_tag :recipient_uuid, @recipient&.uuid %>
+            <%= hidden_field_tag :recipient, @recipient&.uuid %>
             
             <div>
               <label for="submitted_date" class="block text-sm font-medium text-gray-700 mb-2">
