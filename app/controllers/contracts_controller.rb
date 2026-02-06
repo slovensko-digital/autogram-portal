@@ -1,8 +1,8 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
-  before_action :allow_iframe, only: [ :iframe ]
   before_action :set_recipient, only: [ :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
 
   def index
     @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
@@ -155,16 +155,6 @@ class ContractsController < ApplicationController
       end
     else
       redirect_to @contract, alert: I18n.t("contracts.destroy.failure", error: e.message)
-    end
-  end
-
-  def iframe
-    no_header
-    no_footer
-    no_flash
-
-    if params[:no_preview]
-      render template: "contracts/iframe_no_preview"
     end
   end
 

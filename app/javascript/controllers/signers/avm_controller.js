@@ -72,11 +72,11 @@ export default class extends Controller {
   }
 
   resetParentSignButton() {
-    const parentElement = this.element.closest('[data-controller*="signature-method-selector"]')
+    const parentElement = this.element.closest('[data-controller*="signing-app-selector"]')
     if (parentElement) {
       const controller = this.application.getControllerForElementAndIdentifier(
         parentElement, 
-        'signature-method-selector'
+        'signing-app-selector'
       )
       if (controller && typeof controller.setSignButtonLoading === 'function') {
         controller.setSignButtonLoading(false)

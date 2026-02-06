@@ -247,17 +247,13 @@ sk:
       failure: "Nepodarilo sa zmazať balík dokumentov."
       confirm: "Ste si istý, že chcete zmazať tento balík dokumentov? Táto akcia je nezvratná."
     sign:
-      title: "Podpíšte balík dokumentov"
+      title: "Balík dokumentov"
       title_requested_singular: "Dostali ste dokument na podpis"
       title_requested_plural: "Dostali ste balík %{count} dokumentov na podpis"
       subtitle_requested: "Skontrolujte odosielateľa a dokumenty v balíku, potom vyberte spôsob podpisu."
+      contract_number: "Dokument %{current} z %{total}"
       note_title: "Poznámka od odosielateľa"
       awaiting_recipients: "Čaká na podpis od"
-    iframe:
-      title: "Balík dokumentov"
-      subtitle: "Prosím, podpíšte všetky dokumenty v balíku"
-      contract_number: "Dokument %{current} z %{total}"
-      signed: "Podpísané"
     status:
       all_signed: "Všetky dokumenty podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
@@ -320,7 +316,7 @@ sk:
       failure_bundle_attached: "Dokument nemôže byť zmazaný, pretože je súčasťou balíka dokumentov."
     sign:
       all_contracts: "Všetky dokumenty"
-      title: "Podpíšte dokument"
+      title: "Dokument"
       subtitle: "Skontrolujte dokument, potom vyberte spôsob podpisu."
       title_requested: "Dostali ste dokument na podpis"
       subtitle_requested: "Skontrolujte odosielateľa a dokument, potom vyberte spôsob podpisu."
@@ -344,7 +340,7 @@ sk:
       already_signed:
         title: "Dokument je podpísaný"
         message: "Tento dokument je už podpísaný. Nie je od vás potrebný ďalší podpis."
-    signature_actions:
+    signature_apps:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       add_another_signature: "Pridajte ďalší podpis"
       autogram_desktop_label: "Autogram Desktop"
@@ -361,7 +357,6 @@ sk:
       how_signing_works: "Ako funguje podpisovanie"
       signed_title: "Dokumenty boli podpísané"
       signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
-    signature_apps:
       title: "Vyberte podpisovú aplikáciu"
       subtitle: "Vyberte, ktorú aplikáciu chcete použiť na elektronické podpisovanie"
       back_to_signing_options: "Späť na možnosti podpisovania"

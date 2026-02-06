@@ -1,24 +1,14 @@
 <%# locals: (contract:, recipient: nil, bundle_id: nil, onboarding_required: { electronic: false, physical: false }) %>
 
 <%= turbo_frame_tag "signing_method_choice_#{contract.uuid}" do %>
-  <div data-controller="signing-method" 
-       data-signing-method-contract-id-value="<%= contract.uuid %>"
-       data-signing-method-recipient-uuid-value="<%= recipient&.uuid %>"
-       data-signing-method-bundle-id-value="<%= bundle_id %>"
-       data-signing-method-electronic-onboarding-value="<%= onboarding_required[:electronic] %>"
-       data-signing-method-physical-onboarding-value="<%= onboarding_required[:physical] %>"
-       class="w-full space-y-4">
-    
-    <h3 class="text-lg font-semibold text-gray-900">
-      <%= t('contracts.signing_method_choice.title') %>
-    </h3>
-    
+  <div data-controller="signing-method" class="w-full space-y-4">
+    <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
     <div class="space-y-3">
       <%= render 'shared/radio_button_card',
             name: "signing_method_#{contract.uuid}",
             value: 'electronic',
-            label: t('contracts.signing_method_choice.electronic_label'),
-            description: t('contracts.signing_method_choice.electronic_description'),
+            label: t('.electronic_label'),
+            description: t('.electronic_description'),
             checked: true,
             icon: 'device-tablet',
             data_attributes: { 
@@ -29,8 +19,8 @@
       <%= render 'shared/radio_button_card',
             name: "signing_method_#{contract.uuid}",
             value: 'physical',
-            label: t('contracts.signing_method_choice.physical_label'),
-            description: t('contracts.signing_method_choice.physical_description'),
+            label: t('.physical_label'),
+            description: t('.physical_description'),
             checked: false,
             icon: 'pencil',
             data_attributes: { 
@@ -39,12 +29,34 @@
             } %>
     </div>
 
+    <div class="hidden">
+      <% if onboarding_required[:electronic] && params[:iframe].blank? %>
+        <%= link_to "",
+            contract_onboarding_path(contract, step: "eid_card_generation", method: 'electronic', recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
+      <% else %>
+        <%= link_to "",
+            signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
+      <% end %>
+
+      <% if onboarding_required[:physical] && params[:iframe].blank? %>
+        <%= link_to "",
+            contract_onboarding_path(contract, step: "physical_instructions", method: 'physical', recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
+      <% else %>
+        <%= link_to "",
+            physical_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
+      <% end %>
+    </div>
+
     <div class="flex justify-end">
       <button type="button"
               data-signing-method-target="continueButton"
               data-action="click->signing-method#continue"
-              class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <%= t('contracts.signing_method_choice.continue') %>
+              class="px-6 py-3 bg-blue-600 text-white rounded-md cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <%= t('.continue') %>
       </button>
     </div>
   </div>

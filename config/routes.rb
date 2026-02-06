@@ -57,7 +57,6 @@ Rails.application.routes.draw do
       get :validate
       get :visualize
       get :signed_document
-      get :iframe
       get :signature_parameters
       get :signature_extension
       post :extend_signatures
@@ -86,7 +85,6 @@ Rails.application.routes.draw do
 
   resources :bundles, only: [] do
     member do
-      get :iframe
       get :sign
     end
   end

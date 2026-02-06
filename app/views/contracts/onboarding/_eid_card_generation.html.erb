@@ -1,8 +1,8 @@
 <div class="space-y-6">
   <div>
-    <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('contracts.onboarding.eid_card_generation.title') %></h3>
+    <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
     <p class="text-sm text-gray-600 mb-4">
-      <%= t('contracts.onboarding.eid_card_generation.description') %>
+      <%= t('.description') %>
     </p>
   </div>
 
@@ -10,18 +10,19 @@
     <%= hidden_field_tag :recipient, @recipient&.uuid if @recipient %>
     <%= hidden_field_tag :method, @method %>
     <%= hidden_field_tag :review, params[:review] if params[:review] %>
-    
+    <%= hidden_field_tag :iframe, params[:iframe] %>
+
     <div class="space-y-3">
       <% (1..5).each do |gen| %>
         <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 <%= gen >= 4 ? 'border-blue-300' : 'border-gray-200' %>">
           <%= radio_button_tag :eid_card_generation, gen, false, class: 'mr-3' %>
           <div class="flex-1">
-            <div class="font-medium text-gray-900"><%= t('contracts.onboarding.eid_card_generation.generation_label', gen: gen) %></div>
+            <div class="font-medium text-gray-900"><%= t('.generation_label', gen: gen) %></div>
             <div class="text-sm text-gray-600">
               <% if gen >= 4 %>
-                ✓ <%= t('contracts.onboarding.eid_card_generation.compatible_mobile') %>
+                ✓ <%= t('.compatible_mobile') %>
               <% else %>
-                ⚠ <%= t('contracts.onboarding.eid_card_generation.requires_desktop') %>
+                ⚠ <%= t('.requires_desktop') %>
               <% end %>
             </div>
           </div>
@@ -33,9 +34,9 @@
       <% 
         # If contract is part of a bundle, back goes to bundle sign; otherwise to contract sign
         back_path = if @contract.bundle
-          sign_bundle_path(@contract.bundle, recipient: params[:recipient])
+          sign_bundle_path(@contract.bundle, recipient: params[:recipient], iframe: params[:iframe])
         else
-          sign_contract_path(@contract, recipient: params[:recipient])
+          sign_contract_path(@contract, recipient: params[:recipient], iframe: params[:iframe])
         end
       %>
       <%= link_to back_path, 
@@ -45,7 +46,7 @@
         </svg>
         <%= t('contracts.onboarding.back_to_signing_options') %>
       <% end %>
-      <%= f.submit t('contracts.onboarding.eid_card_generation.continue'), class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      <%= f.submit t('.continue'), class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     </div>
   <% end %>
 </div>

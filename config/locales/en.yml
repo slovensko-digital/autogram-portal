@@ -297,17 +297,13 @@ en:
       failure: "Failed to delete contract bundle."
       confirm: "Are you sure you want to delete this contract bundle? This action is irreversible."
     sign:
-      title: "Sign contract bundle"
+      title: "Documents bundle"
       title_requested_singular: "You received a document to sign"
       title_requested_plural: "You received a bundle of %{count} documents to sign"
       subtitle_requested: "Check the sender and documents in the bundle, then select the signing method."
+      contract_number: "Contract %{current} of %{total}"
       note_title: "Note from sender"
       awaiting_recipients: "Awaiting signature from"
-    iframe:
-      title: "Contract Bundle"
-      subtitle: "Please sign all contracts in the bundle"
-      contract_number: "Contract %{current} of %{total}"
-      signed: "Signed"
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
@@ -367,8 +363,8 @@ en:
       confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
       failure_bundle_attached: "Cannot delete contract because it is part of a bundle."
     sign:
-      all_contracts: "All contracts"
-      title: "Sign document"
+      all_contracts: "All documents"
+      title: "Document"
       subtitle: "Check the document, then select the signing method."
       title_requested: "You received a document to sign"
       subtitle_requested: "Check the sender and document, then select the signing method."
@@ -392,7 +388,7 @@ en:
       already_signed:
         title: "Document has been signed"
         message: "This document has been signed and is complete. No further signature is required."
-    signature_actions:
+    signature_apps:
       select_signing_app: "Select signing application"
       add_another_signature: "Add another signature"
       autogram_desktop_label: "Autogram Desktop"
@@ -409,7 +405,6 @@ en:
       how_signing_works: "How signing works"
       signed_title: "Documents have been signed"
       signed_message: "This contract has been signed and is complete. No further signature is required."
-    signature_apps:
       title: "Select Signing Application"
       subtitle: "Choose which application to use for electronic signing"
       back_to_signing_options: "Back to signing options"

@@ -4,6 +4,7 @@ class Contracts::SessionsController < ApplicationController
   before_action :set_recipient, only: [ :create, :show ]
   before_action :redirect_if_completed, only: [ :show ]
   skip_before_action :verify_authenticity_token, only: [ :upload, :get_webhook, :standard_webhook ]
+  before_action :allow_iframe
 
   def create
     session_type = params[:type] || params[:application]
