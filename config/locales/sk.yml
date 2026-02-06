@@ -1,6 +1,10 @@
 sk:
   hello: "Ahoj svet"
-  
+
+  common:
+    important: "Dôležité"
+    desktop_required: "Potrebný stolný počítač"
+
   actions:
     back: "Späť"
     continue: "Pokračovať"
@@ -357,6 +361,12 @@ sk:
       how_signing_works: "Ako funguje podpisovanie"
       signed_title: "Dokumenty boli podpísané"
       signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
+    signature_apps:
+      title: "Vyberte podpisovú aplikáciu"
+      subtitle: "Vyberte, ktorú aplikáciu chcete použiť na elektronické podpisovanie"
+      back_to_signing_options: "Späť na možnosti podpisovania"
+      old_card_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (AVM, eIdentita) nie sú kompatibilné s vašou kartou."
+      old_card_mobile_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
     download_actions:
       message: "Tento dokument bol podpísaný a je pripravený na stiahnutie."
       download_button: "Stiahnuť podpísaný dokument"
@@ -396,6 +406,56 @@ sk:
       error:
         title: "Chyba pri podpisovaní dokumentu"
         close: "Zavrieť"
+    onboarding:
+      back_to_signing_options: "Späť na možnosti podpisovania"
+      electronic_title: "Nastavenie elektronického podpisovania"
+      physical_title: "Nastavenie fyzického podpisovania"
+      subtitle: "Dokončite tieto kroky na prípravu podpisovania"
+      eid_card_generation:
+        title: "Vyberte generáciu vášho občianskeho preukazu"
+        description: "Rôzne generácie občianskych preukazov podporujú rôzne metódy podpisovania. Prosím, vyberte generáciu vašej karty nižšie."
+        generation_label: "Generácia %{gen}"
+        compatible_mobile: "Kompatibilné s mobilnými podpisovými aplikáciami (AVM, eIdentita)"
+        requires_desktop: "Vyžaduje stolný počítač s čítačkou kariet (iba Autogram Desktop)"
+        continue: "Pokračovať"
+      pin_check:
+        title: "Poznáte PIN k vášmu občianskemu preukazu?"
+        description: "Budete potrebovať 4-6 miestny PIN kód na elektronické podpisovanie dokumentov. Tento PIN vám bol poskytnutý pri vydavení občianskeho preukazu."
+        no_pin_title: "Nemáte PIN?"
+        no_pin_description: "Kontaktujte vydavateľa vašej karty alebo navštívte Slovak Point, aby ste ho resetovali."
+        continue: "Mám PIN, pokračovať"
+      certificate_check:
+        title: "Máte certifikáty na vašom občianskom preukaze?"
+        description: "Elektronické podpisovanie vyžaduje platné certifikáty na vašom občianskom preukaze. Väčšina ľudí už tieto certifikáty má."
+        no_certificates_title: "Nemáte ešte certifikáty?"
+        no_certificates_description: "Budete potrebovať stolný počítač s fyzickou čítačkou kariet na ich vydanie. Toto je jednorazová požiadavka."
+        continue: "Mám certifikáty, pokračovať"
+      physical_instructions:
+        title: "Pokyny pre fyzické podpisovanie"
+        description: "Na fyzické podpísanie tohto dokumentu postupujte podľa týchto krokov:"
+        step1: "Stiahnite a vytlačte dokument"
+        step2: "Podpíšte ho vlastnoručným podpisom"
+        step3: "Naskenujte podpísaný dokument alebo si ponechajte originál"
+        step4: "Pošlite ho poštou odosielateľovi"
+        note: "Po odoslaní podpísaného dokumentu nás prosím inform ujte kliknutím na tlačidlo nižšie."
+        continue: "Pokračovať na fyzické podpisovanie"
+    signing_method_choice:
+      title: "Ako by ste chceli podpísať tento dokument?"
+      electronic_label: "Elektronické podpisovanie"
+      electronic_description: "Podpíšte digitálne pomocou vašho občianskeho preukazu a podpisovej aplikácie"
+      physical_label: "Fyzické podpisovanie"
+      physical_description: "Vytlačte, podpíšte ručne a pošlite poštou"
+      continue: "Pokračovať"
+    physical_signing:
+      title: "Fyzický podpis"
+      subtitle: "Odošlite informácie o vašom fyzicky podpísanom dokumente"
+      form_title: "Odoslali ste podpísaný dokument?"
+      form_description: "Prosím, dajte nám vedieť, kedy ste odoslali fyzicky podpísaný dokument poštou."
+      date_label: "Dátum odoslania poštou"
+      date_helper: "Vyberte dátum, kedy ste dokument odoslali"
+      confirmation_message: "Po odoslaní dostanete potvrdenie. Odosielateľ dokumentu bude upovedomený o vašom fyzickom podpise."
+      back: "Späť"
+      submit: "Odoslať fyzický podpis"
   
   homepage:
     index:

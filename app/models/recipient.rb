@@ -6,7 +6,7 @@
 #  email               :string           not null
 #  locale              :string           default("sk"), not null
 #  name                :string
-#  notification_status :integer          default("notifiable"), not null
+#  notification_status :integer          default("not_notified"), not null
 #  status              :integer          default("pending"), not null
 #  uuid                :uuid             not null
 #  created_at          :datetime         not null

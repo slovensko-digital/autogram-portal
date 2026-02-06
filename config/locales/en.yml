@@ -30,6 +30,10 @@
 en:
   hello: "Hello world"
 
+  common:
+    important: "Important"
+    desktop_required: "Desktop computer required"
+
   actions:
     back: "Back"
     continue: "Continue"
@@ -405,6 +409,12 @@ en:
       how_signing_works: "How signing works"
       signed_title: "Documents have been signed"
       signed_message: "This contract has been signed and is complete. No further signature is required."
+    signature_apps:
+      title: "Select Signing Application"
+      subtitle: "Choose which application to use for electronic signing"
+      back_to_signing_options: "Back to signing options"
+      old_card_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Mobile signing apps (AVM, eIdentita) are not compatible with your card."
+      old_card_mobile_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
     download_actions:
       message: "This document has been signed and is ready for download."
       download_button: "Download Signed Document"
@@ -440,6 +450,56 @@ en:
       error:
         title: "Error signing the document"
         close: "Close"
+    onboarding:
+      back_to_signing_options: "Back to signing options"
+      electronic_title: "Electronic Signing Setup"
+      physical_title: "Physical Signing Setup"
+      subtitle: "Complete these steps to prepare for signing"
+      eid_card_generation:
+        title: "Select your eID card generation"
+        description: "Different eID card generations support different signing methods. Please select your card generation below."
+        generation_label: "Generation %{gen}"
+        compatible_mobile: "Compatible with mobile signing apps (AVM, eIdentita)"
+        requires_desktop: "Requires desktop computer with card reader (Autogram Desktop only)"
+        continue: "Continue"
+      pin_check:
+        title: "Do you know your eID card PIN?"
+        description: "You will need your 4-6 digit PIN code to sign documents electronically. This PIN was provided to you when you received your eID card."
+        no_pin_title: "Don't have your PIN?"
+        no_pin_description: "Contact your eID card issuer or visit a Slovak Point to reset it."
+        continue: "I have my PIN, continue"
+      certificate_check:
+        title: "Do you have certificates on your eID card?"
+        description: "Electronic signing requires valid certificates to be issued on your eID card. Most people already have these certificates."
+        no_certificates_title: "Don't have certificates yet?"
+        no_certificates_description: "You'll need to use a desktop computer with a physical card reader to issue them first. This is a one-time requirement."
+        continue: "I have certificates, continue"
+      physical_instructions:
+        title: "Physical Signing Instructions"
+        description: "To sign this document physically, please follow these steps:"
+        step1: "Download and print the document"
+        step2: "Sign it with your handwritten signature"
+        step3: "Scan the signed document or keep the original"
+        step4: "Send it via post office to the sender"
+        note: "After you send the signed document, please let us know by clicking the button below."
+        continue: "Continue to physical signing"
+    signing_method_choice:
+      title: "How would you like to sign this document?"
+      electronic_label: "Electronic Signing"
+      electronic_description: "Sign digitally using your eID card and a signing application"
+      physical_label: "Physical Signing"
+      physical_description: "Print, sign by hand, and send via post office"
+      continue: "Continue"
+    physical_signing:
+      title: "Physical Signing"
+      subtitle: "Submit information about your physically signed document"
+      form_title: "Have you sent the signed document?"
+      form_description: "Please let us know when you sent the physically signed document via post office."
+      date_label: "Date sent via post office"
+      date_helper: "Select the date when you sent the document"
+      confirmation_message: "After submitting, you will receive a confirmation. The document sender will be notified about your physical signature."
+      back: "Back"
+      submit: "Submit Physical Signing"
   
   homepage:
     index:

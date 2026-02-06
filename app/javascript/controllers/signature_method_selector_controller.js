@@ -3,7 +3,7 @@ import { isMobileDevice } from "utils/device_detection"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["methodRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "signButton", "desktopElement"]
+  static targets = ["methodRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "signButton", "desktopElement", "mobileWarning", "yellowWarning", "appSelectionHeading"]
 
   connect() {
     console.log('Signature method selector connected')
@@ -21,16 +21,43 @@ export default class extends Controller {
 
   handleDeviceDetection() {
     if (isMobileDevice()) {
+      const hasMobileOptions = this.methodRadioTargets.some(radio => radio.value !== 'autogram')
+      
+      // Always hide desktop option on mobile
       this.desktopElementTargets.forEach(element => {
         element.style.display = 'none'
       })
 
-      const autogramRadio = this.methodRadioTargets.find(radio => radio.value === 'autogram')
-      const avmRadio = this.methodRadioTargets.find(radio => radio.value === 'avm')
-      
-      if (autogramRadio && autogramRadio.checked && avmRadio) {
-        autogramRadio.checked = false
-        avmRadio.checked = true
+      if (hasMobileOptions) {
+        // Mobile alternatives exist - auto-select first mobile option
+        const autogramRadio = this.methodRadioTargets.find(radio => radio.value === 'autogram')
+        const avmRadio = this.methodRadioTargets.find(radio => radio.value === 'avm')
+        
+        if (autogramRadio && autogramRadio.checked && avmRadio) {
+          autogramRadio.checked = false
+          avmRadio.checked = true
+        }
+      } else {
+        // No mobile options available - show warning that desktop is required
+        if (this.hasMobileWarningTarget) {
+          this.mobileWarningTarget.style.display = 'block'
+        }
+        
+        // Hide yellow warning on mobile since red warning is shown
+        if (this.hasYellowWarningTarget) {
+          this.yellowWarningTarget.style.display = 'none'
+        }
+        
+        // Hide app selection heading since there are no options to select
+        if (this.hasAppSelectionHeadingTarget) {
+          this.appSelectionHeadingTarget.style.display = 'none'
+        }
+        
+        // Disable the sign button since no compatible options
+        if (this.hasSignButtonTarget) {
+          this.signButtonTarget.disabled = true
+          this.signButtonTarget.classList.add('opacity-50', 'cursor-not-allowed')
+        }
       }
     } else {
       this.desktopElementTargets.forEach(element => {

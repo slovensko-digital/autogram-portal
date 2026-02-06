@@ -155,8 +155,8 @@ export default class extends Controller {
           window.location.href = response.url
         } else if (response.ok) {
           window.parent.postMessage({ type: 'message', status: 'document-signed' }, '*');
-          console.log('Document signed and submitted successfully, reloading page.')
-          window.location.reload()
+          console.log('Document signed and submitted successfully. Turbo stream refresh will redirect to sign page.')
+          // Turbo stream will broadcast :refresh action which triggers controller redirect
         } else {
           const errorText = await response.text()
           let errorMessage = 'An error occurred while submitting the signed document.'

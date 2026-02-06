@@ -1,0 +1,51 @@
+<div class="space-y-6">
+  <div>
+    <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('contracts.onboarding.eid_card_generation.title') %></h3>
+    <p class="text-sm text-gray-600 mb-4">
+      <%= t('contracts.onboarding.eid_card_generation.description') %>
+    </p>
+  </div>
+
+  <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
+    <%= hidden_field_tag :recipient_uuid, @recipient&.uuid if @recipient %>
+    <%= hidden_field_tag :method, @method %>
+    <%= hidden_field_tag :review, params[:review] if params[:review] %>
+    
+    <div class="space-y-3">
+      <% (1..5).each do |gen| %>
+        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 <%= gen >= 4 ? 'border-blue-300' : 'border-gray-200' %>">
+          <%= radio_button_tag :eid_card_generation, gen, false, class: 'mr-3' %>
+          <div class="flex-1">
+            <div class="font-medium text-gray-900"><%= t('contracts.onboarding.eid_card_generation.generation_label', gen: gen) %></div>
+            <div class="text-sm text-gray-600">
+              <% if gen >= 4 %>
+                ✓ <%= t('contracts.onboarding.eid_card_generation.compatible_mobile') %>
+              <% else %>
+                ⚠ <%= t('contracts.onboarding.eid_card_generation.requires_desktop') %>
+              <% end %>
+            </div>
+          </div>
+        </label>
+      <% end %>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <% 
+        # If contract is part of a bundle, back goes to bundle sign; otherwise to contract sign
+        back_path = if @contract.bundle
+          sign_bundle_path(@contract.bundle, recipient: params[:recipient_uuid])
+        else
+          sign_contract_path(@contract, recipient_uuid: params[:recipient_uuid])
+        end
+      %>
+      <%= link_to back_path, 
+          class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" do %>
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <%= t('contracts.onboarding.back_to_signing_options') %>
+      <% end %>
+      <%= f.submit t('contracts.onboarding.eid_card_generation.continue'), class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+  <% end %>
+</div>

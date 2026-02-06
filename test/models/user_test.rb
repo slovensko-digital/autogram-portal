@@ -4,11 +4,13 @@
 #
 #  id                     :bigint           not null, primary key
 #  api_token_public_key   :string
+#  completed_onboardings  :jsonb            not null
 #  confirmation_sent_at   :datetime
 #  confirmation_token     :string
 #  confirmed_at           :datetime
 #  current_sign_in_at     :datetime
 #  current_sign_in_ip     :string
+#  eid_card_generation    :integer
 #  email                  :string
 #  encrypted_password     :string           default(""), not null
 #  failed_attempts        :integer          default(0), not null

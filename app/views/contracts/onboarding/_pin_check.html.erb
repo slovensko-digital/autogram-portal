@@ -1,0 +1,40 @@
+<div class="space-y-6">
+  <div>
+    <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('contracts.onboarding.pin_check.title') %></h3>
+    <p class="text-sm text-gray-600 mb-4">
+      <%= t('contracts.onboarding.pin_check.description') %>
+    </p>
+    
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-800">
+            <strong><%= t('contracts.onboarding.pin_check.no_pin_title') %></strong> <%= t('contracts.onboarding.pin_check.no_pin_description') %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
+    <%= hidden_field_tag :recipient_uuid, @recipient&.uuid if @recipient %>
+    <%= hidden_field_tag :method, @method %>
+    <%= hidden_field_tag :review, params[:review] if params[:review] %>
+    
+    <div class="mt-6 flex justify-between">
+      <%= link_to contract_onboarding_path(@contract, 'eid_card_generation', method: params[:method], recipient_uuid: params[:recipient_uuid], bundle_id: params[:bundle_id]), 
+          class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" do %>
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <%= t('contracts.onboarding.back_to_signing_options') %>
+      <% end %>
+      <%= f.submit t('contracts.onboarding.pin_check.continue'), class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+  <% end %>
+</div>

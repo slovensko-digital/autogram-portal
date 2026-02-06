@@ -1,0 +1,51 @@
+<%# locals: (contract:, recipient: nil, bundle_id: nil, onboarding_required: { electronic: false, physical: false }) %>
+
+<%= turbo_frame_tag "signing_method_choice_#{contract.uuid}" do %>
+  <div data-controller="signing-method" 
+       data-signing-method-contract-id-value="<%= contract.uuid %>"
+       data-signing-method-recipient-uuid-value="<%= recipient&.uuid %>"
+       data-signing-method-bundle-id-value="<%= bundle_id %>"
+       data-signing-method-electronic-onboarding-value="<%= onboarding_required[:electronic] %>"
+       data-signing-method-physical-onboarding-value="<%= onboarding_required[:physical] %>"
+       class="w-full space-y-4">
+    
+    <h3 class="text-lg font-semibold text-gray-900">
+      <%= t('contracts.signing_method_choice.title') %>
+    </h3>
+    
+    <div class="space-y-3">
+      <%= render 'shared/radio_button_card',
+            name: "signing_method_#{contract.uuid}",
+            value: 'electronic',
+            label: t('contracts.signing_method_choice.electronic_label'),
+            description: t('contracts.signing_method_choice.electronic_description'),
+            checked: true,
+            icon: 'device-tablet',
+            data_attributes: { 
+              signing_method_target: 'methodRadio',
+              action: 'change->signing-method#handleMethodSelection'
+            } %>
+
+      <%= render 'shared/radio_button_card',
+            name: "signing_method_#{contract.uuid}",
+            value: 'physical',
+            label: t('contracts.signing_method_choice.physical_label'),
+            description: t('contracts.signing_method_choice.physical_description'),
+            checked: false,
+            icon: 'pencil',
+            data_attributes: { 
+              signing_method_target: 'methodRadio',
+              action: 'change->signing-method#handleMethodSelection'
+            } %>
+    </div>
+
+    <div class="flex justify-end">
+      <button type="button"
+              data-signing-method-target="continueButton"
+              data-action="click->signing-method#continue"
+              class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <%= t('contracts.signing_method_choice.continue') %>
+      </button>
+    </div>
+  </div>
+<% end %>

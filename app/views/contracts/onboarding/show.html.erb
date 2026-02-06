@@ -1,0 +1,16 @@
+<main>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div class="w-full">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+          <%= @method == 'electronic' ? t('contracts.onboarding.electronic_title') : t('contracts.onboarding.physical_title') %>
+        </h1>
+        <p class="text-gray-600"><%= t('contracts.onboarding.subtitle') %></p>
+      </div>
+
+      <div class="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <%= render "contracts/onboarding/#{@step}" %>
+      </div>
+    </div>
+  </div>
+</main>

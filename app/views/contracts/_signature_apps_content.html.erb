@@ -1,10 +1,6 @@
-<%# locals: (info_hidden: false, contract:, recipient: nil, eid_card_generation: nil) %>
+<%# locals: (contract:, recipient: nil, eid_card_generation: nil, info_hidden: false) %>
 
-<%= turbo_frame_tag "signature_actions_#{contract.uuid}" do %>
-  <% 
-    # Get eid_card_generation from local or fallback to nil
-    card_generation = eid_card_generation
-  %>
+<%= turbo_frame_tag "signature_apps_#{contract.uuid}" do %>
   <div data-controller="signature-method-selector" class="w-full space-y-4">
     <h3 class="text-lg font-semibold text-gray-900">
       <% if contract.awaiting_signature? %>
@@ -15,7 +11,7 @@
     </h3>
 
     <%# Show warning if on mobile device with old eID card %>
-    <% if card_generation.present? && card_generation < 4 %>
+    <% if eid_card_generation.present? && eid_card_generation < 4 %>
       <div class="bg-red-50 border-l-4 border-red-400 p-4" data-signature-method-selector-target="mobileWarning" style="display: none;">
         <div class="flex items-start">
           <div class="flex-shrink-0">
@@ -25,7 +21,7 @@
           </div>
           <div class="ml-3">
             <p class="text-sm text-red-800">
-              <strong>Desktop computer required:</strong> Your eID card (generation <%= card_generation %>) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document.
+              <strong>Desktop computer required:</strong> Your eID card (generation <%= eid_card_generation %>) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document.
             </p>
           </div>
         </div>
@@ -48,7 +44,7 @@
       </div>
 
       <%# Hide AVM and eIdentita for eID card generations < 4 %>
-      <% unless card_generation.present? && card_generation < 4 %>
+      <% unless eid_card_generation.present? && eid_card_generation < 4 %>
         <%= render 'shared/radio_button_card',
               name: "signature_method_#{contract.uuid}",
               value: 'avm',
@@ -91,22 +87,27 @@
             } %>
     </div>
 
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <div class="flex items-start">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-        <div class="ml-3 flex-1">
-          <h4 class="text-sm font-semibold text-blue-900 mb-1"><%= t('contracts.signature_actions.first_time_signing') %></h4>
-          <p class="text-sm text-blue-800">
-            <%= t('contracts.signature_actions.learn_more_text') %> → 
-            <%= link_to t('contracts.signature_actions.how_signing_works'), "#", class: "font-medium underline hover:text-blue-600" %>
-          </p>
+    <% unless info_hidden %>
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ml-3 flex-1">
+            <h4 class="text-sm font-semibold text-blue-900 mb-1"><%= t('contracts.signature_actions.first_time_signing') %></h4>
+            <p class="text-sm text-blue-800">
+              <%= t('contracts.signature_actions.learn_more_text') %> → 
+              <%= link_to t('contracts.signature_actions.how_signing_works'), 
+                  contract_onboarding_path(contract, 'eid_card_generation', method: 'electronic', review: 'true'), 
+                  class: "font-medium underline hover:text-blue-600",
+                  data: { turbo: false } %>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    <% end %>
 
     <div class="border-b border-gray-200"></div>
 

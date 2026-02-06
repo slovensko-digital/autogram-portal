@@ -67,7 +67,7 @@
             <% end %>
             <% if contract.awaiting_signature? %>
               <div class="w-full pt-4 mb-6">
-                <%= render 'contracts/signature_actions', contract: contract %>
+                <%= render 'contracts/signature_apps_content', contract: contract %>
               </div>
             <% else %>
               <div class="w-full bg-green-50 border-l-4 border-green-400 p-4 mb-6">
