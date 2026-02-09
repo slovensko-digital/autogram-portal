@@ -1,7 +1,7 @@
 class BundlesController < ApplicationController
   before_action :set_bundle, only: [ :show, :edit, :update, :destroy ]
-  skip_before_action :verify_authenticity_token, only: [ :sign ], if: -> { params[:iframe] }
-  before_action :allow_iframe, only: [ :sign ], if: -> { params[:iframe] }
+  skip_before_action :verify_authenticity_token, only: [ :sign ], if: -> { params[:iframe].present? }
+  before_action :allow_iframe, only: [ :sign ], if: -> { params[:iframe].present? }
 
   def index
     @bundles = current_user.bundles.includes(:contracts, :author).order(created_at: :desc)

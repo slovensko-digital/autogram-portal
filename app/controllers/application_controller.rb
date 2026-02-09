@@ -60,7 +60,7 @@ class ApplicationController < ActionController::Base
   def allow_iframe
     response.headers.except! "X-Frame-Options"
 
-    if params[:iframe]
+    if params[:iframe].present?
       no_header
       no_footer
       no_flash
