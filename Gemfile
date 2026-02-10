@@ -80,7 +80,7 @@ gem "redis", "~> 5.4"
 gem "jwt", "~> 3.1"
 
 gem "devise", "~> 5.0"
-gem "devise-i18n", "~> 1.15"
+gem "devise-i18n", "~> 1.16"
 gem "devise-passwordless", "~> 1.1"
 
 gem "letter_opener", "~> 1.10", group: :development
