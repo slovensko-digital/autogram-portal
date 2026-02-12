@@ -417,16 +417,18 @@ sk:
         requires_desktop: "Vyžaduje stolný počítač s čítačkou kariet (iba Autogram Desktop)"
         continue: "Pokračovať"
       pin_check:
-        title: "Poznáte PIN k vášmu občianskemu preukazu?"
-        description: "Budete potrebovať 4-6 miestny PIN kód na elektronické podpisovanie dokumentov. Tento PIN vám bol poskytnutý pri vydavení občianskeho preukazu."
-        no_pin_title: "Nemáte PIN?"
-        no_pin_description: "Kontaktujte vydavateľa vašej karty alebo navštívte Slovak Point, aby ste ho resetovali."
-        continue: "Mám PIN, pokračovať"
+        title: "Poznáte BOK k vášmu občianskemu preukazu?"
+        description: "Budete potrebovať 6 miestny bezpečnostný osobný kód (BOK) na používanie elektronického čipu na vašom občianskom preukaze. Tento BOK vám bol poskytnutý alebo vami zadaný pri vydavení občianskeho preukazu."
+        no_pin_title: "Nemáte BOK?"
+        no_pin_description: "Musíte navštívit oddelenie dokladov na ktorom koľko okresnom riaditeľstve policajného zboru."
+        no_pin_learn_more: "Čo robiť, ak som zabudol BOK?"
+        continue: "Mám BOK, pokračovať"
       certificate_check:
         title: "Máte certifikáty na vašom občianskom preukaze?"
-        description: "Elektronické podpisovanie vyžaduje platné certifikáty na vašom občianskom preukaze. Väčšina ľudí už tieto certifikáty má."
+        description: "Elektronické podpisovanie vyžaduje platné kvalifikované certifikáty na vašom občianskom preukaze. Tieto certifikáty vám buď vydali pri preveraní nového OP na polícii alebo ste si ich museli vydať sami doma. K certifikátom potrebuejte poznať ešte podpisový PIN (6 čísel), ktorý by sa mal líšiť od vášho BOK."
         no_certificates_title: "Nemáte ešte certifikáty?"
         no_certificates_description: "Budete potrebovať stolný počítač s fyzickou čítačkou kariet na ich vydanie. Toto je jednorazová požiadavka."
+        no_certificates_learn_more: "Ako získať certifikáty pre elektronické podpisovanie?"
         continue: "Mám certifikáty, pokračovať"
       physical_instructions:
         title: "Pokyny pre fyzické podpisovanie"
@@ -435,7 +437,7 @@ sk:
         step2: "Podpíšte ho vlastnoručným podpisom"
         step3: "Naskenujte podpísaný dokument alebo si ponechajte originál"
         step4: "Pošlite ho poštou odosielateľovi"
-        note: "Po odoslaní podpísaného dokumentu nás prosím inform ujte kliknutím na tlačidlo nižšie."
+        note: "Po odoslaní podpísaného dokumentu nás prosím informujte kliknutím na tlačidlo nižšie."
         continue: "Pokračovať na fyzické podpisovanie"
     signing_method_choice:
       title: "Ako by ste chceli podpísať tento dokument?"

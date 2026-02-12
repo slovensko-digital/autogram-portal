@@ -458,15 +458,17 @@ en:
         continue: "Continue"
       pin_check:
         title: "Do you know your eID card PIN?"
-        description: "You will need your 4-6 digit PIN code to sign documents electronically. This PIN was provided to you when you received your eID card."
+        description: "You will need your 6 digit PIN code to sign documents electronically. This PIN was provided to you when you received your eID card."
         no_pin_title: "Don't have your PIN?"
         no_pin_description: "Contact your eID card issuer or visit a Slovak Point to reset it."
+        no_pin_learn_more: "Learn more about eID card PINs"
         continue: "I have my PIN, continue"
       certificate_check:
         title: "Do you have certificates on your eID card?"
         description: "Electronic signing requires valid certificates to be issued on your eID card. Most people already have these certificates."
         no_certificates_title: "Don't have certificates yet?"
         no_certificates_description: "You'll need to use a desktop computer with a physical card reader to issue them first. This is a one-time requirement."
+        no_certificates_learn_more: "Learn more about eID card certificates"
         continue: "I have certificates, continue"
       physical_instructions:
         title: "Physical Signing Instructions"
