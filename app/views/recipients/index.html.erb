@@ -17,7 +17,7 @@
               <div class="flex-2">
                 <%= recipient_status_badge(recipient) %>
               </div>
-              <% if recipient.notifiable? %>
+              <% if recipient.notifiable? && @bundle.author.feature_enabled?(:real_emails) %>
                 <%= button_to notify_bundle_recipient_path(@bundle, recipient),
                       method: :post,
                       class: "text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-sm font-medium",
