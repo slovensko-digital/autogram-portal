@@ -31,11 +31,11 @@
 class PhysicalSession < Session
   # Store submitted_date in the options JSONB column
   def submitted_date
-    options&.dig('submitted_date')
+    options&.dig("submitted_date")
   end
 
   def submitted_date=(date)
     self.options ||= {}
-    self.options['submitted_date'] = date
+    self.options["submitted_date"] = date
   end
 end

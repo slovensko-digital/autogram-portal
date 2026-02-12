@@ -99,7 +99,7 @@ class User < ApplicationRecord
 
   def mark_onboarding_complete!(method)
     unless onboarding_completed?(method)
-      update!(completed_onboardings: completed_onboardings + [method.to_s])
+      update!(completed_onboardings: completed_onboardings + [ method.to_s ])
     end
   end
 

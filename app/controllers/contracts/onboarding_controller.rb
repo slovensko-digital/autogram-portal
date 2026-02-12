@@ -19,13 +19,13 @@ module Contracts
       @step = params[:step]
 
       case @step
-      when 'eid_card_generation'
+      when "eid_card_generation"
         handle_eid_card_generation
-      when 'pin_check'
+      when "pin_check"
         handle_pin_check
-      when 'certificate_check'
+      when "certificate_check"
         handle_certificate_check
-      when 'physical_instructions'
+      when "physical_instructions"
         handle_physical_instructions
       else
         redirect_to contract_onboarding_path(@contract, step: first_step, method: @method, iframe: params[:iframe])
@@ -54,9 +54,9 @@ module Contracts
     end
 
     def check_onboarding_status
-      return if params[:skip] == 'true'
+      return if params[:skip] == "true"
 
-      return if params[:review] == 'true'
+      return if params[:review] == "true"
 
       if current_user&.onboarding_completed?(@method)
         redirect_to_next_page
@@ -73,15 +73,15 @@ module Contracts
           session[:eid_card_generation] = generation
         end
 
-        redirect_to contract_onboarding_path(@contract, step: 'pin_check', method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
+        redirect_to contract_onboarding_path(@contract, step: "pin_check", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
       else
-        redirect_to contract_onboarding_path(@contract, step: 'eid_card_generation', method: @method, recipient: @recipient&.uuid, iframe: params[:iframe]),
-                    alert: 'Please select your eID card generation'
+        redirect_to contract_onboarding_path(@contract, step: "eid_card_generation", method: @method, recipient: @recipient&.uuid, iframe: params[:iframe]),
+                    alert: "Please select your eID card generation"
       end
     end
 
     def handle_pin_check
-      redirect_to contract_onboarding_path(@contract, step: 'certificate_check', method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
+      redirect_to contract_onboarding_path(@contract, step: "certificate_check", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
     end
 
     def handle_certificate_check
@@ -108,20 +108,20 @@ module Contracts
 
     def redirect_to_next_page
       case @method
-      when 'electronic'
+      when "electronic"
         generation = current_user&.eid_card_generation || session[:eid_card_generation]
         redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, eid_card_generation: generation, iframe: params[:iframe])
-      when 'physical'
+      when "physical"
         redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
       end
     end
 
     def first_step
       case @method
-      when 'electronic'
-        'eid_card_generation'
-      when 'physical'
-        'physical_instructions'
+      when "electronic"
+        "eid_card_generation"
+      when "physical"
+        "physical_instructions"
       end
     end
   end
