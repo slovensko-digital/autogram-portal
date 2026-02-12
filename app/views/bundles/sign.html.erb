@@ -65,7 +65,7 @@
           <% unless params[:iframe] == "no_preview" %>
             <%= render 'contracts/visualization_with_toggle', contract: contract %>
             <div class="mb-6">
-              <%= turbo_frame_tag "signature_validation_#{contract.uuid}", 
+              <%= turbo_frame_tag "signature_validation_#{contract.uuid}",
                                   src: validate_contract_path(contract),
                                   loading: "lazy",
                                   class: "w-full mb-6" do %>
@@ -140,22 +140,22 @@
             </div>
           <% end %>
           <% if current_user == @bundle.author || contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
-            <% 
+            <%
               electronic_onboarding_required = if current_user
                 !current_user.onboarding_completed?('electronic')
               else
                 !(session[:completed_onboardings] || []).include?('electronic')
               end
-              
+
               physical_onboarding_required = if current_user
                 !current_user.onboarding_completed?('physical')
               else
                 !(session[:completed_onboardings] || []).include?('physical')
               end
             %>
-            
-            <%= render 'contracts/signing_method_choice', 
-                contract: contract, 
+
+            <%= render 'contracts/signing_method_choice',
+                contract: contract,
                 recipient: @recipient,
                 bundle_id: @bundle.uuid,
                 onboarding_required: {

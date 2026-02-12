@@ -34,12 +34,11 @@ class Contract < ApplicationRecord
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
   accepts_nested_attributes_for :signature_parameters
 
-  # ALLOWED_METHODS = %w[qes ts-qes cts-qes ades ses click scan notary paper].freeze
-  ALLOWED_METHODS = %w[qes ts-qes].freeze
+  ALLOWED_METHODS = ENV.fetch("ALLOWED_METHODS", "qes").split(",").map(&:strip)
   attribute :allowed_methods, default: [ "qes" ]
 
   validate :validate_allowed_methods
-  validates :signature_parameters, presence: true, if: -> { allowed_methods.present? && (allowed_methods & %w[qes qes-ts cts-qes ades]).any? }
+  validates :signature_parameters, presence: true, if: -> { allowed_methods.present? && allowed_methods.include?("qes") }
   validate :validate_documents
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
   validates :uuid, presence: true, uniqueness: true
@@ -47,11 +46,14 @@ class Contract < ApplicationRecord
 
   before_validation :ensure_uuid, on: :create
   before_validation :initialize_signature_parameters
-  before_validation :set_signature_level_for_ts_qes
   after_create :associate_with_bundle_recipients
 
   def to_param
     uuid
+  end
+
+  def available_signature_methods
+    ALLOWED_METHODS
   end
 
   def notify_signed!(recipient: nil, signer: nil)
@@ -128,7 +130,6 @@ class Contract < ApplicationRecord
   end
 
   def should_notify_user?(signer: nil)
-    # TODO: Improve logic to not notify "self sign" by user
     user.present? && bundle.nil? && !awaiting_signature? && user != signer
   end
 
@@ -150,11 +151,6 @@ class Contract < ApplicationRecord
     end
 
     document_to_validate&.validation_result
-  end
-
-  # Custom setter to convert singular allowed_method to plural allowed_methods array
-  def allowed_method=(method)
-    self.allowed_methods = [ method ].compact
   end
 
   private
@@ -184,25 +180,8 @@ class Contract < ApplicationRecord
     self.uuid ||= SecureRandom.uuid
   end
 
-  def set_signature_level_for_ts_qes
-    return unless allowed_methods.present?
-    return unless signature_parameters.present?
-
-    if allowed_methods.include?("ts-qes")
-      signature_parameters.level = "BASELINE_T"
-    elsif allowed_methods.include?("qes") && allowed_methods.exclude?("ts-qes")
-      signature_parameters.level = "BASELINE_B"
-    end
-  end
-
   def initialize_signature_parameters
-    return if signature_parameters.present?
-
-    self.signature_parameters = Ades::SignatureParameters.new(
-      level: allowed_methods.include?("ts-qes") ? "BASELINE_T" : "BASELINE_B",
-      format: "CAdES",
-      container: "ASiC_E"
-    )
+    build_signature_parameters unless signature_parameters
   end
 
   def associate_with_bundle_recipients

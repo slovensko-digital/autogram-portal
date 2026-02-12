@@ -37,6 +37,7 @@ en:
   actions:
     back: "Back"
     continue: "Continue"
+    continue_signing: "Continue to signing"
     cancel: "Cancel"
     download: "Download"
     delete: "Delete"
@@ -55,13 +56,13 @@ en:
       bundles: "Bundles"
       sign_in: "Sign in"
       sign_out: "Sign out"
-  
+
   language_switcher:
     language: "Language"
     languages:
       en: "English"
       sk: "Slovenčina"
-  
+
   helpers:
     recipients:
       status:
@@ -82,7 +83,7 @@ en:
         adesig_qc_qc: "Advanced electronic signature based on qualified certificate"
         adesig_qc_qc_ts: "Advanced electronic signature based on qualified certificate with qualified timestamp"
         unknown: "Unknown signature"
-  
+
   devise:
     sessions:
       new:
@@ -145,7 +146,33 @@ en:
     passwordless:
       user:
         signed_up_but_unconfirmed: "You have successfully registered. Your account is not yet activated, please check your email and click the link to confirm your account."
-  
+
+  signature_parameters:
+    format:
+      pades: "PDF Advanced Electronic Signature (PAdES)"
+      xades: "XML Advanced electronic signature in ASiC-E container"
+      cades: "CMS Advanced electronic signature in ASiC-E container"
+      unknown: "Unknown signature format"
+      short:
+        pades: "PAdES"
+        xades: "XAdES in ASiC-E container"
+        cades: "CAdES in ASiC-E container"
+        unknown: "Unknown signature format"
+    level:
+      baseline_b: Qualified Electronic Signature
+      baseline_t: Qualified Electronic Signature with Timestamp
+      baseline_lt: Qualified Electronic Signature with Long-Term Validation
+      baseline_lta: Qualified Electronic Signature with Archive Timestamp
+      short:
+        baseline_b: Handwritten Signature
+        baseline_t: Certified Signature
+        baseline_lt: QES with Long-Term Validity
+        baseline_lta: QES with Archive Timestamp
+
+  document:
+    one: "document"
+    other: "documents"
+
   documents:
     index:
       title: "Documents"
@@ -196,24 +223,6 @@ en:
       download: "Download"
       validating_signatures: "Validating electronic signatures..."
       loading_actions: "Loading document actions..."
-    actions:
-      sign_title: "Sign document"
-      sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
-      signature_format: "Signature Format"
-      allowed_method: "Allowed Signature Method"
-      continue_signing: "Continue to document signing"
-      add_timestamp_title: "Add timestamp"
-      add_timestamp_subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
-      add_timestamp_button: "Add timestamp to signatures"
-      continue: "Continue"
-      request_signature:
-        title: "Request a signature"
-        subtitle: "Send document for signing to someone else via email or shared link."
-        recipient_email: "Recipient Email *"
-        recipient_email_placeholder: "john.doe@example.com"
-        recipient_email_help: "Recipient will receive an email with a link to sign the document"
-        message: "Message for recipient (optional)"
-        message_placeholder: "Hello, please sign the attached document..."
     actions_error:
       title: "Error loading document actions"
     visualize:
@@ -235,26 +244,6 @@ en:
       all_signatures_have_timestamps: "All signatures already have qualified timestamps."
       failed_to_extend_signatures: "Failed to extend signatures: %{error}"
       signature_extended_successfully: "Signature extended successfully."
-  
-  signature_methods:
-    qes: "Qualified Electronic Signature"
-    ts_qes: "Qualified Electronic Signature with Timestamp"
-    ades: "Advanced Electronic Signature"
-    ses: "Simple Electronic Signature"
-    short:
-      qes: "QES"
-      ts_qes: "QES + Timestamp"
-      ades: "AdES"
-      ses: "SES"
-
-  signature_formats:
-    pades: "PDF Advanced Electronic Signature (PAdES)"
-    xades_asice: "XML Advanced Electronic Signature (XAdES) in Associated Signature Container (ASiC-E)"
-    cades_asice: "CMS Advanced Electronic Signature (CAdES) in Associated Signature Container (ASiC-E)"
-    short:
-      pades: "PAdES"
-      xades_asice: "XAdES + ASiC-E"
-      cades_asice: "CAdES + ASiC-E"
 
   bundles:
     index:
@@ -410,6 +399,16 @@ en:
       back_to_signing_options: "Back to signing options"
       old_card_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Mobile signing apps (AVM, eIdentita) are not compatible with your card."
       old_card_mobile_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
+    signature_parameters:
+      sign_title: "Sign document"
+      sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+      signature_format: "Electronic signature format"
+      signature_method: "Electronic signature level"
+      allowed_methods: "Allowed signature methods"
+    signature_extension:
+      add_timestamp_title: "Add timestamp"
+      add_timestamp_subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
+      add_timestamp_button: "Add timestamp to signatures"
     download_actions:
       message: "This document has been signed and is ready for download."
       download_button: "Download Signed Document"
@@ -495,7 +494,19 @@ en:
       confirmation_message: "After submitting, you will receive a confirmation. The document sender will be notified about your physical signature."
       back: "Back"
       submit: "Submit Physical Signing"
-  
+    allowed_methods:
+      qes: Qualified electronic signature
+      ses: Simple electronic signature
+      scan: Print, sign by hand, and scan
+      notary-post: Document signed at a notary and original sent via post office
+      notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
+      short:
+        qes: Qualified electronic signature
+        ses: Simple electronic signature
+        scan: Print, sign by hand, and scan
+        notary-post: Notary signature with postal delivery
+        notary-conversion: Notary signature with conversion to QES
+
   homepage:
     index:
       hero:
@@ -573,21 +584,21 @@ en:
         subtitle: "Try Autogram Portal now or explore the source code on GitHub."
         start_signing: "Start signing documents"
         view_github: "View on GitHub"
-  
+
   terms_of_service:
     index:
       title: "Terms of Service"
       not_production_title: "This is not a production environment"
       not_production_message: "This is a placeholder page. The complete terms of service with detailed information about usage rights, responsibilities, and service conditions will be added in the future."
       work_in_progress: "We are working on comprehensive terms of service that will clearly outline the rights and obligations of all parties using this platform."
-  
+
   privacy_policy:
     index:
       title: "Privacy Policy"
       not_production_title: "This is not a production environment"
       not_production_message: "This is a placeholder page. The complete privacy policy with detailed information about data processing, user rights, and security measures will be added in the future."
       work_in_progress: "We are committed to protecting your privacy and will provide comprehensive details about our data handling practices soon."
-  
+
   footer:
     heading: "Footer"
     by: "by Slovensko.Digital"
@@ -595,7 +606,7 @@ en:
     service_provider: "Service provider"
     support: "Support"
     privacy_policy: "Privacy Policy"
-  
+
   shared:
     signature_validation:
       error_title: "Error validating signatures"
@@ -635,7 +646,7 @@ en:
       drop_text: "Drop here"
       remove_file: "Remove file"
       select_another: "Click to select another file"
-  
+
   javascript:
     errors:
       file_not_supported: "File \"%{filename}\" is not supported. Allowed formats are PDF, XML, and other files."

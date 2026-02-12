@@ -4,7 +4,7 @@
     <p class="text-sm text-gray-600 mb-4">
       <%= t('.description') %>
     </p>
-    
+
     <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 mb-6">
       <li><%= t('.step1') %></li>
       <li><%= t('.step2') %></li>
@@ -24,9 +24,9 @@
     <%= hidden_field_tag :method, @method %>
     <%= hidden_field_tag :review, params[:review] if params[:review] %>
     <%= hidden_field_tag :iframe, params[:iframe] %>
-    
+
     <div class="mt-6 flex justify-between">
-      <% 
+      <%
         # If contract is part of a bundle, back goes to bundle sign; otherwise to contract sign
         back_path = if @contract.bundle
           sign_bundle_path(@contract.bundle, recipient: params[:recipient], iframe: params[:iframe])
@@ -34,7 +34,7 @@
           sign_contract_path(@contract, recipient: params[:recipient], iframe: params[:iframe])
         end
       %>
-      <%= link_to back_path, 
+      <%= link_to back_path,
           class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" do %>
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>

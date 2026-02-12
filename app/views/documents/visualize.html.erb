@@ -7,8 +7,8 @@
   <% elsif mime_type == 'text/html' %>
     <div>
       <div class="border border-gray-200 rounded-lg bg-white">
-        <iframe 
-          srcdoc="<%= html_escape(decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type])) %>" 
+        <iframe
+          srcdoc="<%= html_escape(decode_base64_content(@visualization_result[:content], @visualization_result[:mime_type])) %>"
           class="w-full h-[970px] border-0"
           sandbox="allow-same-origin">
         </iframe>
@@ -16,39 +16,39 @@
     </div>
   <% elsif mime_type == 'image/png' %>
     <div class="flex justify-center">
-      <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>" 
-           alt="Náhľad obrázku" 
+      <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>"
+           alt="Náhľad obrázku"
            class="max-w-full max-h-[970px] border border-gray-200 rounded-lg bg-white" />
     </div>
   <% elsif mime_type == 'image/jpg' || mime_type == 'image/jpeg' %>
     <div class="flex justify-center">
-      <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>" 
-           alt="Náhľad obrázku" 
+      <img src="data:<%= mime_type %>;base64,<%= @visualization_result[:content] %>"
+           alt="Náhľad obrázku"
            class="max-w-full max-h-[970px] border border-gray-200 rounded-lg bg-white" />
     </div>
   <% elsif mime_type == 'application/pdf' %>
     <div>
       <div class="border border-gray-200 rounded-lg bg-white">
-        <% 
+        <%
           # Add cache-busting parameter to ensure PDF reloads when returning to the same document
           pdf_url = pdf_preview_document_path(@document, format: :pdf, t: Time.current.to_i)
         %>
-        <object 
-          data="<%= pdf_url %>" 
-          type="application/pdf" 
+        <object
+          data="<%= pdf_url %>"
+          type="application/pdf"
           class="w-full h-[970px]"
           id="pdf-object-<%= @document.uuid %>"
           key="pdf-object-<%= @document.uuid %>-<%= Time.current.to_i %>">
-          
-          <iframe 
-            src="<%= pdf_url %>" 
+
+          <iframe
+            src="<%= pdf_url %>"
             class="w-full h-[970px] border-0"
             id="pdf-iframe-<%= @document.uuid %>"
             key="pdf-iframe-<%= @document.uuid %>-<%= Time.current.to_i %>">
-            
+
             <div class="p-8 text-center">
               <p class="text-gray-600 mb-4"><%= t('documents.visualize.pdf_load_error') %></p>
-              <a href="<%= pdf_url %>" 
+              <a href="<%= pdf_url %>"
                  target="_blank"
                  class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">

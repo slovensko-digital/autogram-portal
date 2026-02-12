@@ -1,15 +1,15 @@
 <%#
-  Reusable radio button card component
+  Reusable check box card component
 
   Parameters:
-  - name: the name attribute for the radio button group
-  - value: the value for this radio button option
+  - name: the name attribute for the check box
+  - value: the value for this check box option
   - label: the main label text
   - description: the description text below the label
   - checked: whether this option should be checked by default (optional, defaults to false)
   - form: the form builder object (optional, for form helpers)
   - wrapper_class: additional CSS classes for the label wrapper (optional)
-  - data_attributes: hash of data attributes for the radio input (optional)
+  - data_attributes: hash of data attributes for the check box input (optional)
   - icon: the icon type to display (optional, 'mobile' or 'desktop')
 %>
 
@@ -23,15 +23,17 @@
 
 <label class="group relative flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
   <% if form %>
-    <%= form.radio_button name, value, { checked: checked, class: "sr-only", data: data_attributes } %>
+    <%= form.check_box name, { checked: checked, class: "sr-only", data: data_attributes }, value, nil %>
   <% else %>
-    <%= radio_button_tag name, value, checked, { class: "sr-only", data: data_attributes } %>
+    <%= check_box_tag name, value, checked, { class: "sr-only", data: data_attributes } %>
   <% end %>
 
-  <!-- Radio button indicator -->
+  <!-- Checkbox indicator -->
   <div class="flex-shrink-0">
-    <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors">
-      <div class="hidden group-has-[:checked]:block w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+    <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center group-has-[:checked]:border-blue-500 group-has-[:checked]:bg-blue-500 transition-colors">
+      <svg class="hidden group-has-[:checked]:block w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+      </svg>
     </div>
   </div>
 
@@ -44,10 +46,6 @@
       <% elsif icon == 'mobile' %>
         <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-        </svg>
-      <% elsif icon == 'pencil' %>
-        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 .375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/>
         </svg>
       <% end %>
     </div>

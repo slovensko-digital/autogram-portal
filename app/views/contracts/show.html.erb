@@ -83,7 +83,7 @@
         </div>
       <% end %>
 
-      <%= turbo_frame_tag "contract_actions_#{@contract.uuid}", 
+      <%= turbo_frame_tag "contract_actions_#{@contract.uuid}",
                           src: actions_contract_path(@contract, previous_page: @previous_page || root_path),
                           loading: "lazy",
                           class: "w-full" do %>

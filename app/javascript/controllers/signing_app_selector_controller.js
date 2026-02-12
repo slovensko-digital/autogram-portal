@@ -13,7 +13,7 @@ export default class extends Controller {
   handleSigningEvent(event) {
     const { status } = event.detail
     console.log('Autogram signing event:', status)
-    
+
     if (status === 'cancel' || status === 'error') {
       window.location.reload()
     }
@@ -22,7 +22,7 @@ export default class extends Controller {
   handleDeviceDetection() {
     if (isMobileDevice()) {
       const hasMobileOptions = this.appRadioTargets.some(radio => radio.value !== 'autogram')
-      
+
       // Always hide desktop option on mobile
       this.desktopElementTargets.forEach(element => {
         element.style.display = 'none'
@@ -32,7 +32,7 @@ export default class extends Controller {
         // Mobile alternatives exist - auto-select first mobile option
         const autogramRadio = this.appRadioTargets.find(radio => radio.value === 'autogram')
         const avmRadio = this.appRadioTargets.find(radio => radio.value === 'avm')
-        
+
         if (autogramRadio && autogramRadio.checked && avmRadio) {
           autogramRadio.checked = false
           avmRadio.checked = true
@@ -42,17 +42,17 @@ export default class extends Controller {
         if (this.hasMobileWarningTarget) {
           this.mobileWarningTarget.style.display = 'block'
         }
-        
+
         // Hide yellow warning on mobile since red warning is shown
         if (this.hasYellowWarningTarget) {
           this.yellowWarningTarget.style.display = 'none'
         }
-        
+
         // Hide app selection heading since there are no options to select
         if (this.hasAppSelectionHeadingTarget) {
           this.appSelectionHeadingTarget.style.display = 'none'
         }
-        
+
         // Disable the sign button since no compatible options
         if (this.hasSignButtonTarget) {
           this.signButtonTarget.disabled = true

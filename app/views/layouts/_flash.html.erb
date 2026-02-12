@@ -1,7 +1,7 @@
 <% if flash.any? %>
   <div class="mx-auto max-w-4xl px-6 py-4">
     <% flash.each do |type, message| %>
-      <div class="<%= 
+      <div class="<%=
         case type.to_s
         when 'notice' then 'bg-green-50 border border-green-200 text-green-800'
         when 'alert' then 'bg-red-50 border border-red-200 text-red-800'

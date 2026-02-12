@@ -15,7 +15,7 @@ class ContractsController < ApplicationController
   def create
     @contract = Contract.new(
       user: current_user,
-      documents: [ Document.new(params.require(:document).permit(:blob)) ]
+      documents: [ Document.create(params.require(:document).permit(:blob)) ]
     )
 
     @contract.save!
@@ -192,9 +192,9 @@ class ContractsController < ApplicationController
   def contract_params
     params.require(:contract).permit(
       :uuid,
-      :allowed_method,
+      allowed_methods: [],
       documents_attributes: [ :id, :blob, :_destroy ],
-      signature_parameters_attributes: [ :id, :format_container_combination, :add_content_timestamp ]
+      signature_parameters_attributes: [ :id, :add_content_timestamp, :level, :format, :container, :en319132 ]
     )
   end
 

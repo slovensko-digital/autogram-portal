@@ -1,21 +1,21 @@
 <main>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <% 
+      <%
         back_path = if @contract.bundle
           sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
         else
           sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
         end
       %>
-      <%= link_to back_path, 
+      <%= link_to back_path,
           class: "self-start inline-flex items-center text-sm text-gray-600 hover:text-gray-900" do %>
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
           <%= t('.back_to_signing_options') %>
         <% end %>
-        
+
         <div class="w-full">
           <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           <p class="text-gray-600"><%= t('.subtitle') %></p>
@@ -74,7 +74,7 @@
                     checked: true,
                     icon: 'desktop',
                     wrapper_class: 'desktop-signing-element',
-                    data_attributes: { 
+                    data_attributes: {
                       signing_app_selector_target: 'appRadio'
                     } %>
             </div>
@@ -87,7 +87,7 @@
                     description: t('.autogram_mobile_description'),
                     checked: false,
                     icon: 'mobile',
-                    data_attributes: { 
+                    data_attributes: {
                       signing_app_selector_target: 'appRadio'
                     } %>
 
@@ -98,29 +98,29 @@
                     description: t('.eidentita_description'),
                     checked: false,
                     icon: 'mobile',
-                    data_attributes: { 
+                    data_attributes: {
                       signing_app_selector_target: 'appRadio'
                     } %>
             <% end %>
           </div>
 
           <div class="hidden">
-            <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]), 
-                  data: { 
+            <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                  data: {
                     turbo_frame: "signature_apps_#{@contract.uuid}",
-                    signing_app_selector_target: 'autogramSubmitButton' 
+                    signing_app_selector_target: 'autogramSubmitButton'
                   } %>
 
-            <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]), 
-                  data: { 
+            <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                  data: {
                     controller: "signers--avm",
                     action: "click->signers--avm#sign",
                     turbo_frame: "signature_apps_#{@contract.uuid}",
                     signing_app_selector_target: "avmSubmitButton"
                   } %>
 
-            <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]), 
-                  data: { 
+            <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                  data: {
                     controller: "signers--eidentita",
                     action: "click->signers--eidentita#sign",
                     turbo_frame: "signature_apps_#{@contract.uuid}",
@@ -138,8 +138,8 @@
               <div class="ml-3 flex-1">
                 <h4 class="text-sm font-semibold text-blue-900 mb-1"><%= t('.first_time_signing') %></h4>
                 <p class="text-sm text-blue-800">
-                  <%= t('.learn_more_text') %> → 
-                  <%= link_to t('.how_signing_works'), 
+                  <%= t('.learn_more_text') %> →
+                  <%= link_to t('.how_signing_works'),
                       contract_onboarding_path(@contract, 'eid_card_generation', method: 'electronic', review: 'true', recipient: @recipient&.uuid, iframe: params[:iframe]),
                       class: "font-medium underline hover:text-blue-600",
                       data: { turbo: false } %>

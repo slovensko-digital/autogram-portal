@@ -17,7 +17,7 @@
             label: t('documents.new.actions.sign.title'),
             description: t('documents.new.actions.sign.subtitle'),
             checked: true,
-            data_attributes: { 
+            data_attributes: {
               url: signature_parameters_contract_path(@contract, target_step: 'sign')
             } %>
 
@@ -28,7 +28,7 @@
               label: t('documents.new.actions.request_signature.title'),
               description: t('documents.new.actions.request_signature.subtitle'),
               checked: false,
-              data_attributes: { 
+              data_attributes: {
                 url: signature_parameters_contract_path(@contract, target_step: 'request_signature')
               } %>
       <% end %>
@@ -40,7 +40,7 @@
               label: t('documents.new.actions.add_timestamp.title'),
               description: t('documents.new.actions.add_timestamp.subtitle'),
               checked: false,
-              data_attributes: { 
+              data_attributes: {
                 url: signature_extension_contract_path(@contract)
               } %>
       <% end %>
@@ -52,7 +52,7 @@
         <% end %>
         <%= link_to signature_parameters_contract_path(@contract, target_step: 'sign'),
               class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-              data: { 
+              data: {
                 turbo_frame: "_self",
                 "radio-link-target": "link"
               } do %>

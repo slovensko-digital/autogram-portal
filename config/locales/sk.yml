@@ -8,6 +8,7 @@ sk:
   actions:
     back: "Späť"
     continue: "Pokračovať"
+    continue_signing: "Pokračovať na podpisovanie"
     download: "Stiahnuť"
     cancel: "Zrušiť"
     delete: "Zmazať"
@@ -26,7 +27,7 @@ sk:
       bundles: "Balíky"
       sign_in: "Prihlásiť sa"
       sign_out: "Odhlásiť sa"
-  
+
   language_switcher:
     language: "Jazyk"
     languages:
@@ -40,11 +41,6 @@ sk:
         signed: "Podpísané"
         declined: "Odmietnuté"
     application:
-      signature_levels:
-        pades: "PAdES"
-        xades_asice: "XAdES v ASiC-E kontajneri"
-        cades_asice: "CAdES v ASiC-E kontajneri"
-        unknown: "Neznámy formát podpisu"
       signature_qualifications:
         qesig: "Vlastnoručný podpis"
         qesig_ts: "Osvečený podpis"
@@ -117,25 +113,32 @@ sk:
       user:
         signed_up_but_unconfirmed: "Úspešne ste sa zaregistrovali. Váš účet ešte nie je aktivovaný, skontrolujte si prosím email a kliknite na odkaz na potvrdenie vášho účtu."
 
-  signature_methods:
-    qes: "Kvalifikovaný elektronický podpis"
-    ts_qes: "Kvalifikovaný elektronický podpis s časovou pečiatkou"
-    ades: "Pokročilý elektronický podpis"
-    ses: "Jednoduchý elektronický podpis"
-    short:
-      qes: "Vlastnoručný podpis"
-      ts_qes: "Osvedčený podpis"
-      ades: "Zdokonalený elektronický podpis"
-      ses: "Jednoduchý elektronický podpis"
-  
-  signature_formats:
-    pades: "PDF Advanced Electronic Signature (PAdES)"
-    xades_asice: "XML Pokročilý elektronický podpis v ASiC-E kontajneri"
-    cades_asice: "CMS Pokročilý elektronický podpis v ASiC-E kontajneri"
-    short:
-      pades: "PAdES"
-      xades_asice: "XAdES + ASiC-E"
-      cades_asice: "CAdES + ASiC-E"
+  signature_parameters:
+    format:
+      pades: "PDF Pokročilý elektronický podpis (PAdES)"
+      xades: "XML Pokročilý elektronický podpis v ASiC-E kontajneri"
+      cades: "CMS Pokročilý elektronický podpis v ASiC-E kontajneri"
+      unknown: "Neznámy formát podpisu"
+      short:
+        pades: "PAdES"
+        xades: "XAdES v ASiC-E kontajneri"
+        cades: "CAdES v ASiC-E kontajneri"
+        unknown: "Neznámý formát podpisu"
+    level:
+      baseline_b: Kvalifikovaný elektronický podpis
+      baseline_t: Kvalifikovaný elektronický podpis s časovou pečiatkou
+      baseline_lt: Kvalifikovaný elektronický podpis s dlhodobou časovou pečiatkou
+      baseline_lta: Kvalifikovaný elektronický podpis s archívnou časovou pečiatkou
+      short:
+        baseline_b: Vlastnoručný podpis
+        baseline_t: Osvedčený podpis
+        baseline_lt: KEP s dlhodobou platnosťou
+        baseline_lta: KEP s archívnou časovou pečiatkou
+
+  document:
+    one: "dokument"
+    few: "dokumenty"
+    other: "dokumentov"
 
   documents:
     index:
@@ -175,16 +178,6 @@ sk:
         add_timestamp:
           title: "Pridať časovú pečiatku"
           subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
-    actions:
-      sign_title: "Podpísať dokument"
-      sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
-      signature_format: "Formát podpisu"
-      allowed_method: "Typ podpisu"
-      continue_signing: "Pokračovať na podpisovanie dokumentu"
-      add_timestamp_title: "Pridať časovú pečiatku"
-      add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
-      add_timestamp_button: "Pridať časovú pečiatku k podpisom"
-      continue: "Pokračovať"
     actions_error:
       title: "Chyba pri načítavaní akcií dokumentu"
     visualize:
@@ -200,7 +193,7 @@ sk:
       all_signatures_have_timestamps: "Všetky podpisy už majú kvalifikované časové pečiatky."
       failed_to_extend_signatures: "Nepodarilo sa rozšíriť podpisy: %{error}"
       signature_extended_successfully: "Podpis bol úspešne rozšírený."
-  
+
   bundles:
     index:
       title: "Balíky dokumentov"
@@ -362,6 +355,16 @@ sk:
       back_to_signing_options: "Späť na možnosti podpisovania"
       old_card_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (AVM, eIdentita) nie sú kompatibilné s vašou kartou."
       old_card_mobile_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
+    signature_parameters:
+      sign_title: "Podpísať dokument"
+      sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
+      signature_format: "Formát podpisu"
+      signature_level: "Typ podpisu"
+      allowed_methods: "Povolené metódy podpisu"
+    signature_extension:
+      add_timestamp_title: "Pridať časovú pečiatku"
+      add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
+      add_timestamp_button: "Pridať časovú pečiatku k podpisom"
     download_actions:
       message: "Tento dokument bol podpísaný a je pripravený na stiahnutie."
       download_button: "Stiahnuť podpísaný dokument"
@@ -451,7 +454,19 @@ sk:
       confirmation_message: "Po odoslaní dostanete potvrdenie. Odosielateľ dokumentu bude upovedomený o vašom fyzickom podpise."
       back: "Späť"
       submit: "Odoslať fyzický podpis"
-  
+    allowed_methods:
+      qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
+      ses: Elektronický podpis nakreslením podpisu a overením cez SMS
+      scan: Vytlačiť, ručne podpísať a naskenovať
+      notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
+      notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
+      short:
+        qes: Kvalifikovaný elektronický podpis
+        ses: Jednoduchý elektronický podpis
+        scan: Sken podpísaného dokumentu
+        notary-post: Osvedčený podpis u notára
+        notary-conversion: Zaručená konverzia osvedčeného podpisu
+
   homepage:
     index:
       hero:
@@ -529,21 +544,21 @@ sk:
         subtitle: "Vyskúšajte Autogram Portal teraz alebo preskúmajte zdrojový kód na GitHube."
         start_signing: "Začať podpisovať dokumenty"
         view_github: "Zobraziť na GitHube"
-  
+
   terms_of_service:
     index:
       title: "Obchodné podmienky"
       not_production_title: "Toto nie je produkčné prostredie"
       not_production_message: "Toto je zástupná stránka. Kompletné obchodné podmienky s podrobnými informáciami o právach používania, zodpovednostiach a podmienkach služby budú pridané v budúcnosti."
       work_in_progress: "Pracujeme na komplexných obchodných podmienkach, ktoré jasne vymedzujú práva a povinnosti všetkých strán používajúcich túto platformu."
-  
+
   privacy_policy:
     index:
       title: "Zásady ochrany osobných údajov"
       not_production_title: "Toto nie je produkčné prostredie"
       not_production_message: "Toto je zástupná stránka. Kompletné zásady ochrany osobných údajov s podrobnými informáciami o spracovaní údajov, právach používateľov a bezpečnostných opatreniach budú pridané v budúcnosti."
       work_in_progress: "Zaviazali sme sa chrániť vaše súkromie a čoskoro poskytneme komplexné podrobnosti o našich postupoch pri spracovaní údajov."
-  
+
   footer:
     heading: "Päta"
     by: "od Slovensko.Digital"
@@ -551,7 +566,7 @@ sk:
     service_provider: "Poskytovateľ služby"
     support: "Podpora"
     privacy_policy: "Zásady ochrany osobných údajov"
-  
+
   shared:
     signature_validation:
       error_title: "Chyba pri overovaní podpisov"
@@ -590,7 +605,7 @@ sk:
       drop_text: "Pustiť sem"
       remove_file: "Odstrániť súbor"
       select_another: "Kliknite pre výber iného súboru"
-  
+
   javascript:
     errors:
       file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty jsou PDF, XML a iné súbory."

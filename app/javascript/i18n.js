@@ -5,7 +5,7 @@ class I18n {
   constructor() {
     this.translations = {}
     this.locale = 'en'
-    
+
     // Load translations when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => this.loadTranslations())

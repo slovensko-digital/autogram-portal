@@ -56,7 +56,7 @@ export default class extends Controller {
         return url
       }
     }
-    
+
     return null
   }
 
@@ -75,7 +75,7 @@ export default class extends Controller {
     const parentElement = this.element.closest('[data-controller*="signing-app-selector"]')
     if (parentElement) {
       const controller = this.application.getControllerForElementAndIdentifier(
-        parentElement, 
+        parentElement,
         'signing-app-selector'
       )
       if (controller && typeof controller.setSignButtonLoading === 'function') {
@@ -93,9 +93,9 @@ export default class extends Controller {
         console.log("Redirected via window.top (iframe detected)")
       } catch (e) {
         console.log("Cross-origin iframe detected, attempting alternative redirect methods")
-        
+
         const opened = window.open(avmUrl, '_blank')
-        
+
         if (!opened || opened.closed || typeof opened.closed === 'undefined') {
           console.log("window.open blocked, trying link click method")
           const link = document.createElement('a')

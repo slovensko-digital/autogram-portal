@@ -13,7 +13,7 @@ export default class extends Controller {
 
   continue(event) {
     event.preventDefault()
-    
+
     const selectedMethod = this.getSelectedMethod()
     console.log('Selected signing method:', selectedMethod)
 

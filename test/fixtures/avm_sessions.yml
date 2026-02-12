@@ -37,7 +37,7 @@ one:
   completed_at: 2025-10-01 22:50:50
   error_message: MyText
   status: 0
-  options: 
+  options:
     document_identifier: MyString
     encryption_key: MyString
 

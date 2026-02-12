@@ -26,7 +26,7 @@ export default class extends Controller {
       })
 
       if (response.ok) {
-        const responseText = await response.text()      
+        const responseText = await response.text()
         const eidentitaUrl = this.extractEidentitaUrlFromResponse(responseText)
         if (eidentitaUrl) {
           console.log("Redirecting to Eidentita URL:", eidentitaUrl)
@@ -50,20 +50,20 @@ export default class extends Controller {
     const matches = responseText.match(/href="(sk\.minv\.sca:\/\/sign\?[^"]+)"/g)
     if (matches && matches.length > 0) {
     let url = matches[0]
-    
+
     if (url.includes('="')) {
         url = url.split('"')[1]
     } else if (url.includes("='")) {
         url = url.split("'")[1]
     }
-    
+
     if (url.startsWith('sk.minv.sca://')) {
         url = this.decodeHtmlEntities(url)
         console.log("Extracted eIdentita URL:", url)
         return url
     }
     }
-    
+
     return null
   }
 
@@ -82,7 +82,7 @@ export default class extends Controller {
     const parentElement = this.element.closest('[data-controller*="signing-app-selector"]')
     if (parentElement) {
       const controller = this.application.getControllerForElementAndIdentifier(
-        parentElement, 
+        parentElement,
         'signing-app-selector'
       )
       if (controller && typeof controller.setSignButtonLoading === 'function') {
@@ -105,9 +105,9 @@ export default class extends Controller {
         }
       } catch (e) {
         console.log("Cross-origin iframe detected, attempting alternative redirect methods")
-        
+
         const opened = window.open(eidentitaUrl, '_blank')
-        
+
         if (!opened || opened.closed || typeof opened.closed === 'undefined') {
           console.log("window.open blocked, trying link click method")
           const link = document.createElement('a')

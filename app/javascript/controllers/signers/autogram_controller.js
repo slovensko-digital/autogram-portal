@@ -3,7 +3,7 @@ import i18n from "i18n"
 
 export default class extends Controller {
   static targets = ["form"]
-  static values = { 
+  static values = {
     autogramParametersPath: String,
     signedDocumentPath: String,
     sdkPath: String
@@ -65,7 +65,7 @@ export default class extends Controller {
 
     try {
       await this.waitForSDK()
-      
+
       if (typeof window.AutogramSDK === 'undefined') {
         throw new Error('An error occurred while loading the Autogram SDK. Please ensure it is properly included in the page.')
       }
@@ -77,23 +77,23 @@ export default class extends Controller {
       } else {
         throw new Error('No suitable Autogram client found. Available properties: ' + Object.keys(window.AutogramSDK).join(', '))
       }
-      
+
       const autogramParametersResponse = await fetch(this.autogramParametersPathValue, {
         headers: {
           'Accept': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
       })
-      
+
       if (!autogramParametersResponse.ok) {
         throw new Error(i18n.t('errors.contract_load_failed'))
       }
-      
+
       const autogramParameters = await autogramParametersResponse.json()
 
       for (let doc of autogramParameters.documents) {
         doc.contentPromise = Promise.resolve(doc.content);
-        
+
         if (doc.download_url) {
           doc.contentPromise = fetch(doc.download_url)
             .then(response => {
@@ -124,7 +124,7 @@ export default class extends Controller {
         signRequestDocument.filename = autogramParameters.documents[0].filename;
 
       let signRequestSignatureParameters = this.getOldSignatureParameters(
-        autogramParameters.signature_parameters, 
+        autogramParameters.signature_parameters,
         autogramParameters.documents[0].xdc_parameters
       );
 
@@ -141,7 +141,7 @@ export default class extends Controller {
         formData.append('signed_document', signResult.content)
         formData.append('signed_by', signResult.signedBy || '')
         formData.append('issued_by', signResult.issuedBy || '')
-        
+
         const response = await fetch(this.signedDocumentPathValue, {
           method: 'POST',
           body: formData,
@@ -160,13 +160,13 @@ export default class extends Controller {
         } else {
           const errorText = await response.text()
           let errorMessage = 'An error occurred while submitting the signed document.'
-          
+
           try {
             const errorData = JSON.parse(errorText)
             errorMessage = errorData.error || errorMessage
           } catch {
           }
-          
+
           throw new Error(errorMessage)
         }
       } else {
