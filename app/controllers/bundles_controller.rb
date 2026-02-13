@@ -40,12 +40,14 @@ class BundlesController < ApplicationController
     if params[:recipient]
       @recipient = Recipient.find_by_uuid!(params[:recipient])
       @bundle = @recipient.bundle
-    elsif current_user
-      @bundle = Bundle.joins(:recipients).where(recipients: { user: current_user }, uuid: params[:id]).first
-      @recipient = @bundle.recipients.find_by(user: current_user) if @bundle
-    else
-      @bundle = Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
     end
+
+    if current_user
+      @bundle ||= Bundle.joins(:recipients).where(recipients: { user: current_user }, uuid: params[:id]).first
+      @recipient ||= @bundle.recipients.find_by(user: current_user) if @bundle
+    end
+
+    @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
 
     raise ActiveRecord::RecordNotFound unless @bundle
   end
