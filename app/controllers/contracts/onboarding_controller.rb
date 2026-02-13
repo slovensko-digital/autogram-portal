@@ -7,8 +7,10 @@ module Contracts
     before_action :allow_iframe
     skip_before_action :verify_authenticity_token
 
+    VALID_STEPS = %w[eid_card_generation pin_check certificate_check physical_instructions].freeze
+
     def show
-      @step = params[:step] || first_step
+      @step = step_param || first_step
       @method = params[:method] # 'electronic' or 'physical'
 
       render "contracts/onboarding/show"
@@ -16,7 +18,7 @@ module Contracts
 
     def update
       @method = params[:method]
-      @step = params[:step]
+      @step = step_param
 
       case @step
       when "eid_card_generation"
@@ -123,6 +125,10 @@ module Contracts
       when "physical"
         "physical_instructions"
       end
+    end
+
+    def step_param
+      VALID_STEPS.include?(params[:step]) ? params[:step] : nil
     end
   end
 end
