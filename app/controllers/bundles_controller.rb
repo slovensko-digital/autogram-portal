@@ -41,7 +41,7 @@ class BundlesController < ApplicationController
       @recipient = Recipient.find_by_uuid!(params[:recipient])
       @bundle = @recipient.bundle
     elsif current_user
-      @bundle = current_user.joins(:recipients, :bundles).where(bundle: { uuid: params[:id] }).first
+      @bundle = Bundle.joins(:recipients).where(recipients: { user: current_user }, uuid: params[:id]).first
       @recipient = @bundle.recipients.find_by(user: current_user) if @bundle
     else
       @bundle = Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
