@@ -2,12 +2,12 @@
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
-        <p class="text-sm text-gray-600 mb-4">
+        <h3 class="text-4xl font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
+        <p class="text-md text-gray-600 mb-4">
           <%= t('.description') %>
         </p>
 
-        <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 mb-6">
+        <ol class="list-decimal list-inside space-y-2 text-md text-gray-700 mb-6">
           <li><%= t('.step1') %></li>
           <li><%= t('.step2') %></li>
           <li><%= t('.step3') %></li>
@@ -15,11 +15,13 @@
         </ol>
 
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <p class="text-sm text-gray-700">
+          <p class="text-base text-gray-700">
             <%= t('.note') %>
           </p>
         </div>
       </div>
+
+      <div class="my-8 border-t border-gray-200"></div>
 
       <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
         <%= hidden_field_tag :recipient, @recipient&.uuid if @recipient %>
@@ -27,9 +29,8 @@
         <%= hidden_field_tag :review, params[:review] if params[:review] %>
         <%= hidden_field_tag :iframe, params[:iframe] %>
 
-        <div class="mt-6 flex justify-between">
+        <div class="flex gap-8">
           <%
-            # If contract is part of a bundle, back goes to bundle sign; otherwise to contract sign
             back_path = if @contract.bundle
               sign_bundle_path(@contract.bundle, recipient: params[:recipient], iframe: params[:iframe])
             else
@@ -37,13 +38,10 @@
             end
           %>
           <%= link_to back_path,
-              class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" do %>
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
+              class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
             <%= t('actions.back') %>
           <% end %>
-          <%= f.submit t('.continue'), class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+          <%= f.submit t('.continue'), class: "flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
         </div>
       <% end %>
     </div>
