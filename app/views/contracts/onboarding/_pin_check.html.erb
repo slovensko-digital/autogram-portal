@@ -34,7 +34,7 @@
         <%= hidden_field_tag :iframe, params[:iframe] %>
 
         <div class="mt-6 flex justify-between">
-          <%= link_to contract_onboarding_path(@contract, 'eid_card_generation', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe]),
+          <%= link_to contract_onboarding_path(@contract, 'eid_card_generation', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe], review: params[:review]),
               class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" do %>
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
