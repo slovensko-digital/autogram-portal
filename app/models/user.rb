@@ -46,6 +46,9 @@ class User < ApplicationRecord
   has_many :contracts, dependent: :destroy
   has_many :documents, dependent: :destroy
 
+  enum :eid_card_generation, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
+  MOBILE_EID_CARD_GENERATIONS = [ "eid_2022", "eid_2024", "dpb_2023" ].freeze
+
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
   def self.create_from_provider_data(auth, locale: nil)
@@ -104,6 +107,6 @@ class User < ApplicationRecord
   end
 
   def supports_mobile_signing?
-    eid_card_generation.present? && eid_card_generation >= 4
+    MOBILE_EID_CARD_GENERATIONS.include?(eid_card_generation)
   end
 end

@@ -396,7 +396,6 @@ en:
       signed_message: "This contract has been signed and is complete. No further signature is required."
       title: "Select Signing Application"
       subtitle: "Choose which application to use for electronic signing"
-      back_to_signing_options: "Back to signing options"
       old_card_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Mobile signing apps (AVM, eIdentita) are not compatible with your card."
       old_card_mobile_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
     signature_parameters:
@@ -445,16 +444,18 @@ en:
         title: "Error signing the document"
         close: "Close"
     onboarding:
-      back_to_signing_options: "Back to signing options"
       electronic_title: "Electronic Signing Setup"
       physical_title: "Physical Signing Setup"
       subtitle: "Complete these steps to prepare for signing"
       eid_card_generation:
         title: "Select your eID card generation"
         description: "Different eID card generations support different signing methods. Please select your card generation below."
-        generation_label: "Generation %{gen}"
         compatible_mobile: "Compatible with mobile signing apps (AVM, eIdentita)"
         requires_desktop: "Requires desktop computer with card reader (Autogram Desktop only)"
+        issued_after: "Issued after %{date}"
+        dpb_cards: "Residence permit cards"
+        show_dpb: "Show residence permit cards"
+        hide_dpb: "Hide residence permit cards"
         continue: "Continue"
       pin_check:
         title: "Do you know your eID card PIN?"

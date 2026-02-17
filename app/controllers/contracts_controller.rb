@@ -177,7 +177,7 @@ class ContractsController < ApplicationController
       @recipient = @contract.recipients.find_by(email: current_user.email)
     end
 
-    @eid_card_generation = params[:eid_card_generation]&.to_i || current_user&.eid_card_generation || session[:eid_card_generation]
+    @eid_card_generation = params[:eid_card_generation] || current_user&.eid_card_generation || session[:eid_card_generation]
 
     if @recipient&.signed_contract?(@contract)
       redirect_path = if @contract.bundle

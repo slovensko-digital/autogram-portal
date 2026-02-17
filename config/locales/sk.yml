@@ -352,7 +352,6 @@ sk:
       signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
       title: "Vyberte podpisovú aplikáciu"
       subtitle: "Vyberte, ktorú aplikáciu chcete použiť na elektronické podpisovanie"
-      back_to_signing_options: "Späť na možnosti podpisovania"
       old_card_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (AVM, eIdentita) nie sú kompatibilné s vašou kartou."
       old_card_mobile_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
     signature_parameters:
@@ -405,17 +404,19 @@ sk:
         title: "Chyba pri podpisovaní dokumentu"
         close: "Zavrieť"
     onboarding:
-      back_to_signing_options: "Späť na možnosti podpisovania"
       electronic_title: "Nastavenie elektronického podpisovania"
       physical_title: "Nastavenie fyzického podpisovania"
       subtitle: "Dokončite tieto kroky na prípravu podpisovania"
       eid_card_generation:
-        title: "Vyberte generáciu vášho občianskeho preukazu"
-        description: "Rôzne generácie občianskych preukazov podporujú rôzne metódy podpisovania. Prosím, vyberte generáciu vašej karty nižšie."
-        generation_label: "Generácia %{gen}"
+        title: "Vyberte typ vášho občianskeho preukazu"
+        description: "Podľa vášho výberu vám zobrazíme dostupné možnosti kvalifikovaného podpisovania."
         compatible_mobile: "Kompatibilné s mobilnými podpisovými aplikáciami (AVM, eIdentita)"
         requires_desktop: "Vyžaduje stolný počítač s čítačkou kariet (iba Autogram Desktop)"
+        issued_after: "Vydaný po %{date}"
         continue: "Pokračovať"
+        dpb_cards: Doklady o povolení na pobyt
+        show_dpb: Zobraziť doklady o pobyte
+        hide_dpb: Skryť doklady o pobyte
       pin_check:
         title: "Poznáte BOK k vášmu občianskemu preukazu?"
         description: "Budete potrebovať 6 miestny bezpečnostný osobný kód (BOK) na používanie elektronického čipu na vašom občianskom preukaze. Tento BOK vám bol poskytnutý alebo vami zadaný pri vydavení občianskeho preukazu."

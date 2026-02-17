@@ -66,13 +66,11 @@ module Contracts
     end
 
     def handle_eid_card_generation
-      generation = params[:eid_card_generation].to_i
-
-      if generation.between?(1, 5)
+      if params.require(:eid_card_generation).in?(User.eid_card_generations.keys)
         if current_user
-          current_user.update!(eid_card_generation: generation)
+          current_user.update!(eid_card_generation: params[:eid_card_generation])
         else
-          session[:eid_card_generation] = generation
+          session[:eid_card_generation] = params[:eid_card_generation]
         end
 
         redirect_to contract_onboarding_path(@contract, step: "pin_check", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])

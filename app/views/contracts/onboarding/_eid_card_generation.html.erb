@@ -1,52 +1,104 @@
-<div class="space-y-6">
-  <div>
-    <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
-    <p class="text-sm text-gray-600 mb-4">
-      <%= t('.description') %>
-    </p>
-  </div>
+<main>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div>
+        <h3 class="text-4xl font-bold text-gray-900 mb-2"><%= t('.title') %></h3>
+        <p class="text-md text-gray-600 mb-4">
+          <%= t('.description') %>
+        </p>
+      </div>
 
-  <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
-    <%= hidden_field_tag :recipient, @recipient&.uuid if @recipient %>
-    <%= hidden_field_tag :method, @method %>
-    <%= hidden_field_tag :review, params[:review] if params[:review] %>
-    <%= hidden_field_tag :iframe, params[:iframe] %>
+      <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
+        <%= hidden_field_tag :recipient, @recipient&.uuid if @recipient %>
+        <%= hidden_field_tag :method, @method %>
+        <%= hidden_field_tag :review, params[:review] if params[:review] %>
+        <%= hidden_field_tag :iframe, params[:iframe] %>
 
-    <div class="space-y-3">
-      <% (1..5).each do |gen| %>
-        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 <%= gen >= 4 ? 'border-blue-300' : 'border-gray-200' %>">
-          <%= radio_button_tag :eid_card_generation, gen, false, class: 'mr-3' %>
-          <div class="flex-1">
-            <div class="font-medium text-gray-900"><%= t('.generation_label', gen: gen) %></div>
-            <div class="text-sm text-gray-600">
-              <% if gen >= 4 %>
-                ✓ <%= t('.compatible_mobile') %>
-              <% else %>
-                ⚠ <%= t('.requires_desktop') %>
-              <% end %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <% [
+            [ "eid_2024", "2024-12-18" ],
+            [ "eid_2022", "2022-12-01" ],
+            [ "eid_2021", "2021-06-21" ],
+            [ "eid_2013", "2013-11-30" ]
+            ].each do |value, date_from| %>
+            <label class="group relative flex items-center space-x-3 p-4 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2">
+              <%= radio_button_tag :eid_card_generation, value, false, class: 'sr-only' %>
+              <div class="flex-shrink-0">
+                <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors">
+                  <div class="hidden group-has-[:checked]:block w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <%= image_tag("qscd/#{value}.png", alt: value) %>
+                <div class="text-md font-medium text-gray-900"><%= t('.issued_after', date: date_from) %></div>
+              </div>
+            </label>
+          <% end %>
+        </div>
+
+        <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full mt-8">
+          <div class="w-full bg-white border border-gray-200 rounded-md">
+            <div
+              data-action="click->toggle#toggle"
+              class="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
+              <div class="flex flex-col items-start">
+                <span class="text-s text-gray-800"><%= t('.dpb_cards') %></span>
+              </div>
+              <div data-action="click->toggle#toggle">
+                <button data-action="click->toggle#toggle" class="ml-2 flex-shrink-0 inline-flex items-center cursor-pointer">
+                  <span data-toggle-target="textCollapsed"><%= t('.show_dpb') %></span>
+                  <span data-toggle-target="textExpanded" class="hidden"><%= t('.hide_dpb') %></span>
+                  <svg data-toggle-target="icon" class="w-4 h-4 ml-1 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div data-toggle-target="content" class="p-2">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <% [
+                  [ "dpb_2023", "2023-01-01" ],
+                  [ "dpb_2020", "2024-01-01" ],
+                  [ "dpb_2014", "2014-01-01" ]
+                  ].each do |value, date_from| %>
+                  <label class="group relative flex items-center space-x-3 p-4 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2">
+                    <%= radio_button_tag :eid_card_generation, value, false, class: 'sr-only' %>
+                    <div class="flex-shrink-0">
+                      <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors">
+                        <div class="hidden group-has-[:checked]:block w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                      </div>
+                    </div>
+
+                    <div class="space-y-2">
+                      <%= image_tag("qscd/#{value}.png", alt: value) %>
+                      <div class="text-md font-medium text-gray-900"><%= t('.issued_after', date: date_from) %></div>
+                    </div>
+                  </label>
+                <% end %>
+              </div>
             </div>
           </div>
-        </label>
-      <% end %>
-    </div>
+        </div>
 
-    <div class="mt-6 flex justify-between">
-      <%
-        # If contract is part of a bundle, back goes to bundle sign; otherwise to contract sign
-        back_path = if @contract.bundle
-          sign_bundle_path(@contract.bundle, recipient: params[:recipient], iframe: params[:iframe])
-        else
-          sign_contract_path(@contract, recipient: params[:recipient], iframe: params[:iframe])
-        end
-      %>
-      <%= link_to back_path,
-          class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" do %>
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-        <%= t('contracts.onboarding.back_to_signing_options') %>
+        <div class="mt-8 border-t border-gray-200"></div>
+
+        <div class="mt-8 flex gap-8">
+          <%
+            back_path = if @contract.bundle
+              sign_bundle_path(@contract.bundle, recipient: params[:recipient], iframe: params[:iframe])
+            else
+              sign_contract_path(@contract, recipient: params[:recipient], iframe: params[:iframe])
+            end
+          %>
+          <%= link_to back_path,
+              class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+            <%= t('actions.back') %>
+          <% end %>
+          <%= f.submit t('.continue'), class: "flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
       <% end %>
-      <%= f.submit t('.continue'), class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     </div>
-  <% end %>
-</div>
+  </div>
+</main>

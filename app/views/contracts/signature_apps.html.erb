@@ -13,7 +13,7 @@
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
-          <%= t('.back_to_signing_options') %>
+          <%= t('actions.back') %>
         <% end %>
 
         <div class="w-full">
@@ -22,7 +22,7 @@
         </div>
 
         <div class="w-full" data-controller="signing-app-selector">
-          <% if @eid_card_generation.present? && @eid_card_generation < 4 %>
+          <% if @eid_card_generation.present? && !@eid_card_generation.in?(User::MOBILE_EID_CARD_GENERATIONS) %>
             <div class="w-full bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4" data-signing-app-selector-target="yellowWarning">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
@@ -39,7 +39,7 @@
             </div>
           <% end %>
 
-          <% if @eid_card_generation.present? && @eid_card_generation < 4 %>
+          <% if @eid_card_generation.present? && !@eid_card_generation.in?(User::MOBILE_EID_CARD_GENERATIONS) %>
             <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4" data-signing-app-selector-target="mobileWarning" style="display: none;">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
@@ -79,7 +79,7 @@
                     } %>
             </div>
 
-            <% unless @eid_card_generation.present? && @eid_card_generation < 4 %>
+            <% unless @eid_card_generation.present? && User::MOBILE_EID_CARD_GENERATIONS.include?(@eid_card_generation) %>
               <%= render 'shared/radio_button_card',
                     name: "signing_app_#{@contract.uuid}",
                     value: 'avm',
