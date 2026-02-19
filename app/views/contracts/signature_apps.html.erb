@@ -1,166 +1,120 @@
-<main>
+<main class="mx-auto max-w-3xl">
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <%
-        back_path = if @contract.bundle
-          sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
-        else
-          sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
-        end
-      %>
-      <%= link_to back_path,
-          class: "self-start inline-flex items-center text-sm text-gray-600 hover:text-gray-900" do %>
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-          <%= t('actions.back') %>
+    <%= turbo_frame_tag "signature_apps_#{@contract.uuid}",
+      class: "mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8" do %>
+      <div class="w-full">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+        <p class="text-gray-600"><%= t('.subtitle') %></p>
+      </div>
+
+      <div class="w-full" data-controller="signing-app-selector">
+        <% if @eid_card_generation.present? && !User.supports_mobile_signing?(@eid_card_generation) %>
+          <div data-signing-app-selector-target="yellowWarning">
+            <%= render 'shared/warning', title: t('common.important'), content: t('.old_card_warning', generation: @eid_card_generation) %>
+          </div>
         <% end %>
 
-        <div class="w-full">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
-          <p class="text-gray-600"><%= t('.subtitle') %></p>
-        </div>
-
-        <div class="w-full" data-controller="signing-app-selector">
-          <% if @eid_card_generation.present? && !@eid_card_generation.in?(User::MOBILE_EID_CARD_GENERATIONS) %>
-            <div class="w-full bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4" data-signing-app-selector-target="yellowWarning">
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <svg class="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                  </svg>
-                </div>
-                <div class="ml-3">
-                  <p class="text-sm text-yellow-800">
-                    <strong><%= t('common.important') %>:</strong> <%= t('.old_card_warning', generation: @eid_card_generation) %>
-                  </p>
-                </div>
-              </div>
-            </div>
-          <% end %>
-
-          <% if @eid_card_generation.present? && !@eid_card_generation.in?(User::MOBILE_EID_CARD_GENERATIONS) %>
-            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4" data-signing-app-selector-target="mobileWarning" style="display: none;">
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                  </svg>
-                </div>
-                <div class="ml-3">
-                  <p class="text-sm text-red-800">
-                    <strong><%= t('common.desktop_required') %>:</strong> <%= t('.old_card_mobile_warning', generation: @eid_card_generation) %>
-                  </p>
-                </div>
-              </div>
-            </div>
-          <% end %>
-
-          <h3 class="text-lg font-semibold text-gray-900 mb-4" data-signing-app-selector-target="appSelectionHeading">
-            <% if @contract.awaiting_signature? %>
-              <%= t('.select_signing_app') %>
-            <% else %>
-              <%= t('.add_another_signature') %>
-            <% end %>
-          </h3>
-
-          <div class="space-y-3">
-            <div data-signing-app-selector-target="desktopElement">
-              <%= render 'shared/radio_button_card',
-                    name: "signing_app_#{@contract.uuid}",
-                    value: 'autogram',
-                    label: t('.autogram_desktop_label'),
-                    description: t('.autogram_desktop_description'),
-                    checked: true,
-                    icon: 'desktop',
-                    wrapper_class: 'desktop-signing-element',
-                    data_attributes: {
-                      signing_app_selector_target: 'appRadio'
-                    } %>
-            </div>
-
-            <% unless @eid_card_generation.present? && User::MOBILE_EID_CARD_GENERATIONS.include?(@eid_card_generation) %>
-              <%= render 'shared/radio_button_card',
-                    name: "signing_app_#{@contract.uuid}",
-                    value: 'avm',
-                    label: t('.autogram_mobile_label'),
-                    description: t('.autogram_mobile_description'),
-                    checked: false,
-                    icon: 'mobile',
-                    data_attributes: {
-                      signing_app_selector_target: 'appRadio'
-                    } %>
-
-              <%= render 'shared/radio_button_card',
-                    name: "signing_app_#{@contract.uuid}",
-                    value: 'eidentita',
-                    label: t('.eidentita_label'),
-                    description: t('.eidentita_description'),
-                    checked: false,
-                    icon: 'mobile',
-                    data_attributes: {
-                      signing_app_selector_target: 'appRadio'
-                    } %>
-            <% end %>
+        <% if @eid_card_generation.present? && !User.supports_mobile_signing?(@eid_card_generation) %>
+          <div data-signing-app-selector-target="mobileWarning" style="display: none;">
+            <%= render 'shared/error', title: t('common.desktop_required'), content: t('.old_card_mobile_warning', generation: @eid_card_generation) %>
           </div>
+        <% end %>
 
-          <div class="hidden">
-            <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                  data: {
-                    turbo_frame: "signature_apps_#{@contract.uuid}",
-                    signing_app_selector_target: 'autogramSubmitButton'
-                  } %>
-
-            <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                  data: {
-                    controller: "signers--avm",
-                    action: "click->signers--avm#sign",
-                    turbo_frame: "signature_apps_#{@contract.uuid}",
-                    signing_app_selector_target: "avmSubmitButton"
-                  } %>
-
-            <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                  data: {
-                    controller: "signers--eidentita",
-                    action: "click->signers--eidentita#sign",
-                    turbo_frame: "signature_apps_#{@contract.uuid}",
-                    signing_app_selector_target: "eidentitaSubmitButton"
+        <div class="space-y-3 mb-8">
+          <div data-signing-app-selector-target="desktopElement">
+            <%= render 'shared/radio_button_card',
+                  name: "signing_app_#{@contract.uuid}",
+                  value: 'autogram',
+                  label: t('.autogram_desktop_label'),
+                  description: t('.autogram_desktop_description'),
+                  checked: true,
+                  icon: 'desktop',
+                  wrapper_class: 'desktop-signing-element',
+                  data_attributes: {
+                    signing_app_selector_target: 'appRadio'
                   } %>
           </div>
 
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-              <div class="ml-3 flex-1">
-                <h4 class="text-sm font-semibold text-blue-900 mb-1"><%= t('.first_time_signing') %></h4>
-                <p class="text-sm text-blue-800">
-                  <%= t('.learn_more_text') %> →
-                  <%= link_to t('.how_signing_works'),
-                      contract_onboarding_path(@contract, 'eid_card_generation', method: 'electronic', review: 'true', recipient: @recipient&.uuid, iframe: params[:iframe]),
-                      class: "font-medium underline hover:text-blue-600",
-                      data: { turbo: false } %>
-                </p>
-              </div>
-            </div>
-          </div>
+          <% unless @eid_card_generation.present? && !User.supports_mobile_signing?(@eid_card_generation) %>
+            <%= render 'shared/radio_button_card',
+                  name: "signing_app_#{@contract.uuid}",
+                  value: 'avm',
+                  label: t('.autogram_mobile_label'),
+                  description: t('.autogram_mobile_description'),
+                  checked: false,
+                  icon: 'mobile',
+                  data_attributes: {
+                    signing_app_selector_target: 'appRadio'
+                  } %>
 
-          <div class="border-b border-gray-200 my-4"></div>
-
-          <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
-            <div class="flex gap-4">
-              <button type="button"
-                      data-signing-app-selector-target="signButton"
-                      data-action="click->signing-app-selector#triggerSign"
-                      class="flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <%= t('.continue_to_sign') %>
-              </button>
-            </div>
+            <%= render 'shared/radio_button_card',
+                  name: "signing_app_#{@contract.uuid}",
+                  value: 'eidentita',
+                  label: t('.eidentita_label'),
+                  description: t('.eidentita_description'),
+                  checked: false,
+                  icon: 'mobile',
+                  data_attributes: {
+                    signing_app_selector_target: 'appRadio'
+                  } %>
           <% end %>
         </div>
-      </div>
+
+        <div class="hidden">
+          <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                data: {
+                  turbo_frame: "signature_apps_#{@contract.uuid}",
+                  signing_app_selector_target: 'autogramSubmitButton'
+                } %>
+
+          <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                data: {
+                  controller: "signers--avm",
+                  action: "click->signers--avm#sign",
+                  turbo_frame: "signature_apps_#{@contract.uuid}",
+                  signing_app_selector_target: "avmSubmitButton"
+                } %>
+
+          <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                data: {
+                  controller: "signers--eidentita",
+                  action: "click->signers--eidentita#sign",
+                  turbo_frame: "signature_apps_#{@contract.uuid}",
+                  signing_app_selector_target: "eidentitaSubmitButton"
+                } %>
+        </div>
+
+        <%= render 'shared/info',
+          title: t('.first_time_signing'),
+          content: t('.learn_more_text'),
+          button: t('.how_signing_works'),
+          target: contract_onboarding_path(@contract, 'eid_card_generation', method: 'electronic', review: 'true', recipient: @recipient&.uuid, iframe: params[:iframe]),
+          blank: false
+        %>
+
+        <div class="border-b border-gray-200 my-8"></div>
+
+        <div class="flex gap-8">
+          <%
+            back_path = if @contract.bundle
+              sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
+            else
+              sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+            end
+          %>
+          <%= link_to t('actions.back'),
+            back_path,
+            data: { turbo: false },
+            class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          %>
+
+          <button type="button"
+                  data-signing-app-selector-target="signButton"
+                  data-action="click->signing-app-selector#triggerSign"
+                  class="flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <%= t('.continue_to_sign') %>
+          </button>
+        </div>
+      <% end %>
     </div>
   </main>

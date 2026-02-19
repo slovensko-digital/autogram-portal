@@ -106,7 +106,11 @@ class User < ApplicationRecord
     end
   end
 
-  def supports_mobile_signing?
+  def self.supports_mobile_signing?(eid_card_generation)
     MOBILE_EID_CARD_GENERATIONS.include?(eid_card_generation)
+  end
+
+  def self.legacy_eid_card?(generation)
+    generation.present? && generation.in?(%w[eid_2013 dpb_2014])
   end
 end

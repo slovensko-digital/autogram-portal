@@ -7,13 +7,13 @@ module Contracts
     before_action :allow_iframe
     skip_before_action :verify_authenticity_token
 
-    VALID_STEPS = %w[eid_card_generation pin_check certificate_check physical_instructions].freeze
+    VALID_STEPS = %w[eid_card_generation legacy_eid_card pin_check certificate_check physical_instructions].freeze
 
     def show
       @step = step_param || first_step
       @method = params[:method] # 'electronic' or 'physical'
 
-      render "contracts/onboarding/show"
+      render @step
     end
 
     def update
@@ -66,18 +66,21 @@ module Contracts
     end
 
     def handle_eid_card_generation
-      if params.require(:eid_card_generation).in?(User.eid_card_generations.keys)
-        if current_user
-          current_user.update!(eid_card_generation: params[:eid_card_generation])
-        else
-          session[:eid_card_generation] = params[:eid_card_generation]
-        end
-
-        redirect_to contract_onboarding_path(@contract, step: "pin_check", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
-      else
-        redirect_to contract_onboarding_path(@contract, step: "eid_card_generation", method: @method, recipient: @recipient&.uuid, iframe: params[:iframe]),
-                    alert: "Please select your eID card generation"
+      eid_card_generation = params[:eid_card_generation]
+      unless eid_card_generation.in?(User.eid_card_generations.keys)
+        return redirect_to contract_onboarding_path(@contract, step: "eid_card_generation", method: @method, recipient: @recipient&.uuid, iframe: params[:iframe]),
+                  flash: { alert: I18n.t("contracts.onboarding.eid_card_generation.invalid_selection") }
       end
+
+      current_user.update!(eid_card_generation: eid_card_generation) if current_user
+      session[:eid_card_generation] = eid_card_generation
+
+
+      if User.legacy_eid_card?(eid_card_generation)
+        return redirect_to contract_onboarding_path(@contract, step: "legacy_eid_card", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
+      end
+
+      redirect_to contract_onboarding_path(@contract, step: "pin_check", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
     end
 
     def handle_pin_check

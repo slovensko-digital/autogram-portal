@@ -411,26 +411,34 @@ sk:
         title: "Vyberte typ vášho občianskeho preukazu"
         description: "Podľa vášho výberu vám zobrazíme dostupné možnosti kvalifikovaného podpisovania."
         compatible_mobile: "Kompatibilné s mobilnými podpisovými aplikáciami (AVM, eIdentita)"
-        requires_desktop: "Vyžaduje stolný počítač s čítačkou kariet (iba Autogram Desktop)"
+        requires_desktop: "Vyžaduje počítač a čítačku kariet (iba Autogram Desktop)"
         issued_after: "Vydaný po %{date}"
         continue: "Pokračovať"
         dpb_cards: Doklady o povolení na pobyt
         show_dpb: Zobraziť doklady o pobyte
         hide_dpb: Skryť doklady o pobyte
+        invalid_selection: "Vyberte typ občianského preukazu."
       pin_check:
-        title: "Poznáte BOK k vášmu občianskemu preukazu?"
-        description: "Budete potrebovať 6 miestny bezpečnostný osobný kód (BOK) na používanie elektronického čipu na vašom občianskom preukaze. Tento BOK vám bol poskytnutý alebo vami zadaný pri vydavení občianskeho preukazu."
-        no_pin_title: "Nemáte BOK?"
+        title: "Poznáte váš BOK?"
+        description_a: "Na použitie elektronického občianskeho preukazu je potrebné poznať bezpečnostný osobný kód (BOK). Tento kód sa nastavuje pri vydávaní nového občianskeho preukazu na úrade."
+        description_b: "Bezpečnostný osobný kód (BOK) je 6-miestne číslo, ktoré slúži na prihlasovanie sa na slovensko.sk, iné štátne portály a na všetky dôležité úkony spojené s občianskym preukazom. Toto číslo nikomu nikdy neprezrádzajte a bezpečne si ho uchovajte."
+        no_pin_title: "Nepoznáte BOK?"
         no_pin_description: "Musíte navštívit oddelenie dokladov na ktorom koľko okresnom riaditeľstve policajného zboru."
         no_pin_learn_more: "Čo robiť, ak som zabudol BOK?"
         continue: "Mám BOK, pokračovať"
       certificate_check:
-        title: "Máte certifikáty na vašom občianskom preukaze?"
-        description: "Elektronické podpisovanie vyžaduje platné kvalifikované certifikáty na vašom občianskom preukaze. Tieto certifikáty vám buď vydali pri preveraní nového OP na polícii alebo ste si ich museli vydať sami doma. K certifikátom potrebuejte poznať ešte podpisový PIN (6 čísel), ktorý by sa mal líšiť od vášho BOK."
+        title: "Máte vydané certifikáty?"
+        description_a: "Elektronické podpisovanie vyžaduje platné kvalifikované certifikáty na vašom občianskom preukaze. Tieto certifikáty vám buď vydali pri preveraní nového OP na polícii alebo ste si ich museli vydať sami doma. K certifikátom potrebuejte poznať ešte podpisový PIN (6 čísel), ktorý by sa mal líšiť od vášho BOK."
+        description_b: "Ak certifikáty ešte nemáte, môžete si ich vydať aj sami doma. Bude na to ale potrebovať čítačku kariet, pomocou ktorej pripojíte občiansky preukaz k počítaču."
         no_certificates_title: "Nemáte ešte certifikáty?"
-        no_certificates_description: "Budete potrebovať stolný počítač s fyzickou čítačkou kariet na ich vydanie. Toto je jednorazová požiadavka."
+        no_certificates_description: "Budete potrebovať počítač a fyzickú čítačku kariet na ich vydanie. Toto je jednorazová požiadavka."
         no_certificates_learn_more: "Ako získať certifikáty pre elektronické podpisovanie?"
         continue: "Mám certifikáty, pokračovať"
+      legacy_eid_card:
+        title: "Elektronické podpisovanie nie je možné"
+        description: "Bohužiaľ, vaša generácia občianskeho preukazu už nepodporuje kvalifikované elektronické podpisy. Na elektronické podpisovanie dokumentov bude musieť požiadať o nový občiansky preukaz. Výmena z dôvodu starého čipu v občianskom preukaze by mala byť bez poplatku."
+        warning_title: "Tento občiansky preukaz už nie je platný pre kvalifikované podpisovanie"
+        warning_description: "Staré občianske preukazy vydané pred rokom 2021 už nie je možné použiť na kvalifikované elektronické podpisovanie. Musíte navštíviť oddelenie dokladov OR PZ a požiadať o nový občiansky preukaz."
       physical_instructions:
         title: "Pokyny pre fyzické podpisovanie"
         description: "Na fyzické podpísanie tohto dokumentu postupujte podľa týchto krokov:"

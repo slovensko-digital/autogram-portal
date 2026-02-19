@@ -1,4 +1,4 @@
-<main>
+<main class="mx-auto max-w-3xl">
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div>
@@ -7,23 +7,17 @@
           <%= t('.description') %>
         </p>
 
-        <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="ml-3">
-              <p class="text-base text-blue-800">
-                <strong><%= t('.no_pin_title') %></strong>
-                <%= t('.no_pin_description') %>
-              </p>
-              <p class="text-base text-blue-800 mt-4">
-                <a href="https://www.slovensko.sk/sk/faq/_obciansky-preukaz-s-cipom-do#zabudne" target="_blank" class="text-blue-800 hover:text-blue-500 underline"> <%= t('.no_pin_learn_more') %> </a>
-              </p>
-            </div>
-          </div>
+        <ol class="list-decimal list-inside space-y-2 text-md text-gray-700 mb-6">
+          <li><%= t('.step1') %></li>
+          <li><%= t('.step2') %></li>
+          <li><%= t('.step3') %></li>
+          <li><%= t('.step4') %></li>
+        </ol>
+
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p class="text-base text-gray-700">
+            <%= t('.note') %>
+          </p>
         </div>
       </div>
 
@@ -36,7 +30,14 @@
         <%= hidden_field_tag :iframe, params[:iframe] %>
 
         <div class="flex gap-8">
-          <%= link_to contract_onboarding_path(@contract, 'eid_card_generation', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe], review: params[:review]),
+          <%
+            back_path = if @contract.bundle
+              sign_bundle_path(@contract.bundle, recipient: params[:recipient], iframe: params[:iframe])
+            else
+              sign_contract_path(@contract, recipient: params[:recipient], iframe: params[:iframe])
+            end
+          %>
+          <%= link_to back_path,
               class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
             <%= t('actions.back') %>
           <% end %>

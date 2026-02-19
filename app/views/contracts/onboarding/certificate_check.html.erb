@@ -1,32 +1,20 @@
-<main>
+<main class="mx-auto max-w-3xl">
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <div>
-        <h3 class="text-4xl font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
-        <p class="text-md text-gray-600 mb-4">
-          <%= t('.description') %>
-        </p>
+      <div class="space-y-8">
+        <h3 class="text-4xl font-semibold text-gray-900"><%= t('.title') %></h3>
+        <p class="text-md text-gray-600"><%= t('.description_a') %></p>
+        <p class="text-md text-gray-600"><%= t('.description_b') %></p>
 
-        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-              </svg>
-            </div>
-            <div class="ml-3">
-              <p class="text-base text-yellow-800">
-                <strong><%= t('.no_certificates_title') %></strong> <%= t('.no_certificates_description') %>
-              </p>
-              <p class="text-base text-yellow-800 mt-4">
-                <a href="https://navody.digital/zivotne-situacie/aktivacia-eid/krok/certifikaty" target="_blank" class="text-yellow-800 hover:text-yellow-500 underline"> <%= t('.no_certificates_learn_more') %> </a>
-              </p>
-            </div>
-          </div>
-        </div>
+        <%= render 'shared/warning',
+          title: t('.no_certificates_title'),
+          content: t('.no_certificates_description'),
+          button: t('.no_certificates_learn_more'),
+          target: "https://navody.digital/zivotne-situacie/aktivacia-eid/krok/certifikaty"
+        %>
       </div>
 
-      <div class="my-8 border-t border-gray-200"></div>
+      <div class="mb-8 border-t border-gray-200"></div>
 
       <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
         <%= hidden_field_tag :recipient, @recipient&.uuid if @recipient %>

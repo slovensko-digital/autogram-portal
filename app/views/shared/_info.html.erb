@@ -1,0 +1,24 @@
+<%# locals: (title:, content:, button: nil, target: nil, blank: true) %>
+
+<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+  <div class="flex items-start">
+    <div class="flex-shrink-0">
+      <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <div class="ml-3 flex-1">
+      <h4 class="text-sm font-semibold text-blue-900 mb-1"><%= title %></h4>
+      <p class="text-sm text-blue-800">
+        <%= content %>
+      </p>
+      <% if button && target %>
+        <p class="text-sm mt-4">
+          <strong>
+            <%= link_to button, target, target: blank ? "_blank" : "_self", class: "text-blue-800 hover:text-blue-500 underline", data: { turbo: false } %>
+          </strong>
+        </p>
+      <% end %>
+    </div>
+  </div>
+</div>

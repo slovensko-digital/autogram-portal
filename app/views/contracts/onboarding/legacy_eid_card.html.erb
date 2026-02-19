@@ -1,0 +1,23 @@
+<main class="mx-auto max-w-3xl">
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div class="space-y-8">
+        <h3 class="text-4xl font-semibold text-gray-900"><%= t('.title') %></h3>
+        <p class="text-md text-gray-600"><%= t('.description') %></p>
+
+        <%= render 'shared/warning',
+          title: t('.warning_title'),
+          content: t('.warning_description')
+        %>
+
+      </div>
+
+      <div class="mb-8 border-t border-gray-200"></div>
+
+      <%= link_to contract_onboarding_path(@contract, 'eid_card_generation', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe], review: params[:review]),
+          class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+        <%= t('actions.back') %>
+      <% end %>
+    </div>
+  </div>
+</main>
