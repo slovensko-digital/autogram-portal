@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["form"]
+  static targets = ["form", "progressBar", "progressPercent", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateNotInstalled", "stateCancelled", "stateError", "errorMessage"]
   static values = {
     autogramParametersPath: String,
     signedDocumentPath: String,
@@ -71,9 +71,9 @@ export default class extends Controller {
       }
 
       let client
-      if (window.AutogramSDK.CombinedClient) {
-        console.log('Using CombinedClient')
-        client = await window.AutogramSDK.CombinedClient.init()
+      if (window.AutogramSDK.DesktopClient) {
+        console.log('Using DesktopClient')
+        client = new window.AutogramSDK.DesktopClient()
       } else {
         throw new Error('No suitable Autogram client found. Available properties: ' + Object.keys(window.AutogramSDK).join(', '))
       }
@@ -130,11 +130,38 @@ export default class extends Controller {
 
       console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, autogramParameters.documents[0].content_type)
 
-      let signResult = await client.signOnDesktop(
+      let signResult = await client.sign(
         signRequestDocument,
         signRequestSignatureParameters,
-        autogramParameters.documents[0].content_type
+        autogramParameters.documents[0].content_type,
+        {
+          onStateChange: (state) => {
+            if (state.type === 'checkingApp') {
+              this.updateProgress(0, 'checking')
+            }
+            if (state.type === 'launchingApp') {
+              this.updateProgress(25, 'starting')
+            }
+            if (state.type === 'waitingForSignature') {
+              this.updateProgress(75, 'waiting')
+            }
+            if (state.type === 'appNotInstalled') {
+              console.error('Autogram is not installed')
+              this.showAppNotInstalledMessage()
+            }
+            if (state.type === 'signingCancelled') {
+              console.log('User cancelled signing')
+              this.showCancelledState()
+            }
+            if (state.type === 'error') {
+              console.error('Signing error:', state)
+              this.showErrorState(state.message || 'Unknown error')
+            }
+          }
+        }
       )
+
+      this.updateProgress(100, 'signed')
 
       if (signResult && signResult.content) {
         const formData = new FormData()
@@ -154,9 +181,10 @@ export default class extends Controller {
         if (response.redirected) {
           window.location.href = response.url
         } else if (response.ok) {
+          this.updateProgress(100, 'signed')
+          
           window.parent.postMessage({ type: 'message', status: 'document-signed' }, '*');
           console.log('Document signed and submitted successfully. Turbo stream refresh will redirect to sign page.')
-          // Turbo stream will broadcast :refresh action which triggers controller redirect
         } else {
           const errorText = await response.text()
           let errorMessage = 'An error occurred while submitting the signed document.'
@@ -174,13 +202,20 @@ export default class extends Controller {
       }
     } catch (error) {
       if (error.message && (error.message.includes('cancel') || error.message.includes('abort'))) {
-        console.log('User cancelled signing')
-        window.location.reload()
-      } else {
-        console.error('Signing error:', error)
-        alert(i18n.t('errors.signing_error', { message: error.message }))
-        window.location.reload()
+        console.log('User cancelled signing - already handled by onStateChange callback')
+        return
       }
+      
+      if (error.message && error.message.includes('error')) {
+        console.log('Error already handled by onStateChange callback')
+        return
+      }
+      
+      console.error('Unexpected signing error:', error)
+      alert(i18n.t('errors.signing_error', { message: error.message }))
+      setTimeout(() => {
+        window.location.href = this.element.querySelector('a[href*="signature_apps"]')?.href || window.location.href
+      }, 1000)
     }
   }
 
@@ -242,5 +277,132 @@ export default class extends Controller {
       reader.onerror = () => reject(new Error(i18n.t('errors.file_read_failed')));
       reader.readAsDataURL(blob);
     });
+  }
+
+  updateProgress(percent, stage) {
+    if (this.hasProgressBarTarget) {
+      this.progressBarTarget.style.width = `${percent}%`
+    }
+    if (this.hasProgressPercentTarget) {
+      this.progressPercentTarget.textContent = `${percent}%`
+    }
+
+    if (this.hasStatusCheckingTarget && this.hasStatusStartingTarget && 
+        this.hasStatusSendingTarget && this.hasStatusWaitingTarget && this.hasStatusSignedTarget) {
+      
+      switch(stage) {
+        case 'starting':
+          this.markActive(this.statusStartingTarget)
+          break
+        case 'waiting':
+          this.markCompleted(this.statusStartingTarget)
+          this.markCompleted(this.statusSendingTarget)
+          this.markActive(this.statusWaitingTarget)
+          break
+        case 'signed':
+          this.markCompleted(this.statusStartingTarget)
+          this.markCompleted(this.statusSendingTarget)
+          this.markCompleted(this.statusWaitingTarget)
+          this.markCompleted(this.statusSignedTarget)
+          break
+      }
+    }
+  }
+
+  resetStatus(element) {
+    element.classList.remove('bg-green-50', 'border-green-200')
+    element.classList.remove('bg-white', 'border-blue-200')
+    element.classList.add('bg-gray-100', 'border-gray-200', 'opacity-50')
+    const icon = element.querySelector('.flex-shrink-0')
+    if (icon) {
+      icon.innerHTML = '<div class="w-6 h-6 bg-gray-400 rounded-full"></div>'
+    }
+  }
+
+  markCompleted(element) {
+    element.classList.remove('bg-gray-100', 'border-gray-200', 'opacity-50')
+    element.classList.remove('bg-white', 'border-blue-200')
+    element.classList.add('bg-green-50', 'border-green-200')
+    const icon = element.querySelector('.flex-shrink-0')
+    if (icon) {
+      icon.innerHTML = `
+        <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-white">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </div>
+      `
+    }
+  }
+
+  markActive(element) {
+    element.classList.remove('bg-gray-100', 'border-gray-200', 'opacity-50')
+    element.classList.remove('bg-green-50', 'border-green-200')
+    element.classList.remove('bg-blue-50')
+    element.classList.add('bg-white', 'border-blue-200')
+    const icon = element.querySelector('.flex-shrink-0')
+    if (icon) {
+      icon.innerHTML = `
+        <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      `
+    }
+  }
+
+  showAppNotInstalledMessage() {
+    this.hideAllStates()
+    if (this.hasStateNotInstalledTarget) {
+      this.stateNotInstalledTarget.classList.remove('hidden')
+    }
+  }
+
+  showCancelledState() {
+    this.hideAllStates()
+    if (this.hasStateCancelledTarget) {
+      this.stateCancelledTarget.classList.remove('hidden')
+    }
+    
+    setTimeout(() => {
+      window.location.href = this.element.querySelector('a[href*="signature_apps"]')?.href || window.location.href
+    }, 2000)
+  }
+
+  showErrorState(message) {
+    this.hideAllStates()
+    if (this.hasStateErrorTarget) {
+      this.stateErrorTarget.classList.remove('hidden')
+      if (this.hasErrorMessageTarget) {
+        this.errorMessageTarget.textContent = `${message}. Presmerovávame vás späť...`
+      }
+    }
+    
+    setTimeout(() => {
+      window.location.href = this.element.querySelector('a[href*="signature_apps"]')?.href || window.location.href
+    }, 3000)
+  }
+
+  hideAllStates() {
+    if (this.hasStateNormalTarget) this.stateNormalTarget.classList.add('hidden')
+    if (this.hasStateNotInstalledTarget) this.stateNotInstalledTarget.classList.add('hidden')
+    if (this.hasStateCancelledTarget) this.stateCancelledTarget.classList.add('hidden')
+    if (this.hasStateErrorTarget) this.stateErrorTarget.classList.add('hidden')
+  }
+
+  showCancelledMessage() {
+    // Deprecated - use showCancelledState instead
+    this.showCancelledState()
+  }
+
+  showErrorMessage(message) {
+    // Deprecated - use showErrorState instead  
+    this.showErrorState(message)
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
   }
 }

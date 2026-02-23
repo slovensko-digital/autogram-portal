@@ -1,57 +1,209 @@
-<%=  turbo_stream_from @session %>
-<%=  turbo_stream_from "contract_#{@contract.uuid}" %>
-<div
+<div class="bg-white border border-gray-200 rounded-lg"
   data-controller="signers--autogram"
   data-signers--autogram-autogram-parameters-path-value="<%= parameters_contract_session_path(@contract, @session) %>"
   data-signers--autogram-signed-document-path-value="<%= upload_contract_session_path(@contract, @session) %>"
   data-signers--autogram-sdk-path-value="<%= javascript_path('autogram-sdk') %>"
 >
-</div>
-<div class="space-y-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-  <div class="text-center">
-    <div class="flex justify-center mb-4">
-      <svg class="animate-spin h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
+  <!-- Header -->
+  <div class="border-b border-gray-200 px-6 py-5">
+    <h2 class="text-2xl font-bold text-gray-900"><%= t('.title') %></h2>
+    <p class="mt-1 text-sm text-gray-600"><%= t('.subtitle') %></p>
+  </div>
+
+  <!-- Main content area with two columns -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+    <!-- Left column: Instructions -->
+    <div class="space-y-6">
+      <!-- Numbered steps -->
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+            1
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900"><%= t('.step1_title') %></h3>
+            <p class="text-sm text-gray-600 mt-1"><%= t('.step1_desc') %></p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+            2
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900"><%= t('.step2_title') %></h3>
+            <p class="text-sm text-gray-600 mt-1"><%= t('.step2_desc') %></p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+            3
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900"><%= t('.step3_title') %></h3>
+            <p class="text-sm text-gray-600 mt-1"><%= t('.step3_desc') %></p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900"><%= t('.step4_title') %></h3>
+            <p class="text-sm text-gray-600 mt-1"><%= t('.step4_desc') %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Help section -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+          <div>
+            <h4 class="font-semibold text-sm text-blue-900"><%= t('.help_title') %></h4>
+            <p class="text-sm text-blue-800 mt-1"><%= t('.note') %></p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
-    <p class="text-sm text-gray-600 mb-4">
-      <%= t('.subtitle') %>
-    </p>
-  </div>
+    <!-- Right column: Progress indicator -->
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+      <!-- Central status icon and message -->
+      <div class="flex flex-col items-center justify-center mb-8">
+        
+        <!-- Normal signing state -->
+        <div data-signers--autogram-target="stateNormal">
+          <div class="mb-4 flex justify-center">
+            <svg class="animate-spin h-16 w-16 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">
+            <%= t('.progress_title') %>
+          </h3>
+          <p class="text-sm text-gray-600 text-center">
+            <%= t('.progress_subtitle') %>
+          </p>
+        </div>
 
-  <div class="bg-white rounded-lg p-4 border border-blue-200">
-    <div class="space-y-3 text-sm text-gray-700">
-      <div class="flex items-start">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0 mt-0.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span><%= t('.step1') %></span>
+        <!-- App not installed state -->
+        <div class="hidden" data-signers--autogram-target="stateNotInstalled">
+          <div class="mb-4 flex justify-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-red-900 text-center mb-2">
+            Autogram nie je nainštalovaný
+          </h3>
+          <div class="flex flex-col items-center">
+            <p class="text-sm text-red-700 text-center mb-4">
+              Autogram Desktop nie je nainštalovaný na vašom počítači. Stiahnite a nainštalujte si ho pre pokračovanie.
+            </p>
+            <a href="https://autogram.slovensko.digital" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Stiahnuť Autogram
+            </a>
+          </div>
+        </div>
+
+        <!-- Cancelled state -->
+        <div class="hidden" data-signers--autogram-target="stateCancelled">
+          <div class="mb-4 flex justify-center">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-yellow-600">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-yellow-900 text-center mb-2">
+            Podpisovanie zrušené
+          </h3>
+          <p class="text-sm text-yellow-700 text-center">
+            Zrušili ste proces podpisovania. Presmerovávame vás späť...
+          </p>
+        </div>
+
+        <!-- Error state -->
+        <div class="hidden" data-signers--autogram-target="stateError">
+          <div class="mb-4 flex justify-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-red-900 text-center mb-2">
+            Chyba pri podpisovaní
+          </h3>
+          <p class="text-sm text-red-700 text-center" data-signers--autogram-target="errorMessage">
+            Presmerovávame vás späť...
+          </p>
+        </div>
       </div>
-      <div class="flex items-start">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0 mt-0.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-        </svg>
-        <span><%= t('.step2') %></span>
+
+      <!-- Progress bar -->
+      <div class="mb-6">
+        <div class="flex justify-between text-sm text-gray-600 mb-2">
+          <span><%= t('.progress_label') %></span>
+          <span data-signers--autogram-target="progressPercent">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%" data-signers--autogram-target="progressBar"></div>
+        </div>
       </div>
-      <div class="flex items-start">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0 mt-0.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-        </svg>
-        <span><%= t('.step3') %></span>
+
+      <!-- Status items -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg" data-signers--autogram-target="statusChecking">
+          <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-white">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-gray-600"><%= t('.status_checking') %></span>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 bg-gray-100 border border-gray-200 rounded-lg opacity-50" data-signers--autogram-target="statusStarting">
+          <div class="flex-shrink-0 w-6 h-6 rounded-full"></div>
+          <span class="text-sm font-medium text-gray-600"><%= t('.status_starting') %></span>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 bg-gray-100 border border-gray-200 rounded-lg opacity-50" data-signers--autogram-target="statusSending">
+          <div class="flex-shrink-0 w-6 h-6 rounded-full"></div>
+          <span class="text-sm font-medium text-gray-600"><%= t('.status_sending') %></span>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 bg-gray-100 border border-gray-200 rounded-lg opacity-50" data-signers--autogram-target="statusWaiting">
+          <div class="flex-shrink-0 w-6 h-6 rounded-full"></div>
+          <span class="text-sm font-medium text-gray-600"><%= t('.status_waiting') %></span>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 bg-gray-100 border border-gray-200 rounded-lg opacity-50" data-signers--autogram-target="statusSigned">
+          <div class="flex-shrink-0 w-6 h-6 rounded-full"></div>
+          <span class="text-sm font-medium text-gray-600"><%= t('.status_signed') %></span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="text-center text-xs text-gray-500">
-    <p><%= t('.note') %></p>
-  </div>
-
-  <div class="text-center">
+  <!-- Footer with cancel button -->
+  <div class="border-t border-gray-200 px-6 py-4">
     <%= link_to signature_apps_contract_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                class: "inline-flex items-center px-3 py-2 border border-red-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                data: { turbo_method: :get } do %>
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>

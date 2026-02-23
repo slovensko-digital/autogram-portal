@@ -1,4 +1,7 @@
 <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
+  <%=  turbo_stream_from @session %>
+  <%=  turbo_stream_from "contract_#{@contract.uuid}" %>
+
   <% if @session.eidentita? %>
     <%= render "eidentita" %>
   <% elsif @session.avm? %>
