@@ -14,7 +14,7 @@
 
       <div class="mb-8 border-t border-gray-200"></div>
 
-      <%= link_to contract_onboarding_path(@contract, 'eid_card_generation', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe], review: params[:review]),
+      <%= link_to contract_onboarding_path(@contract, 'qscd_check', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe], review: params[:review]),
           class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
         <%= t('actions.back') %>
       <% end %>

@@ -1,8 +1,9 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
-  before_action :set_recipient, only: [ :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
   before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
 
   def index
     @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
@@ -177,8 +178,6 @@ class ContractsController < ApplicationController
       @recipient = @contract.recipients.find_by(email: current_user.email)
     end
 
-    @eid_card_generation = params[:eid_card_generation] || current_user&.eid_card_generation || session[:eid_card_generation]
-
     if @recipient&.signed_contract?(@contract)
       redirect_path = if @contract.bundle
         sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
@@ -186,6 +185,16 @@ class ContractsController < ApplicationController
         sign_contract_path(@contract, recipient: @recipient&.uuid)
       end
       redirect_to redirect_path
+    end
+  end
+
+  def ensure_onboarding
+    case action_name
+    when "signature_apps"
+      @qscd = params[:qscd] || current_user&.qscd || session[:qscd]
+      redirect_to contract_onboarding_path(@contract, method: "electronic", step: "qscd_check", recipient: @recipient&.uuid, iframe: params[:iframe]) if @qscd.blank? || User.legacy_eid_card?(@qscd)
+    when "physical_signing"
+      redirect_to contract_onboarding_path(@contract, method: "physical", step: "physical_signing", recipient: @recipient&.uuid, iframe: params[:iframe]) unless current_user&.onboarding_completed?("physical")
     end
   end
 

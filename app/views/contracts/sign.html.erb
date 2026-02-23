@@ -70,32 +70,7 @@
 
       <% if @contract.awaiting_signature? || current_user == @contract.user %>
         <div class="w-full">
-          <%
-            # Determine if onboarding is required
-            recipient = params[:recipient]
-            @recipient = @contract.recipients.find_by(uuid: recipient) if recipient
-
-            # Check onboarding status for current user or session
-            electronic_onboarding_required = if current_user
-              !current_user.onboarding_completed?('electronic')
-            else
-              !(session[:completed_onboardings] || []).include?('electronic')
-            end
-
-            physical_onboarding_required = if current_user
-              !current_user.onboarding_completed?('physical')
-            else
-              !(session[:completed_onboardings] || []).include?('physical')
-            end
-          %>
-
-          <%= render 'signing_method_choice',
-              contract: @contract,
-              recipient: @recipient,
-              onboarding_required: {
-                electronic: electronic_onboarding_required,
-                physical: physical_onboarding_required
-              } %>
+          <%= render 'signing_method_choice', contract: @contract, recipient: @recipient %>
         </div>
       <% end %>
     </div>

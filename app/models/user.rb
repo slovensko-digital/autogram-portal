@@ -10,7 +10,6 @@
 #  confirmed_at           :datetime
 #  current_sign_in_at     :datetime
 #  current_sign_in_ip     :string
-#  eid_card_generation    :integer
 #  email                  :string
 #  encrypted_password     :string           default(""), not null
 #  failed_attempts        :integer          default(0), not null
@@ -20,6 +19,7 @@
 #  locale                 :string           default("sk")
 #  locked_at              :datetime
 #  name                   :string
+#  qscd                   :integer
 #  remember_created_at    :datetime
 #  reset_password_sent_at :datetime
 #  reset_password_token   :string
@@ -46,8 +46,8 @@ class User < ApplicationRecord
   has_many :contracts, dependent: :destroy
   has_many :documents, dependent: :destroy
 
-  enum :eid_card_generation, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
-  MOBILE_EID_CARD_GENERATIONS = [ "eid_2022", "eid_2024", "dpb_2023" ].freeze
+  enum :qscd, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
+  MOBILE_QSCDS = [ "eid_2022", "eid_2024", "dpb_2023" ].freeze
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
@@ -106,11 +106,11 @@ class User < ApplicationRecord
     end
   end
 
-  def self.supports_mobile_signing?(eid_card_generation)
-    MOBILE_EID_CARD_GENERATIONS.include?(eid_card_generation)
+  def self.supports_mobile_signing?(qscd)
+    MOBILE_QSCDS.include?(qscd)
   end
 
-  def self.legacy_eid_card?(generation)
-    generation.present? && generation.in?(%w[eid_2013 dpb_2014])
+  def self.legacy_eid_card?(qscd)
+    qscd.present? && qscd.in?(%w[eid_2013 dpb_2014])
   end
 end

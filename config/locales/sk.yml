@@ -17,6 +17,7 @@ sk:
     add: "Pridať"
     edit: "Upraviť"
     sign: "Podpísať"
+    change_selection: "Zmeniť výber"
 
   header:
     navigation:
@@ -336,9 +337,9 @@ sk:
     signature_apps:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       add_another_signature: "Pridajte ďalší podpis"
-      autogram_desktop_label: "Autogram Desktop"
-      autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronick podpisov pomocou eID kariet a iných zariadení"
-      autogram_mobile_label: "Autogram v Mobile"
+      autogram_desktop_label: "Autogram na počítači"
+      autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronických podpisov pomocou eID kariet a iných zariadení"
+      autogram_mobile_label: "Autogram v mobile"
       autogram_mobile_description: "Open-source mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
       eidentita_label: "eIdentita"
       eidentita_description: "Štátna mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
@@ -352,8 +353,9 @@ sk:
       signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
       title: "Vyberte podpisovú aplikáciu"
       subtitle: "Vyberte, ktorú aplikáciu chcete použiť na elektronické podpisovanie"
-      old_card_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (AVM, eIdentita) nie sú kompatibilné s vašou kartou."
-      old_card_mobile_warning: "Váš občiansky preukaz (generácia %{generation}) vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
+      old_card_warning_title: "Obmedzenie"
+      old_card_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (Autogram v mobile, eIdentita) nie sú kompatibilné s vašou kartou."
+      old_card_mobile_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
@@ -377,12 +379,12 @@ sk:
       loading_content: "Načítavam obsah dokumentu..."
     sessions:
       autogram:
-        title: "Podpisovanie s Autogram Desktop"
-        subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram Desktop"
-        step1: "Aplikácia Autogram Desktop by sa mala automaticky otvoriť"
+        title: "Podpisovanie v Autograme"
+        subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram"
+        step1: "Aplikácia Autogram  by sa mala automaticky otvoriť"
         step2: "Postupujte podľa pokynov v aplikácii, aby ste dokončili podpisovanie"
         step3: "Táto stránka sa automaticky aktualizuje po dokončení podpisovania"
-        note: "Uistite sa, že je aplikácia Autogram Desktop nainštalovaná a spustená"
+        note: "Uistite sa, že je aplikácia Autogram nainštalovaná a spustená"
         cancel: "Zrušiť"
       avm:
         scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
@@ -407,11 +409,11 @@ sk:
       electronic_title: "Nastavenie elektronického podpisovania"
       physical_title: "Nastavenie fyzického podpisovania"
       subtitle: "Dokončite tieto kroky na prípravu podpisovania"
-      eid_card_generation:
+      qscd_check:
         title: "Vyberte typ vášho občianskeho preukazu"
         description: "Podľa vášho výberu vám zobrazíme dostupné možnosti kvalifikovaného podpisovania."
         compatible_mobile: "Kompatibilné s mobilnými podpisovými aplikáciami (AVM, eIdentita)"
-        requires_desktop: "Vyžaduje počítač a čítačku kariet (iba Autogram Desktop)"
+        requires_desktop: "Vyžaduje počítač a čítačku kariet (iba Autogram na počítači)"
         issued_after: "Vydaný po %{date}"
         continue: "Pokračovať"
         dpb_cards: Doklady o povolení na pobyt
@@ -511,7 +513,7 @@ sk:
           description: "Vložte pracovné toky podpisovania priamo do svojich aplikácií pomocou jednoduchej iframe integrácie alebo komplexného REST API. Automatizujte procesy podpisovania dokumentov vo vašich obchodných systémoch."
         qualified_signatures:
           title: "Kvalifikované eIDAS podpisy"
-          description: "Vytvárajte kvalifikované elektronické podpisy pomocou vládou vydaných eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Bezproblémová integrácia s aplikáciami Autogram Desktop a Mobile."
+          description: "Vytvárajte kvalifikované elektronické podpisy pomocou vládou vydaných eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Bezproblémová integrácia s aplikáciami Autogram a Autogram v mobile."
         validation:
           title: "Overovanie dokumentov"
           description: "Okamžite overujte platnosť a integritu podpísaných dokumentov. Systém automaticky kontroluje certifikáty, podpisy a časové pečiatky, aby zabezpečil súlad."
@@ -526,15 +528,15 @@ sk:
         title: "Kompletná infraštruktúra na podpisovanie"
         description: "Autogram Portal je súčasťou komplexného open-source portfólia pre kvalifikované elektronické podpisy, ktoré bezproblémovo funguje s podpisovacími aplikáciami Autogram."
         desktop:
-          title: "Autogram Desktop"
+          title: "Autogram na počítači"
           description: "Desktopová aplikácia pre Windows, macOS a Linux, ktorá vytvára kvalifikované podpisy pomocou eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Pripája sa priamo k portálu pre bezproblémové pracovné toky podpisovania."
           learn_more: "Dozvedieť sa viac"
         mobile:
-          title: "Autogram v Mobile"
+          title: "Autogram v mobile"
           description: "Mobilné aplikácie pre iOS a Android, ktoré umožňujú kvalifikované podpisy pomocou mobilných eID riešení a kvalifikovaných zariadení na vytváranie podpisov. Podpisujte dokumenty na cestách s plnou integráciou portálu."
         extension:
           title: "Autogram Extension"
-          description: "Rozšírenie prehliadača, ktoré integruje Autogram Desktop a Mobile priamo do slovenských eGovernment portálov. Podpisujte dokumenty bezproblémovo bez opustenia vládnych webových stránok."
+          description: "Rozšírenie prehliadača, ktoré integruje Autogram na počítači a v mobile priamo do slovenských eGovernment portálov. Podpisujte dokumenty bezproblémovo bez opustenia vládnych webových stránok."
         portal:
           title: "Autogram Portal"
           description: "Webová platforma na správu kompletného životného cyklu podpisovania dokumentov v komerčných aplikáciách. Poskytuje overovanie, správu pracovných tokov a API integráciu pre obchodné procesy."
@@ -625,7 +627,7 @@ sk:
       iframe_client_error: "Nepodarilo sa vytvoriť Autogram klienta kompatibilného s iframe"
       contract_load_failed: "Nepodarilo sa načítať údaje dokumentu zo servera."
       signing_error: "Pri podpisovaní sa vyskytla chyba: %{message}"
-      autogram_connection_failed: "Nepodarilo sa pripojiť k Autogram Desktop. Uistite sa, že je nainštalovaný a spustený."
+      autogram_connection_failed: "Nepodarilo sa pripojiť k Autogramu na počítači. Uistite sa, že je nainštalovaný a spustený."
       file_read_failed: "Nepodarilo sa prečítať súbor"
     signature:
       preparing: "Pripravujem podpis..."
@@ -682,6 +684,24 @@ sk:
     footer:
       regards: "S pozdravom,"
       team: "Tím Autogram Portal"
+
+  qscd:
+    title:
+      eid_2013: "Občiansky preukaz vydaný pred 21.6.2021"
+      eid_2021: "Občiansky preukaz vydaný po 21.6.2021"
+      eid_2022: "Občiansky preukaz vydaný po 1.12.2022"
+      eid_2024: "Občiansky preukaz vydaný po 18.12.2024"
+      dpb_2014: "Doklad o povolení na pobyt vydaný pred 10.7.2020"
+      dpb_2020: "Doklad o povolení na pobyt vydaný po 10.7.2020"
+      dpb_2023: "Doklad o povolení na pobyt vydaný po 18.10.2023"
+    description:
+      eid_2013: "Tento občiansky preukaz obsahuje čip, ktorý nie už je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový občiansky preukaz."
+      eid_2021: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími preukazmi."
+      eid_2022: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
+      eid_2024: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
+      dpb_2014: "Tento doklad o povolení na pobyt obsahuje čip, ktorý už nie je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový doklad o povolení na pobyt."
+      dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
+      dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
 
   activerecord:
     errors:

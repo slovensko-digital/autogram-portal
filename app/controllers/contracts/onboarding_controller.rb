@@ -7,7 +7,7 @@ module Contracts
     before_action :allow_iframe
     skip_before_action :verify_authenticity_token
 
-    VALID_STEPS = %w[eid_card_generation legacy_eid_card pin_check certificate_check physical_instructions].freeze
+    VALID_STEPS = %w[qscd_check legacy_eid_card pin_check certificate_check physical_instructions].freeze
 
     def show
       @step = step_param || first_step
@@ -21,8 +21,8 @@ module Contracts
       @step = step_param
 
       case @step
-      when "eid_card_generation"
-        handle_eid_card_generation
+      when "qscd_check"
+        handle_qscd_check
       when "pin_check"
         handle_pin_check
       when "certificate_check"
@@ -65,18 +65,17 @@ module Contracts
       end
     end
 
-    def handle_eid_card_generation
-      eid_card_generation = params[:eid_card_generation]
-      unless eid_card_generation.in?(User.eid_card_generations.keys)
-        return redirect_to contract_onboarding_path(@contract, step: "eid_card_generation", method: @method, recipient: @recipient&.uuid, iframe: params[:iframe]),
-                  flash: { alert: I18n.t("contracts.onboarding.eid_card_generation.invalid_selection") }
+    def handle_qscd_check
+      qscd = params[:qscd]
+      unless qscd.in?(User.qscds.keys)
+        return redirect_to contract_onboarding_path(@contract, step: "qscd_check", method: @method, recipient: @recipient&.uuid, iframe: params[:iframe]),
+                  flash: { alert: I18n.t("contracts.onboarding.qscd_check.invalid_selection") }
       end
 
-      current_user.update!(eid_card_generation: eid_card_generation) if current_user
-      session[:eid_card_generation] = eid_card_generation
+      current_user.update!(qscd: qscd) if current_user
+      session[:qscd] = qscd unless current_user
 
-
-      if User.legacy_eid_card?(eid_card_generation)
+      if User.legacy_eid_card?(qscd)
         return redirect_to contract_onboarding_path(@contract, step: "legacy_eid_card", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
       end
 
@@ -112,8 +111,8 @@ module Contracts
     def redirect_to_next_page
       case @method
       when "electronic"
-        generation = current_user&.eid_card_generation || session[:eid_card_generation]
-        redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, eid_card_generation: generation, iframe: params[:iframe])
+        qscd = current_user&.qscd || session[:qscd]
+        redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, qscd: qscd, iframe: params[:iframe])
       when "physical"
         redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
       end
@@ -122,7 +121,7 @@ module Contracts
     def first_step
       case @method
       when "electronic"
-        "eid_card_generation"
+        "qscd_check"
       when "physical"
         "physical_instructions"
       end

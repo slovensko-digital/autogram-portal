@@ -1,4 +1,4 @@
-<%# locals: (contract:, recipient: nil, bundle_id: nil, onboarding_required: { electronic: false, physical: false }) %>
+<%# locals: (contract:, recipient: nil, bundle_id: nil) %>
 
 <%= turbo_frame_tag "signing_method_choice_#{contract.uuid}" do %>
   <div data-controller="signing-method" class="w-full space-y-4">
@@ -35,27 +35,15 @@
 
     <div class="hidden">
       <% if contract.allowed_methods.include?('qes') %>
-        <% if onboarding_required[:electronic] && params[:iframe].blank? %>
-          <%= link_to "",
-              contract_onboarding_path(contract, step: "eid_card_generation", method: 'electronic', recipient: recipient&.uuid, iframe: params[:iframe]),
-              data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
-        <% else %>
-          <%= link_to "",
-              signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
-              data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
-        <% end %>
+        <%= link_to "",
+            signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
       <% end %>
 
       <% if contract.allowed_methods.include?('scan') %>
-        <% if onboarding_required[:physical] && params[:iframe].blank? %>
-          <%= link_to "",
-              contract_onboarding_path(contract, step: "physical_instructions", method: 'physical', recipient: recipient&.uuid, iframe: params[:iframe]),
-              data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
-        <% else %>
-          <%= link_to "",
-              physical_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
-              data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
-        <% end %>
+        <%= link_to "",
+            physical_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
       <% end %>
     </div>
 

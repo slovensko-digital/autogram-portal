@@ -89,7 +89,7 @@
                 </h3>
                 <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
                   <% if recipient == @recipient %>
-                    <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border-2 border-blue-500 overflow-hidden">
+                    <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border border-blue-500 overflow-hidden">
                       <div class="flex items-center gap-3 flex-1">
                         <div class="text-base font-semibold text-gray-900">
                           <%= recipient.display_name %>
@@ -140,28 +140,7 @@
             </div>
           <% end %>
           <% if current_user == @bundle.author || contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
-            <%
-              electronic_onboarding_required = if current_user
-                !current_user.onboarding_completed?('electronic')
-              else
-                !(session[:completed_onboardings] || []).include?('electronic')
-              end
-
-              physical_onboarding_required = if current_user
-                !current_user.onboarding_completed?('physical')
-              else
-                !(session[:completed_onboardings] || []).include?('physical')
-              end
-            %>
-
-            <%= render 'contracts/signing_method_choice',
-                contract: contract,
-                recipient: @recipient,
-                bundle_id: @bundle.uuid,
-                onboarding_required: {
-                  electronic: electronic_onboarding_required,
-                  physical: physical_onboarding_required
-                } %>
+            <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
           <% end %>
         <% end %>
       </div>

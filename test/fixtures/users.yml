@@ -12,7 +12,6 @@
 #  confirmed_at           :datetime
 #  current_sign_in_at     :datetime
 #  current_sign_in_ip     :string
-#  eid_card_generation    :integer
 #  email                  :string
 #  encrypted_password     :string           default(""), not null
 #  failed_attempts        :integer          default(0), not null
@@ -22,6 +21,7 @@
 #  locale                 :string           default("sk")
 #  locked_at              :datetime
 #  name                   :string
+#  qscd                   :integer
 #  remember_created_at    :datetime
 #  reset_password_sent_at :datetime
 #  reset_password_token   :string

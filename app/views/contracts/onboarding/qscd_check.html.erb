@@ -14,26 +14,9 @@
         <%= hidden_field_tag :review, params[:review] if params[:review] %>
         <%= hidden_field_tag :iframe, params[:iframe] %>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <% [
-            [ "eid_2024", "2024-12-18" ],
-            [ "eid_2022", "2022-12-01" ],
-            [ "eid_2021", "2021-06-21" ],
-            [ "eid_2013", "2013-11-30" ]
-            ].each do |value, date_from| %>
-            <label class="group relative flex items-center space-x-3 p-4 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2">
-              <%= radio_button_tag :eid_card_generation, value, false, class: 'sr-only' %>
-              <div class="flex-shrink-0">
-                <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors">
-                  <div class="hidden group-has-[:checked]:block w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <%= image_tag("qscd/#{value}.png", alt: value) %>
-                <div class="text-md font-medium text-gray-900"><%= t('.issued_after', date: date_from) %></div>
-              </div>
-            </label>
+        <div class="space-y-3">
+          <% [ "eid_2024", "eid_2022", "eid_2021", "eid_2013" ].each do |value| %>
+            <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
           <% end %>
         </div>
 
@@ -56,28 +39,10 @@
               </div>
             </div>
 
-            <div data-toggle-target="content" class="p-2">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <% [
-                  [ "dpb_2023", "2023-10-18" ],
-                  [ "dpb_2020", "2020-07-10" ],
-                  [ "dpb_2014", "2014-04-01" ]
-                  ].each do |value, date_from| %>
-                  <label class="group relative flex items-center space-x-3 p-4 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2">
-                    <%= radio_button_tag :eid_card_generation, value, false, class: 'sr-only' %>
-                    <div class="flex-shrink-0">
-                      <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors">
-                        <div class="hidden group-has-[:checked]:block w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
-                      </div>
-                    </div>
-
-                    <div class="space-y-2">
-                      <%= image_tag("qscd/#{value}.png", alt: value) %>
-                      <div class="text-md font-medium text-gray-900"><%= t('.issued_after', date: date_from) %></div>
-                    </div>
-                  </label>
-                <% end %>
-              </div>
+            <div data-toggle-target="content" class="p-2 space-y-3">
+              <% [ "dpb_2023", "dpb_2020", "dpb_2014"].each do |value| %>
+                <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
+              <% end %>
             </div>
           </div>
         </div>
