@@ -201,21 +201,21 @@ export default class extends Controller {
         console.log('Signing was cancelled or failed:', signResult)
       }
     } catch (error) {
+      // Check if this is a user cancellation (already handled by onStateChange)
       if (error.message && (error.message.includes('cancel') || error.message.includes('abort'))) {
         console.log('User cancelled signing - already handled by onStateChange callback')
         return
       }
       
-      if (error.message && error.message.includes('error')) {
+      // Check if already handled by onStateChange (appNotInstalled, error states)
+      if (error.message && (error.message.includes('error') || error.message.includes('nainštalovaný') || error.message.includes('installed'))) {
         console.log('Error already handled by onStateChange callback')
         return
       }
       
+      // Only show inline error for unexpected errors not caught by SDK
       console.error('Unexpected signing error:', error)
-      alert(i18n.t('errors.signing_error', { message: error.message }))
-      setTimeout(() => {
-        window.location.href = this.element.querySelector('a[href*="signature_apps"]')?.href || window.location.href
-      }, 1000)
+      this.showErrorState(error.message)
     }
   }
 
@@ -295,15 +295,24 @@ export default class extends Controller {
           this.markActive(this.statusStartingTarget)
           break
         case 'waiting':
+          this.markCompleted(this.statusCheckingTarget)
           this.markCompleted(this.statusStartingTarget)
           this.markCompleted(this.statusSendingTarget)
           this.markActive(this.statusWaitingTarget)
           break
         case 'signed':
+          this.markCompleted(this.statusCheckingTarget)
           this.markCompleted(this.statusStartingTarget)
           this.markCompleted(this.statusSendingTarget)
           this.markCompleted(this.statusWaitingTarget)
           this.markCompleted(this.statusSignedTarget)
+          break
+        case 'notInstalled':
+          this.markFailed(this.statusCheckingTarget)
+          this.markFailed(this.statusStartingTarget)
+          break
+        case 'cancelled':
+          this.markFailed(this.statusWaitingTarget)
           break
       }
     }
@@ -315,7 +324,7 @@ export default class extends Controller {
     element.classList.add('bg-gray-100', 'border-gray-200', 'opacity-50')
     const icon = element.querySelector('.flex-shrink-0')
     if (icon) {
-      icon.innerHTML = '<div class="w-6 h-6 bg-gray-400 rounded-full"></div>'
+      icon.innerHTML = '<div style="width: 24px; height: 24px;" class="bg-gray-400 rounded-full"></div>'
     }
   }
 
@@ -326,7 +335,7 @@ export default class extends Controller {
     const icon = element.querySelector('.flex-shrink-0')
     if (icon) {
       icon.innerHTML = `
-        <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+        <div style="width: 24px; height: 24px;" class="bg-green-600 rounded-full flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-white">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
@@ -351,22 +360,38 @@ export default class extends Controller {
     }
   }
 
+  markFailed(element) {
+    element.classList.remove('bg-gray-100', 'border-gray-200', 'opacity-50')
+    element.classList.remove('bg-green-50', 'border-green-200')
+    element.classList.remove('bg-white', 'border-blue-200')
+    element.classList.remove('bg-blue-50')
+    element.classList.add('bg-red-50', 'border-red-200')
+    const icon = element.querySelector('.flex-shrink-0')
+    if (icon) {
+      icon.innerHTML = `
+        <div style="width: 24px; height: 24px;" class="bg-red-600 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-white">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+      `
+    }
+  }
+
   showAppNotInstalledMessage() {
     this.hideAllStates()
+    this.updateProgress(25, 'notInstalled')
     if (this.hasStateNotInstalledTarget) {
       this.stateNotInstalledTarget.classList.remove('hidden')
     }
   }
 
   showCancelledState() {
+    this.updateProgress(75, 'cancelled')
     this.hideAllStates()
     if (this.hasStateCancelledTarget) {
       this.stateCancelledTarget.classList.remove('hidden')
     }
-    
-    setTimeout(() => {
-      window.location.href = this.element.querySelector('a[href*="signature_apps"]')?.href || window.location.href
-    }, 2000)
   }
 
   showErrorState(message) {
@@ -377,10 +402,6 @@ export default class extends Controller {
         this.errorMessageTarget.textContent = `${message}. Presmerovávame vás späť...`
       }
     }
-    
-    setTimeout(() => {
-      window.location.href = this.element.querySelector('a[href*="signature_apps"]')?.href || window.location.href
-    }, 3000)
   }
 
   hideAllStates() {

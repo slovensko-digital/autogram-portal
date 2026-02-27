@@ -1,12 +1,15 @@
 <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
   <%=  turbo_stream_from @session %>
   <%=  turbo_stream_from "contract_#{@contract.uuid}" %>
-
-  <% if @session.eidentita? %>
-    <%= render "eidentita" %>
-  <% elsif @session.avm? %>
-    <%= render "avm" %>
-  <% elsif @session.autogram? %>
-    <%= render "autogram" %>
-  <% end %>
+  <main class="mx-auto flex flex-col items-center max-w-5xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
+    <div class="relative isolate overflow-hidden">
+    <% if @session.eidentita? %>
+      <%= render "eidentita" %>
+    <% elsif @session.avm? %>
+      <%= render "avm" %>
+    <% elsif @session.autogram? %>
+      <%= render "autogram" %>
+    <% end %>
+    </div>
+  </main>
 <% end %>
