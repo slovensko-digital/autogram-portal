@@ -4,17 +4,13 @@
   data-signers--autogram-signed-document-path-value="<%= upload_contract_session_path(@contract, @session) %>"
   data-signers--autogram-sdk-path-value="<%= javascript_path('autogram-sdk') %>"
 >
-  <!-- Header -->
-  <div class="px-6 py-5">
+  <div class="px-6 py-5 hidden md:block">
     <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
     <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
   </div>
 
-  <!-- Main content area with two columns -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-    <!-- Left column: Instructions -->
-    <div class="space-y-6 border border-gray-200 rounded-lg p-6">
-      <!-- Numbered steps -->
+    <div class="space-y-6 border border-gray-200 rounded-lg p-6 hidden md:block">
       <div class="space-y-4">
         <div class="flex items-start gap-3">
           <div class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
@@ -78,11 +74,9 @@
       </div>
     </div>
 
-    <!-- Right column: Progress indicator -->
-    <div class="border border-gray-200 rounded-lg p-6">
-      <!-- Central status icon and message -->
+    <div class="md:border md:border-gray-200 md:rounded-lg md:p-6">
       <div class="flex flex-col items-center justify-center mb-8">
-        
+
         <!-- Normal signing state -->
         <div data-signers--autogram-target="stateNormal">
           <div class="mb-4 flex justify-center">

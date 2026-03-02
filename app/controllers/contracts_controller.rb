@@ -189,6 +189,8 @@ class ContractsController < ApplicationController
   end
 
   def ensure_onboarding
+    return if params[:iframe] == "no_preview"
+
     case action_name
     when "signature_apps"
       @qscd = params[:qscd] || current_user&.qscd || session[:qscd]
