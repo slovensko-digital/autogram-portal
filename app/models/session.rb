@@ -48,6 +48,10 @@ class Session < ApplicationRecord
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
   after_update_commit -> { touch(:completed_at) }, if: -> { saved_change_to_status? && !pending? }
 
+  def not_pending?
+    !pending?
+  end
+
   def eidentita?
     is_a?(EidentitaSession)
   end
@@ -88,12 +92,10 @@ class Session < ApplicationRecord
       if recipient.nil? && user.present? && contract.bundle.present?
         update!(recipient: contract.bundle.recipients.where(user: user).first)
       end
-
-      signed!
     end
 
+    signed!
     contract.sessions.pending.each(&:canceled!)
-    contract.notify_signed!(recipient: recipient, signer: user)
   end
 
   def generate_signed_filename
@@ -114,13 +116,23 @@ class Session < ApplicationRecord
       broadcast_signing_error(error_message || "Signing failed")
     when "expired"
       broadcast_signing_error("Signing expired")
+    when "signed"
+      contract.notify_signed!(recipient: recipient, signer: user)
+      Turbo::StreamsChannel.broadcast_replace_to(
+        self,
+        target: "signature_apps_#{contract.uuid}",
+        partial: "contracts/sessions/signed",
+        locals: { contract: contract }
+      )
+    when "canceled"
+      Turbo::StreamsChannel.broadcast_action_to(self, action: :refresh)
     end
   end
 
   def broadcast_signing_error(error_message)
     Turbo::StreamsChannel.broadcast_replace_to(
-      "contract_#{contract.uuid}",
-      target: "signature_actions_#{contract.uuid}",
+      self,
+      target: "signature_apps_#{contract.uuid}",
       partial: "contracts/sessions/error",
       locals: {
         contract: contract,

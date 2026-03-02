@@ -61,10 +61,7 @@ class Contract < ApplicationRecord
 
     bundle.notify_contract_signed(self, recipient) if bundle.present?
 
-    Turbo::StreamsChannel.broadcast_action_to(
-      "contract_#{uuid}",
-      action: :refresh
-    )
+    Turbo::StreamsChannel.broadcast_action_to(self, action: :refresh)
   end
 
   def documents_to_sign

@@ -1,6 +1,6 @@
 <%= turbo_stream_from @bundle %>
 <% @bundle.contracts.each do |contract| %>
-  <%= turbo_stream_from "contract_#{contract.uuid}" %>
+  <%= turbo_stream_from contract %>
 <% end %>
 
 <main>

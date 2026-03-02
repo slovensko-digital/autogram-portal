@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { isMobileDevice } from "utils/device_detection"
 
 export default class extends Controller {
-  static targets = ["submitButton"]
+  static targets = [ "submitButton", "avmSubmitButton" ]
 
   connect() {
     console.log("AVM signer controller connected")
@@ -17,7 +17,7 @@ export default class extends Controller {
 
   async submitAndRedirect() {
     try {
-      const response = await fetch(this.element.href, {
+      const response = await fetch(this.avmSubmitButtonTarget.href, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
         }
@@ -42,6 +42,9 @@ export default class extends Controller {
       console.error("Error submitting form:", error)
       this.showError(i18n.t('errors.network_error'))
     }
+
+    this.submitButtonTarget.disabled = false
+    this.submitButtonTarget.innerHTML = i18n.t('signature.sign')
   }
 
   extractAvmUrlFromResponse(responseText) {

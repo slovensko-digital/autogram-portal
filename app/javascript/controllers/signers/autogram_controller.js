@@ -312,6 +312,8 @@ export default class extends Controller {
           this.markFailed(this.statusStartingTarget)
           break
         case 'cancelled':
+          this.resetStatus(this.statusCheckingTarget)
+          this.resetStatus(this.statusStartingTarget)
           this.markFailed(this.statusWaitingTarget)
           break
       }

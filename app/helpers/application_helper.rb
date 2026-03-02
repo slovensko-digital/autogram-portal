@@ -14,21 +14,21 @@ module ApplicationHelper
     content
   end
 
-  def qr_code_svg(text, size: 200)
+  def qr_code_svg(text)
     qr = RQRCode::QRCode.new(text)
 
     svg = qr.as_svg(
-      color: "1e40af",
+      color: "black",
       shape_rendering: "crispEdges",
-      module_size: size / qr.modules.count,
       standalone: true,
-      use_path: true
+      use_path: true,
+      viewbox: true
     )
 
     svg.html_safe
   rescue => e
     Rails.logger.error "Failed to generate QR code: #{e.message}"
-    %(<svg width="#{size}" height="#{size}" xmlns="http://www.w3.org/2000/svg">
+    %(<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#f3f4f6"/>
       <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#6b7280" font-size="14">QR code not available</text>
     </svg>).html_safe

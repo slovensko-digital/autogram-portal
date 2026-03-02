@@ -105,7 +105,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def redirect_if_completed
-    return unless @session.completed?
+    return unless @session.not_pending?
 
     redirect_path = if @contract.bundle
       sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)

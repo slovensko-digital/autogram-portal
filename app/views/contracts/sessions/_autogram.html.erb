@@ -12,71 +12,22 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
     <div class="space-y-6 border border-gray-200 rounded-lg p-6 hidden md:block">
       <div class="space-y-4">
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            1
+        <% (1..7).each do |i| %>
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+              <%= i %>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-gray-900"><%= t(".step#{i}_title") %></h3>
+              <p class="text-sm text-gray-600"><%= t(".step#{i}_desc_html", domain: Rails.application.config.action_controller.default_url_options[:host]) %></p>
+            </div>
           </div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-gray-900"><%= t('.step1_title') %></h3>
-            <p class="text-sm text-gray-600 mt-1"><%= t('.step1_desc_html', download_url: 'https://sluzby.slovensko.digital/autogram/#download') %></p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            2
-          </div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-gray-900"><%= t('.step2_title') %></h3>
-            <p class="text-sm text-gray-600 mt-1"><%= t('.step2_desc') %></p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            3
-          </div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-gray-900"><%= t('.step3_title') %></h3>
-            <p class="text-sm text-gray-600 mt-1"><%= t('.step3_desc') %></p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            4
-          </div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-gray-900"><%= t('.step4_title') %></h3>
-            <p class="text-sm text-gray-600 mt-1"><%= t('.step4_desc') %></p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            5
-          </div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-gray-900"><%= t('.step5_title') %></h3>
-            <p class="text-sm text-gray-600 mt-1"><%= t('.step5_desc') %></p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            6
-          </div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-gray-900"><%= t('.step6_title') %></h3>
-            <p class="text-sm text-gray-600 mt-1"><%= t('.step6_desc') %></p>
-          </div>
-        </div>
+        <% end %>
       </div>
     </div>
 
     <div class="md:border md:border-gray-200 md:rounded-lg md:p-6">
       <div class="flex flex-col items-center justify-center mb-8">
-
         <!-- Normal signing state -->
         <div data-signers--autogram-target="stateNormal">
           <div class="mb-4 flex justify-center">
@@ -130,7 +81,7 @@
           <h3 class="text-lg font-semibold text-yellow-900 text-center mb-2">
             <%= t('.cancelled_title') %>
           </h3>
-          <p class="text-sm text-yellow-700 text-center">
+          <p class="text-sm text-yellow-700 text-center" data-signers--autogram-target="errorMessage">
             <%= t('.cancelled_desc') %>
           </p>
         </div>
@@ -205,14 +156,5 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Footer with cancel button -->
-  <div class="border-t border-gray-200 px-6 py-4">
-    <%= link_to signature_apps_contract_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-                data: { turbo_method: :get } do %>
-      <%= t('.cancel') %>
-    <% end %>
   </div>
 </div>
