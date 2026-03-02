@@ -1,3 +1,4 @@
+<div data-controller="signers--avm">
 <div class="px-6 py-5 hidden md:block">
   <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
   <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
@@ -26,7 +27,8 @@
         class="block hover:opacity-75 transition-opacity duration-200 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg"
         target="_blank"
         rel="noopener noreferrer"
-        title="Kliknite pre otvorenie Autogramu v mobile">
+        title="Kliknite pre otvorenie Autogramu v mobile"
+        data-signers--avm-target="appUrl">
         <div class="bg-white p-4 rounded-lg border border-4 border-dashed border-black transition-colors duration-200 w-96 h-96 flex items-center justify-center">
           <%= qr_code_svg(@session.avm_url) %>
         </div>
@@ -38,4 +40,5 @@
       <p><%= t('.note') %></p>
     </div>
   </div>
+</div>
 </div>

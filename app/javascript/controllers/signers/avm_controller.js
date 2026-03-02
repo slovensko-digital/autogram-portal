@@ -2,89 +2,21 @@ import { Controller } from "@hotwired/stimulus"
 import { isMobileDevice } from "utils/device_detection"
 
 export default class extends Controller {
-  static targets = [ "submitButton", "avmSubmitButton" ]
+  static targets = ["appUrl"]
 
   connect() {
     console.log("AVM signer controller connected")
-  }
-
-  sign(event) {
-    if (isMobileDevice()) {
-      event.preventDefault()
-      this.submitAndRedirect()
+    if (isMobileDevice() && this.hasAppUrlTarget) {
+      this.openApp()
     }
   }
 
-  async submitAndRedirect() {
-    try {
-      const response = await fetch(this.avmSubmitButtonTarget.href, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
+  openApp() {
+    const avmUrl = this.appUrlTarget.href
+    if (!avmUrl) return
 
-      if (response.ok) {
-        const responseText = await response.text()
-        const avmUrl = this.extractAvmUrlFromResponse(responseText)
-        if (avmUrl) {
-          console.log("Redirecting to AVM URL:", avmUrl)
-          this.redirectToAvmUrl(avmUrl)
-        } else {
-          console.log("Could not extract AVM URL, falling back to normal flow")
-          this.showError(i18n.t('errors.signing_failed'))
-          window.location.reload()
-        }
-      } else {
-        console.error("Form submission failed:", response.status, response.statusText)
-        this.showError(i18n.t('errors.signing_failed'))
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error)
-      this.showError(i18n.t('errors.network_error'))
-    }
-
-    this.submitButtonTarget.disabled = false
-    this.submitButtonTarget.innerHTML = i18n.t('signature.sign')
-  }
-
-  extractAvmUrlFromResponse(responseText) {
-    const matches = responseText.match(/href="(https:\/\/autogram\.slovensko\.digital\/api\/v1\/qr-code\?[^"]+)"/g)
-    if (matches && matches.length > 0) {
-      let url = matches[0]
-      if (url.includes('="')) {
-        url = url.split('"')[1]
-      }
-      if (url.startsWith('https://')) {
-        url = this.decodeHtmlEntities(url)
-        return url
-      }
-    }
-
-    return null
-  }
-
-  decodeHtmlEntities(text) {
-    const tempElement = document.createElement('div')
-    tempElement.innerHTML = text
-    return tempElement.textContent || tempElement.innerText || text
-  }
-
-  showError(message) {
-    this.resetParentSignButton()
-    alert(message)
-  }
-
-  resetParentSignButton() {
-    const parentElement = this.element.closest('[data-controller*="signing-app-selector"]')
-    if (parentElement) {
-      const controller = this.application.getControllerForElementAndIdentifier(
-        parentElement,
-        'signing-app-selector'
-      )
-      if (controller && typeof controller.setSignButtonLoading === 'function') {
-        controller.setSignButtonLoading(false)
-      }
-    }
+    console.log("Auto-opening AVM app on mobile:", avmUrl)
+    this.redirectToAvmUrl(avmUrl)
   }
 
   redirectToAvmUrl(avmUrl) {

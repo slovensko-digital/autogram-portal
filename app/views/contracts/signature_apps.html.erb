@@ -2,7 +2,7 @@
   <%=  turbo_stream_from @contract %>
   <main class="mx-auto flex flex-col items-center max-w-4xl space-y-6 lg:flex">
     <div class="relative isolate overflow-hidden">
-      <div class="w-full space-y-8 p-6" data-controller="signing-app-selector signers--avm signers--eidentita">
+        <div class="w-full space-y-8 p-6" data-controller="signing-app-selector">
         <div class="w-full mb-4">
           <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           <p class="text-gray-600"><%= t('.subtitle') %></p>
@@ -89,18 +89,14 @@
 
           <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
                 data: {
-                  action: "click->signers--avm#sign",
                   turbo_frame: "signature_apps_#{@contract.uuid}",
-                  signing_app_selector_target: "avmSubmitButton",
-                  "signers--avm-target": "avmSubmitButton"
+                  signing_app_selector_target: "avmSubmitButton"
                 } %>
 
           <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
                 data: {
-                  action: "click->signers--eidentita#sign",
                   turbo_frame: "signature_apps_#{@contract.uuid}",
-                  signing_app_selector_target: "eidentitaSubmitButton",
-                  "signers--eidentita-target": "eidentitaSubmitButton"
+                  signing_app_selector_target: "eidentitaSubmitButton"
                 } %>
         </div>
 
@@ -122,8 +118,6 @@
 
           <button type="button"
                   data-signing-app-selector-target="signButton"
-                  data-signers--avm-target="submitButton"
-                  data-signers--eidentita-target="submitButton"
                   data-action="click->signing-app-selector#triggerSign"
                   class="flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
             <%= t('.continue_to_sign') %>

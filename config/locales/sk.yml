@@ -451,6 +451,10 @@ sk:
         step6_desc_html: "Kliknite na tlačidlo Odoslať a dokončiť"
         step7_title: "Hotovo"
         step7_desc_html: "Dokument je podpísaný"
+        not_installed_title: "Aplikácia eIdentita nie je nainštalovaná"
+        not_installed_desc: "Aplikácia eIdentita nie je nainštalovaná vo vašom telefóne. Stiahnite si ju z App Store alebo Google Play."
+        not_installed_download_ios: "Stiahnuť z App Store"
+        not_installed_download_android: "Stiahnuť z Google Play"
       error:
         title: "Chyba pri podpisovaní dokumentu"
       signed:

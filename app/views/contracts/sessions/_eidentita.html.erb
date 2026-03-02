@@ -1,3 +1,4 @@
+<div data-controller="signers--eidentita">
 <div class="px-6 py-5 hidden md:block">
   <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
   <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
@@ -21,21 +22,59 @@
   </div>
 
   <div class="space-y-6 md:border md:border-gray-200 md:rounded-lg md:p-6">
-    <div class="flex justify-center">
-      <a href="<%= @session.eidentita_url %>"
-        class="block hover:opacity-75 transition-opacity duration-200 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Kliknite pre otvorenie Eidentita aplikácie">
-        <div class="bg-white p-4 rounded-lg border border-4 border-dashed border-black transition-colors duration-200 w-96 h-96 flex items-center justify-center">
-          <%= qr_code_svg(@session.eidentita_url) %>
-        </div>
-      </a>
+    <!-- Normal QR code state -->
+    <div data-signers--eidentita-target="stateNormal">
+      <div class="flex justify-center">
+        <a href="<%= @session.eidentita_url %>"
+          class="block hover:opacity-75 transition-opacity duration-200 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Kliknite pre otvorenie Eidentita aplikácie"
+          data-signers--eidentita-target="appUrl">
+          <div class="bg-white p-4 rounded-lg border border-4 border-dashed border-black transition-colors duration-200 w-96 h-96 flex items-center justify-center">
+            <%= qr_code_svg(@session.eidentita_url) %>
+          </div>
+        </a>
+      </div>
+
+      <div class="text-center text-sm text-gray-500 space-y-4 px-8 mt-4">
+        <p><%= t('.expiry') %></p>
+        <p><%= t('.note') %></p>
+      </div>
     </div>
 
-    <div class="text-center text-sm text-gray-500 space-y-4 px-8">
-      <p><%= t('.expiry') %></p>
-      <p><%= t('.note') %></p>
+    <!-- App not installed state -->
+    <div class="hidden" data-signers--eidentita-target="stateNotInstalled">
+      <div class="flex flex-col items-center justify-center">
+        <div class="mb-4 flex justify-center">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-lg font-semibold text-red-900 text-center mb-2">
+          <%= t('.not_installed_title') %>
+        </h3>
+        <p class="text-sm text-red-700 text-center mb-4">
+          <%= t('.not_installed_desc') %>
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="https://apps.apple.com/sk/app/eidentita/id6739350147" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <%= t('.not_installed_download_ios') %>
+          </a>
+          <a href="https://play.google.com/store/apps/details?id=sk.minv.eidentita" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <%= t('.not_installed_download_android') %>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 </div>
