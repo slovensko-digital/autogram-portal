@@ -43,7 +43,7 @@
         // Create iframe mode
         _createIframe: function (sessionId, config) {
             const iframe = document.createElement('iframe');
-            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/iframe` + (config.noPreview ? '?no_preview=1' : '');
+            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?iframe=` + (config.noPreview ? 'no_preview' : 'true');
             iframe.style.width = config.width;
             iframe.style.height = config.height;
             iframe.style.border = config.border;
@@ -159,7 +159,7 @@
 
             // Create iframe
             const iframe = document.createElement('iframe');
-            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/iframe` + (config.noPreview ? '?no_preview=1' : '');
+            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?iframe=` + (config.noPreview ? 'no_preview' : 'true');
             iframe.style.cssText = `
                 flex: 1;
                 border: none;
@@ -222,7 +222,7 @@
             };
 
             window.addEventListener('message', messageHandler);
-            
+
             // Store reference to remove listener if needed
             iframe._agpMessageHandler = messageHandler;
         },

@@ -13,7 +13,8 @@ export default class extends Controller {
     }
   }
 
-  toggle() {
+  toggle(event) {
+    event.preventDefault()
     if (this.contentTarget.classList.contains("hidden")) {
       this.show()
     } else {

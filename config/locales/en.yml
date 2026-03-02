@@ -30,10 +30,16 @@
 en:
   hello: "Hello world"
 
+  common:
+    important: "Important"
+    desktop_required: "Desktop computer required"
+
   actions:
     back: "Back"
     continue: "Continue"
+    continue_signing: "Continue to signing"
     cancel: "Cancel"
+    close: "Close"
     download: "Download"
     delete: "Delete"
     remove: "Remove"
@@ -41,6 +47,7 @@ en:
     add: "Add"
     edit: "Edit"
     sign: "Sign"
+    change_selection: "Change selection"
 
   header:
     navigation:
@@ -51,13 +58,13 @@ en:
       bundles: "Bundles"
       sign_in: "Sign in"
       sign_out: "Sign out"
-  
+
   language_switcher:
     language: "Language"
     languages:
       en: "English"
       sk: "Slovenčina"
-  
+
   helpers:
     recipients:
       status:
@@ -78,7 +85,7 @@ en:
         adesig_qc_qc: "Advanced electronic signature based on qualified certificate"
         adesig_qc_qc_ts: "Advanced electronic signature based on qualified certificate with qualified timestamp"
         unknown: "Unknown signature"
-  
+
   devise:
     sessions:
       new:
@@ -141,7 +148,33 @@ en:
     passwordless:
       user:
         signed_up_but_unconfirmed: "You have successfully registered. Your account is not yet activated, please check your email and click the link to confirm your account."
-  
+
+  signature_parameters:
+    format:
+      pades: "PDF Advanced Electronic Signature (PAdES)"
+      xades: "XML Advanced electronic signature in ASiC-E container"
+      cades: "CMS Advanced electronic signature in ASiC-E container"
+      unknown: "Unknown signature format"
+      short:
+        pades: "PAdES"
+        xades: "XAdES in ASiC-E container"
+        cades: "CAdES in ASiC-E container"
+        unknown: "Unknown signature format"
+    level:
+      baseline_b: Qualified Electronic Signature
+      baseline_t: Qualified Electronic Signature with Timestamp
+      baseline_lt: Qualified Electronic Signature with Long-Term Validation
+      baseline_lta: Qualified Electronic Signature with Archive Timestamp
+      short:
+        baseline_b: Handwritten Signature
+        baseline_t: Certified Signature
+        baseline_lt: QES with Long-Term Validity
+        baseline_lta: QES with Archive Timestamp
+
+  document:
+    one: "document"
+    other: "documents"
+
   documents:
     index:
       title: "Documents"
@@ -192,24 +225,6 @@ en:
       download: "Download"
       validating_signatures: "Validating electronic signatures..."
       loading_actions: "Loading document actions..."
-    actions:
-      sign_title: "Sign document"
-      sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
-      signature_format: "Signature Format"
-      allowed_method: "Allowed Signature Method"
-      continue_signing: "Continue to document signing"
-      add_timestamp_title: "Add timestamp"
-      add_timestamp_subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
-      add_timestamp_button: "Add timestamp to signatures"
-      continue: "Continue"
-      request_signature:
-        title: "Request a signature"
-        subtitle: "Send document for signing to someone else via email or shared link."
-        recipient_email: "Recipient Email *"
-        recipient_email_placeholder: "john.doe@example.com"
-        recipient_email_help: "Recipient will receive an email with a link to sign the document"
-        message: "Message for recipient (optional)"
-        message_placeholder: "Hello, please sign the attached document..."
     actions_error:
       title: "Error loading document actions"
     visualize:
@@ -231,26 +246,6 @@ en:
       all_signatures_have_timestamps: "All signatures already have qualified timestamps."
       failed_to_extend_signatures: "Failed to extend signatures: %{error}"
       signature_extended_successfully: "Signature extended successfully."
-  
-  signature_methods:
-    qes: "Qualified Electronic Signature"
-    ts_qes: "Qualified Electronic Signature with Timestamp"
-    ades: "Advanced Electronic Signature"
-    ses: "Simple Electronic Signature"
-    short:
-      qes: "QES"
-      ts_qes: "QES + Timestamp"
-      ades: "AdES"
-      ses: "SES"
-
-  signature_formats:
-    pades: "PDF Advanced Electronic Signature (PAdES)"
-    xades_asice: "XML Advanced Electronic Signature (XAdES) in Associated Signature Container (ASiC-E)"
-    cades_asice: "CMS Advanced Electronic Signature (CAdES) in Associated Signature Container (ASiC-E)"
-    short:
-      pades: "PAdES"
-      xades_asice: "XAdES + ASiC-E"
-      cades_asice: "CAdES + ASiC-E"
 
   bundles:
     index:
@@ -293,17 +288,13 @@ en:
       failure: "Failed to delete contract bundle."
       confirm: "Are you sure you want to delete this contract bundle? This action is irreversible."
     sign:
-      title: "Sign contract bundle"
+      title: "Documents bundle"
       title_requested_singular: "You received a document to sign"
       title_requested_plural: "You received a bundle of %{count} documents to sign"
       subtitle_requested: "Check the sender and documents in the bundle, then select the signing method."
+      contract_number: "Contract %{current} of %{total}"
       note_title: "Note from sender"
       awaiting_recipients: "Awaiting signature from"
-    iframe:
-      title: "Contract Bundle"
-      subtitle: "Please sign all contracts in the bundle"
-      contract_number: "Contract %{current} of %{total}"
-      signed: "Signed"
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
@@ -363,8 +354,8 @@ en:
       confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
       failure_bundle_attached: "Cannot delete contract because it is part of a bundle."
     sign:
-      all_contracts: "All contracts"
-      title: "Sign document"
+      all_contracts: "All documents"
+      title: "Document"
       subtitle: "Check the document, then select the signing method."
       title_requested: "You received a document to sign"
       subtitle_requested: "Check the sender and document, then select the signing method."
@@ -388,7 +379,7 @@ en:
       already_signed:
         title: "Document has been signed"
         message: "This document has been signed and is complete. No further signature is required."
-    signature_actions:
+    signature_apps:
       select_signing_app: "Select signing application"
       add_another_signature: "Add another signature"
       autogram_desktop_label: "Autogram Desktop"
@@ -405,6 +396,21 @@ en:
       how_signing_works: "How signing works"
       signed_title: "Documents have been signed"
       signed_message: "This contract has been signed and is complete. No further signature is required."
+      title: "Select Signing Application"
+      subtitle: "Choose which application to use for electronic signing"
+      old_card_warning_title: "Older eID card"
+      old_card_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Mobile signing apps (AVM, eIdentita) are not compatible with your card."
+      old_card_mobile_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
+    signature_parameters:
+      sign_title: "Sign document"
+      sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+      signature_format: "Electronic signature format"
+      signature_method: "Electronic signature level"
+      allowed_methods: "Allowed signature methods"
+    signature_extension:
+      add_timestamp_title: "Add timestamp"
+      add_timestamp_subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
+      add_timestamp_button: "Add timestamp to signatures"
     download_actions:
       message: "This document has been signed and is ready for download."
       download_button: "Download Signed Document"
@@ -414,33 +420,162 @@ en:
       validating: "Validating electronic signatures..."
     sessions:
       autogram:
-        title: "Signing with Autogram Desktop"
-        subtitle: "Please complete the signing process in the Autogram Desktop application"
-        step1: "The Autogram Desktop application should have opened automatically"
-        step2: "Follow the instructions in the application to complete the signing"
-        step3: "This page will automatically update once signing is complete"
+        title: "Sign Document via Autogram"
+        subtitle: "In the Autogram application on your computer"
+        document: "Document"
+        step1_title: "Wait for Autogram to start"
+        step1_desc_html: "If you don't have it yet, <a href='https://sluzby.slovensko.digital/autogram/#download' target='_blank' class='text-blue-600 underline hover:text-blue-800'>download it here</a>"
+        step2_title: "A document preview window will appear"
+        step2_desc_html: "Autogram will automatically display the document ready for signing. Do not upload the document directly into Autogram."
+        step3_title: "Review the document"
+        step3_desc_html: "Make sure the document content is correct and matches what you intend to sign"
+        step4_title: "Click Sign"
+        step4_desc_html: "Confirm the signature by clicking the button in the Autogram application"
+        step5_title: "Enter the required codes and PINs"
+        step5_desc_html: "Use your eID card with a chip and enter the required PINs"
+        step6_title: "Done"
+        step6_desc_html: "The signed document can be downloaded"
+        help_title: "First time signing?"
         note: "Make sure the Autogram Desktop application is installed and running"
-        cancel: "Cancel"
+        progress_title: "Awaiting Signature Completion"
+        progress_subtitle: "Complete the signing process in your Autogram Desktop application"
+        progress_label: "Progress"
+        status_checking: "Checking if Autogram is running"
+        status_starting: "Starting Autogram"
+        status_sending: "Sending document to Autogram"
+        status_waiting: "Waiting for signature"
+        status_signed: "Signed"
+        cancel: "Cancel Process"
+        not_installed_title: "Autogram is not installed"
+        not_installed_desc: "Autogram is not installed on your computer. Please download and install it."
+        not_installed_download: "Download Autogram"
+        cancelled_title: "Signing cancelled"
+        cancelled_desc: "The signing process was cancelled. Please try again."
+        error_title: "Signing error"
+        error_desc: "An error occurred while signing the document."
       avm:
-        scan_qr_desktop: "Scan the QR code with your mobile device"
-        scan_qr_mobile: "Tap the QR code to open the Autogram mobile application"
-        copy_url: "Or copy the URL manually:"
-        note_desktop: "On mobile: Scan the QR code or tap it"
-        note_mobile: "Tap the QR code to open the Autogram mobile application"
+        title: "Sign document in Autogram on mobile"
+        subtitle: "Use the mobile application on your phone"
+        note: "On mobile: Scan the QR code or tap it"
         expiry: "Signing will expire in 10 minutes"
-        cancel: "Cancel operation"
+        step1_title: "Install Autogram on mobile"
+        step1_desc_html: "Download and install <a href='https://sluzby.slovensko.digital/autogram-v-mobile/index.html#download' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>Autogram on mobile</b></a>"
+        step2_title: "Scan the QR code"
+        step2_desc_html: "Use your mobile phone to scan the QR code displayed on the screen"
+        step3_title: "Review the document"
+        step3_desc_html: "Make sure the document content is correct and matches what you intend to sign"
+        step4_title: "Click Sign"
+        step4_desc_html: "Confirm the signature by clicking the button in the Autogram mobile application"
+        step5_title: "Hold your ID card to the phone"
+        step5_desc_html: "Hold your eID card with a chip to the phone and enter the BOK and PIN to load the certificate"
+        step6_title: "Enter BOK and signing PIN"
+        step6_desc_html: "Enter BOK and PIN to complete the signature"
+        step7_title: "Done"
+        step7_desc_html: "The document is signed"
       eidentita:
-        scan_qr_desktop: "Scan the QR code with your mobile device using eIdentita app"
-        scan_qr_mobile: "Tap the QR code to open the eIdentita mobile application"
-        copy_url: "Or copy the URL manually:"
-        note_desktop: "On mobile: Scan the QR code with eIdentita app or tap it"
-        note_mobile: "Tap the QR code to open the eIdentita mobile application"
+        title: "Sign document in the eIdentita application"
+        subtitle: "Use the eIdentita mobile application on your phone"
+        note: "On mobile: Scan the QR code with eIdentita app or tap it"
         expiry: "Signing will expire in 10 minutes"
-        cancel: "Cancel operation"
+        step1_title: "Scan the QR code"
+        step1_desc_html: "Use the <a href='https://meid.minv.sk/' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>eIdentita</b></a> application to scan the QR code displayed on the screen"
+        step2_title: "Check the file source"
+        step2_desc_html: "Verify that the file comes from <b>%{domain}</b>"
+        step3_title: "Click Sign"
+        step3_desc_html: "Confirm the signature by clicking the button in the eIdentita application"
+        step4_title: "Hold your ID card and enter BOK"
+        step4_desc_html: "Hold your eID card with a chip to the phone and enter the BOK to load the certificate"
+        step5_title: "Select certificate and enter PIN"
+        step5_desc_html: "Click continue, enter your PIN and hold your ID card to the phone again"
+        step6_title: "Click Send and complete"
+        step6_desc_html: "Click the Send and complete button"
+        step7_title: "Done"
+        step7_desc_html: "The document is signed"
+        not_installed_title: "eIdentita app is not installed"
+        not_installed_desc: "The eIdentita app is not installed on your phone. Download it from the App Store or Google Play."
+        not_installed_download_ios: "Download from App Store"
+        not_installed_download_android: "Download from Google Play"
       error:
         title: "Error signing the document"
-        close: "Close"
-  
+      signed:
+        title: "Document was signed successfully"
+        message: "Signing was completed successfully. You can close this window or return to the document."
+    onboarding:
+      electronic_title: "Electronic Signing Setup"
+      physical_title: "Physical Signing Setup"
+      subtitle: "Complete these steps to prepare for signing"
+      qscd_check:
+        title: "Select your eID card generation"
+        description: "Different eID card generations support different signing methods. Please select your card generation below."
+        compatible_mobile: "Compatible with mobile signing apps (AVM, eIdentita)"
+        requires_desktop: "Requires a computer with card reader (Autogram Desktop only)"
+        issued_after: "Issued after %{date}"
+        dpb_cards: "Residence permit cards"
+        show_dpb: "Show residence permit cards"
+        hide_dpb: "Hide residence permit cards"
+        continue: "Continue"
+        invalid_selection: "Invalid selection. Please select a valid eID card generation."
+      pin_check:
+        title: "Do you know your BOK?"
+        description_a: "To use the electronic ID card, you need to know the security personal code (BOK). This code is set when issuing a new ID card at the office."
+        description_b: "The security personal code (BOK) is a 6-digit number used for logging into slovensko.sk, other government portals, and for all important actions related to the ID card. Never share this number with anyone and keep it safe."
+        no_pin_title: "Don't have your BOK?"
+        no_pin_description: "You have to visit regional police office to reset it."
+        no_pin_learn_more: "Learn what to do if you forgot your BOK"
+        continue: "I have my BOK, continue"
+      certificate_check:
+        title: "Do you have certificates on your eID card?"
+        description_a: "To sign documents electronically, you need to have valid certificates on your eID card. These certificates are used to create qualified electronic signatures and are essential for the signing process."
+        description_b: "If you don't have the certificates yet, you can issue them at home. However, you will need a card reader to connect your ID card to your computer."
+        no_certificates_title: "Don't have certificates yet?"
+        no_certificates_description: "You'll need to use a computer and a physical card reader to issue them first. This is a one-time requirement."
+        no_certificates_learn_more: "Learn more about eID card certificates"
+        continue: "I have certificates, continue"
+      legacy_eid_card:
+        title: "Electronic Signing Not Available"
+        description: "Unfortunately, your eID card generation no longer supports qualified electronic signatures. To sign documents electronically, you will need to obtain a new eID card."
+        warning_title: "This eID card is no longer valid for electronic signing"
+        warning_description: "Old eID cards issued before 2021 can no longer be used for qualified electronic signatures. You must visit your regional police office to obtain a new eID card."
+        warning_learn_more: "How to get a new eID card"
+      physical_instructions:
+        title: "Physical Signing Instructions"
+        description: "To sign this document physically, please follow these steps:"
+        step1: "Download and print the document"
+        step2: "Sign it with your handwritten signature"
+        step3: "Scan the signed document or keep the original"
+        step4: "Send it via post office to the sender"
+        note: "After you send the signed document, please let us know by clicking the button below."
+        continue: "Continue to physical signing"
+    signing_method_choice:
+      title: "How would you like to sign this document?"
+      electronic_label: "Electronic Signing"
+      electronic_description: "Sign digitally using your eID card and a signing application"
+      physical_label: "Physical Signing"
+      physical_description: "Print, sign by hand, and send via post office"
+      continue: "Continue"
+    physical_signing:
+      title: "Physical Signing"
+      subtitle: "Submit information about your physically signed document"
+      form_title: "Have you sent the signed document?"
+      form_description: "Please let us know when you sent the physically signed document via post office."
+      date_label: "Date sent via post office"
+      date_helper: "Select the date when you sent the document"
+      confirmation_message: "After submitting, you will receive a confirmation. The document sender will be notified about your physical signature."
+      back: "Back"
+      submit: "Submit Physical Signing"
+    allowed_methods:
+      qes: Qualified electronic signature
+      ses: Simple electronic signature
+      scan: Print, sign by hand, and scan
+      notary-post: Document signed at a notary and original sent via post office
+      notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
+      short:
+        qes: Qualified electronic signature
+        ses: Simple electronic signature
+        scan: Print, sign by hand, and scan
+        notary-post: Notary signature with postal delivery
+        notary-conversion: Notary signature with conversion to QES
+
   homepage:
     index:
       hero:
@@ -518,21 +653,21 @@ en:
         subtitle: "Try Autogram Portal now or explore the source code on GitHub."
         start_signing: "Start signing documents"
         view_github: "View on GitHub"
-  
+
   terms_of_service:
     index:
       title: "Terms of Service"
       not_production_title: "This is not a production environment"
       not_production_message: "This is a placeholder page. The complete terms of service with detailed information about usage rights, responsibilities, and service conditions will be added in the future."
       work_in_progress: "We are working on comprehensive terms of service that will clearly outline the rights and obligations of all parties using this platform."
-  
+
   privacy_policy:
     index:
       title: "Privacy Policy"
       not_production_title: "This is not a production environment"
       not_production_message: "This is a placeholder page. The complete privacy policy with detailed information about data processing, user rights, and security measures will be added in the future."
       work_in_progress: "We are committed to protecting your privacy and will provide comprehensive details about our data handling practices soon."
-  
+
   footer:
     heading: "Footer"
     by: "by Slovensko.Digital"
@@ -540,7 +675,7 @@ en:
     service_provider: "Service provider"
     support: "Support"
     privacy_policy: "Privacy Policy"
-  
+
   shared:
     signature_validation:
       error_title: "Error validating signatures"
@@ -580,7 +715,7 @@ en:
       drop_text: "Drop here"
       remove_file: "Remove file"
       select_another: "Click to select another file"
-  
+
   javascript:
     errors:
       file_not_supported: "File \"%{filename}\" is not supported. Allowed formats are PDF, XML, and other files."
@@ -590,6 +725,7 @@ en:
       contract_load_failed: "Failed to load contract data from server."
       signing_error: "An error occurred while signing: %{message}"
       autogram_connection_failed: "Could not connect to Autogram Desktop. Please make sure it is installed and running."
+      autogram_not_installed: "Autogram Desktop is not installed. Please download and install it from autogram.slovensko.digital."
       file_read_failed: "Failed to read file"
     signature:
       preparing: "Preparing signature..."

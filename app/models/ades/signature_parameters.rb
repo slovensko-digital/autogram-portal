@@ -25,64 +25,51 @@ module Ades
     belongs_to :contract
 
     after_initialize :set_defaults, if: :new_record?
+    before_validation :set_container
 
-    validates :format, presence: true, inclusion: { in: %w[PAdES XAdES CAdES] }
+    validates :format, inclusion: { in: ->(record) { record.available_formats } }
     validates :level, presence: true, inclusion: { in: %w[BASELINE_B BASELINE_T BASELINE_LT BASELINE_LTA] }
-    validates :container, inclusion: { in: [ "ASiC_E" ] }, allow_nil: true
+    validates :container, inclusion: { in: [ "ASiC_E" ] }, if: -> { format.in?([ "XAdES", "CAdES" ]) }
+    validates :container, absence: true, if: -> { format == "PAdES" }
     validates :en319132, inclusion: { in: [ true, false ] }
     validates :add_content_timestamp, inclusion: { in: [ true, false ] }
-    validate :validate_parameters_combination
 
-    def format_container_combination
-      case [ format, container ]
-      when [ "PAdES", nil ]
-        "pades"
-      when [ "XAdES", "ASiC_E" ]
-        "xades_asice"
-      when [ "CAdES", "ASiC_E" ]
-        "cades_asice"
-      else
-        throw "Invalid format/container combination: #{format}/#{container}"
+    def available_formats
+      # TODO: handle case with multiple documents with xades/cades signatures without container
+      return [ "XAdES", "CAdES" ] if contract.documents.size > 1
+
+      document = contract.documents.first
+      unless document.has_signatures?
+        return [ document.is_pdf? ? "PAdES" : nil, "XAdES", "CAdES" ].compact
       end
-    end
 
-    def format_container_combination=(combined_format)
-      return if combined_format.nil?
-
-      case combined_format
-      when "pades"
-        self.format = "PAdES"
-        self.container = nil
-      when "xades_asice"
-        self.format = "XAdES"
-        self.container = "ASiC_E"
-      when "cades_asice"
-        self.format = "CAdES"
-        self.container = "ASiC_E"
+      result = document.validation_result.document_info
+      case [ result[:signature_form], result[:container_type] ]
+      when [ "PAdES", nil ]
+        [ "PAdES" ]
+      when [ "XAdES", "ASiC_E" ]
+        [ "XAdES" ]
+      when [ "CAdES", "ASiC_E" ]
+        [ "CAdES" ]
+      else
+        []
       end
     end
 
     private
 
-    def validate_parameters_combination
-      if container
-        errors.add(:container, "must not be ASiC_E when format is PAdES") unless %w[XAdES CAdES].include?(format)
-      else
-        errors.add(:container, "must be ASiC_E when format is XAdES or CAdES") if %w[XAdES CAdES].include?(format)
-      end
-
-      if format == "PAdES"
-        errors.add(:format, "must not be PAdES when signing multiuple documents (container ASiC_E is required)") if contract.documents.size > 1
-        errors.add(:format, "must not be PAdES when document is not PDF") if contract.documents.any? { |d| !d.is_pdf? }
-      end
-    end
-
     def set_defaults
       self.level ||= "BASELINE_B"
-      self.format ||= "PAdES"
-      self.container ||= nil
       self.en319132 = false if self.en319132.nil?
       self.add_content_timestamp = false if self.add_content_timestamp.nil?
+
+      self.format ||= available_formats.first
+      set_container
+    end
+
+    def set_container
+      self.container = "ASiC_E" if format.in?([ "XAdES", "CAdES" ])
+      self.container = nil if format == "PAdES"
     end
   end
 end

@@ -7,9 +7,9 @@
         <p class="text-base text-gray-600"><%= t('.page_help_text_html', link: link_to(t('.signing_guide_link'), '#', class: 'text-blue-600 hover:underline')).html_safe %></p>
       </div>
 
-      <%= form_with model: @contract, local: true, multipart: true, 
-                    class: "space-y-6", 
-                    data: { 
+      <%= form_with model: @contract, local: true, multipart: true,
+                    class: "space-y-6",
+                    data: {
                       controller: "file-upload",
                       "file-upload-mode-value": "single",
                       "file-upload-dragging-class": "border-blue-800 text-blue-800",
@@ -42,17 +42,17 @@
         <div class="space-y-6">
           <%= render 'shared/dropzone', input_name: 'document[blob]' %>
           <div class="flex items-start space-x-3">
-            <%= form.check_box :agree_to_policies, 
+            <%= form.check_box :agree_to_policies,
                               { required: true, class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" },
                               { checked_value: "1", unchecked_value: "0" } %>
             <%= form.label :agree_to_policies, class: "text-sm text-gray-700" do %>
-              <%= t('homepage.index.upload_form.agree_to_policies_html', 
+              <%= t('homepage.index.upload_form.agree_to_policies_html',
                     terms_link: link_to(t('homepage.index.upload_form.terms_of_service'), terms_of_service_index_path, target: "_blank", class: "text-blue-600 hover:underline"),
                     privacy_link: link_to(t('homepage.index.upload_form.privacy_policy'), privacy_policy_index_path, target: "_blank", class: "text-blue-600 hover:underline")).html_safe %>
             <% end %>
           </div>
 
-          <%= form.submit t('.submit_button'), 
+          <%= form.submit t('.submit_button'),
                           class: "w-full inline-flex justify-center items-center px-4 py-3 rounded-md bg-blue-600 text-base font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 opacity-50 cursor-not-allowed transition-all duration-200",
                           disabled: true,
                           data: { "file-upload-target": "submitButton" } %>

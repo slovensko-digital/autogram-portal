@@ -17,8 +17,8 @@
               <div class="flex-2">
                 <%= recipient_status_badge(recipient) %>
               </div>
-              <% if recipient.notifiable? %>
-                <%= button_to notify_bundle_recipient_path(@bundle, recipient), 
+              <% if recipient.notifiable? && @bundle.author.feature_enabled?(:real_emails) %>
+                <%= button_to notify_bundle_recipient_path(@bundle, recipient),
                       method: :post,
                       class: "text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-sm font-medium",
                       form: { data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } } do %>
@@ -26,7 +26,7 @@
                 <% end %>
               <% end %>
               <% if recipient.removable? %>
-                <%= button_to bundle_recipient_path(@bundle, recipient), 
+                <%= button_to bundle_recipient_path(@bundle, recipient),
                       method: :delete,
                       class: "text-red-600 hover:text-red-800 hover:underline cursor-pointer text-sm font-medium",
                       form: { data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } } do %>

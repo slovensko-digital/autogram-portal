@@ -1,106 +1,119 @@
+<% content_for :title, t('.title') + " ##{@bundle.short_uuid}" %>
+
 <%= turbo_stream_from @bundle %>
 <% @bundle.contracts.each do |contract| %>
-  <%= turbo_stream_from "contract_#{contract.uuid}" %>
+  <%= turbo_stream_from contract %>
 <% end %>
 
 <main>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <div class="w-full mb-6">
-        <div class="flex items-center justify-between">
-          <div class="flex-1">
-            <% if current_user == @bundle.author %>
-              <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
-            <% else %>
-              <h1 class="text-3xl font-bold text-gray-900">
-                <% if @bundle.contracts.count == 1 %>
-                  <%= t('.title_requested_singular') %>
-                <% else %>
-                  <%= t('.title_requested_plural', count: @bundle.contracts.count) %>
-                <% end %>
-              </h1>
-              <p class="text-gray-600"><%= t('.subtitle_requested') %></p>
-            <% end %>
-          </div>
-          <% if current_user == @bundle.author %>
-            <%=link_to bundle_path(@bundle),
-                  class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-              <%=  t('actions.edit') %>
-            <% end %>
-          <% end %>
-          <div id="bundle_<%= @bundle.uuid %>_status">
-            <%= render 'status', bundle: @bundle %>
-          </div>
-        </div>
-      </div>
-
-      <%= render 'sender' %>
-
-      <% if @bundle.note.present? %>
+      <% unless params[:iframe].present? %>
         <div class="w-full mb-6">
           <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-900"><%= t('.note_title') %></h2>
-              <p class="text-gray-700 whitespace-pre-line"><%= @bundle.note %></p>
+            <div class="flex-1">
+              <% if current_user == @bundle.author %>
+                <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+              <% else %>
+                <h1 class="text-3xl font-bold text-gray-900">
+                  <% if @bundle.contracts.count == 1 %>
+                    <%= t('.title_requested_singular') %>
+                  <% else %>
+                    <%= t('.title_requested_plural', count: @bundle.contracts.count) %>
+                  <% end %>
+                </h1>
+                <p class="text-gray-600"><%= t('.subtitle_requested') %></p>
+              <% end %>
+            </div>
+            <% if current_user == @bundle.author %>
+              <%=link_to bundle_path(@bundle),
+                    class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <%=  t('actions.edit') %>
+              <% end %>
+            <% end %>
+            <div id="bundle_<%= @bundle.uuid %>_status">
+              <%= render 'status', bundle: @bundle %>
             </div>
           </div>
         </div>
+      <% end %>
+
+      <% unless params[:iframe] == "no_preview" %>
+        <%= render 'sender' %>
+
+        <% if @bundle.note.present? %>
+          <div class="w-full mb-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900"><%= t('.note_title') %></h2>
+                <p class="text-gray-700 whitespace-pre-line"><%= @bundle.note %></p>
+              </div>
+            </div>
+          </div>
+        <% end %>
       <% end %>
 
       <%# TODO: option to batch sign all contracts in the bundle at once %>
 
       <div class="w-full space-y-6 mb-30">
         <% @bundle.contracts.order(:updated_at).each_with_index do |contract, index| %>
-          <%= render 'contracts/visualization_with_toggle', contract: contract %>
-          <div class="mb-6">
-            <%= turbo_frame_tag "signature_validation_#{contract.uuid}", 
-                                src: validate_contract_path(contract),
-                                loading: "lazy",
-                                class: "w-full mb-6" do %>
-              <div class="w-full">
-                <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
-                  <div class="flex items-center">
-                    <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
+          <% if @bundle.contracts.count > 1 %>
+            <div class="text-lg font-semibold text-gray-900 mb-4">
+              <%= t('.contract_number', current: index + 1, total: @bundle.contracts.count) %>
+            </div>
+          <% end %>
+          <% unless params[:iframe] == "no_preview" %>
+            <%= render 'contracts/visualization_with_toggle', contract: contract %>
+            <div class="mb-6">
+              <%= turbo_frame_tag "signature_validation_#{contract.uuid}",
+                                  src: validate_contract_path(contract),
+                                  loading: "lazy",
+                                  class: "w-full mb-6" do %>
+                <div class="w-full">
+                  <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
+                    <div class="flex items-center">
+                      <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            <% end %>
-          </div>
-          <% if @bundle.awaiting_recipients? %>
-            <div class="space-y-3">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
-              </h3>
-              <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
-                <% if recipient == @recipient %>
-                  <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border-2 border-blue-500 overflow-hidden">
-                    <div class="flex items-center gap-3 flex-1">
-                      <div class="text-base font-semibold text-gray-900">
-                        <%= recipient.display_name %>
-                      </div>
-                      <div class="flex-2">
-                        <%= recipient_status_badge(recipient) %>
-                      </div>
-                    </div>
-                  </div>
-                <% else %>
-                  <div class="px-4 py-3 flex items-center justify-between bg-white rounded-lg border border-gray-200 overflow-hidden">
-                    <div class="flex items-center gap-3 flex-1">
-                      <div class="text-base font-semibold text-gray-900">
-                        <%= recipient.display_name %>
-                      </div>
-                      <div class="flex-2">
-                        <%= recipient_status_badge(recipient) %>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
               <% end %>
             </div>
+            <% if @bundle.awaiting_recipients? %>
+              <div class="space-y-3">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
+                </h3>
+                <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
+                  <% if recipient == @recipient %>
+                    <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border border-blue-500 overflow-hidden">
+                      <div class="flex items-center gap-3 flex-1">
+                        <div class="text-base font-semibold text-gray-900">
+                          <%= recipient.display_name %>
+                        </div>
+                        <div class="flex-2">
+                          <%= recipient_status_badge(recipient) %>
+                        </div>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="px-4 py-3 flex items-center justify-between bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <div class="flex items-center gap-3 flex-1">
+                        <div class="text-base font-semibold text-gray-900">
+                          <%= recipient.display_name %>
+                        </div>
+                        <div class="flex-2">
+                          <%= recipient_status_badge(recipient) %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
           <% end %>
           <% unless contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
             <div class="w-full  bg-green-50 border border-green-200 rounded-lg p-4">
@@ -117,20 +130,20 @@
                   </p>
                 </div>
               </div>
-              <div>
-                <%= link_to t('actions.download'),
-                      signed_document_contract_path(contract),
-                      class: "mt-4 inline-flex justify-center items-center px-6 py-3 w-full sm:w-auto border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-              </div>
+              <% unless params[:iframe].present? %>
+                <div>
+                  <%= link_to t('actions.download'),
+                        signed_document_contract_path(contract),
+                        class: "mt-4 inline-flex justify-center items-center px-6 py-3 w-full sm:w-auto border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                </div>
+              <% end %>
             </div>
           <% end %>
           <% if current_user == @bundle.author || contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
-            <%= render 'contracts/signature_actions', contract: contract, recipient: @recipient %>
+            <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
           <% end %>
         <% end %>
       </div>
     </div>
   </div>
 </main>
-
-<% content_for :title, "Bundle ##{@bundle.short_uuid}" %>

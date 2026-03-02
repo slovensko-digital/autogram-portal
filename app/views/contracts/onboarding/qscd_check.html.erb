@@ -1,0 +1,69 @@
+<main class="mx-auto max-w-3xl">
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div>
+        <h3 class="text-4xl font-bold text-gray-900 mb-2"><%= t('.title') %></h3>
+        <p class="text-md text-gray-600 mb-4">
+          <%= t('.description') %>
+        </p>
+      </div>
+
+      <%= form_with url: contract_onboarding_path(@contract, @step), method: :patch do |f| %>
+        <%= hidden_field_tag :recipient, @recipient&.uuid if @recipient %>
+        <%= hidden_field_tag :method, @method %>
+        <%= hidden_field_tag :review, params[:review] if params[:review] %>
+        <%= hidden_field_tag :iframe, params[:iframe] %>
+
+        <div class="space-y-3">
+          <% [ "eid_2024", "eid_2022", "eid_2021", "eid_2013" ].each do |value| %>
+            <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
+          <% end %>
+        </div>
+
+        <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full mt-8">
+          <div class="w-full bg-white border border-gray-200 rounded-md">
+            <div
+              data-action="click->toggle#toggle"
+              class="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
+              <div class="flex flex-col items-start">
+                <span class="text-s text-gray-800"><%= t('.dpb_cards') %></span>
+              </div>
+              <div data-action="click->toggle#toggle">
+                <button data-action="click->toggle#toggle" class="ml-2 flex-shrink-0 inline-flex items-center cursor-pointer">
+                  <span data-toggle-target="textCollapsed"><%= t('.show_dpb') %></span>
+                  <span data-toggle-target="textExpanded" class="hidden"><%= t('.hide_dpb') %></span>
+                  <svg data-toggle-target="icon" class="w-4 h-4 ml-1 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div data-toggle-target="content" class="p-2 space-y-3">
+              <% [ "dpb_2023", "dpb_2020", "dpb_2014"].each do |value| %>
+                <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 border-t border-gray-200"></div>
+
+        <div class="mt-8 flex gap-8">
+          <%
+            back_path = if @contract.bundle
+              sign_bundle_path(@contract.bundle, recipient: params[:recipient], iframe: params[:iframe])
+            else
+              sign_contract_path(@contract, recipient: params[:recipient], iframe: params[:iframe])
+            end
+          %>
+          <%= link_to back_path,
+              class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+            <%= t('actions.back') %>
+          <% end %>
+          <%= f.submit t('.continue'), class: "flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,59 @@
+<%# locals: (contract:, recipient: nil, bundle_id: nil) %>
+
+<%= turbo_frame_tag "signing_method_choice_#{contract.uuid}" do %>
+  <div data-controller="signing-method" class="w-full space-y-4">
+    <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
+    <div class="space-y-3">
+      <% if contract.allowed_methods.include?('qes') %>
+        <%= render 'shared/radio_button_card',
+              name: "signing_method_#{contract.uuid}",
+              value: 'electronic',
+              label: t('.electronic_label'),
+              description: t('.electronic_description'),
+              checked: true,
+              icon: 'mobile',
+              data_attributes: {
+                signing_method_target: 'methodRadio',
+                action: 'change->signing-method#handleMethodSelection'
+              } %>
+      <% end %>
+
+      <% if contract.allowed_methods.include?('scan') %>
+        <%= render 'shared/radio_button_card',
+              name: "signing_method_#{contract.uuid}",
+              value: 'physical',
+              label: t('.physical_label'),
+              description: t('.physical_description'),
+              checked: false,
+              icon: 'pencil',
+              data_attributes: {
+                signing_method_target: 'methodRadio',
+                action: 'change->signing-method#handleMethodSelection'
+              } %>
+      <% end %>
+    </div>
+
+    <div class="hidden">
+      <% if contract.allowed_methods.include?('qes') %>
+        <%= link_to "",
+            signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
+      <% end %>
+
+      <% if contract.allowed_methods.include?('scan') %>
+        <%= link_to "",
+            physical_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
+      <% end %>
+    </div>
+
+    <div class="flex justify-end">
+      <button type="button"
+              data-signing-method-target="continueButton"
+              data-action="click->signing-method#continue"
+              class="px-6 py-3 bg-blue-600 text-white rounded-md cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <%= t('.continue') %>
+      </button>
+    </div>
+  </div>
+<% end %>

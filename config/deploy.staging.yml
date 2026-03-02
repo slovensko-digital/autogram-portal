@@ -18,6 +18,7 @@ env:
     SMTP_AUTHENTICATION: login
     SMTP_ENABLE_STARTTLS_AUTO: true
     SMTP_TLS: false
+    ALLOWED_METHODS: qes
 
 proxy:
   host: agp.dev.slovensko.digital

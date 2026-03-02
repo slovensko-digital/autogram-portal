@@ -2,7 +2,9 @@ class Contracts::SessionsController < ApplicationController
   before_action :set_contract
   before_action :set_session, except: [ :create ]
   before_action :set_recipient, only: [ :create, :show ]
+  before_action :redirect_if_completed, only: [ :show ]
   skip_before_action :verify_authenticity_token, only: [ :upload, :get_webhook, :standard_webhook ]
+  before_action :allow_iframe
 
   def create
     session_type = params[:type] || params[:application]
@@ -90,10 +92,28 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def set_recipient
+    # Priority: URL param (magic link) > current user email match
+    # NEVER use session for recipient - it's identity, not navigation state
     if params[:recipient]
       @recipient = @contract.recipients.find_by_uuid!(params[:recipient])
       raise ActiveRecord::RecordNotFound if @recipient.signed_contract?(@contract)
+    elsif current_user
+      # Logged-in user: find their recipient by email match
+      @recipient = @contract.recipients.find_by(email: current_user.email)
+      raise ActiveRecord::RecordNotFound if @recipient&.signed_contract?(@contract)
     end
+  end
+
+  def redirect_if_completed
+    return unless @session.not_pending?
+
+    redirect_path = if @contract.bundle
+      sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+    else
+      sign_contract_path(@contract, recipient: @recipient&.uuid)
+    end
+
+    redirect_to redirect_path
   end
 
   def create_eidentita_session

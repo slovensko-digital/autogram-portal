@@ -1,48 +1,63 @@
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
   <div class="w-full">
     <div class="mb-6 text-center lg:text-left">
-      <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.actions.sign_title') %></h3>
-      <p class="text-gray-600"><%= t('documents.actions.sign_subtitle') %></p>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.sign_title') %></h3>
+      <p class="text-gray-600"><%= t('.sign_subtitle') %></p>
     </div>
-    <%= form_with url: contract_path(@contract, next_step: @next_step), 
-                  method: :put, 
-                  local: true, 
-                  data: { turbo_frame: "_top", controller: "form-submit", action: "submit->form-submit#handleSubmit" }, 
+    <%= form_with url: contract_path(@contract, next_step: @next_step),
+                  method: :put,
+                  local: true,
+                  data: { turbo_frame: "_top", controller: "form-submit", action: "submit->form-submit#handleSubmit" },
                   class: "space-y-6" do |form| %>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <%= label_tag "format_container_combination", t('documents.actions.signature_format'), class: "block text-sm font-medium text-gray-700 mb-3" %>
+          <%= label_tag "format", t('.signature_format'), class: "block text-sm font-medium text-gray-700 mb-3" %>
           <div class="space-y-3">
-            <% signature_options = @contract.documents.first.signature_options %>
-            <% signature_options.each do |value| %>
-              <%= render 'shared/radio_button_card', 
-                    name: 'contract[signature_parameters_attributes][format_container_combination]',
+            <% @contract.signature_parameters.available_formats.each do |value| %>
+              <%= render 'shared/radio_button_card',
+                    name: 'contract[signature_parameters_attributes][format]',
                     value: value,
-                    label: t("signature_formats.short.#{value}"),
-                    description: t("signature_formats.#{value}"),
-                    checked: value == signature_options.first %>
+                    label: t("signature_parameters.format.short.#{value.downcase}"),
+                    description: t("signature_parameters.format.#{value.downcase}"),
+                    checked: value == @contract.signature_parameters.format %>
             <% end %>
           </div>
         </div>
         <div>
-          <%= label_tag "allowed_method", t('documents.actions.allowed_method'), class: "block text-sm font-medium text-gray-700 mb-3" %>
+          <%= label_tag "level", t('.signature_level'), class: "block text-sm font-medium text-gray-700 mb-3" %>
           <div class="space-y-3">
-            <% [ 'qes', 'ts-qes' ].each do |value| %>
-              <%= render 'shared/radio_button_card', 
-                    name: 'contract[allowed_method]',
+            <% [ 'BASELINE_B', 'BASELINE_T' ].each do |value| %>
+              <%= render 'shared/radio_button_card',
+                    name: 'contract[signature_parameters_attributes][level]',
                     value: value,
-                    label: t("signature_methods.short.#{value.gsub('-', '_')}"),
-                    description: t("signature_methods.#{value.gsub('-', '_')}"),
-                    checked: value == @contract.allowed_methods.first %>
+                    label: t("signature_parameters.level.short.#{value.downcase}"),
+                    description: t("signature_parameters.level.#{value.downcase}"),
+                    checked: value == @contract.signature_parameters.level %>
             <% end %>
           </div>
         </div>
       </div>
+      <% if @contract.available_signature_methods.count > 1 %>
+        <div>
+          <%= label_tag "allowed_methods", t('.allowed_methods'), class: "block text-sm font-medium text-gray-700 mb-3" %>
+          <div class="space-y-3">
+            <% @contract.available_signature_methods.each do |value| %>
+              <%= render 'shared/checkbox_card',
+                    form: form,
+                    name: 'contract[allowed_methods][]',
+                    value: value,
+                    label: t("contracts.allowed_methods.short.#{value.downcase}"),
+                    description: t("contracts.allowed_methods.#{value.downcase}"),
+                    checked: @contract.allowed_methods.include?(value) %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
       <div class="flex flex-col sm:flex-row gap-8">
         <%= link_to actions_contract_path(@contract), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
           <%= t('documents.new.actions.back') %>
         <% end %>
-        <%= submit_tag case @next_step when "sign" then t('documents.actions.continue_signing') else t('documents.actions.continue') end, 
+        <%= submit_tag case @next_step when "sign" then t('actions.continue_signing') else t('actions.continue') end,
                         class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
                         data: { "form-submit-target": "submitButton" } %>
       </div>

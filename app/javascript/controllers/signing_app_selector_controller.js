@@ -3,17 +3,17 @@ import { isMobileDevice } from "utils/device_detection"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["methodRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "signButton", "desktopElement"]
+  static targets = ["appRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "signButton", "desktopElement", "mobileWarning", "yellowWarning", "appSelectionHeading"]
 
   connect() {
-    console.log('Signature method selector connected')
+    console.log('Signing app selector connected')
     this.handleDeviceDetection()
   }
 
   handleSigningEvent(event) {
     const { status } = event.detail
     console.log('Autogram signing event:', status)
-    
+
     if (status === 'cancel' || status === 'error') {
       window.location.reload()
     }
@@ -21,16 +21,43 @@ export default class extends Controller {
 
   handleDeviceDetection() {
     if (isMobileDevice()) {
+      const hasMobileOptions = this.appRadioTargets.some(radio => radio.value !== 'autogram')
+
+      // Always hide desktop option on mobile
       this.desktopElementTargets.forEach(element => {
         element.style.display = 'none'
       })
 
-      const autogramRadio = this.methodRadioTargets.find(radio => radio.value === 'autogram')
-      const avmRadio = this.methodRadioTargets.find(radio => radio.value === 'avm')
-      
-      if (autogramRadio && autogramRadio.checked && avmRadio) {
-        autogramRadio.checked = false
-        avmRadio.checked = true
+      if (hasMobileOptions) {
+        // Mobile alternatives exist - auto-select first mobile option
+        const autogramRadio = this.appRadioTargets.find(radio => radio.value === 'autogram')
+        const avmRadio = this.appRadioTargets.find(radio => radio.value === 'avm')
+
+        if (autogramRadio && autogramRadio.checked && avmRadio) {
+          autogramRadio.checked = false
+          avmRadio.checked = true
+        }
+      } else {
+        // No mobile options available - show warning that desktop is required
+        if (this.hasMobileWarningTarget) {
+          this.mobileWarningTarget.style.display = 'block'
+        }
+
+        // Hide yellow warning on mobile since red warning is shown
+        if (this.hasYellowWarningTarget) {
+          this.yellowWarningTarget.style.display = 'none'
+        }
+
+        // Hide app selection heading since there are no options to select
+        if (this.hasAppSelectionHeadingTarget) {
+          this.appSelectionHeadingTarget.style.display = 'none'
+        }
+
+        // Disable the sign button since no compatible options
+        if (this.hasSignButtonTarget) {
+          this.signButtonTarget.disabled = true
+          this.signButtonTarget.classList.add('opacity-50', 'cursor-not-allowed')
+        }
       }
     } else {
       this.desktopElementTargets.forEach(element => {
@@ -42,10 +69,10 @@ export default class extends Controller {
   triggerSign(event) {
     event.preventDefault()
 
-    const selectedMethod = this.getSelectedMethod()
-    console.log('Selected signing method:', selectedMethod)
+    const selectedApp = this.getSelectedApp()
+    console.log('Selected signing app:', selectedApp)
 
-    if (selectedMethod === 'autogram') {
+    if (selectedApp === 'autogram') {
       if (isMobileDevice()) {
         alert('Autogram Desktop is not available on mobile devices. Please use AVM Mobile instead.')
         return
@@ -55,12 +82,12 @@ export default class extends Controller {
         this.setSignButtonLoading(true)
         this.autogramSubmitButtonTarget.click()
       }
-    } else if (selectedMethod === 'avm') {
+    } else if (selectedApp === 'avm') {
       if (this.hasAvmSubmitButtonTarget) {
         this.setSignButtonLoading(true)
         this.avmSubmitButtonTarget.click()
       }
-    } else if (selectedMethod === 'eidentita') {
+    } else if (selectedApp === 'eidentita') {
       if (this.hasEidentitaSubmitButtonTarget) {
         this.setSignButtonLoading(true)
         this.eidentitaSubmitButtonTarget.click()
@@ -88,8 +115,8 @@ export default class extends Controller {
     }
   }
 
-  getSelectedMethod() {
-    const selectedRadio = this.methodRadioTargets.find(radio => radio.checked)
+  getSelectedApp() {
+    const selectedRadio = this.appRadioTargets.find(radio => radio.checked)
     return selectedRadio ? selectedRadio.value : null
   }
 }

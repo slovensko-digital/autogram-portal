@@ -1,7 +1,9 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
-  before_action :allow_iframe, only: [ :iframe ]
+  before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
 
   def index
     @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
@@ -14,7 +16,7 @@ class ContractsController < ApplicationController
   def create
     @contract = Contract.new(
       user: current_user,
-      documents: [ Document.new(params.require(:document).permit(:blob)) ]
+      documents: [ Document.create(params.require(:document).permit(:blob)) ]
     )
 
     @contract.save!
@@ -54,11 +56,29 @@ class ContractsController < ApplicationController
     end
   end
 
-  def signature_actions
-    render partial: "signature_actions", locals: { contract: @contract }
+  def sign
   end
 
-  def sign
+  def signature_apps
+  end
+
+  def physical_signing
+  end
+
+  def create_physical_session
+    physical_session = PhysicalSession.create!(
+      contract: @contract,
+      user: current_user,
+      recipient: @recipient,
+      status: :pending
+    )
+    physical_session.submitted_date = params[:submitted_date]
+    physical_session.save!
+
+    redirect_to sign_contract_path(@contract, recipient: @recipient&.uuid)
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid),
+                alert: "Failed to submit: #{e.message}"
   end
 
   def signed_document
@@ -139,16 +159,6 @@ class ContractsController < ApplicationController
     end
   end
 
-  def iframe
-    no_header
-    no_footer
-    no_flash
-
-    if params[:no_preview]
-      render template: "contracts/iframe_no_preview"
-    end
-  end
-
   private
 
   def verify_author
@@ -158,15 +168,44 @@ class ContractsController < ApplicationController
   end
 
   def set_contract
-    @contract = Contract.find_by!(uuid: params[:id])
+    @contract = Contract.includes(:bundle).find_by!(uuid: params[:id])
+  end
+
+  def set_recipient
+    if params[:recipient]
+      @recipient = @contract.recipients.find_by(uuid: params[:recipient])
+    elsif current_user
+      @recipient = @contract.recipients.find_by(email: current_user.email)
+    end
+
+    if @recipient&.signed_contract?(@contract)
+      redirect_path = if @contract.bundle
+        sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+      else
+        sign_contract_path(@contract, recipient: @recipient&.uuid)
+      end
+      redirect_to redirect_path
+    end
+  end
+
+  def ensure_onboarding
+    return if params[:iframe] == "no_preview"
+
+    case action_name
+    when "signature_apps"
+      @qscd = params[:qscd] || current_user&.qscd || session[:qscd]
+      redirect_to contract_onboarding_path(@contract, method: "electronic", step: "qscd_check", recipient: @recipient&.uuid, iframe: params[:iframe]) if @qscd.blank? || User.legacy_eid_card?(@qscd)
+    when "physical_signing"
+      redirect_to contract_onboarding_path(@contract, method: "physical", step: "physical_signing", recipient: @recipient&.uuid, iframe: params[:iframe]) unless current_user&.onboarding_completed?("physical")
+    end
   end
 
   def contract_params
     params.require(:contract).permit(
       :uuid,
-      :allowed_method,
+      allowed_methods: [],
       documents_attributes: [ :id, :blob, :_destroy ],
-      signature_parameters_attributes: [ :id, :format_container_combination, :add_content_timestamp ]
+      signature_parameters_attributes: [ :id, :add_content_timestamp, :level, :format, :container, :en319132 ]
     )
   end
 

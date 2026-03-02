@@ -1,17 +1,24 @@
 sk:
   hello: "Ahoj svet"
-  
+
+  common:
+    important: "Dôležité"
+    desktop_required: "Potrebný stolný počítač"
+
   actions:
     back: "Späť"
     continue: "Pokračovať"
+    continue_signing: "Pokračovať na podpisovanie"
     download: "Stiahnuť"
     cancel: "Zrušiť"
+    close: "Zavriet"
     delete: "Zmazať"
     remove: "Odstrániť"
     save: "Uložiť"
     add: "Pridať"
     edit: "Upraviť"
     sign: "Podpísať"
+    change_selection: "Zmeniť výber"
 
   header:
     navigation:
@@ -22,7 +29,7 @@ sk:
       bundles: "Balíky"
       sign_in: "Prihlásiť sa"
       sign_out: "Odhlásiť sa"
-  
+
   language_switcher:
     language: "Jazyk"
     languages:
@@ -36,11 +43,6 @@ sk:
         signed: "Podpísané"
         declined: "Odmietnuté"
     application:
-      signature_levels:
-        pades: "PAdES"
-        xades_asice: "XAdES v ASiC-E kontajneri"
-        cades_asice: "CAdES v ASiC-E kontajneri"
-        unknown: "Neznámy formát podpisu"
       signature_qualifications:
         qesig: "Vlastnoručný podpis"
         qesig_ts: "Osvečený podpis"
@@ -113,25 +115,32 @@ sk:
       user:
         signed_up_but_unconfirmed: "Úspešne ste sa zaregistrovali. Váš účet ešte nie je aktivovaný, skontrolujte si prosím email a kliknite na odkaz na potvrdenie vášho účtu."
 
-  signature_methods:
-    qes: "Kvalifikovaný elektronický podpis"
-    ts_qes: "Kvalifikovaný elektronický podpis s časovou pečiatkou"
-    ades: "Pokročilý elektronický podpis"
-    ses: "Jednoduchý elektronický podpis"
-    short:
-      qes: "Vlastnoručný podpis"
-      ts_qes: "Osvedčený podpis"
-      ades: "Zdokonalený elektronický podpis"
-      ses: "Jednoduchý elektronický podpis"
-  
-  signature_formats:
-    pades: "PDF Advanced Electronic Signature (PAdES)"
-    xades_asice: "XML Pokročilý elektronický podpis v ASiC-E kontajneri"
-    cades_asice: "CMS Pokročilý elektronický podpis v ASiC-E kontajneri"
-    short:
-      pades: "PAdES"
-      xades_asice: "XAdES + ASiC-E"
-      cades_asice: "CAdES + ASiC-E"
+  signature_parameters:
+    format:
+      pades: "PDF Pokročilý elektronický podpis (PAdES)"
+      xades: "XML Pokročilý elektronický podpis v ASiC-E kontajneri"
+      cades: "CMS Pokročilý elektronický podpis v ASiC-E kontajneri"
+      unknown: "Neznámy formát podpisu"
+      short:
+        pades: "PAdES"
+        xades: "XAdES v ASiC-E kontajneri"
+        cades: "CAdES v ASiC-E kontajneri"
+        unknown: "Neznámý formát podpisu"
+    level:
+      baseline_b: Kvalifikovaný elektronický podpis
+      baseline_t: Kvalifikovaný elektronický podpis s časovou pečiatkou
+      baseline_lt: Kvalifikovaný elektronický podpis s dlhodobou časovou pečiatkou
+      baseline_lta: Kvalifikovaný elektronický podpis s archívnou časovou pečiatkou
+      short:
+        baseline_b: Vlastnoručný podpis
+        baseline_t: Osvedčený podpis
+        baseline_lt: KEP s dlhodobou platnosťou
+        baseline_lta: KEP s archívnou časovou pečiatkou
+
+  document:
+    one: "dokument"
+    few: "dokumenty"
+    other: "dokumentov"
 
   documents:
     index:
@@ -171,16 +180,6 @@ sk:
         add_timestamp:
           title: "Pridať časovú pečiatku"
           subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
-    actions:
-      sign_title: "Podpísať dokument"
-      sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
-      signature_format: "Formát podpisu"
-      allowed_method: "Typ podpisu"
-      continue_signing: "Pokračovať na podpisovanie dokumentu"
-      add_timestamp_title: "Pridať časovú pečiatku"
-      add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
-      add_timestamp_button: "Pridať časovú pečiatku k podpisom"
-      continue: "Pokračovať"
     actions_error:
       title: "Chyba pri načítavaní akcií dokumentu"
     visualize:
@@ -196,7 +195,7 @@ sk:
       all_signatures_have_timestamps: "Všetky podpisy už majú kvalifikované časové pečiatky."
       failed_to_extend_signatures: "Nepodarilo sa rozšíriť podpisy: %{error}"
       signature_extended_successfully: "Podpis bol úspešne rozšírený."
-  
+
   bundles:
     index:
       title: "Balíky dokumentov"
@@ -243,17 +242,13 @@ sk:
       failure: "Nepodarilo sa zmazať balík dokumentov."
       confirm: "Ste si istý, že chcete zmazať tento balík dokumentov? Táto akcia je nezvratná."
     sign:
-      title: "Podpíšte balík dokumentov"
+      title: "Balík dokumentov"
       title_requested_singular: "Dostali ste dokument na podpis"
       title_requested_plural: "Dostali ste balík %{count} dokumentov na podpis"
       subtitle_requested: "Skontrolujte odosielateľa a dokumenty v balíku, potom vyberte spôsob podpisu."
+      contract_number: "Dokument %{current} z %{total}"
       note_title: "Poznámka od odosielateľa"
       awaiting_recipients: "Čaká na podpis od"
-    iframe:
-      title: "Balík dokumentov"
-      subtitle: "Prosím, podpíšte všetky dokumenty v balíku"
-      contract_number: "Dokument %{current} z %{total}"
-      signed: "Podpísané"
     status:
       all_signed: "Všetky dokumenty podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
@@ -316,7 +311,7 @@ sk:
       failure_bundle_attached: "Dokument nemôže byť zmazaný, pretože je súčasťou balíka dokumentov."
     sign:
       all_contracts: "Všetky dokumenty"
-      title: "Podpíšte dokument"
+      title: "Dokument"
       subtitle: "Skontrolujte dokument, potom vyberte spôsob podpisu."
       title_requested: "Dostali ste dokument na podpis"
       subtitle_requested: "Skontrolujte odosielateľa a dokument, potom vyberte spôsob podpisu."
@@ -340,12 +335,12 @@ sk:
       already_signed:
         title: "Dokument je podpísaný"
         message: "Tento dokument je už podpísaný. Nie je od vás potrebný ďalší podpis."
-    signature_actions:
+    signature_apps:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       add_another_signature: "Pridajte ďalší podpis"
-      autogram_desktop_label: "Autogram Desktop"
-      autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronick podpisov pomocou eID kariet a iných zariadení"
-      autogram_mobile_label: "Autogram v Mobile"
+      autogram_desktop_label: "Autogram na počítači"
+      autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronických podpisov pomocou eID kariet a iných zariadení"
+      autogram_mobile_label: "Autogram v mobile"
       autogram_mobile_description: "Open-source mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
       eidentita_label: "eIdentita"
       eidentita_description: "Štátna mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
@@ -357,6 +352,21 @@ sk:
       how_signing_works: "Ako funguje podpisovanie"
       signed_title: "Dokumenty boli podpísané"
       signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
+      title: "Vyberte podpisovú aplikáciu"
+      subtitle: "Vyberte, ktorú aplikáciu chcete použiť na elektronické podpisovanie"
+      old_card_warning_title: "Obmedzenie"
+      old_card_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (Autogram v mobile, eIdentita) nie sú kompatibilné s vašou kartou."
+      old_card_mobile_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
+    signature_parameters:
+      sign_title: "Podpísať dokument"
+      sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
+      signature_format: "Formát podpisu"
+      signature_level: "Typ podpisu"
+      allowed_methods: "Povolené metódy podpisu"
+    signature_extension:
+      add_timestamp_title: "Pridať časovú pečiatku"
+      add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
+      add_timestamp_button: "Pridať časovú pečiatku k podpisom"
     download_actions:
       message: "Tento dokument bol podpísaný a je pripravený na stiahnutie."
       download_button: "Stiahnuť podpísaný dokument"
@@ -370,33 +380,161 @@ sk:
       loading_content: "Načítavam obsah dokumentu..."
     sessions:
       autogram:
-        title: "Podpisovanie s Autogram Desktop"
-        subtitle: "Prosím, dokončite proces podpisovania v aplikácii Autogram Desktop"
-        step1: "Aplikácia Autogram Desktop by sa mala automaticky otvoriť"
-        step2: "Postupujte podľa pokynov v aplikácii, aby ste dokončili podpisovanie"
-        step3: "Táto stránka sa automaticky aktualizuje po dokončení podpisovania"
-        note: "Uistite sa, že je aplikácia Autogram Desktop nainštalovaná a spustená"
-        cancel: "Zrušiť"
+        title: "Podpíšte dokument cez Autogram"
+        subtitle: "V aplikácii Autogram na vašom počítači"
+        document: "Dokument"
+        step1_title: "Počkajte na spustenie Autogramu"
+        step1_desc_html: "Ak ho ešte nemáte, <a href='https://sluzby.slovensko.digital/autogram/#download' target='_blank' class='text-blue-600 underline hover:text-blue-800'>stiahnite si ho tu</a>"
+        step2_title: "Zobrazí sa náhľad dokumentu"
+        step2_desc_html: "Autogram automaticky zobrazí dokument pripravený na podpis. Nenahrávajte dokumnet priamo do aplikácie Autogram."
+        step3_title: "Dokument skontrolujte"
+        step3_desc_html: "Uistite sa, že obsah dokumentu je správny a zodpovedá tomu, čo chcete podpísať"
+        step4_title: "Kliknite na Podpísať"
+        step4_desc_html: "Potvrďte podpis kliknutím na tlačidlo v aplikácii Autogram"
+        step5_title: "Zadajte potrebné kódy a PINy"
+        step5_desc_html: "Použite váš občiansky preukaz s čipom a zadajte požadované PINy"
+        step6_title: "Hotovo"
+        step6_desc_html: "Podpísaný dokument si môžete stiahnuť"
+        help_title: "Podpisujete prvýkrát?"
+        note: "Uistite sa, že je aplikácia Autogram nainštalovaná a spustená"
+        progress_title: "Čaká sa na dokončenie podpisovania"
+        progress_subtitle: "Dokončite proces podpisovania vo vašej aplikácii Autogram Desktop"
+        progress_label: "Postup"
+        status_checking: "Kontrolujem, či je Autogram spustený"
+        status_starting: "Spúšťam Autogram"
+        status_sending: "Odosielam dokument do Autogramu"
+        status_waiting: "Čakám na podpísanie dokumentu"
+        status_signed: "Podpísané"
+        cancel: "Zrušiť proces"
+        not_installed_title: "Autogram nie je nainštalovaný"
+        not_installed_desc: "Autogram nie je nainštalovaný na vašom počítači. Stiahnite a nainštalujte si ho."
+        not_installed_download: "Stiahnuť Autogram"
+        cancelled_title: "Podpisovanie zrušené"
+        cancelled_desc: "Proces podpisovania bol zrušený. Skúste to znova."
+        error_title: "Chyba pri podpisovaní"
+        error_desc: "Nastala chyba pri podpisovaní dokumentu."
       avm:
-        scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
-        scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
-        copy_url: "Alebo skopírujte URL manuálne:"
-        note_desktop: "Na mobile: Naskenujte QR kód alebo naň klepnite"
-        note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu Autogram"
+        title: "Podpíšte dokument v Autograme v mobile"
+        subtitle: "Použite mobilnú aplikáciu vo vašom telefóne"
+        note: "Na mobile: Naskenujte QR kód alebo naň klepnite"
         expiry: "Platnosť podpisovania vyprší o 10 minút"
-        cancel: "Zrušiť operáciu"
+        step1_title: "Nainštalujte si Autogram v mobile"
+        step1_desc_html: "Stiahnite a nainštalujte si <a href='https://sluzby.slovensko.digital/autogram-v-mobile/index.html#download' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>Autogram v mobile</b></a>"
+        step2_title: "Naskenujte QR kód"
+        step2_desc_html: "Mobilným telefónom naskenujte QR kód zobrazený na obrazovke"
+        step3_title: "Skontrolujte obsah dokumentu"
+        step3_desc_html: "Uistite sa, že obsah dokumentu je správny a zodpovedá tomu, čo chcete podpísať"
+        step4_title: "Kliknite na Podpísať"
+        step4_desc_html: "Potvrďte podpis kliknutím na tlačidlo v aplikácii Autogram v mobile"
+        step5_title: "Priložte preukaz k telefonu"
+        step5_desc_html: "Priložte váš občiansky preukaz s čipom k telefonu a zadajte BOK a PIN pre načítanie certifikátu"
+        step6_title: "Zadajte BOK a podpisový PIN"
+        step6_desc_html: "Zadajte BOK a PIN pre dokončenie podpisu"
+        step7_title: "Hotovo"
+        step7_desc_html: "Dokument je podpísaný"
       eidentita:
-        scan_qr_desktop: "Naskenujte QR kód mobilným zariadením"
-        scan_qr_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
-        copy_url: "Alebo skopírujte URL manuálne:"
-        note_desktop: "Na mobile: Naskenujte QR kód aplikáciou eIdentita alebo naň klepnite"
-        note_mobile: "Klepnite na QR kód, aby ste otvorili mobilnú aplikáciu eIdentita"
+        title: "Podpíšte dokument v aplikácii eIdentita"
+        subtitle: "Použite mobilnú aplikáciu eIdentita vo vašom telefóne"
+        note: "Na mobile: Naskenujte QR kód aplikáciou eIdentita alebo naň klepnite"
         expiry: "Platnosť podpisovania vyprší o 10 minút"
-        cancel: "Zrušiť operáciu"
+        step1_title: "Naskenujte QR kód"
+        step1_desc_html: "Použite aplikáciu <a href='https://meid.minv.sk/' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>eIdentita</b></a> na naskenovanie QR kódu zobrazeného na obrazovke"
+        step2_title: "Skontrolujte zdroj súboru"
+        step2_desc_html: "Skontrolujte, že súbor pochádza zo stránky <b>%{domain}</b>"
+        step3_title: "Kliknite na Podpísať"
+        step3_desc_html: "Potvrďte podpis kliknutím na tlačidlo v aplikácii eIdentita"
+        step4_title: "Priložte preukaz a zadajte BOK"
+        step4_desc_html: "Priložte váš občianský preukaz s čipom k telefonu a zadajte BOK pre načítanie certifikátu"
+        step5_title: "Vyberte certifikát a zadajte PIN"
+        step5_desc_html: "Kliknite na pokračovať, zadajte PIN a opäť priložte občiansky preukaz k telefónu"
+        step6_title: "Kliknite na Odoslať a dokončiť"
+        step6_desc_html: "Kliknite na tlačidlo Odoslať a dokončiť"
+        step7_title: "Hotovo"
+        step7_desc_html: "Dokument je podpísaný"
+        not_installed_title: "Aplikácia eIdentita nie je nainštalovaná"
+        not_installed_desc: "Aplikácia eIdentita nie je nainštalovaná vo vašom telefóne. Stiahnite si ju z App Store alebo Google Play."
+        not_installed_download_ios: "Stiahnuť z App Store"
+        not_installed_download_android: "Stiahnuť z Google Play"
       error:
         title: "Chyba pri podpisovaní dokumentu"
-        close: "Zavrieť"
-  
+      signed:
+        title: "Dokument bol úspešne podpísaný"
+        message: "Podpisovanie prebehlo v poriadku. Môžete zatvoriť toto okno alebo sa vrátiť späť na dokument."
+    onboarding:
+      electronic_title: "Nastavenie elektronického podpisovania"
+      physical_title: "Nastavenie fyzického podpisovania"
+      subtitle: "Dokončite tieto kroky na prípravu podpisovania"
+      qscd_check:
+        title: "Vyberte typ vášho občianskeho preukazu"
+        description: "Podľa vášho výberu vám zobrazíme dostupné možnosti kvalifikovaného podpisovania."
+        compatible_mobile: "Kompatibilné s mobilnými podpisovými aplikáciami (AVM, eIdentita)"
+        requires_desktop: "Vyžaduje počítač a čítačku kariet (iba Autogram na počítači)"
+        issued_after: "Vydaný po %{date}"
+        continue: "Pokračovať"
+        dpb_cards: Doklady o povolení na pobyt
+        show_dpb: Zobraziť doklady o pobyte
+        hide_dpb: Skryť doklady o pobyte
+        invalid_selection: "Vyberte typ občianského preukazu."
+      pin_check:
+        title: "Poznáte váš BOK?"
+        description_a: "Na použitie elektronického občianskeho preukazu je potrebné poznať bezpečnostný osobný kód (BOK). Tento kód sa nastavuje pri vydávaní nového občianskeho preukazu na úrade."
+        description_b: "Bezpečnostný osobný kód (BOK) je 6-miestne číslo, ktoré slúži na prihlasovanie sa na slovensko.sk, iné štátne portály a na všetky dôležité úkony spojené s občianskym preukazom. Toto číslo nikomu nikdy neprezrádzajte a bezpečne si ho uchovajte."
+        no_pin_title: "Nepoznáte BOK?"
+        no_pin_description: "Musíte navštívit oddelenie dokladov na ktorom koľko okresnom riaditeľstve policajného zboru."
+        no_pin_learn_more: "Čo robiť, ak som zabudol BOK?"
+        continue: "Mám BOK, pokračovať"
+      certificate_check:
+        title: "Máte vydané certifikáty?"
+        description_a: "Elektronické podpisovanie vyžaduje platné kvalifikované certifikáty na vašom občianskom preukaze. Tieto certifikáty vám buď vydali pri preveraní nového OP na polícii alebo ste si ich museli vydať sami doma. K certifikátom potrebuejte poznať ešte podpisový PIN (6 čísel), ktorý by sa mal líšiť od vášho BOK."
+        description_b: "Ak certifikáty ešte nemáte, môžete si ich vydať aj sami doma. Bude na to ale potrebovať čítačku kariet, pomocou ktorej pripojíte občiansky preukaz k počítaču."
+        no_certificates_title: "Nemáte ešte certifikáty?"
+        no_certificates_description: "Budete potrebovať počítač a fyzickú čítačku kariet na ich vydanie. Toto je jednorazová požiadavka."
+        no_certificates_learn_more: "Ako získať certifikáty pre elektronické podpisovanie?"
+        continue: "Mám certifikáty, pokračovať"
+      legacy_eid_card:
+        title: "Elektronické podpisovanie nie je možné"
+        description: "Bohužiaľ, vaša generácia občianskeho preukazu už nepodporuje kvalifikované elektronické podpisy. Na elektronické podpisovanie dokumentov bude musieť požiadať o nový občiansky preukaz. Výmena z dôvodu starého čipu v občianskom preukaze by mala byť bez poplatku."
+        warning_title: "Tento občiansky preukaz už nie je platný pre kvalifikované podpisovanie"
+        warning_description: "Staré občianske preukazy vydané pred rokom 2021 už nie je možné použiť na kvalifikované elektronické podpisovanie. Musíte navštíviť oddelenie dokladov OR PZ a požiadať o nový občiansky preukaz."
+      physical_instructions:
+        title: "Pokyny pre fyzické podpisovanie"
+        description: "Na fyzické podpísanie tohto dokumentu postupujte podľa týchto krokov:"
+        step1: "Stiahnite a vytlačte dokument"
+        step2: "Podpíšte ho vlastnoručným podpisom"
+        step3: "Naskenujte podpísaný dokument alebo si ponechajte originál"
+        step4: "Pošlite ho poštou odosielateľovi"
+        note: "Po odoslaní podpísaného dokumentu nás prosím informujte kliknutím na tlačidlo nižšie."
+        continue: "Pokračovať na fyzické podpisovanie"
+    signing_method_choice:
+      title: "Ako by ste chceli podpísať tento dokument?"
+      electronic_label: "Elektronické podpisovanie"
+      electronic_description: "Podpíšte digitálne pomocou vašho občianskeho preukazu a podpisovej aplikácie"
+      physical_label: "Fyzické podpisovanie"
+      physical_description: "Vytlačte, podpíšte ručne a pošlite poštou"
+      continue: "Pokračovať"
+    physical_signing:
+      title: "Fyzický podpis"
+      subtitle: "Odošlite informácie o vašom fyzicky podpísanom dokumente"
+      form_title: "Odoslali ste podpísaný dokument?"
+      form_description: "Prosím, dajte nám vedieť, kedy ste odoslali fyzicky podpísaný dokument poštou."
+      date_label: "Dátum odoslania poštou"
+      date_helper: "Vyberte dátum, kedy ste dokument odoslali"
+      confirmation_message: "Po odoslaní dostanete potvrdenie. Odosielateľ dokumentu bude upovedomený o vašom fyzickom podpise."
+      back: "Späť"
+      submit: "Odoslať fyzický podpis"
+    allowed_methods:
+      qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
+      ses: Elektronický podpis nakreslením podpisu a overením cez SMS
+      scan: Vytlačiť, ručne podpísať a naskenovať
+      notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
+      notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
+      short:
+        qes: Kvalifikovaný elektronický podpis
+        ses: Jednoduchý elektronický podpis
+        scan: Sken podpísaného dokumentu
+        notary-post: Osvedčený podpis u notára
+        notary-conversion: Zaručená konverzia osvedčeného podpisu
+
   homepage:
     index:
       hero:
@@ -430,7 +568,7 @@ sk:
           description: "Vložte pracovné toky podpisovania priamo do svojich aplikácií pomocou jednoduchej iframe integrácie alebo komplexného REST API. Automatizujte procesy podpisovania dokumentov vo vašich obchodných systémoch."
         qualified_signatures:
           title: "Kvalifikované eIDAS podpisy"
-          description: "Vytvárajte kvalifikované elektronické podpisy pomocou vládou vydaných eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Bezproblémová integrácia s aplikáciami Autogram Desktop a Mobile."
+          description: "Vytvárajte kvalifikované elektronické podpisy pomocou vládou vydaných eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Bezproblémová integrácia s aplikáciami Autogram a Autogram v mobile."
         validation:
           title: "Overovanie dokumentov"
           description: "Okamžite overujte platnosť a integritu podpísaných dokumentov. Systém automaticky kontroluje certifikáty, podpisy a časové pečiatky, aby zabezpečil súlad."
@@ -445,15 +583,15 @@ sk:
         title: "Kompletná infraštruktúra na podpisovanie"
         description: "Autogram Portal je súčasťou komplexného open-source portfólia pre kvalifikované elektronické podpisy, ktoré bezproblémovo funguje s podpisovacími aplikáciami Autogram."
         desktop:
-          title: "Autogram Desktop"
+          title: "Autogram na počítači"
           description: "Desktopová aplikácia pre Windows, macOS a Linux, ktorá vytvára kvalifikované podpisy pomocou eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Pripája sa priamo k portálu pre bezproblémové pracovné toky podpisovania."
           learn_more: "Dozvedieť sa viac"
         mobile:
-          title: "Autogram v Mobile"
+          title: "Autogram v mobile"
           description: "Mobilné aplikácie pre iOS a Android, ktoré umožňujú kvalifikované podpisy pomocou mobilných eID riešení a kvalifikovaných zariadení na vytváranie podpisov. Podpisujte dokumenty na cestách s plnou integráciou portálu."
         extension:
           title: "Autogram Extension"
-          description: "Rozšírenie prehliadača, ktoré integruje Autogram Desktop a Mobile priamo do slovenských eGovernment portálov. Podpisujte dokumenty bezproblémovo bez opustenia vládnych webových stránok."
+          description: "Rozšírenie prehliadača, ktoré integruje Autogram na počítači a v mobile priamo do slovenských eGovernment portálov. Podpisujte dokumenty bezproblémovo bez opustenia vládnych webových stránok."
         portal:
           title: "Autogram Portal"
           description: "Webová platforma na správu kompletného životného cyklu podpisovania dokumentov v komerčných aplikáciách. Poskytuje overovanie, správu pracovných tokov a API integráciu pre obchodné procesy."
@@ -474,21 +612,21 @@ sk:
         subtitle: "Vyskúšajte Autogram Portal teraz alebo preskúmajte zdrojový kód na GitHube."
         start_signing: "Začať podpisovať dokumenty"
         view_github: "Zobraziť na GitHube"
-  
+
   terms_of_service:
     index:
       title: "Obchodné podmienky"
       not_production_title: "Toto nie je produkčné prostredie"
       not_production_message: "Toto je zástupná stránka. Kompletné obchodné podmienky s podrobnými informáciami o právach používania, zodpovednostiach a podmienkach služby budú pridané v budúcnosti."
       work_in_progress: "Pracujeme na komplexných obchodných podmienkach, ktoré jasne vymedzujú práva a povinnosti všetkých strán používajúcich túto platformu."
-  
+
   privacy_policy:
     index:
       title: "Zásady ochrany osobných údajov"
       not_production_title: "Toto nie je produkčné prostredie"
       not_production_message: "Toto je zástupná stránka. Kompletné zásady ochrany osobných údajov s podrobnými informáciami o spracovaní údajov, právach používateľov a bezpečnostných opatreniach budú pridané v budúcnosti."
       work_in_progress: "Zaviazali sme sa chrániť vaše súkromie a čoskoro poskytneme komplexné podrobnosti o našich postupoch pri spracovaní údajov."
-  
+
   footer:
     heading: "Päta"
     by: "od Slovensko.Digital"
@@ -496,7 +634,7 @@ sk:
     service_provider: "Poskytovateľ služby"
     support: "Podpora"
     privacy_policy: "Zásady ochrany osobných údajov"
-  
+
   shared:
     signature_validation:
       error_title: "Chyba pri overovaní podpisov"
@@ -535,7 +673,7 @@ sk:
       drop_text: "Pustiť sem"
       remove_file: "Odstrániť súbor"
       select_another: "Kliknite pre výber iného súboru"
-  
+
   javascript:
     errors:
       file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty jsou PDF, XML a iné súbory."
@@ -544,7 +682,8 @@ sk:
       iframe_client_error: "Nepodarilo sa vytvoriť Autogram klienta kompatibilného s iframe"
       contract_load_failed: "Nepodarilo sa načítať údaje dokumentu zo servera."
       signing_error: "Pri podpisovaní sa vyskytla chyba: %{message}"
-      autogram_connection_failed: "Nepodarilo sa pripojiť k Autogram Desktop. Uistite sa, že je nainštalovaný a spustený."
+      autogram_connection_failed: "Nepodarilo sa pripojiť k Autogramu na počítači. Uistite sa, že je nainštalovaný a spustený."
+      autogram_not_installed: "Autogram na počítači nie je nainštalovaný. Stiahnite a nainštalujte si ho z autogram.slovensko.digital."
       file_read_failed: "Nepodarilo sa prečítať súbor"
     signature:
       preparing: "Pripravujem podpis..."
@@ -601,6 +740,24 @@ sk:
     footer:
       regards: "S pozdravom,"
       team: "Tím Autogram Portal"
+
+  qscd:
+    title:
+      eid_2013: "Občiansky preukaz vydaný pred 21.6.2021"
+      eid_2021: "Občiansky preukaz vydaný po 21.6.2021"
+      eid_2022: "Občiansky preukaz vydaný po 1.12.2022"
+      eid_2024: "Občiansky preukaz vydaný po 18.12.2024"
+      dpb_2014: "Doklad o povolení na pobyt vydaný pred 10.7.2020"
+      dpb_2020: "Doklad o povolení na pobyt vydaný po 10.7.2020"
+      dpb_2023: "Doklad o povolení na pobyt vydaný po 18.10.2023"
+    description:
+      eid_2013: "Tento občiansky preukaz obsahuje čip, ktorý nie už je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový občiansky preukaz."
+      eid_2021: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími preukazmi."
+      eid_2022: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
+      eid_2024: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
+      dpb_2014: "Tento doklad o povolení na pobyt obsahuje čip, ktorý už nie je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový doklad o povolení na pobyt."
+      dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
+      dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
 
   activerecord:
     errors:

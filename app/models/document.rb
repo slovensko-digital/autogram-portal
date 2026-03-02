@@ -91,24 +91,6 @@ class Document < ApplicationRecord
     content_type == "application/vnd.etsi.asic-e+zip"
   end
 
-  def signature_options
-    signature_form, container_type = validation_result.document_info[:signature_form], validation_result.document_info[:container_type]
-    if has_signatures?
-      case [ signature_form, container_type ]
-      when [ "PAdES", nil ]
-        return [ "pades" ]
-      when [ "XAdES", "ASiC_E" ]
-        return [ "xades_asice" ]
-      when [ "CAdES", "ASiC_E" ]
-        return [ "cades_asice" ]
-      else
-        raise "Unknown signature form and container type combination: #{signature_form} + #{container_type}"
-      end
-    end
-
-    [ is_pdf? ? "pades" : nil, "xades_asice", "cades_asice" ].compact
-  end
-
   def visualize(skip_cache: false)
     if blob.content_type.in?([ "text/plain", "image/png", "image/jpg", "image/jpeg" ])
       content_data = blob.download

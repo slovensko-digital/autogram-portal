@@ -29,11 +29,11 @@
 
   <div id="document-content-area">
     <% @contract.documents.each_with_index do |document, index| %>
-      <div class="document-content <%= 'hidden' unless index == 0 %>" 
+      <div class="document-content <%= 'hidden' unless index == 0 %>"
            data-document-viewer-target="documentContent"
            data-document-id="<%= document.uuid %>">
         <div class="mb-6">
-          <%= turbo_frame_tag "document_visualization_#{document.uuid}", 
+          <%= turbo_frame_tag "document_visualization_#{document.uuid}",
                               src: visualize_document_path(document),
                               loading: "lazy",
                               class: "rounded-lg min-h-[600px]" do %>

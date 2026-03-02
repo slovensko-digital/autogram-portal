@@ -4,6 +4,7 @@
 #
 #  id                     :bigint           not null, primary key
 #  api_token_public_key   :string
+#  completed_onboardings  :jsonb            not null
 #  confirmation_sent_at   :datetime
 #  confirmation_token     :string
 #  confirmed_at           :datetime
@@ -18,6 +19,7 @@
 #  locale                 :string           default("sk")
 #  locked_at              :datetime
 #  name                   :string
+#  qscd                   :integer
 #  remember_created_at    :datetime
 #  reset_password_sent_at :datetime
 #  reset_password_token   :string
@@ -43,6 +45,9 @@ class User < ApplicationRecord
   has_many :identities, dependent: :destroy
   has_many :contracts, dependent: :destroy
   has_many :documents, dependent: :destroy
+
+  enum :qscd, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
+  MOBILE_QSCDS = [ "eid_2022", "eid_2024", "dpb_2023" ].freeze
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
@@ -88,5 +93,24 @@ class User < ApplicationRecord
 
   def signature_extension_allowed?
     true
+  end
+
+  # Onboarding helper methods
+  def onboarding_completed?(method)
+    completed_onboardings.include?(method.to_s)
+  end
+
+  def mark_onboarding_complete!(method)
+    unless onboarding_completed?(method)
+      update!(completed_onboardings: completed_onboardings + [ method.to_s ])
+    end
+  end
+
+  def self.supports_mobile_signing?(qscd)
+    MOBILE_QSCDS.include?(qscd)
+  end
+
+  def self.legacy_eid_card?(qscd)
+    qscd.present? && qscd.in?(%w[eid_2013 dpb_2014])
   end
 end

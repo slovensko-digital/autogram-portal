@@ -432,7 +432,7 @@ components:
         recipientName:
           type: string
           example: Company Name
-    
+
     Webhook:
       type: object
       properties:
@@ -480,7 +480,7 @@ components:
         hash:
           type: string
           example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
-          description: SHA-256 hash of the file content.        
+          description: SHA-256 hash of the file content.
         xdcParameters:
           $ref: "#/components/schemas/XdcParameters"
 
@@ -654,7 +654,7 @@ components:
       description: |
         JWT token must be encoded using RS256 and client-specific key matching `sub` claim.
         Maximum `exp` claim duration is 15 minutes.
-        `jti` claim is required and must be unique for the 15 minutes. 
+        `jti` claim is required and must be unique for the 15 minutes.
         `jti` claim must complain with regular expression: `/\A[0-9a-z\-_]{32,256}\z/i`
 
         Example of `header` segment:

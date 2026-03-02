@@ -4,7 +4,7 @@ import i18n from "i18n"
 export default class extends Controller {
   static targets = ["dropzone", "fileInput", "documentsContainer", "submitButton", "fileName", "fileSize"]
   static classes = ["dragging", "uploading"]
-  static values = { 
+  static values = {
     mode: String,
     inputName: String
   }
@@ -55,7 +55,7 @@ export default class extends Controller {
     if (this.uploading) return
     event.preventDefault()
     this.setDragging(false)
-    
+
     const files = event.dataTransfer.files
     if (files.length > 0) {
       const file = files[0]
@@ -67,16 +67,16 @@ export default class extends Controller {
     if (this.isValidFileType(file)) {
       // Clear any existing file first
       this.clearFile()
-      
+
       this.selectedFile = file
       this.updateFileInfo(file)
-      
+
       if (this.modeValue === 'contract') {
         this.createHiddenInput(file)
       } else {
         this.updateFileInput(file)
       }
-      
+
       this.updateUI()
       this.updateSubmitButton()
     } else {
@@ -86,7 +86,7 @@ export default class extends Controller {
 
   clearFile() {
     this.selectedFile = null
-    
+
     if (this.modeValue === 'contract' && this.hasDocumentsContainerTarget) {
       this.documentsContainerTarget.innerHTML = ''
     } else {
@@ -111,23 +111,23 @@ export default class extends Controller {
 
   createHiddenInput(file) {
     if (!this.hasDocumentsContainerTarget) return
-    
+
     const input = document.createElement('input')
     input.type = 'file'
     input.name = `${this.inputNameValue}[0][blob]`
     input.style.display = 'none'
-    
+
     const dt = new DataTransfer()
     dt.items.add(file)
     input.files = dt.files
-    
+
     this.documentsContainerTarget.appendChild(input)
   }
 
   isValidFileType(file) {
     const allowedTypes = [
       'application/pdf',
-      'application/xml', 
+      'application/xml',
       'text/xml',
       'application/vnd.gov.sk.xmldatacontainer+xml',
       'application/vnd.etsi.asic-e+zip',
@@ -137,8 +137,8 @@ export default class extends Controller {
       'image/jpeg'
     ]
     const allowedExtensions = ['.pdf', '.xml', '.xdcf', '.asice', '.txt', '.png', '.jpg', '.jpeg']
-    
-    return allowedTypes.includes(file.type) || 
+
+    return allowedTypes.includes(file.type) ||
            allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
   }
 

@@ -52,17 +52,21 @@ Rails.application.routes.draw do
 
   resources :contracts, except: [ :index ] do
     member do
-      get :signature_actions
+      get :signature_apps
       get :sign
       get :validate
       get :visualize
       get :signed_document
-      get :iframe
       get :signature_parameters
       get :signature_extension
       post :extend_signatures
       get :actions
+      get :signature_apps
+      get :physical_signing
+      post :physical_signing, action: :create_physical_session
     end
+
+    resources :onboarding, only: [ :show, :update ], param: :step, controller: "contracts/onboarding"
 
     resources :sessions, only: [ :show, :destroy ], controller: "contracts/sessions" do
       member do
@@ -81,7 +85,6 @@ Rails.application.routes.draw do
 
   resources :bundles, only: [] do
     member do
-      get :iframe
       get :sign
     end
   end

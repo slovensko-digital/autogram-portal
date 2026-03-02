@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_30_172925) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_05_104730) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -255,6 +255,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_30_172925) do
 
   create_table "users", force: :cascade do |t|
     t.string "api_token_public_key"
+    t.jsonb "completed_onboardings", default: [], null: false
     t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
     t.datetime "confirmed_at"
@@ -270,6 +271,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_30_172925) do
     t.string "locale", default: "sk"
     t.datetime "locked_at"
     t.string "name"
+    t.integer "qscd"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"

@@ -1,8 +1,7 @@
 class BundlesController < ApplicationController
   before_action :set_bundle, only: [ :show, :edit, :update, :destroy ]
-  skip_before_action :verify_authenticity_token, only: [ :iframe ]
-
-  before_action :allow_iframe, only: [ :iframe ]
+  skip_before_action :verify_authenticity_token, only: [ :sign ], if: -> { params[:iframe].present? }
+  before_action :allow_iframe, only: [ :sign ], if: -> { params[:iframe].present? }
 
   def index
     @bundles = current_user.bundles.includes(:contracts, :author).order(created_at: :desc)
@@ -37,21 +36,18 @@ class BundlesController < ApplicationController
     end
   end
 
-  def iframe
-    @bundle = Bundle.publicly_visible.find_by_uuid!(params[:id])
-
-    no_header
-    no_footer
-    no_flash
-  end
-
   def sign
     if params[:recipient]
       @recipient = Recipient.find_by_uuid!(params[:recipient])
       @bundle = @recipient.bundle
-    else
-      @bundle = Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
     end
+
+    if current_user
+      @bundle ||= Bundle.joins(:recipients).where(recipients: { user: current_user }, uuid: params[:id]).first
+      @recipient ||= @bundle.recipients.find_by(user: current_user) if @bundle
+    end
+
+    @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
 
     raise ActiveRecord::RecordNotFound unless @bundle
   end

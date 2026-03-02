@@ -4,6 +4,7 @@
 #
 #  id                     :bigint           not null, primary key
 #  api_token_public_key   :string
+#  completed_onboardings  :jsonb            not null
 #  confirmation_sent_at   :datetime
 #  confirmation_token     :string
 #  confirmed_at           :datetime
@@ -18,6 +19,7 @@
 #  locale                 :string           default("sk")
 #  locked_at              :datetime
 #  name                   :string
+#  qscd                   :integer
 #  remember_created_at    :datetime
 #  reset_password_sent_at :datetime
 #  reset_password_token   :string
