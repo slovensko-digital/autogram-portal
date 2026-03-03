@@ -38,7 +38,7 @@
         </div>
       <% end %>
 
-      <% unless params[:iframe] == "no_preview" %>
+      <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
         <%= render 'sender' %>
 
         <% if @bundle.note.present? %>
@@ -62,7 +62,7 @@
               <%= t('.contract_number', current: index + 1, total: @bundle.contracts.count) %>
             </div>
           <% end %>
-          <% unless params[:iframe] == "no_preview" %>
+          <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
             <%= render 'contracts/visualization_with_toggle', contract: contract %>
             <div class="mb-6">
               <%= turbo_frame_tag "signature_validation_#{contract.uuid}",

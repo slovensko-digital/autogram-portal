@@ -97,7 +97,7 @@ class User < ApplicationRecord
 
   # Onboarding helper methods
   def onboarding_completed?(method)
-    completed_onboardings.include?(method.to_s)
+    completed_onboardings.include?(method.to_s) && !User.legacy_eid_card?(qscd)
   end
 
   def mark_onboarding_complete!(method)

@@ -189,7 +189,7 @@ class ContractsController < ApplicationController
   end
 
   def ensure_onboarding
-    return if params[:iframe] == "no_preview"
+    return if params[:iframe] == "no_onboarding"
 
     case action_name
     when "signature_apps"

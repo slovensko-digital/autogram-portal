@@ -4,6 +4,8 @@
     <div class="relative isolate overflow-hidden">
       <% if @session.signed? %>
         <%= render "signed" %>
+      <% elsif @session.failed? %>
+        <%= render "error" %>
       <% elsif @session.eidentita? %>
         <%= render "eidentita" %>
       <% elsif @session.avm? %>

@@ -20,7 +20,7 @@
             const config = {
                 mode: options.mode || 'iframe', // 'iframe' or 'popup'
                 parentElement: options.parentElement || null,
-                noPreview: options.noPreview || false,
+                previewLevel: options.previewLevel || false,
                 width: options.width || '100%',
                 height: options.height || '800px',
                 border: options.border || 'solid 1px #ccc',
@@ -30,6 +30,8 @@
                 popupTitle: options.popupTitle || 'AGP Portal',
                 onMessage: options.onMessage || null,
                 onClose: options.onClose || null,
+                recipientId: options.recipientId || null,
+                locale: options.locale || null,
                 resourceType: resourceType
             };
 
@@ -43,7 +45,11 @@
         // Create iframe mode
         _createIframe: function (sessionId, config) {
             const iframe = document.createElement('iframe');
-            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?iframe=` + (config.noPreview ? 'no_preview' : 'true');
+            const iframeParam = config.previewLevel || 'true';
+            const params = new URLSearchParams({ iframe: iframeParam });
+            if (config.recipientId) params.set('recipient', config.recipientId);
+            if (config.locale) params.set('locale', config.locale);
+            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?${params}`;
             iframe.style.width = config.width;
             iframe.style.height = config.height;
             iframe.style.border = config.border;
@@ -159,7 +165,11 @@
 
             // Create iframe
             const iframe = document.createElement('iframe');
-            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?iframe=` + (config.noPreview ? 'no_preview' : 'true');
+            const iframeParam = config.previewLevel || 'true';
+            const params = new URLSearchParams({ iframe: iframeParam });
+            if (config.recipientId) params.set('recipient', config.recipientId);
+            if (config.locale) params.set('locale', config.locale);
+            iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?${params}`;
             iframe.style.cssText = `
                 flex: 1;
                 border: none;
@@ -216,7 +226,7 @@
         // Set up message listener
         _setupMessageListener: function (config, iframe) {
             const messageHandler = (event) => {
-                if (config.onMessage && typeof config.onMessage === 'function') {
+                if (config.onMessage && typeof config.onMessage === 'function' && event.data && event.data.type === 'agp-custom-event') {
                     config.onMessage(event.data, event.origin, iframe);
                 }
             };

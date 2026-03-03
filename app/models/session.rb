@@ -122,7 +122,7 @@ class Session < ApplicationRecord
         self,
         target: "signature_apps_#{contract.uuid}",
         partial: "contracts/sessions/signed",
-        locals: { contract: contract }
+        locals: { session: self }
       )
     when "canceled"
       Turbo::StreamsChannel.broadcast_action_to(self, action: :refresh)
@@ -134,10 +134,7 @@ class Session < ApplicationRecord
       self,
       target: "signature_apps_#{contract.uuid}",
       partial: "contracts/sessions/error",
-      locals: {
-        contract: contract,
-        error: error_message
-      }
+      locals: { session: self }
     )
   end
 end
