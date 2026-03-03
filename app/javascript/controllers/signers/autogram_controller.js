@@ -182,8 +182,6 @@ export default class extends Controller {
           window.location.href = response.url
         } else if (response.ok) {
           this.updateProgress(100, 'signed')
-          
-          window.parent.postMessage({ type: 'message', status: 'document-signed' }, '*');
           console.log('Document signed and submitted successfully. Turbo stream refresh will redirect to sign page.')
         } else {
           const errorText = await response.text()

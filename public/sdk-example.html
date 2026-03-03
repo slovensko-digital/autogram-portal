@@ -124,6 +124,23 @@
                     placeholder="Enter bundle UUID"
                 />
             </div>
+            <div>
+                <label for="recipient-id" class="config-label">Recipient ID (optional):</label>
+                <input
+                    type="text"
+                    id="recipient-id"
+                    class="config-input"
+                    value=""
+                    placeholder="Enter recipient ID"
+                />
+            </div>
+            <div>
+                <label for="locale" class="config-label">Locale:</label>
+                <select id="locale" class="config-input">
+                    <option value="sk">Slovak</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
         </div>
         <p style="color: #666; font-size: 14px; margin-top: 10px;">
             💡 <strong>Tip:</strong> The IDs you enter here will be used by all the demo buttons below.
@@ -170,6 +187,7 @@ agp.initIframe('your-contract-id', {
             <button class="primary" onclick="openBundlePopup()">Open Bundle Popup</button>
             <button class="secondary" onclick="openBundlePopupWithCallbacks()">Open Bundle Popup with Callbacks</button>
             <button class="secondary" onclick="openBundlePopupNoPreview()">Open Bundle Popup (Sign Only)</button>
+            <button class="secondary" onclick="openBundleNoOnboarding()">Open Bundle Popup (No Onboarding)</button>
         </div>
 
         <h4>Usage:</h4>
@@ -244,7 +262,7 @@ agp.initIframe(contractId, options)</code></pre>
         <pre><code>agp.initContractIframe('contract-id', {
     mode: 'iframe' | 'popup',           // Integration mode
     parentElement: '#selector' | element, // Parent element for iframe mode
-    noPreview: false,                   // Set to true to show only sign button
+    previewLevel: false | 'no_preview' | 'no_onboarding', // Set to 'no_preview' to show only sign button, set to 'no_onboarding' to skip onboarding
     width: '100%',                      // iframe width
     height: '800px',                    // iframe height
     border: 'solid 1px #ccc',          // iframe border
@@ -252,6 +270,8 @@ agp.initIframe(contractId, options)</code></pre>
     popupWidth: 800,                    // Popup width in pixels
     popupHeight: 600,                   // Popup height in pixels
     popupTitle: 'AGP Portal',           // Popup title
+    recipientId: 'recipient-id',       // Pre-select recipient by ID (optional)
+    locale: 'sk',                       // Override UI language, e.g. 'sk' or 'en' (optional)
     onMessage: function(data, origin, iframe) {}, // Message handler
     onClose: function() {}              // Close handler (popup only)
 });</code></pre>
@@ -285,6 +305,14 @@ agp.initIframe(contractId, options)</code></pre>
             return document.getElementById('bundle-id').value.trim();
         }
 
+        function getRecipientId() {
+            return document.getElementById('recipient-id').value.trim() || undefined;
+        }
+
+        function getLocale() {
+            return document.getElementById('locale').value.trim() || undefined;
+        }
+
         function validateId(id, type) {
             if (!id) {
                 alert(`Please enter a ${type} ID in the configuration section above.`);
@@ -302,7 +330,9 @@ agp.initIframe(contractId, options)</code></pre>
                 mode: 'popup',
                 popupWidth: 1200,
                 popupHeight: 900,
-                popupTitle: 'Sign Contract'
+                popupTitle: 'Sign Contract',
+                recipientId: getRecipientId(),
+                locale: getLocale()
             });
         }
 
@@ -315,6 +345,8 @@ agp.initIframe(contractId, options)</code></pre>
                 popupWidth: 1200,
                 popupHeight: 900,
                 popupTitle: 'Sign Contract - Custom',
+                recipientId: getRecipientId(),
+                locale: getLocale(),
                 onMessage: (data, origin, iframe) => {
                     console.log('Contract message:', data);
                 },
@@ -331,10 +363,12 @@ agp.initIframe(contractId, options)</code></pre>
 
             currentInstance = agp.initContractIframe(contractId, {
                 mode: 'popup',
-                noPreview: true,
+                previewLevel: "no_preview",
                 popupTitle: 'Sign Contract',
                 popupWidth: 500,
                 popupHeight: 600,
+                recipientId: getRecipientId(),
+                locale: getLocale(),
                 onClose: () => {
                     console.log('Contract sign-only popup was closed');
                     currentInstance = null;
@@ -351,7 +385,9 @@ agp.initIframe(contractId, options)</code></pre>
                 mode: 'popup',
                 popupWidth: 1200,
                 popupHeight: 900,
-                popupTitle: 'Sign Bundle'
+                popupTitle: 'Sign Bundle',
+                recipientId: getRecipientId(),
+                locale: getLocale()
             });
         }
 
@@ -364,6 +400,8 @@ agp.initIframe(contractId, options)</code></pre>
                 popupWidth: 1200,
                 popupHeight: 900,
                 popupTitle: 'Sign Bundle - Custom',
+                recipientId: getRecipientId(),
+                locale: getLocale(),
                 onMessage: (data, origin, iframe) => {
                     console.log('Bundle message:', data);
                 },
@@ -380,12 +418,39 @@ agp.initIframe(contractId, options)</code></pre>
 
             currentInstance = agp.initBundleIframe(bundleId, {
                 mode: 'popup',
-                noPreview: true,
+                previewLevel: "no_preview",
                 popupTitle: 'Sign Bundle',
                 popupWidth: 500,
                 popupHeight: 650,
+                recipientId: getRecipientId(),
+                locale: getLocale(),
+                onMessage: (data, origin, iframe) => {
+                    console.log('Bundle message:', data);
+                },
                 onClose: () => {
                     console.log('Bundle sign-only popup was closed');
+                    currentInstance = null;
+                }
+            });
+        }
+
+        function openBundleNoOnboarding() {
+            const bundleId = getBundleId();
+            if (!validateId(bundleId, 'Bundle')) return;
+
+            currentInstance = agp.initBundleIframe(bundleId, {
+                mode: 'popup',
+                previewLevel: "no_onboarding",
+                popupTitle: 'Sign Bundle',
+                popupWidth: 500,
+                popupHeight: 650,
+                recipientId: getRecipientId(),
+                locale: getLocale(),
+                onMessage: (data, origin, iframe) => {
+                    console.log('Bundle message:', data);
+                },
+                onClose: () => {
+                    console.log('Bundle no-onboarding popup was closed');
                     currentInstance = null;
                 }
             });
@@ -401,6 +466,8 @@ agp.initIframe(contractId, options)</code></pre>
                 mode: 'iframe',
                 parentElement: '#agp-container',
                 height: '500px',
+                recipientId: getRecipientId(),
+                locale: getLocale(),
                 onMessage: (data, origin, iframe) => {
                     console.log('Contract iframe message:', data);
                 }
@@ -416,6 +483,8 @@ agp.initIframe(contractId, options)</code></pre>
                 mode: 'iframe',
                 parentElement: '#agp-container',
                 height: '500px',
+                recipientId: getRecipientId(),
+                locale: getLocale(),
                 onMessage: (data, origin, iframe) => {
                     console.log('Bundle iframe message:', data);
                 }
@@ -430,8 +499,10 @@ agp.initIframe(contractId, options)</code></pre>
             currentInstance = agp.initContractIframe(contractId, {
                 mode: 'iframe',
                 parentElement: '#agp-container',
-                noPreview: true,
+                previewLevel: "no_preview",
                 height: '600px',
+                recipientId: getRecipientId(),
+                locale: getLocale(),
                 onMessage: (data, origin, iframe) => {
                     console.log('Contract sign-only iframe message:', data);
                 }
@@ -446,8 +517,10 @@ agp.initIframe(contractId, options)</code></pre>
             currentInstance = agp.initBundleIframe(bundleId, {
                 mode: 'iframe',
                 parentElement: '#agp-container',
-                noPreview: true,
+                previewLevel: "no_preview",
                 height: '500px',
+                recipientId: getRecipientId(),
+                locale: getLocale(),
                 onMessage: (data, origin, iframe) => {
                     console.log('Bundle sign-only iframe message:', data);
                 }

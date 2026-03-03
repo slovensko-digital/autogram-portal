@@ -25,7 +25,7 @@
         </div>
       <% end %>
 
-      <% unless params[:iframe] == "no_preview" %>
+      <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
         <%= render 'visualization_with_toggle', contract: @contract %>
 
         <%= turbo_frame_tag "signature_validation_#{@contract.uuid}",
