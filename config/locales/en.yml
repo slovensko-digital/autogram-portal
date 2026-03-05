@@ -155,7 +155,7 @@ en:
         greeting: "Hello %{recipient}!"
         instruction: "You can login using the link below:"
         action: "Log in to my account"
-        expiry_notice: "Note that the link will expire in %{expiry}."
+        expiry_notice: "Note that the link will expire in %{expiry} minutes."
     shared:
       links:
         sign_in: "Sign in"
@@ -769,35 +769,26 @@ en:
       greeting: "Hello"
       title: "New document for signing"
       sender_message: "%{sender_name} sent you a document for electronic signing."
-      verify_sender_warning: "Before signing, please verify the sender and the content of the document."
       note_from_sender_title: "Note from sender"
       document_name_label: "Document name"
       message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
       how_it_works_title: "How it works"
-      how_to_sign: "How to sign the documents?"
-      signing_is_simple: "If you are unsure, the signing process is simple. After clicking the link, the system will guide you through the steps:"
+      signing_is_simple: "If you are unsure, the signing process is simple. After clicking the link, the system will guide you through the steps."
       step_1_title: "Click the button"
       step_1_desc: "A secure signing platform will open"
       step_2_title: "Authorize yourself"
       step_2_desc: "Use your eID card or mobile key"
       step_3_title: "Done"
       step_3_desc: "You will receive the signed document by email"
-      signing_step_1: "You will be asked to select a signing method (e.g., eID card or another available method)."
-      signing_step_2: "The system will show you what needs to be done."
-      signing_step_3: "The signed version of the document will be displayed to you after completion."
-      contact_support: "If you have any questions or concerns, you can contact the sender."
       details_title: "Documents to sign:"
-      note: "Note from the author:"
-      view_bundle: "Sign document"
+      view_bundle: "View document"
       legal_validity_title: "Legal validity"
       legal_validity_text: "Electronic signature has the same legal force as a handwritten signature under Regulation eIDAS (EU) 910/2014."
-      tag_qualified_signature: "Qualified signature"
-      tag_timestamp: "Timestamp"
-      tag_ca_certificate: "CA Certificate"
-    footer:
+  
+  layouts:
+    mailer:
       regards: "Best regards,"
-      team: "Autogram Portal"
-      certified_provider: "Certified trust service provider"
+      team: "team Autogram Portal"
 
   activerecord:
     errors:

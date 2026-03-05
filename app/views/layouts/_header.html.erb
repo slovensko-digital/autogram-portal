@@ -2,7 +2,7 @@
   <div class="flex grow flex-col overflow-y-auto bg-white border-r border-gray-200 pb-4">
     <div class="flex h-16 shrink-0 items-center px-6 border-b border-gray-100">
       <a href="/" class="flex items-center">
-        <span class="text-xl font-bold text-gray-900">Autogram <span class="font-normal">Portal</span></span>
+        <span class="text-2xl font-bold text-gray-900" style="background: linear-gradient(to bottom, transparent 90%, #FDE047 10%);">Autogram <span class="font-normal">Portal</span></span>
       </a>
     </div>
     <nav class="flex flex-1 flex-col px-4 py-6" x-data="{ langOpen: false }" @click.away="langOpen = false">
@@ -104,7 +104,7 @@
 <header class="bg-blue-800 lg:hidden" x-data="{ mobileMenuOpen: false }">
   <nav class="mx-auto flex items-center justify-between p-4 sm:px-6" aria-label="<%= t('header.navigation.global') %>">
     <a href="/" class="-m-1.5 p-1.5">
-      <span class="text-xl font-bold text-white">Autogram <span class="font-normal">Portal</span></span>
+      <span class="text-xl font-bold text-white underline">Autogram <span class="font-normal">Portal</span></span>
     </a>
     <button type="button"
             @click="mobileMenuOpen = !mobileMenuOpen"

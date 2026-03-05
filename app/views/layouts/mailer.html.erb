@@ -10,49 +10,50 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
         background-color: #F9FAFB;
       }
+      p {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #374151;
+        margin: 0 0 16px;
+      }
       .email-container {
         max-width: 600px;
         margin: 0 auto;
         background-color: #ffffff;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        overflow: hidden;
       }
       .top-bar {
         height: 4px;
-        background: linear-gradient(to right, #6366F1, #8B5CF6, #EC4899, #F59E0B, #10B981);
+        background: linear-gradient(to right, #51A2FF, #155DFC, #9810FA);
         font-size: 0;
         line-height: 0;
       }
       .header {
-        padding: 20px 32px 16px;
+        padding: 2em;
         text-align: center;
         background-color: #ffffff;
       }
       .logo-text {
         font-size: 26px;
-        font-weight: 700;
         line-height: 1.2;
         color: #111827;
         text-decoration: none;
       }
       .logo-highlight {
-        background: linear-gradient(to bottom, transparent 55%, #FCD34D 55%);
+        background: linear-gradient(to bottom, transparent 90%, #FDE047 10%);
         padding: 0 2px;
       }
       .body {
-        padding: 0 32px 32px;
+        padding: 2em;
         background-color: #ffffff;
+        border-top: 1px solid #E5E7EB;
+        border-bottom: 1px solid #E5E7EB;
       }
       .greeting {
-        font-size: 18px;
-        font-weight: 400;
+        font-size: 16px;
         line-height: 1.5;
-        color: #111827;
-        margin: 0 0 16px;
-      }
-      /* Generic text elements used by devise mailer templates */
-      .message {
-        font-size: 15px;
-        font-weight: 400;
-        line-height: 1.6;
         color: #374151;
         margin: 0 0 16px;
       }
@@ -61,10 +62,9 @@
         background: #ffffff;
         border: 1px solid #E5E7EB;
         border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 8px;
+        padding: 1em 1em 0 1em;
+        margin-bottom: 2em;
       }
-
       .section-icon {
         width: 44px;
         height: 44px;
@@ -74,51 +74,16 @@
         box-sizing: border-box;
       }
       .section-title {
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 700;
         color: #111827;
         margin: 0;
         line-height: 1.4;
       }
       .section-body {
-        font-size: 14px;
+        font-size: 16px;
         color: #374151;
         line-height: 1.6;
-        margin: 0 0 10px;
-      }
-      .warning-text {
-        font-size: 13px;
-        color: #6B7280;
-        line-height: 1.5;
-        margin: 0;
-      }
-      .note-body {
-        font-size: 14px;
-        color: #374151;
-        line-height: 1.5;
-        margin: 0 0 8px;
-      }
-      .note-author {
-        font-size: 14px;
-        font-weight: 600;
-        color: #111827;
-        margin: 0;
-      }
-      .doc-label {
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.07em;
-        color: #9CA3AF;
-        text-transform: uppercase;
-        margin: 0 0 10px;
-      }
-      .doc-icon {
-        width: 38px;
-        height: 38px;
-        background-color: #EFF6FF;
-        border-radius: 8px;
-        padding: 10px;
-        box-sizing: border-box;
       }
       /* Details list (used in signed notifications) */
       .details {
@@ -126,14 +91,14 @@
       }
       .details-title {
         font-weight: 600;
-        font-size: 12px;
+        font-size: 14px;
         letter-spacing: 0.07em;
         text-transform: uppercase;
         color: #9CA3AF;
         margin: 0 0 10px;
       }
       .details-list {
-        margin: 0;
+        margin-bottom: 1em;
         padding: 0;
         background-color: #F9FAFB;
         border-radius: 8px;
@@ -143,7 +108,7 @@
         padding: 10px 14px;
         border-bottom: 1px solid #F3F4F6;
         color: #374151;
-        font-size: 14px;
+        font-size: 16px;
       }
       .details-list div:last-child {
         border-bottom: none;
@@ -153,7 +118,7 @@
         display: block;
         width: 100%;
         padding: 14px 24px;
-        background-color: #2563EB;
+        background-color: #165EFC;
         color: #ffffff !important;
         text-align: center;
         text-decoration: none;
@@ -169,140 +134,26 @@
         color: #ffffff !important;
         text-decoration: none !important;
       }
-      /* How it works steps */
-      .steps-section {
-        margin: 8px 0 16px;
-        text-align: center;
-      }
-      .steps-heading {
-        font-size: 18px;
-        font-weight: 700;
-        color: #111827;
-        margin: 0 0 20px;
-      }
-      .steps-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .step-cell {
-        width: 33.33%;
-        text-align: center;
-        vertical-align: top;
-        padding: 0 6px;
-      }
-      .step-bubble {
-        display: inline-block;
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background-color: #3B82F6;
-        color: #ffffff;
-        font-size: 20px;
-        font-weight: 700;
-        line-height: 48px;
-        text-align: center;
-        margin: 0 0 10px;
-      }
-      .step-bubble-done {
-        display: inline-block;
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background-color: #10B981;
-        color: #ffffff;
-        font-size: 20px;
-        font-weight: 700;
-        line-height: 48px;
-        text-align: center;
-        margin: 0 0 10px;
-      }
-      .step-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: #111827;
-        margin: 0 0 4px;
-        line-height: 1.3;
-      }
-      .step-desc {
-        font-size: 12px;
-        color: #6B7280;
-        line-height: 1.5;
-        margin: 0;
-      }
-      /* Legal validity */
-      .legal-box {
-        background-color: #F8FAFC;
-        border: 1px solid #E5E7EB;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-      }
-      .legal-check-circle {
-        width: 28px;
-        height: 28px;
-        background-color: #DBEAFE;
-        border-radius: 50%;
-        padding: 7px;
-        box-sizing: border-box;
-      }
-      .legal-title {
-        font-size: 15px;
-        font-weight: 600;
-        color: #111827;
-        margin: 0;
-      }
-      .legal-body {
-        font-size: 13px;
-        color: #6B7280;
-        line-height: 1.5;
-        margin: 0 0 14px;
-      }
-      .pill-tag {
-        display: inline-block;
-        padding: 4px 10px;
-        border: 1px solid #E5E7EB;
-        border-radius: 20px;
-        font-size: 12px;
-        color: #374151;
-        margin: 0 4px 6px 0;
-      }
       /* Footer block (inside body, above bottom footer) */
       .footer-block {
-        margin: 8px 0 16px;
         text-align: center;
+        padding: 2em;
       }
       .footer-regards-text {
-        font-size: 14px;
+        font-size: 16px;
         color: #6B7280;
         margin: 0 0 2px;
         line-height: 1.5;
       }
       .footer-brand {
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 700;
         color: #111827;
         margin: 0 0 4px;
         line-height: 1.5;
       }
       .footer-provider {
-        font-size: 12px;
-        color: #9CA3AF;
-        margin: 0;
-      }
-      /* Bottom footer strip */
-      .footer {
-        padding: 20px 32px;
-        text-align: center;
-        background-color: #F9FAFB;
-        border-top: 1px solid #E5E7EB;
-      }
-      .footer-copyright {
-        font-size: 12px;
-        color: #9CA3AF;
-        margin: 0 0 4px;
-      }
-      .footer-tagline {
-        font-size: 12px;
+        font-size: 14px;
         color: #9CA3AF;
         margin: 0;
       }
@@ -314,16 +165,16 @@
       <div class="top-bar">&nbsp;</div>
 
       <div class="header">
-        <span class="logo-text"><span class="logo-highlight">Autogram</span> Portal</span>
+        <span class="logo-text logo-highlight"><span style="font-weight: 700;">Autogram</span> Portal</span>
       </div>
 
       <div class="body">
         <%= yield %>
       </div>
 
-      <div class="footer">
-        <p class="footer-copyright">&copy; 2025 Autogram. Všetky práva vyhradené.</p>
-        <p class="footer-tagline">Bezpečné elektronické podpisovanie dokumentov</p>
+      <div class="footer-block">
+        <p class="footer-regards-text"><%= t('.regards') %></p>
+        <p class="footer-brand"><%= t('.team') %></p>
       </div>
     </div>
   </body>

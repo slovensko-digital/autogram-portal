@@ -99,20 +99,20 @@ sk:
         subtitle: "Požiadajte o inštrukcie na odomknutie, aby ste získali prístup k svojmu účtu."
     mailer:
       unlock_instructions:
-        greeting: "Dobrý deň %{recipient}!"
+        greeting: "Dobrý deň 👋 %{recipient}!"
         message: "Váš účet bol uzamknutý kvôli nadmernému počtu neúspešných pokusov o prihlásenie."
         instruction: "Kliknutím na odkaz nižšie odomknete svoj účet:"
         action: "Odomknúť môj účet"
       email_changed:
-        greeting: "Dobrý deň %{recipient}!"
+        greeting: "Dobrý deň 👋 %{recipient}!"
         message: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail bol zmenený na %{email}."
         message_unconfirmed: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail sa mení na %{email}."
       confirmation_instructions:
-        greeting: "Vitajte %{recipient}!"
+        greeting: "Vitajte 👋 %{recipient}!"
         instruction: "Svoj e-mail môžete potvrdiť kliknutím na odkaz nižšie:"
         action: "Potvrdiť môj účet"
       magic_link:
-        greeting: "Dobrý deň %{recipient}!"
+        greeting: "Dobrý deň 👋 %{recipient}!"
         instruction: "Prihlásiť sa môžete pomocou odkazu nižšie:"
         action: "Prihlásiť sa do môjho účtu"
         expiry_notice: "Odkaz je platný %{expiry} minút."
@@ -710,9 +710,9 @@ sk:
       copy_failure: "Nepodarilo sa skopírovať odkaz"
 
   notification_mailer:
+    greeting: "Dobrý deň 👋"
     contract_signed:
       subject: "Vaše dokumenty boli podpísané"
-      greeting: "Dobrý deň,"
       title: "Dokument bol podpísaný"
       message: "dokument %{filename} bol podpísaný."
       details_title: "Detaily podpisu:"
@@ -722,7 +722,6 @@ sk:
       view_contract: "Zobraziť podpísaný dokument"
     bundle_contract_signed:
       subject: "Dokument v balíku bol podpísaný"
-      greeting: "Dobrý deň,"
       title: "Dokument bol podpísaný"
       message: "dokument %{filename} v balíku bol podpísaný adresátom %{signer_name}."
       details_title: "Detaily podpisu:"
@@ -732,45 +731,33 @@ sk:
       view_bundle: "Zobraziť balík dokumentov"
     bundle_completed:
       subject: "Váš balík dokumentov bol podpísaný"
-      greeting: "Dobrý deň,"
       title: "Balík dokumentov bol dokončený"
       message: "Váš balík s dokumentami bol dokončený."
       details_title: "Dokončené dokumenty:"
       view_bundle: "Zobraziť balík"
     signature_requested:
       subject: "Dokumenty na podpis"
-      greeting: "Dobrý deň"
       title: "Nový dokument na podpis"
-      sender_message: "%{sender_name} vám poslal dokument na elektronický podpis."
-      verify_sender_warning: "Pred podpisom si prosím skontrolujte odosielateľa a obsah dokumentu."
       note_from_sender_title: "Poznámka od odosielateľa"
-      document_name_label: "Názov dokumentu"
-      message: "%{author_name} vás požiadal o podpis dokumentov v systémem Autogram Portal."
+      documents: "Dokumenty"
+      message: "%{sender_name} vám poslal dokument na podpis v systéme Autogram Portal."
       how_it_works_title: "Ako to funguje"
-      how_to_sign: "Ako podpísať dokumenty?"
-      signing_is_simple: "Ak si nie ste istý, proces podpisu je jednoduchý. Po kliknutí na odkaz vás systém prevedie krokmi:"
+      signing_is_simple: "Ak si nie ste istý, proces podpisu je jednoduchý. Po kliknutí na odkaz vás systém prevedie krokmi."
       step_1_title: "Kliknite na tlačidlo"
       step_1_desc: "Otvorí sa bezpečná podpisovacia platforma"
       step_2_title: "Autorizujte sa"
-      step_2_desc: "Použite eID kartu alebo mobilný kľúč"
+      step_2_desc: "Použite občiansky preukaz a postupujete podľa pokynov"
       step_3_title: "Hotovo"
-      step_3_desc: "Podpísaný dokument dostanete emailom"
-      signing_step_1: "Budete požiadaný o výber spôsobu podpisu (napr. eID karta alebo iný dostupný spôsob)."
-      signing_step_2: "Systém vám zobrazí, čo je potrebné urobiť."
-      signing_step_3: "Podpísaná verzia dokumentu sa vám zobrazí po dokončení."
-      contact_support: "V prípade otázok alebo nejasností môžete kontaktovať odosielateľa."
+      step_3_desc: "Dokument je podpísaný"
       details_title: "Dokumenty na podpis:"
-      note: "Poznámka od autora:"
-      view_bundle: "Podpísať dokument"
-      legal_validity_title: "Právna platnosť"
-      legal_validity_text: "Elektronický podpis má rovnakú právnu silu ako vlastnoručný podpis podľa nariadenia eIDAS (EU) 910/2014."
-      tag_qualified_signature: "Kvalifikovaný podpis"
-      tag_timestamp: "Časová pečiatka"
-      tag_ca_certificate: "Certifikát CA"
-    footer:
+      view_bundle: "Zobraziť dokument"
+      legal_validity_title: "Právna sila"
+      legal_validity_text: "Kvalifikovaný elektronický podpis má rovnakú právnu silu ako vlastnoručný podpis podľa nariadenia eIDAS (EU) 910/2014."
+
+  layouts:
+    mailer:
       regards: "S pozdravom,"
-      team: "Autogram Portal"
-      certified_provider: "Certifikovaný poskytovateľ kvalifikovaných služieb dôvery"
+      team: "tím Autogram Portal"
 
   qscd:
     title:
