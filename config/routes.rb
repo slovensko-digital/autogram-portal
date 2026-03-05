@@ -25,10 +25,11 @@ Rails.application.routes.draw do
   post "locale/switch" => "locale#switch", as: :switch_locale
 
   # Defines the root path route ("/")
-  root to: "homepage#index"
+  root to: "root#index"
 
   resources :privacy_policy, only: [ :index ]
   resources :terms_of_service, only: [ :index ]
+  resources :about, only: [ :index ]
 
   authenticate(:user) do
     resources :contracts, only: [ :index, :destroy ]

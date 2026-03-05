@@ -1,8 +1,22 @@
 <p class="greeting"><%= t('.greeting') %></p>
 
-<p class="message"><%= t('.message', bundle_count: @bundle.contracts.count) %></p>
+<%# Card 1: Completion notification %>
+<div class="section-card">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
+    <tr>
+      <td width="56" valign="middle">
+        <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
+      </td>
+      <td valign="middle">
+        <h2 class="section-title"><%= t('.title') %></h2>
+      </td>
+    </tr>
+  </table>
+  <p class="section-body"><%= t('.message', bundle_count: @bundle.contracts.count) %></p>
+</div>
 
-<div class="details">
+<%# Card 2: Document list %>
+<div class="section-card">
   <div class="details-title"><%= t('.details_title') %></div>
   <div class="details-list">
     <% @bundle.contracts.each do |contract| %>
@@ -12,3 +26,5 @@
 </div>
 
 <%= link_to t('.view_bundle'), url_for(@bundle), class: "button" %>
+
+<%= render "footer" %>

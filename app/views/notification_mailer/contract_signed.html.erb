@@ -1,17 +1,35 @@
 <p class="greeting"><%= t('.greeting') %></p>
 
-<p class="message"><%= t('.message', filename: @contract.display_name) %></p>
+<%# Card 1: Signed notification %>
+<div class="section-card">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
+    <tr>
+      <td width="56" valign="middle">
+        <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
+      </td>
+      <td valign="middle">
+        <h2 class="section-title"><%= t('.title') %></h2>
+      </td>
+    </tr>
+  </table>
+  <p class="section-body"><%= t('.message', filename: @contract.display_name) %></p>
+</div>
 
-<div class="details">
-  <div class="details-title"><%= t('.details_title') %></div>
-  <div class="details-list">
-    <div><%= t('.signed_by', signer_name: @signature[:signer_name]) %></div>
-    <% if @signature[:timestamp_info] && @signature[:timestamp_info][:qualified] %>
-      <div><%= t('.timestamp_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
-    <% else %>
-      <div><%= t('.timestamp_non_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
-    <% end %>
+<%# Card 2: Signature details %>
+<div class="section-card">
+  <div class="details">
+    <div class="details-title"><%= t('.details_title') %></div>
+    <div class="details-list">
+      <div><%= t('.signed_by', signer_name: @signature[:signer_name]) %></div>
+      <% if @signature[:timestamp_info] && @signature[:timestamp_info][:qualified] %>
+        <div><%= t('.timestamp_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+      <% else %>
+        <div><%= t('.timestamp_non_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+      <% end %>
+    </div>
   </div>
 </div>
 
 <%= link_to t('.view_contract'), url_for(@contract), class: "button" %>
+
+<%= render "footer" %>

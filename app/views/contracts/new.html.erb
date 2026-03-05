@@ -46,9 +46,9 @@
                               { required: true, class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" },
                               { checked_value: "1", unchecked_value: "0" } %>
             <%= form.label :agree_to_policies, class: "text-sm text-gray-700" do %>
-              <%= t('homepage.index.upload_form.agree_to_policies_html',
-                    terms_link: link_to(t('homepage.index.upload_form.terms_of_service'), terms_of_service_index_path, target: "_blank", class: "text-blue-600 hover:underline"),
-                    privacy_link: link_to(t('homepage.index.upload_form.privacy_policy'), privacy_policy_index_path, target: "_blank", class: "text-blue-600 hover:underline")).html_safe %>
+              <%= t('upload_form.agree_to_policies_html',
+                    terms_link: link_to(t('upload_form.terms_of_service'), terms_of_service_index_path, target: "_blank", class: "text-blue-600 hover:underline"),
+                    privacy_link: link_to(t('upload_form.privacy_policy'), privacy_policy_index_path, target: "_blank", class: "text-blue-600 hover:underline")).html_safe %>
             <% end %>
           </div>
 

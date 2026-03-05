@@ -20,13 +20,24 @@ sk:
     sign: "Podpísať"
     change_selection: "Zmeniť výber"
 
+  upload_form:
+    agree_to_policies_html: "Súhlasím s %{terms_link} a %{privacy_link}"
+    terms_of_service: "Obchodnými podmienkami"
+    privacy_policy: "Zásadami ochrany osobných údajov"
+    submit: "Nahrať a pokračovať"
+
   header:
     navigation:
       global: "Globálne"
       toggle_menu: "Otvoriť menu"
     links:
+      about: "O portáli"
+      home: "Domov"
       contracts: "Dokumenty"
       bundles: "Balíky"
+      settings: "Nastavenia"
+      new_contract: "Nový dokument"
+      electronic_onboarding: "Elektronické podpisovanie"
       sign_in: "Prihlásiť sa"
       sign_out: "Odhlásiť sa"
 
@@ -535,18 +546,13 @@ sk:
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
 
-  homepage:
+  about:
     index:
       hero:
         title: "Kvalifikované elektronické podpisy"
         title_highlight: "jednoducho"
         description_html: "<span class=\"font-semibold text-gray-900\">Open-source platforma</span> pre správu <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-kompatibilných</span> elektronických podpisov. <span class=\"font-semibold text-gray-900\">Posielajte dokumenty</span> na podpis, <span class=\"font-semibold text-gray-900\">integrujte pracovné postupy</span> cez <span class=\"font-semibold text-gray-900\">API alebo vložený iframe</span> a <span class=\"font-semibold text-gray-900\">bezproblémovo sa pripojte</span> k viacerým podpisovacím aplikáciám."
         view_on_github: "Zobraziť na GitHube"
-      upload_form:
-        agree_to_policies_html: "Súhlasím s %{terms_link} a %{privacy_link}"
-        terms_of_service: "Obchodnými podmienkami"
-        privacy_policy: "Zásadami ochrany osobných údajov"
-        submit: "Nahrať a pokračovať"
       start_using:
         title: "Začnite používať Autogram Portal dnes"
         subtitle: "Vyberte si, ako chcete pracovať — s účtom alebo bez neho"
@@ -703,6 +709,7 @@ sk:
     contract_signed:
       subject: "Vaše dokumenty boli podpísané"
       greeting: "Dobrý deň,"
+      title: "Dokument bol podpísaný"
       message: "dokument %{filename} bol podpísaný."
       details_title: "Detaily podpisu:"
       signed_by: "Podpísal: %{signer_name}"
@@ -712,6 +719,7 @@ sk:
     bundle_contract_signed:
       subject: "Dokument v balíku bol podpísaný"
       greeting: "Dobrý deň,"
+      title: "Dokument bol podpísaný"
       message: "dokument %{filename} v balíku bol podpísaný adresátom %{signer_name}."
       details_title: "Detaily podpisu:"
       signed_by: "Podpísal: %{signer_name}"
@@ -721,25 +729,44 @@ sk:
     bundle_completed:
       subject: "Váš balík dokumentov bol podpísaný"
       greeting: "Dobrý deň,"
+      title: "Balík dokumentov bol dokončený"
       message: "Váš balík s dokumentami bol dokončený."
       details_title: "Dokončené dokumenty:"
       view_bundle: "Zobraziť balík"
     signature_requested:
       subject: "Dokumenty na podpis"
-      greeting: "Dobrý deň,"
+      greeting: "Dobrý deň"
+      title: "Nový dokument na podpis"
+      sender_message: "%{sender_name} vám poslal dokument na elektronický podpis."
+      verify_sender_warning: "Pred podpisom si prosím skontrolujte odosielateľa a obsah dokumentu."
+      note_from_sender_title: "Poznámka od odosielateľa"
+      document_name_label: "Názov dokumentu"
       message: "%{author_name} vás požiadal o podpis dokumentov v systémem Autogram Portal."
+      how_it_works_title: "Ako to funguje"
       how_to_sign: "Ako podpísať dokumenty?"
       signing_is_simple: "Ak si nie ste istý, proces podpisu je jednoduchý. Po kliknutí na odkaz vás systém prevedie krokmi:"
+      step_1_title: "Kliknite na tlačidlo"
+      step_1_desc: "Otvorí sa bezpečná podpisovacia platforma"
+      step_2_title: "Autorizujte sa"
+      step_2_desc: "Použite eID kartu alebo mobilný kľúč"
+      step_3_title: "Hotovo"
+      step_3_desc: "Podpísaný dokument dostanete emailom"
       signing_step_1: "Budete požiadaný o výber spôsobu podpisu (napr. eID karta alebo iný dostupný spôsob)."
       signing_step_2: "Systém vám zobrazí, čo je potrebné urobiť."
       signing_step_3: "Podpísaná verzia dokumentu sa vám zobrazí po dokončení."
       contact_support: "V prípade otázok alebo nejasností môžete kontaktovať odosielateľa."
       details_title: "Dokumenty na podpis:"
       note: "Poznámka od autora:"
-      view_bundle: "Podpísať dokumenty"
+      view_bundle: "Podpísať dokument"
+      legal_validity_title: "Právna platnosť"
+      legal_validity_text: "Elektronický podpis má rovnakú právnu silu ako vlastnoručný podpis podľa nariadenia eIDAS (EU) 910/2014."
+      tag_qualified_signature: "Kvalifikovaný podpis"
+      tag_timestamp: "Časová pečiatka"
+      tag_ca_certificate: "Certifikát CA"
     footer:
       regards: "S pozdravom,"
-      team: "Tím Autogram Portal"
+      team: "Autogram Portal"
+      certified_provider: "Certifikovaný poskytovateľ kvalifikovaných služieb dôvery"
 
   qscd:
     title:

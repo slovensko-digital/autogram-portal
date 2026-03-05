@@ -152,7 +152,7 @@ class ContractsController < ApplicationController
       if current_user
         redirect_to contracts_path, notice: I18n.t("contracts.destroy.success")
       else
-        redirect_to root_path, notice: I18n.t("contracts.destroy.success")
+        redirect_to new_contract_path, notice: I18n.t("contracts.destroy.success")
       end
     else
       redirect_to @contract, alert: I18n.t("contracts.destroy.failure", error: e.message)
@@ -163,7 +163,7 @@ class ContractsController < ApplicationController
 
   def verify_author
     if @contract.user && @contract.user != current_user
-      redirect_to root_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
+      redirect_to new_contract_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
     end
   end
 
