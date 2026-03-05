@@ -24,6 +24,6 @@ class DeviseMailer < Devise::Passwordless::Mailer
   private
 
   def set_locale_for_user(user)
-    I18n.locale = user&.locale || I18n.default_locale
+    I18n.default_locale = user&.locale || I18n.default_locale
   end
 end

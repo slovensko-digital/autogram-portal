@@ -1,10 +1,25 @@
 <%= t('notification_mailer.greeting') %>
 
-<%= t('.message', bundle_count: @bundle.contracts.count, sender_name: @bundle.author.name) %>
+<%= t('.title') %>
+<%= t('.message', sender_name: @bundle.author.name) %>
+<%= t('.signing_is_simple') %>
 
-<%= t('.details_title') %>
+<% if @bundle.note.present? %>
+<%= t('.note_from_sender_title') %>
+<%= @bundle.note %>
+<% end %>
+
+<%= t('.documents', default: t('.details_title')) %>
 <% @bundle.contracts.each do |contract| %>
 - <%= contract.display_name %>
 <% end %>
 
 <%= t('.view_bundle') %>: <%= sign_bundle_url(@bundle, recipient: @user) %>
+
+<%= t('.how_it_works_title') %>
+1) <%= t('.step_1_title') %> — <%= t('.step_1_desc') %>
+2) <%= t('.step_2_title') %> — <%= t('.step_2_desc') %>
+3) <%= t('.step_3_title') %> — <%= t('.step_3_desc') %>
+
+<%= t('.legal_validity_title') %>
+<%= t('.legal_validity_text') %>

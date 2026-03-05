@@ -98,21 +98,18 @@ sk:
         resend_unlock_instructions: "Znovu poslať inštrukcie na odomknutie"
         subtitle: "Požiadajte o inštrukcie na odomknutie, aby ste získali prístup k svojmu účtu."
     mailer:
+      greeting: "Dobrý deň 👋 %{recipient}!"
       unlock_instructions:
-        greeting: "Dobrý deň 👋 %{recipient}!"
         message: "Váš účet bol uzamknutý kvôli nadmernému počtu neúspešných pokusov o prihlásenie."
         instruction: "Kliknutím na odkaz nižšie odomknete svoj účet:"
         action: "Odomknúť môj účet"
       email_changed:
-        greeting: "Dobrý deň 👋 %{recipient}!"
         message: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail bol zmenený na %{email}."
         message_unconfirmed: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail sa mení na %{email}."
       confirmation_instructions:
-        greeting: "Vitajte 👋 %{recipient}!"
         instruction: "Svoj e-mail môžete potvrdiť kliknutím na odkaz nižšie:"
         action: "Potvrdiť môj účet"
       magic_link:
-        greeting: "Dobrý deň 👋 %{recipient}!"
         instruction: "Prihlásiť sa môžete pomocou odkazu nižšie:"
         action: "Prihlásiť sa do môjho účtu"
         expiry_notice: "Odkaz je platný %{expiry} minút."
