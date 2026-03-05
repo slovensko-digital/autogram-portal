@@ -117,6 +117,12 @@ sk:
         action: "Prihlásiť sa do môjho účtu"
         expiry_notice: "Odkaz je platný %{expiry} minút."
     shared:
+      captcha:
+        captcha_label: "Nie som robot"
+        captcha_verified: "Overené"
+        captcha_verifying: "Overujem…"
+        captcha_wait: "Čakajte prosím…"
+        captcha_error: "Overenie zlyhalo. Skúste to znova."
       links:
         sign_in: "Prihlásiť sa"
         sign_up: "Registrovať sa"

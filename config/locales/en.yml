@@ -98,6 +98,12 @@ en:
         unknown: "Unknown signature"
 
   devise:
+    captcha:
+      captcha_label: "I'm not a robot"
+      captcha_verified: "Verified"
+      captcha_verifying: "Verifying…"
+      captcha_wait: "Please wait…"
+      captcha_error: "Verification failed. Please try again."
     sessions:
       new:
         sign_in: "Sign in"

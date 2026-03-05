@@ -39,6 +39,7 @@ sk:
       updated: "Vaše heslo bolo úspešne zmenené. Teraz ste prihlásený."
       updated_not_active: "Vaše heslo bolo úspešne zmenené."
     registrations:
+      captcha_invalid: "Overenie captcha zlyhalo. Prosím, skúste to znova."
       destroyed: "Váš účet bol úspešne zrušený. Dúfame, že sa onedlho opäť uvidíme."
       signed_up: "Vitajte! Úspešne ste sa zaregistrovali."
       signed_up_but_inactive: "Úspešne ste sa zaregistrovali. Nemohli sme vás však prihlásiť, pretože váš účet ešte nie je aktivovaný."

@@ -1,4 +1,6 @@
 class Users::RegistrationsController < Devise::RegistrationsController
+  include VerifiesAltchaCaptcha
+
   before_action :configure_permitted_parameters
 
   def destroy

@@ -27,7 +27,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="<%= 'bg-gray-50' unless current_page?(about_index_path) %> <%= 'lg:pt-20' unless @no_header %>">
+  <body class="<%= 'lg:pt-24' unless @no_header || flash.any? %>">
     <%= render "layouts/header" unless @no_header %>
 
     <div class="<%= 'lg:pl-64' unless @no_header %>">
