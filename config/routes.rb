@@ -4,6 +4,7 @@ Rails.application.routes.draw do
       sessions: "users/sessions",
       registrations: "users/registrations",
       confirmations: "users/confirmations",
+      unlocks: "users/unlocks",
       omniauth_callbacks: "users/omniauth"
     }
 
@@ -12,6 +13,8 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
+
+  get "altcha/challenge" => "altcha#challenge", as: :altcha_challenge
 
   # Chrome DevTools configuration for better debugging experience
   get "/.well-known/appspecific/com.chrome.devtools.json" => "application#devtools_config"
@@ -25,10 +28,11 @@ Rails.application.routes.draw do
   post "locale/switch" => "locale#switch", as: :switch_locale
 
   # Defines the root path route ("/")
-  root to: "homepage#index"
+  root to: "root#index"
 
   resources :privacy_policy, only: [ :index ]
   resources :terms_of_service, only: [ :index ]
+  resources :about, only: [ :index ]
 
   authenticate(:user) do
     resources :contracts, only: [ :index, :destroy ]

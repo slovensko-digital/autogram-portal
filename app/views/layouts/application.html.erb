@@ -16,26 +16,26 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="<%= 'lg:pt-24' unless @no_header || flash.any? %>">
     <%= render "layouts/header" unless @no_header %>
 
-    <%= render("layouts/flash", flash: flash) unless @no_flash %>
+    <div class="<%= 'lg:pl-64' unless @no_header %>">
+      <%= render("layouts/flash", flash: flash) unless @no_flash %>
 
-    <%= yield %>
+      <%= yield %>
 
-    <%= render "layouts/footer" unless @no_footer %>
+      <%= render "layouts/footer" unless @no_footer %>
+    </div>
   </body>
 </html>

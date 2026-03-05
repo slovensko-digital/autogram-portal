@@ -49,13 +49,24 @@ en:
     sign: "Sign"
     change_selection: "Change selection"
 
+  upload_form:
+    agree_to_policies_html: "I agree with %{terms_link} and %{privacy_link}"
+    terms_of_service: "Terms of Service"
+    privacy_policy: "Privacy Policy"
+    submit: "Upload & Continue"
+
   header:
     navigation:
       global: "Global"
       toggle_menu: "Toggle menu"
     links:
+      home: "Home"
+      about: "About"
       contracts: "Contracts"
       bundles: "Bundles"
+      settings: "Settings"
+      new_contract: "New contract"
+      electronic_onboarding: "Electronic onboarding"
       sign_in: "Sign in"
       sign_out: "Sign out"
 
@@ -87,6 +98,12 @@ en:
         unknown: "Unknown signature"
 
   devise:
+    captcha:
+      captcha_label: "I'm not a robot"
+      captcha_verified: "Verified"
+      captcha_verifying: "Verifying…"
+      captcha_wait: "Please wait…"
+      captcha_error: "Verification failed. Please try again."
     sessions:
       new:
         sign_in: "Sign in"
@@ -121,24 +138,21 @@ en:
         resend_unlock_instructions: "Resend unlock instructions"
         subtitle: "Request unlock instructions to regain access to your account."
     mailer:
+      greeting: "Hello  👋 %{recipient}!"
       unlock_instructions:
-        greeting: "Hello %{recipient}!"
         message: "Your account has been locked due to an excessive number of unsuccessful sign in attempts."
         instruction: "Click the link below to unlock your account:"
         action: "Unlock my account"
       email_changed:
-        greeting: "Hello %{recipient}!"
         message: "We're contacting you to notify you that your email has been changed to %{email}."
         message_unconfirmed: "We're contacting you to notify you that your email is being changed to %{email}."
       confirmation_instructions:
-        greeting: "Welcome %{recipient}!"
         instruction: "You can confirm your account email through the link below:"
         action: "Confirm my account"
       magic_link:
-        greeting: "Hello %{recipient}!"
         instruction: "You can login using the link below:"
         action: "Log in to my account"
-        expiry_notice: "Note that the link will expire in %{expiry}."
+        expiry_notice: "Note that the link will expire in %{expiry} minutes."
     shared:
       links:
         sign_in: "Sign in"
@@ -186,20 +200,6 @@ en:
       no_documents_message: "Get started by uploading a new document."
       upload_document: "Upload Document"
     new:
-      title: "New document"
-      subtitle: "Upload a document for signing or validation."
-      help_text: "You can upload PDF, XML or other files, and sign them in the next step."
-      page_title: "Sign documents electronically, simply and securely"
-      page_subtitle: "Upload the document you want to work with."
-      page_help_text: "If you're not sure how signing works, click here: View signing instructions"
-      errors_title: "Errors occurred while creating the document:"
-      document_details_title: "Document Details"
-      document_details_text: "Upload a single document that you want to work with. You can validate signatures, visualize content, or use it for signing."
-      agree_to_policies: "I agree with %{link}"
-      policies_link: "policies, terms and conditions"
-      upload_document: "Upload Document"
-      submit_button: "Upload & Continue"
-      cancel: "Cancel"
       actions:
         continue: "Continue"
         back: "Back"
@@ -324,9 +324,9 @@ en:
       no_contracts_title: "No documents yet"
       no_contracts_message: "Start by uploading a document."
     new:
-      page_title: "Sign documents electronically, simply and securely"
-      page_subtitle: "Upload the document you want to work with."
-      page_help_text_html: "If you're not sure how signing works, click here: %{link}"
+      title: "New document"
+      subtitle: "Upload the document you want to work with."
+      help_text_html: "If you're not sure how signing works, click here: %{link}"
       signing_guide_link: "View signing instructions"
       submit_button: "Upload & Continue"
       errors_title: "Errors occurred while creating the document:"
@@ -576,18 +576,13 @@ en:
         notary-post: Notary signature with postal delivery
         notary-conversion: Notary signature with conversion to QES
 
-  homepage:
+  about:
     index:
       hero:
         title: "Qualified Electronic Signatures"
         title_highlight: "Made Simple"
         description_html: "<span class=\"font-semibold text-gray-900\">Open-source platform</span> for managing up to <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-compliant</span> electronic signatures. <span class=\"font-semibold text-gray-900\">Send documents</span> for signing, <span class=\"font-semibold text-gray-900\">integrate workflows</span> via <span class=\"font-semibold text-gray-900\">API or embedded iframe</span>, and <span class=\"font-semibold text-gray-900\">connect seamlessly</span> with multiple signing apps."
         view_on_github: "View on GitHub"
-      upload_form:
-        agree_to_policies_html: "I agree with %{terms_link} and %{privacy_link}"
-        terms_of_service: "Terms of Service"
-        privacy_policy: "Privacy Policy"
-        submit: "Upload & Continue"
       start_using:
         title: "Start using Autogram Portal today"
         subtitle: "Choose how you want to work — with or without an account"
@@ -739,9 +734,10 @@ en:
       eidentita_install_android: "Install from Google Play"
 
   notification_mailer:
+    greeting: "Hello 👋"
     contract_signed:
       subject: "Your contract has been signed"
-      greeting: "Hello,"
+      title: "Document has been signed"
       message: "contract %{filename} has been signed."
       details_title: "Signature details:"
       signed_by: "Signed by: %{signer_name}"
@@ -750,7 +746,7 @@ en:
       view_contract: "View signed contract"
     bundle_contract_signed:
       subject: "A document in your contract bundle has been signed"
-      greeting: "Hello,"
+      title: "Document has been signed"
       message: "document %{filename} in the bundle has been signed by %{signer_name}."
       details_title: "Signature details:"
       signed_by: "Signed by: %{signer_name}"
@@ -759,26 +755,34 @@ en:
       view_bundle: "View bundle"
     bundle_completed:
       subject: "Your contract bundle has been signed"
-      greeting: "Hello,"
+      title: "Document bundle has been completed"
       message: "Your bundle of documents has been completed."
       details_title: "Completed documents:"
       view_bundle: "View bundle"
     signature_requested:
       subject: "Documents need your signature"
-      greeting: "Hello,"
+      title: "New document for signing"
+      sender_message: "%{sender_name} sent you a document for electronic signing."
+      note_from_sender_title: "Note from sender"
+      document_name_label: "Document name"
       message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
-      how_to_sign: "How to sign the documents?"
-      signing_is_simple: "If you are unsure, the signing process is simple. After clicking the link, the system will guide you through the steps:"
-      signing_step_1: "You will be asked to select a signing method (e.g., eID card or another available method)."
-      signing_step_2: "The system will show you what needs to be done."
-      signing_step_3: "The signed version of the document will be displayed to you after completion."
-      contact_support: "If you have any questions or concerns, you can contact the sender."
+      how_it_works_title: "How it works"
+      signing_is_simple: "If you are unsure, the signing process is simple. After clicking the link, the system will guide you through the steps."
+      step_1_title: "Click the button"
+      step_1_desc: "A secure signing platform will open"
+      step_2_title: "Authorize yourself"
+      step_2_desc: "Use your eID card or mobile key"
+      step_3_title: "Done"
+      step_3_desc: "You will receive the signed document by email"
       details_title: "Documents to sign:"
-      note: "Note from the author:"
-      view_bundle: "Sign documents"
-    footer:
+      view_bundle: "View document"
+      legal_validity_title: "Legal validity"
+      legal_validity_text: "Electronic signature has the same legal force as a handwritten signature under Regulation eIDAS (EU) 910/2014."
+  
+  layouts:
+    mailer:
       regards: "Best regards,"
-      team: "The Autogram Portal Team"
+      team: "team Autogram Portal"
 
   activerecord:
     errors:

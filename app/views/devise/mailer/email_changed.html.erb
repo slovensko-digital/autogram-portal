@@ -1,7 +1,7 @@
-<p class="greeting"><%= t('.greeting', recipient: @email) %></p>
+<p class="greeting"><%= t('devise.mailer.greeting', recipient: @email) %></p>
 
 <% if @resource.try(:unconfirmed_email?) %>
-  <p class="message"><%= t('.message_unconfirmed', email: @resource.unconfirmed_email) %></p>
+  <p><%= t('.message_unconfirmed', email: @resource.unconfirmed_email) %></p>
 <% else %>
-  <p class="message"><%= t('.message', email: @resource.email) %></p>
+  <p><%= t('.message', email: @resource.email) %></p>
 <% end %>

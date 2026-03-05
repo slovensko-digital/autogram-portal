@@ -1,0 +1,19 @@
+<div>
+  <altcha-widget
+    challengeurl="<%= altcha_challenge_url %>"
+    hidelogo
+    strings='<%= { label: t(".captcha_label"), verified: t(".captcha_verified"), verifying: t(".captcha_verifying"), waitAlert: t(".captcha_wait"), error: t(".captcha_error") }.to_json %>'
+    style="
+      --altcha-color-base: #fff;
+      --altcha-color-border: #d1d5db;
+      --altcha-color-border-focus: #3b82f6;
+      --altcha-color-text: #374151;
+      --altcha-color-subtext: #6b7280;
+      --altcha-border-radius: 6px;
+      --altcha-border-width: 1px;
+      --altcha-max-width: 100%;
+      display: block;
+      width: 100%;
+    "
+  ></altcha-widget>
+</div>

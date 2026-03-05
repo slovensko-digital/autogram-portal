@@ -1,5 +1,12 @@
-<p class="greeting"><%= t('.greeting') %></p>
+<p class="greeting"><%= t('notification_mailer.greeting') %></p>
 
-<p class="message"><%= t('.message', filename: @contract.display_name, signer_name: @signer.display_name) %></p>
+<%# Card: Signed notification %>
+<div class="section-card">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+    <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
+    <h2 class="section-title"><%= t('.title') %></h2>
+  </div>
+  <p class="section-body"><%= t('.message', filename: @contract.display_name, signer_name: @signer.display_name) %></p>
+</div>
 
 <%= link_to t('.view_bundle'), url_for(@bundle), class: "button" %>

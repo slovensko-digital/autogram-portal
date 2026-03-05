@@ -1,4 +1,6 @@
 class Users::ConfirmationsController < Devise::ConfirmationsController
+  include VerifiesAltchaCaptcha
+
   def after_confirmation_path_for(resource_name, resource)
     unless signed_in?(resource_name)
       sign_in(resource)
