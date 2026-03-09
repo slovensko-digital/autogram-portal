@@ -200,6 +200,20 @@ en:
       no_documents_message: "Get started by uploading a new document."
       upload_document: "Upload Document"
     new:
+      title: "New document"
+      subtitle: "Upload a document for signing or validation."
+      help_text: "You can upload PDF, XML or other files, and sign them in the next step."
+      page_title: "Sign documents electronically, simply and securely"
+      page_subtitle: "Upload the document you want to work with."
+      page_help_text: "If you're not sure how signing works, click here: View signing instructions"
+      errors_title: "Errors occurred while creating the document:"
+      document_details_title: "Document Details"
+      document_details_text: "Upload a single document that you want to work with. You can validate signatures, visualize content, or use it for signing."
+      agree_to_policies: "I agree with %{link}"
+      policies_link: "policies, terms and conditions"
+      upload_document: "Upload Document"
+      submit_button: "Upload & Continue"
+      cancel: "Cancel"
       actions:
         continue: "Continue"
         back: "Back"
@@ -575,6 +589,38 @@ en:
         scan: Print, sign by hand, and scan
         notary-post: Notary signature with postal delivery
         notary-conversion: Notary signature with conversion to QES
+
+  dashboard:
+    index:
+      title: "Welcome back, %{name}"
+      subtitle: "Overview of your documents and signatures"
+      stats:
+        my_bundles: "My bundles"
+        my_contracts: "My contracts"
+        awaiting_my_signature: "Awaiting my signature"
+        sent_for_signing: "Sent for signing"
+        declined_bundles: "Declined bundles"
+      quick_actions:
+        title: "Quick actions"
+        upload_document: "Upload new document"
+        upload_document_subtitle: "Start a new signing process"
+        verify_signature: "Verify signature"
+        verify_signature_subtitle: "Check the validity of a signature"
+      recent_bundles:
+        title: "Recent bundles"
+        subtitle: "Overview of your latest bundles"
+        document: "Document"
+        status: "Status"
+        recipients: "Recipients"
+        date: "Date"
+        view: "View"
+        view_all: "View all"
+        bundle_name: "Bundle %{uuid} by %{author}"
+        no_bundles: "No bundles yet"
+        person_one: "person"
+        person_other: "people"
+        status_completed: "Signed"
+        status_awaiting: "Awaiting signature"
 
   about:
     index:

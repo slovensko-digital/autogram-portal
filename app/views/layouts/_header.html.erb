@@ -11,7 +11,7 @@
           <ul role="list" class="-mx-2 space-y-1">
             <% if current_user %>
               <li>
-                <%= render "shared/left_menu_item", path: root_path, label: t('header.links.home'), icon: :home %>
+                <%= render "shared/left_menu_item", path: dashboard_path, label: t('header.links.home'), icon: :home %>
               </li>
               <li>
                 <%= render "shared/left_menu_item", path: contracts_path, label: t('header.links.contracts'), icon: :paper %>
@@ -128,8 +128,8 @@
        style="display: none;">
     <div class="space-y-2 px-6 pb-6 pt-2">
       <% if current_user %>
-        <%= link_to root_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(root_path)}" do %>
+        <%= link_to dashboard_path,
+            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(dashboard_path)}" do %>
           <%= t('header.links.home') %>
         <% end %>
         <%= link_to t('header.links.contracts'), contracts_path,

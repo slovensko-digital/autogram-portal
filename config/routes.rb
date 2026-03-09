@@ -35,6 +35,8 @@ Rails.application.routes.draw do
   resources :about, only: [ :index ]
 
   authenticate(:user) do
+    get "/dashboard", to: "dashboard#index", as: :dashboard
+
     resources :contracts, only: [ :index, :destroy ]
 
     resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do

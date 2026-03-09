@@ -48,6 +48,16 @@ class Contract < ApplicationRecord
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
 
+  scope :awaiting_signature_for, ->(user) {
+    signed_contract_ids = Session.where(status: :signed)
+                                 .where(recipient_id: Recipient.where(user_id: user.id).select(:id))
+                                 .select(:contract_id)
+    joins(:recipients)
+      .where(recipients: { user_id: user.id, status: :pending })
+      .where.not(id: signed_contract_ids)
+      .distinct
+  }
+
   def to_param
     uuid
   end

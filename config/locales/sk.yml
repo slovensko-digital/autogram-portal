@@ -547,6 +547,38 @@ sk:
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
 
+  dashboard:
+    index:
+      title: "Vitajte späť, %{name}"
+      subtitle: "Prehľad vašich dokumentov a podpisov"
+      stats:
+        my_bundles: "Moje balíky"
+        my_contracts: "Moje zmluvy"
+        awaiting_my_signature: "Čaká na môj podpis"
+        sent_for_signing: "Odoslané na podpis"
+        declined_bundles: "Odmietnuté balíky"
+      quick_actions:
+        title: "Rýchle akcie"
+        upload_document: "Nahrať nový dokument"
+        upload_document_subtitle: "Začnite nový proces podpisovania"
+        verify_signature: "Overiť podpis"
+        verify_signature_subtitle: "Skontrolujte platnosť podpisu"
+      recent_bundles:
+        title: "Nedávne balíky"
+        subtitle: "Prehľad vašich posledných balíkov"
+        document: "Dokument"
+        status: "Stav"
+        recipients: "Príjemcovia"
+        date: "Dátum"
+        view: "Zobraziť"
+        view_all: "Zobraziť všetky"
+        bundle_name: "Balík %{uuid} od %{author}"
+        no_bundles: "Zatiaľ žiadne balíky"
+        person_one: "osoba"
+        person_other: "osoby"
+        status_completed: "Podpísané"
+        status_awaiting: "Čaká na podpis"
+
   about:
     index:
       hero:
