@@ -45,6 +45,10 @@ class Bundle < ApplicationRecord
     uuid
   end
 
+  def display_name
+    "#{I18n.t('bundles.display_name')} #{short_uuid}"
+  end
+
   def completed?
      return !awaiting_recipients? if recipients.count.positive?
      contracts.all? { !it.awaiting_signature? }
@@ -56,6 +60,10 @@ class Bundle < ApplicationRecord
     end
 
     recipients.any? { it.unsigned_contracts.any? }
+  end
+
+  def completed_recipients
+    recipients.select { |r| r.unsigned_contracts.none? }
   end
 
   def notify_contract_signed(contract, recipient)

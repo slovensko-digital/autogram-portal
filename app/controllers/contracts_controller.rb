@@ -6,7 +6,15 @@ class ContractsController < ApplicationController
   before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
 
   def index
-    @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
+    @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
+    @state = params[:state].presence_in(%w[awaiting completed])
+
+    order_dir = @sort == "oldest" ? :asc : :desc
+    contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: order_dir)
+
+    @contracts = contracts.to_a
+    @contracts.select! { |c| c.awaiting_signature? } if @state == "awaiting"
+    @contracts.select! { |c| !c.awaiting_signature? } if @state == "completed"
   end
 
   def new

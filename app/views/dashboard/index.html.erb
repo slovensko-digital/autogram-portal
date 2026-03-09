@@ -1,17 +1,11 @@
 <main>
   <div class="mx-auto max-w-6xl px-6 pb-24 pt-10 lg:px-8">
-
-    <%# Welcome heading %>
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900"><%= t('.title', name: (current_user.name.presence || current_user.email).split(/[\s@]/).first) %></h1>
       <p class="mt-1 text-sm text-gray-500"><%= t('.subtitle') %></p>
     </div>
-
-    <%# Stats grid %>
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-8">
-
-      <%# My bundles %>
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <%= link_to bundles_path, class: "bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-300 transition-colors" do %>
         <div class="mb-3">
           <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
             <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -21,10 +15,8 @@
         </div>
         <p class="text-2xl font-bold text-gray-900"><%= @bundles_count %></p>
         <p class="text-xs text-gray-500 mt-0.5"><%= t('.stats.my_bundles') %></p>
-      </div>
-
-      <%# My contracts %>
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <% end %>
+      <%= link_to contracts_path, class: "bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300 transition-colors" do %>
         <div class="mb-3">
           <div class="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center">
             <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -34,10 +26,8 @@
         </div>
         <p class="text-2xl font-bold text-gray-900"><%= @contracts_count %></p>
         <p class="text-xs text-gray-500 mt-0.5"><%= t('.stats.my_contracts') %></p>
-      </div>
-
-      <%# Awaiting my signature %>
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <% end %>
+      <%= link_to received_bundles_path(state: 'awaiting'), class: "bg-white rounded-xl border border-gray-200 p-5 hover:border-yellow-300 transition-colors" do %>
         <div class="mb-3">
           <div class="h-9 w-9 rounded-lg bg-yellow-50 flex items-center justify-center">
             <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -47,10 +37,8 @@
         </div>
         <p class="text-2xl font-bold text-gray-900"><%= @awaiting_my_signature_count %></p>
         <p class="text-xs text-gray-500 mt-0.5"><%= t('.stats.awaiting_my_signature') %></p>
-      </div>
-
-      <%# Sent for signing %>
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <% end %>
+      <%= link_to bundles_path(state: 'awaiting'), class: "bg-white rounded-xl border border-gray-200 p-5 hover:border-green-300 transition-colors" do %>
         <div class="mb-3">
           <div class="h-9 w-9 rounded-lg bg-green-50 flex items-center justify-center">
             <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -60,10 +48,8 @@
         </div>
         <p class="text-2xl font-bold text-gray-900"><%= @sent_for_signing_count %></p>
         <p class="text-xs text-gray-500 mt-0.5"><%= t('.stats.sent_for_signing') %></p>
-      </div>
-
-      <%# Declined bundles %>
-      <div class="bg-white rounded-xl border border-red-100 p-5">
+      <% end %>
+      <%= link_to bundles_path(state: 'declined'), class: "bg-white rounded-xl border border-red-100 p-5 hover:border-red-300 transition-colors" do %>
         <div class="mb-3">
           <div class="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center">
             <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -73,15 +59,11 @@
         </div>
         <p class="text-2xl font-bold <%= @declined_bundles_count > 0 ? 'text-red-600' : 'text-gray-900' %>"><%= @declined_bundles_count %></p>
         <p class="text-xs text-gray-500 mt-0.5"><%= t('.stats.declined_bundles') %></p>
-      </div>
-
+      <% end %>
     </div>
-
-    <%# Quick actions %>
     <div class="mb-8">
       <h2 class="text-lg font-semibold text-gray-900 mb-4"><%= t('.quick_actions.title') %></h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
         <%= link_to new_contract_path, class: "bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 hover:border-blue-300 transition-all group has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" do %>
           <div class="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-700 transition-colors">
             <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -93,7 +75,6 @@
             <p class="text-xs text-gray-500 mt-0.5"><%= t('.quick_actions.upload_document_subtitle') %></p>
           </div>
         <% end %>
-
         <%= link_to new_contract_path, class: "bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 hover:border-green-300 transition-all group has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" do %>
           <div class="h-12 w-12 rounded-xl bg-green-600 flex items-center justify-center shrink-0 group-hover:bg-green-700 transition-colors">
             <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -105,11 +86,8 @@
             <p class="text-xs text-gray-500 mt-0.5"><%= t('.quick_actions.verify_signature_subtitle') %></p>
           </div>
         <% end %>
-
       </div>
     </div>
-
-    <%# Recent bundles %>
     <div>
       <div class="flex items-center justify-between mb-4">
         <div>
@@ -123,63 +101,7 @@
           </svg>
         <% end %>
       </div>
-
-      <% if @recent_bundles.any? %>
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table class="min-w-full">
-            <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('.recent_bundles.document') %></th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('.recent_bundles.status') %></th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('.recent_bundles.recipients') %></th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('.recent_bundles.date') %></th>
-                <th scope="col" class="relative px-6 py-3"><span class="sr-only"><%= t('.recent_bundles.view') %></span></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <% @recent_bundles.each do |bundle| %>
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <p class="text-sm font-medium text-gray-900">
-                      <%= t('.recent_bundles.bundle_name', uuid: bundle.uuid.first(8), author: bundle.author.name.presence || bundle.author.email) %>
-                    </p>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <% if bundle.completed? %>
-                      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <span class="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0"></span>
-                        <%= t('.recent_bundles.status_completed') %>
-                      </span>
-                    <% else %>
-                      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        <span class="h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0"></span>
-                        <%= t('.recent_bundles.status_awaiting') %>
-                      </span>
-                    <% end %>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <%= bundle.recipients.size %> <%= bundle.recipients.size == 1 ? t('.recent_bundles.person_one') : t('.recent_bundles.person_other') %>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <%= bundle.created_at.strftime("%d.%m.%Y") %>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <%= link_to t('.recent_bundles.view'), bundle_path(bundle), class: "font-medium text-blue-600 hover:text-blue-500" %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      <% else %>
-        <div class="bg-white rounded-xl border border-gray-200 text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-          </svg>
-          <h3 class="mt-2 text-sm font-semibold text-gray-900"><%= t('.recent_bundles.no_bundles') %></h3>
-        </div>
-      <% end %>
+      <%= render 'bundles/bundle_list', bundles: @recent_bundles, show_destroy: false %>
     </div>
-
   </div>
 </main>

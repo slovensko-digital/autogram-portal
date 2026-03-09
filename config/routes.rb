@@ -40,6 +40,9 @@ Rails.application.routes.draw do
     resources :contracts, only: [ :index, :destroy ]
 
     resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
+      collection do
+        get :received
+      end
       resources :recipients, only: [ :create, :index, :destroy ] do
         member do
           post :notify
@@ -92,6 +95,7 @@ Rails.application.routes.draw do
   resources :bundles, only: [] do
     member do
       get :sign
+      post :decline
     end
   end
 

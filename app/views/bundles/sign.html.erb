@@ -31,6 +31,12 @@
                 <%=  t('actions.edit') %>
               <% end %>
             <% end %>
+            <% if @recipient && @recipient.pending? %>
+              <%= button_to t('.decline'), decline_bundle_path(@bundle),
+                            method: :post,
+                            data: { turbo_confirm: t('bundles.sign.decline_confirm') },
+                            class: "inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+            <% end %>
             <div id="bundle_<%= @bundle.uuid %>_status">
               <%= render 'status', bundle: @bundle %>
             </div>

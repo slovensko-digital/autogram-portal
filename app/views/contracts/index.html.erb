@@ -1,105 +1,106 @@
 <main>
-  <div class="mx-auto max-w-6xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8">
-    <div class="flex flex-col items-center max-w-full h-auto sm:max-w-3xl mx-auto lg:max-w-none w-[1000px]">
-      <div class="w-full mb-6 flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
-        <%= link_to t('.upload_document'), new_contract_path,
-                    class: "inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all duration-200" %>
+  <div class="mx-auto max-w-6xl px-6 pb-24 pt-10 lg:px-8">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+      <%= link_to new_contract_path, class: "inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors self-start" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <%= t('.upload_document') %>
+      <% end %>
+    </div>
+    <%= form_with url: contracts_path, method: :get, local: true, class: "mb-5 flex flex-col sm:flex-row sm:items-center gap-3" do |f| %>
+      <div class="flex items-center gap-2">
+        <%= f.label :state, t('.filter_state'), class: "text-sm font-medium text-gray-700 whitespace-nowrap" %>
+        <%= f.select :state,
+              [[t('.state_all'), ""], [t('.state_awaiting'), "awaiting"], [t('.state_completed'), "completed"]],
+              { selected: @state.to_s },
+              class: "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
+              onchange: "this.form.submit()" %>
       </div>
-      <div class="w-full">
-        <% if @contracts.any? %>
-          <div class="bg-white overflow-hidden sm:rounded-md">
-            <ul role="list" class="divide-y divide-gray-200">
-              <% @contracts.each do |contract| %>
-                <li>
-                  <div class="px-4 py-4 flex items-center justify-between">
-                    <div class="flex items-center min-w-0 flex-1">
-                      <div class="flex-shrink-0">
-                        <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                      </div>
-                      <div class="ml-4 flex-1 min-w-0">
-                        <div class="flex items-center">
-                          <%= link_to contract_path(contract), class: "text-sm font-medium text-blue-600 hover:text-blue-500" do %>
-                            <%= contract.uuid %>
-                          <% end %>
-                          <% unless contract.awaiting_signature? %>
-                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                              </svg>
-                              <%= t('.signed') %>
-                            </span>
-                          <% end %>
-                          <% if contract.allowed_methods.any? %>
-                            <% contract.allowed_methods.each do |method| %>
-                              <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                          <%= case method
-                                              when 'qes' then 'bg-green-100 text-green-800'
-                                              when 'scan', 'notary-conversion' then 'bg-blue-100 text-blue-800'
-                                              when 'notary-post' then 'bg-purple-100 text-purple-800'
-                                              else 'bg-gray-100 text-gray-800'
-                                              end %>">
-                                <%= t("contracts.allowed_methods.short.#{method.downcase}") %>
-                              </span>
-                            <% end %>
-                          <% end %>
-                        </div>
-                        <div class="mt-1 flex items-center">
-                          <p class="text-sm text-gray-500">
-                            <% if contract.documents.any? %>
-                              <%= pluralize(contract.documents.count, 'document') %>
-                            <% else %>
-                              <%= t('.no_documents') %>
-                            <% end %>
-                            <% if contract.user %>
-                              • <%= contract.user.email rescue t('.unknown_user') %>
-                            <% end %>
-                          </p>
-                        </div>
-                        <div class="mt-1">
-                          <p class="text-xs text-gray-400">
-                            <%= t('.created_at') %>: <%= contract.created_at.strftime("%d.%m.%Y %H:%M") %>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                      <% unless contract.awaiting_signature? %>
-                        <%= link_to url_for(contract.signed_document),
-                                    class: "inline-flex items-center gap-1.5 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500",
-                                    target: "_blank", rel: "noopener" do %>
-                          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                          </svg>
-                          <%= t('actions.download') %>
-                        <% end %>
-                      <% end %>
-                      <%= link_to contract_path(contract),
-                                  class: "inline-flex items-center px-3 py-2 border border-gray-300  text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-                        <%= t('.view') %>
-                      <% end %>
-                    </div>
-                  </div>
-                </li>
-              <% end %>
-            </ul>
-          </div>
-        <% else %>
-          <div class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900"><%= t('.no_contracts_title') %></h3>
-            <p class="mt-1 text-sm text-gray-500"><%= t('.no_contracts_message') %></p>
-            <div class="mt-6">
-              <%= link_to t('.upload_document'), new_contract_path,
-                          class: "inline-flex items-center px-4 py-2 border border-transparent  text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      <div class="flex items-center gap-2">
+        <%= f.label :sort, t('.filter_sort'), class: "text-sm font-medium text-gray-700 whitespace-nowrap" %>
+        <%= f.select :sort,
+              [[t('.sort_newest'), "newest"], [t('.sort_oldest'), "oldest"]],
+              { selected: @sort },
+              class: "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
+              onchange: "this.form.submit()" %>
+      </div>
+    <% end %>
+    <% if @contracts.any? %>
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="divide-y divide-gray-100">
+          <% @contracts.each do |contract| %>
+            <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+              <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <%= link_to contract.display_name, contract_path(contract), class: "text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors" %>
+                </div>
+                <div class="md:hidden">
+                  <% if contract.awaiting_signature? %>
+                    <span class="self-start inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-yellow-100 text-yellow-800">
+                      <span class="h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0"></span>
+                      <%= t('.state_awaiting') %>
+                    </span>
+                  <% else %>
+                    <span class="self-start inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-green-100 text-green-800">
+                      <span class="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0"></span>
+                      <%= t('.state_completed') %>
+                    </span>
+                  <% end %>
+                </div>
+                <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+                  <span class="flex items-center gap-1">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+                    </svg>
+                    <%= contract.created_at.strftime("%d.%m.%Y") %>
+                  </span>
+                </div>
+              </div>
+              <div class="hidden md:flex flex-1">
+                <% if contract.awaiting_signature? %>
+                  <span class="self-start inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-yellow-100 text-yellow-800">
+                    <span class="h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0"></span>
+                    <%= t('.state_awaiting') %>
+                  </span>
+                <% else %>
+                  <span class="self-start inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-green-100 text-green-800">
+                    <span class="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0"></span>
+                    <%= t('.state_completed') %>
+                  </span>
+                <% end %>
+              </div>
+              <div class="flex items-center gap-6 shrink-0 justify-end">
+                <%= link_to t('actions.delete'), contract_path(contract),
+                            data: { turbo_method: :delete, turbo_confirm: t('contracts.destroy.confirm') },
+                            class: "hidden underline sm:inline text-sm text-red-500 hover:text-red-700 transition-colors" %>
+                <%= link_to t('.view'), contract_path(contract),
+                            class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" %>
+              </div>
             </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-xl border border-gray-200 text-center py-16">
+        <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+        <h3 class="mt-3 text-sm font-semibold text-gray-900"><%= t('.no_contracts_title') %></h3>
+        <p class="mt-1 text-sm text-gray-500"><%= @state.present? ? t('.no_filtered_contracts') : t('.no_contracts_message') %></p>
+        <% unless @state.present? %>
+          <div class="mt-6">
+            <%= link_to t('.upload_document'), new_contract_path,
+                        class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
           </div>
         <% end %>
       </div>
-    </div>
+    <% end %>
   </div>
 </main>
