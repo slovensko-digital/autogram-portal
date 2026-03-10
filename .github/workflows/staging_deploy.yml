@@ -41,5 +41,6 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ALTCHA_HMAC_KEY: ${{ secrets.ALTCHA_HMAC_KEY }}
 
         run: kamal deploy -d staging
