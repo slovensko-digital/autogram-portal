@@ -2,36 +2,36 @@
 #
 # Table name: sessions
 #
-#  id                 :bigint           not null, primary key
-#  completed_at       :datetime
-#  error_message      :text
-#  options            :jsonb
-#  signing_started_at :datetime
-#  status             :integer          default("pending"), not null
-#  type               :string
-#  created_at         :datetime         not null
-#  updated_at         :datetime         not null
-#  contract_id        :bigint           not null
-#  recipient_id       :bigint
-#  user_id            :bigint
+#  id                    :bigint           not null, primary key
+#  completed_at          :datetime
+#  error_message         :text
+#  options               :jsonb
+#  signing_started_at    :datetime
+#  status                :integer          default("pending"), not null
+#  type                  :string
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#  contract_id           :bigint           not null
+#  recipient_contract_id :bigint
+#  user_id               :bigint
 #
 # Indexes
 #
-#  index_sessions_on_contract_id   (contract_id)
-#  index_sessions_on_recipient_id  (recipient_id)
-#  index_sessions_on_type          (type)
-#  index_sessions_on_user_id       (user_id)
+#  index_sessions_on_contract_id            (contract_id)
+#  index_sessions_on_recipient_contract_id  (recipient_contract_id)
+#  index_sessions_on_type                   (type)
+#  index_sessions_on_user_id                (user_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (contract_id => contracts.id)
-#  fk_rails_...  (recipient_id => recipients.id)
+#  fk_rails_...  (recipient_contract_id => recipient_contracts.id)
 #  fk_rails_...  (user_id => users.id)
 #
 class Session < ApplicationRecord
   belongs_to :contract
   belongs_to :user, optional: true
-  belongs_to :recipient, optional: true
+  belongs_to :recipient_contract, optional: true
 
   enum :status, {
     pending: 0,
@@ -47,6 +47,12 @@ class Session < ApplicationRecord
 
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
   after_update_commit -> { touch(:completed_at) }, if: -> { saved_change_to_status? && !pending? }
+  after_update_commit :mark_recipient_contract_signed, if: -> { saved_change_to_status? && signed? }
+
+  # Convenience delegator — avoids callers having to go through recipient_contract
+  def recipient
+    recipient_contract&.recipient
+  end
 
   def not_pending?
     !pending?
@@ -88,10 +94,6 @@ class Session < ApplicationRecord
         content_type: new_content_type
       )
       save!
-
-      if recipient.nil? && user.present? && contract.bundle.present?
-        update!(recipient: contract.bundle.recipients.where(user: user).first)
-      end
     end
 
     signed!
@@ -109,6 +111,10 @@ class Session < ApplicationRecord
 
 
   protected
+
+  def mark_recipient_contract_signed
+    recipient_contract&.update_column(:signed_at, completed_at || Time.current)
+  end
 
   def broadcast_status_change
     case status

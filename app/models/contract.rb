@@ -25,7 +25,8 @@ class Contract < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :bundle, optional: true
 
-  has_and_belongs_to_many :recipients
+  has_many :recipient_contracts, dependent: :destroy
+  has_many :recipients, through: :recipient_contracts
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
   has_many :sessions, dependent: :destroy
@@ -49,12 +50,9 @@ class Contract < ApplicationRecord
   after_create :associate_with_bundle_recipients
 
   scope :awaiting_signature_for, ->(user) {
-    signed_contract_ids = Session.where(status: :signed)
-                                 .where(recipient_id: Recipient.where(user_id: user.id).select(:id))
-                                 .select(:contract_id)
-    joins(:recipients)
+    joins(recipient_contracts: :recipient)
+      .where(recipient_contracts: { signed_at: nil })
       .where(recipients: { user_id: user.id, status: :pending })
-      .where.not(id: signed_contract_ids)
       .distinct
   }
 
@@ -192,6 +190,12 @@ class Contract < ApplicationRecord
   end
 
   def associate_with_bundle_recipients
-    self.recipients = bundle.recipients if bundle.present?
+    return unless bundle.present? && bundle.recipients.any?
+
+    now = Time.current
+    RecipientContract.insert_all(
+      bundle.recipients.map { |r| { recipient_id: r.id, contract_id: id, created_at: now, updated_at: now } },
+      unique_by: [ :recipient_id, :contract_id ]
+    )
   end
 end

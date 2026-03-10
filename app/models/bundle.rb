@@ -56,14 +56,16 @@ class Bundle < ApplicationRecord
 
   def awaiting_recipients?(contract: nil)
     if contract
-      return contract.recipients.any? { !it.signed_contract?(contract) }
+      contract.recipient_contracts.where(signed_at: nil).exists?
+    else
+      RecipientContract.where(recipient: recipients).where(signed_at: nil).exists?
     end
-
-    recipients.any? { it.unsigned_contracts.any? }
   end
 
   def completed_recipients
-    recipients.select { |r| r.unsigned_contracts.none? }
+    recipients.where.not(
+      id: RecipientContract.where(recipient: recipients, signed_at: nil).select(:recipient_id)
+    )
   end
 
   def notify_contract_signed(contract, recipient)

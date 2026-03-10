@@ -92,16 +92,25 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def set_recipient
-    # Priority: URL param (magic link) > current user email match
-    # NEVER use session for recipient - it's identity, not navigation state
     if params[:recipient]
       @recipient = @contract.recipients.find_by_uuid!(params[:recipient])
-      raise ActiveRecord::RecordNotFound if @recipient.signed_contract?(@contract)
     elsif current_user
-      # Logged-in user: find their recipient by email match
-      @recipient = @contract.recipients.find_by(email: current_user.email)
-      raise ActiveRecord::RecordNotFound if @recipient&.signed_contract?(@contract)
+      @recipient = @contract.recipients.find_by(user: current_user) ||
+                   @contract.recipients.find_by(email: current_user.email)
+
+      # Bundle author signing their own contract: create a Recipient on the fly
+      if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
+        @recipient = @contract.bundle.recipients.find_or_create_by!(email: current_user.email) do |r|
+          r.user = current_user
+          r.name = current_user.display_name
+        end
+      end
     end
+
+    return unless @recipient
+
+    @recipient_contract = @recipient.recipient_contracts.find_by!(contract: @contract)
+    raise ActiveRecord::RecordNotFound if @recipient_contract.signed?
   end
 
   def redirect_if_completed
@@ -117,8 +126,8 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_eidentita_session
-    if @recipient
-      session = @recipient.sessions.where(contract: @contract, type: "EidentitaSession").pending.first
+    if @recipient_contract
+      session = @recipient_contract.sessions.pending.where(type: "EidentitaSession").first
       return session if session
     else
       return @contract.current_eidentita_session if @contract.has_active_eidentita_session?
@@ -131,13 +140,13 @@ class Contracts::SessionsController < ApplicationController
       type: "EidentitaSession",
       signing_started_at: result[:signing_started_at],
       user: current_user,
-      recipient: @recipient
+      recipient_contract: @recipient_contract
     )
   end
 
   def create_avm_session
-    if @recipient
-      session = @recipient.sessions.where(contract: @contract, type: "AvmSession").pending.first
+    if @recipient_contract
+      session = @recipient_contract.sessions.pending.where(type: "AvmSession").first
       return session if session
     else
       return @contract.current_avm_session if @contract.has_active_avm_session?
@@ -151,7 +160,7 @@ class Contracts::SessionsController < ApplicationController
       encryption_key: result[:encryption_key],
       signing_started_at: result[:signing_started_at],
       user: current_user,
-      recipient: @recipient
+      recipient_contract: @recipient_contract
     )
 
     Avm::SigningPollJob.perform_later(avm_session)
@@ -160,8 +169,8 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_autogram_session
-    if @recipient
-      session = @recipient.sessions.where(contract: @contract, type: "AutogramSession").pending.first
+    if @recipient_contract
+      session = @recipient_contract.sessions.pending.where(type: "AutogramSession").first
       return session if session
     else
       return @contract.current_autogram_session if @contract.has_active_autogram_session?
@@ -171,7 +180,7 @@ class Contracts::SessionsController < ApplicationController
       type: "AutogramSession",
       signing_started_at: Time.current,
       user: current_user,
-      recipient: @recipient
+      recipient_contract: @recipient_contract
     )
   end
 end

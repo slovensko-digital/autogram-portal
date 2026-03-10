@@ -29,21 +29,25 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Recipient < ApplicationRecord
-  has_and_belongs_to_many :contracts
+  has_many :recipient_contracts, dependent: :destroy
+  has_many :contracts, through: :recipient_contracts
+  has_many :sessions, through: :recipient_contracts
   belongs_to :bundle
   belongs_to :user, optional: true
-  has_many :sessions, dependent: :destroy
 
   enum :status, { pending: 0, declined: 3 }
   enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }
 
   scope :signed_contract, ->(contract) {
-    joins(:sessions)
-      .where(sessions: { status: :signed, contract_id: contract.id })
+    joins(:recipient_contracts)
+      .where(recipient_contracts: { contract_id: contract.id })
+      .where.not(recipient_contracts: { signed_at: nil })
       .distinct
   }
   scope :awaiting_contract, ->(contract) {
-    where.not(id: signed_contract(contract).select(:id))
+    joins(:recipient_contracts)
+      .where(recipient_contracts: { contract_id: contract.id, signed_at: nil })
+      .distinct
   }
 
   before_validation :ensure_uuid, on: :create
@@ -66,15 +70,18 @@ class Recipient < ApplicationRecord
   end
 
   def signed_contract?(contract)
-    sessions.signed.where(contract: contract).exists?
+    recipient_contracts.where(contract: contract).where.not(signed_at: nil).exists?
   end
 
   def signed_contracts
-    contracts.joins(:sessions).where(sessions: { recipient: self, status: :signed }).distinct
+    contracts.joins(:recipient_contracts)
+             .where(recipient_contracts: { recipient_id: id })
+             .where.not(recipient_contracts: { signed_at: nil })
   end
 
   def unsigned_contracts
-    contracts.where.not(id: signed_contracts.select(:id))
+    contracts.joins(:recipient_contracts)
+             .where(recipient_contracts: { recipient_id: id, signed_at: nil })
   end
 
   def notifiable?
@@ -117,6 +124,12 @@ class Recipient < ApplicationRecord
   end
 
   def associate_with_bundle_contracts
-    self.contracts = bundle.contracts if bundle.present?
+    return unless bundle.present? && bundle.contracts.any?
+
+    now = Time.current
+    RecipientContract.insert_all(
+      bundle.contracts.map { |c| { recipient_id: id, contract_id: c.id, created_at: now, updated_at: now } },
+      unique_by: [ :recipient_id, :contract_id ]
+    )
   end
 end

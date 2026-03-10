@@ -77,7 +77,7 @@ class ContractsController < ApplicationController
     physical_session = PhysicalSession.create!(
       contract: @contract,
       user: current_user,
-      recipient: @recipient,
+      recipient_contract: @recipient_contract,
       status: :pending
     )
     physical_session.submitted_date = params[:submitted_date]
@@ -183,14 +183,26 @@ class ContractsController < ApplicationController
     if params[:recipient]
       @recipient = @contract.recipients.find_by(uuid: params[:recipient])
     elsif current_user
-      @recipient = @contract.recipients.find_by(email: current_user.email)
+      @recipient = @contract.recipients.find_by(user: current_user) ||
+                   @contract.recipients.find_by(email: current_user.email)
+
+      if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
+        @recipient = @contract.bundle.recipients.find_or_create_by!(email: current_user.email) do |r|
+          r.user = current_user
+          r.name = current_user.display_name
+        end
+      end
     end
 
-    if @recipient&.signed_contract?(@contract)
+    return unless @recipient
+
+    @recipient_contract = @recipient.recipient_contracts.find_by!(contract: @contract)
+
+    if @recipient_contract.signed?
       redirect_path = if @contract.bundle
-        sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+        sign_bundle_path(@contract.bundle, recipient: @recipient.uuid)
       else
-        sign_contract_path(@contract, recipient: @recipient&.uuid)
+        sign_contract_path(@contract, recipient: @recipient.uuid)
       end
       redirect_to redirect_path
     end
