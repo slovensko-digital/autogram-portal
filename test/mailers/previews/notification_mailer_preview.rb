@@ -5,7 +5,7 @@ class NotificationMailerPreview < ActionMailer::Preview
     contract = bundle.contracts.first
     signer = bundle.recipients.first
     user = bundle.author
-    NotificationMailer.with(user: user).contract_signed(contract, signer)
+    NotificationMailer.with(user: user, locale: params[:locale]).contract_signed(contract, signer)
   end
 
   def bundle_contract_signed
@@ -13,18 +13,18 @@ class NotificationMailerPreview < ActionMailer::Preview
     contract = bundle.contracts.first
     signer = bundle.recipients.first
     user = bundle.author
-    NotificationMailer.with(user: user).bundle_contract_signed(bundle, contract, signer)
+    NotificationMailer.with(user: user, locale: params[:locale]).bundle_contract_signed(bundle, contract, signer)
   end
 
   def bundle_completed
     bundle = Bundle.first
     user = bundle.author
-    NotificationMailer.with(user: user).bundle_completed(bundle)
+    NotificationMailer.with(user: user, locale: params[:locale]).bundle_completed(bundle)
   end
 
   def signature_requested
     bundle = Bundle.joins(:recipients).where(recipients: { notification_status: "notified" }).first
     user = bundle.recipients.find_by(notification_status: "notified")
-    NotificationMailer.with(user: user).signature_requested(bundle)
+    NotificationMailer.with(user: user, locale: params[:locale]).signature_requested(bundle)
   end
 end

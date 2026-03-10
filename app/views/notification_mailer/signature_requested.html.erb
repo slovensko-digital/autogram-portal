@@ -134,7 +134,7 @@
     <div class="section-icon"><%= render 'icon_document' %></div>
     <h2 class="section-title"><%= t('.title') %></h2>
   </div>
-  <p><%= t('.message', sender_name: @bundle.author.name) %></p>
+  <p><%= t('.message', author_name: @bundle.author.display_name) %></p>
   <p><%= t('.signing_is_simple') %></p>
 </div>
 

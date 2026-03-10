@@ -34,7 +34,7 @@
                 <%=  t('actions.edit') %>
               <% end %>
             <% end %>
-            <% if @recipient && @recipient.pending? %>
+            <% if @recipient && @recipient.pending? && @recipient.user != @bundle.author %>
               <%= button_to t('.decline'), decline_bundle_path(@bundle, recipient: @recipient.uuid),
                             method: :post,
                             data: { turbo_confirm: t('bundles.sign.decline_confirm') },
@@ -94,29 +94,22 @@
                   <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
                 </h3>
                 <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
-                  <% if recipient == @recipient %>
-                    <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border border-blue-500 overflow-hidden">
-                      <div class="flex items-center gap-3 flex-1">
-                        <div class="text-base font-semibold text-gray-900">
-                          <%= recipient.display_name %>
-                        </div>
-                        <div class="flex-2">
-                          <%= recipient_status_badge(recipient) %>
-                        </div>
-                      </div>
-                    </div>
-                  <% else %>
-                    <div class="px-4 py-3 flex items-center justify-between bg-white rounded-lg border border-gray-200 overflow-hidden">
-                      <div class="flex items-center gap-3 flex-1">
-                        <div class="text-base font-semibold text-gray-900">
-                          <%= recipient.display_name %>
-                        </div>
-                        <div class="flex-2">
-                          <%= recipient_status_badge(recipient) %>
+                  <div class="rounded-lg border <%= recipient == @recipient ? 'border-blue-500 bg-blue-50' : 'border-gray-200' %> overflow-hidden">
+                    <div class="px-4 py-3.5">
+                      <div class="flex items-start gap-3">
+                        <div class="flex-1 min-w-0">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <div class="text-base font-semibold text-gray-900 break-words">
+                              <%= recipient.display_name %>
+                            </div>
+                            <div>
+                              <%= recipient_status_badge(recipient) %>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  <% end %>
+                  </div>
                 <% end %>
               </div>
             <% end %>

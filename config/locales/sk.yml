@@ -820,7 +820,7 @@ sk:
       title: "Nový dokument na podpis"
       note_from_sender_title: "Poznámka od odosielateľa"
       documents: "Dokumenty"
-      message: "%{sender_name} vám poslal dokument na podpis v systéme Autogram Portal."
+      message: "%{author_name} vám poslal dokument na podpis v systéme Autogram Portal."
       how_it_works_title: "Ako to funguje"
       signing_is_simple: "Ak si nie ste istý, proces podpisu je jednoduchý. Po kliknutí na odkaz vás systém prevedie krokmi."
       step_1_title: "Kliknite na tlačidlo"

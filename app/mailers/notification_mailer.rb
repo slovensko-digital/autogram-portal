@@ -30,6 +30,6 @@ class NotificationMailer < ApplicationMailer
   private
 
   def set_locale
-    I18n.default_locale = @user&.locale || I18n.default_locale
+    I18n.locale = params[:locale] || @user&.locale || I18n.default_locale
   end
 end

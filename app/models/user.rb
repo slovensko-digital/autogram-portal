@@ -78,7 +78,11 @@ class User < ApplicationRecord
   end
 
   def display_name
-    name.presence || email
+    if name.present?
+      "#{name} <#{email}>"
+    else
+      email
+    end
   end
 
   def feature_enabled?(feature)
