@@ -22,14 +22,12 @@
 #  fk_rails_...  (contract_id => contracts.id)
 #
 one:
-  user: one
   uuid: MyString
   contract: one
   url: MyString
   remote_hash: MyString
 
 two:
-  user: two
   uuid: MyString
   contract: two
   url: MyString

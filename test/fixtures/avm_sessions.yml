@@ -26,7 +26,7 @@
 #
 one:
   type: AvmSession
-  contract: one
+  signer_contract: one
   signing_started_at: 2025-10-01 22:50:50
   completed_at: 2025-10-01 22:50:50
   error_message: MyText
@@ -37,7 +37,7 @@ one:
 
 two:
   type: AvmSession
-  contract: one
+  signer_contract: two
   signing_started_at: 2025-10-01 22:50:50
   completed_at: 2025-10-01 22:50:50
   error_message: MyText
@@ -45,3 +45,4 @@ two:
   options:
     document_identifier: MyString
     encryption_key: MyString
+
