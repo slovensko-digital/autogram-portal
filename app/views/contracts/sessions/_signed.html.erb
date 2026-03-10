@@ -13,7 +13,7 @@
     </div>
     <div class="mt-2 flex justify-center">
       <% if @session.contract.bundle.present? %>
-        <%= link_to t('.view_bundle'), bundle_path(@session.contract.bundle),
+        <%= link_to t('.view_bundle'), sign_bundle_path(@session.contract.bundle, recipient: @session.recipient&.uuid),
               class: "inline-flex text-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700" %>
       <% else %>
         <%= link_to t('.view_contract'), contract_path(@session.contract),

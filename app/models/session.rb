@@ -40,9 +40,7 @@ class Session < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
 
-  after_update_commit :broadcast_status_change, if: :saved_change_to_status?
-  after_update_commit :mark_signer_contract_signed, if: -> { saved_change_to_status? && signed? }
-  after_update_commit -> { touch(:completed_at) }, if: -> { saved_change_to_status? && !pending? }
+  after_update_commit :handle_status_change, if: :saved_change_to_status?
 
   def recipient
     signer_contract.recipient
@@ -104,7 +102,13 @@ class Session < ApplicationRecord
   end
 
 
-  protected
+  private
+
+  def handle_status_change
+    mark_signer_contract_signed if signed?
+    touch(:completed_at) unless pending?
+    broadcast_status_change
+  end
 
   def mark_signer_contract_signed
     signer_contract.update_column(:signed_at, completed_at || Time.current)
