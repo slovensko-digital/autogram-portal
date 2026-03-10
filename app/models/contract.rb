@@ -53,11 +53,12 @@ class Contract < ApplicationRecord
   scope :anonymous, -> { where(user_id: nil) }
   scope :awaiting_signature_for, ->(user) {
     joins(signer_contracts: { signer: :recipient })
-      .where(signer_contracts: { signed_at: nil })
+      .where(signer_contracts: { signed_at: nil, declined_at: nil })
       .where(signers: { type: "RecipientSigner" })
-      .where(recipients: { user_id: user.id, status: :pending })
+      .where(recipients: { user_id: user.id })
       .distinct
-  }
+    }
+  scope :standalone, -> { where(bundle_id: nil) }
 
   def to_param
     uuid

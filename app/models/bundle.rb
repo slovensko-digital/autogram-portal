@@ -40,6 +40,7 @@ class Bundle < ApplicationRecord
   after_create :notify_recipients
 
   scope :publicly_visible, -> { where(publicly_visible: true) }
+  scope :recipient_user, ->(user) { joins(:recipients).where.not(author: user).where(recipients: { user: user }) }
 
   def to_param
     uuid
@@ -50,13 +51,14 @@ class Bundle < ApplicationRecord
   end
 
   def completed?
-     return !awaiting_recipients? if recipients.count.positive?
-     contracts.all? { !it.awaiting_signature? }
+     return !awaiting_recipients? if recipients.exists?
+
+     contracts.where.missing(:signed_document_attachment).none?
   end
 
   def bundle_state
-    return :no_recipients if recipients.none?
-    return :declined if recipients.any?(&:declined?)
+    return :no_recipients unless recipients.exists?
+    return :declined if declined_recipients?
     return :completed if completed?
     :awaiting
   end
@@ -64,17 +66,17 @@ class Bundle < ApplicationRecord
   def awaiting_recipients?(contract: nil)
     scope = recipients
       .joins(recipient_signer: :signer_contracts)
-      .where(signer_contracts: { signed_at: nil })
+      .where(signer_contracts: { signed_at: nil, declined_at: nil })
     scope = scope.where(signer_contracts: { contract_id: contract.id }) if contract
     scope.exists?
   end
 
   def completed_recipients
-    unsigned_ids = recipients
+    not_completed_ids = recipients
       .joins(recipient_signer: :signer_contracts)
-      .where(signer_contracts: { signed_at: nil })
-      .pluck(:id)
-    recipients.where.not(id: unsigned_ids)
+      .where("signer_contracts.signed_at IS NULL OR signer_contracts.declined_at IS NOT NULL")
+      .select(:id)
+    recipients.where.not(id: not_completed_ids)
   end
 
   def notify_contract_signed(contract, signer)
@@ -110,6 +112,13 @@ class Bundle < ApplicationRecord
   end
 
   private
+
+  def declined_recipients?
+    recipients
+      .joins(recipient_signer: :signer_contracts)
+      .where.not(signer_contracts: { declined_at: nil })
+      .exists?
+  end
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid

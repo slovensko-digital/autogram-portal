@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_10_113000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_10_173000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -213,14 +213,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_113000) do
     t.string "locale", default: "sk", null: false
     t.string "name"
     t.integer "notification_status", default: 0, null: false
-    t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["bundle_id", "email"], name: "index_recipients_on_bundle_id_and_email", unique: true
     t.index ["bundle_id"], name: "index_recipients_on_bundle_id"
     t.index ["email"], name: "index_recipients_on_email"
-    t.index ["status"], name: "index_recipients_on_status"
     t.index ["user_id"], name: "index_recipients_on_user_id"
     t.index ["uuid"], name: "index_recipients_on_uuid", unique: true
   end
@@ -242,10 +240,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_113000) do
   create_table "signer_contracts", force: :cascade do |t|
     t.bigint "contract_id", null: false
     t.datetime "created_at", null: false
+    t.datetime "declined_at"
     t.datetime "signed_at"
     t.bigint "signer_id"
     t.datetime "updated_at", null: false
+    t.index ["contract_id", "signed_at", "declined_at"], name: "index_signer_contracts_on_contract_and_signing_state"
     t.index ["contract_id"], name: "index_signer_contracts_on_contract_id"
+    t.index ["declined_at"], name: "index_signer_contracts_on_declined_at_not_null", where: "(declined_at IS NOT NULL)"
     t.index ["signer_id", "contract_id"], name: "index_signer_contracts_on_signer_id_and_contract_id", unique: true
     t.index ["signer_id"], name: "index_signer_contracts_on_signer_id"
   end

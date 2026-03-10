@@ -6,9 +6,12 @@ module RecipientsHelper
       declined: { bg: "bg-red-100", text: "text-red-800" }
     }
 
-    status = recipient.status.to_sym
-    if status == :pending && recipient.unsigned_contracts.empty?
-      status = :signed
+    status = if recipient.declined?
+      :declined
+    elsif recipient.pending?
+      :pending
+    else
+      :signed
     end
 
     color = colors[status]

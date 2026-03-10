@@ -8,13 +8,38 @@ class BundlesController < ApplicationController
     @state = params[:state].presence_in(%w[awaiting completed declined no_recipients])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    bundles = current_user.bundles.includes(:contracts, :author, :recipients).order(created_at: order_dir)
+    bundles = current_user.bundles
 
-    @bundles = bundles.to_a
-    @bundles.select! { |b| !b.completed? && b.recipients.any?(&:pending?) } if @state == "awaiting"
-    @bundles.select! { |b| b.completed? } if @state == "completed"
-    @bundles.select! { |b| b.recipients.any?(&:declined?) } if @state == "declined"
-    @bundles.select! { |b| b.recipients.none? } if @state == "no_recipients"
+    awaiting_scope = current_user.bundles
+                                 .joins(recipients: { recipient_signer: :signer_contracts })
+                                 .where(signer_contracts: { signed_at: nil, declined_at: nil })
+                                 .distinct
+
+    declined_scope = current_user.bundles
+                                 .joins(recipients: { recipient_signer: :signer_contracts })
+                                 .where.not(signer_contracts: { declined_at: nil })
+                                 .distinct
+
+    bundles = case @state
+    when "awaiting"
+      bundles.joins(:recipients)
+             .where(id: awaiting_scope.select(:id))
+             .where.not(id: declined_scope.select(:id))
+             .distinct
+    when "completed"
+      bundles.joins(:recipients)
+             .where.not(id: awaiting_scope.select(:id))
+             .where.not(id: declined_scope.select(:id))
+             .distinct
+    when "declined"
+      bundles.where(id: declined_scope.select(:id))
+    when "no_recipients"
+      bundles.left_outer_joins(:recipients).where(recipients: { id: nil })
+    else
+      bundles
+    end
+
+    @bundles = bundles.includes(:contracts, :author, :recipients).order(created_at: order_dir)
   end
 
   def received
@@ -22,32 +47,37 @@ class BundlesController < ApplicationController
     @state = params[:state].presence_in(%w[awaiting signed declined])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    @bundles = Bundle.joins(:recipients)
-                     .where(recipients: { user: current_user })
-                     .includes(:contracts, :author)
-                     .order(created_at: order_dir)
-                     .distinct
-                     .to_a
+    recipient_bundles = Bundle.recipient_user(current_user).distinct
+
+    awaiting_for_user_scope = Bundle.recipient_user(current_user)
+                                    .joins(recipients: { recipient_signer: :signer_contracts })
+                                    .where(recipients: { user_id: current_user.id })
+                                    .where(signer_contracts: { signed_at: nil, declined_at: nil })
+                                    .distinct
+
+    declined_for_user_scope = Bundle.recipient_user(current_user)
+                                    .joins(recipients: { recipient_signer: :signer_contracts })
+                                    .where(recipients: { user_id: current_user.id })
+                                    .where.not(signer_contracts: { declined_at: nil })
+                                    .distinct
+
+    @bundles = case @state
+    when "awaiting"
+      recipient_bundles.where(id: awaiting_for_user_scope.select(:id))
+                       .where.not(id: declined_for_user_scope.select(:id))
+    when "signed"
+      recipient_bundles.where.not(id: awaiting_for_user_scope.select(:id))
+                       .where.not(id: declined_for_user_scope.select(:id))
+    when "declined"
+      recipient_bundles.where(id: declined_for_user_scope.select(:id))
+    else
+      recipient_bundles
+    end
+
+    @bundles = @bundles.includes(:contracts, :author).order(created_at: order_dir)
 
     @recipients_by_bundle = Recipient.where(user: current_user, bundle_id: @bundles.map(&:id))
                                      .index_by(&:bundle_id)
-
-    if @state == "awaiting"
-      @bundles.select! do |bundle|
-        recipient = @recipients_by_bundle[bundle.id]
-        recipient.present? && !recipient.declined? && recipient.unsigned_contracts.any?
-      end
-    elsif @state == "signed"
-      @bundles.select! do |bundle|
-        recipient = @recipients_by_bundle[bundle.id]
-        recipient.present? && !recipient.declined? && recipient.unsigned_contracts.none?
-      end
-    elsif @state == "declined"
-      @bundles.select! do |bundle|
-        recipient = @recipients_by_bundle[bundle.id]
-        recipient.present? && recipient.declined?
-      end
-    end
   end
 
   def show
@@ -98,8 +128,18 @@ class BundlesController < ApplicationController
   def decline
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
-    recipient.declined!
-    bundle.webhook&.fire_recipient_declined(recipient)
+    affected_signer_contracts = recipient.signer_contracts
+                                       .joins(:contract)
+                                       .where(contracts: { bundle_id: bundle.id }, signed_at: nil, declined_at: nil)
+    affected_signer_contract_ids = affected_signer_contracts.pluck(:id)
+
+    now = Time.current
+    SignerContract.where(id: affected_signer_contract_ids).update_all(declined_at: now, updated_at: now)
+
+    SignerContract.where(id: affected_signer_contract_ids).includes(:contract).find_each do |signer_contract|
+      bundle.webhook&.fire_recipient_declined(recipient, signer_contract.contract)
+    end
+
     redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
                 notice: I18n.t("bundles.sign.declined_notice")
   end
@@ -107,8 +147,19 @@ class BundlesController < ApplicationController
   def accept
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
-    recipient.pending!
-    bundle.webhook&.fire_recipient_undeclined(recipient)
+    affected_signer_contracts = recipient.signer_contracts
+                                       .joins(:contract)
+                                       .where(contracts: { bundle_id: bundle.id }, signed_at: nil)
+                                       .where.not(declined_at: nil)
+    affected_signer_contract_ids = affected_signer_contracts.pluck(:id)
+
+    now = Time.current
+    SignerContract.where(id: affected_signer_contract_ids).update_all(declined_at: nil, updated_at: now)
+
+    SignerContract.where(id: affected_signer_contract_ids).includes(:contract).find_each do |signer_contract|
+      bundle.webhook&.fire_recipient_undeclined(recipient, signer_contract.contract)
+    end
+
     redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
                 notice: I18n.t("bundles.sign.accepted_notice")
   end

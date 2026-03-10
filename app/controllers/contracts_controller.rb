@@ -11,11 +11,17 @@ class ContractsController < ApplicationController
     @state = params[:state].presence_in(%w[awaiting completed])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: order_dir)
+    contracts = current_user.contracts.standalone
+    contracts = case @state
+    when "awaiting"
+      contracts.where.missing(:signed_document_attachment)
+    when "completed"
+      contracts.where.associated(:signed_document_attachment)
+    else
+      contracts
+    end
 
-    @contracts = contracts.to_a
-    @contracts.select! { |c| c.awaiting_signature? } if @state == "awaiting"
-    @contracts.select! { |c| !c.awaiting_signature? } if @state == "completed"
+    @contracts = contracts.includes(:user, :documents).order(created_at: order_dir)
   end
 
   def new

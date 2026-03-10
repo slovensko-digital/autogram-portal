@@ -32,7 +32,7 @@
         <div class="divide-y divide-gray-100">
           <% @bundles.each do |bundle| %>
             <% recipient = @recipients_by_bundle[bundle.id] %>
-            <% personally_signed = recipient.present? && !recipient.declined? && recipient.unsigned_contracts.none? %>
+            <% personally_signed = recipient&.signed? %>
             <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
               <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
                 <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

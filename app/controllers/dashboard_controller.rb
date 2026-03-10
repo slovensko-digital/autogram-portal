@@ -3,17 +3,22 @@ class DashboardController < ApplicationController
 
   def index
     @bundles_count = current_user.bundles.count
-    @contracts_count = current_user.contracts.count
-    @awaiting_my_signature_count = Contract.awaiting_signature_for(current_user).count
+    @contracts_count = current_user.contracts.standalone.count
+    @awaiting_my_signature_count = Bundle
+                                    .joins(recipients: { recipient_signer: :signer_contracts })
+                                    .where(recipients: { user_id: current_user.id })
+                                    .where(signer_contracts: { signed_at: nil, declined_at: nil })
+                                    .where.not(user_id: current_user.id)
+                                    .distinct
+                                    .count
     @sent_for_signing_count = current_user.bundles
                                           .joins(recipients: { recipient_signer: :signer_contracts })
-                                          .where(recipients: { status: :pending })
-                                          .where(signer_contracts: { signed_at: nil })
+                                          .where(signer_contracts: { signed_at: nil, declined_at: nil })
                                           .distinct
                                           .count
     @declined_bundles_count = current_user.bundles
-                                          .joins(:recipients)
-                                          .where(recipients: { status: :declined })
+                                          .joins(recipients: { recipient_signer: :signer_contracts })
+                                          .where.not(signer_contracts: { declined_at: nil })
                                           .distinct
                                           .count
     @recent_bundles = current_user.bundles

@@ -138,7 +138,7 @@
               <% end %>
             </div>
           <% end %>
-          <% if (current_user == @bundle.author || (contract.awaiting_signature? && !@recipient&.signed_contract?(contract))) && !@recipient&.declined? %>
+          <% if (current_user == @bundle.author || (contract.awaiting_signature? && @recipient&.pending_contract?(contract))) && !@recipient&.declined? %>
             <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
           <% end %>
         <% end %>

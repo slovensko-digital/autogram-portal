@@ -56,7 +56,7 @@ class Webhook < ApplicationRecord
     end
   end
 
-  def fire_recipient_declined(recipient)
+  def fire_recipient_declined(recipient, contract)
     case method
     when "get"
       fire_get_webhook
@@ -66,14 +66,16 @@ class Webhook < ApplicationRecord
           timestamp: Time.now.iso8601,
           data: {
             bundle_id: bundle.uuid,
-            recipient_id: recipient.uuid
+            contract_id: contract.uuid,
+            recipient_id: recipient.uuid,
+            recipient_email: recipient.email
           }
         }
       )
     end
   end
 
-  def fire_recipient_undeclined(recipient)
+  def fire_recipient_undeclined(recipient, contract)
     case method
     when "get"
       fire_get_webhook
@@ -83,7 +85,9 @@ class Webhook < ApplicationRecord
           timestamp: Time.now.iso8601,
           data: {
             bundle_id: bundle.uuid,
-            recipient_id: recipient.uuid
+            contract_id: contract.uuid,
+            recipient_id: recipient.uuid,
+            recipient_email: recipient.email
           }
         }
       )
