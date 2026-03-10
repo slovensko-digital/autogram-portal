@@ -127,9 +127,15 @@ en:
         api_token_admin_help: "API features are currently disabled for your account. Please contact the administrator."
         currently_waiting_confirmation_for_email: "Currently waiting confirmation for: %{email}"
         update: "Update"
+        danger_zone: "Danger Zone"
         cancel_my_account: "Cancel my account"
-        unhappy: "Unhappy?"
+        unhappy: "Permanently delete your account and all data"
         are_you_sure: "Are you sure?"
+        delete_account: "Delete account"
+        delete_confirmation_phrase: "delete profile"
+        delete_confirmation_placeholder: "Type confirmation phrase"
+        delete_confirmation_instruction_html: "To confirm, type %{phrase}."
+        delete_confirmation_mismatch: "Confirmation phrase does not match."
     confirmations:
       new:
         resend_confirmation_instructions: "Resend confirmation instructions"

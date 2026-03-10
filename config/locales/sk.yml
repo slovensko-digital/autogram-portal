@@ -88,9 +88,15 @@ sk:
         api_token_admin_help: "API funkcie sú pre váš účet momentálne vypnuté. Kontaktujte administrátora."
         currently_waiting_confirmation_for_email: "Momentálne čakáme na potvrdenie pre: %{email}"
         update: "Aktualizovať"
+        danger_zone: "Nebezpečná zóna"
         cancel_my_account: "Zrušiť môj účet"
-        unhappy: "Nespokojný?"
+        unhappy: "Trvalo odstránite svoj účet a všetky dáta"
         are_you_sure: "Ste si istý?"
+        delete_account: "Zmazať účet"
+        delete_confirmation_phrase: "zmazať účet"
+        delete_confirmation_placeholder: "Napíšte potvrdzovaciu frázu"
+        delete_confirmation_instruction_html: "Pre potvrdenie napíšte %{phrase}."
+        delete_confirmation_mismatch: "Potvrdzovacia fráza sa nezhoduje."
     confirmations:
       new:
         resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"

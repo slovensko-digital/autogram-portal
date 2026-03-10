@@ -8,7 +8,7 @@
     </div>
     <div class="space-y-3">
       <% @bundle.recipients.order(:created_at).select(&:persisted?).each do |recipient| %>
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div class="px-4 py-3.5">
             <div class="flex items-start gap-3">
               <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
