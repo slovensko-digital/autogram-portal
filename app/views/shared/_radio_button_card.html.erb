@@ -31,7 +31,7 @@
 
   <% if image.present? %>
     <div class="flex-shrink-0">
-      <%= image_tag(image, alt: label, class: "h-24") %>
+      <%= image_tag(image, alt: label, class: "h-16 sm:h-24") %>
     </div>
   <% elsif icon.present? %>
     <div class="flex-shrink-0 mt-0.5">
@@ -53,7 +53,7 @@
 
   <div class="flex-1">
     <div class="text-sm font-medium text-gray-900"><%= label %></div>
-    <div class="text-xs text-gray-500 mt-1"><%= description %></div>
+      <div class="text-xs text-gray-500 mt-1<%= ' hidden sm:block' if image.present? %>"><%= description %></div>
   </div>
 
   <div class="hidden has-[:checked]:block absolute top-4 right-4">

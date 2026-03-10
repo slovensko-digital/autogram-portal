@@ -481,9 +481,9 @@ en:
       signed_message: "This contract has been signed and is complete. No further signature is required."
       title: "Select Signing Application"
       subtitle: "Choose which application to use for electronic signing"
-      old_card_warning_title: "Older eID card"
-      old_card_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Mobile signing apps (AVM, eIdentita) are not compatible with your card."
-      old_card_mobile_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
+      old_card_warning_title: "Limitation"
+      old_card_warning: "%{qscd} requires a desktop computer with a physical card reader. Mobile signing apps (Autogram Mobile, eIdentita) are not compatible with your card/document."
+      old_card_mobile_warning: "%{qscd} requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
@@ -590,8 +590,8 @@ en:
       physical_title: "Physical Signing Setup"
       subtitle: "Complete these steps to prepare for signing"
       qscd_check:
-        title: "Select your eID card generation"
-        description: "Different eID card generations support different signing methods. Please select your card generation below."
+        title: "Select your ID card type"
+        description: "Based on your selection, we will show available qualified signing options."
         compatible_mobile: "Compatible with mobile signing apps (AVM, eIdentita)"
         requires_desktop: "Requires a computer with card reader (Autogram Desktop only)"
         issued_after: "Issued after %{date}"
@@ -599,7 +599,7 @@ en:
         show_dpb: "Show residence permit cards"
         hide_dpb: "Hide residence permit cards"
         continue: "Continue"
-        invalid_selection: "Invalid selection. Please select a valid eID card generation."
+        invalid_selection: "Please select your ID card type."
       pin_check:
         title: "Do you know your BOK?"
         description_a: "To use the electronic ID card, you need to know the security personal code (BOK). This code is set when issuing a new ID card at the office."
@@ -618,9 +618,9 @@ en:
         continue: "I have certificates, continue"
       legacy_eid_card:
         title: "Electronic Signing Not Available"
-        description: "Unfortunately, your eID card generation no longer supports qualified electronic signatures. To sign documents electronically, you will need to obtain a new eID card."
-        warning_title: "This eID card is no longer valid for electronic signing"
-        warning_description: "Old eID cards issued before 2021 can no longer be used for qualified electronic signatures. You must visit your regional police office to obtain a new eID card."
+        description: "Unfortunately, your selected card generation no longer supports qualified electronic signatures. To sign documents electronically, you need to obtain a newer card."
+        warning_title: "This card is no longer valid for qualified electronic signing"
+        warning_description: "Older card generations can no longer be used for qualified electronic signatures. You need to request a newer one at the issuing authority."
         warning_learn_more: "How to get a new eID card"
       physical_instructions:
         title: "Physical Signing Instructions"
@@ -900,6 +900,24 @@ en:
     mailer:
       regards: "Best regards,"
       team: "team Autogram Portal"
+
+  qscd:
+    title:
+      eid_2013: "Slovak ID card issued before 21.6.2021"
+      eid_2021: "Slovak ID card issued after 21.6.2021"
+      eid_2022: "Slovak ID card issued after 1.12.2022"
+      eid_2024: "Slovak ID card issued after 18.12.2024"
+      dpb_2014: "Slovak residence permit card issued before 10.7.2020"
+      dpb_2020: "Slovak residence permit card issued after 10.7.2020"
+      dpb_2023: "Slovak residence permit card issued after 18.10.2023"
+    description:
+      eid_2013: "This ID card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer ID card."
+      eid_2021: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer cards."
+      eid_2022: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
+      eid_2024: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
+      dpb_2014: "This residence permit card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer residence permit card."
+      dpb_2020: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
+      dpb_2023: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
 
   activerecord:
     errors:
