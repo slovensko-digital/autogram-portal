@@ -7,7 +7,6 @@
 #  locale              :string           default("sk"), not null
 #  name                :string
 #  notification_status :integer          default("not_notified"), not null
-#  status              :integer          default("pending"), not null
 #  uuid                :uuid             not null
 #  created_at          :datetime         not null
 #  updated_at          :datetime         not null
@@ -19,7 +18,6 @@
 #  index_recipients_on_bundle_id            (bundle_id)
 #  index_recipients_on_bundle_id_and_email  (bundle_id,email) UNIQUE
 #  index_recipients_on_email                (email)
-#  index_recipients_on_status               (status)
 #  index_recipients_on_user_id              (user_id)
 #  index_recipients_on_uuid                 (uuid) UNIQUE
 #
@@ -29,21 +27,19 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Recipient < ApplicationRecord
-  has_and_belongs_to_many :contracts
+  has_one :recipient_signer, dependent: :destroy, class_name: "RecipientSigner", foreign_key: :recipient_id
+  has_many :signer_contracts, through: :recipient_signer
+  has_many :contracts, through: :signer_contracts
+  has_many :sessions, through: :signer_contracts
   belongs_to :bundle
   belongs_to :user, optional: true
-  has_many :sessions, dependent: :destroy
 
-  enum :status, { pending: 0, declined: 3 }
   enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }
 
-  scope :signed_contract, ->(contract) {
-    joins(:sessions)
-      .where(sessions: { status: :signed, contract_id: contract.id })
-      .distinct
-  }
   scope :awaiting_contract, ->(contract) {
-    where.not(id: signed_contract(contract).select(:id))
+    joins(recipient_signer: :signer_contracts)
+      .where(signer_contracts: { contract_id: contract.id, signed_at: nil, declined_at: nil })
+      .distinct
   }
 
   before_validation :ensure_uuid, on: :create
@@ -66,19 +62,31 @@ class Recipient < ApplicationRecord
   end
 
   def signed_contract?(contract)
-    sessions.signed.where(contract: contract).exists?
+    signer_contracts.find_by!(contract: contract).signed?
   end
 
-  def signed_contracts
-    contracts.joins(:sessions).where(sessions: { recipient: self, status: :signed }).distinct
+  def declined_contract?(contract)
+    signer_contracts.find_by!(contract: contract).declined?
   end
 
-  def unsigned_contracts
-    contracts.where.not(id: signed_contracts.select(:id))
+  def pending_contract?(contract)
+    signer_contracts.find_by!(contract: contract).awaiting?
+  end
+
+  def pending?
+    signer_contracts.awaiting.exists?
+  end
+
+  def declined?
+    signer_contracts.declined.exists?
+  end
+
+  def signed?
+    signer_contracts.exists? && !pending? && !declined?
   end
 
   def notifiable?
-    return false if signed_contracts.exists?
+    return false if signer_contracts.signed.exists?
     not_notified?
   end
 
@@ -91,7 +99,7 @@ class Recipient < ApplicationRecord
   end
 
   def removable?
-    return false if signed_contracts.exists?
+    return false if signer_contracts.signed.exists?
     notifiable? || declined?
   end
 
@@ -117,6 +125,13 @@ class Recipient < ApplicationRecord
   end
 
   def associate_with_bundle_contracts
-    self.contracts = bundle.contracts if bundle.present?
+    return unless bundle.present? && bundle.contracts.any?
+
+    recipient_signer = recipient_signer || create_recipient_signer!
+    now = Time.current
+    SignerContract.insert_all(
+      bundle.contracts.map { |c| { signer_id: recipient_signer.id, contract_id: c.id, created_at: now, updated_at: now } },
+      unique_by: [ :signer_id, :contract_id ]
+    )
   end
 end

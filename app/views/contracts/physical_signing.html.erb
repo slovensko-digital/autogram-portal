@@ -46,7 +46,6 @@
 
             <div class="flex justify-between items-center pt-4">
               <%
-                # If contract is part of a bundle, back goes to bundle sign; otherwise to contract sign
                 back_path = if @contract.bundle
                   sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
                 else

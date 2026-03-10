@@ -2,11 +2,26 @@ class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
   before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
   before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
 
   def index
-    @contracts = current_user.contracts.where(bundle: nil).includes(:user, :documents).order(created_at: :desc)
+    @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
+    @state = params[:state].presence_in(%w[awaiting completed])
+
+    order_dir = @sort == "oldest" ? :asc : :desc
+    contracts = current_user.contracts.standalone
+    contracts = case @state
+    when "awaiting"
+      contracts.where.missing(:signed_document_attachment)
+    when "completed"
+      contracts.where.associated(:signed_document_attachment)
+    else
+      contracts
+    end
+
+    @contracts = contracts.includes(:user, :documents).order(created_at: order_dir)
   end
 
   def new
@@ -36,16 +51,22 @@ class ContractsController < ApplicationController
   end
 
   def signature_extension
+    return head :forbidden unless author_of_contract?
+
     render partial: "signature_extension"
   end
 
   def signature_parameters
+    if params[:target_step] == "request_signature" && !author_of_contract?
+      return head :forbidden
+    end
+
     @next_step = params[:target_step]
     render partial: "signature_parameters"
   end
 
   def extend_signatures
-    return head :unauthorized unless current_user
+    return head :forbidden unless author_of_contract?
     return redirect_to @contract, alert: t("documents.alerts.all_signatures_have_timestamps") unless @contract.extendable_signatures?
 
     begin
@@ -67,9 +88,7 @@ class ContractsController < ApplicationController
 
   def create_physical_session
     physical_session = PhysicalSession.create!(
-      contract: @contract,
-      user: current_user,
-      recipient: @recipient,
+      signer_contract: @signer_contract,
       status: :pending
     )
     physical_session.submitted_date = params[:submitted_date]
@@ -128,6 +147,10 @@ class ContractsController < ApplicationController
   end
 
   def update
+    if params[:next_step] == "request_signature" && !author_of_contract?
+      return head :forbidden
+    end
+
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
@@ -175,16 +198,40 @@ class ContractsController < ApplicationController
     if params[:recipient]
       @recipient = @contract.recipients.find_by(uuid: params[:recipient])
     elsif current_user
-      @recipient = @contract.recipients.find_by(email: current_user.email)
+      @recipient = @contract.recipients.find_by(user: current_user) ||
+                   @contract.recipients.find_by(email: current_user.email)
+
+      if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
+        @recipient = @contract.bundle.recipients.find_or_create_by!(email: current_user.email) do |r|
+          r.user = current_user
+          r.name = current_user.display_name
+        end
+      end
+    end
+  end
+
+  def set_signer_contract
+    if @recipient
+      recipient_signer = @recipient.recipient_signer || @recipient.create_recipient_signer!
+      @signer_contract = recipient_signer.signer_contracts.find_or_create_by!(contract: @contract)
+    elsif current_user
+      user_signer = UserSigner.find_or_create_by!(user: current_user)
+      @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
+    elsif @contract.user.nil?
+      @signer_contract = @contract.signer_contracts
+                                  .joins(:signer)
+                                  .find_by(signers: { type: "AnonymousSigner" })
+      unless @signer_contract
+        @signer_contract = AnonymousSigner.create!.signer_contracts.create!(contract: @contract)
+      end
     end
 
-    if @recipient&.signed_contract?(@contract)
-      redirect_path = if @contract.bundle
-        sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
-      else
-        sign_contract_path(@contract, recipient: @recipient&.uuid)
-      end
-      redirect_to redirect_path
+    return unless @signer_contract&.signed?
+
+    if @contract.bundle
+      redirect_to sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+    else
+      @signer_contract.update_column(:signed_at, nil)
     end
   end
 
@@ -211,6 +258,10 @@ class ContractsController < ApplicationController
 
   def signed_document_param
     params.require(:signed_document)
+  end
+
+  def author_of_contract?
+    current_user.present? && @contract.user == current_user
   end
 
   def format_signature_for_json(signature)

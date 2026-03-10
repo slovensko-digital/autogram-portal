@@ -24,7 +24,6 @@ class Webhook < ApplicationRecord
   validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }
 
   def fire_contract_signed(contract)
-    Rails.logger.info "Firing webhook for contract signed in bundle #{bundle.uuid}, contract #{contract.uuid}, webhook method #{method}, url #{url}"
     case method
     when "get"
       fire_get_webhook
@@ -51,6 +50,44 @@ class Webhook < ApplicationRecord
           timestamp: Time.now.iso8601,
           data: {
             bundle_id: bundle.uuid
+          }
+        }
+      )
+    end
+  end
+
+  def fire_recipient_declined(recipient, contract)
+    case method
+    when "get"
+      fire_get_webhook
+    when "standard"
+      fire_standard_webhook(
+        { type: "bundle.recipient_declined",
+          timestamp: Time.now.iso8601,
+          data: {
+            bundle_id: bundle.uuid,
+            contract_id: contract.uuid,
+            recipient_id: recipient.uuid,
+            recipient_email: recipient.email
+          }
+        }
+      )
+    end
+  end
+
+  def fire_recipient_undeclined(recipient, contract)
+    case method
+    when "get"
+      fire_get_webhook
+    when "standard"
+      fire_standard_webhook(
+        { type: "bundle.recipient_undeclined",
+          timestamp: Time.now.iso8601,
+          data: {
+            bundle_id: bundle.uuid,
+            contract_id: contract.uuid,
+            recipient_id: recipient.uuid,
+            recipient_email: recipient.email
           }
         }
       )

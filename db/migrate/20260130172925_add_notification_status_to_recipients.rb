@@ -2,7 +2,6 @@ class AddNotificationStatusToRecipients < ActiveRecord::Migration[8.1]
   def up
     add_column :recipients, :notification_status, :integer, default: 0, null: false
 
-    # Migrate existing recipients from status to notification_status
     execute <<-SQL
       UPDATE recipients
       SET notification_status = CASE
@@ -13,7 +12,6 @@ class AddNotificationStatusToRecipients < ActiveRecord::Migration[8.1]
       END
     SQL
 
-    # Remove obsolete statuses from status enum
     execute <<-SQL
       UPDATE recipients
       SET status = CASE

@@ -25,10 +25,12 @@ class Contract < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :bundle, optional: true
 
-  has_and_belongs_to_many :recipients
+  has_many :signer_contracts, dependent: :destroy
+  has_many :signers, through: :signer_contracts
+  has_many :recipients, through: :signers
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
-  has_many :sessions, dependent: :destroy
+  has_many :sessions, through: :signer_contracts
   has_one_attached :signed_document
 
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
@@ -48,6 +50,16 @@ class Contract < ApplicationRecord
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
 
+  scope :anonymous, -> { where(user_id: nil) }
+  scope :awaiting_signature_for, ->(user) {
+    joins(signer_contracts: { signer: :recipient })
+      .where(signer_contracts: { signed_at: nil, declined_at: nil })
+      .where(signers: { type: "RecipientSigner" })
+      .where(recipients: { user_id: user.id })
+      .distinct
+    }
+  scope :standalone, -> { where(bundle_id: nil) }
+
   def to_param
     uuid
   end
@@ -56,10 +68,10 @@ class Contract < ApplicationRecord
     ALLOWED_METHODS
   end
 
-  def notify_signed!(recipient: nil, signer: nil)
-    Notification::ContractSignedJob.perform_later(self) unless should_notify_user?(signer: signer)
+  def notify_signed!(signer: nil)
+    Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_user?(signer: signer)
 
-    bundle.notify_contract_signed(self, recipient) if bundle.present?
+    bundle.notify_contract_signed(self, signer) if bundle.present?
 
     Turbo::StreamsChannel.broadcast_action_to(self, action: :refresh)
   end
@@ -127,7 +139,7 @@ class Contract < ApplicationRecord
   end
 
   def should_notify_user?(signer: nil)
-    user.present? && bundle.nil? && !awaiting_signature? && user != signer
+    user.present? && bundle.nil? && !awaiting_signature? && user != signer&.user
   end
 
   def short_uuid
@@ -182,6 +194,13 @@ class Contract < ApplicationRecord
   end
 
   def associate_with_bundle_recipients
-    self.recipients = bundle.recipients if bundle.present?
+    return unless bundle.present? && bundle.recipients.any?
+
+    now = Time.current
+    inserts = bundle.recipients.map do |recipient|
+      recipient_signer = recipient.recipient_signer || recipient.create_recipient_signer!
+      { signer_id: recipient_signer.id, contract_id: id, created_at: now, updated_at: now }
+    end
+    SignerContract.insert_all(inserts, unique_by: [ :signer_id, :contract_id ])
   end
 end

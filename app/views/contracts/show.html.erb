@@ -2,13 +2,13 @@
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div class="w-full">
-        <% if current_user && @contract.user == current_user %>
+        <% if @contract.bundle %>
           <div class="w-full mb-6">
-            <%= link_to contracts_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500" do %>
+            <%= link_to bundle_path(@contract.bundle), class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500" do %>
               <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
-              <%= t('.all_contracts') %>
+              <%= t('.bundle_link') %>
             <% end %>
           </div>
         <% end %>
@@ -27,10 +27,6 @@
               <% end %>
             </div>
           <% end %>
-          <%= link_to sign_contract_path(@contract),
-                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-            <%= t('actions.sign') %>
-          <% end %>
           <% unless @contract.bundle %>
             <div class="flex-shrink-0">
               <%= button_to contract_path(@contract),
@@ -45,23 +41,7 @@
       </div>
 
       <% if @contract.bundle %>
-        <div class="w-full">
-          <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-              <div class="text-sm text-blue-800 ml-3">
-                <p>
-                  <%= t('.part_of_bundle') %>:
-                  <%= link_to t('.bundle_link'), bundle_path(@contract.bundle), class: "font-semibold underline" %>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <%= render "shared/warning", title: t('.part_of_bundle'), content: t('.part_of_bundle_description') %>
       <% end %>
 
       <%= render 'visualization_with_toggle', contract: @contract, default_collapsed: !(@contract.documents.first.is_xml? || @contract.documents.first.is_asice?) %>

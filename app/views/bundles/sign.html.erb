@@ -10,7 +10,7 @@
     <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
       <% unless params[:iframe].present? %>
         <div class="w-full mb-6">
-          <div class="flex items-center justify-between">
+          <div class="md:flex items-center justify-between space-x-4 space-y-4 md:space-y-0">
             <div class="flex-1">
               <% if current_user == @bundle.author %>
                 <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
@@ -25,15 +25,21 @@
                 <p class="text-gray-600"><%= t('.subtitle_requested') %></p>
               <% end %>
             </div>
-            <% if current_user == @bundle.author %>
-              <%=link_to bundle_path(@bundle),
-                    class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-                <%=  t('actions.edit') %>
-              <% end %>
-            <% end %>
             <div id="bundle_<%= @bundle.uuid %>_status">
               <%= render 'status', bundle: @bundle %>
             </div>
+            <% if current_user == @bundle.author %>
+              <%=link_to bundle_path(@bundle),
+                    class: "inline-flex justify-center items-center w-full sm:w-auto px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <%=  t('actions.edit') %>
+              <% end %>
+            <% end %>
+            <% if @recipient && @recipient.pending? && @recipient.user != @bundle.author %>
+              <%= button_to t('.decline'), decline_bundle_path(@bundle, recipient: @recipient.uuid),
+                            method: :post,
+                            data: { turbo_confirm: t('bundles.sign.decline_confirm') },
+                            class: "inline-flex justify-center items-center w-full sm:w-auto px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+            <% end %>
           </div>
         </div>
       <% end %>
@@ -88,29 +94,22 @@
                   <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
                 </h3>
                 <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
-                  <% if recipient == @recipient %>
-                    <div class="px-4 py-3 flex items-center justify-between bg-blue-50 rounded-lg border border-blue-500 overflow-hidden">
-                      <div class="flex items-center gap-3 flex-1">
-                        <div class="text-base font-semibold text-gray-900">
-                          <%= recipient.display_name %>
-                        </div>
-                        <div class="flex-2">
-                          <%= recipient_status_badge(recipient) %>
-                        </div>
-                      </div>
-                    </div>
-                  <% else %>
-                    <div class="px-4 py-3 flex items-center justify-between bg-white rounded-lg border border-gray-200 overflow-hidden">
-                      <div class="flex items-center gap-3 flex-1">
-                        <div class="text-base font-semibold text-gray-900">
-                          <%= recipient.display_name %>
-                        </div>
-                        <div class="flex-2">
-                          <%= recipient_status_badge(recipient) %>
+                  <div class="rounded-lg border <%= recipient == @recipient ? 'border-blue-500 bg-blue-50' : 'border-gray-200' %> overflow-hidden">
+                    <div class="px-4 py-3.5">
+                      <div class="flex items-start gap-3">
+                        <div class="flex-1 min-w-0">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <div class="text-base font-semibold text-gray-900 break-words">
+                              <%= recipient.display_name %>
+                            </div>
+                            <div>
+                              <%= recipient_status_badge(recipient) %>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  <% end %>
+                  </div>
                 <% end %>
               </div>
             <% end %>
@@ -134,14 +133,26 @@
                 <div>
                   <%= link_to t('actions.download'),
                         signed_document_contract_path(contract),
-                        class: "mt-4 inline-flex justify-center items-center px-6 py-3 w-full sm:w-auto border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                        class: "mt-4 inline-flex justify-center items-center px-4 py-2 w-full sm:w-auto border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
                 </div>
               <% end %>
             </div>
           <% end %>
-          <% if current_user == @bundle.author || contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
+          <% if (current_user == @bundle.author || (contract.awaiting_signature? && @recipient&.pending_contract?(contract))) && !@recipient&.declined? %>
             <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
           <% end %>
+        <% end %>
+
+        <% if @recipient&.declined? && current_user != @bundle.author %>
+          <%= render 'shared/error',
+                title: t('.declined_info_title'),
+                content: t('.declined_info_message') %>
+
+          <div class="mt-4 flex justify-end">
+            <%= button_to t('actions.sign'), accept_bundle_path(@bundle, recipient: @recipient.uuid),
+                          method: :post,
+                          class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
         <% end %>
       </div>
     </div>

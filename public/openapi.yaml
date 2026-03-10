@@ -623,6 +623,8 @@ components:
           enum:
             - contract.signed
             - bundle.all_signed
+            - bundle.recipient_declined
+            - bundle.recipient_undeclined
           example: contract.signed
         timestamp:
           type: string
@@ -643,6 +645,16 @@ components:
               format: uuid
               example: 69393b49-c34f-438f-ad7c-4b78db3932be
               description: Bundle identifier
+            recipient_id:
+              type: string
+              format: uuid
+              example: 69393b49-c34f-438f-ad7c-4b78db3932be
+              description: Recipient identifier (present for recipient decline/undecline events)
+            recipient_email:
+              type: string
+              format: email
+              example: john.doe@example.com
+              description: Recipient email (present for recipient decline/undecline events)
       required:
         - type
         - timestamp

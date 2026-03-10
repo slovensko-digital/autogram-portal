@@ -3,7 +3,7 @@ module Notification
     queue_as :default
 
     def perform(contract, signer: nil)
-      NotificationMailer.with(user: contract&.user).contract_signed(contract, signer).deliver_later if contract.should_notify_user?
+      NotificationMailer.with(user: contract&.user).contract_signed(contract, signer).deliver_later if contract.should_notify_user?(signer: signer)
     end
   end
 end

@@ -19,6 +19,7 @@ sk:
     edit: "Upraviť"
     sign: "Podpísať"
     change_selection: "Zmeniť výber"
+    view: "Zobrazit"
 
   upload_form:
     agree_to_policies_html: "Súhlasím s %{terms_link} a %{privacy_link}"
@@ -35,6 +36,7 @@ sk:
       home: "Domov"
       contracts: "Dokumenty"
       bundles: "Balíky"
+      received_bundles: "Prijaté na podpis"
       settings: "Nastavenia"
       new_contract: "Nový dokument"
       electronic_onboarding: "Elektronické podpisovanie"
@@ -86,9 +88,15 @@ sk:
         api_token_admin_help: "API funkcie sú pre váš účet momentálne vypnuté. Kontaktujte administrátora."
         currently_waiting_confirmation_for_email: "Momentálne čakáme na potvrdenie pre: %{email}"
         update: "Aktualizovať"
+        danger_zone: "Nebezpečná zóna"
         cancel_my_account: "Zrušiť môj účet"
-        unhappy: "Nespokojný?"
+        unhappy: "Trvalo odstránite svoj účet a všetky dáta"
         are_you_sure: "Ste si istý?"
+        delete_account: "Zmazať účet"
+        delete_confirmation_phrase: "zmazať účet"
+        delete_confirmation_placeholder: "Napíšte potvrdzovaciu frázu"
+        delete_confirmation_instruction_html: "Pre potvrdenie napíšte %{phrase}."
+        delete_confirmation_mismatch: "Potvrdzovacia fráza sa nezhoduje."
     confirmations:
       new:
         resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"
@@ -209,18 +217,43 @@ sk:
       signature_extended_successfully: "Podpis bol úspešne rozšírený."
 
   bundles:
+    display_name: "Balík dokumentov"
     index:
       title: "Balíky dokumentov"
-      completed: "Dokončené"
-      awaiting_signature: "Čaká na podpis"
       contract: "dokument"
       contracts: "dokumenty"
       no_contracts: "Žiadne dokumenty"
       unknown_user: "Neznámy používateľ"
       created: "Vytvorené"
-      view: "Zobraziť"
-      no_bundles_title: "Žiadne balíky"
-      no_bundles_message: "Balíky sa vytvárajú cez API."
+      no_filtered_bundles: "Žiadne balíky nezodpovedajú vybranému filtru."
+      filter_state: "Stav"
+      filter_sort: "Zoradiť"
+      state_all: "Všetky"
+      state_awaiting: "Čaká na podpis"
+      state_completed: "Dokončené"
+      state_declined: "Odmietnuté"
+      state_no_recipients: "Nepodpísané"
+      sort_newest: "Najnovšie"
+      sort_oldest: "Najstaršie"
+    bundle_list:
+      signatures: "Podpisy"
+      no_bundles: "Zatiaľ žiadne balíky"
+    received:
+      title: "Prijaté na podpis"
+      subtitle: "Balíky, ktoré vám odoslali iní na podpis."
+      filter_state: "Stav"
+      filter_sort: "Zoradiť"
+      state_all: "Všetky"
+      state_awaiting: "Čaká na môj podpis"
+      state_signed: "Podpísané mnou"
+      state_declined: "Odmietnuté"
+      sort_newest: "Najnovšie"
+      sort_oldest: "Najstaršie"
+      contract: "dokument"
+      contracts: "dokumenty"
+      no_bundles_title: "Žiadne prijaté balíky"
+      no_bundles_message: "Zatiaľ ste nedostali žiadne balíky na podpis."
+      no_filtered_bundles: "Žiadne balíky nezodpovedajú vybranému filtru."
     show:
       all_bundles: "Všetky balíky dokumentov"
       title: "Balík dokumentov"
@@ -261,9 +294,20 @@ sk:
       contract_number: "Dokument %{current} z %{total}"
       note_title: "Poznámka od odosielateľa"
       awaiting_recipients: "Čaká na podpis od"
+      decline: "Odmietnuť"
+      accept_again: "Prijať znova"
+      declined_info_title: "Tento balík ste odmietli"
+      declined_info_message: "Podpisovanie je momentálne vypnuté. Ak chcete pokračovať v podpise, kliknite na tlačidlo Podpísať nižšie."
+      decline_confirm: "Ste si istý, že chcete odmietnuť podpísanie tohto balíka?"
+      declined_notice: "Odmietli ste podpísať tento balík."
+      accepted_notice: "Tento balík môžete znovu podpísať."
     status:
       all_signed: "Všetky dokumenty podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
+      completed: "Dokončené"
+      awaiting_signature: "Čaká na podpis"
+      declined: "Odmietnuté"
+      no_recipients: "Nepodpísané"
     sender:
       sender: "Odosielateľ"
 
@@ -291,6 +335,18 @@ sk:
       view: "Zobraziť"
       no_contracts_title: "Zatiaľ žiadne dokumenty"
       no_contracts_message: "Začnite nahratím dokumentu."
+      no_filtered_contracts: "Žiadne dokumenty nezodpovedajú vybranému filtru."
+      filter_state: "Stav"
+      filter_sort: "Zoradiť"
+      state_all: "Všetky"
+      state_awaiting: "Čaká na podpis"
+      state_completed: "Podpísané"
+      sort_newest: "Najnovšie"
+      sort_oldest: "Najstaršie"
+      column_document: "Dokument"
+      column_status: "Stav"
+      column_documents: "Dokumenty"
+      column_date: "Dátum"
     new:
       title: "Nový dokument"
       subtitle: "Nahrajte dokument, s ktorým chcete pracovať."
@@ -303,7 +359,8 @@ sk:
       title: "Dokument"
       uuid: "UUID: %{uuid}"
       part_of_bundle: "Súčasť balíka"
-      bundle_link: "Zobraziť balík dokumentov"
+      part_of_bundle_description: "Tento dokument je súčasťou balíka dokumentov."
+      bundle_link: "Balík dokumentov"
       download: "Stiahnuť"
       signature_parameters_title: "Parametre podpisu"
       signature_parameters_subtitle: "Nakonfigurujte formát podpisu a povolené metódy podpisu pre tento dokument."
@@ -472,6 +529,8 @@ sk:
       signed:
         title: "Dokument bol úspešne podpísaný"
         message: "Podpisovanie prebehlo v poriadku. Môžete zatvoriť toto okno alebo sa vrátiť späť na dokument."
+        view_contract: "Zobraziť podpísaný dokument"
+        view_bundle: "Späť na balík"
     onboarding:
       electronic_title: "Nastavenie elektronického podpisovania"
       physical_title: "Nastavenie fyzického podpisovania"
@@ -546,6 +605,37 @@ sk:
         scan: Sken podpísaného dokumentu
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
+
+  dashboard:
+    index:
+      title: "Vitajte späť, %{name}"
+      subtitle: "Prehľad vašich dokumentov a podpisov"
+      stats:
+        my_bundles: "Moje balíky"
+        my_contracts: "Moje dokumenty"
+        awaiting_my_signature: "Čaká na môj podpis"
+        sent_for_signing: "Odoslané na podpis"
+        declined_bundles: "Odmietnuté balíky"
+      quick_actions:
+        title: "Rýchle akcie"
+        upload_document: "Nahrať nový dokument"
+        upload_document_subtitle: "Začnite nový proces podpisovania"
+        verify_signature: "Overiť podpis"
+        verify_signature_subtitle: "Skontrolujte platnosť podpisu"
+      recent_bundles:
+        title: "Nedávne balíky"
+        subtitle: "Prehľad vašich posledných balíkov"
+        document: "Dokument"
+        status: "Stav"
+        recipients: "Príjemcovia"
+        date: "Dátum"
+        view: "Zobraziť"
+        view_all: "Zobraziť všetky"
+        bundle_name: "Balík %{uuid} od %{author}"
+        person_one: "osoba"
+        person_other: "osoby"
+        status_completed: "Podpísané"
+        status_awaiting: "Čaká na podpis"
 
   about:
     index:
@@ -737,7 +827,7 @@ sk:
       title: "Nový dokument na podpis"
       note_from_sender_title: "Poznámka od odosielateľa"
       documents: "Dokumenty"
-      message: "%{sender_name} vám poslal dokument na podpis v systéme Autogram Portal."
+      message: "%{author_name} vám poslal dokument na podpis v systéme Autogram Portal."
       how_it_works_title: "Ako to funguje"
       signing_is_simple: "Ak si nie ste istý, proces podpisu je jednoduchý. Po kliknutí na odkaz vás systém prevedie krokmi."
       step_1_title: "Kliknite na tlačidlo"

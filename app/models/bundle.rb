@@ -40,26 +40,47 @@ class Bundle < ApplicationRecord
   after_create :notify_recipients
 
   scope :publicly_visible, -> { where(publicly_visible: true) }
+  scope :recipient_user, ->(user) { joins(:recipients).where.not(author: user).where(recipients: { user: user }) }
 
   def to_param
     uuid
   end
 
+  def display_name
+    "#{I18n.t('bundles.display_name')} #{short_uuid}"
+  end
+
   def completed?
-     return !awaiting_recipients? if recipients.count.positive?
-     contracts.all? { !it.awaiting_signature? }
+     return !awaiting_recipients? if recipients.exists?
+
+     contracts.where.missing(:signed_document_attachment).none?
+  end
+
+  def bundle_state
+    return :no_recipients unless recipients.exists?
+    return :declined if declined_recipients?
+    return :completed if completed?
+    :awaiting
   end
 
   def awaiting_recipients?(contract: nil)
-    if contract
-      return contract.recipients.any? { !it.signed_contract?(contract) }
-    end
-
-    recipients.any? { it.unsigned_contracts.any? }
+    scope = recipients
+      .joins(recipient_signer: :signer_contracts)
+      .where(signer_contracts: { signed_at: nil, declined_at: nil })
+    scope = scope.where(signer_contracts: { contract_id: contract.id }) if contract
+    scope.exists?
   end
 
-  def notify_contract_signed(contract, recipient)
-    Notification::BundleContractSignedJob.perform_later(self, contract, signer: recipient)
+  def completed_recipients
+    not_completed_ids = recipients
+      .joins(recipient_signer: :signer_contracts)
+      .where("signer_contracts.signed_at IS NULL OR signer_contracts.declined_at IS NOT NULL")
+      .select(:id)
+    recipients.where.not(id: not_completed_ids)
+  end
+
+  def notify_contract_signed(contract, signer)
+    Notification::BundleContractSignedJob.perform_later(self, contract, signer: signer)
     return unless completed?
 
     Notification::BundleCompletedJob.perform_later(self)
@@ -91,6 +112,13 @@ class Bundle < ApplicationRecord
   end
 
   private
+
+  def declined_recipients?
+    recipients
+      .joins(recipient_signer: :signer_contracts)
+      .where.not(signer_contracts: { declined_at: nil })
+      .exists?
+  end
 
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid

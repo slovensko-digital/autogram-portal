@@ -34,6 +34,10 @@ module AutogramPortal
       delete_old_eidentita_sessions: {
         cron: "every 2 hours",
         class: "Eidentita::SessionCleanupJob"
+      },
+      delete_old_anonymous_contracts: {
+        cron: "every 30 minutes",
+        class: "AnonymousContractsCleanupJob"
       }
     }
   end

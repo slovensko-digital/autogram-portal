@@ -29,10 +29,7 @@
   <% elsif mime_type == 'application/pdf' %>
     <div>
       <div class="border border-gray-200 rounded-lg bg-white">
-        <%
-          # Add cache-busting parameter to ensure PDF reloads when returning to the same document
-          pdf_url = pdf_preview_document_path(@document, format: :pdf, t: Time.current.to_i)
-        %>
+        <% pdf_url = pdf_preview_document_path(@document, format: :pdf, t: Time.current.to_i) %>
         <object
           data="<%= pdf_url %>"
           type="application/pdf"

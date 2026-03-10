@@ -64,6 +64,7 @@ en:
       about: "About"
       contracts: "Contracts"
       bundles: "Bundles"
+      received_bundles: "Received for Signing"
       settings: "Settings"
       new_contract: "New contract"
       electronic_onboarding: "Electronic onboarding"
@@ -126,9 +127,15 @@ en:
         api_token_admin_help: "API features are currently disabled for your account. Please contact the administrator."
         currently_waiting_confirmation_for_email: "Currently waiting confirmation for: %{email}"
         update: "Update"
+        danger_zone: "Danger Zone"
         cancel_my_account: "Cancel my account"
-        unhappy: "Unhappy?"
+        unhappy: "Permanently delete your account and all data"
         are_you_sure: "Are you sure?"
+        delete_account: "Delete account"
+        delete_confirmation_phrase: "delete profile"
+        delete_confirmation_placeholder: "Type confirmation phrase"
+        delete_confirmation_instruction_html: "To confirm, type %{phrase}."
+        delete_confirmation_mismatch: "Confirmation phrase does not match."
     confirmations:
       new:
         resend_confirmation_instructions: "Resend confirmation instructions"
@@ -200,6 +207,20 @@ en:
       no_documents_message: "Get started by uploading a new document."
       upload_document: "Upload Document"
     new:
+      title: "New document"
+      subtitle: "Upload a document for signing or validation."
+      help_text: "You can upload PDF, XML or other files, and sign them in the next step."
+      page_title: "Sign documents electronically, simply and securely"
+      page_subtitle: "Upload the document you want to work with."
+      page_help_text: "If you're not sure how signing works, click here: View signing instructions"
+      errors_title: "Errors occurred while creating the document:"
+      document_details_title: "Document Details"
+      document_details_text: "Upload a single document that you want to work with. You can validate signatures, visualize content, or use it for signing."
+      agree_to_policies: "I agree with %{link}"
+      policies_link: "policies, terms and conditions"
+      upload_document: "Upload Document"
+      submit_button: "Upload & Continue"
+      cancel: "Cancel"
       actions:
         continue: "Continue"
         back: "Back"
@@ -248,6 +269,7 @@ en:
       signature_extended_successfully: "Signature extended successfully."
 
   bundles:
+    display_name: "Bundle"
     index:
       title: "Contract Bundles"
       completed: "Completed"
@@ -260,6 +282,44 @@ en:
       view: "View"
       no_bundles_title: "No bundles"
       no_bundles_message: "Bundles are created via API."
+      no_filtered_bundles: "No bundles match the selected filter."
+      filter_state: "Status"
+      filter_sort: "Sort"
+      state_all: "All"
+      state_awaiting: "Awaiting signature"
+      state_completed: "Completed"
+      state_declined: "Declined"
+      state_no_recipients: "Not sent"
+      sort_newest: "Newest first"
+      sort_oldest: "Oldest first"
+      column_bundle: "Bundle"
+      column_status: "Status"
+      column_contracts: "Documents"
+      column_date: "Date"
+      signatures: "Signatures"
+    received:
+      title: "Received for Signing"
+      subtitle: "Bundles sent to you by others for signing."
+      filter_state: "Status"
+      filter_sort: "Sort"
+      state_all: "All"
+      state_awaiting: "Awaiting my signature"
+      state_signed: "Signed by me"
+      state_declined: "Declined"
+      sort_newest: "Newest first"
+      sort_oldest: "Oldest first"
+      column_bundle: "Bundle"
+      column_sender: "Sender"
+      column_status: "Status"
+      column_contracts: "Documents"
+      column_date: "Date"
+      contract: "document"
+      contracts: "documents"
+      sign: "Sign"
+      view: "View"
+      no_bundles_title: "No received bundles"
+      no_bundles_message: "You haven't received any bundles for signing yet."
+      no_filtered_bundles: "No bundles match the selected filter."
     show:
       all_bundles: "All contract bundles"
       title: "Bundle"
@@ -295,9 +355,20 @@ en:
       contract_number: "Contract %{current} of %{total}"
       note_title: "Note from sender"
       awaiting_recipients: "Awaiting signature from"
+      decline: "Decline"
+      accept_again: "Accept again"
+      declined_info_title: "You have declined this bundle"
+      declined_info_message: "Signing is currently disabled. If you want to continue signing, click the Sign button below."
+      decline_confirm: "Are you sure you want to decline signing this bundle?"
+      declined_notice: "You have declined to sign this bundle."
+      accepted_notice: "You can sign this bundle again."
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
+      completed: "Completed"
+      awaiting_signature: "Awaiting signature"
+      declined: "Declined"
+      no_recipients: "Not sent"
     sender:
       sender: "Sender"
 
@@ -323,6 +394,18 @@ en:
       view: "View"
       no_contracts_title: "No documents yet"
       no_contracts_message: "Start by uploading a document."
+      no_filtered_contracts: "No documents match the selected filter."
+      filter_state: "Status"
+      filter_sort: "Sort"
+      state_all: "All"
+      state_awaiting: "Awaiting signature"
+      state_completed: "Signed"
+      sort_newest: "Newest first"
+      sort_oldest: "Oldest first"
+      column_document: "Document"
+      column_status: "Status"
+      column_documents: "Documents"
+      column_date: "Date"
     new:
       title: "New document"
       subtitle: "Upload the document you want to work with."
@@ -334,7 +417,8 @@ en:
       all_contracts: "All contracts"
       title: "Document"
       part_of_bundle: "Part of bundle"
-      bundle_link: "View bundle →"
+      part_of_bundle_description: "This document is part of a bundle of documents."
+      bundle_link: "View bundle"
       download: "Download"
       uuid: "UUID: %{uuid}"
       signature_parameters_title: "Signature Parameters"
@@ -398,9 +482,9 @@ en:
       signed_message: "This contract has been signed and is complete. No further signature is required."
       title: "Select Signing Application"
       subtitle: "Choose which application to use for electronic signing"
-      old_card_warning_title: "Older eID card"
-      old_card_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Mobile signing apps (AVM, eIdentita) are not compatible with your card."
-      old_card_mobile_warning: "Your eID card (generation %{generation}) requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
+      old_card_warning_title: "Limitation"
+      old_card_warning: "%{qscd} requires a desktop computer with a physical card reader. Mobile signing apps (Autogram Mobile, eIdentita) are not compatible with your card/document."
+      old_card_mobile_warning: "%{qscd} requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
@@ -500,13 +584,15 @@ en:
       signed:
         title: "Document was signed successfully"
         message: "Signing was completed successfully. You can close this window or return to the document."
+        view_contract: "View signed document"
+        view_bundle: "Return to bundle"
     onboarding:
       electronic_title: "Electronic Signing Setup"
       physical_title: "Physical Signing Setup"
       subtitle: "Complete these steps to prepare for signing"
       qscd_check:
-        title: "Select your eID card generation"
-        description: "Different eID card generations support different signing methods. Please select your card generation below."
+        title: "Select your ID card type"
+        description: "Based on your selection, we will show available qualified signing options."
         compatible_mobile: "Compatible with mobile signing apps (AVM, eIdentita)"
         requires_desktop: "Requires a computer with card reader (Autogram Desktop only)"
         issued_after: "Issued after %{date}"
@@ -514,7 +600,7 @@ en:
         show_dpb: "Show residence permit cards"
         hide_dpb: "Hide residence permit cards"
         continue: "Continue"
-        invalid_selection: "Invalid selection. Please select a valid eID card generation."
+        invalid_selection: "Please select your ID card type."
       pin_check:
         title: "Do you know your BOK?"
         description_a: "To use the electronic ID card, you need to know the security personal code (BOK). This code is set when issuing a new ID card at the office."
@@ -533,9 +619,9 @@ en:
         continue: "I have certificates, continue"
       legacy_eid_card:
         title: "Electronic Signing Not Available"
-        description: "Unfortunately, your eID card generation no longer supports qualified electronic signatures. To sign documents electronically, you will need to obtain a new eID card."
-        warning_title: "This eID card is no longer valid for electronic signing"
-        warning_description: "Old eID cards issued before 2021 can no longer be used for qualified electronic signatures. You must visit your regional police office to obtain a new eID card."
+        description: "Unfortunately, your selected card generation no longer supports qualified electronic signatures. To sign documents electronically, you need to obtain a newer card."
+        warning_title: "This card is no longer valid for qualified electronic signing"
+        warning_description: "Older card generations can no longer be used for qualified electronic signatures. You need to request a newer one at the issuing authority."
         warning_learn_more: "How to get a new eID card"
       physical_instructions:
         title: "Physical Signing Instructions"
@@ -575,6 +661,38 @@ en:
         scan: Print, sign by hand, and scan
         notary-post: Notary signature with postal delivery
         notary-conversion: Notary signature with conversion to QES
+
+  dashboard:
+    index:
+      title: "Welcome back, %{name}"
+      subtitle: "Overview of your documents and signatures"
+      stats:
+        my_bundles: "My bundles"
+        my_contracts: "My contracts"
+        awaiting_my_signature: "Awaiting my signature"
+        sent_for_signing: "Sent for signing"
+        declined_bundles: "Declined bundles"
+      quick_actions:
+        title: "Quick actions"
+        upload_document: "Upload new document"
+        upload_document_subtitle: "Start a new signing process"
+        verify_signature: "Verify signature"
+        verify_signature_subtitle: "Check the validity of a signature"
+      recent_bundles:
+        title: "Recent bundles"
+        subtitle: "Overview of your latest bundles"
+        document: "Document"
+        status: "Status"
+        recipients: "Recipients"
+        date: "Date"
+        view: "View"
+        view_all: "View all"
+        bundle_name: "Bundle %{uuid} by %{author}"
+        no_bundles: "No bundles yet"
+        person_one: "person"
+        person_other: "people"
+        status_completed: "Signed"
+        status_awaiting: "Awaiting signature"
 
   about:
     index:
@@ -783,6 +901,24 @@ en:
     mailer:
       regards: "Best regards,"
       team: "team Autogram Portal"
+
+  qscd:
+    title:
+      eid_2013: "Slovak ID card issued before 21.6.2021"
+      eid_2021: "Slovak ID card issued after 21.6.2021"
+      eid_2022: "Slovak ID card issued after 1.12.2022"
+      eid_2024: "Slovak ID card issued after 18.12.2024"
+      dpb_2014: "Slovak residence permit card issued before 10.7.2020"
+      dpb_2020: "Slovak residence permit card issued after 10.7.2020"
+      dpb_2023: "Slovak residence permit card issued after 18.10.2023"
+    description:
+      eid_2013: "This ID card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer ID card."
+      eid_2021: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer cards."
+      eid_2022: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
+      eid_2024: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
+      dpb_2014: "This residence permit card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer residence permit card."
+      dpb_2020: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
+      dpb_2023: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
 
   activerecord:
     errors:

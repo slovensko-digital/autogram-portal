@@ -3,7 +3,7 @@ class CreateSessions < ActiveRecord::Migration[8.1]
     create_table :sessions do |t|
       t.references :contract, null: false, foreign_key: true
       t.references :sessionable, polymorphic: true, null: false
-      t.references :user, null: true, foreign_key: true  # nullable for now, will be used later
+      t.references :user, null: true, foreign_key: true
       t.integer :status, default: 0, null: false
 
       t.timestamps

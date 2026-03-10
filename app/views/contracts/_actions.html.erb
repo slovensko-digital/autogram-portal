@@ -1,9 +1,4 @@
-<%
-  # Configuration options:
-  # - previous_page: Path for the back button
-
-  previous_page = local_assigns.fetch(:previous_page, root_path)
-%>
+<%# locals: (previous_page: root_path) %>
 
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
   <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
@@ -21,7 +16,7 @@
               url: signature_parameters_contract_path(@contract, target_step: 'sign')
             } %>
 
-      <% if current_user&.signature_request_allowed? && @contract.bundle.nil? %>
+      <% if current_user&.signature_request_allowed? && @contract.bundle.nil? && current_user == @contract.user %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'request_signature',
@@ -33,7 +28,7 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures? %>
+      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures? && current_user == @contract.user %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',

@@ -1,7 +1,7 @@
 <%= t('notification_mailer.greeting') %>
 
 <%= t('.title') %>
-<%= t('.message', sender_name: @bundle.author.name) %>
+<%= t('.message', author_name: @bundle.author.display_name) %>
 <%= t('.signing_is_simple') %>
 
 <% if @bundle.note.present? %>

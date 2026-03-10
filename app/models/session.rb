@@ -11,27 +11,22 @@
 #  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
-#  contract_id        :bigint           not null
-#  recipient_id       :bigint
-#  user_id            :bigint
+#  signer_contract_id :bigint           not null
 #
 # Indexes
 #
-#  index_sessions_on_contract_id   (contract_id)
-#  index_sessions_on_recipient_id  (recipient_id)
-#  index_sessions_on_type          (type)
-#  index_sessions_on_user_id       (user_id)
+#  index_sessions_on_signer_contract_id  (signer_contract_id)
+#  index_sessions_on_type                (type)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (contract_id => contracts.id)
-#  fk_rails_...  (recipient_id => recipients.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class Session < ApplicationRecord
-  belongs_to :contract
-  belongs_to :user, optional: true
-  belongs_to :recipient, optional: true
+  belongs_to :signer_contract
+
+  delegate :contract, to: :signer_contract
+  delegate :signer,   to: :signer_contract
 
   enum :status, {
     pending: 0,
@@ -45,8 +40,11 @@ class Session < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
 
-  after_update_commit :broadcast_status_change, if: :saved_change_to_status?
-  after_update_commit -> { touch(:completed_at) }, if: -> { saved_change_to_status? && !pending? }
+  after_update_commit :handle_status_change, if: :saved_change_to_status?
+
+  def recipient
+    signer_contract.recipient
+  end
 
   def not_pending?
     !pending?
@@ -88,14 +86,10 @@ class Session < ApplicationRecord
         content_type: new_content_type
       )
       save!
-
-      if recipient.nil? && user.present? && contract.bundle.present?
-        update!(recipient: contract.bundle.recipients.where(user: user).first)
-      end
     end
 
     signed!
-    contract.sessions.pending.each(&:canceled!)
+    contract.sessions.pending.where.not(id: id).each(&:canceled!)
   end
 
   def generate_signed_filename
@@ -108,7 +102,17 @@ class Session < ApplicationRecord
   end
 
 
-  protected
+  private
+
+  def handle_status_change
+    mark_signer_contract_signed if signed?
+    touch(:completed_at) unless pending?
+    broadcast_status_change
+  end
+
+  def mark_signer_contract_signed
+    signer_contract.update_column(:signed_at, completed_at || Time.current)
+  end
 
   def broadcast_status_change
     case status
@@ -117,7 +121,7 @@ class Session < ApplicationRecord
     when "expired"
       broadcast_signing_error("Signing expired")
     when "signed"
-      contract.notify_signed!(recipient: recipient, signer: user)
+      contract.notify_signed!(signer: signer)
       Turbo::StreamsChannel.broadcast_replace_to(
         self,
         target: "signature_apps_#{contract.uuid}",

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_05_104730) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_10_173000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -77,24 +77,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_104730) do
     t.index ["uuid"], name: "index_contracts_on_uuid"
   end
 
-  create_table "contracts_recipients", id: false, force: :cascade do |t|
-    t.bigint "contract_id", null: false
-    t.bigint "recipient_id", null: false
-    t.index ["contract_id", "recipient_id"], name: "index_contracts_recipients_on_contract_id_and_recipient_id", unique: true
-    t.index ["contract_id"], name: "index_contracts_recipients_on_contract_id"
-    t.index ["recipient_id"], name: "index_contracts_recipients_on_recipient_id"
-  end
-
   create_table "documents", force: :cascade do |t|
     t.bigint "contract_id"
     t.datetime "created_at", null: false
     t.string "remote_hash"
     t.datetime "updated_at", null: false
     t.string "url"
-    t.bigint "user_id"
     t.string "uuid", null: false
     t.index ["contract_id"], name: "index_documents_on_contract_id"
-    t.index ["user_id"], name: "index_documents_on_user_id"
     t.index ["uuid"], name: "index_documents_on_uuid"
   end
 
@@ -223,34 +213,53 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_104730) do
     t.string "locale", default: "sk", null: false
     t.string "name"
     t.integer "notification_status", default: 0, null: false
-    t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["bundle_id", "email"], name: "index_recipients_on_bundle_id_and_email", unique: true
     t.index ["bundle_id"], name: "index_recipients_on_bundle_id"
     t.index ["email"], name: "index_recipients_on_email"
-    t.index ["status"], name: "index_recipients_on_status"
     t.index ["user_id"], name: "index_recipients_on_user_id"
     t.index ["uuid"], name: "index_recipients_on_uuid", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
     t.datetime "completed_at"
-    t.bigint "contract_id", null: false
     t.datetime "created_at", null: false
     t.text "error_message"
     t.jsonb "options", default: {}
-    t.bigint "recipient_id"
+    t.bigint "signer_contract_id", null: false
     t.datetime "signing_started_at"
     t.integer "status", default: 0, null: false
     t.string "type"
     t.datetime "updated_at", null: false
-    t.bigint "user_id"
-    t.index ["contract_id"], name: "index_sessions_on_contract_id"
-    t.index ["recipient_id"], name: "index_sessions_on_recipient_id"
+    t.index ["signer_contract_id"], name: "index_sessions_on_signer_contract_id"
     t.index ["type"], name: "index_sessions_on_type"
-    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "signer_contracts", force: :cascade do |t|
+    t.bigint "contract_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "declined_at"
+    t.datetime "signed_at"
+    t.bigint "signer_id"
+    t.datetime "updated_at", null: false
+    t.index ["contract_id", "signed_at", "declined_at"], name: "index_signer_contracts_on_contract_and_signing_state"
+    t.index ["contract_id"], name: "index_signer_contracts_on_contract_id"
+    t.index ["declined_at"], name: "index_signer_contracts_on_declined_at_not_null", where: "(declined_at IS NOT NULL)"
+    t.index ["signer_id", "contract_id"], name: "index_signer_contracts_on_signer_id_and_contract_id", unique: true
+    t.index ["signer_id"], name: "index_signer_contracts_on_signer_id"
+  end
+
+  create_table "signers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "recipient_id"
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["recipient_id"], name: "index_signers_on_recipient_id"
+    t.index ["recipient_id"], name: "index_signers_on_recipient_id_unique_for_recipient_signers", unique: true, where: "(((type)::text = 'RecipientSigner'::text) AND (recipient_id IS NOT NULL))"
+    t.index ["user_id"], name: "index_signers_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -320,17 +329,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_104730) do
   add_foreign_key "bundles", "users"
   add_foreign_key "contracts", "bundles"
   add_foreign_key "contracts", "users"
-  add_foreign_key "contracts_recipients", "contracts"
-  add_foreign_key "contracts_recipients", "recipients"
   add_foreign_key "documents", "contracts"
-  add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "postal_addresses", "bundles"
   add_foreign_key "recipients", "bundles"
   add_foreign_key "recipients", "users"
-  add_foreign_key "sessions", "contracts"
-  add_foreign_key "sessions", "recipients"
-  add_foreign_key "sessions", "users"
+  add_foreign_key "sessions", "signer_contracts"
+  add_foreign_key "signer_contracts", "contracts"
+  add_foreign_key "signer_contracts", "signers"
+  add_foreign_key "signers", "recipients"
+  add_foreign_key "signers", "users"
   add_foreign_key "webhooks", "bundles"
   add_foreign_key "xdc_parameters", "documents"
 end

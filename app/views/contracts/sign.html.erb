@@ -16,6 +16,18 @@
               <p class="text-gray-600"><%= t('.subtitle') %></p>
             <% end %>
           </div>
+          <% if @contract.signed_document.attached? %>
+            <div class="flex-shrink-0">
+              <%= link_to signed_document_contract_path(@contract),
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                <%= t('actions.download') %>
+              <% end %>
+            </div>
+          <% end %>
+
           <% if @contract.user.nil? || current_user == @contract.user %>
             <%=link_to contract_path(@contract),
                   class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
@@ -44,31 +56,9 @@
             </div>
           </div>
         <% end %>
-        <% unless @contract.awaiting_signature? %>
-          <div class="w-full bg-green-50 border-l-4 border-green-400 p-4">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-              </div>
-              <div class="ml-3">
-                <p class="text-sm text-green-800">
-                  <span class="font-semibold"><%= t('contracts.sign.already_signed.title') %></span><br>
-                  <%= t('contracts.sign.already_signed.message') %>
-                </p>
-              </div>
-            </div>
-            <% unless params[:iframe].present? %>
-              <div>
-                <%= link_to t('actions.download'), signed_document_contract_path(@contract), class: "mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
       <% end %>
 
-      <% if @contract.awaiting_signature? || current_user == @contract.user %>
+      <% if @contract.awaiting_signature? || current_user == @contract.user || @contract.user.nil? %>
         <div class="w-full">
           <%= render 'signing_method_choice', contract: @contract, recipient: @recipient %>
         </div>

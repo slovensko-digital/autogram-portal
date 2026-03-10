@@ -11,22 +11,16 @@
 #  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
-#  contract_id        :bigint           not null
-#  recipient_id       :bigint
-#  user_id            :bigint
+#  signer_contract_id :bigint           not null
 #
 # Indexes
 #
-#  index_sessions_on_contract_id   (contract_id)
-#  index_sessions_on_recipient_id  (recipient_id)
-#  index_sessions_on_type          (type)
-#  index_sessions_on_user_id       (user_id)
+#  index_sessions_on_signer_contract_id  (signer_contract_id)
+#  index_sessions_on_type                (type)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (contract_id => contracts.id)
-#  fk_rails_...  (recipient_id => recipients.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class AvmSession < Session
   # TODO encrypt sensitive fields
