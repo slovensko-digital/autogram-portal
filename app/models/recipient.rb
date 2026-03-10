@@ -124,7 +124,7 @@ class Recipient < ApplicationRecord
   def associate_with_bundle_contracts
     return unless bundle.present? && bundle.contracts.any?
 
-    recipient_signer = RecipientSigner.create_or_find_by!(recipient: self)
+    recipient_signer = recipient_signer || create_recipient_signer!
     now = Time.current
     SignerContract.insert_all(
       bundle.contracts.map { |c| { signer_id: recipient_signer.id, contract_id: c.id, created_at: now, updated_at: now } },

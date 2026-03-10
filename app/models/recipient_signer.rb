@@ -24,8 +24,6 @@ class RecipientSigner < Signer
   validates :recipient, presence: true
   validates :recipient, uniqueness: true
 
-  # Expose the linked user (if the recipient has a matched account)
-  # so callers can uniformly do signer.user on any Signer subtype.
   def user
     recipient&.user
   end

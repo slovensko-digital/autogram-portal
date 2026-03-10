@@ -1,15 +1,12 @@
 class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
   def up
-    # Add new columns to sessions table
     add_column :sessions, :type, :string
     add_column :sessions, :signing_started_at, :datetime
     add_column :sessions, :completed_at, :datetime
     add_column :sessions, :error_message, :text
     add_column :sessions, :options, :jsonb, default: {}
-
     add_index :sessions, :type
 
-    # Migrate data from eidentita_sessions
     execute <<-SQL
       UPDATE sessions
       SET type = 'EidentitaSession',
@@ -21,7 +18,6 @@ class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
         AND sessions.sessionable_id = es.id
     SQL
 
-    # Migrate data from avm_sessions
     execute <<-SQL
       UPDATE sessions
       SET type = 'AvmSession',
@@ -37,7 +33,6 @@ class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
         AND sessions.sessionable_id = avm.id
     SQL
 
-    # Migrate data from autogram_sessions
     execute <<-SQL
       UPDATE sessions
       SET type = 'AutogramSession',
@@ -49,18 +44,14 @@ class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
         AND sessions.sessionable_id = ags.id
     SQL
 
-    # Remove old polymorphic association columns
     remove_column :sessions, :sessionable_type
     remove_column :sessions, :sessionable_id
-
-    # Drop old tables
     drop_table :eidentita_sessions
     drop_table :avm_sessions
     drop_table :autogram_sessions
   end
 
   def down
-    # Recreate old tables
     create_table :eidentita_sessions do |t|
       t.datetime :signing_started_at
       t.datetime :completed_at
@@ -84,11 +75,9 @@ class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    # Add back polymorphic columns
     add_column :sessions, :sessionable_type, :string
     add_column :sessions, :sessionable_id, :bigint
 
-    # Migrate data back to eidentita_sessions
     execute <<-SQL
       INSERT INTO eidentita_sessions (id, signing_started_at, completed_at, error_message, created_at, updated_at)
       SELECT id, signing_started_at, completed_at, error_message, created_at, updated_at
@@ -103,7 +92,6 @@ class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
       WHERE type = 'EidentitaSession'
     SQL
 
-    # Migrate data back to avm_sessions
     execute <<-SQL
       INSERT INTO avm_sessions (id, document_id, encryption_key, signing_started_at, completed_at, error_message, created_at, updated_at)
       SELECT id,
@@ -125,7 +113,6 @@ class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
       WHERE type = 'AvmSession'
     SQL
 
-    # Migrate data back to autogram_sessions
     execute <<-SQL
       INSERT INTO autogram_sessions (id, signing_started_at, completed_at, error_message, created_at, updated_at)
       SELECT id, signing_started_at, completed_at, error_message, created_at, updated_at
@@ -140,7 +127,6 @@ class ConvertSessionsToSti < ActiveRecord::Migration[8.1]
       WHERE type = 'AutogramSession'
     SQL
 
-    # Remove STI columns
     remove_index :sessions, :type
     remove_column :sessions, :type
     remove_column :sessions, :signing_started_at

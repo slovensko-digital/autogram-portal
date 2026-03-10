@@ -206,15 +206,12 @@ class ContractsController < ApplicationController
 
   def set_signer_contract
     if @recipient
-      recipient_signer = RecipientSigner.create_or_find_by!(recipient: @recipient)
+      recipient_signer = @recipient.recipient_signer || @recipient.create_recipient_signer!
       @signer_contract = recipient_signer.signer_contracts.find_or_create_by!(contract: @contract)
     elsif current_user
       user_signer = UserSigner.find_or_create_by!(user: current_user)
       @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
     elsif @contract.user.nil?
-      # Anonymous user signing an anonymous (no-account) contract.
-      # NULL != NULL in SQL so find_or_create_by!(user: nil) always inserts; instead
-      # look for an existing anonymous signer_contract on this contract.
       @signer_contract = @contract.signer_contracts
                                   .joins(:signer)
                                   .find_by(signers: { type: "AnonymousSigner" })
@@ -228,8 +225,6 @@ class ContractsController < ApplicationController
     if @contract.bundle
       redirect_to sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
     else
-      # Standalone contract: allow adding another signature on top by resetting the signed
-      # gate. Session history remains intact; the new session will set signed_at again.
       @signer_contract.update_column(:signed_at, nil)
     end
   end

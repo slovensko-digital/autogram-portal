@@ -31,7 +31,6 @@ class SignerContract < ApplicationRecord
     signed_at.present?
   end
 
-  # Convenience — nil for UserSigner-backed contracts
   def recipient
     signer.recipient if signer.is_a?(RecipientSigner)
   end

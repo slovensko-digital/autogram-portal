@@ -23,7 +23,6 @@
 #  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class PhysicalSession < Session
-  # Store submitted_date in the options JSONB column
   def submitted_date
     options&.dig("submitted_date")
   end

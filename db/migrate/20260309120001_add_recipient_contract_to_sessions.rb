@@ -1,8 +1,6 @@
 class AddRecipientContractToSessions < ActiveRecord::Migration[8.1]
   def up
     add_reference :sessions, :recipient_contract, null: true, foreign_key: true
-
-    # Backfill recipient_contract_id for sessions that already have recipient_id
     execute <<~SQL
       UPDATE sessions
       SET recipient_contract_id = rc.id
@@ -11,10 +9,6 @@ class AddRecipientContractToSessions < ActiveRecord::Migration[8.1]
         AND rc.contract_id = sessions.contract_id
     SQL
 
-    # For bundle-contract sessions without a recipient_id (author signed directly):
-    # create a Recipient row for that user in the bundle, then link via RecipientContract.
-
-    # Step 1: create missing Recipient rows
     execute <<~SQL
       INSERT INTO recipients (bundle_id, email, uuid, status, notification_status, locale, user_id, created_at, updated_at)
       SELECT DISTINCT c.bundle_id, u.email, gen_random_uuid(), 0, 0, COALESCE(u.locale, 'sk'), u.id, NOW(), NOW()
@@ -27,7 +21,6 @@ class AddRecipientContractToSessions < ActiveRecord::Migration[8.1]
       ON CONFLICT (bundle_id, email) DO NOTHING
     SQL
 
-    # Step 2: create RecipientContract rows for those recipients
     execute <<~SQL
       INSERT INTO recipient_contracts (recipient_id, contract_id, created_at, updated_at)
       SELECT DISTINCT r.id, s.contract_id, NOW(), NOW()
@@ -41,7 +34,6 @@ class AddRecipientContractToSessions < ActiveRecord::Migration[8.1]
       ON CONFLICT (recipient_id, contract_id) DO NOTHING
     SQL
 
-    # Step 3: backfill recipient_contract_id for those sessions
     execute <<~SQL
       UPDATE sessions
       SET recipient_contract_id = rc.id
@@ -56,7 +48,6 @@ class AddRecipientContractToSessions < ActiveRecord::Migration[8.1]
         AND c.bundle_id IS NOT NULL
     SQL
 
-    # Backfill signed_at on recipient_contracts from already-signed sessions
     execute <<~SQL
       UPDATE recipient_contracts
       SET signed_at = sessions.completed_at

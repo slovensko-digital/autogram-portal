@@ -51,22 +51,18 @@ class User < ApplicationRecord
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
   def self.create_from_provider_data(auth, locale: nil)
-    # Check if identity already exists
     identity = Identity.find_by(provider: auth.provider, uid: auth.uid)
     return identity.user if identity
 
-    # Check if user exists with this email
     email = auth.info.email
     user = User.find_by(email: email)
 
     if user
-      # Link identity to existing user and update name if blank
       user.update!(name: auth.info.name) if user.name.blank?
       user.identities.create!(provider: auth.provider, uid: auth.uid)
       return user
     end
 
-    # Create new user with identity
     user = User.create!(
       email: email,
       name: auth.info.name,
@@ -98,7 +94,6 @@ class User < ApplicationRecord
     true
   end
 
-  # Onboarding helper methods
   def onboarding_completed?(method)
     completed_onboardings.include?(method.to_s) && !User.legacy_eid_card?(qscd)
   end

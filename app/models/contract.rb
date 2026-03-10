@@ -197,7 +197,7 @@ class Contract < ApplicationRecord
 
     now = Time.current
     inserts = bundle.recipients.map do |recipient|
-      recipient_signer = RecipientSigner.create_or_find_by!(recipient: recipient)
+      recipient_signer = recipient.recipient_signer || recipient.create_recipient_signer!
       { signer_id: recipient_signer.id, contract_id: id, created_at: now, updated_at: now }
     end
     SignerContract.insert_all(inserts, unique_by: [ :signer_id, :contract_id ])

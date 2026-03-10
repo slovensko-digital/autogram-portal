@@ -98,7 +98,6 @@ class Contracts::SessionsController < ApplicationController
       @recipient = @contract.recipients.find_by(user: current_user) ||
                    @contract.recipients.find_by(email: current_user.email)
 
-      # Bundle author signing their own contract: create a Recipient on the fly
       if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
         @recipient = @contract.bundle.recipients.find_or_create_by!(email: current_user.email) do |r|
           r.user = current_user
@@ -108,17 +107,12 @@ class Contracts::SessionsController < ApplicationController
     end
 
     if @recipient
-      # Bundle signing path: sign via RecipientSigner
-      recipient_signer = RecipientSigner.create_or_find_by!(recipient: @recipient)
+      recipient_signer = @recipient.recipient_signer || @recipient.create_recipient_signer!
       @signer_contract = recipient_signer.signer_contracts.find_or_create_by!(contract: @contract)
     elsif current_user
-      # Standalone signing path: sign via UserSigner
       user_signer = UserSigner.find_or_create_by!(user: current_user)
       @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
     elsif @contract.user.nil?
-      # Anonymous user signing an anonymous (no-account) contract.
-      # NULL != NULL in SQL so find_or_create_by!(user: nil) always inserts; instead
-      # look for an existing anonymous signer_contract on this contract.
       @signer_contract = @contract.signer_contracts
                                   .joins(:signer)
                                   .find_by(signers: { type: "AnonymousSigner" })
@@ -127,8 +121,6 @@ class Contracts::SessionsController < ApplicationController
       end
     end
 
-    # Prevent bundle recipients from signing a contract they already signed.
-    # Standalone contracts allow stacking additional signatures.
     raise ActiveRecord::RecordNotFound if @signer_contract&.signed? && @contract.bundle.present?
   end
 

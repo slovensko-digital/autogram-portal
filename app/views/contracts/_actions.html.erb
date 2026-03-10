@@ -1,9 +1,4 @@
-<%
-  # Configuration options:
-  # - previous_page: Path for the back button
-
-  previous_page = local_assigns.fetch(:previous_page, root_path)
-%>
+<%# locals: (previous_page: root_path) %>
 
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
   <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
