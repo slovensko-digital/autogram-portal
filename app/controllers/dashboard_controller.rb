@@ -6,8 +6,9 @@ class DashboardController < ApplicationController
     @contracts_count = current_user.contracts.count
     @awaiting_my_signature_count = Contract.awaiting_signature_for(current_user).count
     @sent_for_signing_count = current_user.bundles
-                                          .joins(:recipients)
+                                          .joins(recipients: { recipient_signer: :signer_contracts })
                                           .where(recipients: { status: :pending })
+                                          .where(signer_contracts: { signed_at: nil })
                                           .distinct
                                           .count
     @declined_bundles_count = current_user.bundles

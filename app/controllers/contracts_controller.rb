@@ -2,6 +2,7 @@ class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
   before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
   before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
 
@@ -44,16 +45,22 @@ class ContractsController < ApplicationController
   end
 
   def signature_extension
+    return head :forbidden unless author_of_contract?
+
     render partial: "signature_extension"
   end
 
   def signature_parameters
+    if params[:target_step] == "request_signature" && !author_of_contract?
+      return head :forbidden
+    end
+
     @next_step = params[:target_step]
     render partial: "signature_parameters"
   end
 
   def extend_signatures
-    return head :unauthorized unless current_user
+    return head :forbidden unless author_of_contract?
     return redirect_to @contract, alert: t("documents.alerts.all_signatures_have_timestamps") unless @contract.extendable_signatures?
 
     begin
@@ -75,9 +82,7 @@ class ContractsController < ApplicationController
 
   def create_physical_session
     physical_session = PhysicalSession.create!(
-      contract: @contract,
-      user: current_user,
-      recipient_contract: @recipient_contract,
+      signer_contract: @signer_contract,
       status: :pending
     )
     physical_session.submitted_date = params[:submitted_date]
@@ -136,6 +141,10 @@ class ContractsController < ApplicationController
   end
 
   def update
+    if params[:next_step] == "request_signature" && !author_of_contract?
+      return head :forbidden
+    end
+
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
@@ -193,18 +202,35 @@ class ContractsController < ApplicationController
         end
       end
     end
+  end
 
-    return unless @recipient
-
-    @recipient_contract = @recipient.recipient_contracts.find_by!(contract: @contract)
-
-    if @recipient_contract.signed?
-      redirect_path = if @contract.bundle
-        sign_bundle_path(@contract.bundle, recipient: @recipient.uuid)
-      else
-        sign_contract_path(@contract, recipient: @recipient.uuid)
+  def set_signer_contract
+    if @recipient
+      recipient_signer = RecipientSigner.create_or_find_by!(recipient: @recipient)
+      @signer_contract = recipient_signer.signer_contracts.find_or_create_by!(contract: @contract)
+    elsif current_user
+      user_signer = UserSigner.find_or_create_by!(user: current_user)
+      @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
+    elsif @contract.user.nil?
+      # Anonymous user signing an anonymous (no-account) contract.
+      # NULL != NULL in SQL so find_or_create_by!(user: nil) always inserts; instead
+      # look for an existing anonymous signer_contract on this contract.
+      @signer_contract = @contract.signer_contracts
+                                  .joins(:signer)
+                                  .find_by(signers: { type: "AnonymousSigner" })
+      unless @signer_contract
+        @signer_contract = AnonymousSigner.create!.signer_contracts.create!(contract: @contract)
       end
-      redirect_to redirect_path
+    end
+
+    return unless @signer_contract&.signed?
+
+    if @contract.bundle
+      redirect_to sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+    else
+      # Standalone contract: allow adding another signature on top by resetting the signed
+      # gate. Session history remains intact; the new session will set signed_at again.
+      @signer_contract.update_column(:signed_at, nil)
     end
   end
 
@@ -231,6 +257,10 @@ class ContractsController < ApplicationController
 
   def signed_document_param
     params.require(:signed_document)
+  end
+
+  def author_of_contract?
+    current_user.present? && @contract.user == current_user
   end
 
   def format_signature_for_json(signature)

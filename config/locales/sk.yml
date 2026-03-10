@@ -226,6 +226,7 @@ sk:
       state_awaiting: "Čaká na podpis"
       state_completed: "Dokončené"
       state_declined: "Odmietnuté"
+      state_no_recipients: "Nepodpísané"
       sort_newest: "Najnovšie"
       sort_oldest: "Najstaršie"
     bundle_list:
@@ -239,6 +240,7 @@ sk:
       state_all: "Všetky"
       state_awaiting: "Čaká na môj podpis"
       state_signed: "Podpísané mnou"
+      state_declined: "Odmietnuté"
       sort_newest: "Najnovšie"
       sort_oldest: "Najstaršie"
       contract: "dokument"
@@ -287,13 +289,19 @@ sk:
       note_title: "Poznámka od odosielateľa"
       awaiting_recipients: "Čaká na podpis od"
       decline: "Odmietnuť"
-      decline_confirm: "Ste si istý, že chcete odmietnuť podpísanie tohto balíka? Táto akcia je nezvratná."
+      accept_again: "Prijať znova"
+      declined_info_title: "Tento balík ste odmietli"
+      declined_info_message: "Podpisovanie je momentálne vypnuté. Ak chcete pokračovať v podpise, kliknite na tlačidlo Podpísať nižšie."
+      decline_confirm: "Ste si istý, že chcete odmietnuť podpísanie tohto balíka?"
       declined_notice: "Odmietli ste podpísať tento balík."
+      accepted_notice: "Tento balík môžete znovu podpísať."
     status:
       all_signed: "Všetky dokumenty podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
       completed: "Dokončené"
       awaiting_signature: "Čaká na podpis"
+      declined: "Odmietnuté"
+      no_recipients: "Nepodpísané"
     sender:
       sender: "Odosielateľ"
 
@@ -514,6 +522,8 @@ sk:
       signed:
         title: "Dokument bol úspešne podpísaný"
         message: "Podpisovanie prebehlo v poriadku. Môžete zatvoriť toto okno alebo sa vrátiť späť na dokument."
+        view_contract: "Zobraziť podpísaný dokument"
+        view_bundle: "Späť na balík"
     onboarding:
       electronic_title: "Nastavenie elektronického podpisovania"
       physical_title: "Nastavenie fyzického podpisovania"

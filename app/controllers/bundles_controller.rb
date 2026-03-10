@@ -5,20 +5,21 @@ class BundlesController < ApplicationController
 
   def index
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
-    @state = params[:state].presence_in(%w[awaiting completed declined])
+    @state = params[:state].presence_in(%w[awaiting completed declined no_recipients])
 
     order_dir = @sort == "oldest" ? :asc : :desc
     bundles = current_user.bundles.includes(:contracts, :author, :recipients).order(created_at: order_dir)
 
     @bundles = bundles.to_a
-    @bundles.select! { |b| !b.completed? && !b.recipients.any?(&:declined?) } if @state == "awaiting"
+    @bundles.select! { |b| !b.completed? && b.recipients.any?(&:pending?) } if @state == "awaiting"
     @bundles.select! { |b| b.completed? } if @state == "completed"
     @bundles.select! { |b| b.recipients.any?(&:declined?) } if @state == "declined"
+    @bundles.select! { |b| b.recipients.none? } if @state == "no_recipients"
   end
 
   def received
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
-    @state = params[:state].presence_in(%w[awaiting signed])
+    @state = params[:state].presence_in(%w[awaiting signed declined])
 
     order_dir = @sort == "oldest" ? :asc : :desc
     @bundles = Bundle.joins(:recipients)
@@ -34,12 +35,17 @@ class BundlesController < ApplicationController
     if @state == "awaiting"
       @bundles.select! do |bundle|
         recipient = @recipients_by_bundle[bundle.id]
-        recipient.present? && recipient.unsigned_contracts.any?
+        recipient.present? && !recipient.declined? && recipient.unsigned_contracts.any?
       end
     elsif @state == "signed"
       @bundles.select! do |bundle|
         recipient = @recipients_by_bundle[bundle.id]
-        recipient.nil? || recipient.unsigned_contracts.none?
+        recipient.present? && !recipient.declined? && recipient.unsigned_contracts.none?
+      end
+    elsif @state == "declined"
+      @bundles.select! do |bundle|
+        recipient = @recipients_by_bundle[bundle.id]
+        recipient.present? && recipient.declined?
       end
     end
   end
@@ -91,14 +97,20 @@ class BundlesController < ApplicationController
 
   def decline
     bundle = Bundle.find_by_uuid!(params[:id])
-    recipient = if params[:recipient]
-                  bundle.recipients.find_by_uuid!(params[:recipient])
-                else
-                  bundle.recipients.find_by!(user: current_user)
-                end
+    recipient = recipient_for_bundle_action(bundle)
     recipient.declined!
+    bundle.webhook&.fire_recipient_declined(recipient)
     redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
                 notice: I18n.t("bundles.sign.declined_notice")
+  end
+
+  def accept
+    bundle = Bundle.find_by_uuid!(params[:id])
+    recipient = recipient_for_bundle_action(bundle)
+    recipient.pending!
+    bundle.webhook&.fire_recipient_undeclined(recipient)
+    redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
+                notice: I18n.t("bundles.sign.accepted_notice")
   end
 
   private
@@ -123,5 +135,13 @@ class BundlesController < ApplicationController
       :publicly_visible,
       recipients_attributes: [ :id, :email, :_destroy ]
     )
+  end
+
+  def recipient_for_bundle_action(bundle)
+    if params[:recipient]
+      bundle.recipients.find_by_uuid!(params[:recipient])
+    else
+      bundle.recipients.find_by!(user: current_user)
+    end
   end
 end

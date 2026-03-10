@@ -96,6 +96,7 @@ Rails.application.routes.draw do
     member do
       get :sign
       post :decline
+      post :accept
     end
   end
 

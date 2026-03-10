@@ -2,31 +2,25 @@
 #
 # Table name: sessions
 #
-#  id                    :bigint           not null, primary key
-#  completed_at          :datetime
-#  error_message         :text
-#  options               :jsonb
-#  signing_started_at    :datetime
-#  status                :integer          default("pending"), not null
-#  type                  :string
-#  created_at            :datetime         not null
-#  updated_at            :datetime         not null
-#  contract_id           :bigint           not null
-#  recipient_contract_id :bigint
-#  user_id               :bigint
+#  id                 :bigint           not null, primary key
+#  completed_at       :datetime
+#  error_message      :text
+#  options            :jsonb
+#  signing_started_at :datetime
+#  status             :integer          default("pending"), not null
+#  type               :string
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  signer_contract_id :bigint           not null
 #
 # Indexes
 #
-#  index_sessions_on_contract_id            (contract_id)
-#  index_sessions_on_recipient_contract_id  (recipient_contract_id)
-#  index_sessions_on_type                   (type)
-#  index_sessions_on_user_id                (user_id)
+#  index_sessions_on_signer_contract_id  (signer_contract_id)
+#  index_sessions_on_type                (type)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (contract_id => contracts.id)
-#  fk_rails_...  (recipient_contract_id => recipient_contracts.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class AutogramSession < Session
   def self.model_name

@@ -1,7 +1,7 @@
 class Contracts::SessionsController < ApplicationController
   before_action :set_contract
   before_action :set_session, except: [ :create ]
-  before_action :set_recipient, only: [ :create, :show ]
+  before_action :set_signer_contract, only: [ :create, :show ]
   before_action :redirect_if_completed, only: [ :show ]
   skip_before_action :verify_authenticity_token, only: [ :upload, :get_webhook, :standard_webhook ]
   before_action :allow_iframe
@@ -91,7 +91,7 @@ class Contracts::SessionsController < ApplicationController
     @session = @contract.sessions.find(params[:id])
   end
 
-  def set_recipient
+  def set_signer_contract
     if params[:recipient]
       @recipient = @contract.recipients.find_by_uuid!(params[:recipient])
     elsif current_user
@@ -107,10 +107,29 @@ class Contracts::SessionsController < ApplicationController
       end
     end
 
-    return unless @recipient
+    if @recipient
+      # Bundle signing path: sign via RecipientSigner
+      recipient_signer = RecipientSigner.create_or_find_by!(recipient: @recipient)
+      @signer_contract = recipient_signer.signer_contracts.find_or_create_by!(contract: @contract)
+    elsif current_user
+      # Standalone signing path: sign via UserSigner
+      user_signer = UserSigner.find_or_create_by!(user: current_user)
+      @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
+    elsif @contract.user.nil?
+      # Anonymous user signing an anonymous (no-account) contract.
+      # NULL != NULL in SQL so find_or_create_by!(user: nil) always inserts; instead
+      # look for an existing anonymous signer_contract on this contract.
+      @signer_contract = @contract.signer_contracts
+                                  .joins(:signer)
+                                  .find_by(signers: { type: "AnonymousSigner" })
+      unless @signer_contract
+        @signer_contract = AnonymousSigner.create!.signer_contracts.create!(contract: @contract)
+      end
+    end
 
-    @recipient_contract = @recipient.recipient_contracts.find_by!(contract: @contract)
-    raise ActiveRecord::RecordNotFound if @recipient_contract.signed?
+    # Prevent bundle recipients from signing a contract they already signed.
+    # Standalone contracts allow stacking additional signatures.
+    raise ActiveRecord::RecordNotFound if @signer_contract&.signed? && @contract.bundle.present?
   end
 
   def redirect_if_completed
@@ -126,41 +145,29 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_eidentita_session
-    if @recipient_contract
-      session = @recipient_contract.sessions.pending.where(type: "EidentitaSession").first
-      return session if session
-    else
-      return @contract.current_eidentita_session if @contract.has_active_eidentita_session?
-    end
+    existing = @signer_contract.sessions.pending.where(type: "EidentitaSession").first
+    return existing if existing
 
     result = AutogramEnvironment.eidentita_service.initiate_signing(@contract)
     raise result[:error] if result[:error]
 
-    @contract.sessions.create!(
+    @signer_contract.sessions.create!(
       type: "EidentitaSession",
-      signing_started_at: result[:signing_started_at],
-      user: current_user,
-      recipient_contract: @recipient_contract
+      signing_started_at: result[:signing_started_at]
     )
   end
 
   def create_avm_session
-    if @recipient_contract
-      session = @recipient_contract.sessions.pending.where(type: "AvmSession").first
-      return session if session
-    else
-      return @contract.current_avm_session if @contract.has_active_avm_session?
-    end
+    existing = @signer_contract.sessions.pending.where(type: "AvmSession").first
+    return existing if existing
 
     result = AutogramEnvironment.avm_service.initiate_signing(@contract)
 
-    avm_session = @contract.sessions.create!(
+    avm_session = @signer_contract.sessions.create!(
       type: "AvmSession",
       document_identifier: result[:document_identifier],
       encryption_key: result[:encryption_key],
-      signing_started_at: result[:signing_started_at],
-      user: current_user,
-      recipient_contract: @recipient_contract
+      signing_started_at: result[:signing_started_at]
     )
 
     Avm::SigningPollJob.perform_later(avm_session)
@@ -169,18 +176,12 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_autogram_session
-    if @recipient_contract
-      session = @recipient_contract.sessions.pending.where(type: "AutogramSession").first
-      return session if session
-    else
-      return @contract.current_autogram_session if @contract.has_active_autogram_session?
-    end
+    existing = @signer_contract.sessions.pending.where(type: "AutogramSession").first
+    return existing if existing
 
-    @contract.sessions.create!(
+    @signer_contract.sessions.create!(
       type: "AutogramSession",
-      signing_started_at: Time.current,
-      user: current_user,
-      recipient_contract: @recipient_contract
+      signing_started_at: Time.current
     )
   end
 end

@@ -2,36 +2,31 @@
 #
 # Table name: sessions
 #
-#  id                    :bigint           not null, primary key
-#  completed_at          :datetime
-#  error_message         :text
-#  options               :jsonb
-#  signing_started_at    :datetime
-#  status                :integer          default("pending"), not null
-#  type                  :string
-#  created_at            :datetime         not null
-#  updated_at            :datetime         not null
-#  contract_id           :bigint           not null
-#  recipient_contract_id :bigint
-#  user_id               :bigint
+#  id                 :bigint           not null, primary key
+#  completed_at       :datetime
+#  error_message      :text
+#  options            :jsonb
+#  signing_started_at :datetime
+#  status             :integer          default("pending"), not null
+#  type               :string
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  signer_contract_id :bigint           not null
 #
 # Indexes
 #
-#  index_sessions_on_contract_id            (contract_id)
-#  index_sessions_on_recipient_contract_id  (recipient_contract_id)
-#  index_sessions_on_type                   (type)
-#  index_sessions_on_user_id                (user_id)
+#  index_sessions_on_signer_contract_id  (signer_contract_id)
+#  index_sessions_on_type                (type)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (contract_id => contracts.id)
-#  fk_rails_...  (recipient_contract_id => recipient_contracts.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class Session < ApplicationRecord
-  belongs_to :contract
-  belongs_to :user, optional: true
-  belongs_to :recipient_contract, optional: true
+  belongs_to :signer_contract
+
+  delegate :contract, to: :signer_contract
+  delegate :signer,   to: :signer_contract
 
   enum :status, {
     pending: 0,
@@ -46,12 +41,11 @@ class Session < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
+  after_update_commit :mark_signer_contract_signed, if: -> { saved_change_to_status? && signed? }
   after_update_commit -> { touch(:completed_at) }, if: -> { saved_change_to_status? && !pending? }
-  after_update_commit :mark_recipient_contract_signed, if: -> { saved_change_to_status? && signed? }
 
-  # Convenience delegator — avoids callers having to go through recipient_contract
   def recipient
-    recipient_contract&.recipient
+    signer_contract.recipient
   end
 
   def not_pending?
@@ -97,7 +91,7 @@ class Session < ApplicationRecord
     end
 
     signed!
-    contract.sessions.pending.each(&:canceled!)
+    contract.sessions.pending.where.not(id: id).each(&:canceled!)
   end
 
   def generate_signed_filename
@@ -112,8 +106,8 @@ class Session < ApplicationRecord
 
   protected
 
-  def mark_recipient_contract_signed
-    recipient_contract&.update_column(:signed_at, completed_at || Time.current)
+  def mark_signer_contract_signed
+    signer_contract.update_column(:signed_at, completed_at || Time.current)
   end
 
   def broadcast_status_change
@@ -123,7 +117,7 @@ class Session < ApplicationRecord
     when "expired"
       broadcast_signing_error("Signing expired")
     when "signed"
-      contract.notify_signed!(recipient: recipient, signer: user)
+      contract.notify_signed!(signer: signer)
       Turbo::StreamsChannel.broadcast_replace_to(
         self,
         target: "signature_apps_#{contract.uuid}",

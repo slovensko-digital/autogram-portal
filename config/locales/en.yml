@@ -283,6 +283,7 @@ en:
       state_awaiting: "Awaiting signature"
       state_completed: "Completed"
       state_declined: "Declined"
+      state_no_recipients: "Not sent"
       sort_newest: "Newest first"
       sort_oldest: "Oldest first"
       column_bundle: "Bundle"
@@ -298,6 +299,7 @@ en:
       state_all: "All"
       state_awaiting: "Awaiting my signature"
       state_signed: "Signed by me"
+      state_declined: "Declined"
       sort_newest: "Newest first"
       sort_oldest: "Oldest first"
       column_bundle: "Bundle"
@@ -348,11 +350,19 @@ en:
       note_title: "Note from sender"
       awaiting_recipients: "Awaiting signature from"
       decline: "Decline"
-      decline_confirm: "Are you sure you want to decline signing this bundle? This action cannot be undone."
+      accept_again: "Accept again"
+      declined_info_title: "You have declined this bundle"
+      declined_info_message: "Signing is currently disabled. If you want to continue signing, click the Sign button below."
+      decline_confirm: "Are you sure you want to decline signing this bundle?"
       declined_notice: "You have declined to sign this bundle."
+      accepted_notice: "You can sign this bundle again."
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
+      completed: "Completed"
+      awaiting_signature: "Awaiting signature"
+      declined: "Declined"
+      no_recipients: "Not sent"
     sender:
       sender: "Sender"
 
@@ -567,6 +577,8 @@ en:
       signed:
         title: "Document was signed successfully"
         message: "Signing was completed successfully. You can close this window or return to the document."
+        view_contract: "View signed document"
+        view_bundle: "Return to bundle"
     onboarding:
       electronic_title: "Electronic Signing Setup"
       physical_title: "Physical Signing Setup"

@@ -4,6 +4,7 @@
   <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
     <div class="divide-y divide-gray-100">
       <% bundles.each do |bundle| %>
+        <% bundle_state = bundle.bundle_state %>
         <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
           <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
             <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -15,10 +16,20 @@
               <span class="text-sm font-semibold text-gray-900"><%= bundle.display_name %></span>
             </div>
             <div class="md:hidden flex-1 items-center w-36 shrink-0">
-              <% if bundle.completed? %>
+              <% if bundle_state == :completed %>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   <span class="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0"></span>
                   <%= t('bundles.status.completed') %>
+                </span>
+              <% elsif bundle_state == :declined %>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  <span class="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></span>
+                  <%= t('bundles.status.declined') %>
+                </span>
+              <% elsif bundle_state == :no_recipients %>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  <span class="h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0"></span>
+                  <%= t('bundles.status.no_recipients') %>
                 </span>
               <% else %>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -43,10 +54,20 @@
             </div>
           </div>
           <div class="hidden md:flex flex-1 items-center w-36 shrink-0">
-            <% if bundle.completed? %>
+            <% if bundle_state == :completed %>
               <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 <span class="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0"></span>
                 <%= t('bundles.status.completed') %>
+              </span>
+            <% elsif bundle_state == :declined %>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <span class="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></span>
+                <%= t('bundles.status.declined') %>
+              </span>
+            <% elsif bundle_state == :no_recipients %>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                <span class="h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0"></span>
+                <%= t('bundles.status.no_recipients') %>
               </span>
             <% else %>
               <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">

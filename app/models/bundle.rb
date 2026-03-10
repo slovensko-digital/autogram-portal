@@ -54,22 +54,31 @@ class Bundle < ApplicationRecord
      contracts.all? { !it.awaiting_signature? }
   end
 
+  def bundle_state
+    return :no_recipients if recipients.none?
+    return :declined if recipients.any?(&:declined?)
+    return :completed if completed?
+    :awaiting
+  end
+
   def awaiting_recipients?(contract: nil)
-    if contract
-      contract.recipient_contracts.where(signed_at: nil).exists?
-    else
-      RecipientContract.where(recipient: recipients).where(signed_at: nil).exists?
-    end
+    scope = recipients
+      .joins(recipient_signer: :signer_contracts)
+      .where(signer_contracts: { signed_at: nil })
+    scope = scope.where(signer_contracts: { contract_id: contract.id }) if contract
+    scope.exists?
   end
 
   def completed_recipients
-    recipients.where.not(
-      id: RecipientContract.where(recipient: recipients, signed_at: nil).select(:recipient_id)
-    )
+    unsigned_ids = recipients
+      .joins(recipient_signer: :signer_contracts)
+      .where(signer_contracts: { signed_at: nil })
+      .pluck(:id)
+    recipients.where.not(id: unsigned_ids)
   end
 
-  def notify_contract_signed(contract, recipient)
-    Notification::BundleContractSignedJob.perform_later(self, contract, signer: recipient)
+  def notify_contract_signed(contract, signer)
+    Notification::BundleContractSignedJob.perform_later(self, contract, signer: signer)
     return unless completed?
 
     Notification::BundleCompletedJob.perform_later(self)
