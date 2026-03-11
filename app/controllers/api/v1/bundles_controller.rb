@@ -49,6 +49,8 @@ class Api::V1::BundlesController < ApiController
   def bundle_params
     permitted_params = params.permit(
       :id,
+      :signingRule,
+      :requiredSignatures,
       contracts: [
         :id,
         { allowedMethods: [] },
@@ -74,9 +76,7 @@ class Api::V1::BundlesController < ApiController
       ],
       webhook: [ :url, :method ],
       postalAddress: [ :address, :recipientName ],
-      recipients: [ :name, :email, :locale ],
-      :signingRule,
-      :requiredSignatures
+      recipients: [ :name, :email, :locale ]
     )
 
     attributes = {
