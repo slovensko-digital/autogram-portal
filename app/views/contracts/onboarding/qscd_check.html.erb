@@ -21,29 +21,29 @@
         </div>
 
         <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full mt-8">
-          <div class="w-full bg-white border border-gray-200 rounded-md">
-            <div
-              data-action="click->toggle#toggle"
-              class="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
-              <div class="flex flex-col items-start">
-                <span class="text-s text-gray-800"><%= t('.dpb_cards') %></span>
-              </div>
-              <div data-action="click->toggle#toggle">
-                <button data-action="click->toggle#toggle" class="ml-2 flex-shrink-0 inline-flex items-center cursor-pointer">
-                  <span data-toggle-target="textCollapsed"><%= t('.show_dpb') %></span>
-                  <span data-toggle-target="textExpanded" class="hidden"><%= t('.hide_dpb') %></span>
-                  <svg data-toggle-target="icon" class="w-4 h-4 ml-1 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+          <button type="button"
+                  data-action="click->toggle#toggle"
+                  class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="whitespace-nowrap"><%= t('.dpb_cards') %></span>
+            </span>
+            <span class="flex items-center gap-2 shrink-0">
+              <span class="hidden md:inline text-xs text-gray-400">
+                <span data-toggle-target="textCollapsed"><%= t('.show_dpb') %></span>
+                <span data-toggle-target="textExpanded" class="hidden"><%= t('.hide_dpb') %></span>
+              </span>
+              <svg data-toggle-target="icon"
+                   class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                   fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
 
-            <div data-toggle-target="content" class="p-2 space-y-3">
-              <% [ "dpb_2023", "dpb_2020", "dpb_2014"].each do |value| %>
-                <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
-              <% end %>
-            </div>
+          <div data-toggle-target="content" class="hidden mt-2 space-y-2">
+            <% [ "dpb_2023", "dpb_2020", "dpb_2014"].each do |value| %>
+              <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
+            <% end %>
           </div>
         </div>
 

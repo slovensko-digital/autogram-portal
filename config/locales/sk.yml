@@ -55,6 +55,7 @@ sk:
         pending: "Čaká na podpis"
         signed: "Podpísané"
         declined: "Odmietnuté"
+        superseded: "Podpis nie je potrebný"
     application:
       signature_qualifications:
         qesig: "Vlastnoručný podpis"
@@ -247,6 +248,7 @@ sk:
       state_awaiting: "Čaká na môj podpis"
       state_signed: "Podpísané mnou"
       state_declined: "Odmietnuté"
+      state_superseded: "Podpis nie je potrebný"
       sort_newest: "Najnovšie"
       sort_oldest: "Najstaršie"
       contract: "dokument"
@@ -301,6 +303,8 @@ sk:
       decline_confirm: "Ste si istý, že chcete odmietnuť podpísanie tohto balíka?"
       declined_notice: "Odmietli ste podpísať tento balík."
       accepted_notice: "Tento balík môžete znovu podpísať."
+      bundle_already_completed: "Balík bol už dokončený."
+      signature_no_longer_required: "Váš podpis už nie je pre tento balík potrebný."
     status:
       all_signed: "Všetky dokumenty podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
@@ -320,7 +324,15 @@ sk:
       email_placeholder: "jan.novak@example.com"
       email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
       copy_to_clipboard: "Kopírovať odkaz na podpisovanie"
-
+      signing_rule_label: "Pravidlo podpisovania"
+      signing_rule_all: "Všetci adresáti musia podpísať"
+      signing_rule_all_description: "Balík je dokončený, keď podpíšu všetci adresáti."
+      signing_rule_any: "Stačí podpis jedného adresáta"
+      signing_rule_any_description: "Balík je dokončený hneď po prvom podpise."
+      signing_rule_threshold: "Určitý počet adresátov musí podpísať"
+      signing_rule_threshold_description: "Balík je dokončený, keď podpíše zadaný počet adresátov."
+      required_signatures_label: "Počet vyžadovaných podpisov"
+      required_signatures_of: "z %{count} adresátov"
   contracts:
     alerts:
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
@@ -429,6 +441,7 @@ sk:
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
+      advanced_settings: "Rozšírené nastavenia"
       signature_format: "Formát podpisu"
       signature_level: "Typ podpisu"
       allowed_methods: "Povolené metódy podpisu"
@@ -840,6 +853,12 @@ sk:
       view_bundle: "Zobraziť dokument"
       legal_validity_title: "Právna sila"
       legal_validity_text: "Kvalifikovaný elektronický podpis má rovnakú právnu silu ako vlastnoručný podpis podľa nariadenia eIDAS (EU) 910/2014."
+    signature_no_longer_required:
+      subject: "Váš podpis už nie je potrebný"
+      title: "Podpis už nie je potrebný"
+      message: "Balík dokumentov od %{author_name} bol dokončený bez vášho podpisu."
+      details_title: "Dokumenty v balíku:"
+      view_bundle: "Zobraziť balík"
 
   layouts:
     mailer:

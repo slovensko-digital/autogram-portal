@@ -38,7 +38,7 @@ class Recipient < ApplicationRecord
 
   scope :awaiting_contract, ->(contract) {
     joins(recipient_signer: :signer_contracts)
-      .where(signer_contracts: { contract_id: contract.id, signed_at: nil, declined_at: nil })
+      .where(signer_contracts: { contract_id: contract.id, signed_at: nil, declined_at: nil, superseded_at: nil })
       .distinct
   }
 
@@ -52,6 +52,7 @@ class Recipient < ApplicationRecord
   before_create :check_blocks
   before_create :set_default_locale
   after_create :associate_with_bundle_contracts
+  after_create :recompute_bundle_superseded_state
 
   def to_param
     uuid
@@ -81,12 +82,17 @@ class Recipient < ApplicationRecord
     signer_contracts.declined.exists?
   end
 
+  def superseded?
+    signer_contracts.superseded.exists? && !signer_contracts.signed.exists? && !pending?
+  end
+
   def signed?
     signer_contracts.exists? && !pending? && !declined?
   end
 
   def notifiable?
     return false if signer_contracts.signed.exists?
+    return false if superseded?
     not_notified?
   end
 
@@ -100,7 +106,7 @@ class Recipient < ApplicationRecord
 
   def removable?
     return false if signer_contracts.signed.exists?
-    notifiable? || declined?
+    notifiable? || declined? || superseded?
   end
 
   private
@@ -133,5 +139,9 @@ class Recipient < ApplicationRecord
       bundle.contracts.map { |c| { signer_id: recipient_signer.id, contract_id: c.id, created_at: now, updated_at: now } },
       unique_by: [ :signer_id, :contract_id ]
     )
+  end
+
+  def recompute_bundle_superseded_state
+    bundle&.recompute_superseded_state_if_rules_changed
   end
 end

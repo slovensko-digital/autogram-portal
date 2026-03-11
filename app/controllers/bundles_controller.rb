@@ -12,7 +12,7 @@ class BundlesController < ApplicationController
 
     awaiting_scope = current_user.bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
-                                 .where(signer_contracts: { signed_at: nil, declined_at: nil })
+                                 .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                  .distinct
 
     declined_scope = current_user.bundles
@@ -44,7 +44,7 @@ class BundlesController < ApplicationController
 
   def received
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
-    @state = params[:state].presence_in(%w[awaiting signed declined])
+    @state = params[:state].presence_in(%w[awaiting signed declined superseded])
 
     order_dir = @sort == "oldest" ? :asc : :desc
     recipient_bundles = Bundle.recipient_user(current_user).distinct
@@ -52,7 +52,7 @@ class BundlesController < ApplicationController
     awaiting_for_user_scope = Bundle.recipient_user(current_user)
                                     .joins(recipients: { recipient_signer: :signer_contracts })
                                     .where(recipients: { user_id: current_user.id })
-                                    .where(signer_contracts: { signed_at: nil, declined_at: nil })
+                                    .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                     .distinct
 
     declined_for_user_scope = Bundle.recipient_user(current_user)
@@ -61,6 +61,14 @@ class BundlesController < ApplicationController
                                     .where.not(signer_contracts: { declined_at: nil })
                                     .distinct
 
+    superseded_for_user_scope = Bundle.recipient_user(current_user)
+                                      .joins(recipients: { recipient_signer: :signer_contracts })
+                                      .where(recipients: { user_id: current_user.id })
+                                      .where.not(signer_contracts: { superseded_at: nil })
+                                      .where(signer_contracts: { signed_at: nil })
+                                      .where(signer_contracts: { declined_at: nil })
+                                      .distinct
+
     @bundles = case @state
     when "awaiting"
       recipient_bundles.where(id: awaiting_for_user_scope.select(:id))
@@ -68,8 +76,12 @@ class BundlesController < ApplicationController
     when "signed"
       recipient_bundles.where.not(id: awaiting_for_user_scope.select(:id))
                        .where.not(id: declined_for_user_scope.select(:id))
+                       .where.not(id: superseded_for_user_scope.select(:id))
     when "declined"
       recipient_bundles.where(id: declined_for_user_scope.select(:id))
+    when "superseded"
+      recipient_bundles.where(id: superseded_for_user_scope.select(:id))
+                       .where.not(id: awaiting_for_user_scope.select(:id))
     else
       recipient_bundles
     end
@@ -93,6 +105,8 @@ class BundlesController < ApplicationController
         render partial: "note_form"
       when "public_link"
         render partial: "public_link_form"
+      when "signing_rule"
+        render "recipients/index"
       else
         redirect_to @bundle
       end
@@ -128,9 +142,20 @@ class BundlesController < ApplicationController
   def decline
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
+
+    if bundle.completed?
+      return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
+                         notice: I18n.t("bundles.sign.bundle_already_completed")
+    end
+
+    if recipient.superseded?
+      return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
+                         notice: I18n.t("bundles.sign.signature_no_longer_required")
+    end
+
     affected_signer_contracts = recipient.signer_contracts
                                        .joins(:contract)
-                                       .where(contracts: { bundle_id: bundle.id }, signed_at: nil, declined_at: nil)
+                                       .where(contracts: { bundle_id: bundle.id }, signed_at: nil, declined_at: nil, superseded_at: nil)
     affected_signer_contract_ids = affected_signer_contracts.pluck(:id)
 
     now = Time.current
@@ -147,6 +172,12 @@ class BundlesController < ApplicationController
   def accept
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
+
+    if bundle.completed?
+      return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
+                         notice: I18n.t("bundles.sign.bundle_already_completed")
+    end
+
     affected_signer_contracts = recipient.signer_contracts
                                        .joins(:contract)
                                        .where(contracts: { bundle_id: bundle.id }, signed_at: nil)
@@ -184,6 +215,8 @@ class BundlesController < ApplicationController
     params.require(:bundle).except(:step).permit(
       :note,
       :publicly_visible,
+      :signing_rule,
+      :required_signatures,
       recipients_attributes: [ :id, :email, :_destroy ]
     )
   end

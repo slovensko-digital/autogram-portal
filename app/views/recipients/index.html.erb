@@ -6,6 +6,81 @@
         <p class="text-gray-600"><%= t('.subtitle') %></p>
       </div>
     </div>
+
+    <%# Signing rule configuration - collapsible %>
+    <div data-controller="toggle" data-toggle-collapsed-value="true">
+      <button type="button"
+              data-action="click->toggle#toggle"
+              class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
+        <span class="flex items-center gap-2 min-w-0">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span class="whitespace-nowrap"><%= t('.signing_rule_label') %></span>
+        </span>
+        <span class="flex items-center gap-2 shrink-0">
+          <span class="hidden md:inline text-xs text-gray-400 max-w-48 truncate">
+            <span data-toggle-target="textCollapsed"><%= t(".signing_rule_#{@bundle.signing_rule}") %></span>
+            <span data-toggle-target="textExpanded" class="hidden"><%= t(".signing_rule_#{@bundle.signing_rule}") %></span>
+          </span>
+          <svg data-toggle-target="icon"
+               class="w-4 h-4 text-gray-400 transition-transform duration-200"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </span>
+      </button>
+
+      <div data-toggle-target="content" class="hidden mt-2">
+        <%= form_with model: @bundle, url: bundle_path(@bundle), method: :patch,
+              data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } do |f| %>
+          <%= f.hidden_field :step, value: "signing_rule" %>
+          <div class="rounded-lg border border-gray-200 p-4 space-y-3"
+               data-controller="signing-rule"
+               data-action="change->signing-rule#change">
+            <div class="grid grid-cols-1 gap-2">
+              <%= render 'shared/radio_button_card',
+                    form: f,
+                    name: :signing_rule,
+                    value: "all",
+                    label: t('.signing_rule_all'),
+                    description: t('.signing_rule_all_description'),
+                    checked: @bundle.signing_rule == "all" %>
+              <%= render 'shared/radio_button_card',
+                    form: f,
+                    name: :signing_rule,
+                    value: "any",
+                    label: t('.signing_rule_any'),
+                    description: t('.signing_rule_any_description'),
+                    checked: @bundle.signing_rule == "any" %>
+              <%= render 'shared/radio_button_card',
+                    form: f,
+                    name: :signing_rule,
+                    value: "threshold",
+                    label: t('.signing_rule_threshold'),
+                    description: t('.signing_rule_threshold_description'),
+                    checked: @bundle.signing_rule == "threshold" %>
+            </div>
+            <div data-signing-rule-target="thresholdField"
+                 class="<%= 'hidden' unless @bundle.signing_rule == 'threshold' %> rounded-lg bg-gray-50 px-4 py-3">
+              <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('.required_signatures_label') %></label>
+              <div class="flex items-center gap-2">
+                <%= f.number_field :required_signatures,
+                      value: @bundle.required_signatures,
+                      min: 1,
+                      max: [@bundle.recipients.size, 1].max,
+                      class: "w-20 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+                <span class="text-sm text-gray-500"><%= t('.required_signatures_of', count: @bundle.recipients.size) %></span>
+              </div>
+            </div>
+            <%= f.submit t('actions.save'),
+                  class: "inline-flex items-center px-3 py-1.5 border border-transparent cursor-pointer text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
     <div class="space-y-3">
       <% @bundle.recipients.order(:created_at).select(&:persisted?).each do |recipient| %>
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">

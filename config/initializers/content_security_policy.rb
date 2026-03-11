@@ -9,6 +9,7 @@ Rails.application.configure do
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data, :blob
+    policy.worker_src  :self, :blob, :data
     # Allow object/embed tags for PDF previews
     policy.object_src  :self
     # Allow unsafe-eval for Alpine.js and unsafe-inline for inline scripts/event handlers

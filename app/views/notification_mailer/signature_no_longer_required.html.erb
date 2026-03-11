@@ -1,0 +1,22 @@
+<p class="greeting"><%= t('notification_mailer.greeting') %></p>
+
+<%# Card: notification %>
+<div class="section-card">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+    <div class="section-icon" style="background-color:#DBEAFE;"><%= render 'icon_check_done' %></div>
+    <h2 class="section-title"><%= t('.title') %></h2>
+  </div>
+  <p class="section-body"><%= t('.message', author_name: @bundle.author.display_name) %></p>
+</div>
+
+<%# Card: document list %>
+<div class="section-card">
+  <div class="details-title"><%= t('.details_title') %></div>
+  <div class="details-list">
+    <% @bundle.contracts.each do |contract| %>
+      <div><%= contract.display_name %></div>
+    <% end %>
+  </div>
+</div>
+
+<%= link_to t('.view_bundle'), sign_bundle_url(@bundle, recipient: @user.uuid), class: "button" %>

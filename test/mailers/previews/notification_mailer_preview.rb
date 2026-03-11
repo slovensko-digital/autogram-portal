@@ -27,4 +27,10 @@ class NotificationMailerPreview < ActionMailer::Preview
     user = bundle.recipients.find_by(notification_status: "notified")
     NotificationMailer.with(user: user, locale: params[:locale]).signature_requested(bundle)
   end
+
+  def signature_no_longer_required
+    bundle = Bundle.joins(:recipients).where.not(recipients: { id: nil }).last
+    recipient = bundle.recipients.first
+    NotificationMailer.with(user: recipient, locale: params[:locale]).signature_no_longer_required(bundle)
+  end
 end

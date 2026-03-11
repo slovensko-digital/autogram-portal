@@ -48,6 +48,7 @@ en:
     edit: "Edit"
     sign: "Sign"
     change_selection: "Change selection"
+    view: "View"
 
   upload_form:
     agree_to_policies_html: "I agree with %{terms_link} and %{privacy_link}"
@@ -83,6 +84,7 @@ en:
         pending: "Awaiting signature"
         signed: "Signed"
         declined: "Declined"
+        superseded: "Signature no longer required"
     application:
       signature_levels:
         pades: "PAdES"
@@ -161,6 +163,12 @@ en:
         action: "Log in to my account"
         expiry_notice: "Note that the link will expire in %{expiry} minutes."
     shared:
+      captcha:
+        captcha_label: "I'm not a robot"
+        captcha_verified: "Verified"
+        captcha_verifying: "Verifying…"
+        captcha_wait: "Please wait…"
+        captcha_error: "Verification failed. Please try again."
       links:
         sign_in: "Sign in"
         sign_up: "Sign up"
@@ -194,6 +202,7 @@ en:
 
   document:
     one: "document"
+    few: "documents"
     other: "documents"
 
   documents:
@@ -297,6 +306,9 @@ en:
       column_contracts: "Documents"
       column_date: "Date"
       signatures: "Signatures"
+    bundle_list:
+      signatures: "Signatures"
+      no_bundles: "No bundles yet"
     received:
       title: "Received for Signing"
       subtitle: "Bundles sent to you by others for signing."
@@ -306,6 +318,7 @@ en:
       state_awaiting: "Awaiting my signature"
       state_signed: "Signed by me"
       state_declined: "Declined"
+      state_superseded: "Signature no longer required"
       sort_newest: "Newest first"
       sort_oldest: "Oldest first"
       column_bundle: "Bundle"
@@ -339,6 +352,16 @@ en:
       no_note: "No note for recipients"
       request_signature_title: "Request Signatures"
       signed: "Signed"
+    public_link_form:
+      title: "Public link for contract bundle"
+      subtitle: "Share this direct link with recipients so they can sign documents in the bundle."
+      label: "Copy link to clipboard"
+      turn_on: "Enable public link"
+      turn_off: "Disable public link"
+    note_form:
+      title: "Note"
+      placeholder: "Optional message for recipients"
+      label: "Message for recipients"
     form:
       note_title: "Note"
       note_placeholder: "Optional message for recipients"
@@ -362,6 +385,8 @@ en:
       decline_confirm: "Are you sure you want to decline signing this bundle?"
       declined_notice: "You have declined to sign this bundle."
       accepted_notice: "You can sign this bundle again."
+      bundle_already_completed: "This bundle has already been completed."
+      signature_no_longer_required: "Your signature is no longer required for this bundle."
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
@@ -376,13 +401,28 @@ en:
     index:
       title: "Send for Signature"
       subtitle: "Send this bundle to others for signing via email."
+      send_invitation: "Send email"
       email_label: "Recipient Email"
       email_placeholder: "jan.novak@example.com"
       email_help: "Recipient will receive an email with a link to sign the documents"
+      copy_to_clipboard: "Copy signing link"
+      signing_rule_label: "Signing rule"
+      signing_rule_all: "All recipients must sign"
+      signing_rule_all_description: "The bundle is complete when all recipients have signed."
+      signing_rule_any: "Any one recipient is enough"
+      signing_rule_any_description: "The bundle is complete after the very first signature."
+      signing_rule_threshold: "A specific number of recipients must sign"
+      signing_rule_threshold_description: "The bundle is complete once the specified number of recipients have signed."
+      required_signatures_label: "Required number of signatures"
+      required_signatures_of: "of %{count} recipients"
 
   contracts:
     alerts:
       unauthorized_edit_attempt: "You are not authorized to edit this contract."
+    visualization_with_toggle:
+      hide_document: "Hide document"
+      show_document: "Show document"
+      loading_content: "Loading document content..."
     index:
       title: "Contracts"
       upload_document: "Upload document"
@@ -488,8 +528,10 @@ en:
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+      advanced_settings: "Advanced settings"
       signature_format: "Electronic signature format"
       signature_method: "Electronic signature level"
+      signature_level: "Electronic signature level"
       allowed_methods: "Allowed signature methods"
     signature_extension:
       add_timestamp_title: "Add timestamp"
@@ -850,6 +892,9 @@ en:
       eidentita_not_installed: "eIdentita app is not installed. Please install it from the App Store (iOS) or Google Play (Android) and try again."
       eidentita_install_ios: "Install from App Store"
       eidentita_install_android: "Install from Google Play"
+    clipboard:
+      copy_success: "Link copied to clipboard"
+      copy_failure: "Failed to copy link"
 
   notification_mailer:
     greeting: "Hello 👋"
@@ -882,6 +927,7 @@ en:
       title: "New document for signing"
       sender_message: "%{sender_name} sent you a document for electronic signing."
       note_from_sender_title: "Note from sender"
+      documents: "Documents"
       document_name_label: "Document name"
       message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
       how_it_works_title: "How it works"
@@ -896,6 +942,12 @@ en:
       view_bundle: "View document"
       legal_validity_title: "Legal validity"
       legal_validity_text: "Electronic signature has the same legal force as a handwritten signature under Regulation eIDAS (EU) 910/2014."
+    signature_no_longer_required:
+      subject: "Your signature is no longer required"
+      title: "Signature no longer required"
+      message: "The bundle of documents from %{author_name} has been completed without requiring your signature."
+      details_title: "Documents in bundle:"
+      view_bundle: "View bundle"
   
   layouts:
     mailer:
