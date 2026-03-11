@@ -48,6 +48,7 @@ en:
     edit: "Edit"
     sign: "Sign"
     change_selection: "Change selection"
+    view: "View"
 
   upload_form:
     agree_to_policies_html: "I agree with %{terms_link} and %{privacy_link}"
@@ -162,6 +163,12 @@ en:
         action: "Log in to my account"
         expiry_notice: "Note that the link will expire in %{expiry} minutes."
     shared:
+      captcha:
+        captcha_label: "I'm not a robot"
+        captcha_verified: "Verified"
+        captcha_verifying: "Verifying…"
+        captcha_wait: "Please wait…"
+        captcha_error: "Verification failed. Please try again."
       links:
         sign_in: "Sign in"
         sign_up: "Sign up"
@@ -195,6 +202,7 @@ en:
 
   document:
     one: "document"
+    few: "documents"
     other: "documents"
 
   documents:
@@ -298,6 +306,9 @@ en:
       column_contracts: "Documents"
       column_date: "Date"
       signatures: "Signatures"
+    bundle_list:
+      signatures: "Signatures"
+      no_bundles: "No bundles yet"
     received:
       title: "Received for Signing"
       subtitle: "Bundles sent to you by others for signing."
@@ -341,6 +352,16 @@ en:
       no_note: "No note for recipients"
       request_signature_title: "Request Signatures"
       signed: "Signed"
+    public_link_form:
+      title: "Public link for contract bundle"
+      subtitle: "Share this direct link with recipients so they can sign documents in the bundle."
+      label: "Copy link to clipboard"
+      turn_on: "Enable public link"
+      turn_off: "Disable public link"
+    note_form:
+      title: "Note"
+      placeholder: "Optional message for recipients"
+      label: "Message for recipients"
     form:
       note_title: "Note"
       note_placeholder: "Optional message for recipients"
@@ -398,6 +419,10 @@ en:
   contracts:
     alerts:
       unauthorized_edit_attempt: "You are not authorized to edit this contract."
+    visualization_with_toggle:
+      hide_document: "Hide document"
+      show_document: "Show document"
+      loading_content: "Loading document content..."
     index:
       title: "Contracts"
       upload_document: "Upload document"
@@ -505,6 +530,7 @@ en:
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
       signature_format: "Electronic signature format"
       signature_method: "Electronic signature level"
+      signature_level: "Electronic signature level"
       allowed_methods: "Allowed signature methods"
     signature_extension:
       add_timestamp_title: "Add timestamp"
@@ -865,6 +891,9 @@ en:
       eidentita_not_installed: "eIdentita app is not installed. Please install it from the App Store (iOS) or Google Play (Android) and try again."
       eidentita_install_ios: "Install from App Store"
       eidentita_install_android: "Install from Google Play"
+    clipboard:
+      copy_success: "Link copied to clipboard"
+      copy_failure: "Failed to copy link"
 
   notification_mailer:
     greeting: "Hello 👋"
@@ -897,6 +926,7 @@ en:
       title: "New document for signing"
       sender_message: "%{sender_name} sent you a document for electronic signing."
       note_from_sender_title: "Note from sender"
+      documents: "Documents"
       document_name_label: "Document name"
       message: "%{author_name} has requested your signature on a bundle of documents in the Autogram Portal system."
       how_it_works_title: "How it works"
