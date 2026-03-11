@@ -940,8 +940,6 @@ en:
       step_3_desc: "You will receive the signed document by email"
       details_title: "Documents to sign:"
       view_bundle: "View document"
-      legal_validity_title: "Legal validity"
-      legal_validity_text: "Electronic signature has the same legal force as a handwritten signature under Regulation eIDAS (EU) 910/2014."
     signature_no_longer_required:
       subject: "Your signature is no longer required"
       title: "Signature no longer required"

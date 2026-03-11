@@ -851,8 +851,6 @@ sk:
       step_3_desc: "Dokument je podpísaný"
       details_title: "Dokumenty na podpis:"
       view_bundle: "Zobraziť dokument"
-      legal_validity_title: "Právna sila"
-      legal_validity_text: "Kvalifikovaný elektronický podpis má rovnakú právnu silu ako vlastnoručný podpis podľa nariadenia eIDAS (EU) 910/2014."
     signature_no_longer_required:
       subject: "Váš podpis už nie je potrebný"
       title: "Podpis už nie je potrebný"
