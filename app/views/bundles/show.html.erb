@@ -56,6 +56,15 @@
                 </div>
               <% end %>
             </div>
+
+            <% if @bundle.author == current_user && contract.signed_document.attached? %>
+              <div class="mt-4 flex justify-end">
+                <%= link_to signed_document_contract_path(contract),
+                      class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  <%= t('contracts.download_actions.download_button') %>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         <% end %>
       </div>
