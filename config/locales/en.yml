@@ -803,6 +803,49 @@ en:
         api:
           title: "REST API & Webhooks"
           description: "Comprehensive REST API for seamless integration into your applications. Standard Webhooks support enables real-time notifications for signature events and workflow automation."
+      how_it_works:
+        subtitle: "Process"
+        title: "How it works"
+        step_1:
+          title: "Upload your document"
+          description: "Select the PDF or other document you want to have signed."
+        step_2:
+          title: "Add recipients"
+          description: "Enter the email addresses of the people who need to sign the document."
+        step_3:
+          title: "Choose signature type"
+          description: "Choose between a qualified electronic signature with or without a timestamp."
+        step_4:
+          title: "Send and wait"
+          description: "Send the document to recipients and wait for required amount of signatures."
+        step_5:
+          title: "Download signed document"
+          description: "Once the recipients have signed, download the completed signed document."
+      faq:
+        subtitle: "FAQ"
+        title: "Frequently asked questions"
+        items:
+          account:
+            question: "Do I need an account to sign a document?"
+            answer: "No. Recipients can sign documents without registering, directly via the link they receive by email. An account is only needed for senders who want to track document history, send signature requests, and use advanced features. An account is also not required if you only want to sign and validate documents yourself."
+          formats:
+            question: "What file formats are supported?"
+            answer: "We primarily work with PDF documents. XML documents for Slovak electronic forms, ASiC-E containers, and other common formats are also supported. Exact list: .pdf, .xml, .xdcf, .asice, .txt, .png, .jpg, .jpeg"
+          signature_types:
+            question: "What is the difference between a qualified electronic signature with and without a timestamp?"
+            answer: "A qualified electronic signature without a timestamp is equivalent to a handwritten signature under Slovak civil law. By adding a qualified timestamp, the signature becomes de facto equivalent to a notarised signature."
+          recipients_install:
+            question: "Do recipients need to install anything?"
+            answer: "Recipients need an application for creating qualified signatures, such as Autogram Desktop, Autogram Mobile, or eIdentita. Depending on the exact card/ID card, using a computer and a physical card reader may be required."
+          multiple_signers:
+            question: "Can I send a document to multiple people for signing?"
+            answer: "Yes. You can add any number of recipients. The system will track who has already signed and notify you when everyone has signed the document. You can also define how many recipients must sign for the bundle to be considered completed."
+          storage:
+            question: "How long are documents stored?"
+            answer: "Documents and bundles of signed-in users are stored until the user deletes them. Documents and bundles of non-signed-in users are stored for at most 60 minutes."
+          open_source:
+            question: "Is Autogram Portal free and open-source?"
+            answer: "Yes. Autogram Portal is a fully open-source project (EUPL licence) available on GitHub. You can run it on your own infrastructure. Development is supported by the NLNet organisation."
       cta:
         title: "Ready to get started?"
         subtitle: "Try Autogram Portal now or explore the source code on GitHub."

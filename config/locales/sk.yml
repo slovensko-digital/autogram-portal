@@ -717,6 +717,49 @@ sk:
         api:
           title: "REST API a Webhooky"
           description: "Komplexné REST API pre bezproblémovú integráciu do vašich aplikácií. Štandardná podpora Webhookov umožňuje notifikácie v reálnom čase pre udalosti podpisovania a automatizáciu pracovných tokov."
+      how_it_works:
+        subtitle: "Proces"
+        title: "Ako to funguje"
+        step_1:
+          title: "Nahrajte dokument"
+          description: "Vyberte PDF alebo iný dokument, ktorý chcete podpísať."
+        step_2:
+          title: "Pridajte príjemcov"
+          description: "Zadajte e-mailové adresy osôb, ktoré majú dokument podpísať."
+        step_3:
+          title: "Vyberte typ podpisu"
+          description: "Zvoľte kvalifikovaný elektronický podpis s časovou pečiatkou alebo bez nej."
+        step_4:
+          title: "Odošlite a čakajte"
+          description: "Odošlite balík adresátom a počkajte, kým ho podpíše požadovaný počet."
+        step_5:
+          title: "Stiahnite podpísaný dokument"
+          description: "Po dokončení podpisovania si stiahnite hotový podpísaný dokument."
+      faq:
+        subtitle: "FAQ"
+        title: "Časté otázky"
+        items:
+          account:
+            question: "Potrebujem účet na podpísanie dokumentu?"
+            answer: "Nie. Príjemcovia môžu dokumenty podpisovať bez registrácie priamo cez odkaz, ktorý dostanú emailom. Účet je potrebný len pre odosielateľov, ktorí chcú sledovať históriu dokumentov, posielať žiadosti o podpis a využívať pokročilé funkcie. Rovnako nie je účet potrebný, ak chcete iba vy sami podpisovať a overovať dokumenty."
+          formats:
+            question: "Aké formáty súborov sú podporované?"
+            answer: "Primárne pracujeme s PDF dokumentmi. Okrem toho sú podporované XML dokumenty slovenských elektronických formulárov, ASiC-E kontajnery a ďalšie bežné formáty. Presný zoznam: .pdf, .xml, .xdcf, .asice, .txt, .png, .jpg, .jpeg"
+          signature_types:
+            question: "Aký je rozdiel medzi kvalifikovaným elektronickým podpisom s časovou pečiatkou a bez nej?"
+            answer: "Kvalifikovaný elektronický podpis bez časovej pečiatky je podľa občianskeho zákonníka ekvivalentom vlastnoručného podpisu. Pridaním kvalifikovanej časovej pečiatky sa dosiahne to, že podpis je de facto rovnocenným overeného podpisu."
+          recipients_install:
+            question: "Musia si príjemcovia niečo inštalovať?"
+            answer: "Príjemca potrebuje aplikáciu pre vytvárenie kvalifikovaných podpisov ako Autogram na počítači, Autogram v mobile alebo eIdentita. V závislosti od presnej karty/občianskeho preukazu môže byť nutné použiť počítač a fyzickú čítačku kariet."
+          multiple_signers:
+            question: "Môžem poslať dokument na podpis viacerým ľuďom?"
+            answer: "Áno. Môžete pridať ľubovoľný počet príjemcov. Systém bude sledovať, kto už podpísal, a notifikuje vás, keď všetci dokument podpíšu. Rovnako si môžete nastaviť, koľkí príjemcovia musia balík podpísať, aby bol považovaný za dokončený."
+          storage:
+            question: "Ako dlho sú dokumenty uložené?"
+            answer: "Dokumenty a balíky prihláseného používateľa sa uchovávajú dokým ich používateľ nezmaže. Dokumenty a balíky nepríhlásených používateľov sa uchovávajú najviac 60 minút."
+          open_source:
+            question: "Je Autogram Portal zadarmo a open-source?"
+            answer: "Áno. Autogram Portal je plne open-source projekt (licencia EUPL) dostupný na GitHube. Môžete si ho spustiť na vlastnej infraštruktúre. Vývoj je podporovaný organizáciou NLNet."
       cta:
         title: "Pripravení začať?"
         subtitle: "Vyskúšajte Autogram Portal teraz alebo preskúmajte zdrojový kód na GitHube."
