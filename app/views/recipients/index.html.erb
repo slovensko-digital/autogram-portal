@@ -20,8 +20,10 @@
           <span class="whitespace-nowrap"><%= t('.signing_rule_label') %></span>
         </span>
         <span class="flex items-center gap-2 shrink-0">
-          <span data-toggle-target="textCollapsed" class="max-md:hidden md:inline text-xs text-gray-400 max-w-48 truncate"><%= t(".signing_rule_#{@bundle.signing_rule}") %></span>
-          <span data-toggle-target="textExpanded" class="hidden"></span>
+          <span class="hidden md:inline text-xs text-gray-400 max-w-48 truncate">
+            <span data-toggle-target="textCollapsed"><%= t(".signing_rule_#{@bundle.signing_rule}") %></span>
+            <span data-toggle-target="textExpanded" class="hidden"><%= t(".signing_rule_#{@bundle.signing_rule}") %></span>
+          </span>
           <svg data-toggle-target="icon"
                class="w-4 h-4 text-gray-400 transition-transform duration-200"
                fill="none" viewBox="0 0 24 24" stroke="currentColor">

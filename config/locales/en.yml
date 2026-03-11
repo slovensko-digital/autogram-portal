@@ -528,6 +528,7 @@ en:
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+      advanced_settings: "Advanced settings"
       signature_format: "Electronic signature format"
       signature_method: "Electronic signature level"
       signature_level: "Electronic signature level"

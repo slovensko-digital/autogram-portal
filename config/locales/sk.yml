@@ -441,6 +441,7 @@ sk:
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
+      advanced_settings: "Rozšírené nastavenia"
       signature_format: "Formát podpisu"
       signature_level: "Typ podpisu"
       allowed_methods: "Povolené metódy podpisu"
