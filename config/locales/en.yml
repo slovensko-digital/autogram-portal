@@ -69,6 +69,7 @@ en:
       settings: "Settings"
       new_contract: "New contract"
       electronic_onboarding: "Electronic onboarding"
+      docs: "User Guide"
       sign_in: "Sign in"
       sign_out: "Sign out"
 
@@ -851,6 +852,297 @@ en:
         subtitle: "Try Autogram Portal now or explore the source code on GitHub."
         start_signing: "Start signing documents"
         view_github: "View on GitHub"
+
+  docs:
+    index:
+      header:
+        eyebrow: "User Guide"
+        title: "User Documentation"
+        subtitle: "Everything you need to know about using Autogram Portal."
+      nav:
+        dashboard: "Dashboard"
+        contracts: "My Documents"
+        bundles: "My Bundles"
+        received: "Received Bundles"
+        signing: "Signing"
+        account: "Account Settings"
+        integration: "API & SDK"
+      dashboard:
+        title: "Dashboard"
+        intro: "After logging in, you are shown a dashboard with statistics about your documents and quick shortcuts for the most common actions."
+        stats:
+          bundles:
+            label: "My Bundles"
+            description: "Total number of bundles you have created and sent for signing."
+            card_class: "border-blue-200 bg-blue-50"
+            dot_class: "bg-blue-500"
+          contracts:
+            label: "My Documents"
+            description: "Total number of documents uploaded to your account."
+            card_class: "border-indigo-200 bg-indigo-50"
+            dot_class: "bg-indigo-500"
+          awaiting:
+            label: "Awaiting My Signature"
+            description: "Bundles from other users where you are a recipient and have not yet signed."
+            card_class: "border-yellow-200 bg-yellow-50"
+            dot_class: "bg-yellow-500"
+          sent:
+            label: "Sent for Signing"
+            description: "Your bundles that are waiting for signatures from recipients."
+            card_class: "border-green-200 bg-green-50"
+            dot_class: "bg-green-500"
+          declined:
+            label: "Declined Bundles"
+            description: "Bundles in which at least one recipient declined to sign."
+            card_class: "border-red-200 bg-red-50"
+            dot_class: "bg-red-500"
+        quick_actions_title: "Quick Actions"
+        quick_actions_description: "From the dashboard you can upload a new document, create a new bundle, or go directly to the list of documents awaiting your signature — all in one click."
+        screenshot_title: "Screenshot"
+        screenshot_description: "Recommended: add a screenshot of the main dashboard with statistics and quick actions."
+        screenshot_file_hint: "File: /public/docs/screenshots/dashboard-overview.png"
+        screenshot_placeholder: "Placeholder for dashboard screenshot"
+      contracts:
+        title: "My Documents"
+        intro: "The \"My Documents\" section shows all individual documents (PDF, XML, ASiC-E\u2026) uploaded to your account. You can filter documents by status and sort them by date."
+        states_title: "Document States"
+        states:
+          awaiting:
+            label: "Awaiting Signature"
+            description: "The document has been uploaded but does not yet contain any signature."
+            badge_class: "bg-yellow-100 text-yellow-800"
+            dot_class: "bg-yellow-500"
+          completed:
+            label: "Signed"
+            description: "The document has been successfully signed."
+            badge_class: "bg-green-100 text-green-800"
+            dot_class: "bg-green-500"
+        actions_title: "Available Document Actions"
+        actions:
+          sign:
+            label: "Sign"
+            description: "Sign the document with your own qualified signature using the Autogram app or eIdentita."
+          request:
+            label: "Request Signature"
+            description: "Send the document to other people for signing via email — the system creates a bundle and sends invitations."
+          timestamp:
+            label: "Add Timestamp"
+            description: "Add a qualified timestamp to a document that already has a signature without one."
+          download:
+            label: "Download"
+            description: "Download the signed document to your device."
+          delete:
+            label: "Delete"
+            description: "Permanently remove the document. A document that is part of a bundle cannot be deleted individually."
+      bundles:
+        title: "My Bundles"
+        intro: "A bundle is a collection of one or more documents sent to recipients for signing. Here you will find all bundles you have created."
+        lifecycle_title: "Creating a Bundle — Step by Step"
+        lifecycle:
+          upload:
+            title: "Upload a Document"
+            description: "Upload a PDF or other file via the \"New Document\" section. After uploading, select the \"Request Signature\" action."
+          configure:
+            title: "Set Signature Type and Format"
+            description: "Choose the signature level (with or without timestamp) and the format (PAdES, XAdES, CAdES, ASiC-E)."
+          recipients:
+            title: "Add Recipients"
+            description: "Enter the email addresses of people who should sign the document. Set the signing rule."
+          send:
+            title: "Send"
+            description: "Recipients receive an email notification with a signing link. You can also copy the link manually."
+          done:
+            title: "Download Signed Documents"
+            description: "Once the bundle is completed, you can download the signed file directly from the bundle detail page."
+        states_title: "Bundle States"
+        states:
+          awaiting:
+            label: "Awaiting Signature"
+            description: "The bundle has been sent to recipients, but not everyone has signed yet."
+            badge_class: "bg-yellow-100 text-yellow-800"
+            dot_class: "bg-yellow-500"
+          completed:
+            label: "Completed"
+            description: "All required recipients have signed the documents in the bundle."
+            badge_class: "bg-green-100 text-green-800"
+            dot_class: "bg-green-500"
+          declined:
+            label: "Declined"
+            description: "At least one recipient declined to sign."
+            badge_class: "bg-red-100 text-red-800"
+            dot_class: "bg-red-500"
+          no_recipients:
+            label: "No Recipients"
+            description: "The bundle was created but has no recipients added yet."
+            badge_class: "bg-gray-100 text-gray-600"
+            dot_class: "bg-gray-400"
+        signing_rules_title: "Signing Rules"
+        signing_rules:
+          all:
+            label: "All Must Sign"
+            description: "The bundle is completed only when all added recipients have signed."
+          any:
+            label: "Any One Signature Is Enough"
+            description: "The bundle is completed as soon as any single recipient signs."
+          threshold:
+            label: "Minimum Number of Signatures"
+            description: "You can set an exact number of recipients who must sign for the bundle to be considered completed."
+        public_link_title: "Public Signing Link"
+        public_link_description: "For each bundle you can generate a public signing link that allows anyone to sign — without being added as a recipient."
+      received:
+        title: "Received Bundles"
+        intro: "The \"Received Bundles\" section shows all bundles you have been invited to sign — whether by email or via a public link."
+        states_title: "Your States in a Received Bundle"
+        states:
+          awaiting:
+            label: "Awaiting Signature"
+            description: "You have been invited and have not yet signed."
+            badge_class: "bg-yellow-100 text-yellow-800"
+            dot_class: "bg-yellow-500"
+          signed:
+            label: "Signed"
+            description: "You have successfully signed the documents in this bundle."
+            badge_class: "bg-green-100 text-green-800"
+            dot_class: "bg-green-500"
+          declined:
+            label: "Declined"
+            description: "You declined to sign the documents in this bundle."
+            badge_class: "bg-red-100 text-red-800"
+            dot_class: "bg-red-500"
+          superseded:
+            label: "Superseded"
+            description: "The bundle was completed without your signature — e.g. based on an \"any one\" signing rule."
+            badge_class: "bg-gray-100 text-gray-600"
+            dot_class: "bg-gray-400"
+        decline_title: "Declining a Signature Request"
+        decline_description: "During signing you may decline the signature request. The bundle sender will receive an email notification about the decline."
+      signing:
+        title: "Signing Documents"
+        intro: "When signing a document, you choose the signature level and format. Then you select a supported signing application."
+        signature_levels_title: "Signature Levels"
+        signature_levels:
+          baseline_b:
+            label: "Without Timestamp (BASELINE_B)"
+            description: "Qualified electronic signature without a timestamp. Under civil law this is equivalent to a handwritten signature."
+          baseline_t:
+            label: "With Timestamp (BASELINE_T)"
+            description: "Qualified electronic signature with a qualified timestamp. De facto equivalent to a notarised signature. Recommended for documents requiring long-term validity."
+        formats_title: "Signature Formats"
+        formats:
+          pades:
+            label: "PAdES"
+            description: "Signature embedded directly inside the PDF file. Ideal for standard PDF documents — the signed output remains a .pdf file."
+          xades:
+            label: "XAdES + ASiC-E"
+            description: "Signature for XML documents (e.g. Slovak eForms). If needed, you can use ASiC-E as the container output."
+          cades:
+            label: "CAdES + ASiC-E"
+            description: "The signature creates a wrapping .p7s file. If needed, you can use ASiC-E as the container output for any file format."
+        methods_title: "Signing Methods"
+        methods:
+          autogram_desktop:
+            label: "Autogram Desktop"
+            description: "Desktop application for Windows, macOS, and Linux that communicates with a smart card or eID device connected to the computer."
+            links:
+              download:
+                label: "Download Autogram"
+                url: "https://autogram.slovensko.digital"
+          autogram_mobile:
+            label: "Autogram Mobile (AVM)"
+            description: "Mobile application for iOS and Android. Sign documents on a smartphone using mobile eID."
+            links:
+              info:
+                label: "More info and download"
+                url: "https://autogram.slovensko.digital"
+          eidentita:
+            label: "eIdentita"
+            description: "Slovak government signing app for mobile devices. Available on the App Store and Google Play."
+            links:
+              ios:
+                label: "Download from App Store"
+                url: "https://apps.apple.com/sk/app/eidentita/id6739350147"
+              android:
+                label: "Download from Google Play"
+                url: "https://play.google.com/store/apps/details?id=sk.minv.eidentita"
+        qualified_signing_title: "Qualified signing — what to expect"
+        qualified_signing_intro: "Before signing, onboarding walks you through a few checks required for creating a qualified electronic signature."
+        qualified_signing_checks:
+          qscd: "Select your exact QSCD device (most commonly eID, but also residence permit cards)."
+          pin: "Confirm that you know your security codes (BOK/PIN/KEP PIN depending on card type)."
+          cert: "Confirm that your signing certificates are issued on the card."
+        qscd_cards_title: "Supported QSCD cards and compatibility"
+        qscd_cards:
+          eid_2024:
+            label: "Slovak ID card issued after 18.12.2024"
+            mode: "Mobile + desktop (NFC)"
+            badge_class: "bg-green-100 text-green-800"
+            description: "Supports mobile signing via NFC (Autogram Mobile/eIdentita) and desktop signing."
+          eid_2022:
+            label: "Slovak ID card issued after 1.12.2022"
+            mode: "Mobile + desktop (NFC)"
+            badge_class: "bg-green-100 text-green-800"
+            description: "Supports mobile signing via NFC and desktop signing."
+          dpb_2023:
+            label: "Slovak residence permit card issued after 18.10.2023"
+            mode: "Mobile + desktop (NFC)"
+            badge_class: "bg-green-100 text-green-800"
+            description: "Supports mobile signing via NFC and desktop signing."
+          eid_2021:
+            label: "Slovak ID card issued after 21.6.2021"
+            mode: "Desktop only"
+            badge_class: "bg-yellow-100 text-yellow-800"
+            description: "Requires a computer, physical card reader, and desktop app. Mobile signing is not available."
+          dpb_2020:
+            label: "Slovak residence permit card issued after 10.7.2020"
+            mode: "Desktop only"
+            badge_class: "bg-yellow-100 text-yellow-800"
+            description: "Requires a computer, physical card reader, and desktop app. Mobile signing is not available."
+          eid_2013:
+            label: "Slovak ID card issued before 21.6.2021"
+            mode: "Legacy — unsupported"
+            badge_class: "bg-red-100 text-red-800"
+            description: "This card type is no longer compatible with qualified signing."
+          dpb_2014:
+            label: "Slovak residence permit card issued before 10.7.2020"
+            mode: "Legacy — unsupported"
+            badge_class: "bg-red-100 text-red-800"
+            description: "This card type is no longer compatible with qualified signing."
+        screenshot_title: "Screenshot"
+        screenshot_description: "Recommended: add a screenshot of application selection and the document signing step."
+        screenshot_file_hint: "File: /public/docs/screenshots/signing-app-selection.png"
+        screenshot_placeholder: "Placeholder for signing screenshot"
+      account:
+        title: "Account Settings"
+        intro: "In account settings (gear icon in the left menu), you manage basic profile details and security options."
+        items:
+          name:
+            label: "Name"
+            description: "Your display name, visible to senders and recipients in notification emails."
+          email:
+            label: "Email"
+            description: "Your login email is displayed as read-only in settings and cannot be changed there."
+          login:
+            label: "Sign-in Methods"
+            description: "Sign in is available via Google OAuth or a one-time email link (magic link)."
+          delete_account:
+            label: "Delete Account"
+            description: "In the Danger Zone section, you can permanently delete your account after confirming the safety phrase."
+        screenshot_title: "Screenshot"
+        screenshot_description: "Recommended: add a screenshot of account settings with the Danger Zone section highlighted."
+        screenshot_file_hint: "File: /public/docs/screenshots/account-danger-zone.png"
+        screenshot_placeholder: "Placeholder for account settings screenshot"
+      integration:
+        title: "API & SDK"
+        intro: "If you want to integrate Autogram Portal into your own application, use the SDK example and API documentation."
+        links:
+          sdk_example:
+            label: "SDK Example"
+            description: "Interactive browser example for using the SDK."
+            url: "/sdk-example.html"
+          api_docs:
+            label: "Swagger / API v1"
+            description: "Overview of API endpoints and usage under /api/v1."
+            url: "/api/v1"
 
   terms_of_service:
     index:

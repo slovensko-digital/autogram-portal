@@ -1,0 +1,320 @@
+<div class="bg-blue-600 py-16 sm:py-24">
+  <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+    <p class="text-sm font-semibold uppercase tracking-widest text-blue-200 mb-3"><%= t('.header.eyebrow') %></p>
+    <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl"><%= t('.header.title') %></h1>
+    <p class="mt-4 text-lg text-blue-100"><%= t('.header.subtitle') %></p>
+  </div>
+</div>
+
+<div class="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+  <div class="mx-auto max-w-4xl px-6 lg:px-8">
+    <nav class="flex gap-6 overflow-x-auto py-3 text-sm font-medium text-gray-600 whitespace-nowrap scrollbar-none">
+      <a href="#dashboard" class="hover:text-blue-600 transition-colors"><%= t('.nav.dashboard') %></a>
+      <a href="#contracts" class="hover:text-blue-600 transition-colors"><%= t('.nav.contracts') %></a>
+      <a href="#bundles" class="hover:text-blue-600 transition-colors"><%= t('.nav.bundles') %></a>
+      <a href="#received" class="hover:text-blue-600 transition-colors"><%= t('.nav.received') %></a>
+      <a href="#signing" class="hover:text-blue-600 transition-colors"><%= t('.nav.signing') %></a>
+      <a href="#account" class="hover:text-blue-600 transition-colors"><%= t('.nav.account') %></a>
+      <a href="#integration" class="hover:text-blue-600 transition-colors"><%= t('.nav.integration') %></a>
+    </nav>
+  </div>
+</div>
+
+<div class="mx-auto max-w-4xl px-6 lg:px-8 py-16 space-y-20">
+
+  <%# ─── DASHBOARD ──────────────────────────────────────────── %>
+  <section id="dashboard">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.dashboard.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= t('.dashboard.intro') %></p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <% t('.dashboard.stats').each do |_key, stat| %>
+        <div class="rounded-xl border p-5 <%= stat[:card_class] %>">
+          <div class="flex items-start gap-3">
+            <span class="mt-1 h-2.5 w-2.5 rounded-full shrink-0 <%= stat[:dot_class] %>"></span>
+            <div>
+              <p class="text-sm font-semibold text-gray-900"><%= stat[:label] %></p>
+              <p class="mt-1 text-sm text-gray-600"><%= stat[:description] %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-5">
+      <p class="text-sm font-semibold text-blue-900 mb-1"><%= t('.dashboard.quick_actions_title') %></p>
+      <p class="text-sm text-blue-700"><%= t('.dashboard.quick_actions_description') %></p>
+    </div>
+    <div class="mt-6 rounded-xl border-2 border-dashed border-gray-300 bg-white p-5">
+      <p class="text-sm font-semibold text-gray-900 mb-1"><%= t('.dashboard.screenshot_title') %></p>
+      <div class="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+        <img src="/docs/screenshots/dashboard-overview.png" alt="<%= t('.dashboard.screenshot_title') %>" class="w-full h-auto">
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-gray-200">
+
+  <%# ─── CONTRACTS (MY DOCUMENTS) ──────────────────────────── %>
+  <section id="contracts">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.contracts.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= t('.contracts.intro') %></p>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.contracts.states_title') %></h3>
+    <div class="space-y-3 mb-6">
+      <% t('.contracts.states').each do |_key, state| %>
+        <div class="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 mt-0.5 <%= state[:badge_class] %>">
+            <span class="h-1.5 w-1.5 rounded-full shrink-0 <%= state[:dot_class] %>"></span>
+            <%= state[:label] %>
+          </span>
+          <p class="text-sm text-gray-600"><%= state[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.contracts.actions_title') %></h3>
+    <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
+      <% t('.contracts.actions').each do |_key, action| %>
+        <li><strong><%= action[:label] %></strong> — <%= action[:description] %></li>
+      <% end %>
+    </ul>
+  </section>
+
+  <hr class="border-gray-200">
+
+  <%# ─── BUNDLES ──────────────────────────────────────────── %>
+  <section id="bundles">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.bundles.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= t('.bundles.intro') %></p>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.bundles.lifecycle_title') %></h3>
+    <ol class="space-y-3 mb-6">
+      <% t('.bundles.lifecycle').each_with_index do |(_key, step), i| %>
+        <li class="flex items-start gap-3">
+          <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold mt-0.5"><%= i + 1 %></span>
+          <div>
+            <p class="text-sm font-semibold text-gray-900"><%= step[:title] %></p>
+            <p class="text-sm text-gray-500"><%= step[:description] %></p>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.bundles.states_title') %></h3>
+    <div class="space-y-3 mb-6">
+      <% t('.bundles.states').each do |_key, state| %>
+        <div class="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 mt-0.5 <%= state[:badge_class] %>">
+            <span class="h-1.5 w-1.5 rounded-full shrink-0 <%= state[:dot_class] %>"></span>
+            <%= state[:label] %>
+          </span>
+          <p class="text-sm text-gray-600"><%= state[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.bundles.signing_rules_title') %></h3>
+    <div class="space-y-3 mb-6">
+      <% t('.bundles.signing_rules').each do |_key, rule| %>
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+          <p class="text-sm font-semibold text-gray-900"><%= rule[:label] %></p>
+          <p class="mt-1 text-sm text-gray-500"><%= rule[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white p-5">
+      <p class="text-sm font-semibold text-gray-900 mb-1"><%= t('.bundles.public_link_title') %></p>
+      <p class="text-sm text-gray-600"><%= t('.bundles.public_link_description') %></p>
+    </div>
+  </section>
+
+  <hr class="border-gray-200">
+
+  <%# ─── RECEIVED BUNDLES ────────────────────────────────── %>
+  <section id="received">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.received.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= t('.received.intro') %></p>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.received.states_title') %></h3>
+    <div class="space-y-3 mb-6">
+      <% t('.received.states').each do |_key, state| %>
+        <div class="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 mt-0.5 <%= state[:badge_class] %>">
+            <span class="h-1.5 w-1.5 rounded-full shrink-0 <%= state[:dot_class] %>"></span>
+            <%= state[:label] %>
+          </span>
+          <p class="text-sm text-gray-600"><%= state[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="rounded-xl border border-yellow-100 bg-yellow-50 p-5">
+      <p class="text-sm font-semibold text-yellow-900 mb-1"><%= t('.received.decline_title') %></p>
+      <p class="text-sm text-yellow-700"><%= t('.received.decline_description') %></p>
+    </div>
+  </section>
+
+  <hr class="border-gray-200">
+
+  <%# ─── SIGNING A DOCUMENT ─────────────────────────────── %>
+  <section id="signing">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.signing.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-8"><%= t('.signing.intro') %></p>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.signing.signature_levels_title') %></h3>
+    <div class="space-y-3 mb-8">
+      <% t('.signing.signature_levels').each do |_key, level| %>
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+          <p class="text-sm font-semibold text-gray-900"><%= level[:label] %></p>
+          <p class="text-sm text-gray-500"><%= level[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.signing.formats_title') %></h3>
+    <div class="space-y-3 mb-8">
+      <% t('.signing.formats').each do |_key, fmt| %>
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+          <p class="text-sm font-semibold text-gray-900"><%= fmt[:label] %></p>
+          <p class="mt-1 text-sm text-gray-500"><%= fmt[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.signing.methods_title') %></h3>
+    <div class="space-y-3">
+      <% t('.signing.methods').each do |_key, method| %>
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+          <p class="text-sm font-semibold text-gray-900"><%= method[:label] %></p>
+          <p class="mt-1 text-sm text-gray-500"><%= method[:description] %></p>
+          <% if method[:links].present? %>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <% method[:links].each do |_link_key, link| %>
+                <a href="<%= link[:url] %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors">
+                  <%= link[:label] %>
+                </a>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="text-base font-semibold text-gray-900 mt-8 mb-3"><%= t('.signing.qualified_signing_title') %></h3>
+    <p class="text-sm text-gray-600 mb-4"><%= t('.signing.qualified_signing_intro') %></p>
+    <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600 mb-6">
+      <% t('.signing.qualified_signing_checks').each do |_key, check| %>
+        <li><%= check %></li>
+      <% end %>
+    </ul>
+
+    <h4 class="text-sm font-semibold text-gray-900 mb-3"><%= t('.signing.qscd_cards_title') %></h4>
+    <div class="space-y-3 mb-6">
+      <% t('.signing.qscd_cards').each do |_key, card| %>
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <p class="text-sm font-semibold text-gray-900"><%= card[:label] %></p>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= card[:badge_class] %>"><%= card[:mode] %></span>
+          </div>
+          <p class="text-sm text-gray-500"><%= card[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-6 rounded-xl border-2 border-dashed border-gray-300 bg-white p-5">
+      <p class="text-sm font-semibold text-gray-900 mb-1"><%= t('.signing.screenshot_title') %></p>
+      <div class="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+        <img src="/docs/screenshots/signing-app-selection.png" alt="<%= t('.signing.screenshot_title') %>" class="w-full h-auto">
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-gray-200">
+
+  <%# ─── ACCOUNT SETTINGS ────────────────────────────────── %>
+  <section id="account">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-700">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.account.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= t('.account.intro') %></p>
+    <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
+      <% t('.account.items').each do |_key, item| %>
+        <li><strong><%= item[:label] %></strong> — <%= item[:description] %></li>
+      <% end %>
+    </ul>
+    <div class="mt-6 rounded-xl border-2 border-dashed border-gray-300 bg-white p-5">
+      <p class="text-sm font-semibold text-gray-900 mb-1"><%= t('.account.screenshot_title') %></p>
+      <div class="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+        <img src="/docs/screenshots/account-danger-zone.png" alt="<%= t('.account.screenshot_title') %>" class="w-full h-auto">
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-gray-200">
+
+  <%# ─── API & SDK ────────────────────────────────── %>
+  <section id="integration">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-700">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25M14.25 3l-4.5 18" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.integration.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= t('.integration.intro') %></p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <% t('.integration.links').each do |_key, link| %>
+        <a href="<%= link[:url] %>" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-gray-200 bg-white p-5 hover:border-blue-300 transition-colors">
+          <p class="text-sm font-semibold text-gray-900"><%= link[:label] %></p>
+          <p class="mt-1 text-sm text-gray-500"><%= link[:description] %></p>
+        </a>
+      <% end %>
+    </div>
+  </section>
+
+</div>
+
+<% content_for :title, t('.header.title') %>

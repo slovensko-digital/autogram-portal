@@ -33,6 +33,7 @@ Rails.application.routes.draw do
   resources :privacy_policy, only: [ :index ]
   resources :terms_of_service, only: [ :index ]
   resources :about, only: [ :index ]
+  resources :docs, only: [ :index ]
 
   authenticate(:user) do
     get "/dashboard", to: "dashboard#index", as: :dashboard
