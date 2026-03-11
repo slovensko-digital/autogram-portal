@@ -74,7 +74,9 @@ class Api::V1::BundlesController < ApiController
       ],
       webhook: [ :url, :method ],
       postalAddress: [ :address, :recipientName ],
-      recipients: [ :name, :email, :locale ]
+      recipients: [ :name, :email, :locale ],
+      :signingRule,
+      :requiredSignatures
     )
 
     attributes = {
@@ -121,6 +123,9 @@ class Api::V1::BundlesController < ApiController
     if permitted_params[:id].present?
       attributes[:uuid] = permitted_params[:id]
     end
+
+    attributes[:signing_rule] = permitted_params[:signingRule] if permitted_params[:signingRule].present?
+    attributes[:required_signatures] = permitted_params[:requiredSignatures] if permitted_params[:requiredSignatures].present?
 
     attributes
   end

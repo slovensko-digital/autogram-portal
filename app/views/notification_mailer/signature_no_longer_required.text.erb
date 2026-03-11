@@ -1,0 +1,11 @@
+<%= t('notification_mailer.greeting') %>
+
+<%= t('.title') %>
+<%= t('.message', author_name: @bundle.author.display_name) %>
+
+<%= t('.details_title') %>
+<% @bundle.contracts.each do |contract| %>
+- <%= contract.display_name %>
+<% end %>
+
+<%= t('.view_bundle') %>: <%= sign_bundle_url(@bundle, recipient: @user.uuid) %>

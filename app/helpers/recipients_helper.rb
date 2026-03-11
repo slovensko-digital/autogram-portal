@@ -1,13 +1,16 @@
 module RecipientsHelper
   def recipient_status_badge(recipient)
     colors = {
-      pending: { bg: "bg-yellow-100", text: "text-yellow-800" },
-      signed: { bg: "bg-green-100", text: "text-green-800" },
-      declined: { bg: "bg-red-100", text: "text-red-800" }
+      pending:    { bg: "bg-yellow-100", text: "text-yellow-800" },
+      signed:     { bg: "bg-green-100",  text: "text-green-800" },
+      declined:   { bg: "bg-red-100",    text: "text-red-800" },
+      superseded: { bg: "bg-gray-100",   text: "text-gray-600" }
     }
 
     status = if recipient.declined?
       :declined
+    elsif recipient.superseded?
+      :superseded
     elsif recipient.pending?
       :pending
     else

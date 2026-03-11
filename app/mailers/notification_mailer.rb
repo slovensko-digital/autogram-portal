@@ -27,6 +27,11 @@ class NotificationMailer < ApplicationMailer
     mail(subject: I18n.t("notification_mailer.signature_requested.subject"))
   end
 
+  def signature_no_longer_required(bundle)
+    @bundle = bundle
+    mail(subject: I18n.t("notification_mailer.signature_no_longer_required.subject"))
+  end
+
   private
 
   def set_locale

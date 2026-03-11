@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_10_173000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_11_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,6 +58,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_173000) do
     t.datetime "created_at", null: false
     t.text "note"
     t.boolean "publicly_visible", default: false, null: false
+    t.integer "required_signatures"
+    t.string "signing_rule", default: "all", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.string "uuid", null: false
@@ -243,12 +245,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_173000) do
     t.datetime "declined_at"
     t.datetime "signed_at"
     t.bigint "signer_id"
+    t.datetime "superseded_at"
     t.datetime "updated_at", null: false
     t.index ["contract_id", "signed_at", "declined_at"], name: "index_signer_contracts_on_contract_and_signing_state"
     t.index ["contract_id"], name: "index_signer_contracts_on_contract_id"
     t.index ["declined_at"], name: "index_signer_contracts_on_declined_at_not_null", where: "(declined_at IS NOT NULL)"
     t.index ["signer_id", "contract_id"], name: "index_signer_contracts_on_signer_id_and_contract_id", unique: true
     t.index ["signer_id"], name: "index_signer_contracts_on_signer_id"
+    t.index ["superseded_at"], name: "index_signer_contracts_on_superseded_at_not_null", where: "(superseded_at IS NOT NULL)"
   end
 
   create_table "signers", force: :cascade do |t|
