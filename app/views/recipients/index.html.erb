@@ -120,9 +120,8 @@
                     <% end %>
                   <% end %>
 
-                  <div data-controller="clipboard" data-clipboard-text="<%= sign_bundle_url(@bundle, recipient: recipient.uuid) %>">
-                    <%= link_to sign_bundle_url(@bundle, recipient: recipient.uuid),
-                          method: :get,
+                  <div data-controller="clipboard" data-clipboard-text-value="<%= sign_bundle_url(@bundle, recipient: recipient.uuid) %>">
+                    <%= button_tag type: "button",
                           class: "text-gray-500 underline hover:text-gray-700 hover:underline cursor-pointer font-medium",
                           data: { action: "clipboard#copyToClipboard" } do %>
                       <%= t('.copy_to_clipboard') %>
