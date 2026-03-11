@@ -23,7 +23,7 @@ export default class extends Controller {
 
   showCopiedFeedback(button) {
     const originalText = button.innerText
-    button.innerText = i18n.t("clipboard.copied")
+    button.innerText = i18n.t("clipboard.copy_success")
     button.disabled = true
 
     setTimeout(() => {
