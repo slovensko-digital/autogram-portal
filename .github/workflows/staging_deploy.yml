@@ -27,7 +27,7 @@ jobs:
           KAMAL_VERSION=$(ruby -rbundler -e "puts Bundler.locked_gems.specs.find { |s| s.name == 'kamal' }&.version")
           gem install kamal -v $KAMAL_VERSION
 
-      - uses: webfactory/ssh-agent@v0.9.1
+      - uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.DEV_DEPLOY_KEY }}
 
