@@ -1,15 +1,18 @@
 <p class="greeting"><%= t('notification_mailer.greeting') %></p>
 
-<%# Card 1: Completion notification %>
 <div class="section-card">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-    <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
-    <h2 class="section-title"><%= t('.title') %></h2>
-  </div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+    <tr>
+      <td width="56" valign="top" style="padding: 0 12px 10px 0;">
+        <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
+      </td>
+      <td valign="middle" style="padding: 0 0 10px 0;">
+        <h2 class="section-title" style="margin: 0;"><%= t('.title') %></h2>
+      </td>
+    </tr>
+  </table>
   <p class="section-body"><%= t('.message', bundle_count: @bundle.contracts.count) %></p>
 </div>
-
-<%# Card 2: Document list %>
 <div class="section-card">
   <div class="details-title"><%= t('.details_title') %></div>
   <div class="details-list">
