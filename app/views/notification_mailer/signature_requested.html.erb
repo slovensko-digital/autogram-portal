@@ -1,157 +1,38 @@
-<style>
-  /* How it works steps */
-  .steps-section {
-    margin: 2em 0;
-    text-align: center;
-  }
-  .steps-heading {
-    font-size: 18px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 20px;
-  }
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .card-header-icon {
-    flex: 0 0 44px;
-  }
-  .doc-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  .doc-row:last-child {
-    margin-bottom: 0;
-  }
-  .doc-row-icon {
-    flex: 0 0 46px;
-  }
-  .doc-row-name {
-    font-size: 14px;
-    color: #374151;
-  }
-  .steps-grid {
-    display: flex;
-    gap: 12px;
-    width: 100%;
-  }
-  .step-item {
-    width: 33.33%;
-    text-align: center;
-  }
-  .step-bubble {
-    display: inline-block;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background-color: #3B82F6;
-    color: #ffffff;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 48px;
-    text-align: center;
-    margin: 0 0 10px;
-  }
-  .step-bubble-done {
-    display: inline-block;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background-color: #10B981;
-    color: #ffffff;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 48px;
-    text-align: center;
-    margin: 0 0 10px;
-  }
-  .step-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 4px;
-    line-height: 1.3;
-  }
-  .step-desc {
-    font-size: 14px;
-    color: #6B7280;
-    line-height: 1.5;
-    margin: 0;
-  }
-  .doc-label {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    color: #9CA3AF;
-    text-transform: uppercase;
-    margin: 0 0 10px;
-  }
-  /* Legal validity */
-  .legal-box {
-    background-color: #F8FAFC;
-    border: 1px solid #E5E7EB;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .legal-check-circle {
-    width: 28px;
-    height: 28px;
-    background-color: #DBEAFE;
-    border-radius: 50%;
-    padding: 7px;
-    box-sizing: border-box;
-  }
-  .legal-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
-    margin: 0;
-  }
-  .legal-body {
-    font-size: 16px;
-    color: #6B7280;
-    line-height: 1.5;
-    margin: 0 0 14px;
-  }
-  .legal-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-</style>
-
 <p class="greeting"><%= t('notification_mailer.greeting') %></p>
 
 <div class="section-card">
-  <div class="card-header">
-    <div class="section-icon"><%= render 'icon_document' %></div>
-    <h2 class="section-title"><%= t('.title') %></h2>
-  </div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+    <tr>
+      <td width="56" valign="top" style="padding: 0 12px 10px 0;">
+        <div class="section-icon"><%= render 'icon_document' %></div>
+      </td>
+      <td valign="middle" style="padding: 0 0 10px 0;">
+        <h2 class="section-title" style="margin: 0;"><%= t('.title') %></h2>
+      </td>
+    </tr>
+  </table>
   <p><%= t('.message', author_name: @bundle.author.display_name) %></p>
   <p><%= t('.signing_is_simple') %></p>
 </div>
 
 <% if @bundle.note.present? %>
 <div class="section-card">
-  <div class="card-header">
-    <div class="card-header-icon">
-      <div class="section-icon"><%= render 'icon_document' %></div>
-    </div>
-    <h3 class="section-title"><%= t('.note_from_sender_title') %></h3>
-  </div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+    <tr>
+      <td width="56" valign="top" style="padding: 0 12px 10px 0;">
+        <div class="section-icon"><%= render 'icon_document' %></div>
+      </td>
+      <td valign="middle" style="padding: 0 0 10px 0;">
+        <h3 class="section-title" style="margin: 0;"><%= t('.note_from_sender_title') %></h3>
+      </td>
+    </tr>
+  </table>
   <p><%= @bundle.note.gsub("\n", "<br>").html_safe %></p>
 </div>
 <% end %>
 
 <div class="section-card">
-  <p class="doc-label"><%= t('.documents') %></p>
+  <p style="font-size: 14px; font-weight: 600; letter-spacing: 0.07em; color: #9CA3AF; text-transform: uppercase; margin: 0 0 10px;"><%= t('.documents') %></p>
   <% @bundle.contracts.each do |contract| %>
     <p><%= contract.display_name %></p>
   <% end %>
@@ -161,23 +42,25 @@
 
 <div style="height:1px;background-color:#E5E7EB;margin:24px 0;"></div>
 
-<div class="steps-section">
-  <h3 class="steps-heading"><%= t('.how_it_works_title') %></h3>
-  <div class="steps-grid">
-    <div class="step-item">
-      <div class="step-bubble">1</div>
-      <p class="step-title"><%= t('.step_1_title') %></p>
-      <p class="step-desc"><%= t('.step_1_desc') %></p>
-    </div>
-    <div class="step-item">
-      <div class="step-bubble">2</div>
-      <p class="step-title"><%= t('.step_2_title') %></p>
-      <p class="step-desc"><%= t('.step_2_desc') %></p>
-    </div>
-    <div class="step-item">
-      <div class="step-bubble-done">&#10003;</div>
-      <p class="step-title"><%= t('.step_3_title') %></p>
-      <p class="step-desc"><%= t('.step_3_desc') %></p>
-    </div>
-  </div>
+<div style="margin: 32px 0 20px;">
+  <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 20px; text-align: center;"><%= t('.how_it_works_title') %></h3>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; table-layout: fixed;">
+    <tr>
+      <td width="33.33%" valign="top" align="center" style="padding: 0 6px;">
+        <div style="width: 48px; height: 48px; line-height: 48px; text-align: center; background: #3B82F6; color: #ffffff; border-radius: 12px; font-size: 20px; font-weight: 700; margin: 0 auto 10px;">1</div>
+        <p style="font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3; margin: 0 0 4px;"><%= t('.step_1_title') %></p>
+        <p style="font-size: 14px; color: #6B7280; line-height: 1.5; margin: 0;"><%= t('.step_1_desc') %></p>
+      </td>
+      <td width="33.33%" valign="top" align="center" style="padding: 0 6px;">
+        <div style="width: 48px; height: 48px; line-height: 48px; text-align: center; background: #3B82F6; color: #ffffff; border-radius: 12px; font-size: 20px; font-weight: 700; margin: 0 auto 10px;">2</div>
+        <p style="font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3; margin: 0 0 4px;"><%= t('.step_2_title') %></p>
+        <p style="font-size: 14px; color: #6B7280; line-height: 1.5; margin: 0;"><%= t('.step_2_desc') %></p>
+      </td>
+      <td width="33.33%" valign="top" align="center" style="padding: 0 6px;">
+        <div style="width: 48px; height: 48px; line-height: 48px; text-align: center; background: #10B981; color: #ffffff; border-radius: 12px; font-size: 20px; font-weight: 700; margin: 0 auto 10px;">✓</div>
+        <p style="font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3; margin: 0 0 4px;"><%= t('.step_3_title') %></p>
+        <p style="font-size: 14px; color: #6B7280; line-height: 1.5; margin: 0;"><%= t('.step_3_desc') %></p>
+      </td>
+    </tr>
+  </table>
 </div>
