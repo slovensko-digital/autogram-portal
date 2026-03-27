@@ -112,8 +112,6 @@ class Bundle < ApplicationRecord
   end
 
   def notify_recipients
-    return unless author.feature_enabled?(:real_emails)
-
     recipients.each(&:notify!)
   end
 
