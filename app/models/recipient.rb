@@ -98,8 +98,6 @@ class Recipient < ApplicationRecord
 
   def notify!
     return unless notifiable?
-    return unless bundle.author.feature_enabled?(:real_emails)
-
     sending!
     Notification::RecipientSignatureRequestedJob.perform_later(self)
   end

@@ -102,7 +102,7 @@
                 </div>
 
                 <div class="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-                  <% if recipient.notifiable? && @bundle.author.feature_enabled?(:real_emails) %>
+                  <% if recipient.notifiable? %>
                     <%= button_to notify_bundle_recipient_path(@bundle, recipient),
                           method: :post,
                           class: "text-blue-600 underline hover:text-blue-800 hover:underline cursor-pointer font-medium",
