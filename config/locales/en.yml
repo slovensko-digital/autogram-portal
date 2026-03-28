@@ -599,6 +599,10 @@ en:
         step6_desc_html: "Enter BOK and PIN to complete the signature"
         step7_title: "Done"
         step7_desc_html: "The document is signed"
+        not_installed_title: "Autogram Mobile app is not installed"
+        not_installed_desc: "The Autogram Mobile app is not installed on your phone. Download it from the App Store or Google Play."
+        not_installed_download_ios: "Download from App Store"
+        not_installed_download_android: "Download from Google Play"
       eidentita:
         title: "Sign document in the eIdentita application"
         subtitle: "Use the eIdentita mobile application on your phone"

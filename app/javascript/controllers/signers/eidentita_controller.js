@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { isMobileDevice } from "utils/device_detection"
 
 export default class extends Controller {
-  static targets = ["appUrl", "stateNormal", "stateNotInstalled"]
+  static targets = ["appUrl", "stateNotInstalled"]
 
   connect() {
     console.log("Eidentita signer controller connected")
@@ -78,9 +78,6 @@ export default class extends Controller {
   }
 
   showAppNotInstalledError() {
-    if (this.hasStateNormalTarget) {
-      this.stateNormalTarget.classList.add('hidden')
-    }
     if (this.hasStateNotInstalledTarget) {
       this.stateNotInstalledTarget.classList.remove('hidden')
     }
