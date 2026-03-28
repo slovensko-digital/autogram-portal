@@ -34,8 +34,7 @@ class AvmSession < Session
   end
 
   def avm_url
-    base_url = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital").chomp("/")
-    "#{base_url}/api/v1/qr-code?guid=#{document_identifier}&key=#{encryption_key}"
+    "avm://autogram.slovensko.digital/api/v1/qr-code?guid=#{document_identifier}&key=#{encryption_key}"
   end
 
   def expired?

@@ -515,6 +515,10 @@ sk:
         step6_desc_html: "Zadajte BOK a PIN pre dokončenie podpisu"
         step7_title: "Hotovo"
         step7_desc_html: "Dokument je podpísaný"
+        not_installed_title: "Aplikácia Autogram v mobile nie je nainštalovaná"
+        not_installed_desc: "Aplikácia Autogram v mobile nie je nainštalovaná vo vašom telefóne. Stiahnite si ju z App Store alebo Google Play."
+        not_installed_download_ios: "Stiahnuť z App Store"
+        not_installed_download_android: "Stiahnuť z Google Play"
       eidentita:
         title: "Podpíšte dokument v aplikácii eIdentita"
         subtitle: "Použite mobilnú aplikáciu eIdentita vo vašom telefóne"
