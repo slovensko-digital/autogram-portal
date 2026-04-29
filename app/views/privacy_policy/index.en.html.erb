@@ -1,0 +1,381 @@
+<main>
+  <style>
+    .my-list-first {
+        counter-reset: item 0;
+        list-style-type: none;
+        list-style-position: outside;
+        padding-left: 0;
+    }
+
+    .my-list {
+        counter-reset: item;
+        list-style-type: none;
+    }
+
+    .my-list > li {
+        counter-increment: item;
+    }
+
+    .my-list-first > li {
+        counter-increment: item;
+    }
+
+    .my-list > li::marker {
+        content: counters(item, '.') '. ';
+    }
+  </style>
+  <div class="min-h-screen px-6 lg:px-8 mx-auto max-w-5xl">
+    <% if !Rails.env.production? %>
+      <br>
+      <%= render 'shared/error', title: t('.not_production_title'), content: t('.not_production_message') %>
+      <br>
+    <% end %>
+    <div class="prose prose-sm lg:prose-base mx-auto max-w-5xl">
+      <h1>Privacy Policy</h1>
+
+      <p><i>for the service <b>Autogram Portal</b></i></p>
+      <p><i>effective from <b>29.4.2026</b></i></p>
+      
+      <ol class="my-list-first">
+        <li>
+          <i>
+          <h2>Preamble</h2>
+          <ol class="my-list">
+            <li>
+              <p>We take your privacy seriously. This Privacy Policy explains what data we process about you, why we need it, and how we protect it. We wrote it in clear language so you know exactly what happens to your data.</p>
+            </li>
+            <li>
+              <p>We only process the data strictly necessary for the service to work. We do not read your documents, we do not see your card security codes (for example, your signing PIN), and we delete data as soon as it is no longer needed.</p>
+            </li>
+          </ol>
+          </i>
+        </li>
+        <li>
+          <h2>2. Who processes your data</h2>
+          <ol class="my-list">
+            <li>
+              <h3>The controller of your personal data is:</h3>
+              <ul class="list-none">
+                <li><i><b>Name:</b> <b>Služby Slovensko.Digital, s.r.o.</b> - Company registered in the Commercial Register of the Bratislava III City Court, Section: Sro, File No. 119763/B</i></li>
+                <li><i><b>Company ID:</b> 50881337</i></li>
+                <li><i><b>Registered office:</b> Staré grunty 18, 841 04 Bratislava</i></li>
+                <li><i><b>E-mail:</b> <a href="mailto:podpora@slovensko.digital">podpora@slovensko.digital</a></i></li>
+                <li><i><b>Web:</b> <a href="https://sluzby.slovensko.digital">https://sluzby.slovensko.digital</a></i></li>
+              </ul>
+            </li>
+            <li>
+              <h3>Contact for data protection questions:</h3>
+              <ul class="list-none">
+                <li><i><b>E-mail:</b></i> <a href="mailto:zodpovednaosoba@slovensko.digital">zodpovednaosoba@slovensko.digital</a></li>
+              </ul>
+            </li>
+            <li>
+              <h3>What does it mean that we are your data controller?</h3>
+              <p>As controller, we decide why and how your personal data is processed. We are responsible for protecting it and for upholding your rights under the GDPR (Regulation (EU) 2016/679) and Act No. 18/2018 Coll. on Personal Data Protection.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>3. What data we process</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Categories of processed data</h3>
+              <ul class="list-disc list-outside prose-p:mt-0 prose-p:mb-0">
+                <li>
+                  <i><b>Identification data</b> - First name, last name, and possibly other identifying data contained in a signature or signing certificate</i>
+                  <p>From the qualified certificate used for electronic signing, from data provided during registration, or from data obtained through a supported sign-in method</p>
+                </li>
+                <li>
+                  <i><b>Contact data</b> - E-mail address</i>
+                  <p>During registration / Google OAuth</p>
+                </li>
+                <li>
+                  <i><b>Technical data / cookies</b> - IP address, browser type, OS</i>
+                  <p>Collected automatically during your visit</p>
+                </li>
+                <li>
+                  <i><b>Certificate data</b> - Public key, certificate identifier or number, signing certificate data, signature metadata</i>
+                  <p>From the qualified certificate and signing device used when creating a signature; from an already signed document uploaded to verify an existing signature</p>
+                </li>
+                <li>
+                  <i><b>Activity data</b> - Signing time, document metadata</i>
+                  <p>Generated while using the service</p>
+                </li>
+                <li>
+                  <i><b>Account data</b> - E-mail, preferences, history</i>
+                  <p>During registration and use</p>
+              </ul>
+            </li>
+            <li>
+              <h3>What technically does not leave your device and what we do not store</h3>
+              <p>The following data technically does not leave your device, or the qualified signature device used, and we do not receive or store it:</p>
+              <ul class="list-disc">
+                <li><i>Your <b>BOK (Security Personal Code)</b></i></li>
+                <li><i>Your <b>Signing PIN (PIN for a qualified electronic signature)</b></i></li>
+                <li><i>Your <b>private cryptographic key</b></i></li>
+              </ul>
+            </li>
+            <li>
+              <h3>Specifically about documents</h3>
+              <p>Documents you upload for signing or verification are processed automatically only to the extent necessary to provide the service, in particular to create a signature, verify a signature, store the document, display the result, or deliver the service output. We do not manually review document contents unless it is necessary to resolve a technical incident, a security incident, or to comply with a legal obligation.</p>
+            </li>
+            <li>
+              <h3>Notice on file names</h3>
+              <p>The filename you upload is temporarily stored as part of metadata and may appear in diagnostic logs. If maximum anonymity matters to you, we recommend using neutral file names (for example, <code>document.pdf</code> instead of <code>Contract_John_Doe.pdf</code>).</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>4. Why we process your data</h2>
+          <ol class="my-list prose-p:mt-0 prose-p:mb-0">
+            <li>
+              <h3>Processing purposes and legal bases</h3>
+              <ul class="list-none">
+                <li>
+                  <b>Provision of electronic signing services</b>
+                  <ul>
+                    <li><i>Legal basis:</i> Art. 6(1)(b) - performance of a contract</li>
+                    <li><i>Explanation:</i> Without this data, we could not provide the service</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>Verification of your identity</b>
+                  <ul>
+                    <li><i>Legal basis:</i> Art. 6(1)(b) - performance of a contract</li>
+                    <li><i>Explanation:</i> Sign-in via eID or Google</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>User account management</b>
+                  <ul>
+                    <li><i>Legal basis:</i> Art. 6(1)(b) - performance of a contract</li>
+                    <li><i>Explanation:</i> Storage of documents and preferences</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>Sending notifications</b>
+                  <ul>
+                    <li><i>Legal basis:</i> Art. 6(1)(b) - performance of a contract</li>
+                    <li><i>Explanation:</i> Information on document status</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>Security and abuse prevention</b>
+                  <ul>
+                    <li><i>Legal basis:</i> Art. 6(1)(f) - legitimate interest</li>
+                    <li><i>Explanation:</i> Protecting the service against attacks</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>Error diagnostics</b>
+                  <ul>
+                    <li><i>Legal basis:</i> Art. 6(1)(f) - legitimate interest</li>
+                    <li><i>Explanation:</i> Fixing errors and improving the service</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>5. How long we retain data</h2>
+          <ol class="my-list prose-p:mt-0 prose-p:mb-0">
+            <li>
+              <h3>Retention period by data type and user type</h3>
+              <ul class="list-none">
+                <li>
+                  <b>Documents from an unauthenticated user</b>
+                  <ul>
+                    <li>Uploaded documents for verification or signing</li>
+                    <li>Maximum 60 minutes, then automatically deleted</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>Documents from an authenticated user</b>
+                  <ul>
+                    <li>Uploaded documents for verification or signing</li>
+                    <li>Until deleted by the user</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>Account data</b>
+                  <ul>
+                    <li>User data and documents uploaded by the user</li>
+                    <li>Until account deletion and then 30 days for possible recovery</li>
+                  </ul>
+                </li>
+                <li>
+                  <b>Server logs</b>
+                  <ul>
+                    <li>Technical logs for security and diagnostics</li>
+                    <li>Retained for 30 days</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <h3>Automatic deletion for unauthenticated users</h3>
+              <p>If you are not signed in, we retain your documents only for the time required for technical signature processing, but no longer than 60 minutes. They are then automatically and irreversibly deleted. If you do not download a document in time, it cannot be restored.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>6. Who we share your data with</h2>
+          <ol class="my-list prose-p:mt-0 prose-p:mb-0">
+            <li>
+              <h3>List of recipients and processors</h3>
+              <p>We may provide your data to the following categories of recipients:</p>
+              <ul>
+                <li>
+                  <b>Infrastructure providers (hosting)</b>
+                  <p>Service servers are located in the European Union. No transfers to third countries take place.</p>
+                </li>
+                <li>
+                  <b>Error tracking service</b>
+                  <p>Processes only technical data about application errors (error type, stack trace, browser type). Your personal data is not intentionally sent to this service; however, operation metadata (for example, a filename) may exceptionally appear in error reports.</p>
+                </li>
+                <li>
+                  <b>Related applications</b>
+                  <p>When signing on mobile, a document may be temporarily transferred to the server of the application used to create the signature (for example, Autogram in mobile or eIdentita).</p>
+                  <p>These applications are governed by their own terms of use and privacy policies.</p>
+                </li>
+                <li>
+                  <b>Google (optional)</b>
+                  <p>If you choose to sign in with a Google account, Google processes the data required for authentication under its own terms.</p>
+                </li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>7. Technical infrastructure and data processing</h2>
+          <ol class="my-list prose-p:mt-0 prose-p:mb-0">
+            <li>
+              <h3>Where your data is stored</h3>
+              <p>All your data is primarily stored on servers in the European Union.</p>
+            </li>
+            <li>
+              <h3>Server logs</h3>
+              <p>Our servers automatically record technical operational information:</p>
+              <ul>
+                <li><i>Operation timestamps</i></li>
+                <li><i>IP addresses (for security purposes)</i></li>
+                <li><i>Technical error messages</i></li>
+              </ul>
+              <p>We intentionally do not retain IP addresses beyond standard server logs. These logs are automatically deleted after 30 days.</p>
+            </li>
+            <li>
+              <h3>Error diagnostics</h3>
+              <p>For rapid detection of software errors, we use a service that automatically captures technical information needed for diagnostics when an error occurs:</p>
+              <ul>
+                <li><i>Error type and description</i></li>
+                <li><i>Technical stack trace (for developers)</i></li>
+                <li><i>Browser and operating system type</i></li>
+                <li><i>Request headers</i></li>
+              </ul>
+              <p>What the service does not capture:</p>
+              <ul>
+                <li><i>The content of your documents</i></li>
+                <li><i>Your PIN codes or passwords</i></li>
+                <li><i>Identification data from the signing certificate</i></li>
+              </ul>
+              <p>Filenames may exceptionally appear in error reports.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>8. How we protect your data</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Technical measures</h3>
+              <p>The controller applies appropriate technical security measures to protect personal data against unauthorized access, loss, misuse, or damage. Communication between the user and the system is carried out through an encrypted connection (HTTPS/TLS), ensuring confidentiality during transmission. Personal data is also encrypted at rest to minimize the risk of disclosure in case of a technical incident. Documents uploaded by unauthenticated users are automatically deleted within one hour at the latest. The system is regularly updated from a security perspective and continuously monitored to identify and respond to potential security threats.</p>
+            </li>
+            <li>
+              <h3>Organizational measures</h3>
+              <p>From an organizational perspective, access to personal data is restricted exclusively to authorized administrators who need the data to perform their job duties. We apply the principle of least privilege, under which each authorized person has access only to the data and functions necessary to perform their tasks. The controller also has established and documented internal procedures for handling security incidents and regularly ensures compliance with them.</p>
+            </li>
+            <li>
+              <h3>What we do in case of a security incident</h3>
+              <p>In the event of a personal data breach, the controller will immediately conduct an investigation to determine the scope and nature of the incident and take corrective measures. If required by law, the incident will be reported without undue delay to the Office for Personal Data Protection of the Slovak Republic. If the breach is likely to result in a high risk to the rights and freedoms of affected persons, those persons will be informed directly and without undue delay.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>9. Your rights under GDPR</h2>
+          <ol class="my-list">
+            <li>
+              <b>Right of access (Art. 15 GDPR)</b> - You have the right to obtain confirmation as to whether we process your personal data and, if so, to access it.
+            </li>
+            <li>
+              <b>Right to rectification (Art. 16 GDPR)</b> - You have the right to have inaccurate data corrected.
+            </li>
+            <li>
+              <b>Right to erasure (Art. 17 GDPR)</b> - You have the right to request deletion of your data. Please note that an electronic signature in an already signed document cannot be deleted without invalidating the document.
+            </li>
+            <li>
+              <b>Right to restriction of processing (Art. 18 GDPR)</b> - You have the right to request restriction of processing in certain situations.
+            </li>
+            <li>
+              <b>Right to data portability (Art. 20 GDPR)</b> - You have the right to receive your data in a structured format.
+            </li>
+            <li>
+              <b>Right to object (Art. 21 GDPR)</b> - You have the right to object to processing based on legitimate interest.
+            </li>
+            <li>
+              <b>Right to lodge a complaint (Art. 77 GDPR)</b> - You have the right to lodge a complaint with the supervisory authority:
+              <p><i>Office for Personal Data Protection of the Slovak Republic<br>
+              Hraničná 12, 820 07 Bratislava 27<br>
+              <a href="https://dataprotection.gov.sk">https://dataprotection.gov.sk</a></i></p>
+            </li>
+            <li>
+              <p>You may exercise your rights by e-mail at <a href="mailto:zodpovednaosoba@slovensko.digital">zodpovednaosoba@slovensko.digital</a>. We will respond within 30 days.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>10. Cookies</h2>
+          <ol class="my-list">
+            <li>
+              <p>The portal uses only technical (necessary) cookies required to ensure the basic functionality of the service. These include session cookies used to maintain the user's login session and security cookies in the form of CSRF tokens, which protect the system from unauthorized and malicious attacks. Since these cookies are necessary for the proper functioning of the service, their use does not require user consent.</p>
+            </li>
+            <li>
+              <p>We do not use any tracking or marketing cookies.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>11. Special situations</h2>
+          <ol class="my-list">
+            <li>
+              <p>If you use the service on behalf of a business entity, your company may be the controller of personal data in relation to signed documents.</p>
+            </li>
+            <li>
+              <p>Documents you sign may contain personal data of third parties. You are responsible for the lawfulness of processing such data.</p>
+            </li>
+            <li>
+              <p>The service is not intended for persons under 18 years of age.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>12. Changes to this policy</h2>
+          <ol class="my-list">
+            <li>
+              <p>We may update this policy from time to time. We will inform you about material changes through the website or by e-mail (if you are a registered user).</p>
+            </li>
+          </ol>
+        </li>
+      </ol>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,331 @@
+<main>
+  <style>
+    .my-list-first {
+        counter-reset: item 0;
+        list-style-type: none;
+        list-style-position: outside;
+        padding-left: 0;
+    }
+
+    .my-list {
+        counter-reset: item;
+        list-style-type: none;
+    }
+
+    .my-list > li {
+        counter-increment: item;
+    }
+
+    .my-list-first > li {
+        counter-increment: item;
+    }
+
+    .my-list > li::marker {
+        content: counters(item, '.') '. ';
+    }
+  </style>
+  <div class="min-h-screen px-6 lg:px-8 mx-auto max-w-5xl">
+    <% if !Rails.env.production? %>
+      <br>
+      <%= render 'shared/error', title: t('.not_production_title'), content: t('.not_production_message') %>
+      <br>
+    <% end %>
+    <div class="prose prose-sm lg:prose-base mx-auto max-w-5xl">
+      <h1>Terms of Service</h1>
+
+      <p><i>for the <b>Autogram Portál</b> service</i></p>
+      <p><i>effective from <b>29.4.2026</b></i></p>
+
+      <ol class="my-list-first">
+        <li>
+          <h2>Preamble</h2>
+          <ol class="my-list">
+            <li>
+              <p><i>Autogram Portál is a tool that helps you electronically sign documents using your ID card with a chip. We provide the technology - you are responsible for what you sign.</i></p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Basic information and definitions</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Who operates this service?</h3>
+              <i><ul class="list-none">
+                <li><b>Operator:</b> <b>Služby Slovensko.Digital, s.r.o.</b> - Company registered in the register of the Bratislava III Municipal Court, section: Sro, file no. 119763/B</li>
+                <li><b>Company ID:</b> 50881337</li>
+                <li><b>Registered office:</b> Staré grunty 18, 841 04 Bratislava</li>
+                <li><b>Contact:</b> <a href="mailto:podpora@slovensko.digital">podpora@slovensko.digital</a></li>
+                <li>(hereinafter referred to as the "Provider" or "we")</li>
+              </ul></i>
+            </li>
+            <li>
+              <h3>What do the terms used in these Terms mean?</h3>
+              <p>To make sure we understand each other, we explain the key terms in simple language:</p>
+              <ul class="list-disc list-outside prose-p:mt-0 prose-p:mb-0">
+                <li><b><i>Service</i></b> - the Autogram Portál web application available at <a href="https://agp.slovensko.digital">https://agp.slovensko.digital</a>, which enables electronic document signing.</li>
+                <li>
+                  <b><i>User</i></b> - anyone who uses the Service (that is, you). We distinguish between:
+                  <ul>
+                    <li><i>Unregistered user (guest)</i> - uses the Service without creating an account</li>
+                    <li><i>Registered user</i> - has created an account and signs in to the Service</li>
+                  </ul>
+                </li>
+                <li><b><i>Qualified electronic signature (QES)</i></b> - an electronic signature created by a qualified electronic signature creation device and based on a qualified certificate for electronic signatures</li>
+                <li><b><i>Simple electronic signature</i></b> - other forms of electronic signature (e.g. a drawn signature, signature image) that do not automatically have the same legal force as a QES</li>
+                <li><b><i>Qualified electronic signature creation device (QSCD)</i></b> - a hardware device used to create a qualified electronic signature in accordance with the eIDAS Regulation. For example, an ID card with a chip</li>
+                <li><b><i>eID card</i></b> - an ID card with an electronic chip issued by the Slovak Republic; within the Service, it may represent one of the supported means for creating a qualified electronic signature</li>
+                <li><b><i>BOK</i></b> - Security Personal Code - a 6-digit number you chose when receiving your ID card</li>
+                <li><b><i>Signature PIN</i></b> - a PIN code used to create a qualified electronic signature</li>
+                <li><b><i>Timestamp</i></b> - electronic confirmation of the exact time when a document was signed</li>
+                <li><b><i>eIDAS</i></b> - Regulation (EU) No 910/2014 on electronic identification, authentication and trust services</li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>What the Service does and does not do</h2>
+          <ol class="my-list">
+            <li>
+              <h3>What Autogram Portál does</h3>
+              <p>The Service allows you to:</p>
+              <ul class="list-disc">
+                <li>Upload documents (PDF, XML and other supported formats) for signing</li>
+                <li>Sign documents using a supported signing method. For example, via the electronic signature creation application Autogram, Autogram v mobile, eIdentita, and others</li>
+                <li>Informationally verify existing electronic signatures on documents</li>
+                <li>Download signed documents</li>
+                <li>Invite other people to sign a document (for registered users)</li>
+                <li>Organize and manage documents (for registered users)</li>
+                <li>Add timestamps to signatures (for registered users)</li>
+              </ul>
+            </li>
+            <li>
+              <h3>What is important to know about security</h3>
+              <p>Your private key and signature PIN never leave your device. When creating a qualified electronic signature, your BOK, signature PIN, and private cryptographic key do not leave your device or the qualified signature device used. The Autogram Portál server does not receive or store this data in any way.</p>
+              <p>Simply put: our server technically mediates communication between your browser and the signing application or client used, but it does not work with your PIN code or private key for the signing itself.</p>
+            </li>
+            <li>
+              <h3>What Autogram Portál does not do and what we are not responsible for</h3>
+              <ul class="list-disc">
+                <li>We do not manually review your document content and do not process it beyond automated technical operations necessary to create a signature, verify a signature, store the result, or deliver the service output</li>
+                <li>We do not provide legal advice on whether you should sign a document</li>
+                <li>We are not responsible for the content of the documents you sign</li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Types of electronic signatures and their legal effect</h2>
+          <ol class="my-list">
+            <li>
+              <p>Autogram Portál may support multiple electronic signing methods. The legal effect of each method depends on its nature, technical implementation, and the requirements of legal regulations or a specific legal act.</p>
+            </li>
+            <li>
+              <p>For electronic signing methods, when selecting a method, Autogram Portál indicates what type of signature it is or what practical limitations it has. The assessment of whether the selected signing method is sufficient for a specific legal act is the user's responsibility.</p>
+            </li>
+            <li>
+              <p>It is solely your responsibility to choose a signing method that is suitable for the given legal act and complies with applicable legal requirements. If you are unsure, we recommend using a qualified electronic signature or seeking legal advice.</p>
+            </li>
+            <li>
+              <p>The visual representation of a signature inserted into a document may have only informational or usability meaning. The legal binding effect of an electronic signature is determined by the technical and cryptographic data contained in or associated with the document, not by the visual representation of the signature itself.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Registration and account types</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Use without registration (guest)</h3>
+              <p>You can use the Service without registration. In that case:</p>
+              <ul class="list-disc">
+                <li>You can upload and sign documents</li>
+                <li>Documents are stored on the server for a maximum of 1 hour and are then automatically and irreversibly deleted</li>
+                <li>You do not have access to the history of signed documents</li>
+                <li>You must download the document immediately after signing</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Use with registration (free account)</h3>
+              <p>If you create a free account, you get the following benefits:</p>
+              <b>Document storage</b>
+              <ul class="list-disc">
+                <li>Storage of up to 20 documents at the same time</li>
+                <li>Documents you upload remain stored in the "Documents" and "Packages" sections until you delete them</li>
+                <li>You also have access to the history of documents you signed for other parties, until the document owner deletes them</li>
+                <li>You can return to documents and download them at any time</li>
+                <li>An overview of document status for documents awaiting signature</li>
+              </ul>
+              <b>Advanced features</b>
+              <ul class="list-disc">
+                <li>Bulk signing of multiple documents</li>
+                <li>Email notifications about document status</li>
+                <li>The ability to invite multiple signatories to one document</li>
+              </ul>
+            </li>
+            <li>
+              <h3>How to register</h3>
+              <p>Registration is free and can be completed by:</p>
+              <ul class="list-disc">
+                <li>Signing in with a Google account</li>
+                <li>Verifying an email address and signing in via a magic link</li>
+              </ul>
+              <p>When registering, you actively confirm your agreement with these Terms of Service and the Privacy Policy.</p>
+            </li>
+            <li>
+              <h3>Account cancellation</h3>
+              <p>You may cancel your account at any time. When canceling your account:</p>
+              <ul class="list-disc">
+                <li>Your personal data will be deleted within 30 days</li>
+                <li>Documents stored in your account will be irreversibly deleted</li>
+                <li>We recommend downloading all important documents before cancellation</li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Service price</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Price list</h3>
+              <p>Autogram Portal is provided to users according to the <a href="/pricing_terms">currently valid price list</a>.</p>
+            </li>
+            <li>
+              <h3>Possible future changes</h3>
+              <p>The price list is subject to change. We will inform you of changes at least 30 days in advance.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Your obligations as a user</h2>
+          <ol class="my-list">
+            <li>
+              <h3>When using the Service, you agree to</h3>
+              <ul class="list-disc">
+                <li>Use the Service in accordance with applicable legal regulations</li>
+                <li>Sign only documents you are authorized to sign</li>
+                <li>Protect your BOK and signature PIN from misuse</li>
+                <li>Protect access credentials to your account</li>
+                <li>Not use the Service to sign documents with unlawful content</li>
+                <li>Not upload documents containing malicious code</li>
+                <li>Not create multiple accounts for one person to circumvent service limits</li>
+              </ul>
+            </li>
+            <li>
+              <h3>You are responsible for</h3>
+              <ul class="list-disc">
+                <li>The content of the documents you sign</li>
+                <li>Choosing the correct signature type for the relevant legal act</li>
+                <li>Activity carried out through your account</li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Limitation of provider liability</h2>
+          <ol class="my-list">
+            <li>
+              <h3>The Service is provided "as is"</h3>
+              <p><b>The free service is provided on an "AS IS" basis</b> without any warranties of availability, performance, or fitness for a particular purpose.</p>
+              <p>The Provider reserves the right to limit or interrupt the provision of the Service at any time due to maintenance, updates, or other operational reasons.</p>
+            </li>
+            <li>
+              <h3>What we are not liable for</h3>
+              <ul class="list-disc">
+                <li>Service outages caused by technical issues, maintenance, or force majeure</li>
+                <li>Damage caused by malfunctioning user hardware</li>
+                <li>Damage caused by the other party not accepting an electronically signed document</li>
+                <li>Legal consequences arising from choosing an incorrect signature type</li>
+                <li>Legal consequences arising from the content of signed documents</li>
+                <li>Damage and legal consequences arising from incorrect verification of signature validity</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Open-source license</h3>
+              <p>Autogram Portál is open-source software distributed under the EUPL v1.2 license. This license explicitly excludes all warranties.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Third parties and integrations</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Third-party services and integrations</h3>
+              <p>To operate the Service, we use the following external services and applications:</p>
+              <ul class="list-disc">
+                <li>eIdentita mobile app - mobile app for signing</li>
+                <li>Autogram v mobile - mobile app for signing</li>
+                <li>Providers of qualified timestamps</li>
+                <li>Google (optional) - sign-in via Google account</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Terms of use for third parties and integrations</h3>
+              <p>When using third-party services and integrations (for example eIdentita, Autogram v mobile), their terms of use also apply to you. We recommend familiarizing yourself with them.</p>
+            </li>
+            <li>
+              <h3>Liability for third-party services</h3>
+              <p>We are not responsible for the availability and functionality of third-party services. If these services are unavailable, some Autogram Portál features may not work.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Termination of the Service and changes to the Terms</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Your right to stop using the Service</h3>
+              <p>You may stop using the Service at any time or request account cancellation.</p>
+            </li>
+            <li>
+              <h3>Our right to terminate or suspend the Service</h3>
+              <ul class="list-disc">
+                <li>Temporarily suspend the Service due to maintenance or updates</li>
+                <li>Terminate the Service with 30 days' notice</li>
+                <li>Immediately block access for a user who violates these Terms</li>
+                <li>Delete inactive accounts after 12 months of inactivity (with prior notice)</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Changes to these Terms</h3>
+              <p>We will inform you of material changes via the website or by email. By continuing to use the Service, you express your consent with the new version.</p>
+            </li>
+          </ol>
+        </li>
+
+        <li>
+          <h2>Final provisions</h2>
+          <ol class="my-list">
+            <li>
+              <h3>Governing law</h3>
+              <p>These Terms of Service are governed by the laws of the Slovak Republic.</p>
+            </li>
+            <li>
+              <h3>Dispute resolution</h3>
+              <p>We will seek to resolve disputes primarily out of court. Consumers have the right to contact an alternative dispute resolution body. The courts of the Slovak Republic have jurisdiction.</p>
+            </li>
+            <li>
+              <h3>Severability</h3>
+              <p>If any provision becomes invalid, the remaining provisions remain in force.</p>
+            </li>
+            <li>
+              <h3>Contact</h3>
+              <ul class="list-none">
+                <li><b><i>General questions:</i></b> <a href="mailto:podpora@slovensko.digital">podpora@slovensko.digital</a></li>
+                <li><b><i>Business solutions:</i></b> <a href="mailto:podpora@slovensko.digital">podpora@slovensko.digital</a></li>
+                <li><b><i>Personal data protection:</i></b> <a href="mailto:zodpovednaosoba@slovensko.digital">zodpovednaosoba@slovensko.digital</a></li>
+                <li><b><i>Web:</i></b> <a href="https://sluzby.slovensko.digital">https://sluzby.slovensko.digital</a></li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+      </ol>
+    </div>
+  </div>
+</main>

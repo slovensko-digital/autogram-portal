@@ -1152,15 +1152,13 @@ en:
     index:
       title: "Terms of Service"
       not_production_title: "This is not a production environment"
-      not_production_message: "This is a placeholder page. The complete terms of service with detailed information about usage rights, responsibilities, and service conditions will be added in the future."
-      work_in_progress: "We are working on comprehensive terms of service that will clearly outline the rights and obligations of all parties using this platform."
+      not_production_message: "Terms of Service are only available in the production environment. In this testing environment, you can use the service freely without any restrictions."
 
   privacy_policy:
     index:
       title: "Privacy Policy"
       not_production_title: "This is not a production environment"
-      not_production_message: "This is a placeholder page. The complete privacy policy with detailed information about data processing, user rights, and security measures will be added in the future."
-      work_in_progress: "We are committed to protecting your privacy and will provide comprehensive details about our data handling practices soon."
+      not_production_message: "Privacy Policy is only available in the production environment. In this testing environment, you can use the service with no guarantee of data privacy. Do not upload any sensitive or personal documents here."
 
   footer:
     heading: "Footer"
