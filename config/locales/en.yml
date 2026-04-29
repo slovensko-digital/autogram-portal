@@ -1152,7 +1152,7 @@ en:
     index:
       title: "Terms of Service"
       not_production_title: "This is not a production environment"
-      not_production_message: "Terms of Service are only available in the production environment. In this testing environment, you can use the service freely without any restrictions."
+      not_production_message: "Terms of Service are only available in the production environment. In this testing environment, no legal agreements are in place. Do not use this service for any real or sensitive documents."
 
   privacy_policy:
     index:
