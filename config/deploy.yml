@@ -31,6 +31,13 @@ accessories:
     image: registry.dev.slovensko.digital/sd/ag-service
     roles:
       - web
+    proxy:
+      ssl: true
+      host: ag-service.dev.slovensko.digital
+      app_port: 7200
+      healthcheck:
+        path: /info
+
 
 registry:
   server: registry.dev.slovensko.digital
