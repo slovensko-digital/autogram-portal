@@ -1064,17 +1064,17 @@ sk:
 
   terms_of_service:
     index:
-      title: "Obchodné podmienky"
+      title: "Všeobecné obchodné podmienky"
+      for_service_html: "pre službu <b>Autogram Portal</b>"
       not_production_title: "Toto nie je produkčné prostredie"
-      not_production_message: "Toto je zástupná stránka. Kompletné obchodné podmienky s podrobnými informáciami o právach používania, zodpovednostiach a podmienkach služby budú pridané v budúcnosti."
-      work_in_progress: "Pracujeme na komplexných obchodných podmienkach, ktoré jasne vymedzujú práva a povinnosti všetkých strán používajúcich túto platformu."
+      not_production_message: "Na tomto neprodukčnom prostredí nie sú zavedené žiadne skutočné obchodné podmienky a preto tu konáte na vlastné riziko."
 
   privacy_policy:
     index:
       title: "Zásady ochrany osobných údajov"
+      for_service_html: "pre službu <b>Autogram Portal</b>"
       not_production_title: "Toto nie je produkčné prostredie"
-      not_production_message: "Toto je zástupná stránka. Kompletné zásady ochrany osobných údajov s podrobnými informáciami o spracovaní údajov, právach používateľov a bezpečnostných opatreniach budú pridané v budúcnosti."
-      work_in_progress: "Zaviazali sme sa chrániť vaše súkromie a čoskoro poskytneme komplexné podrobnosti o našich postupoch pri spracovaní údajov."
+      not_production_message: "Na tomto neprodukčnom prostredí nie sú zavedené žiadne skutočné zásady ochrany osobných údajov a preto tu konáte na vlastné riziko. Nenahrávajte sem žiadne skutočné osobné údaje."
 
   footer:
     heading: "Päta"
@@ -1083,6 +1083,7 @@ sk:
     service_provider: "Poskytovateľ služby"
     support: "Podpora"
     privacy_policy: "Zásady ochrany osobných údajov"
+    terms_of_service: "Všeobecné obchodné podmienky"
 
   shared:
     signature_validation:

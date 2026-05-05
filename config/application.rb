@@ -25,7 +25,7 @@ module AutogramPortal
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.i18n.available_locales = [ :en, :sk ]
-    config.i18n.default_locale = :en
+    config.i18n.default_locale = :sk
 
     config.active_job.queue_adapter = :good_job
     config.good_job.enable_cron = true
