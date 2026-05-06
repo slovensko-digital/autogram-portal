@@ -1,0 +1,25 @@
+<p class="greeting"><%= t('notification_mailer.greeting') %></p>
+
+<div class="section-card">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+    <tr>
+      <td width="56" valign="top" style="padding: 0 12px 10px 0;">
+        <div class="section-icon" style="background-color:#FEF3C7;"><%= render 'icon_check_done' %></div>
+      </td>
+      <td valign="middle" style="padding: 0 0 10px 0;">
+        <h2 class="section-title" style="margin: 0;"><%= t('.title') %></h2>
+      </td>
+    </tr>
+  </table>
+  <p class="section-body"><%= t('.message', author_name: @bundle.author.display_name) %></p>
+  <p class="section-body"><%= t('.apology') %></p>
+</div>
+
+<div class="section-card">
+  <div class="details-title"><%= t('.details_title') %></div>
+  <div class="details-list">
+    <% @bundle.contracts.each do |contract| %>
+      <div><%= contract.display_name %></div>
+    <% end %>
+  </div>
+</div>

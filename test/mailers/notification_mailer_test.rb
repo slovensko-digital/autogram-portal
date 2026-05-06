@@ -12,6 +12,18 @@ class NotificationMailerTest < ActionMailer::TestCase
 		assert_not_includes body, "<b>Phish</b>"
 	end
 
+	test "signature withdrawn includes apology and no action link" do
+		bundle = create_bundle_with_note("test")
+		recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(6)}@example.com", locale: "en")
+
+		mail = NotificationMailer.with(user: recipient).signature_withdrawn(bundle)
+		body = mail.html_part ? mail.html_part.body.encoded : mail.body.encoded
+
+		assert_equal I18n.t("notification_mailer.signature_withdrawn.subject", locale: :en), mail.subject
+		assert_includes body, I18n.t("notification_mailer.signature_withdrawn.apology", locale: :en)
+		assert_not_includes body, "View bundle"
+	end
+
 	private
 
 	def create_bundle_with_note(note)

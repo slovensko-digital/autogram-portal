@@ -16,9 +16,7 @@ class RecipientsController < ApplicationController
   end
 
   def destroy
-    if @recipient.removable?
-      @recipient.destroy
-    end
+    @recipient.withdraw!
 
     render "index"
   end
@@ -35,7 +33,7 @@ class RecipientsController < ApplicationController
   end
 
   def set_recipient
-    @recipient = @bundle.recipients.find_by_uuid(params[:id])
+    @recipient = @bundle.recipients.find_by_uuid!(params[:id])
   end
 
   def recipient_params

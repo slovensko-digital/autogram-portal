@@ -15,6 +15,9 @@ class SessionAccessToken
 
     def valid?(token:, contract:, session:)
       payload = verifier.verify(token).with_indifferent_access
+      recipient = session.recipient
+
+      return false if recipient&.withdrawn?
 
       payload[:contract_uuid] == contract.uuid &&
         payload[:session_id].to_i == session.id &&

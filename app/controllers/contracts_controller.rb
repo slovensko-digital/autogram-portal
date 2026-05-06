@@ -204,13 +204,23 @@ class ContractsController < ApplicationController
 
   def set_recipient
     if params[:recipient]
-      @recipient = @contract.recipients.find_by(uuid: params[:recipient])
+      @recipient = @contract.recipients.active.find_by(uuid: params[:recipient])
+
+      return if @recipient
+
+      withdrawn_recipient = @contract.recipients.withdrawn.find_by(uuid: params[:recipient])
+      if withdrawn_recipient&.bundle
+        redirect_to sign_bundle_path(withdrawn_recipient.bundle, recipient: withdrawn_recipient.uuid)
+        return
+      end
+
+      raise ActiveRecord::RecordNotFound
     elsif current_user
-      @recipient = @contract.recipients.find_by(user: current_user) ||
-                   @contract.recipients.find_by(email: current_user.email)
+      @recipient = @contract.recipients.active.find_by(user: current_user) ||
+                   @contract.recipients.active.find_by(email: current_user.email)
 
       if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
-        @recipient = @contract.bundle.recipients.find_or_create_by!(email: current_user.email) do |r|
+        @recipient = @contract.bundle.recipients.active.find_or_create_by!(email: current_user.email) do |r|
           r.user = current_user
           r.name = current_user.display_name
         end
