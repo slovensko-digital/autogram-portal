@@ -462,6 +462,8 @@ sk:
       signed_message: "Tento dokument bol podpísaný a je dokončený. Nie je potrebný žiadny ďalší podpis."
       title: "Vyberte podpisovú aplikáciu"
       subtitle: "Vyberte, ktorú aplikáciu chcete použiť na elektronické podpisovanie"
+      third_party_notice_title: "Služby tretích strán"
+      third_party_notice: "Autogram v mobile a eIdentita sú externé aplikácie s vlastnými podmienkami používania a zásadami ochrany osobných údajov. Pred použitím sa s nimi oboznámte."
       old_card_warning_title: "Obmedzenie"
       old_card_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (Autogram v mobile, eIdentita) nie sú kompatibilné s vašou kartou."
       old_card_mobile_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
