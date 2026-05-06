@@ -1,6 +1,29 @@
 sk:
   hello: "Ahoj svet"
 
+  consents:
+    must_accept_to_register: "Pre vytvorenie účtu musíte prijať podmienky a zásady ochrany súkromia."
+    please_accept_updated_policies: "Prosím, prečítajte si a prijmite aktualizované zásady."
+    accepted: "Ďakujeme za prijatie aktualizovaných zásad."
+    google_sign_in_failed: "Pri prihlasovaní cez Google nastala chyba. Zaregistrujte sa alebo to skúste neskôr."
+    must_accept: "Pre pokračovanie musíte prijať zásady."
+    new:
+      title: "Aktualizované podmienky používania"
+      subtitle: "Pre pokračovanie musíte súhlasiť s najnovšími všeobecnými obchodnými podmienkami a zásadami ochrany osobných údajov."
+      accept: "Súhlasím a pokračovať"
+
+  oauth_consents:
+    new:
+      title: "Už len krok"
+      subtitle: "Pre vytvorenie účtu musíte súhlasiť so všeobecnými obchodnými podmienkami a zásadami ochrany osobných údajov."
+      accept: "Vytvoriť účet a pokračovať"
+      cancel: "Zrušiť"
+
+  activerecord:
+    attributes:
+      user:
+        agree_to_policies: "Podmienky a zásady ochrany súkromia a Všeobecné obchodné podmienky"
+
   common:
     important: "Dôležité"
     desktop_required: "Potrebný stolný počítač"
@@ -75,11 +98,13 @@ sk:
         email: "Email"
         remember_me: "Zapamätať si ma"
         or_continue_with: "Alebo pokračovať s"
-        sign_in_with_google: "Prihlásiť sa cez Google"
+        sign_in_with_google: "Pokračovať cez Google"
     registrations:
       new:
         sign_up: "Registrovať sa"
         subtitle: "Vytvorte si nový účet."
+        or_continue_with: "Alebo pokračovať s"
+        sign_up_with_google: "Pokračovať cez Google"
       edit:
         title: "Upraviť %{resource}"
         subtitle: "Aktualizujte informácie o svojom účte."
@@ -337,6 +362,7 @@ sk:
   contracts:
     alerts:
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
+      missing_policy_agreement: "Musíte súhlasiť s pravidlami a podmienkami, aby ste mohli pokračovať."
     index:
       title: "Dokumenty"
       upload_document: "Nahrať dokument"

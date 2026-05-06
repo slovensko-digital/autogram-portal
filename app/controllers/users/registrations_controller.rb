@@ -3,6 +3,12 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   before_action :configure_permitted_parameters
 
+  def create
+    super do |resource|
+      UserPolicyConsent.record_current_for(user: resource, source: "email_signup", request: request) if resource.persisted?
+    end
+  end
+
   def destroy
     expected_phrase = I18n.t("devise.registrations.edit.delete_confirmation_phrase")
     provided_phrase = params[:delete_confirmation].to_s.strip
@@ -23,6 +29,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   protected
 
   def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :agree_to_policies ])
     devise_parameter_sanitizer.permit(:account_update, keys: [ :name, :api_token_public_key ])
   end
 

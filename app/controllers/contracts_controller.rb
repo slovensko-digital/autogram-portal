@@ -26,6 +26,7 @@ class ContractsController < ApplicationController
 
   def new
     @contract = Contract.new
+    @current_user = current_user
   end
 
   def create
@@ -33,6 +34,13 @@ class ContractsController < ApplicationController
       user: current_user,
       documents: [ Document.create(params.require(:document).permit(:blob)) ]
     )
+
+    unless current_user
+      unless params.dig(:contract, :agree_to_policies) == "1"
+        @contract.errors.add(:agree_to_policies, t("contracts.alerts.missing_policy_agreement"))
+        return render :new, locals: { errors: [ t("contracts.alerts.missing_policy_agreement") ] }, status: :unprocessable_entity
+      end
+    end
 
     @contract.save!
 

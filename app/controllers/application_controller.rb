@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :set_locale
+  before_action :enforce_current_policy_consent, if: :user_signed_in?
 
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActionController::RoutingError, with: :render_not_found
@@ -44,6 +45,13 @@ class ApplicationController < ActionController::Base
   def set_locale
     I18n.locale = params[:locale] || session[:locale] || current_user.try(:locale) || I18n.default_locale
     session[:locale] = I18n.locale
+  end
+
+  def enforce_current_policy_consent
+    return if devise_controller?
+    return if current_user.accepted_current_policies?
+
+    redirect_to new_consent_url
   end
 
   def no_header

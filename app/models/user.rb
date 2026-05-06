@@ -44,13 +44,22 @@ class User < ApplicationRecord
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
   has_many :identities, dependent: :destroy
   has_many :contracts, dependent: :destroy
+  has_many :policy_consents, class_name: "UserPolicyConsent", dependent: :destroy
 
   enum :qscd, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
   MOBILE_QSCDS = [ "eid_2022", "eid_2024", "dpb_2023" ].freeze
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
+  validates :agree_to_policies, acceptance: true, on: :create
 
-  def self.create_from_provider_data(auth, locale: nil)
+  # Returns the User record for the given OmniAuth payload, or nil for a brand-new
+  # email address that still needs consent collection.
+  #
+  # Cases:
+  #   1. Known identity          – returns the linked user immediately.
+  #   2. Existing user by email  – links the new identity and returns the user.
+  #   3. Brand-new email         – returns nil; caller should collect consent first.
+  def self.find_or_link_from_provider_data(auth, locale: nil)
     identity = Identity.find_by(provider: auth.provider, uid: auth.uid)
     return identity.user if identity
 
@@ -63,14 +72,13 @@ class User < ApplicationRecord
       return user
     end
 
-    user = User.create!(
-      email: email,
-      name: auth.info.name,
-      confirmed_at: Time.current,
-      locale: locale || I18n.default_locale.to_s
-    )
-    user.identities.create!(provider: auth.provider, uid: auth.uid)
-    user
+    nil
+  end
+
+  def accepted_current_policies?
+    PolicyVersions.current.all? do |policy_type, version|
+      policy_consents.for_policy(policy_type, version).exists?
+    end
   end
 
   def display_name
