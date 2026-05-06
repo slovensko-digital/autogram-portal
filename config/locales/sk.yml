@@ -98,13 +98,13 @@ sk:
         email: "Email"
         remember_me: "Zapamätať si ma"
         or_continue_with: "Alebo pokračovať s"
-        sign_in_with_google: "Prihlásiť sa cez Google"
+        sign_in_with_google: "Pokračovať cez Google"
     registrations:
       new:
         sign_up: "Registrovať sa"
         subtitle: "Vytvorte si nový účet."
         or_continue_with: "Alebo pokračovať s"
-        sign_up_with_google: "Registrovať sa cez Google"
+        sign_up_with_google: "Pokračovať cez Google"
       edit:
         title: "Upraviť %{resource}"
         subtitle: "Aktualizujte informácie o svojom účte."
