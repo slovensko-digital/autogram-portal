@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_11_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -201,6 +201,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_000001) do
     t.index ["bundle_id"], name: "index_postal_addresses_on_bundle_id"
   end
 
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.string "auth", null: false
+    t.datetime "created_at", null: false
+    t.text "endpoint", null: false
+    t.string "p256dh", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
   create_table "recipient_blocks", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
@@ -264,6 +275,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_000001) do
     t.index ["recipient_id"], name: "index_signers_on_recipient_id"
     t.index ["recipient_id"], name: "index_signers_on_recipient_id_unique_for_recipient_signers", unique: true, where: "(((type)::text = 'RecipientSigner'::text) AND (recipient_id IS NOT NULL))"
     t.index ["user_id"], name: "index_signers_on_user_id"
+  end
+
+  create_table "user_policy_consents", force: :cascade do |t|
+    t.datetime "accepted_at", null: false
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.string "policy_type", null: false
+    t.string "policy_version", null: false
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.bigint "user_id", null: false
+    t.index ["user_id", "accepted_at"], name: "index_user_policy_consents_on_user_id_and_accepted_at"
+    t.index ["user_id", "policy_type", "policy_version"], name: "index_user_policy_consents_on_user_policy_version"
+    t.index ["user_id"], name: "index_user_policy_consents_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -336,6 +362,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_000001) do
   add_foreign_key "documents", "contracts"
   add_foreign_key "identities", "users"
   add_foreign_key "postal_addresses", "bundles"
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "recipients", "bundles"
   add_foreign_key "recipients", "users"
   add_foreign_key "sessions", "signer_contracts"
@@ -343,6 +370,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_000001) do
   add_foreign_key "signer_contracts", "signers"
   add_foreign_key "signers", "recipients"
   add_foreign_key "signers", "users"
+  add_foreign_key "user_policy_consents", "users"
   add_foreign_key "webhooks", "bundles"
   add_foreign_key "xdc_parameters", "documents"
 end

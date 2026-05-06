@@ -35,6 +35,12 @@ Rails.application.routes.draw do
   resources :about, only: [ :index ]
   resources :docs, only: [ :index ]
 
+  get  "consent" => "consents#new",    as: :new_consent
+  post "consent" => "consents#create", as: :consent
+
+  get  "oauth_consent" => "oauth_consents#new",    as: :new_oauth_consent
+  post "oauth_consent" => "oauth_consents#create", as: :oauth_consent
+
   authenticate(:user) do
     get "/dashboard", to: "dashboard#index", as: :dashboard
 

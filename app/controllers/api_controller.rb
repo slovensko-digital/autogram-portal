@@ -1,6 +1,7 @@
 class ApiController < ApplicationController
   protect_from_forgery with: :null_session
   before_action :authenticate_user!
+  skip_before_action :enforce_current_policy_consent
 
   rescue_from JWT::DecodeError do |error|
     render_unauthorized("API token")

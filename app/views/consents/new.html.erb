@@ -1,0 +1,45 @@
+<main>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:px-8">
+      <div class="mx-auto max-w-md border border-gray-200 rounded-lg px-4 py-5 sm:p-6 bg-white">
+        <div class="mb-8 text-center">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+          <p class="text-gray-600"><%= t('.subtitle') %></p>
+        </div>
+
+        <%= form_with url: consent_path, method: :post, html: { class: "space-y-6" } do |f| %>
+          <label class="group relative flex items-center space-x-3 p-4 border border-gray-300 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2">
+            <%= check_box_tag :agree_to_policies, "1", false, required: true, class: "sr-only" %>
+            <div class="flex-shrink-0">
+              <div class="w-5 h-5 border border-gray-500 rounded flex items-center justify-center group-has-[:checked]:border-blue-500 group-has-[:checked]:bg-blue-500 transition-colors">
+                <svg class="hidden group-has-[:checked]:block w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <div class="text-sm text-gray-800 mt-1">
+                <%= t('upload_form.agree_to_policies_html',
+                      terms_link: link_to(t('upload_form.terms_of_service'), terms_of_service_index_path, target: "_blank", class: "text-blue-600 underline"),
+                      privacy_link: link_to(t('upload_form.privacy_policy'), privacy_policy_index_path, target: "_blank", class: "text-blue-600 underline")).html_safe %>
+                <span class="text-red-500">*</span>
+              </div>
+            </div>
+            <div class="hidden has-[:checked]:block absolute top-4 right-4">
+              <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </label>
+
+          <div>
+            <%= f.submit t('.accept'),
+                class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<% content_for :title, t('.title') %>

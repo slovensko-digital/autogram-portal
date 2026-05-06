@@ -37,9 +37,48 @@
 #  index_users_on_unlock_token          (unlock_token) UNIQUE
 #
 require "test_helper"
+require "ostruct"
 
 class UserTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  def auth_double(email:, name: "Test User", provider: "google_oauth2", uid: "uid123")
+    OpenStruct.new(
+      provider: provider,
+      uid:      uid,
+      info:     OpenStruct.new(email: email, name: name)
+    )
+  end
+
+  test "returns existing user when identity is found" do
+    user = users(:one)
+    identity = user.identities.create!(provider: "google_oauth2", uid: "known_uid")
+    auth = auth_double(email: user.email, uid: identity.uid)
+
+    result = User.find_or_link_from_provider_data(auth)
+    assert_equal user, result
+  end
+
+  test "links identity and returns existing user matched by email" do
+    user = users(:one)
+    auth = auth_double(email: user.email, uid: "new_uid_for_one")
+
+    assert_no_difference "User.count" do
+      result = User.find_or_link_from_provider_data(auth)
+      assert_equal user, result
+    end
+  end
+
+  test "returns nil for a brand-new email address" do
+    auth = auth_double(email: "brand_new_#{SecureRandom.hex(4)}@example.com")
+
+    result = User.find_or_link_from_provider_data(auth)
+    assert_nil result
+  end
+
+  test "user with all current consents returns true" do
+    assert users(:one).accepted_current_policies?
+  end
+
+  test "user without any consents returns false" do
+    assert_not users(:two).accepted_current_policies?
+  end
 end

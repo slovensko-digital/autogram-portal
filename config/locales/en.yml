@@ -30,6 +30,29 @@
 en:
   hello: "Hello world"
 
+  consents:
+    must_accept_to_register: "You must accept the terms and privacy policy to create an account."
+    please_accept_updated_policies: "Please review and accept the updated policies to continue."
+    accepted: "Thank you for accepting the updated policies."
+    google_sign_in_failed: "There was a problem signing you in through Google. Please register or try signing in later."
+    must_accept: "You must accept the policies to continue."
+    new:
+      title: "Updated policies"
+      subtitle: "Please accept the latest terms and privacy policy to continue."
+      accept: "Accept and continue"
+
+  oauth_consents:
+    new:
+      title: "Almost there"
+      subtitle: "Please accept the terms and privacy policy to create your account."
+      accept: "Create account and continue"
+      cancel: "Cancel"
+
+  activerecord:
+    attributes:
+      user:
+        agree_to_policies: "Terms and Privacy Policy"
+
   common:
     important: "Important"
     desktop_required: "Desktop computer required"
@@ -120,6 +143,8 @@ en:
       new:
         sign_up: "Sign up"
         subtitle: "Create a new account to get started."
+        or_continue_with: "Or continue with"
+        sign_up_with_google: "Sign up with Google"
       edit:
         title: "Edit %{resource}"
         subtitle: "Update your account information."
@@ -420,6 +445,7 @@ en:
   contracts:
     alerts:
       unauthorized_edit_attempt: "You are not authorized to edit this contract."
+      missing_policy_agreement: "You must agree to the policies and terms to continue"
     visualization_with_toggle:
       hide_document: "Hide document"
       show_document: "Show document"
@@ -1309,12 +1335,3 @@ en:
       dpb_2014: "This residence permit card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer residence permit card."
       dpb_2020: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
       dpb_2023: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
-
-  activerecord:
-    errors:
-      models:
-        contract:
-          attributes:
-            agree_to_policies:
-              blank: "You must agree to the policies and terms to continue"
-              acceptance: "You must agree to the policies and terms to continue"
