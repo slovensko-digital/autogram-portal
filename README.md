@@ -61,7 +61,7 @@ Visit `http://localhost:3000`
 
 ### GoodJob
 
-We are using GoodJob for job queue. Admin at [/admin/good_job](http://localhost:3000/admin/good_job)
+We are using GoodJob for job queue. Dashboard is available at [/admin/good_job](http://localhost:3000/admin/good_job) for authenticated admin users.
 
 ## Configuration
 
@@ -69,6 +69,10 @@ Edit `.env` file:
 - `API_SKIP_AUTH=true` - Skip auth in development
 - `AUTOGRAM_SERVICE_URL` - Autogram service URL
 - `AVM_URL` - Autogram AVM service URL
+- `WEBHOOK_REQUIRE_HTTPS=true` - Require HTTPS for webhook destinations (defaults to true in production)
+- `WEBHOOK_ALLOWED_HOSTS=host1,host2` - Optional allowlist override for internal webhook destinations
+- `WEBHOOK_OPEN_TIMEOUT=3` - Outbound webhook TCP connect timeout in seconds
+- `WEBHOOK_TIMEOUT=5` - Outbound webhook request timeout in seconds
 
 ## Development
 

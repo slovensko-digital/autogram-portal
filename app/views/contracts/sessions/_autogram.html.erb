@@ -1,7 +1,9 @@
+<% session_token = SessionAccessToken.generate(contract: @contract, session: @session) %>
+
 <div
   data-controller="signers--autogram"
-  data-signers--autogram-autogram-parameters-path-value="<%= parameters_contract_session_path(@contract, @session) %>"
-  data-signers--autogram-signed-document-path-value="<%= upload_contract_session_path(@contract, @session) %>"
+  data-signers--autogram-autogram-parameters-path-value="<%= parameters_contract_session_path(@contract, @session, session_token: session_token) %>"
+  data-signers--autogram-signed-document-path-value="<%= upload_contract_session_path(@contract, @session, session_token: session_token) %>"
   data-signers--autogram-sdk-path-value="<%= javascript_path('autogram-sdk') %>"
 >
   <div class="px-6 py-5 hidden md:block">

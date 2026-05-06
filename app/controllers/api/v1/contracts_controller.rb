@@ -42,7 +42,13 @@ class Api::V1::ContractsController < ApiController
   private
 
   def set_contract
-    @contract = Contract.find_by(uuid: params[:id])
+    @contract = accessible_contracts.find_by(uuid: params[:id])
     render json: { error: "Contract not found" }, status: :not_found unless @contract
+  end
+
+  def accessible_contracts
+    Contract
+      .left_outer_joins(:bundle)
+      .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
   end
 end

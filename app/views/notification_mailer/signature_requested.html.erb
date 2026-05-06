@@ -27,7 +27,7 @@
       </td>
     </tr>
   </table>
-  <p><%= @bundle.note.gsub("\n", "<br>").html_safe %></p>
+  <%= simple_format(ERB::Util.html_escape(@bundle.note), {}, wrapper_tag: "p") %>
 </div>
 <% end %>
 

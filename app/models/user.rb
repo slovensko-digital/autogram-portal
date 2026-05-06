@@ -93,6 +93,10 @@ class User < ApplicationRecord
     features.include? feature.to_s
   end
 
+  def admin?
+    feature_enabled?(:admin)
+  end
+
   def signature_request_allowed?
     # TODO: verify user first before allowing them to send signature requests
     true

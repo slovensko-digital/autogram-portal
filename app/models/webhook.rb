@@ -21,7 +21,7 @@ class Webhook < ApplicationRecord
   belongs_to :bundle
   enum :method, [ :standard, :get ]
 
-  validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }
+  validates :url, presence: true, webhook_url: true
 
   def fire_contract_signed(contract)
     case method

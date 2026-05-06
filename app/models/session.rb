@@ -68,20 +68,15 @@ class Session < ApplicationRecord
   end
 
   def accept_signed_file(signed_file)
-    # TODO: Check if signed_file is a signed version of the original documents
-    # AutogramEnvironment.autogram_service.validate_signed_file(signed_file, documents.map(&:blob))
-
-    # TODO: Validate the signatures in the signed file
-    # AutogramEnvironment.autogram_service.validate_signatures(signed_file, signature_parameters)
-
-    # TODO: version signed document attachment to avoid overwriting in concurrent scenarios
+    decoded_signed_file = decode_signed_file!(signed_file)
+    validate_signed_file!(decoded_signed_file)
 
     ActiveRecord::Base.transaction do
       new_filename = generate_signed_filename
       new_content_type = new_filename.ends_with?(".asice") ? "application/vnd.etsi.asic-e+zip" : "application/pdf"
       contract.signed_document.purge if contract.signed_document.attached?
       contract.signed_document.attach(
-        io: StringIO.new(Base64.decode64(signed_file)),
+        io: StringIO.new(decoded_signed_file),
         filename: new_filename,
         content_type: new_content_type
       )
@@ -103,6 +98,52 @@ class Session < ApplicationRecord
 
 
   private
+
+  def decode_signed_file!(signed_file)
+    decoded_signed_file = Base64.strict_decode64(signed_file.to_s)
+    raise "Signed document payload is empty" if decoded_signed_file.blank?
+
+    decoded_signed_file
+  rescue ArgumentError
+    raise "Signed document payload is not valid Base64"
+  end
+
+  def validate_signed_file!(decoded_signed_file)
+    validation_blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new(decoded_signed_file),
+      filename: generate_signed_filename,
+      content_type: inferred_signed_content_type
+    )
+
+    validation_document = Document.new(blob: validation_blob)
+    validation_result = AutogramEnvironment.autogram_service.validate_signatures(validation_document)
+
+    raise "Signed document validation failed" unless validation_result.valid_response?
+    raise "Signed document does not contain signatures" unless validation_result.has_signatures
+    raise "Signed document signatures are invalid" unless validation_result.signatures.any? { |signature| signature[:valid] }
+
+    ensure_signed_content_matches_contract!(validation_result)
+  ensure
+    validation_blob&.purge
+  end
+
+  def ensure_signed_content_matches_contract!(validation_result)
+    return unless contract.signature_parameters.container.present?
+
+    expected_documents = contract.documents.count
+    signed_objects = validation_result.document_info[:signed_objects_count].to_i
+
+    return if expected_documents.zero?
+    return if signed_objects >= expected_documents
+
+    raise "Signed document does not include all contract documents"
+
+    # TODO: compare old and new versions of the signed document via external service - AutogramEnvironment.autogram_service.compare_documents(old: contract.documents.map(&:blob), new: validation_blob) - doesnt exist yet
+  end
+
+  def inferred_signed_content_type
+    contract.signature_parameters.container.present? ? "application/vnd.etsi.asic-e+zip" : "application/pdf"
+  end
 
   def handle_status_change
     mark_signer_contract_signed if signed?

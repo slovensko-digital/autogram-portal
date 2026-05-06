@@ -129,8 +129,9 @@ Rails.application.routes.draw do
     end
   end
 
-  # add good job admin interface at /admin/good_job
-  mount GoodJob::Engine => "/admin/good_job"
+  authenticate(:user, ->(user) { user.admin? }) do
+    mount GoodJob::Engine => "/admin/good_job"
+  end
 
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 end
