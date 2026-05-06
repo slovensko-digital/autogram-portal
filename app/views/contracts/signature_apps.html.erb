@@ -77,6 +77,10 @@
                   data_attributes: {
                     signing_app_selector_target: 'appRadio'
                   } %>
+
+            <%= render 'shared/info',
+                  title: t('.third_party_notice_title'),
+                  content: t('.third_party_notice') %>
           <% end %>
         </div>
 

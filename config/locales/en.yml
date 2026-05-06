@@ -549,6 +549,8 @@ en:
       signed_message: "This contract has been signed and is complete. No further signature is required."
       title: "Select Signing Application"
       subtitle: "Choose which application to use for electronic signing"
+      third_party_notice_title: "Third-party services"
+      third_party_notice: "Autogram Mobile and eIdentita are external applications with their own terms of service and privacy policies. Please review them before use."
       old_card_warning_title: "Limitation"
       old_card_warning: "%{qscd} requires a desktop computer with a physical card reader. Mobile signing apps (Autogram Mobile, eIdentita) are not compatible with your card/document."
       old_card_mobile_warning: "%{qscd} requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
