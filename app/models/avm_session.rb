@@ -23,8 +23,6 @@
 #  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class AvmSession < Session
-  # TODO encrypt sensitive fields
-
   store_accessor :options, :encryption_key, :document_identifier
 
   validates :document_identifier, :encryption_key, presence: true

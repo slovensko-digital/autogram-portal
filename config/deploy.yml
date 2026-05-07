@@ -20,6 +20,9 @@ env:
     - GOOGLE_CLIENT_SECRET
     - SMTP_PASSWORD
     - ALTCHA_HMAC_KEY
+    - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+    - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+    - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"

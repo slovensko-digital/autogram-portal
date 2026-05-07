@@ -50,4 +50,9 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  config.active_record.encryption.primary_key = "default_primary_key"
+  config.active_record.encryption.deterministic_key = "default_deterministic_key"
+  config.active_record.encryption.key_derivation_salt = "default_key_derivation_salt"
+  config.active_record.encryption.encrypt_fixtures = true
 end
