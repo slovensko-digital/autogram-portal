@@ -12,29 +12,33 @@ class BundlesController < ApplicationController
 
     awaiting_scope = current_user.bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
+                                 .merge(Recipient.active)
                                  .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                  .distinct
 
     declined_scope = current_user.bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
+                                 .merge(Recipient.active)
                                  .where.not(signer_contracts: { declined_at: nil })
                                  .distinct
 
     bundles = case @state
     when "awaiting"
       bundles.joins(:recipients)
+             .merge(Recipient.active)
              .where(id: awaiting_scope.select(:id))
              .where.not(id: declined_scope.select(:id))
              .distinct
     when "completed"
       bundles.joins(:recipients)
+             .merge(Recipient.active)
              .where.not(id: awaiting_scope.select(:id))
              .where.not(id: declined_scope.select(:id))
              .distinct
     when "declined"
       bundles.where(id: declined_scope.select(:id))
     when "no_recipients"
-      bundles.left_outer_joins(:recipients).where(recipients: { id: nil })
+      bundles.where.not(id: bundles.joins(:recipients).merge(Recipient.active).select(:id))
     else
       bundles
     end
@@ -51,19 +55,19 @@ class BundlesController < ApplicationController
 
     awaiting_for_user_scope = Bundle.recipient_user(current_user)
                                     .joins(recipients: { recipient_signer: :signer_contracts })
-                                    .where(recipients: { user_id: current_user.id })
+                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil })
                                     .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                     .distinct
 
     declined_for_user_scope = Bundle.recipient_user(current_user)
                                     .joins(recipients: { recipient_signer: :signer_contracts })
-                                    .where(recipients: { user_id: current_user.id })
+                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil })
                                     .where.not(signer_contracts: { declined_at: nil })
                                     .distinct
 
     superseded_for_user_scope = Bundle.recipient_user(current_user)
                                       .joins(recipients: { recipient_signer: :signer_contracts })
-                                      .where(recipients: { user_id: current_user.id })
+                                      .where(recipients: { user_id: current_user.id, withdrawn_at: nil })
                                       .where.not(signer_contracts: { superseded_at: nil })
                                       .where(signer_contracts: { signed_at: nil })
                                       .where(signer_contracts: { declined_at: nil })
@@ -88,7 +92,7 @@ class BundlesController < ApplicationController
 
     @bundles = @bundles.includes(:contracts, :author).order(created_at: order_dir)
 
-    @recipients_by_bundle = Recipient.where(user: current_user, bundle_id: @bundles.map(&:id))
+    @recipients_by_bundle = Recipient.active.where(user: current_user, bundle_id: @bundles.map(&:id))
                                      .index_by(&:bundle_id)
   end
 
@@ -127,11 +131,14 @@ class BundlesController < ApplicationController
     if params[:recipient]
       @recipient = Recipient.find_by_uuid!(params[:recipient])
       @bundle = @recipient.bundle
+      return render :sign_withdrawn, status: :gone if @recipient.withdrawn?
     end
 
     if current_user
-      @bundle ||= Bundle.joins(:recipients).where(recipients: { user: current_user }, uuid: params[:id]).first
-      @recipient ||= @bundle.recipients.find_by(user: current_user) if @bundle
+      @bundle ||= Bundle.joins(:recipients)
+                        .merge(Recipient.active)
+                        .where(recipients: { user: current_user }, uuid: params[:id]).first
+      @recipient ||= @bundle.recipients.active.find_by(user: current_user) if @bundle
     end
 
     @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
@@ -142,6 +149,11 @@ class BundlesController < ApplicationController
   def decline
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
+
+    if recipient.withdrawn?
+      return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
+                         alert: I18n.t("bundles.sign.signature_request_withdrawn")
+    end
 
     if bundle.completed?
       return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
@@ -172,6 +184,11 @@ class BundlesController < ApplicationController
   def accept
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
+
+    if recipient.withdrawn?
+      return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
+                         alert: I18n.t("bundles.sign.signature_request_withdrawn")
+    end
 
     if bundle.completed?
       return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
@@ -206,8 +223,10 @@ class BundlesController < ApplicationController
       @recipient = Recipient.find_by_uuid!(params[:recipient])
       @bundle = @recipient.bundle
     elsif current_user
-      @bundle = Bundle.joins(:recipients).where(recipients: { user: current_user }, uuid: params[:id]).first
-      @recipient = @bundle&.recipients&.find_by(user: current_user)
+      @bundle = Bundle.joins(:recipients)
+                      .merge(Recipient.active)
+                      .where(recipients: { user: current_user }, uuid: params[:id]).first
+      @recipient = @bundle&.recipients&.active&.find_by(user: current_user)
     end
   end
 
@@ -225,7 +244,7 @@ class BundlesController < ApplicationController
     if params[:recipient]
       bundle.recipients.find_by_uuid!(params[:recipient])
     else
-      bundle.recipients.find_by!(user: current_user)
+      bundle.recipients.active.find_by!(user: current_user)
     end
   end
 end

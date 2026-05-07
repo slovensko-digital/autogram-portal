@@ -26,6 +26,8 @@ class Bundle < ApplicationRecord
 
   has_many :contracts, dependent: :destroy
   has_many :recipients, dependent: :destroy
+  has_many :active_recipients, -> { active }, class_name: "Recipient", foreign_key: :bundle_id
+  has_many :withdrawn_recipients, -> { withdrawn }, class_name: "Recipient", foreign_key: :bundle_id
   has_one :webhook, dependent: :destroy
   has_one :postal_address, dependent: :destroy
 
@@ -47,7 +49,12 @@ class Bundle < ApplicationRecord
   after_save :recompute_superseded_state_if_rules_changed, if: :rules_changed?
 
   scope :publicly_visible, -> { where(publicly_visible: true) }
-  scope :recipient_user, ->(user) { joins(:recipients).where.not(author: user).where(recipients: { user: user }) }
+  scope :recipient_user, ->(user) {
+    joins(:recipients)
+      .merge(Recipient.active)
+      .where.not(author: user)
+      .where(recipients: { user: user })
+  }
 
   def to_param
     uuid
@@ -58,20 +65,20 @@ class Bundle < ApplicationRecord
   end
 
   def completed?
-      return threshold_met? && !awaiting_recipients? if recipients.exists?
+    return threshold_met? && !awaiting_recipients? if active_recipients.exists?
 
-     contracts.where.missing(:signed_document_attachment).none?
+    contracts.where.missing(:signed_document_attachment).none?
   end
 
   def bundle_state
-    return :no_recipients unless recipients.exists?
+    return :no_recipients unless active_recipients.exists?
     return :completed if completed?
     return :declined if declined_recipients?
     :awaiting
   end
 
   def awaiting_recipients?(contract: nil)
-    scope = recipients
+    scope = active_recipients
       .joins(recipient_signer: :signer_contracts)
       .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
     scope = scope.where(signer_contracts: { contract_id: contract.id }) if contract
@@ -79,11 +86,11 @@ class Bundle < ApplicationRecord
   end
 
   def completed_recipients
-    not_completed_ids = recipients
+    not_completed_ids = active_recipients
       .joins(recipient_signer: :signer_contracts)
       .where("signer_contracts.signed_at IS NULL OR signer_contracts.declined_at IS NOT NULL")
       .select(:id)
-    recipients.where.not(id: not_completed_ids)
+    active_recipients.where.not(id: not_completed_ids)
   end
 
   def notify_contract_signed(contract, signer)
@@ -112,7 +119,7 @@ class Bundle < ApplicationRecord
   end
 
   def notify_recipients
-    recipients.each(&:notify!)
+    active_recipients.each(&:notify!)
   end
 
   def short_uuid
@@ -127,17 +134,17 @@ class Bundle < ApplicationRecord
     when "threshold"
       signed_recipients_count >= required_signatures.to_i
     else # "all"
-      signed_recipients_count >= recipients.count
+      signed_recipients_count >= active_recipients.count
     end
   end
 
   # Number of recipients who have signed every contract in the bundle.
   def signed_recipients_count
-    not_signed_ids = recipients
+    not_signed_ids = active_recipients
       .joins(recipient_signer: :signer_contracts)
       .where("signer_contracts.signed_at IS NULL")
       .select(:id)
-    recipients.where.not(id: not_signed_ids).count
+    active_recipients.where.not(id: not_signed_ids).count
   end
 
   # Mark every still-awaiting signer_contract in this bundle as superseded, then
@@ -146,7 +153,7 @@ class Bundle < ApplicationRecord
     with_lock do
       awaiting_sc_ids = SignerContract
         .joins(signer: :recipient)
-        .where(recipients: { bundle_id: id }, signed_at: nil, declined_at: nil, superseded_at: nil)
+        .where(recipients: { bundle_id: id, withdrawn_at: nil }, signed_at: nil, declined_at: nil, superseded_at: nil)
         .pluck(:id)
 
       return if awaiting_sc_ids.empty?
@@ -202,7 +209,7 @@ class Bundle < ApplicationRecord
   end
 
   def declined_recipients?
-    recipients
+    active_recipients
       .joins(recipient_signer: :signer_contracts)
       .where.not(signer_contracts: { declined_at: nil })
       .exists?

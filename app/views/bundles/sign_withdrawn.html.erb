@@ -1,0 +1,13 @@
+<% content_for :title, t('.title') %>
+
+<main>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex flex-col items-center max-w-3xl px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div class="w-full">
+        <%= render 'shared/error',
+              title: t('bundles.sign.withdrawn_info_title'),
+              content: "#{t('bundles.sign.withdrawn_info_message')} #{t('bundles.sign.withdrawn_info_apology')}" %>
+      </div>
+    </div>
+  </div>
+</main>

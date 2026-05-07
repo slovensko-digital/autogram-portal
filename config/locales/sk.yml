@@ -23,6 +23,13 @@ sk:
     attributes:
       user:
         agree_to_policies: "Podmienky a zásady ochrany súkromia a Všeobecné obchodné podmienky"
+    errors:
+      models:
+        contract:
+          attributes:
+            agree_to_policies:
+              blank: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
+              acceptance: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
 
   common:
     important: "Dôležité"
@@ -80,6 +87,7 @@ sk:
         signed: "Podpísané"
         declined: "Odmietnuté"
         superseded: "Podpis nie je potrebný"
+        withdrawn: "Stiahnuté"
     application:
       signature_qualifications:
         qesig: "Vlastnoručný podpis"
@@ -331,6 +339,12 @@ sk:
       accepted_notice: "Tento balík môžete znovu podpísať."
       bundle_already_completed: "Balík bol už dokončený."
       signature_no_longer_required: "Váš podpis už nie je pre tento balík potrebný."
+      signature_request_withdrawn: "Požiadavka na podpis tohto balíka bola stiahnutá."
+      withdrawn_info_title: "Požiadavka na podpis bola stiahnutá"
+      withdrawn_info_message: "Pôvodne ste boli požiadaný o podpis tohto balíka, ale vlastník túto požiadavku stiahol."
+      withdrawn_info_apology: "Ospravedlňujeme sa za vzniknuté nepríjemnosti."
+    sign_withdrawn:
+      title: "Požiadavka na podpis bola stiahnutá"
     status:
       all_signed: "Všetky dokumenty podpísané"
       signed_count: "Podpísaných %{signed} z %{total}"
@@ -359,6 +373,7 @@ sk:
       signing_rule_threshold_description: "Balík je dokončený, keď podpíše zadaný počet adresátov."
       required_signatures_label: "Počet vyžadovaných podpisov"
       required_signatures_of: "z %{count} adresátov"
+      request_withdrawn: "Požiadavka na podpis bola stiahnutá"
   contracts:
     alerts:
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
@@ -1225,6 +1240,12 @@ sk:
       message: "Balík dokumentov od %{author_name} bol dokončený bez vášho podpisu."
       details_title: "Dokumenty v balíku:"
       view_bundle: "Zobraziť balík"
+    signature_withdrawn:
+      subject: "Požiadavka na podpis bola stiahnutá"
+      title: "Požiadavka na podpis bola stiahnutá"
+      message: "%{author_name} stiahol požiadavku na váš podpis pre tento balík."
+      apology: "Ospravedlňujeme sa za prípadné komplikácie."
+      details_title: "Dokumenty v balíku:"
 
   layouts:
     mailer:
@@ -1249,11 +1270,3 @@ sk:
       dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
       dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
 
-  activerecord:
-    errors:
-      models:
-        contract:
-          attributes:
-            agree_to_policies:
-              blank: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
-              acceptance: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
