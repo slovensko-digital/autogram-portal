@@ -1,6 +1,14 @@
 require "rqrcode"
 
 module ApplicationHelper
+  def terms_of_service_link
+    ENV["TERMS_OF_SERVICE_URL"].presence || root_path
+  end
+
+  def privacy_policy_link
+    ENV["PRIVACY_POLICY_URL"].presence || root_path
+  end
+
   def decode_base64_content(content, mime_type)
     return content unless mime_type&.include?(";base64")
 

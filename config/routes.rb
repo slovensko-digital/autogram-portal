@@ -30,8 +30,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root to: "root#index"
 
-  resources :privacy_policy, only: [ :index ]
-  resources :terms_of_service, only: [ :index ]
   resources :about, only: [ :index ]
   resources :docs, only: [ :index ]
 
