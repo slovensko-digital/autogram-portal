@@ -36,7 +36,7 @@ class Recipient < ApplicationRecord
   belongs_to :bundle
   belongs_to :user, optional: true
 
-  enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }
+  enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }, scopes: false
 
   scope :active, -> { where(withdrawn_at: nil) }
   scope :withdrawn, -> { where.not(withdrawn_at: nil) }

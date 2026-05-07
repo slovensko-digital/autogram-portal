@@ -15,5 +15,4 @@ staging:
   <<: *default
 
 production:
-  database: cache
   <<: *default
