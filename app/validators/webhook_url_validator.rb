@@ -85,7 +85,7 @@ class WebhookUrlValidator < ActiveModel::EachValidator
 
   def resolve_addresses(host)
     parsed_ip = IPAddr.new(host)
-    return [ parsed_ip ]
+    [ parsed_ip ]
   rescue IPAddr::InvalidAddressError
     Resolv.getaddresses(host).filter_map do |address|
       IPAddr.new(address)
