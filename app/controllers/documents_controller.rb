@@ -41,7 +41,7 @@ class DocumentsController < ApplicationController
   private
 
   def set_document
-    @document = Document.find_by(uuid: params[:id]) || Document.find(params[:id])
+    @document = Document.find_by!(uuid: params[:id])
   end
 
   def document_params

@@ -8,6 +8,7 @@
 #  name                :string
 #  notification_status :integer          default("not_notified"), not null
 #  uuid                :uuid             not null
+#  withdrawn_at        :datetime
 #  created_at          :datetime         not null
 #  updated_at          :datetime         not null
 #  bundle_id           :bigint           not null
@@ -15,11 +16,12 @@
 #
 # Indexes
 #
-#  index_recipients_on_bundle_id            (bundle_id)
-#  index_recipients_on_bundle_id_and_email  (bundle_id,email) UNIQUE
-#  index_recipients_on_email                (email)
-#  index_recipients_on_user_id              (user_id)
-#  index_recipients_on_uuid                 (uuid) UNIQUE
+#  index_recipients_on_bundle_id                   (bundle_id)
+#  index_recipients_on_bundle_id_and_email_active  (bundle_id,email) UNIQUE WHERE (withdrawn_at IS NULL)
+#  index_recipients_on_bundle_id_and_withdrawn_at  (bundle_id,withdrawn_at)
+#  index_recipients_on_email                       (email)
+#  index_recipients_on_user_id                     (user_id)
+#  index_recipients_on_uuid                        (uuid) UNIQUE
 #
 # Foreign Keys
 #
@@ -36,6 +38,9 @@ class Recipient < ApplicationRecord
 
   enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }
 
+  scope :active, -> { where(withdrawn_at: nil) }
+  scope :withdrawn, -> { where.not(withdrawn_at: nil) }
+
   scope :awaiting_contract, ->(contract) {
     joins(recipient_signer: :signer_contracts)
       .where(signer_contracts: { contract_id: contract.id, signed_at: nil, declined_at: nil, superseded_at: nil })
@@ -45,7 +50,10 @@ class Recipient < ApplicationRecord
   before_validation :ensure_uuid, on: :create
   validates :uuid, presence: true, uniqueness: true
   validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
-  validates :email, presence: true, uniqueness: { scope: :bundle_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email,
+    presence: true,
+    uniqueness: { scope: :bundle_id, conditions: -> { where(withdrawn_at: nil) } },
+    format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
   before_create :link_user_by_email
@@ -62,6 +70,14 @@ class Recipient < ApplicationRecord
     name.presence || user&.display_name || email
   end
 
+  def active?
+    !withdrawn?
+  end
+
+  def withdrawn?
+    withdrawn_at.present?
+  end
+
   def signed_contract?(contract)
     signer_contracts.find_by!(contract: contract).signed?
   end
@@ -75,22 +91,27 @@ class Recipient < ApplicationRecord
   end
 
   def pending?
+    return false if withdrawn?
     signer_contracts.awaiting.exists?
   end
 
   def declined?
+    return false if withdrawn?
     signer_contracts.declined.exists?
   end
 
   def superseded?
+    return false if withdrawn?
     signer_contracts.superseded.exists? && !signer_contracts.signed.exists? && !pending?
   end
 
   def signed?
+    return false if withdrawn?
     signer_contracts.exists? && !pending? && !declined?
   end
 
   def notifiable?
+    return false if withdrawn?
     return false if signer_contracts.signed.exists?
     return false if superseded?
     not_notified?
@@ -103,8 +124,22 @@ class Recipient < ApplicationRecord
   end
 
   def removable?
+    return false if withdrawn?
     return false if signer_contracts.signed.exists?
-    notifiable? || declined? || superseded?
+    true
+  end
+
+  def withdraw!
+    return false unless removable?
+
+    transaction do
+      now = Time.current
+      signer_contracts.where(signed_at: nil).update_all(declined_at: nil, superseded_at: now, updated_at: now)
+      update!(withdrawn_at: now)
+      Notification::RecipientSignatureWithdrawnJob.perform_later(self) if notified?
+    end
+
+    true
   end
 
   private

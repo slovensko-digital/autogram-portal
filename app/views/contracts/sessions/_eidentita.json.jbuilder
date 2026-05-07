@@ -1,6 +1,8 @@
-json.sourceUrl download_contract_session_url(@contract, @session)
+session_token = SessionAccessToken.generate(contract: @contract, session: @session)
+
+json.sourceUrl download_contract_session_url(@contract, @session, session_token: session_token)
 json.callbackUrl contract_url(@contract)
-json.destinationUrl upload_contract_session_url(@contract, @session)
+json.destinationUrl upload_contract_session_url(@contract, @session, session_token: session_token)
 
 json.signatureFormat case @contract.signature_parameters.format
 when "XAdES"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_06_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -229,7 +229,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
-    t.index ["bundle_id", "email"], name: "index_recipients_on_bundle_id_and_email", unique: true
+    t.datetime "withdrawn_at"
+    t.index ["bundle_id", "email"], name: "index_recipients_on_bundle_id_and_email_active", unique: true, where: "(withdrawn_at IS NULL)"
+    t.index ["bundle_id", "withdrawn_at"], name: "index_recipients_on_bundle_id_and_withdrawn_at"
     t.index ["bundle_id"], name: "index_recipients_on_bundle_id"
     t.index ["email"], name: "index_recipients_on_email"
     t.index ["user_id"], name: "index_recipients_on_user_id"

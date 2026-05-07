@@ -33,4 +33,10 @@ class NotificationMailerPreview < ActionMailer::Preview
     recipient = bundle.recipients.first
     NotificationMailer.with(user: recipient, locale: params[:locale]).signature_no_longer_required(bundle)
   end
+
+  def signature_withdrawn
+    bundle = Bundle.joins(:recipients).where.not(recipients: { id: nil }).last
+    recipient = bundle.recipients.first
+    NotificationMailer.with(user: recipient, locale: params[:locale]).signature_withdrawn(bundle)
+  end
 end

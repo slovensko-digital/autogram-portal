@@ -2,6 +2,8 @@ class Contracts::SessionsController < ApplicationController
   before_action :set_contract
   before_action :set_session, except: [ :create ]
   before_action :set_signer_contract, only: [ :create, :show ]
+  before_action :authorize_session_access!, only: [ :parameters, :download, :upload ]
+  before_action :authorize_session_destroy!, only: [ :destroy ]
   before_action :redirect_if_completed, only: [ :show ]
   skip_before_action :verify_authenticity_token, only: [ :upload, :get_webhook, :standard_webhook ]
   before_action :allow_iframe
@@ -55,7 +57,7 @@ class Contracts::SessionsController < ApplicationController
     return head :not_found unless @session.eidentita? || @session.autogram?
 
     if params[:file].present?
-      @session.accept_signed_file(Base64.encode64(params[:file].tempfile.read))
+      @session.accept_signed_file(Base64.strict_encode64(params[:file].tempfile.read))
       render json: { success: true }
     elsif params[:signed_document].present?
       @session.accept_signed_file(params[:signed_document])
@@ -93,13 +95,23 @@ class Contracts::SessionsController < ApplicationController
 
   def set_signer_contract
     if params[:recipient]
-      @recipient = @contract.recipients.find_by_uuid!(params[:recipient])
+      @recipient = @contract.recipients.active.find_by_uuid(params[:recipient])
+
+      unless @recipient
+        withdrawn_recipient = @contract.recipients.withdrawn.find_by_uuid(params[:recipient])
+        if withdrawn_recipient&.bundle
+          redirect_to sign_bundle_path(withdrawn_recipient.bundle, recipient: withdrawn_recipient.uuid)
+          return
+        end
+
+        raise ActiveRecord::RecordNotFound
+      end
     elsif current_user
-      @recipient = @contract.recipients.find_by(user: current_user) ||
-                   @contract.recipients.find_by(email: current_user.email)
+      @recipient = @contract.recipients.active.find_by(user: current_user) ||
+                   @contract.recipients.active.find_by(email: current_user.email)
 
       if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
-        @recipient = @contract.bundle.recipients.find_or_create_by!(email: current_user.email) do |r|
+        @recipient = @contract.bundle.recipients.active.find_or_create_by!(email: current_user.email) do |r|
           r.user = current_user
           r.name = current_user.display_name
         end
@@ -175,5 +187,44 @@ class Contracts::SessionsController < ApplicationController
       type: "AutogramSession",
       signing_started_at: Time.current
     )
+  end
+
+  def authorize_session_access!
+    return if session_token_authorized? || allowed_user_for_session?
+
+    head :forbidden
+  end
+
+  def authorize_session_destroy!
+    return if allowed_user_for_session?
+
+    head :forbidden
+  end
+
+  def session_token_authorized?
+    token = params[:session_token].presence
+    return false unless token
+
+    SessionAccessToken.valid?(token: token, contract: @contract, session: @session)
+  end
+
+  def allowed_user_for_session?
+    return false unless current_user
+    return true if @contract.user == current_user
+    return true if @contract.bundle&.author == current_user
+
+    signer = @session.signer
+
+    case signer
+    when UserSigner
+      signer.user == current_user
+    when RecipientSigner
+      recipient = signer.recipient
+      return false if recipient&.withdrawn?
+
+      recipient&.user == current_user || recipient&.email == current_user.email
+    else
+      false
+    end
   end
 end

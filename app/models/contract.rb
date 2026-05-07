@@ -55,7 +55,7 @@ class Contract < ApplicationRecord
     joins(signer_contracts: { signer: :recipient })
       .where(signer_contracts: { signed_at: nil, declined_at: nil })
       .where(signers: { type: "RecipientSigner" })
-      .where(recipients: { user_id: user.id })
+      .where(recipients: { user_id: user.id, withdrawn_at: nil })
       .distinct
     }
   scope :standalone, -> { where(bundle_id: nil) }
@@ -194,10 +194,10 @@ class Contract < ApplicationRecord
   end
 
   def associate_with_bundle_recipients
-    return unless bundle.present? && bundle.recipients.any?
+    return unless bundle.present? && bundle.active_recipients.any?
 
     now = Time.current
-    inserts = bundle.recipients.map do |recipient|
+    inserts = bundle.active_recipients.map do |recipient|
       recipient_signer = recipient.recipient_signer || recipient.create_recipient_signer!
       { signer_id: recipient_signer.id, contract_id: id, created_at: now, updated_at: now }
     end

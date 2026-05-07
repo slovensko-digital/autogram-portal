@@ -29,13 +29,25 @@ class EidentitaSession < Session
 
   def eidentita_url
     url_options = Rails.application.config.action_controller.default_url_options || {}
-    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(contract, self, **url_options)
-    "sk.minv.sca://sign?qr=true&linkUrl=#{CGI.escape(link_url)}.json"
+    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(
+      contract,
+      self,
+      format: :json,
+      session_token: SessionAccessToken.generate(contract: contract, session: self),
+      **url_options
+    )
+    "sk.minv.sca://sign?qr=true&linkUrl=#{CGI.escape(link_url)}"
   end
 
   def eidentita_url_mobile
     url_options = Rails.application.config.action_controller.default_url_options || {}
-    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(contract, self, **url_options)
-    "sk.minv.sca://sign?qr=false&linkUrl=#{CGI.escape(link_url)}.json"
+    link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(
+      contract,
+      self,
+      format: :json,
+      session_token: SessionAccessToken.generate(contract: contract, session: self),
+      **url_options
+    )
+    "sk.minv.sca://sign?qr=false&linkUrl=#{CGI.escape(link_url)}"
   end
 end

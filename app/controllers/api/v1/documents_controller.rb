@@ -12,7 +12,14 @@ class Api::V1::DocumentsController < ApiController
   private
 
   def set_document
-    @document = Document.find_by(uuid: params[:id])
+    @document = accessible_documents.find_by(uuid: params[:id])
     render json: { error: "Document not found" }, status: :not_found unless @document
+  end
+
+  def accessible_documents
+    Document
+      .joins(:contract)
+      .left_outer_joins(contract: :bundle)
+      .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
   end
 end

@@ -109,6 +109,7 @@ en:
         signed: "Signed"
         declined: "Declined"
         superseded: "Signature no longer required"
+        withdrawn: "Withdrawn"
     application:
       signature_levels:
         pades: "PAdES"
@@ -413,6 +414,12 @@ en:
       accepted_notice: "You can sign this bundle again."
       bundle_already_completed: "This bundle has already been completed."
       signature_no_longer_required: "Your signature is no longer required for this bundle."
+      signature_request_withdrawn: "The signature request for this bundle has been withdrawn."
+      withdrawn_info_title: "Signature request was withdrawn"
+      withdrawn_info_message: "You were originally asked to sign this bundle, but the owner has withdrawn that request."
+      withdrawn_info_apology: "We apologize for the inconvenience."
+    sign_withdrawn:
+      title: "Signature request withdrawn"
     status:
       all_signed: "All contracts signed"
       signed_count: "Signed %{signed} of %{total}"
@@ -441,6 +448,7 @@ en:
       signing_rule_threshold_description: "The bundle is complete once the specified number of recipients have signed."
       required_signatures_label: "Required number of signatures"
       required_signatures_of: "of %{count} recipients"
+      request_withdrawn: "Signature request withdrawn"
 
   contracts:
     alerts:
@@ -1314,6 +1322,12 @@ en:
       message: "The bundle of documents from %{author_name} has been completed without requiring your signature."
       details_title: "Documents in bundle:"
       view_bundle: "View bundle"
+    signature_withdrawn:
+      subject: "Signature request withdrawn"
+      title: "Signature request withdrawn"
+      message: "%{author_name} has withdrawn their request for your signature on this bundle."
+      apology: "We apologize for any confusion this may have caused."
+      details_title: "Documents in bundle:"
   
   layouts:
     mailer:
