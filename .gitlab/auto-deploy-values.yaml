@@ -1,0 +1,25 @@
+service:
+  externalPort: 3000
+  internalPort: 3000
+image:
+  secrets:
+  - name: skdigital-bonet-registry
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 32m
+startupProbe:
+  periodSeconds: 5
+  probeType: httpGet
+  path: /up
+livenessProbe:
+  initialDelaySeconds: 20
+  probeType: httpGet
+  path: /up
+readinessProbe:
+  initialDelaySeconds: 20
+  probeType: httpGet
+  path: /up
+resources:
+  requests:
+    cpu: 25m
+    memory: 450Mi
