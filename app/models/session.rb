@@ -28,6 +28,8 @@ class Session < ApplicationRecord
   delegate :contract, to: :signer_contract
   delegate :signer,   to: :signer_contract
 
+  encrypts :options
+
   enum :status, {
     pending: 0,
     signed: 1,
