@@ -1,6 +1,7 @@
 class ApiTokenAuthenticator
   MAX_EXP_IN = 15.minutes
   JTI_PATTERN = /\A[0-9a-z\-_]{32,256}\z/i
+  SUPPORTED_ALGORITHMS = [ "RS256", "ES256" ]
 
   def initialize(public_key_reader:, return_handler:)
     @public_key_reader = public_key_reader
@@ -9,7 +10,7 @@ class ApiTokenAuthenticator
 
   def verify_token(token)
     options = {
-      algorithm: "RS256",
+      algorithm: SUPPORTED_ALGORITHMS,
       verify_jti: ->(jti) { jti =~ JTI_PATTERN }
     }
 
