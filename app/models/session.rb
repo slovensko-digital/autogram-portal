@@ -98,9 +98,6 @@ class Session < ApplicationRecord
     "contract-#{id}-signed.#{contract.signature_parameters.container.present? ? 'asice' : 'pdf'}"
   end
 
-
-  private
-
   def decode_signed_file!(signed_file)
     decoded_signed_file = Base64.strict_decode64(signed_file.to_s)
     raise "Signed document payload is empty" if decoded_signed_file.blank?
