@@ -6,7 +6,7 @@ module ApiEnvironment
     )
   end
 
-  API_USER_PUBLIC_KEY_READER = ->(sub) { OpenSSL::PKey::RSA.new(API_USER_BY_IDENTITY_FINDER.call(sub).api_token_public_key) }
+  API_USER_PUBLIC_KEY_READER = ->(sub) { OpenSSL::PKey.read(API_USER_BY_IDENTITY_FINDER.call(sub).api_token_public_key) }
   API_USER_BY_IDENTITY_FINDER = ->(sub) do
     raise unless sub&.to_i
 

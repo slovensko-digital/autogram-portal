@@ -41,15 +41,45 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "api contract show allows owner access with ES256 token" do
+    owner_ec_key = attach_api_public_key!(@owner, algorithm: "ES256")
+
+    get "/api/v1/contracts/#{@owner_contract.uuid}", headers: bearer_headers_for(@owner, owner_ec_key, algorithm: "ES256")
+
+    assert_response :success
+  end
+
+  test "api contract show allows owner access with RS256 token" do
+    get "/api/v1/contracts/#{@owner_contract.uuid}", headers: bearer_headers_for(@owner, @owner_key, algorithm: "RS256")
+
+    assert_response :success
+  end
+
+  test "api returns 401 for token with non matching algorithm to user" do
+    unsupported_key = OpenSSL::PKey::EC.generate("prime256v1")
+
+    get "/api/v1/contracts/#{@owner_contract.uuid}", headers: bearer_headers_for(@owner, unsupported_key, algorithm: "ES256")
+
+    assert_response :unauthorized
+  end
+
   private
 
-  def attach_api_public_key!(user)
-    key = OpenSSL::PKey::RSA.generate(2048)
-    user.update_column(:api_token_public_key, key.public_key.to_pem)
+  def attach_api_public_key!(user, algorithm: "RS256")
+    key = case algorithm
+    when "ES256"
+      OpenSSL::PKey::EC.generate("prime256v1")
+    when "RS256"
+      OpenSSL::PKey::RSA.generate(2048)
+    else
+      raise ArgumentError, "Unsupported algorithm: #{algorithm}"
+    end
+
+    user.update_column(:api_token_public_key, key.public_to_pem)
     key
   end
 
-  def bearer_headers_for(user, key)
+  def bearer_headers_for(user, key, algorithm: "RS256")
     token = JWT.encode(
       {
         sub: user.id.to_s,
@@ -57,7 +87,7 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
         jti: SecureRandom.hex(16)
       },
       key,
-      "RS256"
+      algorithm
     )
 
     {
