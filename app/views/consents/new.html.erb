@@ -20,8 +20,8 @@
             <div class="flex-1">
               <div class="text-sm text-gray-800 mt-1">
                 <%= t('upload_form.agree_to_policies_html',
-                      terms_link: link_to(t('upload_form.terms_of_service'), terms_of_service_index_path, target: "_blank", class: "text-blue-600 underline"),
-                      privacy_link: link_to(t('upload_form.privacy_policy'), privacy_policy_index_path, target: "_blank", class: "text-blue-600 underline")).html_safe %>
+                      terms_link: link_to(t('upload_form.terms_of_service'), terms_of_service_link, target: "_blank", class: "text-blue-600 underline"),
+                      privacy_link: link_to(t('upload_form.privacy_policy'), privacy_policy_link, target: "_blank", class: "text-blue-600 underline")).html_safe %>
                 <span class="text-red-500">*</span>
               </div>
             </div>
