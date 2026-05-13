@@ -189,7 +189,7 @@ GEM
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
     json (2.19.4)
-    jwt (3.1.2)
+    jwt (3.2.0)
       base64
     kamal (2.11.0)
       activesupport (>= 7.0)
@@ -528,7 +528,7 @@ DEPENDENCIES
   good_job (~> 4.12)
   importmap-rails
   jbuilder
-  jwt (~> 3.1)
+  jwt (~> 3.2)
   kamal
   letter_opener (~> 1.10)
   letter_opener_web
