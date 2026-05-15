@@ -81,7 +81,7 @@ gem "good_job", "~> 4.12"
 
 gem "redis", "~> 5.4"
 
-gem "jwt", "~> 3.1"
+gem "jwt", "~> 3.2"
 
 gem "devise", "~> 5.0"
 gem "devise-i18n", "~> 1.15"
