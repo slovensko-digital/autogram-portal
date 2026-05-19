@@ -4,7 +4,7 @@
   data-controller="signers--autogram"
   data-signers--autogram-autogram-parameters-path-value="<%= parameters_contract_session_path(@contract, @session, session_token: session_token) %>"
   data-signers--autogram-signed-document-path-value="<%= upload_contract_session_path(@contract, @session, session_token: session_token) %>"
-  data-signers--autogram-sdk-path-value="<%= javascript_path('autogram-sdk') %>"
+  data-signers--autogram-sdk-path-value="<%= asset_path('autogram-sdk.js') %>"
 >
   <div class="px-6 py-5 hidden md:block">
     <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
@@ -14,7 +14,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
     <div class="space-y-6 border border-gray-200 rounded-lg p-6 hidden md:block">
       <div class="space-y-4">
-        <% (1..7).each do |i| %>
+        <% (1..6).each do |i| %>
           <div class="flex items-start gap-3">
             <div class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
               <%= i %>
@@ -44,6 +44,31 @@
           <p class="text-sm text-gray-600 text-center">
             <%= t('.progress_subtitle') %>
           </p>
+        </div>
+
+        <!-- App may not be installed yet state -->
+        <div class="hidden" data-signers--autogram-target="stateMaybeNotInstalled">
+          <div class="mb-4 flex justify-center">
+            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-amber-600">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-amber-900 text-center mb-2">
+            <%= t('.maybe_not_installed_title') %>
+          </h3>
+          <div class="flex flex-col items-center">
+            <p class="text-sm text-amber-700 text-center mb-4">
+              <%= t('.maybe_not_installed_waiting') %>
+            </p>
+            <a href="https://sluzby.slovensko.digital/autogram/#download" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              <%= t('.not_installed_download') %>
+            </a>
+          </div>
         </div>
 
         <!-- App not installed state -->

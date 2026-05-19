@@ -532,6 +532,8 @@ sk:
         status_waiting: "Čakám na podpísanie dokumentu"
         status_signed: "Podpísané"
         cancel: "Zrušiť proces"
+        maybe_not_installed_title: "Autogram sa zatiaľ nespustil"
+        maybe_not_installed_waiting: "Ešte chvíľu čakáme na odpoveď aplikácie. Ak sa nespustí, zobrazíme ďalšie pokyny."
         not_installed_title: "Autogram nie je nainštalovaný"
         not_installed_desc: "Autogram nie je nainštalovaný na vašom počítači. Stiahnite a nainštalujte si ho."
         not_installed_download: "Stiahnuť Autogram"
