@@ -609,6 +609,8 @@ en:
         status_waiting: "Waiting for signature"
         status_signed: "Signed"
         cancel: "Cancel Process"
+        maybe_not_installed_title: "Autogram has not started yet"
+        maybe_not_installed_waiting: "We are still waiting a little longer. If it does not start, we will show further instructions."
         not_installed_title: "Autogram is not installed"
         not_installed_desc: "Autogram is not installed on your computer. Please download and install it."
         not_installed_download: "Download Autogram"

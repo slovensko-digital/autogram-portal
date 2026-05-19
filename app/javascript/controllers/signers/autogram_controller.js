@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["form", "progressBar", "progressPercent", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateNotInstalled", "stateCancelled", "stateError", "errorMessage"]
+  static targets = ["form", "progressBar", "progressPercent", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateMaybeNotInstalled", "stateNotInstalled", "stateCancelled", "stateError", "errorMessage"]
   static values = {
     autogramParametersPath: String,
     signedDocumentPath: String,
@@ -13,28 +13,36 @@ export default class extends Controller {
     console.log('Autogram signer controller connected')
     this.loadSDKScript().then(() => {
       this.sign()
+    }).catch((error) => {
+      console.error('Failed to load Autogram SDK script:', error)
+      this.showErrorState(error?.message || 'Autogram SDK sa nepodarilo načítať')
     })
   }
 
   loadSDKScript() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (typeof window.AutogramSDK !== 'undefined') {
-        resolve()
+        resolve(window.AutogramSDK)
+        return
+      }
+
+      if (!this.hasSdkPathValue || !this.sdkPathValue) {
+        reject(new Error('Autogram SDK URL nie je nakonfigurovaná pre túto stránku.'))
         return
       }
 
       const existingScript = document.querySelector('script[src*="autogram-sdk"]')
       if (existingScript) {
-        existingScript.addEventListener('load', () => resolve())
-        existingScript.addEventListener('error', () => resolve())
+        existingScript.addEventListener('load', () => resolve(window.AutogramSDK))
+        existingScript.addEventListener('error', () => reject(new Error(`Autogram SDK sa nepodarilo načítať z ${this.sdkPathValue}.`)))
         return
       }
 
       const script = document.createElement('script')
       script.src = this.sdkPathValue
       script.async = true
-      script.addEventListener('load', () => resolve())
-      script.addEventListener('error', () => resolve())
+      script.addEventListener('load', () => resolve(window.AutogramSDK))
+      script.addEventListener('error', () => reject(new Error(`Autogram SDK sa nepodarilo načítať z ${this.sdkPathValue}.`)))
       document.head.appendChild(script)
       console.log('Loading Autogram SDK script from:', this.sdkPathValue)
     })
@@ -60,22 +68,50 @@ export default class extends Controller {
     })
   }
 
+  isUserCancelledError(sdk, error) {
+    if (!error) {
+      return false
+    }
+
+    if (typeof sdk.UserCancelledSigningException === 'function' && error instanceof sdk.UserCancelledSigningException) {
+      return true
+    }
+
+    return error.name === 'UserCancelledSigningException' ||
+      error.message?.includes('cancel') ||
+      error.message?.includes('Aborted')
+  }
+
+  isAppNotInstalledError(sdk, error) {
+    if (!error) {
+      return false
+    }
+
+    if (typeof sdk.AutogramAppNotInstalledException === 'function' && error instanceof sdk.AutogramAppNotInstalledException) {
+      return true
+    }
+
+    return error.name === 'AutogramAppNotInstalledException'
+  }
+
   async sign() {
     console.log('Starting Autogram Desktop signing process')
 
-    try {
-      await this.waitForSDK()
+    let sdk = window.AutogramSDK || {}
 
-      if (typeof window.AutogramSDK === 'undefined') {
+    try {
+      sdk = await this.loadSDKScript()
+
+      if (typeof sdk === 'undefined' || typeof sdk.DesktopClient !== 'function') {
         throw new Error('An error occurred while loading the Autogram SDK. Please ensure it is properly included in the page.')
       }
 
       let client
-      if (window.AutogramSDK.DesktopClient) {
+      if (sdk.DesktopClient) {
         console.log('Using DesktopClient')
-        client = new window.AutogramSDK.DesktopClient()
+        client = new sdk.DesktopClient()
       } else {
-        throw new Error('No suitable Autogram client found. Available properties: ' + Object.keys(window.AutogramSDK).join(', '))
+        throw new Error('No suitable Autogram client found. Available properties: ' + Object.keys(sdk).join(', '))
       }
 
       const autogramParametersResponse = await fetch(this.autogramParametersPathValue, {
@@ -137,12 +173,19 @@ export default class extends Controller {
         {
           onStateChange: (state) => {
             if (state.type === 'checkingApp') {
+              this.showNormalState()
               this.updateProgress(0, 'checking')
             }
             if (state.type === 'launchingApp') {
+              this.showNormalState()
               this.updateProgress(25, 'starting')
             }
+            if (state.type === 'appMayNotBeInstalled') {
+              console.warn('Autogram may not be installed yet')
+              this.showAppMayNotBeInstalledHint()
+            }
             if (state.type === 'waitingForSignature') {
+              this.showNormalState()
               this.updateProgress(75, 'waiting')
             }
             if (state.type === 'appNotInstalled') {
@@ -200,20 +243,19 @@ export default class extends Controller {
       }
     } catch (error) {
       // Check if this is a user cancellation (already handled by onStateChange)
-      if (error.message && (error.message.includes('cancel') || error.message.includes('abort'))) {
+      if (this.isUserCancelledError(sdk, error)) {
         console.log('User cancelled signing - already handled by onStateChange callback')
         return
       }
-      
-      // Check if already handled by onStateChange (appNotInstalled, error states)
-      if (error.message && (error.message.includes('error') || error.message.includes('nainštalovaný') || error.message.includes('installed'))) {
-        console.log('Error already handled by onStateChange callback')
+
+      if (this.isAppNotInstalledError(sdk, error)) {
+        console.log('App not installed - already handled by onStateChange callback')
         return
       }
-      
+
       // Only show inline error for unexpected errors not caught by SDK
       console.error('Unexpected signing error:', error)
-      this.showErrorState(error.message)
+      this.showErrorState(error?.message || 'Unknown error')
     }
   }
 
@@ -310,8 +352,6 @@ export default class extends Controller {
           this.markFailed(this.statusStartingTarget)
           break
         case 'cancelled':
-          this.resetStatus(this.statusCheckingTarget)
-          this.resetStatus(this.statusStartingTarget)
           this.markFailed(this.statusWaitingTarget)
           break
       }
@@ -386,6 +426,21 @@ export default class extends Controller {
     }
   }
 
+  showAppMayNotBeInstalledHint() {
+    this.hideAllStates()
+    this.updateProgress(25, 'starting')
+    if (this.hasStateMaybeNotInstalledTarget) {
+      this.stateMaybeNotInstalledTarget.classList.remove('hidden')
+    }
+  }
+
+  showNormalState() {
+    this.hideAllStates()
+    if (this.hasStateNormalTarget) {
+      this.stateNormalTarget.classList.remove('hidden')
+    }
+  }
+
   showCancelledState() {
     this.updateProgress(75, 'cancelled')
     this.hideAllStates()
@@ -406,6 +461,7 @@ export default class extends Controller {
 
   hideAllStates() {
     if (this.hasStateNormalTarget) this.stateNormalTarget.classList.add('hidden')
+    if (this.hasStateMaybeNotInstalledTarget) this.stateMaybeNotInstalledTarget.classList.add('hidden')
     if (this.hasStateNotInstalledTarget) this.stateNotInstalledTarget.classList.add('hidden')
     if (this.hasStateCancelledTarget) this.stateCancelledTarget.classList.add('hidden')
     if (this.hasStateErrorTarget) this.stateErrorTarget.classList.add('hidden')
