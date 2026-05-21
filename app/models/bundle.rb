@@ -2,15 +2,16 @@
 #
 # Table name: bundles
 #
-#  id                  :bigint           not null, primary key
-#  note                :text
-#  publicly_visible    :boolean          default(FALSE), not null
-#  required_signatures :integer
-#  signing_rule        :string           default("all"), not null
-#  uuid                :string           not null
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
-#  user_id             :bigint           not null
+#  id                           :bigint           not null, primary key
+#  author_notifications_enabled :boolean          default(FALSE), not null
+#  note                         :text
+#  publicly_visible             :boolean          default(FALSE), not null
+#  required_signatures          :integer
+#  signing_rule                 :string           default("all"), not null
+#  uuid                         :string           not null
+#  created_at                   :datetime         not null
+#  updated_at                   :datetime         not null
+#  user_id                      :bigint           not null
 #
 # Indexes
 #
@@ -111,6 +112,9 @@ class Bundle < ApplicationRecord
   end
 
   def should_notify_author?(contract: nil, signer: nil)
+    return false unless author_notifications_enabled?
+    return false if webhook.present?
+
     if signer
       return false if author == signer.user
     end

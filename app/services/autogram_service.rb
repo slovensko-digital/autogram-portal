@@ -1,5 +1,6 @@
 class AutogramService
   AUTOGRAM_BASE_URL = ENV.fetch("AUTOGRAM_SERVICE_URL", "http://localhost:7200")
+  TEST_SIGNER_COMMON_NAME = "Autogram Test".freeze
 
   class ValidationResult
     attr_reader :has_signatures, :signatures, :errors, :document_info
@@ -180,6 +181,7 @@ class AutogramService
 
     subject_dn = signing_cert["subjectDN"] || ""
     signer_name = extract_cn_from_dn(subject_dn)
+    validation_result = signatures_data["validationResult"]
 
     first_timestamp = timestamps.find { |ts| ts["timestampType"] == "SIGNATURE_TIMESTAMP" }
     signing_time = if first_timestamp
@@ -196,8 +198,8 @@ class AutogramService
       signer_name: signer_name,
       signing_time: signing_time,
       signature_level: signatures_data["level"],
-      validation_result: signatures_data["validationResult"],
-      valid: signatures_data["validationResult"] == "TOTAL_PASSED",
+      validation_result: validation_result,
+      valid: accepted_signature_result?(validation_result, signer_name),
       certificate_info: {
         subject: signing_cert["subjectDN"],
         issuer: signing_cert["issuerDN"],
@@ -221,6 +223,20 @@ class AutogramService
   def extract_cn_from_dn(dn)
     match = dn.match(/CN=([^,]+)/)
     match ? match[1].strip : dn
+  end
+
+  # The public dev signing flow uses the Autogram test certificate, which the
+  # validation service reports as INDETERMINATE because it is not publicly trusted.
+  # Accept it only in local/test environments so embedded signing can be exercised.
+  def accepted_signature_result?(validation_result, signer_name)
+    return true if validation_result == "TOTAL_PASSED"
+    return false unless allow_indeterminate_test_signatures?
+
+    validation_result == "INDETERMINATE" && signer_name == TEST_SIGNER_COMMON_NAME
+  end
+
+  def allow_indeterminate_test_signatures?
+    Rails.env.development? || Rails.env.test?
   end
 
   def error_result(message)

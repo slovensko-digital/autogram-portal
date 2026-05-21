@@ -9,9 +9,17 @@
     <%= csp_meta_tag %>
 
     <%# I18n for JavaScript %>
+    <% javascript_translations = I18n.t('javascript', default: {}).deep_merge(
+      bundles: {
+        autogram_batch: I18n.t('bundles.autogram_batch', default: {}),
+        sign: {
+          batch_sign_unavailable: I18n.t('bundles.sign.batch_sign_unavailable')
+        }
+      }
+    ) %>
     <meta name="i18n-locale" content="<%= I18n.locale %>">
     <meta name="i18n-translations" content="<%= {
-      I18n.locale => I18n.t('javascript', default: {})
+      I18n.locale => javascript_translations
     }.to_json %>">
 
     <%= yield :head %>

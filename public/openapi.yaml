@@ -19,7 +19,7 @@ paths:
       summary: Hello world endpoint
       description: Returns a simple hello world message.
       responses:
-        200:
+        "200":
           description: A successful response with a hello world message.
           content:
             application/json:
@@ -39,7 +39,7 @@ paths:
       summary: Authenticated hello world endpoint
       description: Returns a hello message for authenticated users.
       responses:
-        200:
+        "200":
           description: A successful response with a hello message.
           content:
             application/json:
@@ -49,7 +49,7 @@ paths:
                   message:
                     type: string
                     example: Hello, 42!
-        401:
+        "401":
           description: Unauthorized access.
 
   /contracts:
@@ -101,7 +101,7 @@ paths:
                     contentType: "application/pdf; base64"
 
       responses:
-        201:
+        "201":
           description: A successful response with the uploaded file details.
           content:
             application/json:
@@ -112,9 +112,9 @@ paths:
                     type: string
                     format: uuid
                     example: 69393b49-c34f-438f-ad7c-4b78db3932be
-        409:
+        "409":
           description: Conflict - A contract with the same ID already exists.
-        422:
+        "422":
           description: Unprocessable Entity - The request body is invalid.
 
   /contracts/{id}:
@@ -134,13 +134,13 @@ paths:
             example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: The unique identifier of the contract.
       responses:
-        200:
+        "200":
           description: A successful response with the contract details.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Contract"
-        404:
+        "404":
           description: Contract not found.
 
     delete:
@@ -159,9 +159,9 @@ paths:
             example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: The unique identifier of the contract.
       responses:
-        204:
+        "204":
           description: Contract successfully deleted.
-        404:
+        "404":
           description: Contract not found.
 
   /contracts/{id}/signed_document:
@@ -181,7 +181,7 @@ paths:
             example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: The unique identifier of the contract.
       responses:
-        200:
+        "200":
           description: A successful response with the signed document details.
           content:
             application/json:
@@ -208,7 +208,7 @@ paths:
                     type: string
                     format: date-time
                     example: '2023-10-01T12:34:56Z'
-        404:
+        "404":
           description: Contract or signed document not found.
 
   /contracts/{id}/status:
@@ -228,7 +228,7 @@ paths:
             example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: The unique identifier of the contract.
       responses:
-        200:
+        "200":
           description: Pending
           headers:
             Retry-After:
@@ -236,7 +236,7 @@ paths:
               schema:
                 type: integer
                 example: 30
-        302:
+        "302":
           description: Found
           headers:
             Location:
@@ -245,7 +245,7 @@ paths:
                 type: string
                 format: uri
                 example: https://example.com/api/v1/contracts/69393b49-c34f-438f-ad7c-4b78db3932be
-        404:
+        "404":
           description: Contract not found.
 
   /bundles:
@@ -274,7 +274,7 @@ paths:
               postal-signing:
                 $ref: "#/components/examples/postal-signing"
       responses:
-        201:
+        "201":
           description: A successful response indicating the bundle was created.
           content:
             application/json:
@@ -284,9 +284,9 @@ paths:
                   id:
                     type: string
                     example: bundle-1
-        409:
+        "409":
           description: Conflict - A bundle with the same ID already exists.
-        422:
+        "422":
           description: Unprocessable Entity - The request body is invalid.
 
   /bundles/{id}:
@@ -306,13 +306,13 @@ paths:
             example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: The unique identifier of the bundle.
       responses:
-        200:
+        "200":
           description: A successful response with the bundle details.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Bundle"
-        404:
+        "404":
           description: Bundle not found.
 
     delete:
@@ -331,9 +331,9 @@ paths:
             example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: The unique identifier of the bundle.
       responses:
-        204:
+        "204":
           description: Bundle successfully deleted.
-        404:
+        "404":
           description: Bundle not found.
 
   /bundles/{id}/status:
@@ -353,7 +353,7 @@ paths:
             example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: The unique identifier of the bundle.
       responses:
-        200:
+        "200":
           description: Pending
           headers:
             Retry-After:
@@ -361,7 +361,7 @@ paths:
               schema:
                 type: integer
                 example: 30
-        302:
+        "302":
           description: Found
           headers:
             Location:
@@ -370,7 +370,7 @@ paths:
                 type: string
                 format: uri
                 example: https://example.com/api/v1/bundles/69393b49-c34f-438f-ad7c-4b78db3932be
-        404:
+        "404":
           description: Bundle not found.
 
 webhooks:
@@ -391,6 +391,10 @@ components:
           type: string
           example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: Unique identifier for the bundle. If not provided, a new UUID will be generated.
+        publiclyVisible:
+          type: boolean
+          default: false
+          description: When true, the bundle sign page can be opened without an AGP recipient or AGP session. Useful for embedded third-party signing flows.
         contracts:
           type: array
           items:
@@ -696,6 +700,7 @@ components:
     bundle-minimal:
       summary: Minimal bundle with one document
       value:
+        publiclyVisible: true
         contracts:
           - allowedMethods: [ "qes" ]
             documents:

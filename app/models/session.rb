@@ -48,6 +48,53 @@ class Session < ApplicationRecord
     signer_contract.recipient
   end
 
+  def iframe_param
+    options&.dig("iframe").presence
+  end
+
+  def bundle_contracts_total
+    contract.bundle&.contracts&.count.to_i
+  end
+
+  def remaining_bundle_contracts_count
+    bundle = contract.bundle
+    return 0 unless bundle
+
+    if recipient
+      recipient.signer_contracts.awaiting.where(contract: bundle.contracts).count
+    else
+      bundle.contracts.to_a.count(&:awaiting_signature?)
+    end
+  end
+
+  def bundle_signing_complete?
+    contract.bundle.present? && remaining_bundle_contracts_count.zero?
+  end
+
+  def inline_bundle_success?
+    contract.bundle.present? && bundle_contracts_total > 1 && !bundle_signing_complete?
+  end
+
+  def close_iframe_after_completion?
+    return false unless iframe_param.present?
+    return true unless contract.bundle.present?
+
+    bundle_signing_complete?
+  end
+
+  def completion_event_payload
+    {
+      type: "agp-custom-event",
+      status: "document-signed",
+      contract_id: contract.uuid,
+      bundle_id: contract.bundle&.uuid,
+      total_contracts_count: bundle_contracts_total,
+      remaining_contracts_count: remaining_bundle_contracts_count,
+      bundle_completed: bundle_signing_complete?,
+      close_iframe: close_iframe_after_completion?
+    }
+  end
+
   def not_pending?
     !pending?
   end

@@ -1,3 +1,5 @@
+<% error_list = local_assigns[:errors] || @errors || [] %>
+
 <%= turbo_frame_tag "document_visualization_#{@document.uuid}" do %>
   <div class="p-4 bg-yellow-50 h-[200px] flex items-center justify-center border border-yellow-200 rounded-lg">
     <div class="text-center">
@@ -7,7 +9,7 @@
         </svg>
         <span class="text-yellow-800 font-medium"><%= t('documents.visualize_error.title') %></span>
       </div>
-      <% @errors&.each do |error| %>
+      <% error_list.each do |error| %>
         <p class="text-yellow-700 text-sm"><%= error %></p>
       <% end %>
       <p class="text-yellow-700 text-sm"><%= t('documents.visualize_error.trust_warning') %></p>

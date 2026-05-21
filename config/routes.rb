@@ -100,6 +100,7 @@ Rails.application.routes.draw do
   resources :bundles, only: [] do
     member do
       get :sign
+      get :autogram_batch
       post :decline
       post :accept
     end
