@@ -5,9 +5,11 @@
   <%= turbo_stream_from contract %>
 <% end %>
 
+<% embedded_layout = params[:iframe].present? %>
+
 <main>
   <div class="relative isolate overflow-hidden">
-    <div class="mx-auto flex flex-col items-center max-w-4xl px-6 pb-8 pt-10 lg:flex lg:px-8">
+    <div class="mx-auto flex flex-col items-center max-w-4xl lg:flex <%= embedded_layout ? '' : 'px-6 pb-8 pt-10 lg:px-8' %>">
       <% unless params[:iframe].present? %>
         <div class="w-full mb-6">
           <div class="md:flex items-center justify-between space-x-4 space-y-4 md:space-y-0">
@@ -59,88 +61,191 @@
         <% end %>
       <% end %>
 
-      <%# TODO: option to batch sign all contracts in the bundle at once %>
+      <% public_signing_available = @bundle.publicly_visible? && @bundle.recipients.none? %>
+      <% batch_autogram_hidden_on_mobile = mobile_device_request? && @pending_batch_contracts.many? && @batch_autogram_contracts.size == @pending_batch_contracts.size %>
 
-      <div class="w-full space-y-6 mb-30">
+      <% if @batch_autogram_available %>
+        <div class="mb-6 w-full space-y-3">
+          <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-200">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div class="min-w-0">
+                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700"><%= t('.batch_sign_recommended') %></span>
+                <h2 class="mt-3 text-lg font-semibold text-gray-900"><%= t('.batch_sign_title') %></h2>
+                <p class="mt-1 text-sm text-gray-600"><%= t('.batch_sign_description', count: @batch_autogram_contracts.count) %></p>
+              </div>
+
+              <%= link_to t('.batch_sign_action'),
+                    autogram_batch_bundle_path(@bundle, recipient: @recipient&.uuid, iframe: params[:iframe]),
+                    data: { turbo: false },
+                    class: "inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 md:w-auto" %>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <p class="font-semibold"><%= t('.individual_signing_hint_title') %></p>
+            <p class="mt-1 text-blue-800"><%= t('.individual_signing_hint') %></p>
+          </div>
+        </div>
+      <% elsif batch_autogram_hidden_on_mobile %>
+        <div class="mb-6 w-full rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-200">
+          <h2 class="text-base font-semibold text-gray-900"><%= t('.mobile_individual_signing_title') %></h2>
+          <p class="mt-1 text-sm text-gray-600"><%= t('.mobile_individual_signing_description') %></p>
+        </div>
+      <% end %>
+
+      <% show_individual_signing_section = embedded_layout && @batch_autogram_available %>
+
+      <% if show_individual_signing_section %>
+        <section class="w-full rounded-xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
+          <div class="mb-6">
+            <span class="inline-flex items-center rounded-full border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700"><%= t('.individual_signing_section_badge') %></span>
+            <h2 class="mt-3 text-lg font-semibold text-gray-900"><%= t('.individual_signing_section_title') %></h2>
+            <p class="mt-1 text-sm text-gray-600"><%= t('.individual_signing_section_description') %></p>
+          </div>
+
+          <div class="space-y-8">
+      <% else %>
+        <div class="w-full space-y-8">
+      <% end %>
         <% @bundle.contracts.order(:updated_at).each_with_index do |contract, index| %>
-          <% if @bundle.contracts.count > 1 %>
-            <div class="text-lg font-semibold text-gray-900 mb-4">
-              <%= t('.contract_number', current: index + 1, total: @bundle.contracts.count) %>
+          <% contract_signable = (current_user == @bundle.author ||
+                                  (contract.awaiting_signature? && @recipient&.pending_contract?(contract)) ||
+                                  (public_signing_available && contract.awaiting_signature?)) && !@recipient&.declined? %>
+          <% contract_signed_for_viewer = !contract.awaiting_signature? || @recipient&.signed_contract?(contract) %>
+          <% first_document = contract.documents.first %>
+          <% only_electronic_signing = contract.allowed_methods.one? && contract.allowed_methods.include?('qes') %>
+          <% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || session[:qscd] %>
+          <% can_render_signature_apps_in_frame = params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd)) %>
+          <% embedded_signature_apps_path = signature_apps_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: true, skip_method_choice: true, qscd: signature_apps_qscd.presence) %>
+          <% full_page_signature_apps_path = signature_apps_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], qscd: signature_apps_qscd.presence) %>
+          <% contract_status_label = contract_signed_for_viewer ? t('bundles.status.completed') : t('bundles.status.awaiting_signature') %>
+          <% contract_status_classes = contract_signed_for_viewer ? 'border-green-200 bg-green-50 text-green-700' : 'border-blue-200 bg-blue-50 text-blue-700' %>
+
+          <section class="border-t border-gray-200 pt-6">
+            <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+              <div class="min-w-0 flex-1 basis-72">
+                <h2 class="text-xl font-semibold text-gray-900">
+                  <% if @bundle.contracts.count > 1 %>
+                    <%= t('.contract_number', current: index + 1, total: @bundle.contracts.count) %>
+                  <% else %>
+                    <%= t('contracts.sign.title') %>
+                  <% end %>
+                </h2>
+                <% if params[:iframe]&.in?(%w[no_preview no_onboarding]) && first_document.present? %>
+                  <p class="mt-1 break-words text-sm text-gray-500"><%= first_document.filename %></p>
+                <% end %>
+              </div>
+
+              <span class="inline-flex shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-sm font-medium <%= contract_status_classes %>">
+                <%= contract_status_label %>
+              </span>
             </div>
-          <% end %>
-          <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
-            <%= render 'contracts/visualization_with_toggle', contract: contract %>
-            <div class="mb-6">
-              <%= turbo_frame_tag "signature_validation_#{contract.uuid}",
-                                  src: validate_contract_path(contract),
-                                  loading: "lazy",
-                                  class: "w-full mb-6" do %>
-                <div class="w-full">
-                  <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
-                    <div class="flex items-center">
-                      <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
+
+            <div class="mt-5 space-y-5">
+              <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
+                <% if params[:iframe].present? %>
+                  <% if first_document %>
+                    <% preview_path = first_document.is_pdf? ? pdf_preview_document_path(first_document, format: :pdf, t: Time.current.to_i, iframe: params[:iframe]) : visualize_document_path(first_document, t: Time.current.to_i) %>
+                    <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
+                      <span class="min-w-0 truncate text-sm font-medium text-gray-700"><%= first_document.filename %></span>
+                      <%= link_to t('actions.view'),
+                            preview_path,
+                            target: "_blank",
+                            rel: "noopener noreferrer",
+                            data: { turbo: false },
+                            class: "inline-flex items-center justify-center whitespace-nowrap rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50" %>
                     </div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-            <% if @bundle.awaiting_recipients? %>
-              <div class="space-y-3">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                  <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
-                </h3>
-                <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
-                  <div class="rounded-lg border <%= recipient == @recipient ? 'border-blue-500 bg-blue-50' : 'border-gray-200' %> overflow-hidden">
-                    <div class="px-4 py-3.5">
-                      <div class="flex items-start gap-3">
-                        <div class="flex-1 min-w-0">
-                          <div class="flex flex-wrap items-center gap-2">
-                            <div class="text-base font-semibold text-gray-900 break-words">
-                              <%= recipient.display_name %>
-                            </div>
-                            <div>
-                              <%= recipient_status_badge(recipient) %>
-                            </div>
-                          </div>
-                        </div>
+                  <% end %>
+                <% else %>
+                  <%= render 'contracts/visualization_with_toggle', contract: contract %>
+                <% end %>
+                <%= turbo_frame_tag "signature_validation_#{contract.uuid}",
+                                    src: validate_contract_path(contract),
+                                    loading: "lazy",
+                                    class: "w-full" do %>
+                  <div class="w-full">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                      <div class="flex items-center">
+                        <svg class="mr-3 h-5 w-5 animate-spin text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
                       </div>
                     </div>
                   </div>
                 <% end %>
-              </div>
-            <% end %>
-          <% end %>
-          <% unless contract.awaiting_signature? && !@recipient&.signed_contract?(contract) %>
-            <div class="w-full  bg-green-50 border border-green-200 rounded-lg p-4">
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                  </svg>
-                </div>
-                <div class="ml-3">
-                  <p class="text-sm text-green-800">
-                    <span class="font-semibold"><%= t('contracts.sign.already_signed.title') %></span><br>
-                    <%= t('contracts.sign.already_signed.message') %>
-                  </p>
-                </div>
-              </div>
-              <% unless params[:iframe].present? %>
-                <div>
-                  <%= link_to t('actions.download'),
-                        signed_document_contract_path(contract),
-                        class: "mt-4 inline-flex justify-center items-center px-4 py-2 w-full sm:w-auto border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-                </div>
+
+                <% if @bundle.awaiting_recipients? %>
+                  <div class="space-y-3">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                      <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
+                    </h3>
+                    <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
+                      <div class="overflow-hidden rounded-lg border <%= recipient == @recipient ? 'border-blue-500 bg-blue-50' : 'border-gray-200' %>">
+                        <div class="px-4 py-3.5">
+                          <div class="flex items-start gap-3">
+                            <div class="min-w-0 flex-1">
+                              <div class="flex flex-wrap items-center gap-2">
+                                <div class="break-words text-base font-semibold text-gray-900">
+                                  <%= recipient.display_name %>
+                                </div>
+                                <div>
+                                  <%= recipient_status_badge(recipient) %>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              <% end %>
+
+              <%= turbo_frame_tag "signature_apps_#{contract.uuid}",
+                  src: (contract_signable && only_electronic_signing && can_render_signature_apps_in_frame ? embedded_signature_apps_path : nil),
+                  loading: (contract_signable && only_electronic_signing && can_render_signature_apps_in_frame ? "eager" : nil) do %>
+                <% if contract_signed_for_viewer %>
+                  <div class="mt-6">
+                    <% unless params[:iframe].present? %>
+                      <%= render 'shared/success', title: t('contracts.sign.already_signed.title'), content: t('contracts.sign.already_signed.message'), button: t('actions.download_contract'), target: signed_document_contract_path(contract) %>
+                    <% else %>
+                      <%= render 'shared/success', title: t('contracts.sign.already_signed.title'), content: t('contracts.sign.already_signed.message') %>
+                    <% end %>
+                  </div>
+                <% end %>
+
+                <% if contract_signable && only_electronic_signing && can_render_signature_apps_in_frame %>
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                    <div class="animate-pulse space-y-3">
+                      <div class="h-5 w-48 rounded bg-gray-200"></div>
+                      <div class="h-16 rounded bg-gray-200"></div>
+                      <div class="h-16 rounded bg-gray-200"></div>
+                    </div>
+                  </div>
+                <% elsif contract_signable && only_electronic_signing %>
+                  <div class="rounded-xl border border-blue-200 bg-blue-50 p-5">
+                    <h3 class="text-lg font-semibold text-blue-900"><%= t('.electronic_setup_title') %></h3>
+                    <p class="mt-1 text-sm text-blue-800"><%= t('.electronic_setup_description') %></p>
+                    <%= link_to t('.electronic_setup_action'),
+                          full_page_signature_apps_path,
+                          data: { turbo_frame: '_top' },
+                          class: "mt-4 inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700" %>
+                  </div>
+                <% elsif contract_signable %>
+                  <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
+                <% end %>
               <% end %>
             </div>
-          <% end %>
-          <% if (current_user == @bundle.author || (contract.awaiting_signature? && @recipient&.pending_contract?(contract))) && !@recipient&.declined? %>
-            <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
-          <% end %>
+          </section>
+        <% end %>
+
+        <% if show_individual_signing_section %>
+          </div>
+        </section>
+        <% else %>
+          </div>
         <% end %>
 
         <% if @recipient&.declined? && current_user != @bundle.author %>

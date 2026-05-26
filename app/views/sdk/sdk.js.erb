@@ -23,7 +23,7 @@
                 previewLevel: options.previewLevel || false,
                 width: options.width || '100%',
                 height: options.height || '800px',
-                border: options.border || 'solid 1px #ccc',
+                border: options.border || null,
                 baseUrl: options.baseUrl || "<%= root_url.chomp('/') %>",
                 popupWidth: options.popupWidth || 800,
                 popupHeight: options.popupHeight || 600,
@@ -163,6 +163,15 @@
             header.appendChild(title);
             header.appendChild(closeButton);
 
+            const iframeDiv = document.createElement('div');
+            iframeDiv.style.cssText = `
+                padding: 24px;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            `;
+
             // Create iframe
             const iframe = document.createElement('iframe');
             const iframeParam = config.previewLevel || 'true';
@@ -179,7 +188,8 @@
             iframe.setAttribute('data-agp-session', sessionId);
 
             popupContent.appendChild(header);
-            popupContent.appendChild(iframe);
+            iframeDiv.appendChild(iframe);
+            popupContent.appendChild(iframeDiv);
             popup.appendChild(popupContent);
 
             // Set up message listener

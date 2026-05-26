@@ -2,19 +2,22 @@
 #
 # Table name: contracts
 #
-#  id              :bigint           not null, primary key
-#  allowed_methods :string           default(["qes"]), is an Array
-#  uuid            :string           not null
-#  created_at      :datetime         not null
-#  updated_at      :datetime         not null
-#  bundle_id       :bigint
-#  user_id         :bigint
+#  id                           :bigint           not null, primary key
+#  allowed_methods              :string           default(["qes"]), is an Array
+#  author_notifications_enabled :boolean          default(FALSE), not null
+#  temporary_storage_reason     :string
+#  uuid                         :string           not null
+#  created_at                   :datetime         not null
+#  updated_at                   :datetime         not null
+#  bundle_id                    :bigint
+#  user_id                      :bigint
 #
 # Indexes
 #
-#  index_contracts_on_bundle_id  (bundle_id)
-#  index_contracts_on_user_id    (user_id)
-#  index_contracts_on_uuid       (uuid)
+#  index_contracts_on_bundle_id                 (bundle_id)
+#  index_contracts_on_temporary_storage_reason  (temporary_storage_reason)
+#  index_contracts_on_user_id                   (user_id)
+#  index_contracts_on_uuid                      (uuid)
 #
 # Foreign Keys
 #
@@ -50,7 +53,7 @@ class Contract < ApplicationRecord
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
 
-  scope :anonymous, -> { where(user_id: nil) }
+  scope :anonymous, -> { where(user_id: nil).where(bundle_id: nil) }
   scope :awaiting_signature_for, ->(user) {
     joins(signer_contracts: { signer: :recipient })
       .where(signer_contracts: { signed_at: nil, declined_at: nil })
@@ -139,6 +142,8 @@ class Contract < ApplicationRecord
   end
 
   def should_notify_user?(signer: nil)
+    return false unless author_notifications_enabled?
+
     user.present? && bundle.nil? && !awaiting_signature? && user != signer&.user
   end
 

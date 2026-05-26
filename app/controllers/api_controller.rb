@@ -2,6 +2,7 @@ class ApiController < ApplicationController
   protect_from_forgery with: :null_session
   before_action :authenticate_user!
   skip_before_action :enforce_current_policy_consent
+  before_action :set_json_format
 
   rescue_from JWT::DecodeError do |error|
     render_unauthorized("API token")
@@ -37,5 +38,9 @@ class ApiController < ApplicationController
 
   def render_not_found
     render status: :not_found, json: { message: "Not found" }
+  end
+
+  def set_json_format
+    request.format = :json
   end
 end

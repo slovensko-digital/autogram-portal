@@ -1,4 +1,6 @@
 class Contracts::SessionsController < ApplicationController
+  class SessionCreationError < StandardError; end
+
   before_action :set_contract
   before_action :set_session, except: [ :create ]
   before_action :set_signer_contract, only: [ :create, :show ]
@@ -23,6 +25,10 @@ class Contracts::SessionsController < ApplicationController
     end
 
     render @session
+  rescue SessionCreationError, ActiveRecord::RecordInvalid => e
+    Rails.logger.warn("Failed to create signing session for contract #{@contract.uuid}: #{e.message}")
+    @session_error_message = e.message
+    render partial: "contracts/sessions/creation_error", status: :unprocessable_entity
   end
 
   def show
@@ -140,9 +146,9 @@ class Contracts::SessionsController < ApplicationController
     return unless @session.not_pending?
 
     redirect_path = if @contract.bundle
-      sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+      sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: @session.iframe_param)
     else
-      sign_contract_path(@contract, recipient: @recipient&.uuid)
+      sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: @session.iframe_param)
     end
 
     redirect_to redirect_path
@@ -150,43 +156,52 @@ class Contracts::SessionsController < ApplicationController
 
   def create_eidentita_session
     existing = @signer_contract.sessions.pending.where(type: "EidentitaSession").first
-    return existing if existing
+    return persist_session_view_options(existing) if existing
 
     result = AutogramEnvironment.eidentita_service.initiate_signing(@contract)
-    raise result[:error] if result[:error]
+    raise SessionCreationError, result[:error] if result[:error]
 
-    @signer_contract.sessions.create!(
+    persist_session_view_options(@signer_contract.sessions.create!(
       type: "EidentitaSession",
-      signing_started_at: result[:signing_started_at]
-    )
+      signing_started_at: result[:signing_started_at],
+      options: session_view_options
+    ))
   end
 
   def create_avm_session
     existing = @signer_contract.sessions.pending.where(type: "AvmSession").first
-    return existing if existing
+    return persist_session_view_options(existing) if existing
 
     result = AutogramEnvironment.avm_service.initiate_signing(@contract)
+    raise SessionCreationError, result[:error] if result[:error]
+
+    unless result[:document_identifier].present? && result[:encryption_key].present? && result[:signing_started_at].present?
+      raise SessionCreationError, t("errors.signing_failed")
+    end
 
     avm_session = @signer_contract.sessions.create!(
       type: "AvmSession",
-      document_identifier: result[:document_identifier],
-      encryption_key: result[:encryption_key],
-      signing_started_at: result[:signing_started_at]
+      signing_started_at: result[:signing_started_at],
+      options: session_view_options.merge(
+        "document_identifier" => result[:document_identifier],
+        "encryption_key" => result[:encryption_key]
+      )
     )
 
     Avm::SigningPollJob.perform_later(avm_session)
 
-    avm_session
+    persist_session_view_options(avm_session)
   end
 
   def create_autogram_session
     existing = @signer_contract.sessions.pending.where(type: "AutogramSession").first
-    return existing if existing
+    return persist_session_view_options(existing) if existing
 
-    @signer_contract.sessions.create!(
+    persist_session_view_options(@signer_contract.sessions.create!(
       type: "AutogramSession",
-      signing_started_at: Time.current
-    )
+      signing_started_at: Time.current,
+      options: session_view_options
+    ))
   end
 
   def authorize_session_access!
@@ -226,5 +241,19 @@ class Contracts::SessionsController < ApplicationController
     else
       false
     end
+  end
+
+  def session_view_options
+    {}.tap do |options|
+      options["iframe"] = params[:iframe] if params[:iframe].present?
+    end
+  end
+
+  def persist_session_view_options(session)
+    return session if session_view_options.empty?
+
+    merged_options = (session.options || {}).merge(session_view_options)
+    session.update!(options: merged_options) if session.options != merged_options
+    session
   end
 end

@@ -1,7 +1,14 @@
 class BundlesController < ApplicationController
+  MOBILE_DEVICE_USER_AGENT = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+  helper_method :mobile_device_request?
+
   before_action :set_bundle, only: [ :show, :edit, :update, :destroy ]
   skip_before_action :verify_authenticity_token, only: [ :sign ], if: -> { params[:iframe].present? }
-  before_action :allow_iframe, only: [ :sign ], if: -> { params[:iframe].present? }
+  before_action :allow_iframe, only: [ :sign, :autogram_batch ], if: -> { params[:iframe].present? }
+  before_action :load_signing_bundle_context, only: [ :sign, :autogram_batch ]
+  before_action :render_sign_withdrawn_if_needed, only: [ :sign, :autogram_batch ]
+  before_action :set_batch_autogram_contracts, only: [ :sign, :autogram_batch ]
+  before_action :ensure_batch_autogram_available!, only: [ :autogram_batch ]
 
   def index
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
@@ -128,22 +135,22 @@ class BundlesController < ApplicationController
   end
 
   def sign
-    if params[:recipient]
-      @recipient = Recipient.find_by_uuid!(params[:recipient])
-      @bundle = @recipient.bundle
-      return render :sign_withdrawn, status: :gone if @recipient.withdrawn?
+  end
+
+  def autogram_batch
+    @batch_items = @batch_autogram_contracts.map do |contract|
+      session = find_or_create_batch_autogram_session(contract)
+      session_token = SessionAccessToken.generate(contract: contract, session: session)
+
+      {
+        contract_id: contract.uuid,
+        contract_name: contract.display_name.to_s,
+        parameters_path: parameters_contract_session_path(contract, session, session_token: session_token),
+        upload_path: upload_contract_session_path(contract, session, session_token: session_token)
+      }
     end
 
-    if current_user
-      @bundle ||= Bundle.joins(:recipients)
-                        .merge(Recipient.active)
-                        .where(recipients: { user: current_user }, uuid: params[:id]).first
-      @recipient ||= @bundle.recipients.active.find_by(user: current_user) if @bundle
-    end
-
-    @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
-
-    raise ActiveRecord::RecordNotFound unless @bundle
+    @return_path = sign_bundle_path(@bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
   end
 
   def decline
@@ -246,5 +253,109 @@ class BundlesController < ApplicationController
     else
       bundle.recipients.active.find_by!(user: current_user)
     end
+  end
+
+  def load_signing_bundle_context
+    if params[:recipient]
+      @recipient = Recipient.find_by_uuid!(params[:recipient])
+      @bundle = @recipient.bundle
+      return
+    end
+
+    if current_user
+      @bundle = Bundle.joins(:recipients)
+                      .merge(Recipient.active)
+                      .where(recipients: { user: current_user }, uuid: params[:id]).first
+      @recipient = @bundle&.recipients&.active&.find_by(user: current_user) if @bundle
+    end
+
+    @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
+
+    raise ActiveRecord::RecordNotFound unless @bundle
+  end
+
+  def render_sign_withdrawn_if_needed
+    return unless @recipient&.withdrawn?
+
+    render :sign_withdrawn, status: :gone
+  end
+
+  def set_batch_autogram_contracts
+    @pending_batch_contracts = @bundle.contracts.select do |contract|
+      next false unless contract.awaiting_signature?
+
+      if @recipient
+        @recipient.pending_contract?(contract)
+      else
+        public_signing_available?
+      end
+    end
+
+    @batch_autogram_contracts = @pending_batch_contracts.select { |contract| contract.allowed_methods.include?("qes") }
+    @batch_autogram_available = !mobile_device_request? && @pending_batch_contracts.many? && @batch_autogram_contracts.size == @pending_batch_contracts.size
+  end
+
+  def ensure_batch_autogram_available!
+    return if @batch_autogram_available
+
+    alert_key = mobile_device_request? ? "bundles.autogram_batch.desktop_only" : "bundles.sign.batch_sign_unavailable"
+
+    redirect_to sign_bundle_path(@bundle, recipient: @recipient&.uuid, iframe: params[:iframe]),
+                alert: I18n.t(alert_key)
+  end
+
+  def find_or_create_batch_autogram_session(contract)
+    signer_contract = signer_contract_for_batch(contract)
+    existing = signer_contract.sessions.pending.where(type: "AutogramSession").first
+    return persist_batch_session_view_options(existing) if existing
+
+    persist_batch_session_view_options(
+      signer_contract.sessions.create!(
+        type: "AutogramSession",
+        signing_started_at: Time.current,
+        options: batch_session_view_options
+      )
+    )
+  end
+
+  def persist_batch_session_view_options(session)
+    return session if batch_session_view_options.empty?
+
+    merged_options = (session.options || {}).merge(batch_session_view_options)
+    session.update!(options: merged_options) if session.options != merged_options
+    session
+  end
+
+  def batch_session_view_options
+    {}.tap do |options|
+      options["iframe"] = params[:iframe] if params[:iframe].present?
+    end
+  end
+
+  def signer_contract_for_batch(contract)
+    if @recipient
+      recipient_signer = @recipient.recipient_signer || @recipient.create_recipient_signer!
+      return recipient_signer.signer_contracts.find_or_create_by!(contract: contract)
+    end
+
+    if current_user
+      user_signer = UserSigner.find_or_create_by!(user: current_user)
+      return user_signer.signer_contracts.find_or_create_by!(contract: contract)
+    end
+
+    signer_contract = contract.signer_contracts
+                             .joins(:signer)
+                             .find_by(signers: { type: "AnonymousSigner" })
+    return signer_contract if signer_contract
+
+    AnonymousSigner.create!.signer_contracts.create!(contract: contract)
+  end
+
+  def public_signing_available?
+    @bundle.publicly_visible? && @bundle.recipients.none?
+  end
+
+  def mobile_device_request?
+    request.user_agent.to_s.match?(MOBILE_DEVICE_USER_AGENT)
   end
 end

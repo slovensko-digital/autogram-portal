@@ -5,10 +5,13 @@ class DocumentsController < ApplicationController
   def visualize
     @visualization_result = @document.visualize
     if @visualization_result.is_a?(Hash) && !@visualization_result[:content].nil?
-      render "visualize", locals: { result: @visualization_result }
+      render "visualize"
     else
-      render "visualize_error", locals: { errors: @visualization_result.errors }
+      render "visualize_error", status: :unprocessable_entity, locals: { errors: visualization_errors(@visualization_result) }
     end
+  rescue StandardError => e
+    Rails.logger.error("Failed to visualize document #{@document.uuid}: #{e.message}")
+    render "visualize_error", status: :unprocessable_entity, locals: { errors: [ e.message ] }
   end
 
   def pdf_preview
@@ -46,5 +49,12 @@ class DocumentsController < ApplicationController
 
   def document_params
     params.require(:document).permit(:blob)
+  end
+
+  def visualization_errors(result)
+    return Array(result.errors) if result.respond_to?(:errors)
+    return Array(result[:errors]) if result.is_a?(Hash) && result[:errors].present?
+
+    []
   end
 end

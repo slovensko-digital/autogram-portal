@@ -1,0 +1,16 @@
+<%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
+  <%= render "shared/error", title: t("contracts.sessions.error.title"), content: @session_error_message %>
+
+  <div class="flex justify-end">
+    <%= link_to t("actions.back"),
+          signature_apps_contract_path(
+            @contract,
+            recipient: @recipient&.uuid,
+            iframe: params[:iframe],
+            embedded: params[:embedded],
+            skip_method_choice: params[:skip_method_choice]
+          ),
+          data: { turbo_frame: "signature_apps_#{@contract.uuid}" },
+          class: "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+  </div>
+<% end %>

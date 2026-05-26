@@ -1,0 +1,157 @@
+<% content_for :title, t('.title') + " ##{@bundle.short_uuid}" %>
+
+<main>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex max-w-4xl flex-col items-center px-6 pb-8 pt-10 lg:px-8">
+      <div
+        class="w-full"
+        data-controller="signers--autogram-batch"
+        data-signers--autogram-batch-items-value="<%= json_escape(@batch_items.to_json) %>"
+        data-signers--autogram-batch-return-path-value="<%= @return_path %>"
+        data-signers--autogram-batch-bundle-id-value="<%= @bundle.uuid %>"
+        data-signers--autogram-batch-total-contracts-count-value="<%= @bundle.contracts.count %>"
+        data-signers--autogram-batch-iframe-value="<%= params[:iframe].present? %>"
+        data-signers--autogram-batch-sdk-path-value="<%= asset_path('autogram-sdk.js') %>"
+      >
+        <% unless params[:iframe].present? %>
+          <div class="mb-6 w-full">
+            <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+            <p class="mt-2 text-gray-600"><%= t('.subtitle', count: @batch_items.count) %></p>
+          </div>
+        <% end %>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="hidden rounded-lg border border-gray-200 bg-white p-6 lg:block">
+            <div class="space-y-4">
+              <% (1..5).each do |i| %>
+                <div class="flex items-start gap-3">
+                  <div class="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
+                    <%= i %>
+                  </div>
+                  <div class="flex-1">
+                    <h2 class="font-semibold text-gray-900"><%= t(".step#{i}_title") %></h2>
+                    <p class="text-sm text-gray-600"><%= t(".step#{i}_desc_html", count: @batch_items.count) %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-white p-6">
+            <div data-signers--autogram-batch-target="stateNormal">
+              <div class="mb-4 flex justify-center">
+                <svg class="animate-spin text-blue-600" style="width: 64px; height: 64px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                  <path class="opacity-75" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" d="M12 2 A 10 10 0 0 1 22 12"></path>
+                </svg>
+              </div>
+              <h2 class="text-center text-lg font-semibold text-gray-900"><%= t('.progress_title') %></h2>
+              <p class="mt-2 text-center text-sm text-gray-600" data-signers--autogram-batch-target="progressText"><%= t('.progress_subtitle') %></p>
+            </div>
+
+            <div class="hidden" data-signers--autogram-batch-target="stateAppNotRunning">
+              <h2 class="text-center text-lg font-semibold text-red-900"><%= t('.app_not_running_title') %></h2>
+              <p class="mt-2 text-center text-sm text-red-700"><%= t('.app_not_running_message') %></p>
+            </div>
+
+            <div class="hidden" data-signers--autogram-batch-target="stateSuccess">
+              <h2 class="text-center text-lg font-semibold text-green-900"><%= t('.success_title') %></h2>
+              <p class="mt-2 text-center text-sm text-green-700"><%= t('.success_message') %></p>
+            </div>
+
+            <div class="hidden" data-signers--autogram-batch-target="stateCancelled">
+              <h2 class="text-center text-lg font-semibold text-yellow-900"><%= t('.cancelled_title') %></h2>
+              <p class="mt-2 text-center text-sm text-yellow-700"><%= t('.cancelled_desc') %></p>
+            </div>
+
+            <div class="hidden" data-signers--autogram-batch-target="stateError">
+              <h2 class="text-center text-lg font-semibold text-red-900"><%= t('.error_title') %></h2>
+              <p class="mt-2 text-center text-sm text-red-700" data-signers--autogram-batch-target="errorMessage"><%= t('.error_message') %></p>
+            </div>
+
+            <div class="mt-6">
+              <div class="mb-2 flex justify-between text-sm text-gray-600">
+                <span><%= t('.progress_label') %></span>
+                <span data-signers--autogram-batch-target="progressPercent">0%</span>
+              </div>
+              <div class="h-2 w-full rounded-full bg-gray-200">
+                <div class="h-2 rounded-full bg-blue-600 transition-all duration-500" style="width: 0%" data-signers--autogram-batch-target="progressBar"></div>
+              </div>
+            </div>
+
+            <p class="mt-4 text-center text-sm text-gray-600" data-signers--autogram-batch-target="currentDocumentName"></p>
+
+            <div class="mt-6 space-y-3">
+              <div class="flex items-center gap-3 rounded-lg border border-blue-200 bg-white p-3" data-signers--autogram-batch-target="statusChecking">
+                <div class="flex-shrink-0" style="width: 24px; height: 24px;">
+                  <svg class="animate-spin text-blue-600" style="width: 24px; height: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+                <span class="text-sm font-medium text-gray-600"><%= t('.status_checking') %></span>
+              </div>
+
+              <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-100 p-3 opacity-50" data-signers--autogram-batch-target="statusStarting">
+                <div class="flex-shrink-0" style="width: 24px; height: 24px;">
+                  <div style="width: 24px; height: 24px;" class="rounded-full bg-gray-400"></div>
+                </div>
+                <span class="text-sm font-medium text-gray-600"><%= t('.status_starting') %></span>
+              </div>
+
+              <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-100 p-3 opacity-50" data-signers--autogram-batch-target="statusSending">
+                <div class="flex-shrink-0" style="width: 24px; height: 24px;">
+                  <div style="width: 24px; height: 24px;" class="rounded-full bg-gray-400"></div>
+                </div>
+                <span class="text-sm font-medium text-gray-600"><%= t('.status_sending') %></span>
+              </div>
+
+              <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-100 p-3 opacity-50" data-signers--autogram-batch-target="statusWaiting">
+                <div class="flex-shrink-0" style="width: 24px; height: 24px;">
+                  <div style="width: 24px; height: 24px;" class="rounded-full bg-gray-400"></div>
+                </div>
+                <span class="text-sm font-medium text-gray-600"><%= t('.status_waiting') %></span>
+              </div>
+
+              <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-100 p-3 opacity-50" data-signers--autogram-batch-target="statusSigned">
+                <div class="flex-shrink-0" style="width: 24px; height: 24px;">
+                  <div style="width: 24px; height: 24px;" class="rounded-full bg-gray-400"></div>
+                </div>
+                <span class="text-sm font-medium text-gray-600"><%= t('.status_signed') %></span>
+              </div>
+            </div>
+
+            <div class="mt-6 flex justify-between gap-4">
+              <%= link_to t('.back_to_bundle'), @return_path,
+                    class: "inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50" %>
+            </div>
+          </div>
+        </div>
+
+        <details class="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-900">
+          <summary class="cursor-pointer text-sm font-semibold">
+            <%= t('.documents_toggle', count: @batch_items.count) %>
+          </summary>
+
+          <p class="mt-2 text-sm text-gray-600"><%= t('.documents_description') %></p>
+
+          <div class="mt-4 max-h-72 overflow-y-auto pr-1">
+            <ol class="space-y-3">
+              <% @batch_items.each_with_index do |item, index| %>
+                <li class="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3" data-signers--autogram-batch-target="documentItem">
+                  <div class="mt-0.5 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-700">
+                    <%= index + 1 %>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="break-words text-sm font-medium text-gray-900"><%= item[:contract_name] %></p>
+                  </div>
+                </li>
+              <% end %>
+            </ol>
+          </div>
+        </details>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

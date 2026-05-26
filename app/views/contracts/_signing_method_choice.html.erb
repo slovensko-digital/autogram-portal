@@ -1,5 +1,13 @@
 <%# locals: (contract:, recipient: nil, bundle_id: nil) %>
 
+<% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || session[:qscd] %>
+<% can_render_signature_apps_in_frame = bundle_id.present? && (params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd))) %>
+<% electronic_signature_apps_path = if can_render_signature_apps_in_frame
+  signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], embedded: true, qscd: signature_apps_qscd.presence)
+else
+  signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], qscd: signature_apps_qscd.presence)
+end %>
+
 <%= turbo_frame_tag "signing_method_choice_#{contract.uuid}" do %>
   <div data-controller="signing-method" class="w-full space-y-4">
     <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
@@ -36,8 +44,11 @@
     <div class="hidden">
       <% if contract.allowed_methods.include?('qes') %>
         <%= link_to "",
-            signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
-            data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
+            electronic_signature_apps_path,
+            data: {
+              signing_method_target: 'electronicButton',
+              turbo_frame: (can_render_signature_apps_in_frame ? "signature_apps_#{contract.uuid}" : "_top")
+            } %>
       <% end %>
 
       <% if contract.allowed_methods.include?('scan') %>

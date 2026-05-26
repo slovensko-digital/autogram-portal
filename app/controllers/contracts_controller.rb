@@ -32,6 +32,7 @@ class ContractsController < ApplicationController
   def create
     @contract = Contract.new(
       user: current_user,
+      author_notifications_enabled: true,
       documents: [ Document.create(params.require(:document).permit(:blob)) ]
     )
 
@@ -162,7 +163,7 @@ class ContractsController < ApplicationController
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
-        bundle = Bundle.create!(contracts: [ @contract ], author: current_user)
+        bundle = Bundle.create!(contracts: [ @contract ], author: current_user, author_notifications_enabled: true)
         redirect_to bundle
       elsif params[:next_step] == "sign"
         redirect_to sign_contract_path(@contract)

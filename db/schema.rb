@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_06_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_20_103500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_06_000001) do
   end
 
   create_table "bundles", force: :cascade do |t|
+    t.boolean "author_notifications_enabled", default: false, null: false
     t.datetime "created_at", null: false
     t.text "note"
     t.boolean "publicly_visible", default: false, null: false
@@ -69,12 +70,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_06_000001) do
 
   create_table "contracts", force: :cascade do |t|
     t.string "allowed_methods", default: [], array: true
+    t.boolean "author_notifications_enabled", default: false, null: false
     t.bigint "bundle_id"
     t.datetime "created_at", null: false
+    t.string "temporary_storage_reason"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.string "uuid", null: false
     t.index ["bundle_id"], name: "index_contracts_on_bundle_id"
+    t.index ["temporary_storage_reason"], name: "index_contracts_on_temporary_storage_reason"
     t.index ["user_id"], name: "index_contracts_on_user_id"
     t.index ["uuid"], name: "index_contracts_on_uuid"
   end
