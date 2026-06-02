@@ -36,15 +36,15 @@
   </head>
 
   <% no_padding_top = @no_header || flash.any? || current_page?(about_index_path) || current_page?(docs_path) %>
-  <body class="<%= 'lg:pt-24' unless no_padding_top %>">
+  <body class="<%= 'lg:pt-24' unless no_padding_top %> bg-gradient-to-tr from-slate-50 to-gray-50 text-gray-900 antialiased">
     <%= render "layouts/header" unless @no_header %>
 
-    <div class="<%= 'lg:pl-64' unless @no_header %>">
+    <div class="<%= 'min-h-screen' unless @no_footer %> <%= 'lg:pl-64' unless @no_header %>">
       <%= render("layouts/flash", flash: flash) unless @no_flash %>
 
       <%= yield %>
-
-      <%= render "layouts/footer" unless @no_footer %>
     </div>
+
+    <%= render "layouts/footer" unless @no_footer %>
   </body>
 </html>

@@ -32,6 +32,10 @@ class AvmSession < Session
   end
 
   def avm_url
+    "https://autogram.slovensko.digital/api/v1/qr-code?guid=#{document_identifier}&key=#{encryption_key}"
+  end
+
+  def avm_custom_url
     "avm://autogram.slovensko.digital/api/v1/qr-code?guid=#{document_identifier}&key=#{encryption_key}"
   end
 

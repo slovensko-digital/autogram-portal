@@ -52,6 +52,7 @@ class Api::V1::BundlesController < ApiController
       :publiclyVisible,
       :signingRule,
       :requiredSignatures,
+      :authorNotificationsEnabled,
       contracts: [
         :id,
         { allowedMethods: [] },
@@ -128,6 +129,7 @@ class Api::V1::BundlesController < ApiController
     attributes[:publicly_visible] = permitted_params[:publiclyVisible] if permitted_params.key?(:publiclyVisible)
     attributes[:signing_rule] = permitted_params[:signingRule] if permitted_params[:signingRule].present?
     attributes[:required_signatures] = permitted_params[:requiredSignatures] if permitted_params[:requiredSignatures].present?
+    attributes[:author_notifications_enabled] = permitted_params[:authorNotificationsEnabled] if permitted_params.key?(:authorNotificationsEnabled)
 
     attributes
   end

@@ -221,10 +221,7 @@ class ContractsController < ApplicationController
                    @contract.recipients.active.find_by(email: current_user.email)
 
       if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
-        @recipient = @contract.bundle.recipients.active.find_or_create_by!(email: current_user.email) do |r|
-          r.user = current_user
-          r.name = current_user.display_name
-        end
+        @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
   end

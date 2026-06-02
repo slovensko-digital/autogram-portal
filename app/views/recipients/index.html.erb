@@ -69,9 +69,9 @@
                 <%= f.number_field :required_signatures,
                       value: @bundle.required_signatures,
                       min: 1,
-                      max: [@bundle.recipients.size, 1].max,
+                      max: [@bundle.visible_recipients.size, 1].max,
                       class: "w-20 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
-                <span class="text-sm text-gray-500"><%= t('.required_signatures_of', count: @bundle.recipients.size) %></span>
+                    <span class="text-sm text-gray-500"><%= t('.required_signatures_of', count: @bundle.visible_recipients.size) %></span>
               </div>
             </div>
             <%= f.submit t('actions.save'),
@@ -82,7 +82,7 @@
     </div>
 
     <div class="space-y-3">
-      <% @bundle.recipients.order(:created_at).select(&:persisted?).each do |recipient| %>
+      <% @bundle.visible_recipients.order(:created_at).select(&:persisted?).each do |recipient| %>
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div class="px-4 py-3.5">
             <div class="flex items-start gap-3">

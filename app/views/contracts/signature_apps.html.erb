@@ -111,9 +111,9 @@
       <div class="flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
         <%
           back_path = if @contract.bundle
-            sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
+            sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice])
           else
-            sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+            sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice])
           end
         %>
         <% unless skip_method_choice %>

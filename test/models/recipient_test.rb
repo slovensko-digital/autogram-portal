@@ -3,6 +3,7 @@
 # Table name: recipients
 #
 #  id                  :bigint           not null, primary key
+#  author_proxy        :boolean          default(FALSE), not null
 #  email               :string           not null
 #  locale              :string           default("sk"), not null
 #  name                :string
@@ -16,12 +17,13 @@
 #
 # Indexes
 #
-#  index_recipients_on_bundle_id                   (bundle_id)
-#  index_recipients_on_bundle_id_and_email_active  (bundle_id,email) UNIQUE WHERE (withdrawn_at IS NULL)
-#  index_recipients_on_bundle_id_and_withdrawn_at  (bundle_id,withdrawn_at)
-#  index_recipients_on_email                       (email)
-#  index_recipients_on_user_id                     (user_id)
-#  index_recipients_on_uuid                        (uuid) UNIQUE
+#  idx_on_bundle_id_author_proxy_withdrawn_at_dd4336f6ca  (bundle_id,author_proxy,withdrawn_at)
+#  index_recipients_on_bundle_id                          (bundle_id)
+#  index_recipients_on_bundle_id_and_email_active         (bundle_id,email) UNIQUE WHERE (withdrawn_at IS NULL)
+#  index_recipients_on_bundle_id_and_withdrawn_at         (bundle_id,withdrawn_at)
+#  index_recipients_on_email                              (email)
+#  index_recipients_on_user_id                            (user_id)
+#  index_recipients_on_uuid                               (uuid) UNIQUE
 #
 # Foreign Keys
 #
@@ -37,6 +39,7 @@ class RecipientTest < ActiveSupport::TestCase
     @queue_adapter = ActiveJob::Base.queue_adapter
     ActiveJob::Base.queue_adapter = :test
     clear_enqueued_jobs
+    users(:one).update_column(:email, "owner@example.com")
   end
 
   teardown do
@@ -78,7 +81,68 @@ class RecipientTest < ActiveSupport::TestCase
     assert new_recipient.active?
   end
 
+  test "find_or_create_author_proxy_for creates a hidden recipient" do
+    bundle = create_bundle_with_contract
+
+    recipient = Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: users(:one))
+
+    assert recipient.author_proxy?
+    assert_not recipient.visible?
+    assert_equal [ recipient ], bundle.recipients.author_proxies.to_a
+    assert_empty bundle.visible_recipients
+  end
+
+  test "find_or_create_author_proxy_for reuses an existing visible recipient" do
+    bundle = create_bundle_with_contract
+    visible_recipient = bundle.recipients.create!(email: users(:one).email, user: users(:one), locale: "sk")
+
+    recipient = Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: users(:one))
+
+    assert_equal visible_recipient, recipient
+    assert_not recipient.author_proxy?
+    assert_equal 1, bundle.recipients.active.where(email: users(:one).email).count
+  end
+
+  test "find_or_create_author_proxy_for returns the created recipient after a duplicate key race" do
+    bundle = create_bundle_with_contract
+    recipients = bundle.recipients
+    created_recipient = nil
+
+    recipients.singleton_class.alias_method :__original_create_for_race_test, :create!
+    recipients.singleton_class.define_method(:create!) do |*args, **kwargs, &block|
+      created_recipient ||= __original_create_for_race_test(*args, **kwargs, &block)
+      raise ActiveRecord::RecordNotUnique, "duplicate recipient"
+    end
+
+    recipient = Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: users(:one))
+
+    assert_equal created_recipient, recipient
+    assert recipient.author_proxy?
+    assert_equal 1, bundle.recipients.active.where(email: users(:one).email).count
+  ensure
+    recipients.singleton_class.alias_method :create!, :__original_create_for_race_test
+    recipients.singleton_class.remove_method :__original_create_for_race_test
+  end
+
   private
+
+  def create_bundle_with_contract
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new("%PDF-1.4 test content"),
+      filename: "recipient-test.pdf",
+      content_type: "application/pdf"
+    )
+
+    contract = Contract.create!(
+      documents_attributes: [ { blob: blob } ],
+      signature_parameters_attributes: {
+        level: "BASELINE_B",
+        format: "PAdES"
+      }
+    )
+
+    Bundle.create!(author: users(:one), contracts: [ contract ])
+  end
 
   def create_recipient(notification_status:, email: nil)
     recipient = bundles(:one).recipients.create!(

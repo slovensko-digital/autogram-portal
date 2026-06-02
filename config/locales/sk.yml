@@ -17,7 +17,6 @@ sk:
       title: "Už len krok"
       subtitle: "Pre vytvorenie účtu musíte súhlasiť so všeobecnými obchodnými podmienkami a zásadami ochrany osobných údajov."
       accept: "Vytvoriť účet a pokračovať"
-      cancel: "Zrušiť"
 
   activerecord:
     attributes:
@@ -41,7 +40,6 @@ sk:
     continue_signing: "Pokračovať na podpisovanie"
     download: "Stiahnuť"
     download_contract: "Stiahnuť dokument"
-    cancel: "Zrušiť"
     close: "Zavriet"
     delete: "Zmazať"
     remove: "Odstrániť"
@@ -50,7 +48,7 @@ sk:
     edit: "Upraviť"
     sign: "Podpísať"
     change_selection: "Zmeniť výber"
-    view: "Zobrazit"
+    view: "Zobraziť"
 
   upload_form:
     agree_to_policies_html: "Súhlasím s %{terms_link} a %{privacy_link}"
@@ -71,7 +69,7 @@ sk:
       settings: "Nastavenia"
       new_contract: "Nový dokument"
       electronic_onboarding: "Elektronické podpisovanie"
-      docs: "Používateľská prínručka"
+      docs: "Používateľská príručka"
       sign_in: "Prihlásiť sa"
       sign_out: "Odhlásiť sa"
 
@@ -222,7 +220,6 @@ sk:
       policies_link: "zásadami, pravidlami a podmienkami"
       upload_document: "Nahrať dokument"
       submit_button: "Nahrať a pokračovať"
-      cancel: "Zrušiť"
       actions:
         continue: "Pokračovať"
         back: "Späť"
@@ -315,6 +312,11 @@ sk:
       label: "Kopírovať odkaz do schránky"
       turn_on: "Zapnúť verejný odkaz"
       turn_off: "Vypnúť verejný odkaz"
+    author_notifications_form:
+      title: "Notifikácie pre autora"
+      subtitle: "Zapnite notifikácie, aby ste dostávali emaily o dôležitých udalostiach týkajúcich sa tohto balíka."
+      turn_on: "Zapnúť notifikácie"
+      turn_off: "Vypnúť notifikácie"
     note_form:
       title: "Poznámka"
       placeholder: "Voliteľná správa pre adresátov"
@@ -479,7 +481,6 @@ sk:
       no_documents: "Žiadne dokumenty priradené k tomuto dokumentu."
       destroy_contract: "Zmazať dokument"
       destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
-      cancel: "Zrušiť"
       update_contract: "Aktualizovať dokument"
     destroy:
       success: "Dokument bol úspešne zmazaný."
@@ -508,7 +509,6 @@ sk:
       first_time_signing: "Podpisujete prvýkrát?"
       learn_more_text: "Pozrite si návod"
       how_signing_works: "Ako funguje podpisovanie"
-      cancel: "Zrušiť proces"
       already_signed:
         title: "Dokument je podpísaný"
         message: "Tento dokument je už podpísaný. Nie je od vás potrebný ďalší podpis."
@@ -523,7 +523,6 @@ sk:
       eidentita_description: "Štátna mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
       sign: "Podpísať"
       continue_to_sign: "Pokračovať k podpisu"
-      cancel: "Zrušiť proces"
       first_time_signing: "Podpisujete prvýkrát?"
       learn_more_text: "Pozrite si návod"
       how_signing_works: "Ako funguje podpisovanie"
@@ -585,7 +584,6 @@ sk:
         status_sending: "Odosielam dokument do Autogramu"
         status_waiting: "Čakám na podpísanie dokumentu"
         status_signed: "Podpísané"
-        cancel: "Zrušiť proces"
         maybe_not_installed_title: "Autogram sa zatiaľ nespustil"
         maybe_not_installed_waiting: "Ešte chvíľu čakáme na odpoveď aplikácie. Ak sa nespustí, zobrazíme ďalšie pokyny."
         not_installed_title: "Autogram nie je nainštalovaný"
@@ -875,7 +873,7 @@ sk:
   docs:
     index:
       header:
-        eyebrow: "Používateľská prínručka"
+        eyebrow: "Používateľská príručka"
         title: "Dokumentácia pre používateľov"
         subtitle: "Všetko, čo potrebujete vedieť o používaní Autogram Portalu."
       nav:

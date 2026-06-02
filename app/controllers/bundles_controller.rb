@@ -19,33 +19,33 @@ class BundlesController < ApplicationController
 
     awaiting_scope = current_user.bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
-                                 .merge(Recipient.active)
+                                 .merge(Recipient.active.visible)
                                  .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                  .distinct
 
     declined_scope = current_user.bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
-                                 .merge(Recipient.active)
+                                 .merge(Recipient.active.visible)
                                  .where.not(signer_contracts: { declined_at: nil })
                                  .distinct
 
     bundles = case @state
     when "awaiting"
       bundles.joins(:recipients)
-             .merge(Recipient.active)
+             .merge(Recipient.active.visible)
              .where(id: awaiting_scope.select(:id))
              .where.not(id: declined_scope.select(:id))
              .distinct
     when "completed"
       bundles.joins(:recipients)
-             .merge(Recipient.active)
+             .merge(Recipient.active.visible)
              .where.not(id: awaiting_scope.select(:id))
              .where.not(id: declined_scope.select(:id))
              .distinct
     when "declined"
       bundles.where(id: declined_scope.select(:id))
     when "no_recipients"
-      bundles.where.not(id: bundles.joins(:recipients).merge(Recipient.active).select(:id))
+      bundles.where.not(id: bundles.joins(:recipients).merge(Recipient.active.visible).select(:id))
     else
       bundles
     end
@@ -62,19 +62,19 @@ class BundlesController < ApplicationController
 
     awaiting_for_user_scope = Bundle.recipient_user(current_user)
                                     .joins(recipients: { recipient_signer: :signer_contracts })
-                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil })
+                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
                                     .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                     .distinct
 
     declined_for_user_scope = Bundle.recipient_user(current_user)
                                     .joins(recipients: { recipient_signer: :signer_contracts })
-                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil })
+                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
                                     .where.not(signer_contracts: { declined_at: nil })
                                     .distinct
 
     superseded_for_user_scope = Bundle.recipient_user(current_user)
                                       .joins(recipients: { recipient_signer: :signer_contracts })
-                                      .where(recipients: { user_id: current_user.id, withdrawn_at: nil })
+                                      .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
                                       .where.not(signer_contracts: { superseded_at: nil })
                                       .where(signer_contracts: { signed_at: nil })
                                       .where(signer_contracts: { declined_at: nil })
@@ -99,7 +99,7 @@ class BundlesController < ApplicationController
 
     @bundles = @bundles.includes(:contracts, :author).order(created_at: order_dir)
 
-    @recipients_by_bundle = Recipient.active.where(user: current_user, bundle_id: @bundles.map(&:id))
+    @recipients_by_bundle = Recipient.active.visible.where(user: current_user, bundle_id: @bundles.map(&:id))
                                      .index_by(&:bundle_id)
   end
 
@@ -231,7 +231,7 @@ class BundlesController < ApplicationController
       @bundle = @recipient.bundle
     elsif current_user
       @bundle = Bundle.joins(:recipients)
-                      .merge(Recipient.active)
+                      .merge(Recipient.active.visible)
                       .where(recipients: { user: current_user }, uuid: params[:id]).first
       @recipient = @bundle&.recipients&.active&.find_by(user: current_user)
     end
@@ -243,6 +243,7 @@ class BundlesController < ApplicationController
       :publicly_visible,
       :signing_rule,
       :required_signatures,
+      :author_notifications_enabled,
       recipients_attributes: [ :id, :email, :_destroy ]
     )
   end
@@ -264,12 +265,16 @@ class BundlesController < ApplicationController
 
     if current_user
       @bundle = Bundle.joins(:recipients)
-                      .merge(Recipient.active)
+                      .merge(Recipient.active.visible)
                       .where(recipients: { user: current_user }, uuid: params[:id]).first
       @recipient = @bundle&.recipients&.active&.find_by(user: current_user) if @bundle
     end
 
     @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
+
+    if current_user && @bundle && current_user == @bundle.author && @recipient.nil?
+      @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @bundle, user: current_user)
+    end
 
     raise ActiveRecord::RecordNotFound unless @bundle
   end
@@ -352,7 +357,7 @@ class BundlesController < ApplicationController
   end
 
   def public_signing_available?
-    @bundle.publicly_visible? && @bundle.recipients.none?
+    @bundle.publicly_visible? && @bundle.visible_recipients.none?
   end
 
   def mobile_device_request?

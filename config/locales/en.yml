@@ -46,7 +46,6 @@ en:
       title: "Almost there"
       subtitle: "Please accept the terms and privacy policy to create your account."
       accept: "Create account and continue"
-      cancel: "Cancel"
 
   activerecord:
     attributes:
@@ -61,7 +60,6 @@ en:
     back: "Back"
     continue: "Continue"
     continue_signing: "Continue to signing"
-    cancel: "Cancel"
     close: "Close"
     download: "Download"
     download_contract: "Download contract"
@@ -257,7 +255,6 @@ en:
       policies_link: "policies, terms and conditions"
       upload_document: "Upload Document"
       submit_button: "Upload & Continue"
-      cancel: "Cancel"
       actions:
         continue: "Continue"
         back: "Back"
@@ -386,6 +383,11 @@ en:
       label: "Copy link to clipboard"
       turn_on: "Enable public link"
       turn_off: "Disable public link"
+    author_notifications_form:
+      title: "Author notifications"
+      subtitle: "Enable notifications to receive email updates about important events related to this bundle."
+      turn_on: "Turn on notifications"
+      turn_off: "Turn off notifications"
     note_form:
       title: "Note"
       placeholder: "Optional message for recipients"
@@ -559,7 +561,6 @@ en:
       no_documents: "No documents associated with this contract."
       destroy_contract: "Destroy contract"
       destroy_confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
-      cancel: "Cancel"
       update_contract: "Update Contract"
     destroy:
       success: "Contract was successfully deleted."
@@ -588,7 +589,6 @@ en:
       first_time_signing: "Signing for the first time?"
       learn_more_text: "View guide"
       how_signing_works: "How signing works"
-      cancel: "Cancel process"
       already_signed:
         title: "Document has been signed"
         message: "This document has been signed and is complete. No further signature is required."
@@ -603,7 +603,6 @@ en:
       eidentita_description: "Slovak mobile app for qualified electronic signatures - scan QR code or open eIdentita app directly"
       sign: "Sign"
       continue_to_sign: "Continue to signing"
-      cancel: "Cancel process"
       first_time_signing: "Signing for the first time?"
       learn_more_text: "View guide"
       how_signing_works: "How signing works"
@@ -662,7 +661,6 @@ en:
         status_sending: "Sending document to Autogram"
         status_waiting: "Waiting for signature"
         status_signed: "Signed"
-        cancel: "Cancel Process"
         maybe_not_installed_title: "Autogram has not started yet"
         maybe_not_installed_waiting: "We are still waiting a little longer. If it does not start, we will show further instructions."
         not_installed_title: "Autogram is not installed"

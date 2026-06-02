@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_20_103500) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_01_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -224,6 +224,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_20_103500) do
   end
 
   create_table "recipients", force: :cascade do |t|
+    t.boolean "author_proxy", default: false, null: false
     t.bigint "bundle_id", null: false
     t.datetime "created_at", null: false
     t.string "email", null: false
@@ -234,6 +235,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_20_103500) do
     t.bigint "user_id"
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.datetime "withdrawn_at"
+    t.index ["bundle_id", "author_proxy", "withdrawn_at"], name: "idx_on_bundle_id_author_proxy_withdrawn_at_dd4336f6ca"
     t.index ["bundle_id", "email"], name: "index_recipients_on_bundle_id_and_email_active", unique: true, where: "(withdrawn_at IS NULL)"
     t.index ["bundle_id", "withdrawn_at"], name: "index_recipients_on_bundle_id_and_withdrawn_at"
     t.index ["bundle_id"], name: "index_recipients_on_bundle_id"
