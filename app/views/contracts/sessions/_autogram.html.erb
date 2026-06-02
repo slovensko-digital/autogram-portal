@@ -6,12 +6,19 @@
   data-signers--autogram-signed-document-path-value="<%= upload_contract_session_path(@contract, @session, session_token: session_token) %>"
   data-signers--autogram-sdk-path-value="<%= asset_path('autogram-sdk.js') %>"
 >
-  <div class="px-6 py-5 hidden md:block">
-    <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
-    <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
-  </div>
+  <% if params[:embedded] %>
+    <div class="w-full space-y-1">
+      <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
+      <p class="text-sm text-gray-600"><%= t('.subtitle') %></p>
+    </div>
+  <% else %>
+    <div class="px-6 py-5 hidden md:block">
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+      <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
+    </div>
+  <% end %>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 <%= 'px-6' unless params[:embedded] %>">
     <div class="space-y-6 border border-gray-200 rounded-lg p-6 hidden md:block">
       <div class="space-y-4">
         <% (1..6).each do |i| %>

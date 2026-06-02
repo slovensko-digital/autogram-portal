@@ -23,7 +23,7 @@ module ApiEnvironment
 
   class DummyAuthenticator
     def verify_token(_token)
-      User.first || raise("No users in DB")
+      User.second || raise("No users in DB")
     end
   end
 end

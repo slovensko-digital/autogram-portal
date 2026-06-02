@@ -27,7 +27,8 @@ class Bundle < ApplicationRecord
 
   has_many :contracts, dependent: :destroy
   has_many :recipients, dependent: :destroy
-  has_many :active_recipients, -> { active }, class_name: "Recipient", foreign_key: :bundle_id
+  has_many :visible_recipients, -> { visible }, class_name: "Recipient", foreign_key: :bundle_id
+  has_many :active_recipients, -> { active.visible }, class_name: "Recipient", foreign_key: :bundle_id
   has_many :withdrawn_recipients, -> { withdrawn }, class_name: "Recipient", foreign_key: :bundle_id
   has_one :webhook, dependent: :destroy
   has_one :postal_address, dependent: :destroy
@@ -52,7 +53,7 @@ class Bundle < ApplicationRecord
   scope :publicly_visible, -> { where(publicly_visible: true) }
   scope :recipient_user, ->(user) {
     joins(:recipients)
-      .merge(Recipient.active)
+      .merge(Recipient.active.visible)
       .where.not(author: user)
       .where(recipients: { user: user })
   }
@@ -132,6 +133,8 @@ class Bundle < ApplicationRecord
 
   # Returns true when the signing rule is satisfied by the current number of fully-signed recipients.
   def threshold_met?
+    return false unless active_recipients.exists?
+
     case signing_rule
     when "any"
       signed_recipients_count >= 1
@@ -157,7 +160,7 @@ class Bundle < ApplicationRecord
     with_lock do
       awaiting_sc_ids = SignerContract
         .joins(signer: :recipient)
-        .where(recipients: { bundle_id: id, withdrawn_at: nil }, signed_at: nil, declined_at: nil, superseded_at: nil)
+        .where(recipients: { bundle_id: id, withdrawn_at: nil, author_proxy: false }, signed_at: nil, declined_at: nil, superseded_at: nil)
         .pluck(:id)
 
       return if awaiting_sc_ids.empty?
@@ -185,7 +188,7 @@ class Bundle < ApplicationRecord
       # Find all currently superseded signer contracts
       superseded_scs = SignerContract
         .joins(signer: :recipient)
-        .where(recipients: { bundle_id: id }, superseded_at: nil..Float::INFINITY)
+        .where(recipients: { bundle_id: id, author_proxy: false }, superseded_at: nil..Float::INFINITY)
 
       return if superseded_scs.empty?
 

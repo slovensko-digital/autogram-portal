@@ -117,10 +117,7 @@ class Contracts::SessionsController < ApplicationController
                    @contract.recipients.active.find_by(email: current_user.email)
 
       if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
-        @recipient = @contract.bundle.recipients.active.find_or_create_by!(email: current_user.email) do |r|
-          r.user = current_user
-          r.name = current_user.display_name
-        end
+        @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
 
@@ -130,7 +127,7 @@ class Contracts::SessionsController < ApplicationController
     elsif current_user
       user_signer = UserSigner.find_or_create_by!(user: current_user)
       @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
-    elsif @contract.user.nil?
+    elsif @contract.bundle.present?
       @signer_contract = @contract.signer_contracts
                                   .joins(:signer)
                                   .find_by(signers: { type: "AnonymousSigner" })
@@ -140,6 +137,8 @@ class Contracts::SessionsController < ApplicationController
     end
 
     raise ActiveRecord::RecordNotFound if @signer_contract&.signed? && @contract.bundle.present?
+
+    @signer_contract = AnonymousSigner.create!.signer_contracts.create!(contract: @contract) unless @signer_contract
   end
 
   def redirect_if_completed
@@ -155,7 +154,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_eidentita_session
-    existing = @signer_contract.sessions.pending.where(type: "EidentitaSession").first
+    existing = @signer_contract&.sessions&.pending&.where(type: "EidentitaSession")&.first
     return persist_session_view_options(existing) if existing
 
     result = AutogramEnvironment.eidentita_service.initiate_signing(@contract)
@@ -169,7 +168,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_avm_session
-    existing = @signer_contract.sessions.pending.where(type: "AvmSession").first
+    existing = @signer_contract&.sessions&.pending&.where(type: "AvmSession")&.first
     return persist_session_view_options(existing) if existing
 
     result = AutogramEnvironment.avm_service.initiate_signing(@contract)
@@ -194,7 +193,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_autogram_session
-    existing = @signer_contract.sessions.pending.where(type: "AutogramSession").first
+    existing = @signer_contract&.sessions&.pending&.where(type: "AutogramSession")&.first
     return persist_session_view_options(existing) if existing
 
     persist_session_view_options(@signer_contract.sessions.create!(

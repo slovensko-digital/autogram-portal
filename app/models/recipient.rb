@@ -3,6 +3,7 @@
 # Table name: recipients
 #
 #  id                  :bigint           not null, primary key
+#  author_proxy        :boolean          default(FALSE), not null
 #  email               :string           not null
 #  locale              :string           default("sk"), not null
 #  name                :string
@@ -16,12 +17,13 @@
 #
 # Indexes
 #
-#  index_recipients_on_bundle_id                   (bundle_id)
-#  index_recipients_on_bundle_id_and_email_active  (bundle_id,email) UNIQUE WHERE (withdrawn_at IS NULL)
-#  index_recipients_on_bundle_id_and_withdrawn_at  (bundle_id,withdrawn_at)
-#  index_recipients_on_email                       (email)
-#  index_recipients_on_user_id                     (user_id)
-#  index_recipients_on_uuid                        (uuid) UNIQUE
+#  idx_on_bundle_id_author_proxy_withdrawn_at_dd4336f6ca  (bundle_id,author_proxy,withdrawn_at)
+#  index_recipients_on_bundle_id                          (bundle_id)
+#  index_recipients_on_bundle_id_and_email_active         (bundle_id,email) UNIQUE WHERE (withdrawn_at IS NULL)
+#  index_recipients_on_bundle_id_and_withdrawn_at         (bundle_id,withdrawn_at)
+#  index_recipients_on_email                              (email)
+#  index_recipients_on_user_id                            (user_id)
+#  index_recipients_on_uuid                               (uuid) UNIQUE
 #
 # Foreign Keys
 #
@@ -40,6 +42,8 @@ class Recipient < ApplicationRecord
 
   scope :active, -> { where(withdrawn_at: nil) }
   scope :withdrawn, -> { where.not(withdrawn_at: nil) }
+  scope :visible, -> { where(author_proxy: false) }
+  scope :author_proxies, -> { where(author_proxy: true) }
 
   scope :awaiting_contract, ->(contract) {
     joins(recipient_signer: :signer_contracts)
@@ -62,6 +66,21 @@ class Recipient < ApplicationRecord
   after_create :associate_with_bundle_contracts
   after_create :recompute_bundle_superseded_state
 
+  def self.find_or_create_author_proxy_for!(bundle:, user:)
+    existing_recipient = bundle.recipients.active.find_by(user: user) ||
+      bundle.recipients.active.find_by(email: user.email)
+    return existing_recipient if existing_recipient
+
+    bundle.recipients.create!(
+      email: user.email,
+      user: user,
+      name: user.display_name,
+      author_proxy: true
+    )
+  rescue ActiveRecord::RecordNotUnique
+    bundle.recipients.active.find_by!(email: user.email)
+  end
+
   def to_param
     uuid
   end
@@ -76,6 +95,10 @@ class Recipient < ApplicationRecord
 
   def withdrawn?
     withdrawn_at.present?
+  end
+
+  def visible?
+    !author_proxy?
   end
 
   def signed_contract?(contract)

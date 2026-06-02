@@ -33,7 +33,7 @@
           <% end %>
         </div>
       </div>
-      <div class="w-full">
+      <div class="w-full space-y-6">
         <% @bundle.contracts.each do |contract| %>
           <div class="border border-gray-200 p-6 rounded-lg bg-white">
             <%= render 'contracts/visualization_with_toggle', contract: contract %>
@@ -86,6 +86,7 @@
         </div>
       <% end %>
 
+      <%= render "author_notifications_form" %>
       <%= render "public_link_form" %>
       <%= render "note_form" %>
     </div>

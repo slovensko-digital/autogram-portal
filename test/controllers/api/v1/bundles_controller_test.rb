@@ -5,6 +5,7 @@ require "openssl"
 class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @owner = users(:one)
+    @owner.update_column(:email, "owner@example.com")
     @owner_key = OpenSSL::PKey::RSA.generate(2048)
     @owner.update_column(:api_token_public_key, @owner_key.public_to_pem)
   end
@@ -47,7 +48,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     contract = bundle.contracts.first
     assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}[src]", count: 0
     assert_select "a[href='/contracts/#{contract.uuid}/sessions/autogram']", count: 0
-    assert_select "a[href*='/contracts/#{contract.uuid}/signature_apps'][data-turbo-frame='_top']", text: "Pokračovať"
+    assert_select "a[href*='/contracts/#{contract.uuid}/signature_apps']", text: "Pokračovať"
   end
 
   test "public bundle sign route loads embedded signature apps directly in no_onboarding mode" do
@@ -80,6 +81,44 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
     assert_not bundle.author_notifications_enabled?
     contract = bundle.contracts.first
+
+    get "/bundles/#{bundle.uuid}/sign", params: { iframe: "no_onboarding" }
+
+    assert_response :success
+    assert_select "button[data-signing-method-target='continueButton']", count: 0
+    assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}[src*='/contracts/#{contract.uuid}/signature_apps'][src*='embedded=true'][src*='iframe=no_onboarding']"
+  end
+
+  test "public bundle sign route stays available when bundle only has an author proxy recipient" do
+    post "/api/v1/bundles",
+         params: {
+           id: SecureRandom.uuid,
+           publiclyVisible: true,
+           contracts: [
+             {
+               id: SecureRandom.uuid,
+               allowedMethods: [ "qes" ],
+               documents: [
+                 {
+                   filename: "contract.txt",
+                   content: Base64.strict_encode64("Sample text content"),
+                   contentType: "text/plain;base64"
+                 }
+               ],
+               signatureParameters: {
+                 format: "XAdES",
+                 container: "ASiC_E"
+               }
+             }
+           ]
+         },
+         headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :created
+
+    bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
+    contract = bundle.contracts.first
+    Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: @owner)
 
     get "/bundles/#{bundle.uuid}/sign", params: { iframe: "no_onboarding" }
 

@@ -61,7 +61,7 @@
         <% end %>
       <% end %>
 
-      <% public_signing_available = @bundle.publicly_visible? && @bundle.recipients.none? %>
+      <% public_signing_available = @bundle.publicly_visible? && @bundle.visible_recipients.none? %>
       <% batch_autogram_hidden_on_mobile = mobile_device_request? && @pending_batch_contracts.many? && @batch_autogram_contracts.size == @pending_batch_contracts.size %>
 
       <% if @batch_autogram_available %>
@@ -179,15 +179,15 @@
                 <% if @bundle.awaiting_recipients? %>
                   <div class="space-y-3">
                     <h3 class="text-lg font-semibold text-gray-900">
-                      <%= t('.awaiting_recipients') %> (<%= @bundle.recipients.awaiting_contract(contract).count %>)
+                      <%= t('.awaiting_recipients') %> (<%= @bundle.active_recipients.awaiting_contract(contract).count %>)
                     </h3>
-                    <% @bundle.recipients.awaiting_contract(contract).each do |recipient| %>
-                      <div class="overflow-hidden rounded-lg border <%= recipient == @recipient ? 'border-blue-500 bg-blue-50' : 'border-gray-200' %>">
+                    <% @bundle.active_recipients.awaiting_contract(contract).each do |recipient| %>
+                      <div class="overflow-hidden rounded-lg border <%= recipient == @recipient ? 'border-blue-200 bg-blue-50' : 'border-gray-200' %>">
                         <div class="px-4 py-3.5">
                           <div class="flex items-start gap-3">
                             <div class="min-w-0 flex-1">
                               <div class="flex flex-wrap items-center gap-2">
-                                <div class="break-words text-base font-semibold text-gray-900">
+                                <div class="break-words text-base <%= recipient == @recipient ? 'text-blue-800 font-semibold' : 'text-gray-700' %>">
                                   <%= recipient.display_name %>
                                 </div>
                                 <div>
@@ -214,27 +214,26 @@
                       <%= render 'shared/success', title: t('contracts.sign.already_signed.title'), content: t('contracts.sign.already_signed.message') %>
                     <% end %>
                   </div>
-                <% end %>
-
-                <% if contract_signable && only_electronic_signing && can_render_signature_apps_in_frame %>
-                  <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
-                    <div class="animate-pulse space-y-3">
-                      <div class="h-5 w-48 rounded bg-gray-200"></div>
-                      <div class="h-16 rounded bg-gray-200"></div>
-                      <div class="h-16 rounded bg-gray-200"></div>
+                <% else %>
+                  <% if contract_signable && only_electronic_signing && can_render_signature_apps_in_frame %>
+                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                      <div class="animate-pulse space-y-3">
+                        <div class="h-5 w-48 rounded bg-gray-200"></div>
+                        <div class="h-16 rounded bg-gray-200"></div>
+                        <div class="h-16 rounded bg-gray-200"></div>
+                      </div>
                     </div>
-                  </div>
-                <% elsif contract_signable && only_electronic_signing %>
-                  <div class="rounded-xl border border-blue-200 bg-blue-50 p-5">
-                    <h3 class="text-lg font-semibold text-blue-900"><%= t('.electronic_setup_title') %></h3>
-                    <p class="mt-1 text-sm text-blue-800"><%= t('.electronic_setup_description') %></p>
-                    <%= link_to t('.electronic_setup_action'),
-                          full_page_signature_apps_path,
-                          data: { turbo_frame: '_top' },
-                          class: "mt-4 inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700" %>
-                  </div>
-                <% elsif contract_signable %>
-                  <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
+                  <% elsif contract_signable && only_electronic_signing %>
+                    <div class="rounded-xl border border-blue-200 bg-blue-50 p-5">
+                      <h3 class="text-lg font-semibold text-blue-900"><%= t('.electronic_setup_title') %></h3>
+                      <p class="mt-1 text-sm text-blue-800"><%= t('.electronic_setup_description') %></p>
+                      <%= link_to t('.electronic_setup_action'),
+                            full_page_signature_apps_path,
+                            class: "mt-4 inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700" %>
+                    </div>
+                  <% elsif contract_signable %>
+                    <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
+                  <% end %>
                 <% end %>
               <% end %>
             </div>
