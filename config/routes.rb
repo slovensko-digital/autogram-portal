@@ -78,6 +78,7 @@ Rails.application.routes.draw do
       get :signature_apps
       get :physical_signing
       post :physical_signing, action: :create_physical_session
+      get :show_bundle
     end
 
     resources :onboarding, only: [ :show, :update ], param: :step, controller: "contracts/onboarding"

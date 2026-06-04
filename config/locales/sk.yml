@@ -232,7 +232,10 @@ sk:
           subtitle: "Pošlite tento dokument iným na podpisovanie cez e-mail alebo zdieľaný odkaz."
         add_timestamp:
           title: "Pridať časovú pečiatku"
-          subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
+          subtitle: "Rozšíri podpisy na úroveň T pridaním kvalifikovanej časovej pečiatky."
+        archive:
+          title: "Archivovať dokument"
+          subtitle: "Rozšíri podpisy na úroveň LTA archívnou časovou pečiatkou pre dlhodobé overenie."
     actions_error:
       title: "Chyba pri načítavaní akcií dokumentu"
     visualize:
@@ -246,8 +249,9 @@ sk:
     alerts:
       no_file_attached: "K tomuto dokumentu nie je pripojený žiadny súbor."
       all_signatures_have_timestamps: "Všetky podpisy už majú kvalifikované časové pečiatky."
+      signatures_already_extended: "Tento dokument je už rozšírený na úroveň %{target_level}."
       failed_to_extend_signatures: "Nepodarilo sa rozšíriť podpisy: %{error}"
-      signature_extended_successfully: "Podpis bol úspešne rozšírený."
+      signature_extended_successfully: "Podpisy boli úspešne rozšírené na úroveň %{target_level}."
 
   bundles:
     display_name: "Balík dokumentov"
@@ -543,9 +547,15 @@ sk:
       signature_level: "Typ podpisu"
       allowed_methods: "Povolené metódy podpisu"
     signature_extension:
-      add_timestamp_title: "Pridať časovú pečiatku"
-      add_timestamp_subtitle: "Tento dokument obsahuje podpisy bez kvalifikovaných časových pečiatok. Ak je to potrebné, môžete ich teraz rozšíriť."
-      add_timestamp_button: "Pridať časovú pečiatku k podpisom"
+      levels:
+        t:
+          title: "Pridať časovú pečiatku"
+          subtitle: "Rozšíri podpisy na úroveň T pridaním kvalifikovanej časovej pečiatky."
+          button: "Pridať časovú pečiatku k podpisom"
+        lta:
+          title: "Archivovať dokument"
+          subtitle: "Rozšíri podpisy na úroveň LTA pridaním archívnej časovej pečiatky pre dlhodobé overenie."
+          button: "Archivovať podpísaný dokument"
     download_actions:
       message: "Tento dokument bol podpísaný a je pripravený na stiahnutie."
       download_button: "Stiahnuť podpísaný dokument"

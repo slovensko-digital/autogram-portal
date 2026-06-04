@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-4xl px-6 py-4">
     <% flash.each do |type, message| %>
       <% if type == 'notice' %>
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4 relative" role="alert">
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 relative" role="alert">
           <div class="flex items-start">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,7 +17,7 @@
           </div>
         </div>
       <% elsif type == 'alert' %>
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 relative" role="alert">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 relative" role="alert">
           <div class="flex items-start">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@
           </div>
         </div>
       <% else %>
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 relative" role="alert">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 relative" role="alert">
           <div class="flex items-start">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

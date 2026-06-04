@@ -89,19 +89,26 @@ class Contract < ApplicationRecord
     signed_document.blank? || bundle&.awaiting_recipients?(contract: self)
   end
 
-  def extendable_signatures?
-    return Document.new(blob: signed_document.blob).extendable_signatures? if signed_document.attached?
+  def extendable_signatures?(target_level: "T")
+    return Document.new(blob: signed_document.blob).extendable_signatures?(target_level: target_level) if signed_document.attached?
 
     return false unless documents.count == 1
-    documents.first.extendable_signatures?
+    documents.first.extendable_signatures?(target_level: target_level)
   end
 
-  def extend_signatures!
-    return unless extendable_signatures?
+  def available_extension_target_levels
+    return Document.new(blob: signed_document.blob).available_extension_target_levels if signed_document.attached?
+
+    return [] unless documents.count == 1
+    documents.first.available_extension_target_levels
+  end
+
+  def extend_signatures!(target_level: "T")
+    return unless extendable_signatures?(target_level: target_level)
 
     if signed_document.attached?
       document = Document.new(blob: signed_document.blob)
-      document.extend_signatures!
+      document.extend_signatures!(target_level: target_level)
       signed_document.purge
       signed_document.attach(
         io: StringIO.new(document.content),
@@ -110,7 +117,7 @@ class Contract < ApplicationRecord
       )
       save!
     else
-      documents.first.extend_signatures!
+      documents.first.extend_signatures!(target_level: target_level)
     end
   end
 

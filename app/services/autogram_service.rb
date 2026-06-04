@@ -1,6 +1,7 @@
 class AutogramService
   AUTOGRAM_BASE_URL = ENV.fetch("AUTOGRAM_SERVICE_URL", "http://localhost:7200")
   TEST_SIGNER_COMMON_NAME = "Autogram Test".freeze
+  EXTENSION_LEVELS = %w[T LT LTA].freeze
 
   class ValidationResult
     attr_reader :has_signatures, :signatures, :errors, :document_info
@@ -57,12 +58,12 @@ class AutogramService
     end
   end
 
-  def extend_signatures(document)
+  def extend_signatures(document, target_level: "T")
     return nil if document.content.nil?
 
     begin
       file_content = Base64.strict_encode64(document.content)
-      response = call_autogram_extend_api(file_content)
+      response = call_autogram_extend_api(file_content, target_level: target_level)
 
       raise "Error communicating with Autogram service: #{response.status}" unless response.success?
 
@@ -115,7 +116,7 @@ class AutogramService
     connection.post("/visualization", payload)
   end
 
-  def call_autogram_extend_api(file_content)
+  def call_autogram_extend_api(file_content, target_level: "T")
     connection = Faraday.new(url: AUTOGRAM_BASE_URL) do |faraday|
       faraday.request :json
       faraday.response :json
@@ -123,8 +124,11 @@ class AutogramService
       faraday.options.timeout = 30
     end
 
+    normalized_target_level = target_level.to_s.upcase
+    raise ArgumentError, "Unsupported target level: #{target_level}" unless EXTENSION_LEVELS.include?(normalized_target_level)
+
     payload = {
-      targetLevel: "T",
+      targetLevel: normalized_target_level,
       document: {
         content: file_content
       }
@@ -197,7 +201,7 @@ class AutogramService
     {
       signer_name: signer_name,
       signing_time: signing_time,
-      signature_level: signatures_data["level"],
+      signature_level: signatures_data["level"]&.gsub(/[XPC]AdES_/, ""),
       validation_result: validation_result,
       valid: accepted_signature_result?(validation_result, signer_name),
       certificate_info: {
@@ -213,7 +217,8 @@ class AutogramService
             type: ts["timestampType"],
             time: Time.parse(ts["productionTime"]),
             qualification: ts["qualification"],
-            subject: ts["subjectDN"]
+            subject: ts["subjectDN"],
+            not_after: ts["notAfter"]
           }
         end
       } : nil
