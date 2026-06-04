@@ -20,6 +20,20 @@
 #  fk_rails_...  (contract_id => contracts.id)
 #
 class Document < ApplicationRecord
+  SIGNATURE_LEVEL_ORDER = {
+    "BASELINE_B" => 0,
+    "BASELINE_T" => 1,
+    "BASELINE_LT" => 2,
+    "BASELINE_LTA" => 3
+  }.freeze
+
+  EXTENSION_TARGET_LEVELS = {
+    "T" => "BASELINE_T",
+    "LT" => "BASELINE_LT",
+    "LTA" => "BASELINE_LTA"
+  }.freeze
+  UI_EXTENSION_TARGET_LEVELS = %w[T LTA].freeze
+
   belongs_to :contract, optional: true
 
   has_one :xdc_parameters, class_name: "XdcParameters", dependent: :destroy
@@ -61,18 +75,39 @@ class Document < ApplicationRecord
 
     blob_key = blob&.checksum || "no-blob"
     cache_key = "document/validation/#{blob_key}"
-    Rails.cache.fetch(cache_key, expires_in: 5.minutes, race_condition_ttl: 10.seconds) do
+    Rails.cache.fetch(cache_key, expires_in: 15.seconds, race_condition_ttl: 10.seconds) do
       get_new_validation_result
     end
   end
 
-  def extendable_signatures?
+  def extendable_signatures?(target_level: "T")
     return false unless has_signatures?
-    validation_result.signatures.any? { |signature| signature[:timestamp_info].nil? }
+    return true if validation_result.signatures.any? { |signature| signature[:timestamp_info].nil? }
+
+    required_level = EXTENSION_TARGET_LEVELS[target_level.to_s.upcase]
+    return false if required_level.nil?
+
+    return true if validation_result.signatures.any? do |signature|
+      signature_level_rank(signature[:signature_level]) < signature_level_rank(required_level)
+    end
+
+    if required_level == "BASELINE_LTA"
+      return true unless validation_result.signatures.all? do |signature|
+        signature.dig(:timestamp_info, :timestamps)&.select { it[:type] == "ARCHIVE_TIMESTAMP" && it[:qualification] == "QTSA" }&.any? do |timestamp|
+          Time.parse(timestamp[:not_after]) > 1.year.from_now
+        end
+      end
+    end
+
+    false
   end
 
   def has_signatures?
     validation_result.has_signatures
+  end
+
+  def available_extension_target_levels
+    UI_EXTENSION_TARGET_LEVELS.select { |target_level| extendable_signatures?(target_level: target_level) }
   end
 
   def is_pdf?
@@ -106,8 +141,8 @@ class Document < ApplicationRecord
     uuid.first(8)
   end
 
-  def extend_signatures!
-    extended_content = AutogramEnvironment.autogram_service.extend_signatures(self)
+  def extend_signatures!(target_level: "T")
+    extended_content = AutogramEnvironment.autogram_service.extend_signatures(self, target_level: target_level)
 
     raise "No extended content received from Autogram service" if extended_content.nil?
 
@@ -151,5 +186,9 @@ class Document < ApplicationRecord
 
   def get_new_visualization_result
     AutogramEnvironment.autogram_service.visualize_document(self)
+  end
+
+  def signature_level_rank(level)
+    SIGNATURE_LEVEL_ORDER.fetch(level.to_s.upcase, -1)
   end
 end

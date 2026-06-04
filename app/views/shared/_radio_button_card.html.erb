@@ -16,7 +16,7 @@
   - image: image to display on the left side of the card (optional, overrides icon if present)
 %>
 
-<label class="group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
+<label class="group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
   <% if form %>
     <%= form.radio_button name, value, { checked: checked, class: "sr-only", data: data_attributes } %>
   <% else %>

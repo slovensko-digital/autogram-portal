@@ -272,7 +272,10 @@ en:
           message_placeholder: "Hello, please sign the attached document..."
         add_timestamp:
           title: "Add timestamp"
-          subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
+          subtitle: "Extend signatures to T level by adding a qualified timestamp."
+        archive:
+          title: "Archive document"
+          subtitle: "Extend signatures to LTA level with an archive timestamp for long-term validation."
     show:
       title: "Document"
       filename: "Filename: %{filename}"
@@ -299,8 +302,9 @@ en:
       already_part_of_contract: "This document is already part of a contract."
       failed_to_create_contract: "Failed to create contract: %{errors}"
       all_signatures_have_timestamps: "All signatures already have qualified timestamps."
+      signatures_already_extended: "This document is already extended to %{target_level}."
       failed_to_extend_signatures: "Failed to extend signatures: %{error}"
-      signature_extended_successfully: "Signature extended successfully."
+      signature_extended_successfully: "Signatures extended successfully to %{target_level}."
 
   bundles:
     display_name: "Bundle"
@@ -624,9 +628,15 @@ en:
       signature_level: "Electronic signature level"
       allowed_methods: "Allowed signature methods"
     signature_extension:
-      add_timestamp_title: "Add timestamp"
-      add_timestamp_subtitle: "This document contains signatures without qualified timestamps. You can extend them now if needed."
-      add_timestamp_button: "Add timestamp to signatures"
+      levels:
+        t:
+          title: "Add timestamp"
+          subtitle: "Extend signatures to T level by adding a qualified timestamp."
+          button: "Add timestamp to signatures"
+        lta:
+          title: "Archive document"
+          subtitle: "Extend signatures to LTA level by adding an archive timestamp for long-term validation."
+          button: "Archive signed document"
     download_actions:
       message: "This document has been signed and is ready for download."
       download_button: "Download Signed Document"

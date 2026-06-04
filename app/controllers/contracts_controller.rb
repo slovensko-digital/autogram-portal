@@ -55,6 +55,10 @@ class ContractsController < ApplicationController
     @previous_page = request.referrer
   end
 
+  def show_bundle
+    head :not_found unless @contract.bundle
+  end
+
   def actions
     render partial: "actions", locals: { previous_page: params[:previous_page] }
   end
@@ -62,7 +66,10 @@ class ContractsController < ApplicationController
   def signature_extension
     return head :forbidden unless author_of_contract?
 
-    render partial: "signature_extension"
+    target_level = params[:target_level].presence&.upcase || "T"
+    return head :unprocessable_entity unless @contract.extendable_signatures?(target_level: target_level)
+
+    render partial: "signature_extension", locals: { target_level: target_level }
   end
 
   def signature_parameters
@@ -76,13 +83,16 @@ class ContractsController < ApplicationController
 
   def extend_signatures
     return head :forbidden unless author_of_contract?
-    return redirect_to @contract, alert: t("documents.alerts.all_signatures_have_timestamps") unless @contract.extendable_signatures?
+
+    target_level = params[:target_level].presence&.upcase || "T"
+    return_url = @contract.bundle ? show_bundle_contract_path(@contract) : contract_path(@contract)
+    return redirect_to return_url, alert: t("documents.alerts.signatures_already_extended", target_level: target_level) unless @contract.extendable_signatures?(target_level: target_level)
 
     begin
-      @contract.extend_signatures!
-      redirect_to @contract, notice: t("documents.alerts.signature_extended_successfully")
+      @contract.extend_signatures!(target_level: target_level)
+      redirect_to return_url, notice: t("documents.alerts.signature_extended_successfully", target_level: target_level)
     rescue => e
-      redirect_to @contract, alert: t("documents.alerts.failed_to_extend_signatures", error: e.message)
+      redirect_to return_url, alert: t("documents.alerts.failed_to_extend_signatures", error: e.message)
     end
   end
 
@@ -277,6 +287,10 @@ class ContractsController < ApplicationController
   end
 
   def author_of_contract?
+    if @contract.bundle
+      return current_user.present? && @contract.bundle.author == current_user
+    end
+
     current_user.present? && @contract.user == current_user
   end
 

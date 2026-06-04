@@ -28,7 +28,7 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures? && current_user == @contract.user %>
+      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') && current_user == @contract.user %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',
@@ -36,7 +36,19 @@
               description: t('documents.new.actions.add_timestamp.subtitle'),
               checked: false,
               data_attributes: {
-                url: signature_extension_contract_path(@contract)
+                url: signature_extension_contract_path(@contract, target_level: 'T')
+              } %>
+      <% end %>
+
+      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') && current_user == @contract.user %>
+        <%= render 'shared/radio_button_card',
+              name: 'document_action',
+              value: 'archive_signature',
+              label: t('documents.new.actions.archive.title'),
+              description: t('documents.new.actions.archive.subtitle'),
+              checked: false,
+              data_attributes: {
+                url: signature_extension_contract_path(@contract, target_level: 'LTA')
               } %>
       <% end %>
     </div>
