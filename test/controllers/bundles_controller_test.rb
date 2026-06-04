@@ -33,6 +33,17 @@ class BundlesControllerTest < ActionController::TestCase
 
     begin
       get :show, params: { id: bundle.uuid }
+
+      frame_selector = "turbo-frame#contract_#{contract.id}[src='#{show_bundle_contract_path(contract)}'][loading='lazy']"
+      assert_select frame_selector, count: 1
+
+      contracts_controller = ContractsController.new
+      author = @author
+      contracts_controller.singleton_class.define_method(:current_user) { author }
+      contracts_controller.singleton_class.define_method(:user_signed_in?) { true }
+      @controller = contracts_controller
+
+      get :show_bundle, params: { id: contract.uuid }
     ensure
       AutogramEnvironment.singleton_class.define_method(:autogram_service) { original_autogram_service.call }
     end

@@ -42,7 +42,7 @@ class DocumentTest < ActiveSupport::TestCase
 
   test "timestamp extension is unavailable when signatures already have timestamps even at lower baseline level" do
     document = build_document_with_signatures(
-      { signature_level: "BASELINE_B", timestamp_info: { qualified: true } }
+      { signature_level: "BASELINE_T", timestamp_info: { qualified: true } }
     )
 
     assert_equal [ "LTA" ], document.available_extension_target_levels
