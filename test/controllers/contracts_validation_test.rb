@@ -13,7 +13,7 @@ class ContractsValidationTest < ActionController::TestCase
   end
 
   test "validate renders each document separately for multi document contracts" do
-    contract = create_contract_with_documents(document_names: ["contract-a.txt", "contract-b.txt"])
+    contract = create_contract_with_documents(document_names: [ "contract-a.txt", "contract-b.txt" ])
     service = RecordingValidationService.new(
       "contract-a.txt" => AutogramService::ValidationResult.new(hasSignatures: false),
       "contract-b.txt" => AutogramService::ValidationResult.new(hasSignatures: false)
@@ -24,14 +24,14 @@ class ContractsValidationTest < ActionController::TestCase
     end
 
     assert_response :success
-    assert_equal ["contract-a.txt", "contract-b.txt"], service.calls
-    assert_equal ["contract-a.txt", "contract-b.txt"], @controller.instance_variable_get(:@validation_results).map(&:label)
+    assert_equal [ "contract-a.txt", "contract-b.txt" ], service.calls
+    assert_equal [ "contract-a.txt", "contract-b.txt" ], @controller.instance_variable_get(:@validation_results).map(&:label)
     assert_includes response.body, I18n.t("shared.signature_validation.no_signatures_title")
   end
 
   test "validate shows coverage badges for signed multi document containers" do
     contract = create_contract_with_documents(
-      document_names: ["contract-a.txt", "contract-b.txt"],
+      document_names: [ "contract-a.txt", "contract-b.txt" ],
       signed_document_name: "contract-signed.asice"
     )
     service = RecordingValidationService.new(
@@ -76,7 +76,7 @@ class ContractsValidationTest < ActionController::TestCase
     end
 
     assert_response :success
-    assert_equal ["contract-signed.asice"], service.calls
+    assert_equal [ "contract-signed.asice" ], service.calls
     assert_includes response.body, I18n.t("shared.signature_validation.all_documents_covered")
     assert_includes response.body, I18n.t("shared.signature_validation.valid")
     assert_select "span[data-signature-badge='coverage']", count: 2
@@ -86,7 +86,7 @@ class ContractsValidationTest < ActionController::TestCase
 
   test "validate lists only covered documents when signature covers part of a multi document container" do
     contract = create_contract_with_documents(
-      document_names: ["contract-a.txt", "contract-b.txt"],
+      document_names: [ "contract-a.txt", "contract-b.txt" ],
       signed_document_name: "contract-signed.asice"
     )
     service = RecordingValidationService.new(
@@ -142,7 +142,7 @@ class ContractsValidationTest < ActionController::TestCase
 
   test "validate does not show coverage badges for single document signatures" do
     contract = Contract.new(
-      allowed_methods: ["qes"],
+      allowed_methods: [ "qes" ],
       signature_parameters_attributes: {
         level: "BASELINE_B",
         format: "XAdES"
@@ -210,7 +210,7 @@ class ContractsValidationTest < ActionController::TestCase
 
   test "validate treats matching asice object paths as covered documents" do
     contract = create_contract_with_documents(
-      document_names: ["contract-a.txt", "contract-b.txt"],
+      document_names: [ "contract-a.txt", "contract-b.txt" ],
       signed_document_name: "contract-signed.asice"
     )
     service = RecordingValidationService.new(
@@ -260,7 +260,7 @@ class ContractsValidationTest < ActionController::TestCase
 
   test "validate shows qualification and timestamp badges without valid badge for non qualified signatures" do
     contract = create_contract_with_documents(
-      document_names: ["contract-a.txt", "contract-b.txt"],
+      document_names: [ "contract-a.txt", "contract-b.txt" ],
       signed_document_name: "contract-signed.asice"
     )
     service = RecordingValidationService.new(
@@ -324,7 +324,7 @@ class ContractsValidationTest < ActionController::TestCase
 
   test "validate falls back to container-level signed objects when signature coverage is omitted" do
     contract = create_contract_with_documents(
-      document_names: ["contract-a.txt", "contract-b.txt"],
+      document_names: [ "contract-a.txt", "contract-b.txt" ],
       signed_document_name: "contract-signed.asice"
     )
     service = RecordingValidationService.new(
@@ -374,7 +374,7 @@ class ContractsValidationTest < ActionController::TestCase
 
   test "validate shows per-signature covered documents for multi-signature containers" do
     contract = create_contract_with_documents(
-      document_names: ["TextDocument.txt", "PdfDocument.pdf", "document.xdcf"],
+      document_names: [ "TextDocument.txt", "PdfDocument.pdf", "document.xdcf" ],
       signed_document_name: "contract-signed.asice"
     )
     pdf_blob = contract.documents.find { |document| document.filename == "PdfDocument.pdf" }.blob
@@ -452,7 +452,7 @@ class ContractsValidationTest < ActionController::TestCase
 
   def create_contract_with_documents(document_names:, signed_document_name: nil)
     contract = Contract.new(
-      allowed_methods: ["qes"],
+      allowed_methods: [ "qes" ],
       signature_parameters_attributes: {
         level: "BASELINE_B",
         format: document_names.length > 1 ? "XAdES" : "PAdES"

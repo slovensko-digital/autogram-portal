@@ -27,7 +27,7 @@ class DocumentTest < ActiveSupport::TestCase
     blob = Struct.new(:checksum).new("transient-checksum")
     transient_error = AutogramService::ValidationResult.new(
       hasSignatures: false,
-      errors: ["Error communicating with Autogram service: ActiveStorage::FileNotFoundError: missing file"]
+      errors: [ "Error communicating with Autogram service: ActiveStorage::FileNotFoundError: missing file" ]
     )
     success = AutogramService::ValidationResult.new(hasSignatures: false)
 

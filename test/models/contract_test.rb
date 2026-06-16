@@ -68,7 +68,7 @@ class ContractTest < ActiveSupport::TestCase
     assert contract.save, contract.errors.full_messages.to_sentence
     assert contract.signed_document.attached?
     assert_equal "container.asice", contract.signed_document.filename.to_s
-    assert_equal ["contract-a.txt", "contract-b.txt"], contract.documents.map(&:filename).sort
+    assert_equal [ "contract-a.txt", "contract-b.txt" ], contract.documents.map(&:filename).sort
     assert_equal "XAdES", contract.signature_parameters.format
   end
 
@@ -90,7 +90,7 @@ class ContractTest < ActiveSupport::TestCase
     assert contract.save, contract.errors.full_messages.to_sentence
     assert contract.signed_document.attached?
     assert_equal "pending.asice", contract.signed_document.filename.to_s
-    assert_equal ["contract-a.txt", "contract-b.pdf", "contract-b.txt", "document.xdcf"], contract.documents.map(&:filename).sort
+    assert_equal [ "contract-a.txt", "contract-b.pdf", "contract-b.txt", "document.xdcf" ], contract.documents.map(&:filename).sort
     xdcf_document = contract.documents.find { |document| document.filename == "document.xdcf" }
     assert_equal "application/vnd.gov.sk.xmldatacontainer+xml", xdcf_document.content_type
     assert_predicate xdcf_document.xdc_parameters, :present?
@@ -123,7 +123,7 @@ class ContractTest < ActiveSupport::TestCase
       end
     end
 
-    tempfile = Tempfile.new([File.basename(filename, ".asice"), ".asice"])
+    tempfile = Tempfile.new([ File.basename(filename, ".asice"), ".asice" ])
     tempfile.binmode
     tempfile.write(buffer.string)
     tempfile.rewind

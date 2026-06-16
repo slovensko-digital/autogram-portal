@@ -21,7 +21,7 @@ class AutogramServiceTest < ActiveSupport::TestCase
             "subjectDN" => "CN=Autogram Test"
           },
           "areQualifiedTimestamps" => false,
-          "signedObjectsIds" => ["id-xdcf", "id-pdf", "id-txt"]
+          "signedObjectsIds" => [ "id-xdcf", "id-pdf", "id-txt" ]
         },
         {
           "validationResult" => "TOTAL_PASSED",
@@ -33,14 +33,14 @@ class AutogramServiceTest < ActiveSupport::TestCase
             "subjectDN" => "CN=Autogram Test"
           },
           "areQualifiedTimestamps" => false,
-          "signedObjectsIds" => ["id-pdf"]
+          "signedObjectsIds" => [ "id-pdf" ]
         }
       ]
     }
 
     validation_result = AutogramService.new.send(:parse_validation_response, response)
 
-    assert_equal ["document.xdcf", "PdfDocument.pdf", "TextDocument.txt"], validation_result.signatures.first[:signed_objects].map { |object| object["filename"] }
-    assert_equal ["PdfDocument.pdf"], validation_result.signatures.second[:signed_objects].map { |object| object["filename"] }
+    assert_equal [ "document.xdcf", "PdfDocument.pdf", "TextDocument.txt" ], validation_result.signatures.first[:signed_objects].map { |object| object["filename"] }
+    assert_equal [ "PdfDocument.pdf" ], validation_result.signatures.second[:signed_objects].map { |object| object["filename"] }
   end
 end
