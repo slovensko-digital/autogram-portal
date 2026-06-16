@@ -1,142 +1,173 @@
 <div class="w-full">
-  <% if validation_result.errors.any? %>
-    <div class="rounded-lg bg-red-50 border border-red-200 p-4">
-      <div class="flex items-center mb-2">
-        <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-        </svg>
-        <h3 class="text-red-800 font-semibold"><%= t('.error_title') %></h3>
+  <% validation_results = signature_validation_entries(local_assigns[:validation_results] || [ local_assigns[:validation_result] || @validation_result ]) %>
+
+  <% validation_results.each do |validation_entry| %>
+    <% validation_result = validation_entry.validation_result %>
+    <% if validation_results.length > 1 && validation_entry.label.present? %>
+      <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 mb-4">
+        <%= validation_entry.label %>
       </div>
-      <ul class="text-red-700 text-sm space-y-1">
-        <% validation_result.errors.each do |error| %>
-          <li>• <%= error %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% elsif !validation_result.has_signatures %>
-    <%= render 'shared/info', title: t('.no_signatures_title'), content: t('.no_signatures_message') %>
-  <% else %>
-    <div class="space-y-3">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">
-        <%= t('.signatures_found_title') %> (<%= validation_result.signatures.length %>)
-      </h3>
-      <% validation_result.signatures.each do |signature| %>
-        <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full">
-          <button type="button"
-                  data-action="click->toggle#toggle"
-                  class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
-            <span class="flex items-center gap-3 min-w-0">
-              <span class="text-base font-semibold text-gray-900 truncate"><%= signature[:signer_name] %></span>
-              <span class="shrink-0">
-                <% if signature[:valid] %>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <%= t('.valid') %>
-                  </span>
-                <% else %>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                    </svg>
-                    <%= t('.invalid') %>
-                  </span>
-                <% end %>
-              </span>
-            </span>
-            <span class="flex items-center gap-2 shrink-0">
-              <span class="hidden md:inline text-xs text-gray-400">
-                <span data-toggle-target="textCollapsed"><%= t('.open_details') %></span>
-                <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_details') %></span>
-              </span>
-              <svg data-toggle-target="icon"
-                   class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                   fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </span>
-          </button>
+    <% end %>
 
-          <div data-toggle-target="content" class="hidden mt-2 rounded-lg border border-gray-200 bg-white px-4 py-3">
-            <div data-controller="toggle" data-toggle-collapsed-value="true" class="space-y-2 text-sm">
-                <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
-                  <div class="text-gray-600"><%= t('.qualification') %>:</div>
-                  <div class="text-gray-900">
-                    <%= signature_qualification(signature[:certificate_info][:qualification], signature.dig(:timestamp_info, :qualified) == true) %>
-                  </div>
+    <% if validation_result.errors.any? %>
+      <div class="rounded-lg bg-red-50 border border-red-200 p-4 mb-4">
+        <div class="flex items-center mb-2">
+          <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          <h3 class="text-red-800 font-semibold"><%= t('.error_title') %></h3>
+        </div>
+        <ul class="text-red-700 text-sm space-y-1">
+          <% validation_result.errors.each do |error| %>
+            <li>• <%= error %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% elsif !validation_result.has_signatures? %>
+      <%= render 'shared/info', title: t('.no_signatures_title'), content: t('.no_signatures_message') %>
+    <% else %>
+      <div class="space-y-3 mb-4 last:mb-0">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          <%= t('.signatures_found_title') %> (<%= validation_result.signatures.length %>)
+        </h3>
+        <% validation_result.signatures.each do |signature| %>
+          <% signature_documents = signature_validation_signature_documents(signature, validation_result, @contract) %>
+          <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full">
+            <button type="button"
+                    data-action="click->toggle#toggle"
+                    class="flex w-full items-start sm:items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
+              <span class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <span class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <span class="text-base font-semibold text-gray-900 truncate"><%= signature.signerName %></span>
+                  <% if !signature.valid %>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      <span class="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></span>
+                      <%= t('.invalid') %>
+                    </span>
+                  <% end %>
 
-                  <div class="text-gray-600"><%= t('.time') %>:</div>
-                  <div class="text-gray-900">
-                    <% if signature.dig(:timestamp_info, :qualified) == true %>
-                      <%= signature.dig(:timestamp_info, :timestamps)&.first&.dig(:time)&.strftime('%d. %b %Y %H:%M:%S') %>
-                      (<%= t('.timestamp') %>)
-                    <% else %>
-                      <%= signature[:signing_time]&.strftime('%d. %b %Y %H:%M:%S') %>
-                      (<%= t('.wo_timestamp') %>)
+                  <% if signature_validation_qualified_signature?(signature) %>
+                    <%= render 'shared/badge', color: 'green', label: signature_qualification(signature) %>
+                  <% else %>
+                    <%= render 'shared/badge', color: 'yellow', label: signature_qualification(signature) %>
+                  <% end %>
+
+                  <% if signature_validation_multiple_documents?(validation_result, @contract) && signature_documents.any? %>
+                    <% if signature_validation_partially_documents_covered?(signature, validation_result, @contract) %>
+                      <%= render 'shared/badge', color: 'yellow', label: t('.not_all_documents_covered') %>
                     <% end %>
-                  </div>
+                  <% end %>
+                </span>
+              </span>
+              <span class="flex items-center gap-2 shrink-0">
+                <span class="hidden md:inline text-xs text-gray-400">
+                  <span data-toggle-target="textCollapsed"><%= t('.open_details') %></span>
+                  <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_details') %></span>
+                </span>
+                <svg data-toggle-target="icon"
+                     class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </span>
+            </button>
 
-                  <div class="text-gray-600"><%= t('.format') %>:</div>
-                  <div class="text-gray-900 flex items-center justify-between">
-                    <span><%= signature_format(validation_result.document_info[:signature_form], validation_result.document_info[:container_type]) %></span>
-                    <button data-action="click->toggle#toggle" data-toggle-target="button"
-                      class="inline-flex items-center ml-4 cursor-pointer text-gray-900 hover:text-black hover:underline">
-                      <span data-toggle-target="textCollapsed"><%= t('.open_technical_details') %></span>
-                      <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_technical_details') %></span>
-                      <div data-toggle-target="icon" class="hidden"></div>
-                    </button>
-                  </div>
-                </div>
-                <div data-toggle-target="content" class="hidden">
-                  <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-gray-200">
-                    <div class="text-gray-600"><%= t('.certificate') %>:</div>
-                    <div class="text-gray-900">
-                      <%= signature.dig(:certificate_info, :subject) %>
-                    </div>
-
-                    <div class="text-gray-600"><%= t('.issuer') %>:</div>
-                    <div class="text-gray-900">
-                      <%= signature.dig(:certificate_info, :issuer) %>
-                    </div>
-
-                    <div class="text-gray-600"><%= t('.qualification') %>:</div>
-                    <div class="text-gray-900">
-                      <%= signature.dig(:certificate_info, :qualification) %>
-                    </div>
-                  </div>
-                  <% if signature.dig(:timestamp_info, :timestamps) %>
-                    <div class="mt-3 pt-3 border-t border-gray-200">
-                      <div class="font-medium text-gray-700"><%= t('.timestamps') %>:</div>
-                      <div class="ml-2 text-gray-600 space-y-4">
-                        <% signature[:timestamp_info][:timestamps].each do |timestamp| %>
-                          <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 mt-3 pt-3">
-                            <div class="text-gray-600"><%= t('.time') %>:</div>
-                            <div class="text-gray-900">
-                              <%= timestamp[:time]&.strftime('%d. %b %Y %H:%M:%S') %>
-                            </div>
-                            <div class="text-gray-600"><%= t('.timestamp_type') %>:</div>
-                            <div class="text-gray-900">
-                              <%= timestamp[:type] %>
-                            </div>
-                            <div class="text-gray-600"><%= t('.qualification') %>:</div>
-                            <div class="text-gray-900">
-                              <%= timestamp[:qualification] %>
-                            </div>
-                            <div class="text-gray-600"><%= t('.certificate') %>:</div>
-                            <div class="text-gray-900">
-                              <%= timestamp[:subject] %>
-                            </div>
-                          </div>
-                        <% end %>
-                      </div>
+            <div data-toggle-target="content" class="hidden mt-2 rounded-lg border border-gray-200 bg-white px-4 py-3">
+              <div data-controller="toggle" data-toggle-collapsed-value="true" class="space-y-2 text-sm">
+                  <% if signature_validation_multiple_documents?(validation_result, @contract) && signature_documents.any? %>
+                    <div class="mb-3 pb-3 border-b border-gray-200">
+                      <% if signature_validation_all_documents_covered?(signature, validation_result, @contract) %>
+                        <%= render 'shared/badge', color: 'green', label: t('.all_documents_covered') %>
+                      <% else %>
+                        <%= render 'shared/badge', color: 'yellow', label: t('.not_all_documents_covered') %>
+                        <div class="font-medium text-gray-700 my-2"><%= t('.covered_documents') %>:</div>
+                        <ul class="mt-2 list-disc pl-5 text-gray-700 space-y-1">
+                          <% signature_documents.each do |document_name| %>
+                            <li><%= document_name %></li>
+                          <% end %>
+                        </ul>
+                      <% end %>
                     </div>
                   <% end %>
+
+                  <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+                    <div class="text-gray-600"><%= t('.qualification') %>:</div>
+                    <div class="text-gray-900">
+                      <%= signature_qualification(signature) %>
+                    </div>
+
+                    <div class="text-gray-600"><%= t('.time') %>:</div>
+                    <div class="text-gray-900">
+                      <% if signature.qualified_timestamps? %>
+                        <%= signature.timestampInfo[:timestamps]&.first&.time&.strftime('%d. %b %Y %H:%M:%S') %>
+                        (<%= t('.timestamp') %>)
+                      <% else %>
+                        <%= signature.signingTime&.strftime('%d. %b %Y %H:%M:%S') %>
+                        (<%= t('.wo_timestamp') %>)
+                      <% end %>
+                    </div>
+
+                    <div class="text-gray-600"><%= t('.format') %>:</div>
+                    <div class="text-gray-900 flex items-center justify-between">
+                      <span><%= signature_format(validation_result.documentInfo[:signatureForm], validation_result.documentInfo[:containerType]) %></span>
+                      <button data-action="click->toggle#toggle" data-toggle-target="button"
+                        class="inline-flex items-center ml-4 cursor-pointer underline text-gray-900 hover:text-gray-700">
+                        <span data-toggle-target="textCollapsed"><%= t('.open_technical_details') %></span>
+                        <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_technical_details') %></span>
+                        <div data-toggle-target="icon" class="hidden"></div>
+                      </button>
+                    </div>
+                  </div>
+                  <div data-toggle-target="content" class="hidden">
+                    <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-gray-200">
+                      <div class="text-gray-600"><%= t('.certificate') %>:</div>
+                      <div class="text-gray-900">
+                        <%= signature.certificateInfo[:subject] %>
+                      </div>
+
+                      <div class="text-gray-600"><%= t('.issuer') %>:</div>
+                      <div class="text-gray-900">
+                        <%= signature.certificateInfo[:issuer] %>
+                      </div>
+
+                      <div class="text-gray-600"><%= t('.qualification') %>:</div>
+                      <div class="text-gray-900">
+                        <%= signature.certificateInfo[:qualification] %>
+                      </div>
+                    </div>
+                    <% if signature.timestampInfo.present? %>
+                      <div class="mt-3 pt-3 border-t border-gray-200">
+                        <div class="font-medium text-gray-700"><%= t('.timestamps') %>:</div>
+                        <div class="ml-2 text-gray-600 space-y-4">
+                          <% signature.timestampInfo[:timestamps]&.each do |timestamp| %>
+                            <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 mt-3 pt-3">
+                              <div class="text-gray-600"><%= t('.time') %>:</div>
+                              <div class="text-gray-900">
+                                <%= timestamp.time&.strftime('%d. %b %Y %H:%M:%S') %>
+                              </div>
+                              <div class="text-gray-600"><%= t('.timestamp_type') %>:</div>
+                              <div class="text-gray-900">
+                                <%= timestamp.type %>
+                              </div>
+                              <div class="text-gray-600"><%= t('.qualification') %>:</div>
+                              <div class="text-gray-900">
+                                <%= timestamp.qualification %>
+                              </div>
+                              <div class="text-gray-600"><%= t('.certificate') %>:</div>
+                              <div class="text-gray-900">
+                                <%= timestamp.subject %>
+                              </div>
+                            </div>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
                 </div>
-              </div>
+            </div>
           </div>
-        </div>
-      <% end %>
-    </div>
+        <% end %>
+      </div>
+    <% end %>
   <% end %>
 </div>

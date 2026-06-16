@@ -75,20 +75,26 @@ class Document < ApplicationRecord
 
     blob_key = blob&.checksum || "no-blob"
     cache_key = "document/validation/#{blob_key}"
-    Rails.cache.fetch(cache_key, expires_in: 15.seconds, race_condition_ttl: 10.seconds) do
-      get_new_validation_result
+    cached_result = validation_cache.read(cache_key)
+    return cached_result if cached_result
+
+    result = get_new_validation_result
+    unless transient_validation_error?(result)
+      validation_cache.write(cache_key, result, expires_in: 15.seconds, race_condition_ttl: 10.seconds)
     end
+
+    result
   end
 
   def extendable_signatures?(target_level: "T")
     return false unless has_signatures?
-    return true if validation_result.signatures.any? { |signature| signature[:timestamp_info].nil? }
+    return true if validation_result.signatures.any? { |signature| signature.timestampInfo.nil? }
 
     required_level = EXTENSION_TARGET_LEVELS[target_level.to_s.upcase]
     return false if required_level.nil?
 
     return true if validation_result.signatures.any? do |signature|
-      signature_level_rank(signature[:signature_level]) < signature_level_rank(required_level)
+      signature_level_rank(signature.signatureLevel) < signature_level_rank(required_level)
     end
 
     if required_level == "BASELINE_LTA"
@@ -103,7 +109,7 @@ class Document < ApplicationRecord
   end
 
   def has_signatures?
-    validation_result.has_signatures
+    validation_result.has_signatures?
   end
 
   def available_extension_target_levels
@@ -182,6 +188,18 @@ class Document < ApplicationRecord
 
   def get_new_validation_result
     AutogramEnvironment.autogram_service.validate_signatures(self)
+  end
+
+  def transient_validation_error?(result)
+    errors = Array(result&.errors)
+    errors.any? do |error|
+      message = error.to_s
+      message.include?("ActiveStorage::FileNotFoundError") || message.include?("No such file or directory")
+    end
+  end
+
+  def validation_cache
+    Rails.cache
   end
 
   def get_new_visualization_result

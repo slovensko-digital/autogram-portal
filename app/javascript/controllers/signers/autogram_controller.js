@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["form", "progressBar", "progressPercent", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateMaybeNotInstalled", "stateNotInstalled", "stateCancelled", "stateError", "errorMessage"]
+  static targets = ["form", "progressBar", "progressPercent", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateMaybeNotInstalled", "stateNotInstalled", "stateAppVersionTooLow", "stateCancelled", "stateError", "errorMessage"]
   static values = {
     autogramParametersPath: String,
     signedDocumentPath: String,
@@ -91,7 +91,23 @@ export default class extends Controller {
       return true
     }
 
+    if (typeof sdk.AutogramAppVersionTooLowException === 'function' && error instanceof sdk.AutogramAppVersionTooLowException) {
+      return false
+    }
+
     return error.name === 'AutogramAppNotInstalledException'
+  }
+
+  isAppVersionTooLowError(sdk, error) {
+    if (!error) {
+      return false
+    }
+
+    if (typeof sdk.AutogramAppVersionTooLowException === 'function' && error instanceof sdk.AutogramAppVersionTooLowException) {
+      return true
+    }
+
+    return error.name === 'AutogramAppVersionTooLowException'
   }
 
   async sign() {
@@ -152,24 +168,47 @@ export default class extends Controller {
         }
       }
 
-      let signRequestDocument = {
-        content: autogramParameters.documents[0].content
-      }
+      // let signRequestDocument = {
+      //   content: autogramParameters.documents[0].content
+      // }
 
-      if (autogramParameters.documents[0].filename)
-        signRequestDocument.filename = autogramParameters.documents[0].filename;
+      // if (autogramParameters.documents[0].filename)
+      //   signRequestDocument.filename = autogramParameters.documents[0].filename;
 
-      let signRequestSignatureParameters = this.getOldSignatureParameters(
+      // let signRequestSignatureParameters = this.getOldSignatureParameters(
+      //   autogramParameters.signature_parameters,
+      //   autogramParameters.documents[0].xdc_parameters
+      // );
+
+      // console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, autogramParameters.documents[0].content_type)
+
+      // let signResult = await client.sign(
+      //   signRequestDocument,
+      //   signRequestSignatureParameters,
+
+  let signResult = await client.signV1(
+        autogramParameters.documents.map(doc => ({
+          content: doc.content,
+          filename: doc.filename,
+          mimeType: doc.content_type,
+          xdcParameters: doc.xdc_parameters ? {
+            autoLoadEform: doc.xdc_parameters.auto_load_eform,
+            containerXmlns: doc.xdc_parameters.container_xmlns,
+            embedUsedSchemas: doc.xdc_parameters.embed_used_schemas,
+            fsFormIdentifier: doc.xdc_parameters.fs_form_identifier,
+            identifier: doc.xdc_parameters.identifier,
+            packaging: doc.xdc_parameters.packaging,
+            schema: doc.xdc_parameters.schema,
+            schemaIdentifier: doc.xdc_parameters.schema_identifier,
+            schemaMimeType: doc.xdc_parameters.schema_mime_type,
+            transformation: doc.xdc_parameters.transformation,
+            transformationIdentifier: doc.xdc_parameters.transformation_identifier,
+            transformationLanguage: doc.xdc_parameters.transformation_language,
+            transformationMediaDestinationTypeDescription: doc.xdc_parameters.transformation_media_destination_type_description,
+            transformationTargetEnvironment: doc.xdc_parameters.transformation_target_environment
+          } : undefined
+        })),
         autogramParameters.signature_parameters,
-        autogramParameters.documents[0].xdc_parameters
-      );
-
-      console.log('Signing document with parameters:', signRequestDocument, signRequestSignatureParameters, autogramParameters.documents[0].content_type)
-
-      let signResult = await client.sign(
-        signRequestDocument,
-        signRequestSignatureParameters,
-        autogramParameters.documents[0].content_type,
         {
           onStateChange: (state) => {
             if (state.type === 'checkingApp') {
@@ -199,6 +238,10 @@ export default class extends Controller {
             if (state.type === 'error') {
               console.error('Signing error:', state)
               this.showErrorState(state.message || 'Unknown error')
+            }
+            if (state.type === 'appVersionTooLow') {
+              console.error('Autogram version is too low:', state)
+              this.showAppVersionTooLowMessage();
             }
           }
         }
@@ -250,6 +293,11 @@ export default class extends Controller {
 
       if (this.isAppNotInstalledError(sdk, error)) {
         console.log('App not installed - already handled by onStateChange callback')
+        return
+      }
+
+      if (this.isAppVersionTooLowError(sdk, error)) {
+        console.log('App version too low - already handled by onStateChange callback')
         return
       }
 
@@ -354,6 +402,10 @@ export default class extends Controller {
         case 'cancelled':
           this.markFailed(this.statusWaitingTarget)
           break
+        case 'appVersionTooLow':
+          this.markFailed(this.statusCheckingTarget)
+          this.markFailed(this.statusStartingTarget)
+          break
       }
     }
   }
@@ -426,6 +478,14 @@ export default class extends Controller {
     }
   }
 
+  showAppVersionTooLowMessage() {
+    this.hideAllStates()
+    this.updateProgress(25, 'appVersionTooLow')
+    if (this.hasStateAppVersionTooLowTarget) {
+      this.stateAppVersionTooLowTarget.classList.remove('hidden')
+    }
+  }
+
   showAppMayNotBeInstalledHint() {
     this.hideAllStates()
     this.updateProgress(25, 'starting')
@@ -463,6 +523,7 @@ export default class extends Controller {
     if (this.hasStateNormalTarget) this.stateNormalTarget.classList.add('hidden')
     if (this.hasStateMaybeNotInstalledTarget) this.stateMaybeNotInstalledTarget.classList.add('hidden')
     if (this.hasStateNotInstalledTarget) this.stateNotInstalledTarget.classList.add('hidden')
+    if (this.hasStateAppVersionTooLowTarget) this.stateAppVersionTooLowTarget.classList.add('hidden')
     if (this.hasStateCancelledTarget) this.stateCancelledTarget.classList.add('hidden')
     if (this.hasStateErrorTarget) this.stateErrorTarget.classList.add('hidden')
   }

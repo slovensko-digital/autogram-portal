@@ -116,11 +116,11 @@ class User < ApplicationRecord
     end
   end
 
-  def self.supports_mobile_signing?(qscd)
-    MOBILE_QSCDS.include?(qscd)
-  end
-
   def self.legacy_eid_card?(qscd)
     qscd.present? && qscd.in?(%w[eid_2013 dpb_2014])
+  end
+
+  def self.mobile_qscd?(qscd)
+    qscd.present? && qscd.in?(MOBILE_QSCDS)
   end
 end

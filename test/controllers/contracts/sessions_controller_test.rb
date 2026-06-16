@@ -96,7 +96,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
   test "upload succeeds for indeterminate autogram test certificate in test environment" do
     validation_result = AutogramService::ValidationResult.new(
-      has_signatures: true,
+      hasSignatures: true,
       signatures: [
         parsed_signature(
           validation_result: "INDETERMINATE",
@@ -120,7 +120,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
   test "upload rejects indeterminate signature from unknown certificate" do
     validation_result = AutogramService::ValidationResult.new(
-      has_signatures: true,
+      hasSignatures: true,
       signatures: [
         parsed_signature(
           validation_result: "INDETERMINATE",

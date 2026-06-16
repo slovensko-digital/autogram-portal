@@ -97,7 +97,7 @@ class BundlesControllerTest < ActionController::TestCase
 
       define_method(:validate_signatures) do |_document|
         AutogramService::ValidationResult.new(
-          has_signatures: true,
+          hasSignatures: true,
           signatures: @validation_signatures
         )
       end

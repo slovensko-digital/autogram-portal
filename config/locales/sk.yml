@@ -95,7 +95,7 @@ sk:
         qeseal_ts: "Kvalifikovaná elektronická pečať s časovou pečiatkou"
         adesig_qc_qc: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte"
         adesig_qc_qc_ts: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte s kvalifikovanou časovou pečiatkou"
-        unknown: "Neznámy podpisu"
+        unknown: "Neznámy podpis"
 
   devise:
     sessions:
@@ -539,6 +539,9 @@ sk:
       old_card_warning_title: "Obmedzenie"
       old_card_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Mobilné podpisové aplikácie (Autogram v mobile, eIdentita) nie sú kompatibilné s vašou kartou."
       old_card_mobile_warning: "%{qscd} vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
+      multiple_files_in_contract_warning_title: "Viacero súborov v dokumente"
+      multiple_files_in_contract_warning: "Tento dokument obsahuje viac súborov. Pre podpisovanie je možné použiť iba desktopovú aplikáciu Autogram, ktorá podporuje prácu s viacerými súbormi."
+      multiple_files_in_contract_mobile_warning: "Tento dokument obsahuje viac súborov. Podpisovanie takéhoto dokumentu vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
@@ -599,6 +602,9 @@ sk:
         not_installed_title: "Autogram nie je nainštalovaný"
         not_installed_desc: "Autogram nie je nainštalovaný na vašom počítači. Stiahnite a nainštalujte si ho."
         not_installed_download: "Stiahnuť Autogram"
+        app_version_too_low_title: "Verzia Autogramu je príliš stará"
+        app_version_too_low_desc: "Vaša verzia Autogramu je príliš stará. Aktualizujte na najnovšiu verziu."
+        app_version_too_low_download: "Aktualizovať Autogram"
         cancelled_title: "Podpisovanie zrušené"
         cancelled_desc: "Proces podpisovania bol zrušený. Skúste to znova."
         error_title: "Chyba pri podpisovaní"
@@ -1204,8 +1210,11 @@ sk:
       qualified_timestamp: "Kvalifikovaná časová pečiatka"
       no_timestamp: "Žiadna časová pečiatka"
       timestamps_count: "(%{count} časových pečiatok)"
-      valid: "Podpísané"
+      valid: "Platný"
       invalid: "Neplatné"
+      all_documents_covered: "Podpísané všetky dokumenty"
+      not_all_documents_covered: "Nie sú podpísané všetky dokumenty"
+      covered_documents: "Podpísané dokumenty"
       signature_details: "Podrobnosti podpisu"
       subject: "Predmet"
       issuer: "Vydavateľ"

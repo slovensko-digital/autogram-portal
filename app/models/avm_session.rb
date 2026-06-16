@@ -31,6 +31,13 @@ class AvmSession < Session
     Session.model_name
   end
 
+  def self.available?(qscd, contract)
+    return false if contract.documents.count > 1
+    return User.mobile_qscd?(qscd) if qscd.present?
+
+    true
+  end
+
   def avm_url
     "https://autogram.slovensko.digital/api/v1/qr-code?guid=#{document_identifier}&key=#{encryption_key}"
   end

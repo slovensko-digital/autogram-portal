@@ -56,7 +56,9 @@ module ApplicationHelper
     end
   end
 
-  def signature_qualification(qualification, timestamp)
+  def signature_qualification(signature)
+    qualification = signature.certificateInfo[:qualification]
+    timestamp = signature.qualified_timestamps?
     if timestamp
       case qualification
       when "QESIG"
@@ -80,5 +82,96 @@ module ApplicationHelper
         t("helpers.application.signature_qualifications.unknown")
       end
     end
+  end
+
+  def signature_validation_entries(validation_results)
+    Array(validation_results).compact.map do |entry|
+      if entry.respond_to?(:validation_result)
+        entry
+      else
+        Struct.new(:label, :validation_result, keyword_init: true).new(label: nil, validation_result: entry)
+      end
+    end
+  end
+
+  def signature_validation_object_name(object)
+    raw_name = case object
+    when String
+      object
+    when Hash
+      object[:filename] || object["filename"] ||
+        object[:name] || object["name"] ||
+        object[:path] || object["path"] ||
+        object[:value] || object["value"] ||
+        signature_validation_object_name(object[:document] || object["document"] || object[:object] || object["object"])
+    else
+      object.respond_to?(:filename) ? object.filename.to_s : object.to_s
+    end
+
+    signature_validation_normalize_object_name(raw_name)
+  end
+
+  def signature_validation_signature_documents(signature, validation_result = nil, contract = nil)
+    signed_objects = Array(signature.signedObjects)
+    if signed_objects.blank? && validation_result&.signatures&.length == 1
+      signed_objects = Array(validation_result.document_info[:signed_objects])
+    end
+
+    document_names = signed_objects.map { |object| signature_validation_object_name(object) }.compact_blank.uniq
+    visible_documents = signature_validation_contract_documents(contract)
+
+    return document_names if visible_documents.blank?
+
+    document_names & visible_documents
+  end
+
+  def signature_validation_all_documents_covered?(signature, validation_result, contract = nil)
+    covered_documents = signature_validation_signature_documents(signature, validation_result, contract)
+    all_documents = signature_validation_result_documents(validation_result, contract)
+
+    covered_documents.any? && all_documents.any? && covered_documents.sort == all_documents.sort
+  end
+
+  def signature_validation_multiple_documents?(validation_result, contract = nil)
+    signature_validation_result_documents(validation_result, contract).length > 1
+  end
+
+  def signature_validation_partially_documents_covered?(signature, validation_result, contract = nil)
+    return false unless signature_validation_multiple_documents?(validation_result, contract)
+
+    covered_documents = signature_validation_signature_documents(signature, validation_result, contract)
+    all_documents = signature_validation_result_documents(validation_result, contract)
+
+    covered_documents.any? && all_documents.any? && covered_documents.sort != all_documents.sort
+  end
+
+  def signature_validation_result_documents(validation_result, contract = nil)
+    visible_documents = signature_validation_contract_documents(contract)
+    return visible_documents if visible_documents.any?
+
+    document_info = validation_result&.document_info || {}
+    Array(document_info[:signed_objects]).map { |object| signature_validation_object_name(object) }.compact_blank +
+      Array(document_info[:unsigned_objects]).map { |object| signature_validation_object_name(object) }.compact_blank
+  end
+
+  def signature_validation_qualified_signature?(signature)
+    signature.certificateInfo[:qualification].to_s.in?(%w[QESIG QESEAL])
+  end
+
+  def signature_validation_valid_badge?(signature)
+    signature.valid && signature_validation_qualified_signature?(signature)
+  end
+
+  private
+
+  def signature_validation_contract_documents(contract)
+    Array(contract&.documents).map { |document| signature_validation_object_name(document.filename) }.compact_blank.uniq
+  end
+
+  def signature_validation_normalize_object_name(name)
+    value = name.to_s.strip
+    return if value.blank?
+
+    value.split(/[\\\/]/).last
   end
 end

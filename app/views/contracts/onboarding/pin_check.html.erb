@@ -23,9 +23,10 @@
         <%= hidden_field_tag :method, @method %>
         <%= hidden_field_tag :review, params[:review] if params[:review] %>
         <%= hidden_field_tag :iframe, params[:iframe] %>
+        <%= hidden_field_tag :qscd, params[:qscd] if params[:qscd].present? %>
 
         <div class="flex gap-8">
-          <%= link_to contract_onboarding_path(@contract, 'qscd_check', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe], review: params[:review]),
+          <%= link_to contract_onboarding_path(@contract, 'qscd_check', method: params[:method], recipient: params[:recipient], bundle_id: params[:bundle_id], iframe: params[:iframe], review: params[:review], qscd: params[:qscd]),
               class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
             <%= t('actions.back') %>
           <% end %>

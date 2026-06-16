@@ -27,6 +27,13 @@ class EidentitaSession < Session
     Session.model_name
   end
 
+  def self.available?(qscd, contract)
+    return false if contract.documents.count > 1
+    return User.mobile_qscd?(qscd) if qscd.present?
+
+    true
+  end
+
   def eidentita_url
     url_options = Rails.application.config.action_controller.default_url_options || {}
     link_url = Rails.application.routes.url_helpers.parameters_contract_session_url(

@@ -22,6 +22,56 @@
 require "test_helper"
 
 class DocumentTest < ActiveSupport::TestCase
+  test "validation_result does not cache transient file-missing errors" do
+    cache_store = ActiveSupport::Cache::MemoryStore.new
+    blob = Struct.new(:checksum).new("transient-checksum")
+    transient_error = AutogramService::ValidationResult.new(
+      hasSignatures: false,
+      errors: ["Error communicating with Autogram service: ActiveStorage::FileNotFoundError: missing file"]
+    )
+    success = AutogramService::ValidationResult.new(hasSignatures: false)
+
+    calls = 0
+    document = Document.new
+    document.define_singleton_method(:blob) { blob }
+    document.define_singleton_method(:get_new_validation_result) do
+      calls += 1
+      calls == 1 ? transient_error : success
+    end
+
+    document.define_singleton_method(:validation_cache) { cache_store }
+
+    first = document.validation_result
+    second = document.validation_result
+    third = document.validation_result
+
+    assert_includes first.errors.join(" "), "ActiveStorage::FileNotFoundError"
+    assert_empty second.errors
+    assert_empty third.errors
+    assert_equal 2, calls
+  end
+
+  test "validation_result caches non-transient responses" do
+    cache_store = ActiveSupport::Cache::MemoryStore.new
+    blob = Struct.new(:checksum).new("stable-checksum")
+    success = AutogramService::ValidationResult.new(hasSignatures: false)
+
+    calls = 0
+    document = Document.new
+    document.define_singleton_method(:blob) { blob }
+    document.define_singleton_method(:get_new_validation_result) do
+      calls += 1
+      success
+    end
+
+    document.define_singleton_method(:validation_cache) { cache_store }
+
+    document.validation_result
+    document.validation_result
+
+    assert_equal 1, calls
+  end
+
   test "available extension target levels include timestamp and archive for baseline signatures" do
     document = build_document_with_signature_levels("BASELINE_B")
 
@@ -58,7 +108,7 @@ class DocumentTest < ActiveSupport::TestCase
 
   def build_document_with_signatures(*signatures)
     validation_result = AutogramService::ValidationResult.new(
-      has_signatures: true,
+      hasSignatures: true,
       signatures: signatures
     )
 

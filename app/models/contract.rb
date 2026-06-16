@@ -25,6 +25,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Contract < ApplicationRecord
+  ValidationEntry = Struct.new(:label, :validation_result, keyword_init: true)
+
   belongs_to :user, optional: true
   belongs_to :bundle, optional: true
 
@@ -50,6 +52,7 @@ class Contract < ApplicationRecord
   validates_associated :signature_parameters
 
   before_validation :ensure_uuid, on: :create
+  before_validation :expand_asice_container_documents, on: :create
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
 
@@ -163,15 +166,20 @@ class Contract < ApplicationRecord
   end
 
   def validation_result
-    document_to_validate = if signed_document.attached?
-      Document.new(blob: signed_document.blob)
-    elsif documents.size == 1
-      documents.first
-    else
-      nil
-    end
+    validation_results.first&.validation_result
+  end
 
-    document_to_validate&.validation_result
+  def validation_results
+    if signed_document.attached?
+      [ ValidationEntry.new(
+          label: signed_document.filename.to_s,
+          validation_result: Document.new(blob: signed_document.blob).validation_result
+        ) ]
+    else
+      documents.map do |document|
+        ValidationEntry.new(label: document.filename.to_s, validation_result: document.validation_result)
+      end
+    end
   end
 
   private
@@ -203,6 +211,30 @@ class Contract < ApplicationRecord
 
   def initialize_signature_parameters
     build_signature_parameters unless signature_parameters
+  end
+
+  def expand_asice_container_documents
+    return if signed_document.attached?
+    return unless documents.one?
+
+    container_document = documents.first
+    return unless container_document&.blob&.attached?
+    return unless container_document.is_asice?
+
+    extractor = AsiceContainerExtractor.new(container_document)
+    extracted_documents = extractor.extract_documents
+    return if extracted_documents.blank?
+
+    self.documents = extracted_documents.map do |extracted_document|
+      Document.new(blob: extracted_document.blob).tap do |document|
+        document.build_xdc_parameters if extracted_document.xdcf
+      end
+    end
+    signed_document.attach(
+      io: StringIO.new(extractor.container_content),
+      filename: container_document.filename,
+      content_type: container_document.content_type
+    )
   end
 
   def associate_with_bundle_recipients

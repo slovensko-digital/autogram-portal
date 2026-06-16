@@ -46,25 +46,13 @@
                 </div>
                 <div class="md:hidden">
                   <% if recipient&.declined? %>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      <span class="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></span>
-                      <%= t('.state_declined') %>
-                    </span>
+                    <%= render 'shared/badge', color: 'red', label: t('.state_declined') %>
                   <% elsif personally_superseded %>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                      <span class="h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0"></span>
-                      <%= t('.state_superseded') %>
-                    </span>
+                    <%= render 'shared/badge', color: 'gray', label: t('.state_superseded') %>
                   <% elsif personally_signed %>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      <span class="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0"></span>
-                      <%= t('.state_signed') %>
-                    </span>
+                    <%= render 'shared/badge', color: 'green', label: t('.state_signed') %>
                   <% else %>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      <span class="h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0"></span>
-                      <%= t('.state_awaiting') %>
-                    </span>
+                    <%= render 'shared/badge', color: 'yellow', label: t('.state_awaiting') %>
                   <% end %>
                 </div>
                 <div class="mt-0.5 flex items-center space-y-1 space-x-3 text-xs text-gray-400 flex-wrap">
@@ -84,25 +72,13 @@
               </div>
               <div class="hidden md:flex flex-1">
                 <% if recipient&.declined? %>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    <span class="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></span>
-                    <%= t('.state_declined') %>
-                  </span>
+                  <%= render 'shared/badge', color: 'red', label: t('.state_declined') %>
                 <% elsif personally_superseded %>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                    <span class="h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0"></span>
-                    <%= t('.state_superseded') %>
-                  </span>
+                  <%= render 'shared/badge', color: 'gray', label: t('.state_superseded') %>
                 <% elsif personally_signed %>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <span class="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0"></span>
-                    <%= t('.state_signed') %>
-                  </span>
+                  <%= render 'shared/badge', color: 'green', label: t('.state_signed') %>
                 <% else %>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    <span class="h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0"></span>
-                    <%= t('.state_awaiting') %>
-                  </span>
+                  <%= render 'shared/badge', color: 'yellow', label: t('.state_awaiting') %>
                 <% end %>
               </div>
               <div class="flex items-center gap-0.5 w-20 shrink-0 justify-end">
