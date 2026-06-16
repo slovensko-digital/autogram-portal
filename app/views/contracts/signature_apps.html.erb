@@ -32,7 +32,7 @@
         <% end %>
       <% end %>
 
-      <% unless Session.old_card?(@qscd) %>
+      <% if Session.old_card?(@qscd) %>
         <div data-signing-app-selector-target="yellowWarning">
           <%= render 'shared/warning', title: t('.old_card_warning_title'), content: t('.old_card_warning', qscd: t("qscd.title.#{@qscd}")) %>
         </div>
