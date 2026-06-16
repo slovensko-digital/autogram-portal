@@ -147,15 +147,15 @@ class ContractsController < ApplicationController
           render json: @validation_results
         end
       end
-    # rescue => e
-    #   respond_to do |format|
-    #     format.html do
-    #       render "validate_error", locals: { errors: [ e.message ] }
-    #     end
-    #     format.json do
-    #       render json: { errors: [ e.message ] }, status: :unprocessable_entity
-    #     end
-    #   end
+    rescue => e
+      respond_to do |format|
+        format.html do
+          render "validate_error", locals: { errors: [ e.message ] }
+        end
+        format.json do
+          render json: { errors: [ e.message ] }, status: :unprocessable_entity
+        end
+      end
     end
   end
 

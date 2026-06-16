@@ -9,9 +9,9 @@ class DocumentsController < ApplicationController
     else
       render "visualize_error", status: :unprocessable_entity, locals: { errors: visualization_errors(@visualization_result) }
     end
-  # rescue StandardError => e
-  #   Rails.logger.error("Failed to visualize document #{@document.uuid}: #{e.message}")
-  #   render "visualize_error", status: :unprocessable_entity, locals: { errors: [ e.message ] }
+  rescue StandardError => e
+    Rails.logger.error("Failed to visualize document #{@document.uuid}: #{e.message}")
+    render "visualize_error", status: :unprocessable_entity, locals: { errors: [ e.message ] }
   end
 
   def pdf_preview
