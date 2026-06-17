@@ -3,6 +3,8 @@ class Api::V1::BundlesController < ApiController
 
   def create
     @bundle = Bundle.new(bundle_params)
+    @bundle.allow_blank_recipient_emails = true
+
     if @bundle.save
       render status: :created
     else
@@ -78,7 +80,7 @@ class Api::V1::BundlesController < ApiController
       ],
       webhook: [ :url, :method ],
       postalAddress: [ :address, :recipientName ],
-      recipients: [ :name, :email, :locale ]
+      recipients: [ :name, :email, :locale, :uuid ]
     )
 
     attributes = {
@@ -111,7 +113,10 @@ class Api::V1::BundlesController < ApiController
           end || []
         }.compact
       end || [],
-      recipients_attributes: permitted_params[:recipients] || []
+      recipients_attributes: permitted_params[:recipients]&.map do |recipient|
+        recipient[:uuid] = recipient[:uuid] || SecureRandom.uuid
+        recipient
+      end || []
     }
 
     if permitted_params[:webhook].present?

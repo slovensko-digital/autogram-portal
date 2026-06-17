@@ -4,7 +4,7 @@
 #
 #  id                  :bigint           not null, primary key
 #  author_proxy        :boolean          default(FALSE), not null
-#  email               :string           not null
+#  email               :string
 #  locale              :string           default("sk"), not null
 #  name                :string
 #  notification_status :integer          default("not_notified"), not null
@@ -56,8 +56,11 @@ class Recipient < ApplicationRecord
   validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :email,
     presence: true,
+    unless: :allow_blank_email?
+  validates :email,
     uniqueness: { scope: :bundle_id, conditions: -> { where(withdrawn_at: nil) } },
-    format: { with: URI::MailTo::EMAIL_REGEXP }
+    format: { with: URI::MailTo::EMAIL_REGEXP },
+    allow_blank: true
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
   before_create :link_user_by_email
@@ -167,11 +170,19 @@ class Recipient < ApplicationRecord
 
   private
 
+  def allow_blank_email?
+    email.blank? && bundle&.allow_blank_recipient_emails
+  end
+
   def link_user_by_email
+    return if email.blank?
+
     self.user = User.find_by(email: email)
   end
 
   def check_blocks
+    return if email.blank?
+
     if RecipientBlock.blocked?(email)
       errors.add(:email, "is blocked")
       throw :abort

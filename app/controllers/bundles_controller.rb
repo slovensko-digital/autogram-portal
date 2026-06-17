@@ -225,18 +225,6 @@ class BundlesController < ApplicationController
     @bundle = Bundle.find_by!(uuid: params[:id], author: current_user)
   end
 
-  def set_bundle_for_sign
-    if params[:recipient]
-      @recipient = Recipient.find_by_uuid!(params[:recipient])
-      @bundle = @recipient.bundle
-    elsif current_user
-      @bundle = Bundle.joins(:recipients)
-                      .merge(Recipient.active.visible)
-                      .where(recipients: { user: current_user }, uuid: params[:id]).first
-      @recipient = @bundle&.recipients&.active&.find_by(user: current_user)
-    end
-  end
-
   def bundle_params
     params.require(:bundle).except(:step).permit(
       :note,
@@ -259,6 +247,7 @@ class BundlesController < ApplicationController
   def load_signing_bundle_context
     if params[:recipient]
       @recipient = Recipient.find_by_uuid!(params[:recipient])
+      raise ActiveRecord::RecordNotFound unless @recipient.bundle.uuid == params[:id]
       @bundle = @recipient.bundle
       return
     end
