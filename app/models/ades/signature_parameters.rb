@@ -43,7 +43,7 @@ module Ades
         return [ document.is_pdf? ? "PAdES" : nil, "XAdES", "CAdES" ].compact
       end
 
-      result = document.validation_result.document_info
+      result = document.validation_result.documentInfo
       case [ result[:signature_form], result[:container_type] ]
       when [ "PAdES", nil ]
         [ "PAdES" ]

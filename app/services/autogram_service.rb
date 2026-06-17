@@ -2,15 +2,17 @@ class AutogramService
   AUTOGRAM_BASE_URL = ENV.fetch("AUTOGRAM_SERVICE_URL", "http://localhost:7200")
   TEST_SIGNER_COMMON_NAME = "Autogram Test".freeze
   EXTENSION_LEVELS = %w[T LT LTA].freeze
+  VALIDATION_READ_RETRIES = 3
+  VALIDATION_READ_RETRY_DELAY = 0.05
 
   class ValidationResult
-    attr_reader :has_signatures, :signatures, :errors, :document_info
+    attr_reader :hasSignatures, :signatures, :errors, :documentInfo
 
-    def initialize(has_signatures:, signatures: [], errors: [], document_info: {})
-      @has_signatures = has_signatures
+    def initialize(hasSignatures:, signatures: [], errors: [], documentInfo: {})
+      @hasSignatures = hasSignatures
       @signatures = signatures
       @errors = errors
-      @document_info = document_info
+      @documentInfo = documentInfo
     end
 
     def valid_response?
@@ -20,24 +22,100 @@ class AutogramService
     def signature_count
       @signatures.length
     end
+
+    def has_signatures?
+      @hasSignatures
+    end
+  end
+
+  class ValidationSignature
+    attr_reader :signerName, :signingTime, :signatureLevel, :validationResult, :valid, :signedObjects, :unsignedObjects, :certificateInfo, :timestampInfo
+
+    def initialize(signerName:, signingTime: nil, signatureLevel: nil, validationResult: nil, valid: false, signedObjects: [], unsignedObjects: [], certificateInfo: {}, timestampInfo: nil)
+      @signerName = signerName
+      @signingTime = signingTime
+      @signatureLevel = signatureLevel
+      @validationResult = validationResult
+      @valid = valid
+      @signedObjects = signedObjects
+      @unsignedObjects = unsignedObjects
+      @certificateInfo = certificateInfo
+      @timestampInfo = timestampInfo
+    end
+
+    def qualified?
+      valid && certificateInfo[:qualification].to_s.in?(%w[QESIG QESEAL])
+    end
+
+    def adesig_qc?
+      valid && certificateInfo[:qualification].to_s == "ADESIG_QC-QC"
+    end
+
+    def qualified_timestamps?
+      timestampInfo && timestampInfo[:qualified] == true
+    end
+
+    def qualification_label
+      qualification = certificateInfo[:qualification]
+      timestamp = qualified_timestamps?
+      if timestamp
+        case qualification
+        when "QESIG"
+          "qesig_ts"
+        when "QESEAL"
+          "qeseal_ts"
+        when "ADESIG_QC-QC"
+          "adesig_qc_qc_ts"
+        else
+          "unknown"
+        end
+      else
+        case qualification
+        when "QESIG"
+          "qesig"
+        when "QESEAL"
+          "qeseal"
+        when "ADESIG_QC-QC"
+          "adesig_qc_qc"
+        else
+          "unknown"
+        end
+      end
+    end
+  end
+
+  class ValidationTimestamp
+    attr_reader :type, :time, :qualification, :subject, :notAfter
+
+    def initialize(type:, time:, qualification: nil, subject: nil, notAfter: nil)
+      @type = type
+      @time = time
+      @qualification = qualification
+      @subject = subject
+      @notAfter = notAfter
+    end
+
+    def qualified?
+      qualification.to_s == "QTS"
+    end
   end
 
   def validate_signatures(document)
     return error_result("Súbor nie je pripojený") unless document.blob.attached?
 
     begin
-      file_content = Base64.strict_encode64(document.content)
+      file_content = Base64.strict_encode64(read_document_content_with_retry(document))
       response = call_autogram_validate_api(file_content)
 
       if response.success?
         parse_validation_response(response.body)
       elsif response.status == 422 && response.body["code"] == "DOCUMENT_NOT_SIGNED"
-        ValidationResult.new(has_signatures: false)
+        ValidationResult.new(hasSignatures: false)
       else
         error_result("Error communicating with Autogram service: #{response.status}")
       end
     rescue StandardError => e
-      error_result("Error communicating with Autogram service: #{e.message}")
+      error_result("Error communicating with Autogram service: #{e.class}: #{e.message}")
     end
   end
 
@@ -51,10 +129,10 @@ class AutogramService
       if response.success?
         parse_visualization_response(response.body)
       else
-        error_result("Error communicating with Autogram service: #{response.status}")
+        error_result("Error communicating with Autogram service: #{response.status}: #{response.body}")
       end
     rescue StandardError => e
-      error_result("Error communicating with Autogram service: #{e.message}")
+      error_result("Error communicating with Autogram service: #{e.class}: #{e.message}")
     end
   end
 
@@ -148,15 +226,15 @@ class AutogramService
     signatures = has_signatures ? signatures_data.map { |sig| parse_signature_info(sig, data) } : []
 
     ValidationResult.new(
-      has_signatures: has_signatures,
+      hasSignatures: has_signatures,
       signatures: signatures,
-      document_info: {
-        container_type: data["containerType"],
-        signature_form: data["signatureForm"],
-        signed_objects_count: signed_objects.length,
-        unsigned_objects_count: unsigned_objects.length,
-        signed_objects: signed_objects,
-        unsigned_objects: unsigned_objects
+      documentInfo: {
+        containerType: data["containerType"],
+        signatureForm: data["signatureForm"],
+        signedObjectsCount: signed_objects.length,
+        unsignedObjectsCount: unsigned_objects.length,
+        signedObjects: signed_objects,
+        unsignedObjects: unsigned_objects
       }
     )
   rescue JSON::ParserError => e
@@ -182,6 +260,8 @@ class AutogramService
   def parse_signature_info(signatures_data, value_data)
     signing_cert = signatures_data["signingCertificate"] || {}
     timestamps = signatures_data["timestamps"] || []
+    signed_objects = resolve_signature_objects(signatures_data, value_data, "signedObjects")
+    unsigned_objects = resolve_signature_objects(signatures_data, value_data, "unsignedObjects")
 
     subject_dn = signing_cert["subjectDN"] || ""
     signer_name = extract_cn_from_dn(subject_dn)
@@ -198,31 +278,58 @@ class AutogramService
 
     has_qualified_timestamps = signatures_data["areQualifiedTimestamps"]
 
-    {
-      signer_name: signer_name,
-      signing_time: signing_time,
-      signature_level: signatures_data["level"]&.gsub(/[XPC]AdES_/, ""),
-      validation_result: validation_result,
+    ValidationSignature.new(
+      signerName: signer_name,
+      signingTime: signing_time,
+      signatureLevel: signatures_data["level"]&.gsub(/[XPC]AdES_/, ""),
+      validationResult: validation_result,
       valid: accepted_signature_result?(validation_result, signer_name),
-      certificate_info: {
+      certificateInfo: {
         subject: signing_cert["subjectDN"],
         issuer: signing_cert["issuerDN"],
         qualification: signing_cert["qualification"]
       },
-      timestamp_info: has_qualified_timestamps && timestamps.any? ? {
+      signedObjects: signed_objects,
+      unsignedObjects: unsigned_objects,
+      timestampInfo: has_qualified_timestamps && timestamps.any? ? {
         count: timestamps.length,
         qualified: has_qualified_timestamps,
         timestamps: timestamps.map do |ts|
-          {
+          ValidationTimestamp.new(
             type: ts["timestampType"],
             time: Time.parse(ts["productionTime"]),
             qualification: ts["qualification"],
             subject: ts["subjectDN"],
-            not_after: ts["notAfter"]
-          }
+            notAfter: ts["notAfter"]
+          )
         end
       } : nil
-    }
+    )
+  end
+
+  def resolve_signature_objects(signatures_data, value_data, key)
+    objects = signatures_data[key] || []
+    return objects if objects.present?
+
+    object_ids = signatures_data["#{key}Ids"] || []
+    return [] if object_ids.blank?
+
+    object_index = Array(value_data["signedObjects"]).concat(Array(value_data["unsignedObjects"])).index_by { |object| object["id"] }
+    object_ids.filter_map { |object_id| object_index[object_id] }
+  end
+
+  def read_document_content_with_retry(document)
+    attempts = 0
+
+    begin
+      attempts += 1
+      document.content
+    rescue ActiveStorage::FileNotFoundError, Errno::ENOENT
+      raise if attempts >= VALIDATION_READ_RETRIES
+
+      sleep(VALIDATION_READ_RETRY_DELAY * attempts)
+      retry
+    end
   end
 
   def extract_cn_from_dn(dn)
@@ -246,7 +353,7 @@ class AutogramService
 
   def error_result(message)
     ValidationResult.new(
-      has_signatures: false,
+      hasSignatures: false,
       errors: [ message ]
     )
   end

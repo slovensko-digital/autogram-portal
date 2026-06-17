@@ -1,6 +1,6 @@
 <%# locals: (contract:, recipient: nil, bundle_id: nil) %>
 
-<% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || session[:qscd] %>
+<% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
 <% can_render_signature_apps_in_frame = bundle_id.present? && (params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd))) %>
 <% electronic_signature_apps_path = if can_render_signature_apps_in_frame
   signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], embedded: true, qscd: signature_apps_qscd.presence)

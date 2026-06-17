@@ -43,8 +43,9 @@ class ApplicationController < ActionController::Base
   private
 
   def set_locale
-    I18n.locale = params[:locale] || session[:locale] || current_user.try(:locale) || I18n.default_locale
+    I18n.locale = params[:locale] || session[:locale] || cookies[:locale] || current_user.try(:locale) || I18n.default_locale
     session[:locale] = I18n.locale
+    cookies[:locale] = { value: I18n.locale, expires: 1.year.from_now, secure: Rails.env.production?, httponly: true }
   end
 
   def enforce_current_policy_consent

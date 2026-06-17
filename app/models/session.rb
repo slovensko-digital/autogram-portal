@@ -111,6 +111,20 @@ class Session < ApplicationRecord
     is_a?(AutogramSession)
   end
 
+  def self.old_card?(qscd)
+    return false unless qscd.present?
+
+    [ :eid_2013, :dpb_2014 ].include?(qscd.to_sym)
+  end
+
+  def self.multiple_files?(contract)
+    contract.documents.count > 1
+  end
+
+  def self.available?(qscd, contract)
+    raise NotImplementedError, "Subclasses must implement the .available?(qscd, contract) method"
+  end
+
   def mark_failed!(message = nil)
     failed!
     update!(error_message: message || "Signing failed")
@@ -165,8 +179,8 @@ class Session < ApplicationRecord
     validation_result = AutogramEnvironment.autogram_service.validate_signatures(validation_document)
 
     raise "Signed document validation failed" unless validation_result.valid_response?
-    raise "Signed document does not contain signatures" unless validation_result.has_signatures
-    raise "Signed document signatures are invalid" unless validation_result.signatures.any? { |signature| signature[:valid] }
+    raise "Signed document does not contain signatures" unless validation_result.has_signatures?
+    raise "Signed document signatures are invalid" unless validation_result.signatures.any? { |signature| signature.valid }
 
     ensure_signed_content_matches_contract!(validation_result)
   ensure
@@ -177,10 +191,8 @@ class Session < ApplicationRecord
     return unless contract.signature_parameters.container.present?
 
     expected_documents = contract.documents.count
-    signed_objects = validation_result.document_info[:signed_objects_count].to_i
-
     return if expected_documents.zero?
-    return if signed_objects >= expected_documents
+    return if validation_result.documentInfo[:signedObjectsCount].to_i >= expected_documents
 
     raise "Signed document does not include all contract documents"
 

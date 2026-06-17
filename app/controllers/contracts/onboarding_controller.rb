@@ -83,25 +83,25 @@ module Contracts
       end
 
       current_user.update!(qscd: qscd) if current_user
-      session[:qscd] = qscd unless current_user
+      cookies[:qscd] = { value: qscd, expires: 1.year.from_now, secure: Rails.env.production?, httponly: true } unless current_user
 
       if User.legacy_eid_card?(qscd)
-        return redirect_to contract_onboarding_path(@contract, step: "legacy_eid_card", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
+        return redirect_to contract_onboarding_path(@contract, step: "legacy_eid_card", **onboarding_params(qscd: qscd))
       end
 
-      redirect_to contract_onboarding_path(@contract, step: "pin_check", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
+      redirect_to contract_onboarding_path(@contract, step: "pin_check", **onboarding_params(qscd: qscd))
     end
 
     def handle_pin_check
-      redirect_to contract_onboarding_path(@contract, step: "certificate_check", method: @method, review: params[:review], recipient: @recipient&.uuid, iframe: params[:iframe])
+      redirect_to contract_onboarding_path(@contract, step: "certificate_check", **onboarding_params(qscd: flow_qscd))
     end
 
     def handle_certificate_check
       if current_user
         current_user.mark_onboarding_complete!(@method)
       else
-        session[:completed_onboardings] ||= []
-        session[:completed_onboardings] << @method unless session[:completed_onboardings].include?(@method)
+        cookies[:completed_onboardings] ||= { value: [], expires: 1.year.from_now, secure: Rails.env.production?, httponly: true }
+        cookies[:completed_onboardings] << @method unless cookies[:completed_onboardings].include?(@method)
       end
 
       redirect_to_next_page
@@ -111,8 +111,8 @@ module Contracts
       if current_user
         current_user.mark_onboarding_complete!(@method)
       else
-        session[:completed_onboardings] ||= []
-        session[:completed_onboardings] << @method unless session[:completed_onboardings].include?(@method)
+        cookies[:completed_onboardings] ||= { value: [], expires: 1.year.from_now, secure: Rails.env.production?, httponly: true }
+        cookies[:completed_onboardings] << @method unless cookies[:completed_onboardings].include?(@method)
       end
 
       redirect_to_next_page
@@ -121,8 +121,7 @@ module Contracts
     def redirect_to_next_page
       case @method
       when "electronic"
-        qscd = current_user&.qscd || session[:qscd]
-        redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, qscd: qscd, iframe: params[:iframe])
+        redirect_to signature_apps_contract_path(@contract, **redirect_to_signature_apps_params)
       when "physical"
         redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
       end
@@ -139,6 +138,28 @@ module Contracts
 
     def step_param
       VALID_STEPS.include?(params[:step]) ? params[:step] : nil
+    end
+
+    def flow_qscd
+      params[:qscd].presence || current_user&.qscd || cookies[:qscd]
+    end
+
+    def onboarding_params(qscd: nil)
+      {
+        method: @method,
+        review: params[:review],
+        recipient: @recipient&.uuid,
+        iframe: params[:iframe],
+        qscd: qscd
+      }.compact
+    end
+
+    def redirect_to_signature_apps_params
+      {
+        recipient: @recipient&.uuid,
+        iframe: params[:iframe],
+        qscd: flow_qscd
+      }.compact
     end
   end
 end

@@ -3,6 +3,7 @@ class Api::V1::ContractsController < ApiController
 
   def create
     contract = Contract.new(contract_params)
+    contract.user = current_user
     if contract.save
       render json: { message: "Contract created successfully", contract: contract }, status: :created
     else
@@ -50,5 +51,42 @@ class Api::V1::ContractsController < ApiController
     Contract
       .left_outer_joins(:bundle)
       .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
+  end
+
+  def contract_params
+    contract = params.permit(
+      :id,
+      allowedMethods: [],
+      signatureParameters: [ :container, :format, :level, :en319132, :addContentTimestamp ],
+      documents: [ :filename, :content, :contentType, :url, :hash,
+        xdcParameters: [ :autoLoadEform, :containerXmlns, :embedUsedSchemas, :fsFormIdentifier, :identifier, :schema, :schemaIdentifier, :schemaMimeType, :transformation, :transformationIdentifier, :transformationLanguage, :transformationMediaDestinationTypeDescription, :transformationTargetEnvironment ]
+      ]
+    )
+    {
+      uuid: contract[:id],
+      allowed_methods: contract[:allowedMethods] || [],
+      signature_parameters_attributes: contract[:signatureParameters]&.transform_keys(&:underscore) || {},
+      documents_attributes: contract[:documents]&.filter_map do |document|
+        doc_attributes = {
+          xdc_parameters_attributes: document[:xdcParameters]&.transform_keys(&:underscore) || {}
+        }
+
+        doc_attributes[:url] = document[:url] if document[:url].present?
+        doc_attributes[:remote_hash] = document[:hash] if document[:hash].present?
+        doc_attributes[:uuid] = document[:id] if document[:id].present?
+
+        content = document[:content]
+        if content.present?
+          content = Base64.decode64(content) if document[:contentType].include?("base64")
+          doc_attributes[:blob] = ActiveStorage::Blob.create_and_upload!(
+            io: StringIO.new(content),
+            filename: document[:filename],
+            content_type: document[:contentType].split(";").first.strip
+          )
+        end
+
+        doc_attributes
+      end || []
+    }
   end
 end

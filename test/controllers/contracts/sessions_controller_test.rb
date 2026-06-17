@@ -96,14 +96,14 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
   test "upload succeeds for indeterminate autogram test certificate in test environment" do
     validation_result = AutogramService::ValidationResult.new(
-      has_signatures: true,
+      hasSignatures: true,
       signatures: [
         parsed_signature(
           validation_result: "INDETERMINATE",
           subject_dn: "CN=Autogram Test, OU=Autogram, O=Autogram, L=Bratislava, ST=Bratislava, C=SK"
         )
       ],
-      document_info: { signed_objects_count: 1 }
+      documentInfo: { signed_objects_count: 1 }
     )
 
     with_autogram_service(fake_validation_service(validation_result)) do
@@ -120,14 +120,14 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
   test "upload rejects indeterminate signature from unknown certificate" do
     validation_result = AutogramService::ValidationResult.new(
-      has_signatures: true,
+      hasSignatures: true,
       signatures: [
         parsed_signature(
           validation_result: "INDETERMINATE",
           subject_dn: "CN=Unknown Test, OU=Autogram, O=Autogram, L=Bratislava, ST=Bratislava, C=SK"
         )
       ],
-      document_info: { signed_objects_count: 1 }
+      documentInfo: { signed_objects_count: 1 }
     )
 
     with_autogram_service(fake_validation_service(validation_result)) do

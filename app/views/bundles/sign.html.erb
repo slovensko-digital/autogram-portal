@@ -114,7 +114,7 @@
           <% contract_signed_for_viewer = !contract.awaiting_signature? || @recipient&.signed_contract?(contract) %>
           <% first_document = contract.documents.first %>
           <% only_electronic_signing = contract.allowed_methods.one? && contract.allowed_methods.include?('qes') %>
-          <% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || session[:qscd] %>
+          <% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
           <% can_render_signature_apps_in_frame = params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd)) %>
           <% embedded_signature_apps_path = signature_apps_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: true, skip_method_choice: true, qscd: signature_apps_qscd.presence) %>
           <% full_page_signature_apps_path = signature_apps_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], qscd: signature_apps_qscd.presence) %>

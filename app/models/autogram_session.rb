@@ -26,4 +26,8 @@ class AutogramSession < Session
   def self.model_name
     Session.model_name
   end
+
+  def self.available?(qscd, contract)
+    true
+  end
 end

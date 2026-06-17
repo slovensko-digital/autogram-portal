@@ -36,7 +36,7 @@
   </head>
 
   <% no_padding_top = @no_header || flash.any? || current_page?(about_index_path) || current_page?(docs_path) %>
-  <body class="<%= 'lg:pt-24' unless no_padding_top %> bg-gradient-to-tr from-slate-50 to-gray-50 text-gray-900 antialiased">
+  <body class="<%= 'lg:pt-24' unless no_padding_top %> <%= 'bg-gradient-to-tr from-slate-50 to-gray-50 text-gray-900 antialiased' unless params[:iframe] %>">
     <%= render "layouts/header" unless @no_header %>
 
     <div class="<%= 'min-h-screen' unless @no_footer %> <%= 'lg:pl-64' unless @no_header %>">

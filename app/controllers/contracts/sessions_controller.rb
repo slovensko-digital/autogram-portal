@@ -53,10 +53,18 @@ class Contracts::SessionsController < ApplicationController
       return
     end
 
-    send_data document.content,
+    content = document.content
+    if content.nil?
+      render plain: "Document not found", status: :not_found
+      return
+    end
+
+    send_data content,
               filename: document.filename,
               type: document.content_type,
               disposition: "attachment"
+  rescue ActiveStorage::FileNotFoundError
+    render plain: "Document not found", status: :not_found
   end
 
   def upload

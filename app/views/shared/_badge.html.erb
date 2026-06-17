@@ -1,0 +1,13 @@
+<%# locals: (color: nil, label: nil) %>
+
+<% if color == "gray" %>
+  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-600">
+    <span class="h-1.5 w-1.5 rounded-full bg-<%= color %>-400 shrink-0"></span>
+    <%= label %>
+  </span>
+<% else %>
+  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-800">
+    <span class="h-1.5 w-1.5 rounded-full bg-<%= color %>-500 shrink-0"></span>
+    <%= label %>
+  </span>
+<% end %>

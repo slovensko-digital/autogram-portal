@@ -32,7 +32,7 @@
         <% end %>
       <% end %>
 
-      <% if @qscd.present? && !User.supports_mobile_signing?(@qscd) %>
+      <% if Session.old_card?(@qscd) %>
         <div data-signing-app-selector-target="yellowWarning">
           <%= render 'shared/warning', title: t('.old_card_warning_title'), content: t('.old_card_warning', qscd: t("qscd.title.#{@qscd}")) %>
         </div>
@@ -44,20 +44,22 @@
 
       <div class="space-y-3">
         <div data-signing-app-selector-target="desktopElement">
-          <%= render 'shared/radio_button_card',
-                name: "signing_app_#{@contract.uuid}",
-                value: 'autogram',
-                label: t('.autogram_desktop_label'),
-                description: t('.autogram_desktop_description'),
-                checked: true,
-                icon: 'desktop',
-                wrapper_class: 'desktop-signing-element',
-                data_attributes: {
-                  signing_app_selector_target: 'appRadio'
-                } %>
+          <% if AutogramSession.available?(@qscd, @contract) %>
+            <%= render 'shared/radio_button_card',
+                  name: "signing_app_#{@contract.uuid}",
+                  value: 'autogram',
+                  label: t('.autogram_desktop_label'),
+                  description: t('.autogram_desktop_description'),
+                  checked: true,
+                  icon: 'desktop',
+                  wrapper_class: 'desktop-signing-element',
+                  data_attributes: {
+                    signing_app_selector_target: 'appRadio'
+                  } %>
+          <% end %>
         </div>
 
-        <% unless @qscd.present? && !User.supports_mobile_signing?(@qscd) %>
+        <% if AvmSession.available?(@qscd, @contract) %>
           <%= render 'shared/radio_button_card',
                 name: "signing_app_#{@contract.uuid}",
                 value: 'avm',
@@ -68,7 +70,9 @@
                 data_attributes: {
                   signing_app_selector_target: 'appRadio'
                 } %>
+        <% end %>
 
+        <% if EidentitaSession.available?(@qscd, @contract) %>
           <%= render 'shared/radio_button_card',
                 name: "signing_app_#{@contract.uuid}",
                 value: 'eidentita',
@@ -89,23 +93,29 @@
       </div>
 
       <div class="hidden">
-        <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]),
-              data: {
-                turbo_frame: "signature_apps_#{@contract.uuid}",
-                signing_app_selector_target: 'autogramSubmitButton'
-              } %>
+        <% if AutogramSession.available?(@qscd, @contract) %>
+          <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]),
+                data: {
+                  turbo_frame: "signature_apps_#{@contract.uuid}",
+                  signing_app_selector_target: 'autogramSubmitButton'
+                } %>
+        <% end %>
 
-        <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]),
-              data: {
-                turbo_frame: "signature_apps_#{@contract.uuid}",
-                signing_app_selector_target: "avmSubmitButton"
-              } %>
+        <% if AvmSession.available?(@qscd, @contract) %>
+          <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]),
+                data: {
+                  turbo_frame: "signature_apps_#{@contract.uuid}",
+                  signing_app_selector_target: "avmSubmitButton"
+                } %>
+        <% end %>
 
-        <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]),
-              data: {
-                turbo_frame: "signature_apps_#{@contract.uuid}",
-                signing_app_selector_target: "eidentitaSubmitButton"
-              } %>
+        <% if EidentitaSession.available?(@qscd, @contract) %>
+          <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]),
+                data: {
+                  turbo_frame: "signature_apps_#{@contract.uuid}",
+                  signing_app_selector_target: "eidentitaSubmitButton"
+                } %>
+        <% end %>
       </div>
 
       <div class="flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
@@ -163,7 +173,7 @@
             <% end %>
           <% end %>
 
-          <% if @qscd.present? && !User.supports_mobile_signing?(@qscd) %>
+          <% if Session.old_card?(@qscd) %>
             <div data-signing-app-selector-target="yellowWarning">
               <%= render 'shared/warning', title: t('.old_card_warning_title'), content: t('.old_card_warning', qscd: t("qscd.title.#{@qscd}")) %>
             </div>
@@ -173,22 +183,34 @@
             </div>
           <% end %>
 
-          <div class="space-y-3">
-            <div data-signing-app-selector-target="desktopElement">
-              <%= render 'shared/radio_button_card',
-                    name: "signing_app_#{@contract.uuid}",
-                    value: 'autogram',
-                    label: t('.autogram_desktop_label'),
-                    description: t('.autogram_desktop_description'),
-                    checked: true,
-                    icon: 'desktop',
-                    wrapper_class: 'desktop-signing-element',
-                    data_attributes: {
-                      signing_app_selector_target: 'appRadio'
-                    } %>
+          <% if Session.multiple_files?(@contract) %>
+            <div data-signing-app-selector-target="yellowWarning">
+              <%= render 'shared/warning', title: t('.multiple_files_in_contract_warning_title'), content: t('.multiple_files_in_contract_warning') %>
             </div>
 
-            <% unless @qscd.present? && !User.supports_mobile_signing?(@qscd) %>
+            <div data-signing-app-selector-target="mobileWarning" style="display: none;">
+              <%= render 'shared/error', title: t('common.desktop_required'), content: t('.multiple_files_in_contract_mobile_warning') %>
+            </div>
+          <% end %>
+
+          <div class="space-y-3">
+            <div data-signing-app-selector-target="desktopElement">
+              <% if AutogramSession.available?(@qscd, @contract) %>
+                <%= render 'shared/radio_button_card',
+                      name: "signing_app_#{@contract.uuid}",
+                      value: 'autogram',
+                      label: t('.autogram_desktop_label'),
+                      description: t('.autogram_desktop_description'),
+                      checked: true,
+                      icon: 'desktop',
+                      wrapper_class: 'desktop-signing-element',
+                      data_attributes: {
+                        signing_app_selector_target: 'appRadio'
+                      } %>
+              <% end %>
+            </div>
+
+            <% if AvmSession.available?(@qscd, @contract) %>
               <%= render 'shared/radio_button_card',
                     name: "signing_app_#{@contract.uuid}",
                     value: 'avm',
@@ -199,7 +221,9 @@
                     data_attributes: {
                       signing_app_selector_target: 'appRadio'
                     } %>
+            <% end %>
 
+            <% if EidentitaSession.available?(@qscd, @contract) %>
               <%= render 'shared/radio_button_card',
                     name: "signing_app_#{@contract.uuid}",
                     value: 'eidentita',
@@ -220,23 +244,29 @@
           </div>
 
           <div class="hidden">
-            <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                  data: {
-                    turbo_frame: "signature_apps_#{@contract.uuid}",
-                    signing_app_selector_target: 'autogramSubmitButton'
-                  } %>
+            <% if AutogramSession.available?(@qscd, @contract) %>
+              <%= link_to "", autogram_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                    data: {
+                      turbo_frame: "signature_apps_#{@contract.uuid}",
+                      signing_app_selector_target: 'autogramSubmitButton'
+                    } %>
+            <% end %>
 
-            <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                  data: {
-                    turbo_frame: "signature_apps_#{@contract.uuid}",
-                    signing_app_selector_target: "avmSubmitButton"
-                  } %>
+            <% if AvmSession.available?(@qscd, @contract) %>
+              <%= link_to "", avm_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                    data: {
+                      turbo_frame: "signature_apps_#{@contract.uuid}",
+                      signing_app_selector_target: "avmSubmitButton"
+                    } %>
+            <% end %>
 
-            <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
-                  data: {
-                    turbo_frame: "signature_apps_#{@contract.uuid}",
-                    signing_app_selector_target: "eidentitaSubmitButton"
-                  } %>
+            <% if EidentitaSession.available?(@qscd, @contract) %>
+              <%= link_to "", eidentita_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                    data: {
+                      turbo_frame: "signature_apps_#{@contract.uuid}",
+                      signing_app_selector_target: "eidentitaSubmitButton"
+                    } %>
+            <% end %>
           </div>
 
           <div class="border-b border-gray-200"></div>

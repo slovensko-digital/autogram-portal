@@ -33,7 +33,7 @@ class ContractsController < ApplicationController
     @contract = Contract.new(
       user: current_user,
       author_notifications_enabled: true,
-      documents: [ Document.create(params.require(:document).permit(:blob)) ]
+      documents: [ Document.new(params.require(:document).permit(:blob)) ]
     )
 
     unless current_user
@@ -124,14 +124,14 @@ class ContractsController < ApplicationController
   end
 
   def validate
-    @validation_result = @contract.validation_result
-    if @validation_result.nil?
+    @validation_results = @contract.validation_results
+    if @validation_results.blank?
       respond_to do |format|
         format.html do
-          render "validate_error", locals: { errors: [ "It is not possible to validate signatures for a contract with multiple documents." ] }
+          render "validate_error", locals: { errors: [ "No documents are available for validation." ] }
         end
         format.json do
-          render json: { errors: [ "It is not possible to validate signatures for a contract with multiple documents." ] }, status: :unprocessable_entity
+          render json: { errors: [ "No documents are available for validation." ] }, status: :unprocessable_entity
         end
       end
       return
@@ -143,14 +143,7 @@ class ContractsController < ApplicationController
           render "validate"
         end
         format.json do
-          signatures = @validation_result.signatures.flatten
-
-          render json: {
-            hasSignatures: @validation_result.has_signatures,
-            signatures: signatures.map { |sig| format_signature_for_json(sig) },
-            documentInfo: @validation_result.document_info,
-            errors: @validation_result.errors
-          }
+          render json: @validation_results
         end
       end
     rescue => e
@@ -266,7 +259,7 @@ class ContractsController < ApplicationController
 
     case action_name
     when "signature_apps"
-      @qscd = params[:qscd] || current_user&.qscd || session[:qscd]
+      @qscd = params[:qscd] || current_user&.qscd || cookies[:qscd]
       redirect_to contract_onboarding_path(@contract, method: "electronic", step: "qscd_check", recipient: @recipient&.uuid, iframe: params[:iframe]) if @qscd.blank? || User.legacy_eid_card?(@qscd)
     when "physical_signing"
       redirect_to contract_onboarding_path(@contract, method: "physical", step: "physical_signing", recipient: @recipient&.uuid, iframe: params[:iframe]) unless current_user&.onboarding_completed?("physical")
@@ -292,32 +285,5 @@ class ContractsController < ApplicationController
     end
 
     current_user.present? && @contract.user == current_user
-  end
-
-  def format_signature_for_json(signature)
-    {
-      signerName: signature[:signer_name],
-      signingTime: signature[:signing_time]&.iso8601,
-      signatureLevel: signature[:signature_level],
-      validationResult: signature[:validation_result],
-      valid: signature[:valid],
-      certificateInfo: {
-        subject: signature.dig(:certificate_info, :subject),
-        issuer: signature.dig(:certificate_info, :issuer),
-        qualification: signature.dig(:certificate_info, :qualification)
-      },
-      timestampInfo: signature[:timestamp_info] ? {
-        count: signature.dig(:timestamp_info, :count),
-        qualified: signature.dig(:timestamp_info, :qualified),
-        timestamps: signature.dig(:timestamp_info, :timestamps)&.map do |ts|
-          {
-            type: ts[:type],
-            time: ts[:time]&.iso8601,
-            subject: ts[:subject],
-            qualification: ts[:qualification]
-          }
-        end
-      } : nil
-    }
   end
 end
