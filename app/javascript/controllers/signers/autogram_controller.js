@@ -207,7 +207,7 @@ export default class extends Controller {
 
       let signResult;
 
-      if (autogramParameters.documents.length === 1) {
+      if (autogramParameters.multiple_documents === false) {
         let signRequestDocument = {
           content: autogramParameters.documents[0].content
         }

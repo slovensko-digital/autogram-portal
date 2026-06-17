@@ -7,3 +7,4 @@ json.signature_parameters do
   json.add_content_timestamp @contract.signature_parameters&.add_content_timestamp
 end
 json.documents @contract.documents_to_sign, partial: "api/v1/documents/document", as: :document
+json.multiple_documents @contract.documents.many?
