@@ -138,7 +138,6 @@ class ContractsController < ApplicationController
     end
 
     begin
-      puts @validation_results.inspect
       respond_to do |format|
         format.html do
           render "validate"

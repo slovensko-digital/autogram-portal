@@ -103,7 +103,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
           subject_dn: "CN=Autogram Test, OU=Autogram, O=Autogram, L=Bratislava, ST=Bratislava, C=SK"
         )
       ],
-      document_info: { signed_objects_count: 1 }
+      documentInfo: { signed_objects_count: 1 }
     )
 
     with_autogram_service(fake_validation_service(validation_result)) do
@@ -127,7 +127,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
           subject_dn: "CN=Unknown Test, OU=Autogram, O=Autogram, L=Bratislava, ST=Bratislava, C=SK"
         )
       ],
-      document_info: { signed_objects_count: 1 }
+      documentInfo: { signed_objects_count: 1 }
     )
 
     with_autogram_service(fake_validation_service(validation_result)) do

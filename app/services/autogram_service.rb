@@ -43,16 +43,44 @@ class AutogramService
       @timestampInfo = timestampInfo
     end
 
-    def qualified_signature?
-      certificateInfo[:qualification].to_s.in?(%w[QESIG QESEAL])
+    def qualified?
+      valid && certificateInfo[:qualification].to_s.in?(%w[QESIG QESEAL])
     end
 
-    def valid_badge?
-      valid && qualified_signature?
+    def adesig_qc?
+      valid && certificateInfo[:qualification].to_s == "ADESIG_QC-QC"
     end
 
     def qualified_timestamps?
       timestampInfo && timestampInfo[:qualified] == true
+    end
+
+    def qualification_label
+      qualification = certificateInfo[:qualification]
+      timestamp = qualified_timestamps?
+      if timestamp
+        case qualification
+        when "QESIG"
+          "qesig_ts"
+        when "QESEAL"
+          "qeseal_ts"
+        when "ADESIG_QC-QC"
+          "adesig_qc_qc_ts"
+        else
+          "unknown"
+        end
+      else
+        case qualification
+        when "QESIG"
+          "qesig"
+        when "QESEAL"
+          "qeseal"
+        when "ADESIG_QC-QC"
+          "adesig_qc_qc"
+        else
+          "unknown"
+        end
+      end
     end
   end
 

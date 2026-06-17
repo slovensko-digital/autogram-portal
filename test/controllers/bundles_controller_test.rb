@@ -25,7 +25,7 @@ class BundlesControllerTest < ActionController::TestCase
     bundle = create_bundle_with_contracts(author: @author, count: 1, signed: true)
     contract = bundle.contracts.first
     autogram_service = fake_autogram_service_with_signatures(
-      { signature_level: "BASELINE_T", timestamp_info: { qualified: true } }
+      AutogramService::ValidationSignature.new(signatureLevel: "BASELINE_T", timestampInfo: { qualified: true }, signerName: "Autogram Test")
     )
     original_autogram_service = AutogramEnvironment.method(:autogram_service)
 

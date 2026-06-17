@@ -82,7 +82,7 @@ class DocumentTest < ActiveSupport::TestCase
 
   test "available extension target levels only include archive for timestamped signatures" do
     document = build_document_with_signatures(
-      { signature_level: "BASELINE_T", timestamp_info: { qualified: true } }
+      AutogramService::ValidationSignature.new(signatureLevel: "BASELINE_T", timestampInfo: { qualified: true }, signerName: "Autogram Test")
     )
 
     assert_equal [ "LTA" ], document.available_extension_target_levels
@@ -92,7 +92,7 @@ class DocumentTest < ActiveSupport::TestCase
 
   test "timestamp extension is unavailable when signatures already have timestamps even at lower baseline level" do
     document = build_document_with_signatures(
-      { signature_level: "BASELINE_T", timestamp_info: { qualified: true } }
+      AutogramService::ValidationSignature.new(signatureLevel: "BASELINE_T", timestampInfo: { qualified: true }, signerName: "Autogram Test")
     )
 
     assert_equal [ "LTA" ], document.available_extension_target_levels
@@ -103,7 +103,7 @@ class DocumentTest < ActiveSupport::TestCase
   private
 
   def build_document_with_signature_levels(*levels)
-    build_document_with_signatures(*levels.map { |level| { signature_level: level } })
+    build_document_with_signatures(*levels.map { |level| AutogramService::ValidationSignature.new(signatureLevel: level, signerName: "Autogram Test") })
   end
 
   def build_document_with_signatures(*signatures)

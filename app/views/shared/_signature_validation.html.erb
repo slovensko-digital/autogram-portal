@@ -1,5 +1,5 @@
 <div class="w-full">
-  <% validation_results = signature_validation_entries(local_assigns[:validation_results] || [ local_assigns[:validation_result] || @validation_result ]) %>
+  <% validation_results = local_assigns[:validation_results] || [ local_assigns[:validation_result] || @validation_result ] %>
 
   <% validation_results.each do |validation_entry| %>
     <% validation_result = validation_entry.validation_result %>
@@ -46,10 +46,12 @@
                     </span>
                   <% end %>
 
-                  <% if signature_validation_qualified_signature?(signature) %>
-                    <%= render 'shared/badge', color: 'green', label: signature_qualification(signature) %>
+                  <% if signature.qualified? %>
+                    <%= render 'shared/badge', color: 'green', label: t(".signature_qualifications.#{signature.qualification_label}") %>
+                  <% elsif signature.adesig_qc? %>
+                    <%= render 'shared/badge', color: 'blue', label: t(".signature_qualifications.#{signature.qualification_label}") %>
                   <% else %>
-                    <%= render 'shared/badge', color: 'yellow', label: signature_qualification(signature) %>
+                    <%= render 'shared/badge', color: 'yellow', label: t(".signature_qualifications.#{signature.qualification_label}") %>
                   <% end %>
 
                   <% if signature_validation_multiple_documents?(validation_result, @contract) && signature_documents.any? %>
@@ -93,7 +95,7 @@
                   <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
                     <div class="text-gray-600"><%= t('.qualification') %>:</div>
                     <div class="text-gray-900">
-                      <%= signature_qualification(signature) %>
+                      <%= t(".signature_qualifications.#{signature.qualification_label}") %>
                     </div>
 
                     <div class="text-gray-600"><%= t('.time') %>:</div>

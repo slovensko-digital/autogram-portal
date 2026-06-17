@@ -40,7 +40,65 @@ class AutogramServiceTest < ActiveSupport::TestCase
 
     validation_result = AutogramService.new.send(:parse_validation_response, response)
 
-    assert_equal [ "document.xdcf", "PdfDocument.pdf", "TextDocument.txt" ], validation_result.signatures.first[:signed_objects].map { |object| object["filename"] }
-    assert_equal [ "PdfDocument.pdf" ], validation_result.signatures.second[:signed_objects].map { |object| object["filename"] }
+    assert_equal [ "document.xdcf", "PdfDocument.pdf", "TextDocument.txt" ], validation_result.signatures.first.signedObjects.map { |object| object["filename"] }
+    assert_equal [ "PdfDocument.pdf" ], validation_result.signatures.second.signedObjects.map { |object| object["filename"] }
+  end
+
+  class AutogramValidationResultTest < ActiveSupport::TestCase
+    test "qualified? returns true for valid qualified signature" do
+      signature = AutogramService::ValidationSignature.new(
+        valid: true,
+        certificateInfo: { qualification: "QESIG" },
+        signerName: "Autogram Test",
+        signingTime: "2026-06-02T12:25:52 +0000"
+      )
+
+      assert signature.qualified?
+    end
+
+    test "qualified? returns false for valid non-qualified signature" do
+      signature = AutogramService::ValidationSignature.new(
+        valid: true,
+        certificateInfo: { qualification: "NA" },
+        signerName: "Autogram Test",
+        signingTime: "2026-06-02T12:25:52 +0000"
+      )
+
+      refute signature.qualified?
+    end
+
+    test "qualified? returns false for invalid qualified signature" do
+      signature = AutogramService::ValidationSignature.new(
+        valid: false,
+        certificateInfo: { qualification: "QESIG" },
+        signerName: "Autogram Test",
+        signingTime: "2026-06-02T12:25:52 +0000"
+      )
+
+      refute signature.qualified?
+    end
+
+    test "qualification_label returns correct label for adesig qc qc signature" do
+      signature = AutogramService::ValidationSignature.new(
+        valid: true,
+        certificateInfo: { qualification: "ADESIG_QC-QC" },
+        signerName: "Autogram Test",
+        signingTime: "2026-06-02T12:25:52 +0000"
+      )
+
+      assert_equal "adesig_qc_qc", signature.qualification_label
+    end
+
+    test "qualification_label returns correct label for adesig qc qc with ts signature" do
+      signature = AutogramService::ValidationSignature.new(
+        valid: true,
+        certificateInfo: { qualification: "ADESIG_QC-QC" },
+        timestampInfo: { qualified: true },
+        signerName: "Autogram Test",
+        signingTime: "2026-06-02T12:25:52 +0000"
+      )
+
+      assert_equal "adesig_qc_qc_ts", signature.qualification_label
+    end
   end
 end

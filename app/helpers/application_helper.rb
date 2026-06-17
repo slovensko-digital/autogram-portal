@@ -56,44 +56,6 @@ module ApplicationHelper
     end
   end
 
-  def signature_qualification(signature)
-    qualification = signature.certificateInfo[:qualification]
-    timestamp = signature.qualified_timestamps?
-    if timestamp
-      case qualification
-      when "QESIG"
-        t("helpers.application.signature_qualifications.qesig_ts")
-      when "QESEAL"
-        t("helpers.application.signature_qualifications.qeseal_ts")
-      when "ADESIG_QC-QC"
-        t("helpers.application.signature_qualifications.adesig_qc_qc_ts")
-      else
-        t("helpers.application.signature_qualifications.unknown")
-      end
-    else
-      case qualification
-      when "QESIG"
-        t("helpers.application.signature_qualifications.qesig")
-      when "QESEAL"
-        t("helpers.application.signature_qualifications.qeseal")
-      when "ADESIG_QC-QC"
-        t("helpers.application.signature_qualifications.adesig_qc_qc")
-      else
-        t("helpers.application.signature_qualifications.unknown")
-      end
-    end
-  end
-
-  def signature_validation_entries(validation_results)
-    Array(validation_results).compact.map do |entry|
-      if entry.respond_to?(:validation_result)
-        entry
-      else
-        Struct.new(:label, :validation_result, keyword_init: true).new(label: nil, validation_result: entry)
-      end
-    end
-  end
-
   def signature_validation_object_name(object)
     raw_name = case object
     when String
@@ -152,14 +114,6 @@ module ApplicationHelper
     document_info = validation_result&.document_info || {}
     Array(document_info[:signed_objects]).map { |object| signature_validation_object_name(object) }.compact_blank +
       Array(document_info[:unsigned_objects]).map { |object| signature_validation_object_name(object) }.compact_blank
-  end
-
-  def signature_validation_qualified_signature?(signature)
-    signature.certificateInfo[:qualification].to_s.in?(%w[QESIG QESEAL])
-  end
-
-  def signature_validation_valid_badge?(signature)
-    signature.valid && signature_validation_qualified_signature?(signature)
   end
 
   private

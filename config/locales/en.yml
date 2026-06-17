@@ -115,14 +115,6 @@ en:
         xades_asice: "XAdES in ASiC-E container"
         cades_asice: "CAdES in ASiC-E container"
         unknown: "Unknown signature format"
-      signature_qualifications:
-        qesig: "Qualified electronic signature"
-        qesig_ts: "Qualified electronic signature with timestamp"
-        qeseal: "Qualified electronic seal"
-        qeseal_ts: "Qualified electronic seal with timestamp"
-        adesig_qc_qc: "Advanced electronic signature based on qualified certificate"
-        adesig_qc_qc_ts: "Advanced electronic signature based on qualified certificate with qualified timestamp"
-        unknown: "Unknown signature"
 
   devise:
     captcha:
@@ -1307,6 +1299,15 @@ en:
       signature_type: "Signature type"
       certificate: "Certificate"
       timestamp_type: "Timestamp type"
+      signature_qualifications:
+        qesig: "Qualified electronic signature"
+        qesig_ts: "Qualified electronic signature with timestamp"
+        qeseal: "Qualified electronic seal"
+        qeseal_ts: "Qualified electronic seal with timestamp"
+        adesig_qc_qc: "Advanced electronic signature based on qualified certificate"
+        adesig_qc_qc_ts: "Advanced electronic signature based on qualified certificate with qualified timestamp"
+        unknown: "Unknown signature"
+
     signature_validation_error:
       title: "Error validating signatures"
       message: "Failed to validate the electronic signatures of this document."

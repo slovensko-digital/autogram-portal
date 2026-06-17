@@ -87,15 +87,6 @@ sk:
         declined: "Odmietnuté"
         superseded: "Podpis nie je potrebný"
         withdrawn: "Stiahnuté"
-    application:
-      signature_qualifications:
-        qesig: "Vlastnoručný podpis"
-        qesig_ts: "Osvečený podpis"
-        qeseal: "Kvalifikovaná elektronická pečať"
-        qeseal_ts: "Kvalifikovaná elektronická pečať s časovou pečiatkou"
-        adesig_qc_qc: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte"
-        adesig_qc_qc_ts: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte s kvalifikovanou časovou pečiatkou"
-        unknown: "Neznámy podpis"
 
   devise:
     sessions:
@@ -1230,6 +1221,14 @@ sk:
       collapse_technical_details: "Zbaliť technické detaily"
       signature_type: "Typ podpisu"
       certificate: "Certifikát"
+      signature_qualifications:
+        qesig: "Vlastnoručný podpis"
+        qesig_ts: "Osvečený podpis"
+        qeseal: "Kvalifikovaná elektronická pečať"
+        qeseal_ts: "Kvalifikovaná elektronická pečať s časovou pečiatkou"
+        adesig_qc_qc: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte"
+        adesig_qc_qc_ts: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte s kvalifikovanou časovou pečiatkou"
+        unknown: "Neznámy podpis"
     signature_validation_error:
       title: "Chyba pri overovaní podpisov"
       message: "Nepodarilo sa overiť elektronické podpisy tohto dokumentu."
@@ -1241,6 +1240,7 @@ sk:
       drop_text: "Pustiť sem"
       remove_file: "Odstrániť súbor"
       select_another: "Kliknite pre výber iného súboru"
+
 
   javascript:
     errors:
