@@ -2,12 +2,12 @@ class Api::V1::ContractsController < ApiController
   before_action :set_contract, only: [ :show, :signed_document, :status, :destroy ]
 
   def create
-    contract = Contract.new(contract_params)
-    contract.user = current_user
-    if contract.save
-      render json: { message: "Contract created successfully", contract: contract }, status: :created
+    @contract = Contract.new(contract_params)
+    @contract.user = current_user
+    if @contract.save
+      render status: :created
     else
-      render json: { errors: contract.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @contract.errors.full_messages }, status: :unprocessable_entity
     end
   end
 

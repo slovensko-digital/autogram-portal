@@ -4,7 +4,7 @@
 #
 #  id                  :bigint           not null, primary key
 #  author_proxy        :boolean          default(FALSE), not null
-#  email               :string           not null
+#  email               :string
 #  locale              :string           default("sk"), not null
 #  name                :string
 #  notification_status :integer          default("not_notified"), not null
@@ -79,6 +79,23 @@ class RecipientTest < ActiveSupport::TestCase
 
     assert new_recipient.persisted?
     assert new_recipient.active?
+  end
+
+  test "email is required by default" do
+    recipient = bundles(:one).recipients.build(email: nil, locale: "en")
+
+    assert_not recipient.valid?
+    assert recipient.errors.of_kind?(:email, :blank)
+  end
+
+  test "email can be blank when bundle allows blank recipient emails" do
+    bundle = bundles(:one)
+    bundle.allow_blank_recipient_emails = true
+
+    recipient = bundle.recipients.create!(email: nil, locale: "en")
+
+    assert recipient.persisted?
+    assert_nil recipient.email
   end
 
   test "find_or_create_author_proxy_for creates a hidden recipient" do

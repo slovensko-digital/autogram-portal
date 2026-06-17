@@ -51,6 +51,44 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href*='/contracts/#{contract.uuid}/signature_apps']", text: "Pokračovať"
   end
 
+  test "api bundle creation allows recipients without email" do
+    post "/api/v1/bundles",
+         params: {
+           id: SecureRandom.uuid,
+           contracts: [
+             {
+               id: SecureRandom.uuid,
+               allowedMethods: [ "qes" ],
+               documents: [
+                 {
+                   filename: "contract.txt",
+                   content: Base64.strict_encode64("Sample text content"),
+                   contentType: "text/plain;base64"
+                 }
+               ],
+               signatureParameters: {
+                 format: "XAdES",
+                 container: "ASiC_E"
+               }
+             }
+           ],
+           recipients: [
+             {
+               name: "API recipient",
+               locale: "sk"
+             }
+           ]
+         },
+         headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :created
+
+    bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
+    recipient = bundle.recipients.visible.find_by!(name: "API recipient")
+
+    assert_nil recipient.email
+  end
+
   test "public bundle sign route loads embedded signature apps directly in no_onboarding mode" do
     post "/api/v1/bundles",
          params: {

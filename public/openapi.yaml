@@ -502,8 +502,12 @@ components:
           type: string
           default: sk
           description: Preferred locale for the recipient. Defaults to "sk".
+        uuid:
+          type: string
+          format: uuid
+          example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: Unique identifier for the recipient. If not provided, a new UUID will be generated.
       required:
-        - name
         - email
 
     SignatureParameters:

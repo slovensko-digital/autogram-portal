@@ -23,6 +23,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Bundle < ApplicationRecord
+  attr_accessor :allow_blank_recipient_emails
+
   belongs_to :author, class_name: "User", foreign_key: "user_id"
 
   has_many :contracts, dependent: :destroy
@@ -47,7 +49,8 @@ class Bundle < ApplicationRecord
                                   numericality: { only_integer: true, greater_than: 0 },
                                   if: -> { signing_rule == "threshold" }
 
-  after_create :notify_recipients
+  # TODO: add a method to notify recipients later via API
+  # after_create :notify_recipients
   after_save :recompute_superseded_state_if_rules_changed, if: :rules_changed?
 
   scope :publicly_visible, -> { where(publicly_visible: true) }

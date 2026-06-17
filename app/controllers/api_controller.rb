@@ -1,7 +1,5 @@
-class ApiController < ApplicationController
-  protect_from_forgery with: :null_session
+class ApiController < ActionController::API
   before_action :authenticate_user!
-  skip_before_action :enforce_current_policy_consent
   before_action :set_json_format
 
   rescue_from JWT::DecodeError do |error|
@@ -10,6 +8,7 @@ class ApiController < ApplicationController
 
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
+  rescue_from ActionDispatch::Http::Parameters::ParseError, with: :render_bad_request
 
   def current_user
     @current_user
