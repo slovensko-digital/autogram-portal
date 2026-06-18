@@ -1,6 +1,12 @@
 sk:
   hello: "Ahoj svet"
 
+  autogram_service:
+    errors:
+      certificate_expired_error: "Podpisový certifikát je neplatný alebo exspirovaný."
+      service_unavailable_error: "Služba je momentálne nedostupná."
+      unknown_response_error: "Nepodarilo sa spracovať odpoveď zo služby."
+
   consents:
     must_accept_to_register: "Pre vytvorenie účtu musíte prijať podmienky a zásady ochrany súkromia."
     please_accept_updated_policies: "Prosím, prečítajte si a prijmite aktualizované zásady."

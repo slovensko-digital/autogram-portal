@@ -150,8 +150,6 @@ class Document < ApplicationRecord
   def extend_signatures!(target_level: "T")
     extended_content = AutogramEnvironment.autogram_service.extend_signatures(self, target_level: target_level)
 
-    raise "No extended content received from Autogram service" if extended_content.nil?
-
     blob.attach(
       io: StringIO.new(extended_content),
       filename: filename,

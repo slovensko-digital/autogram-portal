@@ -30,6 +30,12 @@
 en:
   hello: "Hello world"
 
+  autogram_service:
+    errors:
+      certificate_expired_error: "The signing certificate is invalid or expired."
+      service_unavailable_error: "The service is currently unavailable."
+      unknown_response_error: "Failed to process the response from the service."
+
   consents:
     must_accept_to_register: "You must accept the terms and privacy policy to create an account."
     please_accept_updated_policies: "Please review and accept the updated policies to continue."
