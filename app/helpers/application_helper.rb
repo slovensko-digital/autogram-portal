@@ -126,7 +126,7 @@ module ApplicationHelper
       Time.zone.parse(value.to_s)
     end
 
-    parsed_value&.strftime('%d. %b %Y %H:%M:%S')
+    parsed_value&.strftime("%d. %b %Y %H:%M:%S")
   rescue ArgumentError
     nil
   end
