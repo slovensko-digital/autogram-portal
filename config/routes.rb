@@ -43,6 +43,9 @@ Rails.application.routes.draw do
     get "/dashboard", to: "dashboard#index", as: :dashboard
 
     resources :contracts, only: [ :index, :destroy ]
+    resources :contract_validation_records, only: [ :index, :destroy ] do
+      post :refresh, on: :member
+    end
 
     resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
       collection do
@@ -66,6 +69,7 @@ Rails.application.routes.draw do
 
   resources :contracts, except: [ :index ] do
     member do
+      get :content_versions
       get :signature_apps
       get :sign
       get :validate

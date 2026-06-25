@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_17_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_23_102000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -66,6 +66,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_120000) do
     t.string "uuid", null: false
     t.index ["user_id"], name: "index_bundles_on_user_id"
     t.index ["uuid"], name: "index_bundles_on_uuid"
+  end
+
+  create_table "contract_content_versions", force: :cascade do |t|
+    t.bigint "contract_id", null: false
+    t.datetime "created_at", null: false
+    t.string "origin", default: "signed", null: false
+    t.datetime "updated_at", null: false
+    t.integer "version_number", null: false
+    t.index ["contract_id", "version_number"], name: "idx_on_contract_id_version_number_0129589952", unique: true
+    t.index ["contract_id"], name: "index_contract_content_versions_on_contract_id"
+  end
+
+  create_table "contract_validation_records", force: :cascade do |t|
+    t.bigint "contract_content_version_id"
+    t.bigint "contract_id"
+    t.datetime "created_at", null: false
+    t.string "document_hash", null: false
+    t.datetime "expires_at"
+    t.string "filename", null: false
+    t.datetime "latest_archive_timestamp_expires_at"
+    t.string "signature_levels", default: [], null: false, array: true
+    t.integer "signatures_count", default: 0, null: false
+    t.string "source_bundle_uuid"
+    t.string "source_contract_uuid", null: false
+    t.integer "source_version_number", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.jsonb "validation_details", default: {}, null: false
+    t.index ["contract_content_version_id"], name: "idx_on_contract_content_version_id_7e3d0b9366"
+    t.index ["contract_id"], name: "index_contract_validation_records_on_contract_id"
+    t.index ["document_hash"], name: "index_contract_validation_records_on_document_hash"
+    t.index ["user_id", "expires_at"], name: "index_contract_validation_records_on_user_id_and_expires_at"
+    t.index ["user_id", "source_contract_uuid", "source_version_number"], name: "index_contract_validation_records_on_user_contract_and_version", unique: true
+    t.index ["user_id"], name: "index_contract_validation_records_on_user_id"
   end
 
   create_table "contracts", force: :cascade do |t|
@@ -365,6 +399,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_120000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ades_signature_parameters", "contracts"
   add_foreign_key "bundles", "users"
+  add_foreign_key "contract_content_versions", "contracts"
+  add_foreign_key "contract_validation_records", "contract_content_versions", on_delete: :nullify
+  add_foreign_key "contract_validation_records", "contracts", on_delete: :nullify
+  add_foreign_key "contract_validation_records", "users"
   add_foreign_key "contracts", "bundles"
   add_foreign_key "contracts", "users"
   add_foreign_key "documents", "contracts"

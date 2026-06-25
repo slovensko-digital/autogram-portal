@@ -305,7 +305,8 @@ class AutogramService
       certificateInfo: {
         subject: signing_cert["subjectDN"],
         issuer: signing_cert["issuerDN"],
-        qualification: signing_cert["qualification"]
+        qualification: signing_cert["qualification"],
+        notAfter: signing_cert["notAfter"]
       },
       signedObjects: signed_objects,
       unsignedObjects: unsigned_objects,

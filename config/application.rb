@@ -40,6 +40,10 @@ module AutogramPortal
       delete_old_anonymous_contracts: {
         cron: "every 30 minutes",
         class: "AnonymousContractsCleanupJob"
+      },
+      contract_validation_records_maintenance: {
+        cron: "every monday at 3am",
+        class: "ContractValidationRecordsMaintenanceJob"
       }
     }
   end

@@ -25,7 +25,16 @@ class BundlesControllerTest < ActionController::TestCase
     bundle = create_bundle_with_contracts(author: @author, count: 1, signed: true)
     contract = bundle.contracts.first
     autogram_service = fake_autogram_service_with_signatures(
-      AutogramService::ValidationSignature.new(signatureLevel: "BASELINE_T", timestampInfo: { qualified: true }, signerName: "Autogram Test")
+      AutogramService::ValidationSignature.new(
+        signatureLevel: "BASELINE_T",
+        validationResult: "TOTAL_PASSED",
+        valid: true,
+        timestampInfo: {
+          qualified: true,
+          timestamps: []
+        },
+        signerName: "Autogram Test"
+      )
     )
     original_autogram_service = AutogramEnvironment.method(:autogram_service)
 
@@ -76,10 +85,11 @@ class BundlesControllerTest < ActionController::TestCase
       )
 
       if signed
-        contract.signed_document.attach(
-          io: StringIO.new("%PDF-1.4 signed content #{index}"),
+        contract.add_signed_content_version!(
+          content: "%PDF-1.4 signed content #{index}",
           filename: "bundle-contract-signed-#{index}.pdf",
-          content_type: "application/pdf"
+          content_type: "application/pdf",
+          origin: "uploaded_signed"
         )
       end
 

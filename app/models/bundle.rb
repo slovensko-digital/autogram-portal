@@ -72,7 +72,7 @@ class Bundle < ApplicationRecord
   def completed?
     return threshold_met? && !awaiting_recipients? if active_recipients.exists?
 
-    contracts.where.missing(:signed_document_attachment).none?
+    contracts.left_outer_joins(:content_versions).where(contract_content_versions: { id: nil }).none?
   end
 
   def bundle_state

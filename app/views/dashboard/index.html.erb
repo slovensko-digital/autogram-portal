@@ -4,6 +4,14 @@
       <h1 class="text-3xl font-bold text-gray-900"><%= t('.title', name: (current_user.name.presence || current_user.email).split(/[\s@]/).first) %></h1>
       <p class="mt-1 text-sm text-gray-500"><%= t('.subtitle') %></p>
     </div>
+    <% if current_user.archivation_enabled? && @expiring_contract_validation_records_count.positive? %>
+      <%= render 'shared/warning',
+          title: t('.validation_warning.title'),
+          content: t('.validation_warning.content', count: @expiring_contract_validation_records_count, date: @expiring_contract_validation_records.first.expires_at) %>
+      <p class="-mt-1 mb-8 text-sm text-yellow-800">
+        <%= link_to t('.validation_warning.action'), contract_validation_records_path(state: 'expiring'), class: 'underline hover:text-yellow-600 transition-colors font-semibold' %>
+      </p>
+    <% end %>
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-8">
       <%= link_to bundles_path, class: "bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 transition-colors" do %>
         <div class="mb-3">
@@ -85,6 +93,19 @@
             <p class="text-sm font-semibold text-gray-900"><%= t('.quick_actions.verify_signature') %></p>
             <p class="text-xs text-gray-500 mt-0.5"><%= t('.quick_actions.verify_signature_subtitle') %></p>
           </div>
+        <% end %>
+        <% if current_user.archivation_enabled? %>
+          <%= link_to contract_validation_records_path, class: "bg-white rounded-lg border border-gray-200 p-5 flex items-center gap-4 hover:border-yellow-300 transition-all group has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" do %>
+            <div class="h-12 w-12 rounded-lg bg-yellow-500 flex items-center justify-center shrink-0 group-hover:bg-yellow-600 transition-colors">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5A2.25 2.25 0 0119.5 12.75v6A2.25 2.25 0 0117.25 21h-10.5A2.25 2.25 0 014.5 18.75v-6A2.25 2.25 0 016.75 10.5z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900"><%= t('.quick_actions.validation_archive') %></p>
+              <p class="text-xs text-gray-500 mt-0.5"><%= t('.quick_actions.validation_archive_subtitle') %></p>
+            </div>
+          <% end %>
         <% end %>
       </div>
     </div>
