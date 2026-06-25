@@ -132,16 +132,23 @@ class Session < ApplicationRecord
 
   def accept_signed_file(signed_file)
     decoded_signed_file = decode_signed_file!(signed_file)
-    validate_signed_file!(decoded_signed_file)
+    validation_result = validate_signed_file!(decoded_signed_file)
 
     ActiveRecord::Base.transaction do
       new_filename = generate_signed_filename
       new_content_type = new_filename.ends_with?(".asice") ? "application/vnd.etsi.asic-e+zip" : "application/pdf"
-      contract.signed_document.purge if contract.signed_document.attached?
-      contract.signed_document.attach(
-        io: StringIO.new(decoded_signed_file),
+      version = contract.add_signed_content_version!(
+        content: decoded_signed_file,
         filename: new_filename,
-        content_type: new_content_type
+        content_type: new_content_type,
+        origin: "signing"
+      )
+      contract.persist_validation_record!(
+        contract_content_version: version,
+        validation_result: validation_result,
+        signed_content: decoded_signed_file,
+        filename: new_filename,
+        session: self
       )
       save!
     end
@@ -183,6 +190,8 @@ class Session < ApplicationRecord
     raise "Signed document signatures are invalid" unless validation_result.signatures.any? { |signature| signature.valid }
 
     ensure_signed_content_matches_contract!(validation_result)
+
+    validation_result
   ensure
     validation_blob&.purge
   end

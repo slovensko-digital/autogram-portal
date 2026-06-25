@@ -116,6 +116,21 @@ module ApplicationHelper
       Array(document_info[:unsigned_objects]).map { |object| signature_validation_object_name(object) }.compact_blank
   end
 
+  def signature_validation_format_datetime(value)
+    return if value.blank?
+
+    parsed_value = case value
+    when Time, ActiveSupport::TimeWithZone
+      value
+    else
+      Time.zone.parse(value.to_s)
+    end
+
+    parsed_value&.strftime("%d. %b %Y %H:%M:%S")
+  rescue ArgumentError
+    nil
+  end
+
   private
 
   def signature_validation_contract_documents(contract)

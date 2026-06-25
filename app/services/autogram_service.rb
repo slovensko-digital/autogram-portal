@@ -136,22 +136,40 @@ class AutogramService
     end
   end
 
+  class AutogramServiceError < StandardError
+    def message
+      I18n.t("autogram_service.errors.#{self.class.name.demodulize.underscore}", default: super)
+    end
+  end
+  class CertificateExpiredError < AutogramService::AutogramServiceError; end
+  class ServiceUnavailableError < AutogramService::AutogramServiceError; end
+  class UnknownResponseError < AutogramService::AutogramServiceError; end
+
   def extend_signatures(document, target_level: "T")
     return nil if document.content.nil?
 
+    file_content = Base64.strict_encode64(document.content)
     begin
-      file_content = Base64.strict_encode64(document.content)
       response = call_autogram_extend_api(file_content, target_level: target_level)
-
-      raise "Error communicating with Autogram service: #{response.status}" unless response.success?
-
-      data = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
-      Base64.decode64(data["content"])
-
     rescue StandardError => e
       Rails.logger.warn "Autogram extend signatures service not available: #{e.message}"
-      nil
+      raise ServiceUnavailableError
     end
+
+    if response.success?
+      begin
+        data = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
+        return Base64.decode64(data["content"])
+      rescue StandardError => e
+        raise UnknownResponseError
+      end
+    end
+
+    if response.status == 422 && response.body["code"] == "CERTIFICATE_EXPIRED"
+      raise CertificateExpiredError
+    end
+
+    raise ServiceUnavailableError
   end
 
   private
@@ -287,7 +305,8 @@ class AutogramService
       certificateInfo: {
         subject: signing_cert["subjectDN"],
         issuer: signing_cert["issuerDN"],
-        qualification: signing_cert["qualification"]
+        qualification: signing_cert["qualification"],
+        notAfter: signing_cert["notAfter"]
       },
       signedObjects: signed_objects,
       unsignedObjects: unsigned_objects,

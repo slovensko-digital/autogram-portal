@@ -1,0 +1,99 @@
+<main>
+  <div class="mx-auto max-w-6xl px-6 pb-24 pt-10 lg:px-8">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+      <p class="mt-1 text-sm text-gray-500"><%= t('.subtitle') %></p>
+    </div>
+
+    <%= form_with url: contract_validation_records_path, method: :get, local: true, class: "mb-5 flex flex-col sm:flex-row sm:items-center gap-3" do |f| %>
+      <div class="flex items-center gap-2">
+        <%= f.label :state, t('.filter_state'), class: "text-sm font-medium text-gray-700 whitespace-nowrap" %>
+        <%= f.select :state,
+              [[t('.state_all'), 'all'], [t('.state_expiring'), 'expiring'], [t('.state_expired'), 'expired'], [t('.state_healthy'), 'healthy'], [t('.state_unknown'), 'unknown'], [t('.state_notexpired'), 'notexpired']],
+              { selected: @state },
+              class: "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
+              onchange: "this.form.submit()" %>
+      </div>
+      <div class="flex items-center gap-2">
+        <%= f.label :sort, t('.filter_sort'), class: "text-sm font-medium text-gray-700 whitespace-nowrap" %>
+        <%= f.select :sort,
+              [[t('.sort_deadline'), 'deadline'], [t('.sort_newest'), 'newest'], [t('.sort_oldest'), 'oldest']],
+              { selected: @sort },
+              class: "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
+              onchange: "this.form.submit()" %>
+      </div>
+    <% end %>
+
+    <% if @contract_validation_records.any? %>
+      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="divide-y divide-gray-100">
+          <% @contract_validation_records.each do |record| %>
+            <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+              <div class="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-semibold text-gray-900"><%= record.filename %></span>
+                  <% if record.signature_levels.any? %>
+                    <span class="text-xs text-gray-400"><%= record.signature_levels.map { |level| t("signature_parameters.level.#{level.downcase}", default: level) }.join(', ') %></span>
+                  <% end %>
+                </div>
+                <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+                  <span><%= t('.version_label') %>: <%= record.source_version_number %></span>
+                  <span><%= t('.hash_label') %>: <%= record.document_hash.first(12) %>...</span>
+                  <% if record.signer_names.any? %>
+                    <span><%= t('.signers_label') %>: <%= record.signer_names.join(', ') %></span>
+                  <% end %>
+                  <span>
+                    <%= record.source_contract_available? ? t('.source_available') : t('.source_deleted') %>
+                  </span>
+                  <% unless record.latest_for_contract? %>
+                    <span><%= t('.historical_version') %></span>
+                  <% end %>
+                </div>
+              </div>
+              <div class="hidden md:flex flex-1 items-center w-36 shrink-0">
+                <% if record.status == :expired %>
+                  <%= render 'shared/badge', color: 'red', label: t('.status_expired') %>
+                <% elsif record.status == :expiring %>
+                  <%= render 'shared/badge', color: 'yellow', label: t('.status_expiring') %>
+                <% elsif record.status == :unknown %>
+                  <%= render 'shared/badge', color: 'gray', label: t('.status_unknown') %>
+                <% else %>
+                  <%= render 'shared/badge', color: 'green', label: t('.status_healthy') %>
+                <% end %>
+              </div>
+              <div class="hidden md:block w-36 shrink-0 text-sm text-gray-500">
+                <%= record.expires_at.present? ? record.expires_at.strftime('%d.%m.%Y %H:%M') : t('.unknown_expiry') %>
+              </div>
+              <div class="flex items-center gap-6 shrink-0 justify-end">
+                <% if record.source_contract_available? %>
+                  <%= link_to t('.view_contract'), contract_path(record.contract), class: "hidden underline sm:inline text-sm text-blue-600 hover:text-blue-700 transition-colors" %>
+                <% end %>
+                <% if record.refresh_action_available? %>
+                  <%= link_to t('.refresh_archive'), refresh_contract_validation_record_path(record),
+                              data: { turbo_method: :post, turbo_confirm: t('.refresh_confirm') },
+                              class: "hidden underline sm:inline text-sm text-yellow-700 hover:text-yellow-800 transition-colors" %>
+                <% end %>
+                <%= link_to t('actions.delete'), contract_validation_record_path(record),
+                            data: { turbo_method: :delete, turbo_confirm: t('contract_validation_records.destroy.confirm') },
+                            class: "underline text-sm font-medium text-red-500 hover:text-red-700 transition-colors" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-lg border border-gray-200 text-center py-16">
+        <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+        <h3 class="mt-3 text-sm font-semibold text-gray-900"><%= t('.empty_title') %></h3>
+        <p class="mt-1 text-sm text-gray-500"><%= t('.empty_message') %></p>
+      </div>
+    <% end %>
+  </div>
+</main>

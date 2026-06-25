@@ -26,6 +26,19 @@
 #
 class Contract < ApplicationRecord
   ValidationEntry = Struct.new(:label, :validation_result, keyword_init: true)
+  MissingSignedDocument = Struct.new(:contract) do
+    def attached?
+      false
+    end
+
+    def blank?
+      true
+    end
+
+    def present?
+      false
+    end
+  end
 
   belongs_to :user, optional: true
   belongs_to :bundle, optional: true
@@ -33,10 +46,11 @@ class Contract < ApplicationRecord
   has_many :signer_contracts, dependent: :destroy
   has_many :signers, through: :signer_contracts
   has_many :recipients, through: :signers
+  has_many :content_versions, -> { order(version_number: :desc, id: :desc) }, class_name: "ContractContentVersion", dependent: :destroy
+  has_many :contract_validation_records, dependent: :nullify
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
   has_many :sessions, through: :signer_contracts
-  has_one_attached :signed_document
 
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
   accepts_nested_attributes_for :signature_parameters
@@ -55,6 +69,7 @@ class Contract < ApplicationRecord
   before_validation :expand_asice_container_documents, on: :create
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
+  after_commit :schedule_existing_signed_content_capture, on: :create
 
   scope :anonymous, -> { where(user_id: nil).where(bundle_id: nil) }
   scope :awaiting_signature_for, ->(user) {
@@ -82,46 +97,83 @@ class Contract < ApplicationRecord
     Turbo::StreamsChannel.broadcast_action_to(self, action: :refresh)
   end
 
-  def documents_to_sign
-    return documents unless signed_document.attached?
+  def latest_content_version
+    if association(:content_versions).loaded?
+      content_versions.max_by { |version| [ version.version_number.to_i, version.id.to_i ] }
+    else
+      content_versions.first
+    end
+  end
 
-    [ Document.new(blob: signed_document.blob) ]
+  def signed_document_versions
+    association(:content_versions).loaded? ? content_versions.sort_by { |version| [ -version.version_number.to_i, -version.id.to_i ] } : content_versions
+  end
+
+  def signed_document
+    latest_content_version&.file || MissingSignedDocument.new(self)
+  end
+
+  def signed_document_attached?
+    latest_content_version&.file&.attached? || false
+  end
+
+  def add_signed_content_version!(content:, filename:, content_type:, origin:, created_at: Time.current)
+    raise "Contract must be persisted before adding signed content versions" unless persisted?
+
+    version = content_versions.build(
+      version_number: next_content_version_number,
+      origin: origin,
+      created_at: created_at,
+      updated_at: created_at
+    )
+    version.file.attach(
+      io: StringIO.new(content),
+      filename: filename,
+      content_type: content_type
+    )
+    version.save!
+    version
+  end
+
+  def documents_to_sign
+    return documents unless signed_document_attached?
+
+    [ latest_content_version.document ]
   end
 
   def awaiting_signature?
-    signed_document.blank? || bundle&.awaiting_recipients?(contract: self)
+    !signed_document_attached? || bundle&.awaiting_recipients?(contract: self)
   end
 
   def extendable_signatures?(target_level: "T")
-    return Document.new(blob: signed_document.blob).extendable_signatures?(target_level: target_level) if signed_document.attached?
+    return latest_content_version.extendable_signatures?(target_level: target_level) if signed_document_attached?
 
     return false unless documents.count == 1
     documents.first.extendable_signatures?(target_level: target_level)
   end
 
   def available_extension_target_levels
-    return Document.new(blob: signed_document.blob).available_extension_target_levels if signed_document.attached?
+    return latest_content_version.available_extension_target_levels if signed_document_attached?
 
     return [] unless documents.count == 1
     documents.first.available_extension_target_levels
   end
 
-  def extend_signatures!(target_level: "T")
+  def extend_signatures!(target_level: "T", source_content_version: latest_content_version)
     return unless extendable_signatures?(target_level: target_level)
 
-    if signed_document.attached?
-      document = Document.new(blob: signed_document.blob)
-      document.extend_signatures!(target_level: target_level)
-      signed_document.purge
-      signed_document.attach(
-        io: StringIO.new(document.content),
-        filename: document.filename,
-        content_type: document.content_type
-      )
-      save!
-    else
-      documents.first.extend_signatures!(target_level: target_level)
-    end
+    source_document = source_content_version&.document || documents.first
+    raise "No signed content is available for extension" if source_document.blank?
+
+    extended_content = AutogramEnvironment.autogram_service.extend_signatures(source_document, target_level: target_level)
+    version = add_signed_content_version!(
+      content: extended_content,
+      filename: source_document.filename,
+      content_type: source_document.content_type,
+      origin: "extension"
+    )
+    persist_validation_record!(contract_content_version: version)
+    version
   end
 
   def current_avm_session
@@ -170,16 +222,38 @@ class Contract < ApplicationRecord
   end
 
   def validation_results
-    if signed_document.attached?
+    if signed_document_attached?
       [ ValidationEntry.new(
-          label: signed_document.filename.to_s,
-          validation_result: Document.new(blob: signed_document.blob).validation_result
+          label: latest_content_version.filename.to_s,
+          validation_result: latest_content_version.validation_result
         ) ]
     else
-      documents.map do |document|
+      documents.order(:id).map do |document|
         ValidationEntry.new(label: document.filename.to_s, validation_result: document.validation_result)
       end
     end
+  end
+
+  def persist_validation_record!(contract_content_version: latest_content_version, validation_result: nil, signed_content: nil, filename: nil, session: nil)
+    owner = user || bundle&.author
+    return if owner.blank? || !owner.archivation_enabled?
+    # return if contract_content_version.blank?
+
+    signed_content ||= contract_content_version.content
+    filename ||= contract_content_version.filename
+    validation_result ||= contract_content_version.validation_result(skip_cache: true)
+
+    # return if signed_content.blank? || filename.blank?
+    # return if validation_result.blank? || !validation_result.valid_response? || !validation_result.has_signatures?
+
+    ContractValidationRecord.capture!(
+      contract: self,
+      contract_content_version: contract_content_version,
+      validation_result: validation_result,
+      signed_content: signed_content,
+      filename: filename,
+      session: session
+    )
   end
 
   private
@@ -214,7 +288,7 @@ class Contract < ApplicationRecord
   end
 
   def expand_asice_container_documents
-    return if signed_document.attached?
+    return if signed_document_attached?
     return unless documents.one?
 
     container_document = documents.first
@@ -230,11 +304,72 @@ class Contract < ApplicationRecord
         document.build_xdc_parameters if extracted_document.xdcf
       end
     end
-    signed_document.attach(
-      io: StringIO.new(extractor.container_content),
+    build_signed_content_version(
+      content: extractor.container_content,
       filename: container_document.filename,
-      content_type: container_document.content_type
+      content_type: container_document.content_type,
+      origin: "uploaded_signed"
     )
+  end
+
+  def next_content_version_number
+    versions = if association(:content_versions).loaded?
+      content_versions.map(&:version_number)
+    else
+      content_versions.pluck(:version_number)
+    end
+
+    versions.compact.max.to_i + 1
+  end
+
+  def build_signed_content_version(content:, filename:, content_type:, origin:, created_at: Time.current)
+    content_versions.build(
+      version_number: next_content_version_number,
+      origin: origin,
+      created_at: created_at,
+      updated_at: created_at
+    ).tap do |version|
+      version.file.attach(
+        io: StringIO.new(content),
+        filename: filename,
+        content_type: content_type
+      )
+    end
+  end
+
+  def capture_existing_signed_content!
+    if latest_content_version.present?
+      persist_validation_record!
+      return
+    end
+
+    return unless documents.one?
+
+    document = documents.first
+    validation_result = document.validation_result(skip_cache: true)
+    return unless validation_result.valid_response?
+    return unless validation_result.has_signatures?
+
+    version = add_signed_content_version!(
+      content: document.content,
+      filename: document.filename,
+      content_type: document.content_type,
+      origin: "uploaded_signed"
+    )
+    persist_validation_record!(
+      contract_content_version: version,
+      validation_result: validation_result,
+      signed_content: document.content,
+      filename: document.filename
+    )
+  end
+
+  def schedule_existing_signed_content_capture
+    owner = user || bundle&.author
+    return if owner.blank? || !owner.archivation_enabled?
+    return unless latest_content_version.present? || documents.one?
+
+    ContractValidationRecordCaptureJob.perform_later(id)
   end
 
   def associate_with_bundle_recipients

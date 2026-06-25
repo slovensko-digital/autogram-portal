@@ -17,13 +17,19 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           </div>
           <% if @contract.signed_document.attached? %>
-            <div class="flex-shrink-0">
+            <div class="flex flex-shrink-0 gap-2">
               <%= link_to signed_document_contract_path(@contract),
                           class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
                 <svg class="h-5 w-5 mr-2 text-white-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                 </svg>
                 <%= t('actions.download') %>
+              <% end %>
+              <% if current_user&.archivation_enabled? %>
+                <%= link_to content_versions_contract_path(@contract),
+                            class: "inline-flex items-center px-4 py-2 border border-blue-300 rounded-md text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  <%= t('.version_history') %>
+                <% end %>
               <% end %>
             </div>
           <% end %>

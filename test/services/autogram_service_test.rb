@@ -44,6 +44,40 @@ class AutogramServiceTest < ActiveSupport::TestCase
     assert_equal [ "PdfDocument.pdf" ], validation_result.signatures.second.signedObjects.map { |object| object["filename"] }
   end
 
+  test "parse_validation_response preserves signing certificate and timestamp expiry" do
+    response = {
+      "signatures" => [
+        {
+          "validationResult" => "TOTAL_PASSED",
+          "level" => "PAdES_BASELINE_LTA",
+          "claimedSigningTime" => "2026-06-02T12:25:52 +0000",
+          "signingCertificate" => {
+            "qualification" => "QESIG",
+            "issuerDN" => "CN=Issuer",
+            "subjectDN" => "CN=Autogram Test",
+            "notAfter" => "2028-06-02T12:25:52 +0000"
+          },
+          "areQualifiedTimestamps" => true,
+          "timestamps" => [
+            {
+              "timestampType" => "ARCHIVE_TIMESTAMP",
+              "productionTime" => "2026-06-02T12:26:52 +0000",
+              "qualification" => "QTS",
+              "subjectDN" => "CN=Timestamp Authority",
+              "notAfter" => "2030-06-02T12:26:52 +0000"
+            }
+          ]
+        }
+      ]
+    }
+
+    validation_result = AutogramService.new.send(:parse_validation_response, response)
+    signature = validation_result.signatures.first
+
+    assert_equal "2028-06-02T12:25:52 +0000", signature.certificateInfo[:notAfter]
+    assert_equal "2030-06-02T12:26:52 +0000", signature.timestampInfo[:timestamps].first.notAfter
+  end
+
   class AutogramValidationResultTest < ActiveSupport::TestCase
     test "qualified? returns true for valid qualified signature" do
       signature = AutogramService::ValidationSignature.new(

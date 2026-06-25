@@ -22,6 +22,11 @@
               <li>
                 <%= render "shared/left_menu_item", path: received_bundles_path, label: t('header.links.received_bundles'), icon: :inbox %>
               </li>
+              <% if current_user.archivation_enabled? %>
+                <li>
+                  <%= render "shared/left_menu_item", path: contract_validation_records_path, label: t('header.links.validation_archive'), icon: :shield %>
+                </li>
+              <% end %>
               <li>
                 <%= render "shared/left_menu_item", path: edit_user_registration_path, label: t('header.links.settings'), icon: :settings %>
               </li>
@@ -144,6 +149,10 @@
             class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(bundles_path)}" %>
         <%= link_to t('header.links.received_bundles'), received_bundles_path,
             class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(received_bundles_path)}" %>
+        <% if current_user.archivation_enabled? %>
+          <%= link_to t('header.links.validation_archive'), contract_validation_records_path,
+            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(contract_validation_records_path)}" %>
+        <% end %>
         <%= link_to t('header.links.settings'), edit_user_registration_path,
             class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(edit_user_registration_path)}" %>
       <% end %>

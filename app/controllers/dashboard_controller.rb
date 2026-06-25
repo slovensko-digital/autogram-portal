@@ -2,6 +2,15 @@ class DashboardController < ApplicationController
   before_action :authenticate_user!
 
   def index
+    latest_validation_records = current_user.archivation_enabled? ? current_user.contract_validation_records.latest_per_contract : ContractValidationRecord.none
+
+    @expiring_contract_validation_records = latest_validation_records
+                                               .expiring
+                                               .order(expires_at: :asc)
+                                               .limit(5)
+    @expiring_contract_validation_records_count = latest_validation_records
+                                                              .expiring
+                                                              .count
     @bundles_count = current_user.bundles.count
     @contracts_count = current_user.contracts.standalone.count
     @awaiting_my_signature_count = Bundle

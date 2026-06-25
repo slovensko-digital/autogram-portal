@@ -88,6 +88,9 @@ class Document < ApplicationRecord
 
   def extendable_signatures?(target_level: "T")
     return false unless has_signatures?
+    return false if validation_result.signatures.any? do |signature|
+      signature.validationResult.present? && (!signature.valid || signature.validationResult != "TOTAL_PASSED")
+    end
     return true if validation_result.signatures.any? { |signature| signature.timestampInfo.nil? }
 
     required_level = EXTENSION_TARGET_LEVELS[target_level.to_s.upcase]
@@ -99,8 +102,8 @@ class Document < ApplicationRecord
 
     if required_level == "BASELINE_LTA"
       return true unless validation_result.signatures.all? do |signature|
-        signature.dig(:timestamp_info, :timestamps)&.select { it[:type] == "ARCHIVE_TIMESTAMP" && it[:qualification] == "QTSA" }&.any? do |timestamp|
-          Time.parse(timestamp[:not_after]) > 1.year.from_now
+        signature.timestampInfo[:timestamps]&.select { it.type.in?([ "ARCHIVE_TIMESTAMP", "DOCUMENT_TIMESTAMP" ]) && it.qualification == "QTSA" }&.any? do |timestamp|
+          Time.parse(timestamp.notAfter) > 1.year.from_now
         end
       end
     end
@@ -149,8 +152,6 @@ class Document < ApplicationRecord
 
   def extend_signatures!(target_level: "T")
     extended_content = AutogramEnvironment.autogram_service.extend_signatures(self, target_level: target_level)
-
-    raise "No extended content received from Autogram service" if extended_content.nil?
 
     blob.attach(
       io: StringIO.new(extended_content),

@@ -44,6 +44,7 @@ class User < ApplicationRecord
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
   has_many :identities, dependent: :destroy
   has_many :contracts, dependent: :destroy
+  has_many :contract_validation_records, dependent: :destroy
   has_many :policy_consents, class_name: "UserPolicyConsent", dependent: :destroy
 
   enum :qscd, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
@@ -93,8 +94,14 @@ class User < ApplicationRecord
     features.include? feature.to_s
   end
 
+  scope :with_feature, ->(feature) { where("? = ANY(features)", feature.to_s) }
+
   def admin?
     feature_enabled?(:admin)
+  end
+
+  def archivation_enabled?
+    feature_enabled?(:archivation)
   end
 
   def signature_request_allowed?

@@ -14,9 +14,9 @@ class ContractsController < ApplicationController
     contracts = current_user.contracts.standalone
     contracts = case @state
     when "awaiting"
-      contracts.where.missing(:signed_document_attachment)
+      contracts.left_outer_joins(:content_versions).where(contract_content_versions: { id: nil })
     when "completed"
-      contracts.where.associated(:signed_document_attachment)
+      contracts.joins(:content_versions).distinct
     else
       contracts
     end
@@ -57,6 +57,12 @@ class ContractsController < ApplicationController
 
   def show_bundle
     head :not_found unless @contract.bundle
+  end
+
+  def content_versions
+    return head :forbidden unless author_of_contract? && current_user&.archivation_enabled?
+
+    @content_versions = @contract.signed_document_versions.with_attached_file
   end
 
   def actions

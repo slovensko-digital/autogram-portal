@@ -66,8 +66,9 @@ class ContractTest < ActiveSupport::TestCase
     )
 
     assert contract.save, contract.errors.full_messages.to_sentence
-    assert contract.signed_document.attached?
+    assert contract.signed_document_attached?
     assert_equal "container.asice", contract.signed_document.filename.to_s
+    assert_equal 1, contract.content_versions.count
     assert_equal [ "contract-a.txt", "contract-b.txt" ], contract.documents.map(&:filename).sort
     assert_equal "XAdES", contract.signature_parameters.format
   end
@@ -88,8 +89,9 @@ class ContractTest < ActiveSupport::TestCase
     )
 
     assert contract.save, contract.errors.full_messages.to_sentence
-    assert contract.signed_document.attached?
+    assert contract.signed_document_attached?
     assert_equal "pending.asice", contract.signed_document.filename.to_s
+    assert_equal 1, contract.content_versions.count
     assert_equal [ "contract-a.txt", "contract-b.pdf", "contract-b.txt", "document.xdcf" ], contract.documents.map(&:filename).sort
     xdcf_document = contract.documents.find { |document| document.filename == "document.xdcf" }
     assert_equal "application/vnd.gov.sk.xmldatacontainer+xml", xdcf_document.content_type
@@ -98,7 +100,75 @@ class ContractTest < ActiveSupport::TestCase
     uploaded_file&.tempfile&.close!
   end
 
+  test "extend_signatures creates a new content version without overwriting the previous one" do
+    contract = Contract.create!(
+      user: @user,
+      documents_attributes: [ { blob: pdf_blob("original.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    initial_version = contract.add_signed_content_version!(
+      content: "signed v1",
+      filename: "original-signed.pdf",
+      content_type: "application/pdf",
+      origin: "uploaded_signed"
+    )
+
+    fake_service = Struct.new(:extended_content) do
+      def validate_signatures(_document)
+        AutogramService::ValidationResult.new(
+          hasSignatures: true,
+          signatures: [
+            AutogramService::ValidationSignature.new(
+              signerName: "Autogram Test",
+              signingTime: Time.current,
+              signatureLevel: "BASELINE_T",
+              validationResult: "TOTAL_PASSED",
+              valid: true,
+              certificateInfo: {
+                qualification: "QESIG",
+                notAfter: 1.year.from_now.iso8601
+              },
+              timestampInfo: nil
+            )
+          ],
+          documentInfo: {
+            signedObjectsCount: 1,
+            unsignedObjectsCount: 0,
+            signedObjects: [],
+            unsignedObjects: []
+          }
+        )
+      end
+
+      def extend_signatures(_document, target_level:)
+        extended_content
+      end
+    end.new("signed v2")
+    environment_singleton = AutogramEnvironment.singleton_class
+    environment_singleton.send(:alias_method, :__original_autogram_service, :autogram_service)
+    environment_singleton.send(:define_method, :autogram_service) { fake_service }
+
+    contract.extend_signatures!(target_level: "LTA", source_content_version: initial_version)
+
+    contract.reload
+    assert_equal 2, contract.content_versions.count
+    assert_equal "signed v1", initial_version.reload.content
+    assert_equal "signed v2", contract.latest_content_version.content
+  ensure
+    environment_singleton.send(:remove_method, :autogram_service)
+    environment_singleton.send(:alias_method, :autogram_service, :__original_autogram_service)
+    environment_singleton.send(:remove_method, :__original_autogram_service)
+  end
+
   private
+
+  def pdf_blob(filename, content)
+    ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new(content),
+      filename: filename,
+      content_type: "application/pdf"
+    )
+  end
 
   def asice_blob(filename, entries)
     buffer = Zip::OutputStream.write_buffer do |zip|

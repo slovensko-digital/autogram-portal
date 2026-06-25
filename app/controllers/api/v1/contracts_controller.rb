@@ -24,7 +24,7 @@ class Api::V1::ContractsController < ApiController
   end
 
   def signed_document
-    if @contract.signed_document.attached?
+    if @contract.signed_document_attached?
       render partial: "api/v1/contracts/signed_document", locals: { signed_document: @contract.signed_document }
     else
       render json: { error: "No signed document available" }, status: :not_found

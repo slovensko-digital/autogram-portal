@@ -1,6 +1,12 @@
 sk:
   hello: "Ahoj svet"
 
+  autogram_service:
+    errors:
+      certificate_expired_error: "Podpisový certifikát je neplatný alebo exspirovaný."
+      service_unavailable_error: "Služba je momentálne nedostupná."
+      unknown_response_error: "Nepodarilo sa spracovať odpoveď zo služby."
+
   consents:
     must_accept_to_register: "Pre vytvorenie účtu musíte prijať podmienky a zásady ochrany súkromia."
     please_accept_updated_policies: "Prosím, prečítajte si a prijmite aktualizované zásady."
@@ -30,6 +36,9 @@ sk:
               blank: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
               acceptance: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
 
+  errors:
+    archivation_disabled: "Funkcia archivácie dokumentov je pre váš účet momentálne vypnutá. Kontaktujte administrátora."
+
   common:
     important: "Dôležité"
     desktop_required: "Potrebný stolný počítač"
@@ -40,7 +49,7 @@ sk:
     continue_signing: "Pokračovať na podpisovanie"
     download: "Stiahnuť"
     download_contract: "Stiahnuť dokument"
-    close: "Zavriet"
+    close: "Zavrieť"
     delete: "Zmazať"
     remove: "Odstrániť"
     save: "Uložiť"
@@ -66,6 +75,7 @@ sk:
       contracts: "Dokumenty"
       bundles: "Balíky"
       received_bundles: "Prijaté na podpis"
+      validation_archive: "Archív podpisov"
       settings: "Nastavenia"
       new_contract: "Nový dokument"
       electronic_onboarding: "Elektronické podpisovanie"
@@ -462,6 +472,7 @@ sk:
     show:
       all_contracts: "Všetky dokumenty"
       title: "Dokument"
+      version_history: "História verzií"
       uuid: "UUID: %{uuid}"
       part_of_bundle: "Súčasť balíka"
       part_of_bundle_description: "Tento dokument je súčasťou balíka dokumentov."
@@ -477,6 +488,23 @@ sk:
       destroy_contract: "Zmazať dokument"
       destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
       update_contract: "Aktualizovať dokument"
+    content_versions:
+      back_to_contract: "Späť na dokument"
+      title: "História obsahu dokumentu"
+      subtitle: "Skontrolujte a stiahnite aktuálne aj historické podpísané verzie tohto dokumentu."
+      download_latest: "Stiahnuť aktuálnu verziu"
+      download_version: "Stiahnuť"
+      current_version: "Aktuálna"
+      version_label: "Verzia"
+      origin_label: "Pôvod"
+      created_at_label: "Vytvorené"
+      empty_title: "Zatiaľ žiadne podpísané verzie"
+      empty_message: "Podpísané verzie obsahu sa tu zobrazia po podpísaní dokumentu."
+      origins:
+        signing: "Vytvorené podpisom"
+        extension: "Vytvorené archivačným rozšírením"
+        uploaded_signed: "Nahraté s existujúcimi podpismi"
+        legacy_signed_document: "Migrovaný pôvodný podpísaný obsah"
     destroy:
       success: "Dokument bol úspešne zmazaný."
       failure: "Nepodarilo sa zmazať dokument."
@@ -730,10 +758,54 @@ sk:
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
 
+  contract_validation_records:
+    index:
+      title: "Archív podpisov"
+      subtitle: "Uložené validačné metadáta vašich podpísaných dokumentov"
+      version_label: "Verzia"
+      filter_state: "Stav"
+      filter_sort: "Zoradiť"
+      state_all: "Všetky"
+      state_expiring: "Exspirujú do 2 mesiacov"
+      state_expired: "Exspirované"
+      state_healthy: "V poriadku"
+      state_unknown: "Neznáma exspirácia"
+      state_notexpired: "Neexspirované"
+      sort_deadline: "Najbližšia exspirácia"
+      sort_newest: "Najnovšie"
+      sort_oldest: "Najstaršie"
+      hash_label: "SHA-256"
+      expires_at_label: "Exspirácia"
+      archive_expires_at_label: "Exspirácia archívnej pečiatky"
+      signers_label: "Podpisujúci"
+      unknown_expiry: "Neznáma"
+      source_available: "Zdrojový dokument je dostupný"
+      source_deleted: "Zdrojový dokument bol zmazaný"
+      historical_version: "Historická verzia"
+      status_expired: "Exspirované"
+      status_expiring: "Vyžaduje pozornosť"
+      status_healthy: "V poriadku"
+      status_unknown: "Neznáme"
+      view_contract: "Zobraziť dokument"
+      refresh_archive: "Obnoviť do LTA"
+      refresh_confirm: "Vytvoriť novú LTA archívnu verziu pre tento podpísaný obsah?"
+      empty_title: "Zatiaľ žiadne validačné metadáta"
+      empty_message: "Validačné metadáta sa tu zobrazia po podpísaní dokumentu."
+    destroy:
+      success: "Validačné metadáta boli úspešne zmazané."
+      confirm: "Naozaj chcete zmazať tieto uložené validačné metadáta?"
+    refresh:
+      scheduled: "Obnovenie archívnej verzie bolo naplánované."
+      not_refreshable: "Tento validačný záznam už nie je možné obnoviť."
+
   dashboard:
     index:
       title: "Vitajte späť, %{name}"
       subtitle: "Prehľad vašich dokumentov a podpisov"
+      validation_warning:
+        title: "Archív podpisov vyžaduje pozornosť"
+        content: "%{count} záznamov podpísaných dokumentov vyžaduje zásah pred %{date}."
+        action: "Otvoriť archív podpisov"
       stats:
         my_bundles: "Moje balíky"
         my_contracts: "Moje dokumenty"
@@ -746,6 +818,8 @@ sk:
         upload_document_subtitle: "Začnite nový proces podpisovania"
         verify_signature: "Overiť podpis"
         verify_signature_subtitle: "Skontrolujte platnosť podpisu"
+        validation_archive: "Archív podpisov"
+        validation_archive_subtitle: "Skontrolujte uložené metadáta exspirácie"
       recent_bundles:
         title: "Nedávne balíky"
         subtitle: "Prehľad vašich posledných balíkov"
@@ -1210,6 +1284,7 @@ sk:
       subject: "Predmet"
       issuer: "Vydavateľ"
       qualification: "Kvalifikácia"
+      not_after: "Platnosť do"
       timestamps: "Časové pečiatky"
       timestamp: "Časová pečiatka"
       wo_timestamp: "Bez časovej pečiatky"

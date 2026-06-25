@@ -150,12 +150,12 @@ class ContractsValidationTest < ActionController::TestCase
     contract.documents.build(blob: blob)
     contract.save!
 
-    signed_blob = ActiveStorage::Blob.create_and_upload!(
-      io: StringIO.new("signed container content"),
+    contract.add_signed_content_version!(
+      content: "signed container content",
       filename: "contract-signed.asice",
-      content_type: "application/vnd.etsi.asic-e+zip"
+      content_type: "application/vnd.etsi.asic-e+zip",
+      origin: "uploaded_signed"
     )
-    contract.signed_document.attach(signed_blob)
 
     service = RecordingValidationService.new(
       "contract-signed.asice" => AutogramService::ValidationResult.new(
@@ -363,14 +363,14 @@ class ContractsValidationTest < ActionController::TestCase
     contract.reload
 
     if signed_document_name
-      signed_blob = ActiveStorage::Blob.create_and_upload!(
-        io: StringIO.new("signed container content"),
+      contract.add_signed_content_version!(
+        content: "signed container content",
         filename: signed_document_name,
-        content_type: "application/vnd.etsi.asic-e+zip"
+        content_type: "application/vnd.etsi.asic-e+zip",
+        origin: "uploaded_signed"
       )
-      contract.signed_document.attach(signed_blob)
-    elsif contract.signed_document.attached?
-      contract.signed_document.detach
+    elsif contract.signed_document_attached?
+      contract.content_versions.destroy_all
     end
 
     contract

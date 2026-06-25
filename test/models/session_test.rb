@@ -57,9 +57,114 @@ class SessionTest < ActiveSupport::TestCase
     assert_equal true, session.completion_event_payload[:bundle_completed]
   end
 
+  test "accept_signed_file persists validation metadata for authored contracts" do
+    users(:one).update_column(:features, [ "archivation" ])
+    contract = create_contract(user: users(:one))
+    session = create_session_for(contract)
+    validation_result = AutogramService::ValidationResult.new(
+      hasSignatures: true,
+      signatures: [
+        AutogramService::ValidationSignature.new(
+          signerName: "Autogram Test",
+          signingTime: Time.parse("2026-06-02T12:25:52 +0000"),
+          signatureLevel: "BASELINE_T",
+          validationResult: "TOTAL_PASSED",
+          valid: true,
+          certificateInfo: {
+            subject: "CN=Autogram Test",
+            issuer: "CN=Issuer",
+            qualification: "QESIG",
+            notAfter: "2028-06-02T12:25:52 +0000"
+          },
+          timestampInfo: nil
+        )
+      ],
+      documentInfo: {
+        containerType: nil,
+        signatureForm: "PAdES",
+        signedObjectsCount: 1,
+        unsignedObjectsCount: 0,
+        signedObjects: [],
+        unsignedObjects: []
+      }
+    )
+
+    with_autogram_service(fake_validation_service(validation_result)) do
+      session.accept_signed_file(Base64.strict_encode64("signed pdf content"))
+    end
+
+    record = ContractValidationRecord.find_by!(source_contract_uuid: contract.uuid)
+
+    assert_equal users(:one), record.user
+    assert_equal "session-test-signed.pdf", record.filename
+    assert_equal Digest::SHA256.hexdigest("signed pdf content"), record.document_hash
+    assert_equal [ "BASELINE_T" ], record.signature_levels
+    assert_equal "AutogramSession", record.validation_details["captured_via"]
+    assert_equal 1, record.source_version_number
+    assert_equal 1, contract.reload.content_versions.count
+  end
+
+  test "accept_signed_file does not persist validation metadata when archivation is disabled" do
+    contract = create_contract(user: users(:one))
+    session = create_session_for(contract)
+    validation_result = AutogramService::ValidationResult.new(
+      hasSignatures: true,
+      signatures: [
+        AutogramService::ValidationSignature.new(
+          signerName: "Autogram Test",
+          signingTime: Time.parse("2026-06-02T12:25:52 +0000"),
+          signatureLevel: "BASELINE_T",
+          validationResult: "TOTAL_PASSED",
+          valid: true,
+          certificateInfo: {
+            subject: "CN=Autogram Test",
+            issuer: "CN=Issuer",
+            qualification: "QESIG",
+            notAfter: "2028-06-02T12:25:52 +0000"
+          },
+          timestampInfo: nil
+        )
+      ],
+      documentInfo: {
+        containerType: nil,
+        signatureForm: "PAdES",
+        signedObjectsCount: 1,
+        unsignedObjectsCount: 0,
+        signedObjects: [],
+        unsignedObjects: []
+      }
+    )
+
+    with_autogram_service(fake_validation_service(validation_result)) do
+      session.accept_signed_file(Base64.strict_encode64("signed pdf content"))
+    end
+
+    assert_nil ContractValidationRecord.find_by(source_contract_uuid: contract.uuid)
+  end
+
   private
 
-  def create_contract
+  def fake_validation_service(validation_result)
+    Struct.new(:validation_result) do
+      def validate_signatures(_document)
+        validation_result
+      end
+    end.new(validation_result)
+  end
+
+  def with_autogram_service(fake_service)
+    environment_singleton = AutogramEnvironment.singleton_class
+    environment_singleton.send(:alias_method, :__original_autogram_service, :autogram_service)
+    environment_singleton.send(:define_method, :autogram_service) { fake_service }
+
+    yield
+  ensure
+    environment_singleton.send(:remove_method, :autogram_service)
+    environment_singleton.send(:alias_method, :autogram_service, :__original_autogram_service)
+    environment_singleton.send(:remove_method, :__original_autogram_service)
+  end
+
+  def create_contract(user: nil)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
       filename: "session-test.pdf",
@@ -67,6 +172,7 @@ class SessionTest < ActiveSupport::TestCase
     )
 
     Contract.create!(
+      user: user,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",
@@ -86,10 +192,11 @@ class SessionTest < ActiveSupport::TestCase
   end
 
   def attach_signed_document(contract)
-    contract.signed_document.attach(
-      io: StringIO.new("signed pdf content"),
+    contract.add_signed_content_version!(
+      content: "signed pdf content",
       filename: "signed.pdf",
-      content_type: "application/pdf"
+      content_type: "application/pdf",
+      origin: "uploaded_signed"
     )
   end
 end
