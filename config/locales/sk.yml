@@ -137,9 +137,6 @@ sk:
         manage_portal_instances: "Dôveryhodné portály"
         manage_portal_instances_description: "Spravujte externé inštancie Autogram Portálu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
         manage_portal_instances_link: "Spravovať dôveryhodné portály"
-        open_foreign_request: "Otvoriť cudzí odkaz"
-        open_foreign_request_description: "Vložte podpisový odkaz z inej inštancie Autogram Portálu a pokračujte v požiadavke cez tento portál."
-        open_foreign_request_link: "Otvoriť federovanú požiadavku"
         features: "Funkcie"
         features_title: "Funkcie aktuálneho používateľa"
         features_description: "Ako administrátor môžete zapínať alebo vypínať funkcie dostupné na vašom vlastnom účte. Funkcia administrátora tu zostáva vždy zapnutá."
@@ -149,10 +146,12 @@ sk:
           admin: "Administrátorský prístup"
           archivation: "Archív podpisov"
           api: "API prístup"
+          federation: "Federácia"
         feature_descriptions:
           admin: "Umožňuje prístup do administrátorských častí, napríklad správy dôveryhodných portálov a administrácie úloh."
           archivation: "Zapína archív podpisov a funkcie správy záznamov dlhodobého overovania."
           api: "Umožňuje upravovať verejný kľúč pre API a používať autentifikované integračné endpointy."
+          federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portálu."
     confirmations:
       new:
         resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"

@@ -22,9 +22,11 @@
               <li>
                 <%= render "shared/left_menu_item", path: received_bundles_path, label: t('header.links.received_bundles'), icon: :inbox %>
               </li>
-              <li>
-                <%= render "shared/left_menu_item", path: federation_requests_open_path, label: t('header.links.open_foreign_request'), icon: :link %>
-              </li>
+              <% if current_user.federation_enabled? %>
+                <li>
+                  <%= render "shared/left_menu_item", path: federation_requests_open_path, label: t('header.links.open_foreign_request'), icon: :link %>
+                </li>
+              <% end %>
               <% if current_user.archivation_enabled? %>
                 <li>
                   <%= render "shared/left_menu_item", path: contract_validation_records_path, label: t('header.links.validation_archive'), icon: :shield %>

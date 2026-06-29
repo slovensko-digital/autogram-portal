@@ -171,9 +171,6 @@ en:
         manage_portal_instances: "Trusted portals"
         manage_portal_instances_description: "Manage the external Autogram Portal instances that can exchange federated requests with this portal."
         manage_portal_instances_link: "Manage trusted portals"
-        open_foreign_request: "Open foreign request"
-        open_foreign_request_description: "Paste a signing link from another Autogram Portal instance and continue the request through this portal."
-        open_foreign_request_link: "Open federated request"
         features: "Features"
         features_title: "Current user features"
         features_description: "As an admin, you can enable or disable the features available on your own account. The admin feature is always kept enabled here."
@@ -183,10 +180,12 @@ en:
           admin: "Admin access"
           archivation: "Validation archive"
           api: "API access"
+          federation: "Federation"
         feature_descriptions:
           admin: "Allows access to administration-only areas such as trusted portal management and job administration."
           archivation: "Enables the validation archive and long-term validation record management features."
           api: "Allows editing the API public key and using authenticated integration endpoints."
+          federation: "Allows managing federated requests and integrations with other Autogram Portal instances."
     confirmations:
       new:
         resend_confirmation_instructions: "Resend confirmation instructions"
