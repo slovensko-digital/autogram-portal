@@ -102,6 +102,7 @@ Rails.application.routes.draw do
       get :autogram, on: :collection, to: "contracts/sessions#create", defaults: { type: "autogram" }
       get :eidentita, on: :collection, to: "contracts/sessions#create", defaults: { type: "eidentita" }
       get :avm, on: :collection, to: "contracts/sessions#create", defaults: { type: "avm" }
+      get :podpisuj, on: :collection, to: "contracts/sessions#create", defaults: { type: "podpisuj" }
     end
   end
 

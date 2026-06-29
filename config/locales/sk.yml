@@ -6,6 +6,7 @@ sk:
       certificate_expired_error: "Podpisový certifikát je neplatný alebo exspirovaný."
       service_unavailable_error: "Služba je momentálne nedostupná."
       unknown_response_error: "Nepodarilo sa spracovať odpoveď zo služby."
+      document_mismatch_error: "Podpisovaný dokument sa nezhoduje s pôvodným dokumentom."
 
   consents:
     must_accept_to_register: "Pre vytvorenie účtu musíte prijať podmienky a zásady ochrany súkromia."
@@ -627,6 +628,8 @@ sk:
       autogram_mobile_description: "Open-source mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
       eidentita_label: "eIdentita"
       eidentita_description: "Štátna mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
+      podpisuj_label: "Podpisuj alebo iné samostatné aplikácie"
+      podpisuj_description: "Stiahnite si dokument, podpíšte ho vo vašej aplikácii na počítači a podpísaný dokument nahrajte späť"
       sign: "Podpísať"
       continue_to_sign: "Pokračovať k podpisu"
       first_time_signing: "Podpisujete prvýkrát?"
@@ -757,6 +760,17 @@ sk:
         not_installed_desc: "Aplikácia eIdentita nie je nainštalovaná vo vašom telefóne. Stiahnite si ju z App Store alebo Google Play."
         not_installed_download_ios: "Stiahnuť z App Store"
         not_installed_download_android: "Stiahnuť z Google Play"
+      podpisuj:
+        title: "Podpíšte dokument vo vlastnej aplikácii"
+        subtitle: "Stiahnite dokument, podpíšte ho lokálne a nahrajte podpísaný dokument späť"
+        instructions_title: "Ako podpísať dokument"
+        instructions: "Stiahnite si dokument, podpíšte ho vo vašej preferovanej aplikácii (napr. Podpisuj) priamo na počítači a podpísaný dokument nahrajte späť na dokončenie."
+        download_title: "Stiahnite dokument"
+        download_desc: "Stiahnite si dokument, ktorý chcete podpísať."
+        download_button: "Stiahnuť dokument"
+        upload_title: "Nahrajte podpísaný dokument"
+        upload_desc: "Po podpísaní nahrajte podpísaný dokument späť."
+        upload_dropzone: "Presuňte súbor sem alebo kliknite pre výber"
       error:
         title: "Chyba pri podpisovaní dokumentu"
       signed:
@@ -1246,6 +1260,13 @@ sk:
               android:
                 label: "Stiahnuť z Google Play"
                 url: "https://play.google.com/store/apps/details?id=sk.minv.eidentita"
+          podpisuj:
+            label: "Podpisuj alebo iné samostatné aplikácie"
+            description: "Dostupné len pri podpisovaní jednotlivých dokumentov bez časovej pečiatky a iba na počítači. Stiahnite si dokument, podpíšte ho v samostatnej aplikácii (napr. Podpisuj) a podpísaný dokument nahrajte späť."
+            links:
+              download:
+                label: "Stiahnuť Podpisuj"
+                url: "https://www.podpisuj.sk/download"
         qualified_signing_title: "Kvalifikované podpisovanie — čo vás čaká"
         qualified_signing_intro: "Pred samotným podpisom vás onboarding prevedie niekoľkými kontrolami, aby ste mohli úspešne vytvoriť kvalifikovaný elektronický podpis."
         qualified_signing_checks:

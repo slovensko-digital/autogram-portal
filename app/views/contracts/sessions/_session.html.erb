@@ -12,6 +12,8 @@
         <%= render "avm" %>
       <% elsif @session.autogram? %>
         <%= render "autogram" %>
+      <% elsif @session.podpisuj? %>
+        <%= render "podpisuj" %>
       <% end %>
       <!-- Footer with back button -->
       <div class="border-t border-gray-200 px-6 py-4">

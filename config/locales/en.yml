@@ -35,6 +35,7 @@ en:
       certificate_expired_error: "The signing certificate is invalid or expired."
       service_unavailable_error: "The service is currently unavailable."
       unknown_response_error: "Failed to process the response from the service."
+      document_mismatch_error: "The signed document does not match the original document."
 
   consents:
     must_accept_to_register: "You must accept the terms and privacy policy to create an account."
@@ -708,6 +709,8 @@ en:
       autogram_mobile_description: "Open-source mobile app - scan QR code or open AVM app directly"
       eidentita_label: "eIdentita"
       eidentita_description: "Slovak mobile app for qualified electronic signatures - scan QR code or open eIdentita app directly"
+      podpisuj_label: "Podpisuj or other standalone applications"
+      podpisuj_description: "Download the document, sign it in your application on the computer, and upload the signed document back"
       sign: "Sign"
       continue_to_sign: "Continue to signing"
       first_time_signing: "Signing for the first time?"
@@ -832,6 +835,17 @@ en:
         not_installed_desc: "The eIdentita app is not installed on your phone. Download it from the App Store or Google Play."
         not_installed_download_ios: "Download from App Store"
         not_installed_download_android: "Download from Google Play"
+      podpisuj:
+        title: "Sign the document in your own application"
+        subtitle: "Download the document, sign it locally, and upload the signed document back"
+        instructions_title: "How to sign the document"
+        instructions: "Download the document, sign it in your preferred application (e.g. Podpisuj) on your computer, and upload the signed document back to complete signing."
+        download_title: "Download the document"
+        download_desc: "Download the document you want to sign."
+        download_button: "Download document"
+        upload_title: "Upload the signed document"
+        upload_desc: "After signing, upload the signed document back."
+        upload_dropzone: "Drop a file here or click to select"
       error:
         title: "Error signing the document"
       signed:
@@ -1323,6 +1337,13 @@ en:
               android:
                 label: "Download from Google Play"
                 url: "https://play.google.com/store/apps/details?id=sk.minv.eidentita"
+          podpisuj:
+            label: "Podpisuj or other standalone applications"
+            description: "Available only when signing individual documents without a timestamp and on desktop only. Download the document, sign it in a standalone application (e.g. Podpisuj), and upload the signed document back."
+            links:
+              download:
+                label: "Download Podpisuj"
+                url: "https://www.podpisuj.sk/download"
         qualified_signing_title: "Qualified signing — what to expect"
         qualified_signing_intro: "Before signing, onboarding walks you through a few checks required for creating a qualified electronic signature."
         qualified_signing_checks:
