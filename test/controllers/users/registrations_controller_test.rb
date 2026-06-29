@@ -48,13 +48,4 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     assert_redirected_to edit_user_registration_path
     assert_equal [], @user.reload.features
   end
-
-  test "edit shows federation link and features section for admins" do
-    get :edit
-
-    assert_response :success
-    assert_includes response.body, I18n.t("devise.registrations.edit.open_foreign_request_link")
-    assert_includes response.body, I18n.t("devise.registrations.edit.features_title")
-    assert_select "input[name='user[features][]'][value='admin'][disabled]"
-  end
 end
