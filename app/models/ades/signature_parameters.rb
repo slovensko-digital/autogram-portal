@@ -44,7 +44,10 @@ module Ades
       end
 
       result = document.validation_result.documentInfo
-      case [ result[:signature_form], result[:container_type] ]
+      signature_form = result[:signatureForm] || result[:signature_form]
+      container_type = result[:containerType] || result[:container_type]
+
+      case [ signature_form, container_type ]
       when [ "PAdES", nil ]
         [ "PAdES" ]
       when [ "XAdES", "ASiC_E" ]

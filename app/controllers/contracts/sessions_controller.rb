@@ -20,6 +20,8 @@ class Contracts::SessionsController < ApplicationController
       create_avm_session
     when "autogram"
       create_autogram_session
+    when "podpisuj"
+      create_podpisuj_session
     else
       return render plain: "Invalid session type", status: :bad_request
     end
@@ -68,7 +70,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def upload
-    return head :not_found unless @session.eidentita? || @session.autogram?
+    return head :not_found unless @session.eidentita? || @session.autogram? || @session.podpisuj?
 
     if params[:file].present?
       @session.accept_signed_file(Base64.strict_encode64(params[:file].tempfile.read))
@@ -81,8 +83,9 @@ class Contracts::SessionsController < ApplicationController
     end
   rescue => e
     Rails.logger.error "Error uploading signed document: #{e.message}"
+    @session.update(error_message: e.message) if @session.respond_to?(:update)
     @session.mark_failed!(e.message) if @session.respond_to?(:mark_failed!)
-    render json: { error: e.message }, status: :internal_server_error
+    render json: { error: e.message }, status: :bad_request
   end
 
   def get_webhook
@@ -206,6 +209,17 @@ class Contracts::SessionsController < ApplicationController
 
     persist_session_view_options(@signer_contract.sessions.create!(
       type: "AutogramSession",
+      signing_started_at: Time.current,
+      options: session_view_options
+    ))
+  end
+
+  def create_podpisuj_session
+    existing = @signer_contract&.sessions&.pending&.where(type: "PodpisujSession")&.first
+    return persist_session_view_options(existing) if existing
+
+    persist_session_view_options(@signer_contract.sessions.create!(
+      type: "PodpisujSession",
       signing_started_at: Time.current,
       options: session_view_options
     ))

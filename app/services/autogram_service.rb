@@ -144,6 +144,7 @@ class AutogramService
   class CertificateExpiredError < AutogramService::AutogramServiceError; end
   class ServiceUnavailableError < AutogramService::AutogramServiceError; end
   class UnknownResponseError < AutogramService::AutogramServiceError; end
+  class DocumentMismatchError < AutogramService::AutogramServiceError; end
 
   def extend_signatures(document, target_level: "T")
     return nil if document.content.nil?
@@ -170,6 +171,25 @@ class AutogramService
     end
 
     raise ServiceUnavailableError
+  end
+
+  def ensure_documents_equal(old:, new:)
+    old_content = old.map { Base64.strict_encode64(read_document_content_with_retry(it)) }
+    new_content = Base64.strict_encode64(read_document_content_with_retry(new))
+
+    begin
+      response = call_autogram_compare_api(old_content, new_content)
+    rescue StandardError => e
+      Rails.logger.warn "Autogram compare documents service not available: #{e.message}"
+      raise ServiceUnavailableError
+    end
+
+    raise DocumentMismatchError unless response.success?
+
+    data = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
+    raise DocumentMismatchError unless data["contentMatches"] == true && data["allSignaturesPreserved"] == true
+  rescue JSON::ParserError => e
+    raise UnknownResponseError
   end
 
   private
@@ -231,6 +251,22 @@ class AutogramService
     }
 
     connection.post("/extend", payload)
+  end
+
+  def call_autogram_compare_api(old_content, new_content)
+    connection = Faraday.new(url: AUTOGRAM_BASE_URL) do |faraday|
+      faraday.request :json
+      faraday.response :json
+      faraday.adapter Faraday.default_adapter
+      faraday.options.timeout = 30
+    end
+
+    payload = {
+      originalDocuments: old_content.map { |content| { content: content } },
+      signedDocument: { content: new_content }
+    }
+
+    connection.post("/validate-signed-version", payload)
   end
 
   def parse_validation_response(response_body)

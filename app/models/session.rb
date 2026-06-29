@@ -111,6 +111,10 @@ class Session < ApplicationRecord
     is_a?(AutogramSession)
   end
 
+  def podpisuj?
+    is_a?(PodpisujSession)
+  end
+
   def self.old_card?(qscd)
     return false unless qscd.present?
 
@@ -189,23 +193,16 @@ class Session < ApplicationRecord
     raise "Signed document does not contain signatures" unless validation_result.has_signatures?
     raise "Signed document signatures are invalid" unless validation_result.signatures.any? { |signature| signature.valid }
 
-    ensure_signed_content_matches_contract!(validation_result)
+    ensure_signed_content_matches_contract!(validation_document)
 
     validation_result
   ensure
     validation_blob&.purge
   end
 
-  def ensure_signed_content_matches_contract!(validation_result)
-    return unless contract.signature_parameters.container.present?
-
-    expected_documents = contract.documents.count
-    return if expected_documents.zero?
-    return if validation_result.documentInfo[:signedObjectsCount].to_i >= expected_documents
-
-    raise "Signed document does not include all contract documents"
-
-    # TODO: compare old and new versions of the signed document via external service - AutogramEnvironment.autogram_service.compare_documents(old: contract.documents.map(&:blob), new: validation_blob) - doesnt exist yet
+  def ensure_signed_content_matches_contract!(validation_document)
+    # TODO: This check is currently only performed for Podpisuj sessions, but it should be extended to all session types.
+    AutogramEnvironment.autogram_service.ensure_documents_equal(old: contract.documents, new: validation_document) if podpisuj?
   end
 
   def inferred_signed_content_type

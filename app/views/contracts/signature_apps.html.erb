@@ -43,7 +43,7 @@
       <% end %>
 
       <div class="space-y-3">
-        <div data-signing-app-selector-target="desktopElement">
+        <div data-signing-app-selector-target="desktopElement" class="space-y-3">
           <% if AutogramSession.available?(@qscd, @contract) %>
             <%= render 'shared/radio_button_card',
                   name: "signing_app_#{@contract.uuid}",
@@ -52,6 +52,19 @@
                   description: t('.autogram_desktop_description'),
                   checked: true,
                   icon: 'desktop',
+                  wrapper_class: 'desktop-signing-element',
+                  data_attributes: {
+                    signing_app_selector_target: 'appRadio'
+                  } %>
+          <% end %>
+          <% if PodpisujSession.available?(@qscd, @contract) %>
+            <%= render 'shared/radio_button_card',
+                  name: "signing_app_#{@contract.uuid}",
+                  value: 'podpisuj',
+                  label: t('.podpisuj_label'),
+                  description: t('.podpisuj_description'),
+                  checked: false,
+                  icon: 'pencil',
                   wrapper_class: 'desktop-signing-element',
                   data_attributes: {
                     signing_app_selector_target: 'appRadio'
@@ -98,6 +111,14 @@
                 data: {
                   turbo_frame: "signature_apps_#{@contract.uuid}",
                   signing_app_selector_target: 'autogramSubmitButton'
+                } %>
+        <% end %>
+
+        <% if PodpisujSession.available?(@qscd, @contract) %>
+          <%= link_to "", podpisuj_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]),
+                data: {
+                  turbo_frame: "signature_apps_#{@contract.uuid}",
+                  signing_app_selector_target: 'podpisujSubmitButton'
                 } %>
         <% end %>
 
@@ -194,7 +215,7 @@
           <% end %>
 
           <div class="space-y-3">
-            <div data-signing-app-selector-target="desktopElement">
+            <div data-signing-app-selector-target="desktopElement" class="space-y-3">
               <% if AutogramSession.available?(@qscd, @contract) %>
                 <%= render 'shared/radio_button_card',
                       name: "signing_app_#{@contract.uuid}",
@@ -203,6 +224,19 @@
                       description: t('.autogram_desktop_description'),
                       checked: true,
                       icon: 'desktop',
+                      wrapper_class: 'desktop-signing-element',
+                      data_attributes: {
+                        signing_app_selector_target: 'appRadio'
+                      } %>
+              <% end %>
+              <% if PodpisujSession.available?(@qscd, @contract) %>
+                <%= render 'shared/radio_button_card',
+                      name: "signing_app_#{@contract.uuid}",
+                      value: 'podpisuj',
+                      label: t('.podpisuj_label'),
+                      description: t('.podpisuj_description'),
+                      checked: false,
+                      icon: 'pencil',
                       wrapper_class: 'desktop-signing-element',
                       data_attributes: {
                         signing_app_selector_target: 'appRadio'
@@ -249,6 +283,14 @@
                     data: {
                       turbo_frame: "signature_apps_#{@contract.uuid}",
                       signing_app_selector_target: 'autogramSubmitButton'
+                    } %>
+            <% end %>
+
+            <% if PodpisujSession.available?(@qscd, @contract) %>
+              <%= link_to "", podpisuj_contract_sessions_path(@contract, recipient: @recipient, iframe: params[:iframe]),
+                    data: {
+                      turbo_frame: "signature_apps_#{@contract.uuid}",
+                      signing_app_selector_target: 'podpisujSubmitButton'
                     } %>
             <% end %>
 

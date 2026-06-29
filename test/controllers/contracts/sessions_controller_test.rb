@@ -136,7 +136,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
         signed_document: Base64.strict_encode64("signed")
       }
 
-      assert_response :internal_server_error
+      assert_response :bad_request
       assert_equal "Signed document signatures are invalid", JSON.parse(response.body).fetch("error")
       assert @session.reload.failed?
     end

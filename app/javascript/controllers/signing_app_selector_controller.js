@@ -3,7 +3,7 @@ import { isMobileDevice } from "utils/device_detection"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["appRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "signButton", "desktopElement", "mobileWarning", "yellowWarning", "appSelectionHeading"]
+  static targets = ["appRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "podpisujSubmitButton", "signButton", "desktopElement", "mobileWarning", "yellowWarning", "appSelectionHeading"]
 
   connect() {
     console.log('Signing app selector connected')
@@ -21,7 +21,7 @@ export default class extends Controller {
 
   handleDeviceDetection() {
     if (isMobileDevice()) {
-      const hasMobileOptions = this.appRadioTargets.some(radio => radio.value !== 'autogram')
+      const hasMobileOptions = this.appRadioTargets.some(radio => radio.value !== 'autogram' && radio.value !== 'podpisuj')
 
       // Always hide desktop option on mobile
       this.desktopElementTargets.forEach(element => {
@@ -91,6 +91,16 @@ export default class extends Controller {
       if (this.hasEidentitaSubmitButtonTarget) {
         this.setSignButtonLoading(true)
         this.eidentitaSubmitButtonTarget.click()
+      }
+    } else if (selectedApp === 'podpisuj') {
+      if (isMobileDevice()) {
+        alert('Podpisuj is not available on mobile devices. Please use a desktop computer instead.')
+        return
+      }
+
+      if (this.hasPodpisujSubmitButtonTarget) {
+        this.setSignButtonLoading(true)
+        this.podpisujSubmitButtonTarget.click()
       }
     }
   }
