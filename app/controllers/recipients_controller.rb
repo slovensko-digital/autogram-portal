@@ -1,5 +1,6 @@
 class RecipientsController < ApplicationController
   before_action :set_bundle
+  before_action :set_portal_instances
   before_action :set_recipient, except: [ :create, :index ]
 
   def index
@@ -36,7 +37,11 @@ class RecipientsController < ApplicationController
     @recipient = @bundle.recipients.find_by_uuid!(params[:id])
   end
 
+  def set_portal_instances
+    @portal_instances = PortalInstance.trusted.order(:name)
+  end
+
   def recipient_params
-    params.require(:recipient).permit(:email)
+    params.require(:recipient).permit(:email, :portal_instance_uuid)
   end
 end

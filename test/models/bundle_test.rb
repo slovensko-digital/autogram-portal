@@ -23,6 +23,7 @@
 #  fk_rails_...  (user_id => users.id)
 #
 require "test_helper"
+require "openssl"
 
 class BundleTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
@@ -81,6 +82,30 @@ class BundleTest < ActiveSupport::TestCase
     end
   end
 
+  test "superseding recipients revokes their active access grants" do
+    bundle = create_bundle_with_contract(author: @author)
+    bundle.update!(signing_rule: "any")
+
+    first_recipient = bundle.recipients.create!(email: "first@example.com", locale: "en")
+    second_recipient = bundle.recipients.create!(email: "second@example.com", locale: "en")
+    portal_instance = create_portal_instance
+
+    grant = RecipientAccessGrant.issue!(
+      recipient: second_recipient,
+      portal_instance: portal_instance,
+      claimed_by_email: second_recipient.email,
+      claimed_by_external_user_id: "remote-123",
+      claim_jti: SecureRandom.hex(16)
+    )
+
+    first_recipient.signer_contracts.find_by!(contract: bundle.contracts.first).update!(signed_at: Time.current)
+
+    bundle.notify_contract_signed(bundle.contracts.first, nil)
+
+    assert_not grant.reload.active?
+    assert_not_nil grant.revoked_at
+  end
+
   private
 
   def create_bundle_with_contract(author:)
@@ -105,5 +130,15 @@ class BundleTest < ActiveSupport::TestCase
     end
 
     Bundle.create!(author: author, contracts: contracts)
+  end
+
+  def create_portal_instance
+    PortalInstance.create!(
+      name: "Partner portal",
+      base_url: "https://example.com",
+      issuer: "https://issuer.example.com/#{SecureRandom.hex(4)}",
+      public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
+      allowed_email_domains: [ "example.com" ]
+    )
   end
 end

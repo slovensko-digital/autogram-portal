@@ -2,18 +2,22 @@
 #
 # Table name: recipients
 #
-#  id                  :bigint           not null, primary key
-#  author_proxy        :boolean          default(FALSE), not null
-#  email               :string
-#  locale              :string           default("sk"), not null
-#  name                :string
-#  notification_status :integer          default("not_notified"), not null
-#  uuid                :uuid             not null
-#  withdrawn_at        :datetime
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
-#  bundle_id           :bigint           not null
-#  user_id             :bigint
+#  id                      :bigint           not null, primary key
+#  author_proxy            :boolean          default(FALSE), not null
+#  email                   :string
+#  federation_mode         :string           default("local"), not null
+#  locale                  :string           default("sk"), not null
+#  name                    :string
+#  notification_status     :integer          default("not_notified"), not null
+#  remote_claimed_at       :datetime
+#  remote_claimed_by_email :string
+#  uuid                    :uuid             not null
+#  withdrawn_at            :datetime
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  bundle_id               :bigint           not null
+#  portal_instance_id      :bigint
+#  user_id                 :bigint
 #
 # Indexes
 #
@@ -22,22 +26,30 @@
 #  index_recipients_on_bundle_id_and_email_active         (bundle_id,email) UNIQUE WHERE (withdrawn_at IS NULL)
 #  index_recipients_on_bundle_id_and_withdrawn_at         (bundle_id,withdrawn_at)
 #  index_recipients_on_email                              (email)
+#  index_recipients_on_federation_mode                    (federation_mode)
+#  index_recipients_on_portal_instance_id                 (portal_instance_id)
 #  index_recipients_on_user_id                            (user_id)
 #  index_recipients_on_uuid                               (uuid) UNIQUE
 #
 # Foreign Keys
 #
 #  fk_rails_...  (bundle_id => bundles.id)
+#  fk_rails_...  (portal_instance_id => portal_instances.id)
 #  fk_rails_...  (user_id => users.id)
 #
 class Recipient < ApplicationRecord
+  attr_accessor :portal_instance_uuid
+
   has_one :recipient_signer, dependent: :destroy, class_name: "RecipientSigner", foreign_key: :recipient_id
   has_many :signer_contracts, through: :recipient_signer
   has_many :contracts, through: :signer_contracts
   has_many :sessions, through: :signer_contracts
+  has_many :recipient_access_grants, dependent: :destroy
   belongs_to :bundle
   belongs_to :user, optional: true
+  belongs_to :portal_instance, optional: true
 
+  enum :federation_mode, { local: "local", federated: "federated" }, scopes: false
   enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }, scopes: false
 
   scope :active, -> { where(withdrawn_at: nil) }
@@ -62,8 +74,13 @@ class Recipient < ApplicationRecord
     format: { with: URI::MailTo::EMAIL_REGEXP },
     allow_blank: true
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
+  validate :portal_instance_reference_must_exist
+  validate :portal_instance_must_be_verified, if: -> { portal_instance.present? }
+  validate :portal_instance_matches_federation_mode
+  validate :federated_recipient_cannot_have_local_user
 
   before_create :link_user_by_email
+  before_validation :assign_identity, on: :create
   before_create :check_blocks
   before_create :set_default_locale
   after_create :associate_with_bundle_contracts
@@ -102,6 +119,18 @@ class Recipient < ApplicationRecord
 
   def visible?
     !author_proxy?
+  end
+
+  def local_recipient?
+    federation_mode == "local"
+  end
+
+  def federated_recipient?
+    federation_mode == "federated"
+  end
+
+  def revoke_active_access_grants!
+    recipient_access_grants.active.update_all(revoked_at: Time.current, updated_at: Time.current)
   end
 
   def signed_contract?(contract)
@@ -162,6 +191,7 @@ class Recipient < ApplicationRecord
       now = Time.current
       signer_contracts.where(signed_at: nil).update_all(declined_at: nil, superseded_at: now, updated_at: now)
       update!(withdrawn_at: now)
+      revoke_active_access_grants!
       Notification::RecipientSignatureWithdrawnJob.perform_later(self) if notified?
     end
 
@@ -170,12 +200,17 @@ class Recipient < ApplicationRecord
 
   private
 
+  def assign_identity
+    RecipientResolver.assign_identity(self)
+  end
+
   def allow_blank_email?
     email.blank? && bundle&.allow_blank_recipient_emails
   end
 
   def link_user_by_email
-    return if email.blank?
+    return unless local_recipient?
+    return if email.blank? || user.present?
 
     self.user = User.find_by(email: email)
   end
@@ -210,5 +245,31 @@ class Recipient < ApplicationRecord
 
   def recompute_bundle_superseded_state
     bundle&.recompute_superseded_state_if_rules_changed
+  end
+
+  def portal_instance_reference_must_exist
+    return if portal_instance_uuid.blank? || portal_instance.present?
+
+    errors.add(:portal_instance, "must exist")
+  end
+
+  def portal_instance_must_be_verified
+    return if portal_instance.verified?
+
+    errors.add(:portal_instance, "must be verified")
+  end
+
+  def portal_instance_matches_federation_mode
+    if portal_instance_id.present? && federation_mode != "federated"
+      errors.add(:federation_mode, "must be federated when portal instance is set")
+    elsif portal_instance_id.blank? && federation_mode == "federated"
+      errors.add(:portal_instance, "must be present for federated recipients")
+    end
+  end
+
+  def federated_recipient_cannot_have_local_user
+    return unless federation_mode == "federated" && user.present?
+
+    errors.add(:user, "must be blank for federated recipients")
   end
 end

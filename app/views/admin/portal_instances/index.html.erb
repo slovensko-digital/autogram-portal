@@ -1,0 +1,44 @@
+<div class="mx-auto max-w-5xl space-y-6 px-4 py-8">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900"><%= t('.title') %></h1>
+      <p class="mt-1 text-sm text-gray-600"><%= t('.subtitle') %></p>
+    </div>
+    <%= link_to t('.new'), new_admin_portal_instance_path, class: "inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+  </div>
+
+  <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.name') %></th>
+          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.base_url') %></th>
+          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.status') %></th>
+          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.domains') %></th>
+          <th class="px-4 py-3 text-right font-medium text-gray-700"><%= t('.actions') %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @portal_instances.each do |portal_instance| %>
+          <tr>
+            <td class="px-4 py-3 text-gray-900"><%= portal_instance.name %></td>
+            <td class="px-4 py-3 text-gray-600"><%= portal_instance.base_url %></td>
+            <td class="px-4 py-3 text-gray-600"><%= portal_instance.status.humanize %></td>
+            <td class="px-4 py-3 text-gray-600"><%= portal_instance.allowed_email_domains.join(", ") %></td>
+            <td class="px-4 py-3">
+              <div class="flex items-center justify-end gap-3">
+                <%= link_to t('.edit'), edit_admin_portal_instance_path(portal_instance), class: "text-blue-600 hover:text-blue-800" %>
+                <% unless portal_instance.verified? %>
+                  <%= button_to t('.verify'), verify_admin_portal_instance_path(portal_instance), method: :post, class: "text-green-600 hover:text-green-800 cursor-pointer" %>
+                <% end %>
+                <% unless portal_instance.revoked? %>
+                  <%= button_to t('.revoke'), revoke_admin_portal_instance_path(portal_instance), method: :post, class: "text-red-600 hover:text-red-800 cursor-pointer" %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

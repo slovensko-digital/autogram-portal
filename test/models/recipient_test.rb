@@ -2,18 +2,22 @@
 #
 # Table name: recipients
 #
-#  id                  :bigint           not null, primary key
-#  author_proxy        :boolean          default(FALSE), not null
-#  email               :string
-#  locale              :string           default("sk"), not null
-#  name                :string
-#  notification_status :integer          default("not_notified"), not null
-#  uuid                :uuid             not null
-#  withdrawn_at        :datetime
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
-#  bundle_id           :bigint           not null
-#  user_id             :bigint
+#  id                      :bigint           not null, primary key
+#  author_proxy            :boolean          default(FALSE), not null
+#  email                   :string
+#  federation_mode         :string           default("local"), not null
+#  locale                  :string           default("sk"), not null
+#  name                    :string
+#  notification_status     :integer          default("not_notified"), not null
+#  remote_claimed_at       :datetime
+#  remote_claimed_by_email :string
+#  uuid                    :uuid             not null
+#  withdrawn_at            :datetime
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  bundle_id               :bigint           not null
+#  portal_instance_id      :bigint
+#  user_id                 :bigint
 #
 # Indexes
 #
@@ -22,15 +26,19 @@
 #  index_recipients_on_bundle_id_and_email_active         (bundle_id,email) UNIQUE WHERE (withdrawn_at IS NULL)
 #  index_recipients_on_bundle_id_and_withdrawn_at         (bundle_id,withdrawn_at)
 #  index_recipients_on_email                              (email)
+#  index_recipients_on_federation_mode                    (federation_mode)
+#  index_recipients_on_portal_instance_id                 (portal_instance_id)
 #  index_recipients_on_user_id                            (user_id)
 #  index_recipients_on_uuid                               (uuid) UNIQUE
 #
 # Foreign Keys
 #
 #  fk_rails_...  (bundle_id => bundles.id)
+#  fk_rails_...  (portal_instance_id => portal_instances.id)
 #  fk_rails_...  (user_id => users.id)
 #
 require "test_helper"
+require "openssl"
 
 class RecipientTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
@@ -70,6 +78,23 @@ class RecipientTest < ActiveSupport::TestCase
     end
   end
 
+  test "withdraw revokes active access grants" do
+    recipient = create_recipient(notification_status: :not_notified)
+    portal_instance = create_portal_instance
+    grant = RecipientAccessGrant.issue!(
+      recipient: recipient,
+      portal_instance: portal_instance,
+      claimed_by_email: recipient.email,
+      claimed_by_external_user_id: "remote-123",
+      claim_jti: SecureRandom.hex(16)
+    )
+
+    recipient.withdraw!
+
+    assert_not grant.reload.active?
+    assert_not_nil grant.revoked_at
+  end
+
   test "same email can be added again after withdrawal" do
     email = "recipient-#{SecureRandom.hex(6)}@example.com"
     recipient = create_recipient(notification_status: :notified, email: email)
@@ -96,6 +121,43 @@ class RecipientTest < ActiveSupport::TestCase
 
     assert recipient.persisted?
     assert_nil recipient.email
+  end
+
+  test "local recipients still link to an existing user by email" do
+    users(:two).update_column(:email, "recipient@example.com")
+
+    recipient = bundles(:one).recipients.create!(email: "recipient@example.com", locale: "en")
+
+    assert_equal users(:two), recipient.user
+    assert recipient.local_recipient?
+    assert_nil recipient.portal_instance
+  end
+
+  test "federated recipients resolve portal instance and skip local user linking" do
+    users(:two).update_column(:email, "recipient@example.com")
+    portal_instance = create_portal_instance
+
+    recipient = bundles(:one).recipients.create!(
+      email: "recipient@example.com",
+      locale: "en",
+      portal_instance_uuid: portal_instance.uuid
+    )
+
+    assert recipient.federated_recipient?
+    assert_equal portal_instance, recipient.portal_instance
+    assert_nil recipient.user
+  end
+
+  test "federated recipients require a verified portal instance" do
+    portal_instance = create_portal_instance(status: "revoked")
+    recipient = bundles(:one).recipients.build(
+      email: "recipient@example.com",
+      locale: "en",
+      portal_instance_uuid: portal_instance.uuid
+    )
+
+    assert_not recipient.valid?
+    assert_includes recipient.errors[:portal_instance], "must be verified"
   end
 
   test "find_or_create_author_proxy_for creates a hidden recipient" do
@@ -170,5 +232,15 @@ class RecipientTest < ActiveSupport::TestCase
     recipient.update!(notification_status: notification_status)
 
     recipient
+  end
+
+  def create_portal_instance(**attributes)
+    PortalInstance.create!({
+      name: "Partner portal",
+      base_url: "https://example.com",
+      issuer: "https://issuer.example.com/#{SecureRandom.hex(4)}",
+      public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
+      allowed_email_domains: [ "example.com" ]
+    }.merge(attributes))
   end
 end

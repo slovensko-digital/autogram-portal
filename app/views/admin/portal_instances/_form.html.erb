@@ -1,0 +1,54 @@
+<%= form_with model: [ :admin, @portal_instance ], class: "space-y-4" do |form| %>
+  <% if @portal_instance.errors.any? %>
+    <div class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <p class="font-medium"><%= t('.error_title') %></p>
+      <ul class="mt-2 list-disc pl-5">
+        <% @portal_instance.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, t('.name'), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.text_field :name, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+  </div>
+
+  <div>
+    <%= form.label :base_url, t('.base_url'), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.url_field :base_url, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+  </div>
+
+  <div>
+    <%= form.label :issuer, t('.issuer'), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.url_field :issuer, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+  </div>
+
+  <div>
+    <%= form.label :public_key_pem, t('.public_key_pem'), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.text_area :public_key_pem, rows: 8, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono" %>
+  </div>
+
+  <div>
+    <%= form.label :status, t('.status'), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.select :status,
+          PortalInstance.statuses.keys.map { |value| [ value.humanize, value ] },
+          {},
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+  </div>
+
+  <div>
+    <%= form.label :allowed_email_domains, t('.allowed_email_domains'), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.text_field :allowed_email_domains,
+          value: @portal_instance.allowed_email_domains.join(", "),
+          name: "portal_instance[allowed_email_domains][]",
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    <p class="mt-1 text-sm text-gray-500"><%= t('.allowed_email_domains_help') %></p>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= form.submit class: "inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+    <%= link_to t('.cancel'), admin_portal_instances_path, class: "text-sm text-gray-600 hover:text-gray-900" %>
+  </div>
+<% end %>

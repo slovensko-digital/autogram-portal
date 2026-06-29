@@ -178,6 +178,7 @@ class Bundle < ApplicationRecord
         .uniq
 
       Recipient.where(id: affected_recipient_ids).find_each do |recipient|
+        recipient.revoke_active_access_grants!
         Notification::RecipientNoLongerRequiredJob.perform_later(recipient)
       end
     end

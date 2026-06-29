@@ -106,18 +106,19 @@ Autogram Portal provides a complete API solution for applications that need elec
 - **API Documentation** - [/api/v1](https://agp.dev.slovensko.digital/api/v1/) (Swagger UI) or `public/openapi.yaml`
 - **SDK Examples** - [public/sdk-example.html](https://agp.dev.slovensko.digital/sdk-example.html)
 - **API Environment** - Set `API_SKIP_AUTH=true` in `.env` to skip JWTs in local development
-
+- **Process documentation** - [/docs](https://agp.dev.slovensko.digital/docs)
+- **Federation architecture** - [docs/federation.md](docs/federation.md)
 
 ### How It Works
 
 1. **Create Contracts** - Your app sends documents via API to create a Bundle of Contracts
-   - Each Bundle can contain one or more Contracts (typically one)
-   - Each Contract can contain multiple Documents (rare, only if needed for single ASiC-E container)
-   - You receive UUIDs for the bundle and contracts to track them
+  - Each Bundle can contain one or more Contracts (typically one)
+  - Each Contract can contain multiple Documents (rare, only if needed for single ASiC-E container)
+  - You receive UUIDs for the bundle and contracts to track them
 
 2. **Get Notified** - When signing is complete, you're notified via:
-   - **Webhooks** - Receive callbacks at your specified URL (using [Standard Webhooks](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md) specification)
-   - **Polling** - Check bundle/contract status via API
+  - **Webhooks** - Receive callbacks at your specified URL (using [Standard Webhooks](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md) specification)
+  - **Polling** - Check bundle/contract status via API
 
 3. **Download Results** - Retrieve signed files and optionally delete records from the portal
 
@@ -139,6 +140,54 @@ Choose how end users will sign:
 **Option C: Email Notifications** *(planned)*
 - Specify recipients when creating bundle/contract
 - Portal automatically sends emails with signing links and instructions
+
+
+### Federation Between Portals
+
+Autogram Portal can route signing requests across portal instances. The current implementation uses two different trust decisions:
+
+- sender-side routing is explicit, because a sender chooses a trusted home portal for a federated recipient
+- recipient-side pasted-link opening is dynamic, because a recipient can paste an origin link into their own portal even if that origin portal was not preconfigured locally
+
+**How it works**
+
+1. Admins register the home portals that local senders are allowed to target when creating federated recipients.
+2. The sender creates a bundle and assigns a recipient either to the local portal or to one of those trusted remote home portals.
+3. The origin portal still creates the canonical signing link, typically `/bundles/:bundle_uuid/sign?recipient=:recipient_uuid`.
+4. The recipient can either open that link directly on the origin portal or paste it into their own portal at `/federation/requests/open`.
+5. The recipient's home portal discovers the origin portal from the pasted URL, loads `/.well-known/autogram-portal.json`, and checks that the origin supports the federation preview and claim APIs.
+6. The home portal asks the origin portal for a preview of the request and, after local sign-in, sends a signed federation claim request.
+7. The origin portal verifies that the claiming home portal matches the portal assigned to that recipient. If accepted, it returns a short-lived sign URL containing `grant=...`.
+8. The recipient is redirected back to the origin portal, which validates the grant and continues with the standard signing flow.
+
+**Which requests are used**
+
+- **Origin request URL** - The normal bundle signing link used in emails and copied links.
+- **Metadata document** - `/.well-known/autogram-portal.json` exposes issuer, portal name, public key, federation API base URL, supported capabilities, and optional email-domain hints.
+- **Preview request** - `GET /api/federation/v1/requests/:recipient_uuid` fetches a user-facing preview of a pasted origin request.
+- **Claim request** - `POST /api/federation/v1/requests/:recipient_uuid/claim` exchanges the locally authenticated user for a short-lived origin sign URL.
+- **Grant-backed sign URL** - The claim response returns the actual signing URL with `grant=...`. This token is short-lived and tied to a stored access-grant record.
+
+**Security model**
+
+- Sender-side routing uses an explicitly configured trusted portal list. This is how the origin portal decides which home portal is allowed to claim a federated recipient.
+- Recipient-side pasted-link opening is more permissive: the home portal may dynamically discover an origin portal from its metadata document without a preconfigured local trust record.
+- Portal-to-portal requests use a dedicated JWT assertion with `iss`, `aud`, `exp`, `jti`, and `scope` claims.
+- The origin portal remains the source of truth for recipient state, signing rules, bundle completion, and signed documents, and it still decides which home portal is allowed to claim each federated recipient.
+- Access grants are revoked when the recipient is withdrawn or no longer needed because the bundle has already completed.
+
+**Current scope**
+
+The current implementation lets a recipient paste and claim a foreign request on their own portal even if the origin portal was not preconfigured locally, but the actual signing still completes on the origin portal.
+
+### Federation Configuration
+
+- `FEDERATION_BASE_URL` - Public base URL this portal advertises to peer portals
+- `FEDERATION_ISSUER` - Stable issuer identifier used in federation metadata and JWT assertions
+- `FEDERATION_PORTAL_NAME` - Display name exposed in federation metadata
+- `FEDERATION_PUBLIC_KEY_PEM` - Public key advertised to peer portals
+- `FEDERATION_PRIVATE_KEY_PEM` - Private key used to sign outgoing federation assertions
+- `FEDERATION_EMAIL_DOMAINS` - Optional comma-separated email domains advertised in federation metadata
 
 ### Quick Start
 

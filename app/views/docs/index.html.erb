@@ -15,6 +15,7 @@
       <a href="#received" class="hover:text-blue-600 transition-colors underline"><%= t('.nav.received') %></a>
       <a href="#signing" class="hover:text-blue-600 transition-colors underline"><%= t('.nav.signing') %></a>
       <a href="#account" class="hover:text-blue-600 transition-colors underline"><%= t('.nav.account') %></a>
+      <a href="#federation" class="hover:text-blue-600 transition-colors underline"><%= t('.nav.federation') %></a>
       <a href="#integration" class="hover:text-blue-600 transition-colors underline"><%= t('.nav.integration') %></a>
     </nav>
   </div>
@@ -288,6 +289,66 @@
       <div class="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
         <img src="/docs/screenshots/account-danger-zone.png" alt="<%= t('.account.screenshot_title') %>" class="w-full h-auto">
       </div>
+    </div>
+  </section>
+
+  <hr class="border-gray-200">
+
+  <%# ─── FEDERATION ────────────────────────────────── %>
+  <section id="federation">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-700">
+        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75h-1.5m-9 0a2.25 2.25 0 004.5 0m-4.5 0a2.25 2.25 0 014.5 0m0 0a2.25 2.25 0 004.5 0m-4.5 0h4.5" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.federation.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= render_inline_code(t('.federation.intro')) %></p>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.federation.actors_title') %></h3>
+    <div class="space-y-3 mb-6">
+      <% t('.federation.actors').each do |_key, actor| %>
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+          <p class="text-sm font-semibold text-gray-900"><%= actor[:label] %></p>
+          <p class="mt-1 text-sm text-gray-500"><%= actor[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.federation.flow_title') %></h3>
+    <ol class="space-y-3 mb-6">
+      <% t('.federation.flow').each_with_index do |(_key, step), i| %>
+        <li class="flex items-start gap-3">
+          <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-700 text-white text-xs font-bold mt-0.5"><%= i + 1 %></span>
+          <div>
+            <p class="text-sm font-semibold text-gray-900"><%= step[:title] %></p>
+            <p class="text-sm text-gray-500"><%= render_inline_code(step[:description]) %></p>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.federation.requests_title') %></h3>
+    <div class="space-y-3 mb-6">
+      <% t('.federation.requests').each do |_key, request| %>
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+          <p class="text-sm font-semibold text-gray-900"><%= request[:label] %></p>
+          <p class="mt-1 text-sm text-gray-500"><%= render_inline_code(request[:description]) %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="text-base font-semibold text-gray-900 mb-3"><%= t('.federation.security_title') %></h3>
+    <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600 mb-6">
+      <% t('.federation.security_points').each do |_key, point| %>
+        <li><%= point %></li>
+      <% end %>
+    </ul>
+
+    <div class="rounded-xl border border-violet-100 bg-violet-50 p-5">
+      <p class="text-sm font-semibold text-violet-900 mb-1"><%= t('.federation.current_scope_title') %></p>
+      <p class="text-sm text-violet-700"><%= render_inline_code(t('.federation.current_scope_description')) %></p>
     </div>
   </section>
 

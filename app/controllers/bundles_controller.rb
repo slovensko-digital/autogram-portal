@@ -245,6 +245,21 @@ class BundlesController < ApplicationController
   end
 
   def load_signing_bundle_context
+    if params[:grant].present?
+      grant = RecipientAccessGrant.find_active_by_token(params[:grant])
+      raise ActiveRecord::RecordNotFound unless grant
+
+      @recipient = grant.recipient
+      raise ActiveRecord::RecordNotFound unless @recipient.bundle.uuid == params[:id]
+
+      if params[:recipient].present? && params[:recipient] != @recipient.uuid
+        raise ActiveRecord::RecordNotFound
+      end
+
+      @bundle = @recipient.bundle
+      return
+    end
+
     if params[:recipient]
       @recipient = Recipient.find_by_uuid!(params[:recipient])
       raise ActiveRecord::RecordNotFound unless @recipient.bundle.uuid == params[:id]

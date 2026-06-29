@@ -80,7 +80,7 @@ class Api::V1::BundlesController < ApiController
       ],
       webhook: [ :url, :method ],
       postalAddress: [ :address, :recipientName ],
-      recipients: [ :name, :email, :locale, :uuid ]
+      recipients: [ :name, :email, :locale, :uuid, :portalInstanceId ]
     )
 
     attributes = {
@@ -114,8 +114,13 @@ class Api::V1::BundlesController < ApiController
         }.compact
       end || [],
       recipients_attributes: permitted_params[:recipients]&.map do |recipient|
-        recipient[:uuid] = recipient[:uuid] || SecureRandom.uuid
-        recipient
+        recipient_attributes = recipient.to_h
+        recipient_attributes["uuid"] ||= SecureRandom.uuid
+
+        portal_instance_uuid = recipient_attributes.delete("portalInstanceId").presence
+        recipient_attributes["portal_instance_uuid"] = portal_instance_uuid if portal_instance_uuid.present?
+
+        recipient_attributes
       end || []
     }
 

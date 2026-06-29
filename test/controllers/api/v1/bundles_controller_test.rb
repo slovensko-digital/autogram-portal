@@ -89,6 +89,56 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     assert_nil recipient.email
   end
 
+  test "api bundle creation accepts federated recipients" do
+    portal_instance = PortalInstance.create!(
+      name: "Partner portal",
+      base_url: "https://example.com",
+      issuer: "https://issuer.example.com/#{SecureRandom.hex(4)}",
+      public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
+      allowed_email_domains: [ "partner.example" ]
+    )
+    users(:two).update_column(:email, "recipient@partner.example")
+
+    post "/api/v1/bundles",
+         params: {
+           id: SecureRandom.uuid,
+           contracts: [
+             {
+               id: SecureRandom.uuid,
+               allowedMethods: [ "qes" ],
+               documents: [
+                 {
+                   filename: "contract.txt",
+                   content: Base64.strict_encode64("Sample text content"),
+                   contentType: "text/plain;base64"
+                 }
+               ],
+               signatureParameters: {
+                 format: "XAdES",
+                 container: "ASiC_E"
+               }
+             }
+           ],
+           recipients: [
+             {
+               name: "Federated recipient",
+               email: "recipient@partner.example",
+               portalInstanceId: portal_instance.uuid
+             }
+           ]
+         },
+         headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :created
+
+    bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
+    recipient = bundle.recipients.visible.find_by!(email: "recipient@partner.example")
+
+    assert_equal portal_instance, recipient.portal_instance
+    assert recipient.federated_recipient?
+    assert_nil recipient.user
+  end
+
   test "public bundle sign route loads embedded signature apps directly in no_onboarding mode" do
     post "/api/v1/bundles",
          params: {

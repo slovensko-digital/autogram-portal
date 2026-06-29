@@ -40,6 +40,7 @@ class User < ApplicationRecord
   devise :magic_link_authenticatable, :omniauthable, :registerable, :confirmable, :rememberable, :validatable, :lockable
 
   attribute :features, :string, array: true, default: []
+  AVAILABLE_FEATURES = %w[admin archivation api].freeze
 
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
   has_many :identities, dependent: :destroy

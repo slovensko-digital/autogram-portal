@@ -18,6 +18,9 @@ Rails.application.routes.draw do
 
   # Chrome DevTools configuration for better debugging experience
   get "/.well-known/appspecific/com.chrome.devtools.json" => "application#devtools_config"
+  get "/.well-known/autogram-portal.json" => "federation/metadata#show"
+  get "federation/requests/open" => "federation/requests#show", as: :federation_requests_open
+  post "federation/requests/claim" => "federation/requests#claim", as: :federation_requests_claim
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
@@ -112,6 +115,14 @@ Rails.application.routes.draw do
   end
 
   namespace :api do
+    namespace :federation do
+      namespace :v1 do
+        resources :requests, only: [ :show ], controller: "requests" do
+          post :claim, on: :member
+        end
+      end
+    end
+
     namespace :v1 do
       get "hello", to: "hello#show"
       get "hello_auth", to: "hello#show_auth"
@@ -134,6 +145,15 @@ Rails.application.routes.draw do
   end
 
   authenticate(:user, ->(user) { user.admin? }) do
+    namespace :admin do
+      resources :portal_instances, except: [ :show, :destroy ] do
+        member do
+          post :verify
+          post :revoke
+        end
+      end
+    end
+
     mount GoodJob::Engine => "/admin/good_job"
   end
 
