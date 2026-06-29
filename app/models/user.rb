@@ -40,6 +40,7 @@ class User < ApplicationRecord
   devise :magic_link_authenticatable, :omniauthable, :registerable, :confirmable, :rememberable, :validatable, :lockable
 
   attribute :features, :string, array: true, default: []
+  AVAILABLE_FEATURES = %w[admin archivation api federation].freeze
 
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
   has_many :identities, dependent: :destroy
@@ -102,6 +103,10 @@ class User < ApplicationRecord
 
   def archivation_enabled?
     feature_enabled?(:archivation)
+  end
+
+  def federation_enabled?
+    feature_enabled?(:federation)
   end
 
   def signature_request_allowed?

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_23_102000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_26_143000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -230,6 +230,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_102000) do
     t.index ["user_id"], name: "index_identities_on_user_id"
   end
 
+  create_table "portal_instances", force: :cascade do |t|
+    t.string "allowed_email_domains", default: [], null: false, array: true
+    t.string "base_url", null: false
+    t.jsonb "capabilities", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.string "issuer", null: false
+    t.datetime "last_verified_at"
+    t.jsonb "metadata", default: {}, null: false
+    t.string "name", null: false
+    t.string "outbound_kid"
+    t.text "public_key_pem", null: false
+    t.string "status", default: "verified", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
+    t.index ["issuer"], name: "index_portal_instances_on_issuer", unique: true
+    t.index ["status"], name: "index_portal_instances_on_status"
+    t.index ["uuid"], name: "index_portal_instances_on_uuid", unique: true
+  end
+
   create_table "postal_addresses", force: :cascade do |t|
     t.text "address"
     t.bigint "bundle_id", null: false
@@ -250,6 +269,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_102000) do
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
 
+  create_table "recipient_access_grants", force: :cascade do |t|
+    t.string "claim_jti", null: false
+    t.string "claimed_by_email", null: false
+    t.string "claimed_by_external_user_id"
+    t.datetime "consumed_at"
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.bigint "portal_instance_id", null: false
+    t.bigint "recipient_id", null: false
+    t.datetime "revoked_at"
+    t.string "token_digest", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
+    t.index ["claim_jti"], name: "index_recipient_access_grants_on_claim_jti"
+    t.index ["expires_at"], name: "index_recipient_access_grants_on_expires_at"
+    t.index ["portal_instance_id"], name: "index_recipient_access_grants_on_portal_instance_id"
+    t.index ["recipient_id"], name: "index_recipient_access_grants_on_recipient_id"
+    t.index ["token_digest"], name: "index_recipient_access_grants_on_token_digest", unique: true
+    t.index ["uuid"], name: "index_recipient_access_grants_on_uuid", unique: true
+  end
+
   create_table "recipient_blocks", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
@@ -262,9 +302,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_102000) do
     t.bigint "bundle_id", null: false
     t.datetime "created_at", null: false
     t.string "email"
+    t.string "federation_mode", default: "local", null: false
     t.string "locale", default: "sk", null: false
     t.string "name"
     t.integer "notification_status", default: 0, null: false
+    t.bigint "portal_instance_id"
+    t.datetime "remote_claimed_at"
+    t.string "remote_claimed_by_email"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
@@ -274,8 +318,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_102000) do
     t.index ["bundle_id", "withdrawn_at"], name: "index_recipients_on_bundle_id_and_withdrawn_at"
     t.index ["bundle_id"], name: "index_recipients_on_bundle_id"
     t.index ["email"], name: "index_recipients_on_email"
+    t.index ["federation_mode"], name: "index_recipients_on_federation_mode"
+    t.index ["portal_instance_id"], name: "index_recipients_on_portal_instance_id"
     t.index ["user_id"], name: "index_recipients_on_user_id"
     t.index ["uuid"], name: "index_recipients_on_uuid", unique: true
+    t.check_constraint "federation_mode::text = 'local'::text AND portal_instance_id IS NULL OR federation_mode::text = 'federated'::text AND portal_instance_id IS NOT NULL", name: "recipients_federation_mode_matches_portal_instance"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -409,7 +456,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_102000) do
   add_foreign_key "identities", "users"
   add_foreign_key "postal_addresses", "bundles"
   add_foreign_key "push_subscriptions", "users"
+  add_foreign_key "recipient_access_grants", "portal_instances"
+  add_foreign_key "recipient_access_grants", "recipients"
   add_foreign_key "recipients", "bundles"
+  add_foreign_key "recipients", "portal_instances"
   add_foreign_key "recipients", "users"
   add_foreign_key "sessions", "signer_contracts"
   add_foreign_key "signer_contracts", "contracts"

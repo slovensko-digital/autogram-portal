@@ -99,6 +99,7 @@ en:
       received_bundles: "Received for Signing"
       validation_archive: "Validation archive"
       settings: "Settings"
+      open_foreign_request: "Open foreign request"
       new_contract: "New contract"
       electronic_onboarding: "Electronic onboarding"
       docs: "User Guide"
@@ -166,6 +167,25 @@ en:
         delete_confirmation_placeholder: "Type confirmation phrase"
         delete_confirmation_instruction_html: "To confirm, type %{phrase}."
         delete_confirmation_mismatch: "Confirmation phrase does not match."
+        admin: "Admin"
+        manage_portal_instances: "Trusted portals"
+        manage_portal_instances_description: "Manage the external Autogram Portal instances that can exchange federated requests with this portal."
+        manage_portal_instances_link: "Manage trusted portals"
+        features: "Features"
+        features_title: "Current user features"
+        features_description: "As an admin, you can enable or disable the features available on your own account. The admin feature is always kept enabled here."
+        admin_feature_locked: "The admin feature cannot be removed from your current account here."
+        save_features: "Save features"
+        feature_labels:
+          admin: "Admin access"
+          archivation: "Validation archive"
+          api: "API access"
+          federation: "Federation"
+        feature_descriptions:
+          admin: "Allows access to administration-only areas such as trusted portal management and job administration."
+          archivation: "Enables the validation archive and long-term validation record management features."
+          api: "Allows editing the API public key and using authenticated integration endpoints."
+          federation: "Allows managing federated requests and integrations with other Autogram Portal instances."
     confirmations:
       new:
         resend_confirmation_instructions: "Resend confirmation instructions"
@@ -497,6 +517,9 @@ en:
       title: "Send for Signature"
       subtitle: "Send this bundle to others for signing via email."
       send_invitation: "Send email"
+      portal_label: "Recipient portal"
+      portal_blank_option: "Current portal"
+      portal_help: "Choose a trusted partner portal when the recipient should open the request through another Autogram Portal instance."
       email_label: "Recipient Email"
       email_placeholder: "jan.novak@example.com"
       email_help: "Recipient will receive an email with a link to sign the documents"
@@ -511,6 +534,66 @@ en:
       required_signatures_label: "Required number of signatures"
       required_signatures_of: "of %{count} recipients"
       request_withdrawn: "Signature request withdrawn"
+
+  admin:
+    portal_instances:
+      index:
+        title: "Trusted portals"
+        subtitle: "Manage external Autogram Portal instances that are allowed to receive federated recipients."
+        new: "Add portal"
+        name: "Name"
+        base_url: "Base URL"
+        status: "Status"
+        domains: "Email domains"
+        actions: "Actions"
+        edit: "Edit"
+        verify: "Verify"
+        revoke: "Revoke"
+      new:
+        title: "Add trusted portal"
+        subtitle: "Register a remote Autogram Portal instance for federated recipient routing."
+      edit:
+        title: "Edit trusted portal"
+        subtitle: "Update the remote portal configuration and trust state."
+      form:
+        error_title: "Could not save portal"
+        name: "Name"
+        base_url: "Base URL"
+        issuer: "Issuer"
+        public_key_pem: "Public key (PEM)"
+        status: "Status"
+        allowed_email_domains: "Allowed email domains"
+        allowed_email_domains_help: "Enter a comma-separated list of email domains that should suggest this portal to senders."
+        cancel: "Cancel"
+      create:
+        success: "Trusted portal created"
+      update:
+        success: "Trusted portal updated"
+      verify:
+        success: "Trusted portal verified"
+      revoke:
+        success: "Trusted portal revoked"
+
+  federation:
+    requests:
+      show:
+        title: "Open a federated request"
+        subtitle: "Paste a signing request link from another Autogram Portal instance to preview and claim it here."
+        url_label: "Request URL"
+        url_placeholder: "https://portal.example/bundles/.../sign?recipient=..."
+        preview: "Preview request"
+        portal: "Remote portal"
+        author: "Sender"
+        documents: "Documents"
+        note: "Note"
+        claim: "Claim and continue"
+        sign_in_required: "Sign in on this portal to claim the request and continue to signing."
+      errors:
+        invalid_url: "The provided request URL is invalid."
+        untrusted_portal: "This request points to a portal that is not in the trusted portal list."
+        unsupported_portal: "The origin portal does not expose the federation metadata or request APIs needed for this flow."
+        private_key_missing: "Federation private key is not configured on this portal."
+        remote_request_failed: "The remote portal request failed."
 
   contracts:
     alerts:
@@ -1041,6 +1124,7 @@ en:
         received: "Received Bundles"
         signing: "Signing"
         account: "Account Settings"
+        federation: "Federation"
         integration: "API & SDK"
       dashboard:
         title: "Dashboard"
@@ -1306,6 +1390,73 @@ en:
         screenshot_description: "Recommended: add a screenshot of account settings with the Danger Zone section highlighted."
         screenshot_file_hint: "File: /public/docs/screenshots/account-danger-zone.png"
         screenshot_placeholder: "Placeholder for account settings screenshot"
+      federation:
+        title: "Federation Between Portals"
+        intro: "Autogram Portal can hand signing requests between portal instances. The origin portal keeps ownership of the bundle, while the recipient's home portal helps with local sign-in and claiming the request."
+        actors_title: "Who participates"
+        actors:
+          origin:
+            label: "Origin portal"
+            description: "The portal where the sender created the bundle. It owns the recipient list, signing rules, bundle status, and final signed documents."
+          home:
+            label: "Home portal"
+            description: "The portal where the recipient prefers to sign in. It can preview a request from another portal and claim it on behalf of the locally signed-in user."
+          trust:
+            label: "Trusted portal registry"
+            description: "An admin-managed list of external Autogram Portal instances used when senders intentionally target recipients on other portals."
+        flow_title: "How the process works"
+        flow:
+          setup:
+            title: "Admins configure sender-side routing"
+            description: "Admins register the home portals that local senders are allowed to target when creating federated recipients."
+          sender:
+            title: "Sender targets a remote portal"
+            description: "When creating a bundle recipient, the sender can keep the recipient local or assign them to a trusted remote portal instance."
+          link:
+            title: "Origin portal creates the request link"
+            description: "The sender still works with the usual bundle signing link on the origin portal. That URL remains the canonical reference to the request."
+          preview:
+            title: "Recipient opens the request on their home portal"
+            description: "The recipient can paste the origin request URL into the home portal. The home portal parses the link, loads the origin portal metadata, and asks the origin portal for a preview of the request."
+          claim:
+            title: "Home portal claims the request"
+            description: "After the recipient signs in locally, the home portal sends a portal-authenticated claim to the origin portal. If the recipient still matches, the request is active, and that home portal is the one assigned to the recipient, the origin portal accepts the claim."
+          grant:
+            title: "Origin portal returns a short-lived grant"
+            description: "The origin portal issues a short-lived access grant and returns a sign URL containing `grant=...`. This avoids exposing long-lived cross-portal access tokens in copied links."
+          sign:
+            title: "Signing continues on the origin portal"
+            description: "The recipient is redirected back to the origin portal, which validates the grant and continues with the standard signing flow."
+          revoke:
+            title: "Grants are revoked when the request changes"
+            description: "If the recipient is withdrawn or the bundle is completed without them, active grants are revoked and old links stop working."
+        requests_title: "Which requests and URLs are used"
+        requests:
+          origin_link:
+            label: "Origin request URL"
+            description: "The regular bundle signing URL, typically `/bundles/:bundle_uuid/sign?recipient=:recipient_uuid`. This is what the sender copies or what the recipient receives in notification emails."
+          well_known:
+            label: "Federation metadata"
+            description: "The `/.well-known/autogram-portal.json` document advertises the issuer, portal name, public key, federation API base URL, supported capabilities, and optional email domains of a portal."
+          preview_api:
+            label: "Preview API request"
+            description: "`GET /api/federation/v1/requests/:recipient_uuid` is used by the home portal to retrieve a human-readable preview before the recipient claims the request."
+          claim_api:
+            label: "Claim API request"
+            description: "`POST /api/federation/v1/requests/:recipient_uuid/claim` is used by the home portal to exchange the local signed-in user identity for a short-lived sign URL on the origin portal."
+          grant_url:
+            label: "Grant-backed sign URL"
+            description: "The claim response returns a sign URL with `grant=...`. That URL is short-lived and validated against a stored access-grant record on the origin portal."
+        security_title: "Trust and security rules"
+        security_points:
+          explicit_trust: "Sender-side routing uses an explicitly configured trusted portal list. This is how the origin portal decides which home portal is allowed to claim a federated recipient."
+          dynamic_opening: "Recipient-side pasted-link opening is more permissive: the home portal may dynamically discover an origin portal from its metadata document without a preconfigured local trust record."
+          portal_auth: "Portal-to-portal API calls are authenticated with a dedicated JWT assertion containing issuer, audience, expiry, unique ID, and federation scope."
+          recipient_binding: "The origin portal verifies that the claiming portal matches the portal assigned to the recipient and that the claimant email still matches the recipient email."
+          source_of_truth: "Bundle completion, recipient withdrawal, superseding, and signed document storage always remain on the origin portal."
+          revocation: "Short-lived access grants are revoked automatically when the request is no longer valid for that recipient."
+        current_scope_title: "Current implementation scope"
+        current_scope_description: "Today, federation lets a recipient paste and claim a foreign request on their own portal even if the origin portal was not preconfigured locally, but the actual signing still completes on the origin portal."
       integration:
         title: "API & SDK"
         intro: "If you want to integrate Autogram Portal into your own application, use the SDK example and API documentation."

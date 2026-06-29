@@ -1,6 +1,22 @@
 require "rqrcode"
 
 module ApplicationHelper
+  def render_inline_code(text)
+    fragments = text.to_s.split(/(`[^`]+`)/)
+
+    safe_join(fragments.map do |fragment|
+      if fragment.start_with?("`") && fragment.end_with?("`")
+        content_tag(
+          :code,
+          fragment[1..-2],
+          class: "rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[0.9em] text-gray-800"
+        )
+      else
+        ERB::Util.html_escape(fragment)
+      end
+    end)
+  end
+
   def terms_of_service_link
     ENV["TERMS_OF_SERVICE_URL"].presence || root_path
   end

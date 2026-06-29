@@ -30,11 +30,18 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :agree_to_policies ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, :api_token_public_key ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, :api_token_public_key, { features: [] } ])
   end
 
   def update_resource(resource, params)
     params = params.except(:current_password, :password, :password_confirmation)
+    params = params.except(:features) unless resource.admin?
+
+    if resource.admin?
+      submitted_features = Array(params[:features]).map(&:to_s).reject(&:blank?)
+      submitted_features |= [ "admin" ]
+      params[:features] = submitted_features & User::AVAILABLE_FEATURES
+    end
 
     resource.update(params)
   end

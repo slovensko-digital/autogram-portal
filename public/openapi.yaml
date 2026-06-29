@@ -10,8 +10,23 @@ servers:
 
 tags:
   - name: Integration
+  - name: Federation
 
 paths:
+  /.well-known/autogram-portal.json:
+    get:
+      tags:
+        - Federation
+      summary: Federation metadata
+      description: Returns metadata that trusted peer portals use to discover federation capabilities and configure request routing.
+      responses:
+        "200":
+          description: Federation metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FederationMetadata"
+
   /hello:
     get:
       tags:
@@ -373,6 +388,125 @@ paths:
         "404":
           description: Bundle not found.
 
+  /federation/v1/requests/{id}:
+    get:
+      tags:
+        - Federation
+      security:
+        - PortalJWT: []
+      summary: Preview a federated signing request
+      description: Returns request preview metadata for a federated recipient assigned to the calling trusted portal.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The recipient UUID on the origin portal.
+        - name: bundleId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Optional bundle UUID for stronger request matching.
+      responses:
+        "200":
+          description: Request preview.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request:
+                    $ref: "#/components/schemas/FederationRequestPreview"
+        "401":
+          description: Invalid portal assertion.
+        "403":
+          description: Portal is not authorized for this recipient.
+        "404":
+          description: Recipient not found.
+        "409":
+          description: Request is no longer claimable.
+
+  /federation/v1/requests/{id}/claim:
+    post:
+      tags:
+        - Federation
+      security:
+        - PortalJWT: []
+      summary: Claim a federated signing request
+      description: Claims a recipient on behalf of a local user from another trusted portal and returns a short-lived origin sign URL.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The recipient UUID on the origin portal.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bundleId:
+                  type: string
+                  format: uuid
+                claimant:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    displayName:
+                      type: string
+                    externalUserId:
+                      type: string
+                  required:
+                    - email
+              required:
+                - claimant
+      responses:
+        "201":
+          description: Claim accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claim:
+                    type: object
+                    properties:
+                      recipientId:
+                        type: string
+                        format: uuid
+                      claimedAt:
+                        type: string
+                        format: date-time
+                      signUrl:
+                        type: string
+                        format: uri
+                      bundleId:
+                        type: string
+                        format: uuid
+                      expiresAt:
+                        type: string
+                        format: date-time
+        "401":
+          description: Invalid portal assertion.
+        "403":
+          description: Portal is not authorized for this recipient.
+        "404":
+          description: Recipient not found.
+        "409":
+          description: Request is no longer claimable.
+        "422":
+          description: Claimant email does not match recipient.
+
 webhooks:
   notificationWebhook:
     post:
@@ -507,6 +641,11 @@ components:
           format: uuid
           example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: Unique identifier for the recipient. If not provided, a new UUID will be generated.
+        portalInstanceId:
+          type: string
+          format: uuid
+          example: 2ad58f5f-6f56-4ab6-a6df-5b80aa6f4a25
+          description: Optional trusted portal instance identifier. When provided, the recipient is treated as federated and is expected to open the request through that remote portal instance.
       required:
         - email
 
@@ -668,6 +807,79 @@ components:
         - timestamp
         - data
 
+    FederationMetadata:
+      type: object
+      properties:
+        issuer:
+          type: string
+          format: uri
+        baseUrl:
+          type: string
+          format: uri
+        federationApiBase:
+          type: string
+          format: uri
+        publicKeyPem:
+          type: string
+        capabilities:
+          type: object
+          additionalProperties: true
+        emailDomains:
+          type: array
+          items:
+            type: string
+
+    FederationRequestPreview:
+      type: object
+      properties:
+        recipientId:
+          type: string
+          format: uuid
+        bundleId:
+          type: string
+          format: uuid
+        originPortal:
+          type: object
+          properties:
+            issuer:
+              type: string
+              format: uri
+            name:
+              type: string
+        authorName:
+          type: string
+        recipientEmail:
+          type: string
+          format: email
+        recipientPortalId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        contracts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              displayName:
+                type: string
+        signingRule:
+          type: string
+        requiredSignatures:
+          type:
+            - integer
+            - "null"
+        note:
+          type:
+            - string
+            - "null"
+        openUrl:
+          type: string
+          format: uri
+
 
   securitySchemes:
     JWT:
@@ -696,6 +908,19 @@ components:
         Token must be present in either:
         - header `Authorization: Bearer <api-token>`
         - query parameter `?token=<api-token>`
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    PortalJWT:
+      description: |
+        JWT token signed by a trusted portal instance private key.
+        Required claims:
+        - `iss` trusted portal issuer
+        - `aud` origin portal issuer
+        - `exp` no more than 5 minutes in the future
+        - `jti` unique assertion identifier
+        - `scope` space-separated federation scopes such as `federation.request.read` and `federation.request.claim`
       type: http
       scheme: bearer
       bearerFormat: JWT
@@ -745,6 +970,32 @@ components:
         recipients:
           - name: "John Doe"
             email: "john.doe@example.com"
+
+    federated-recipient:
+      summary: Recipient assigned to a trusted remote portal
+      value:
+        contracts:
+          - allowedMethods: [ "qes" ]
+            documents:
+              - filename: "contract.txt"
+                content: "Sample text content"
+                contentType: "text/plain"
+            signatureParameters:
+              format: XAdES
+              container: ASiC_E
+        recipients:
+          - name: "John Doe"
+            email: "john@partner.example"
+            portalInstanceId: "2ad58f5f-6f56-4ab6-a6df-5b80aa6f4a25"
+
+    federation-claim:
+      summary: Claim a federated request
+      value:
+        bundleId: "69393b49-c34f-438f-ad7c-4b78db3932be"
+        claimant:
+          email: "john@partner.example"
+          displayName: "John Doe"
+          externalUserId: "remote-user-123"
 
     multiple-users-and-docs:
       summary: Multiple users and contracts

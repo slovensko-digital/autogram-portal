@@ -77,6 +77,7 @@ sk:
       received_bundles: "Prijaté na podpis"
       validation_archive: "Archív podpisov"
       settings: "Nastavenia"
+      open_foreign_request: "Otvoriť cudzí odkaz"
       new_contract: "Nový dokument"
       electronic_onboarding: "Elektronické podpisovanie"
       docs: "Používateľská príručka"
@@ -132,6 +133,25 @@ sk:
         delete_confirmation_placeholder: "Napíšte potvrdzovaciu frázu"
         delete_confirmation_instruction_html: "Pre potvrdenie napíšte %{phrase}."
         delete_confirmation_mismatch: "Potvrdzovacia fráza sa nezhoduje."
+        admin: "Administrácia"
+        manage_portal_instances: "Dôveryhodné portály"
+        manage_portal_instances_description: "Spravujte externé inštancie Autogram Portálu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
+        manage_portal_instances_link: "Spravovať dôveryhodné portály"
+        features: "Funkcie"
+        features_title: "Funkcie aktuálneho používateľa"
+        features_description: "Ako administrátor môžete zapínať alebo vypínať funkcie dostupné na vašom vlastnom účte. Funkcia administrátora tu zostáva vždy zapnutá."
+        admin_feature_locked: "Funkciu administrátora nie je možné na tomto účte tu odobrať."
+        save_features: "Uložiť funkcie"
+        feature_labels:
+          admin: "Administrátorský prístup"
+          archivation: "Archív podpisov"
+          api: "API prístup"
+          federation: "Federácia"
+        feature_descriptions:
+          admin: "Umožňuje prístup do administrátorských častí, napríklad správy dôveryhodných portálov a administrácie úloh."
+          archivation: "Zapína archív podpisov a funkcie správy záznamov dlhodobého overovania."
+          api: "Umožňuje upravovať verejný kľúč pre API a používať autentifikované integračné endpointy."
+          federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portálu."
     confirmations:
       new:
         resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"
@@ -421,6 +441,9 @@ sk:
       title: "Poslať na podpis"
       subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
       send_invitation: "Odoslať email"
+      portal_label: "Portál adresáta"
+      portal_blank_option: "Tento portál"
+      portal_help: "Vyberte dôveryhodný partnerský portál, ak má adresát otvoriť požiadavku cez inú inštanciu Autogram Portálu."
       email_label: "Email adresáta"
       email_placeholder: "jan.novak@example.com"
       email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
@@ -435,6 +458,66 @@ sk:
       required_signatures_label: "Počet vyžadovaných podpisov"
       required_signatures_of: "z %{count} adresátov"
       request_withdrawn: "Požiadavka na podpis bola stiahnutá"
+
+  admin:
+    portal_instances:
+      index:
+        title: "Dôveryhodné portály"
+        subtitle: "Spravujte externé inštancie Autogram Portálu, ktoré možno použiť pre federovaných adresátov."
+        new: "Pridať portál"
+        name: "Názov"
+        base_url: "Základná URL"
+        status: "Stav"
+        domains: "Emailové domény"
+        actions: "Akcie"
+        edit: "Upraviť"
+        verify: "Overiť"
+        revoke: "Zrušiť dôveru"
+      new:
+        title: "Pridať dôveryhodný portál"
+        subtitle: "Zaregistrujte vzdialenú inštanciu Autogram Portálu pre federované smerovanie adresátov."
+      edit:
+        title: "Upraviť dôveryhodný portál"
+        subtitle: "Aktualizujte konfiguráciu vzdialeného portálu a stav dôvery."
+      form:
+        error_title: "Portál sa nepodarilo uložiť"
+        name: "Názov"
+        base_url: "Základná URL"
+        issuer: "Issuer"
+        public_key_pem: "Verejný kľúč (PEM)"
+        status: "Stav"
+        allowed_email_domains: "Povolené emailové domény"
+        allowed_email_domains_help: "Zadajte zoznam emailových domén oddelených čiarkou, pri ktorých sa má tento portál navrhovať odosielateľom."
+        cancel: "Zrušiť"
+      create:
+        success: "Dôveryhodný portál bol vytvorený"
+      update:
+        success: "Dôveryhodný portál bol upravený"
+      verify:
+        success: "Dôveryhodný portál bol overený"
+      revoke:
+        success: "Dôvera k portálu bola zrušená"
+
+  federation:
+    requests:
+      show:
+        title: "Otvoriť federovanú požiadavku"
+        subtitle: "Vložte odkaz na požiadavku na podpis z inej inštancie Autogram Portálu a zobrazte si jej náhľad alebo si ju prevezmite tu."
+        url_label: "URL požiadavky"
+        url_placeholder: "https://portal.example/bundles/.../sign?recipient=..."
+        preview: "Zobraziť náhľad"
+        portal: "Vzdialený portál"
+        author: "Odosielateľ"
+        documents: "Dokumenty"
+        note: "Poznámka"
+        claim: "Prevziať a pokračovať"
+        sign_in_required: "Prihláste sa na tomto portáli, aby ste mohli požiadavku prevziať a pokračovať na podpisovanie."
+      errors:
+        invalid_url: "Zadaná URL požiadavky je neplatná."
+        untrusted_portal: "Táto požiadavka smeruje na portál, ktorý nie je v zozname dôveryhodných portálov."
+        unsupported_portal: "Pôvodný portál neposkytuje federované metadáta alebo API endpointy potrebné pre tento scenár."
+        private_key_missing: "Na tomto portáli nie je nakonfigurovaný súkromný kľúč pre federáciu."
+        remote_request_failed: "Požiadavka na vzdialený portál zlyhala."
   contracts:
     alerts:
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
@@ -964,6 +1047,7 @@ sk:
         received: "Prijaté balíky"
         signing: "Podpisovanie"
         account: "Nastavenia"
+        federation: "Federácia"
         integration: "API a SDK"
       dashboard:
         title: "Prehľad (Dashboard)"
@@ -1229,6 +1313,73 @@ sk:
         screenshot_description: "Odporúčame sem doplniť screenshot stránky nastavení s vyznačenou sekciou Danger Zone."
         screenshot_file_hint: "Súbor: /public/docs/screenshots/account-danger-zone.png"
         screenshot_placeholder: "Miesto pre screenshot nastavení účtu"
+      federation:
+        title: "Federácia medzi portálmi"
+        intro: "Autogram Portal dokáže odovzdávať požiadavky na podpis medzi inštanciami portálu. Pôvodný portál zostáva vlastníkom balíka, zatiaľ čo domáci portál adresáta pomáha s lokálnym prihlásením a prevzatím požiadavky."
+        actors_title: "Kto sa procesu zúčastňuje"
+        actors:
+          origin:
+            label: "Pôvodný portál"
+            description: "Portál, na ktorom odosielateľ vytvoril balík. Vlastní zoznam adresátov, pravidlá podpisovania, stav balíka aj finálne podpísané dokumenty."
+          home:
+            label: "Domáci portál"
+            description: "Portál, na ktorom sa adresát preferuje prihlasovať. Vie zobraziť náhľad požiadavky z iného portálu a prevziať ju v mene lokálne prihláseného používateľa."
+          trust:
+            label: "Zoznam dôveryhodných portálov"
+            description: "Administrátorom spravovaný zoznam externých inštancií Autogram Portálu používaný vtedy, keď odosielateľ cielene priraďuje adresáta na iný portál."
+        flow_title: "Ako celý proces funguje"
+        flow:
+          setup:
+            title: "Administrátori nastavia smerovanie pre odosielateľov"
+            description: "Administrátori zaregistrujú domáce portály, na ktoré môžu lokálni odosielatelia cielene smerovať federovaných adresátov."
+          sender:
+            title: "Odosielateľ vyberie vzdialený portál"
+            description: "Pri vytváraní adresáta v balíku môže odosielateľ ponechať adresáta lokálneho alebo ho priradiť ku konkrétnej dôveryhodnej vzdialenej inštancii portálu."
+          link:
+            title: "Pôvodný portál vytvorí odkaz na požiadavku"
+            description: "Odosielateľ stále pracuje s bežným podpisovým odkazom balíka na pôvodnom portáli. Táto URL zostáva kanonickou referenciou na požiadavku."
+          preview:
+            title: "Adresát otvorí požiadavku na svojom domácom portáli"
+            description: "Adresát môže vložiť URL pôvodnej požiadavky do domáceho portálu. Domáci portál odkaz spracuje, načíta metadáta pôvodného portálu a vyžiada si náhľad požiadavky."
+          claim:
+            title: "Domáci portál prevezme požiadavku"
+            description: "Po lokálnom prihlásení adresáta odošle domáci portál portálom autentifikovanú požiadavku na prevzatie. Ak sa adresát stále zhoduje, požiadavka je aktívna a domáci portál je ten, ktorý bol priradený adresátovi, pôvodný portál ju prijme."
+          grant:
+            title: "Pôvodný portál vráti krátkodobý grant"
+            description: "Pôvodný portál vydá krátkodobý prístupový grant a vráti podpisovú URL s parametrom `grant=...`. Tým sa vyhne zdieľaniu dlhodobých tokenov v kopírovaných odkazoch."
+          sign:
+            title: "Podpis pokračuje na pôvodnom portáli"
+            description: "Adresát je presmerovaný späť na pôvodný portál, ktorý grant overí a pokračuje štandardným podpisovým procesom."
+          revoke:
+            title: "Granty sa rušia pri zmene požiadavky"
+            description: "Ak je adresát stiahnutý alebo je balík dokončený bez neho, aktívne granty sa zrušia a staré odkazy prestanú fungovať."
+        requests_title: "Aké URL a požiadavky sa používajú"
+        requests:
+          origin_link:
+            label: "Pôvodná URL požiadavky"
+            description: "Bežná podpisová URL balíka, typicky `/bundles/:bundle_uuid/sign?recipient=:recipient_uuid`. Túto URL odosielateľ kopíruje alebo ju adresát dostane v notifikačnom emaile."
+          well_known:
+            label: "Federované metadáta"
+            description: "Dokument `/.well-known/autogram-portal.json` zverejňuje issuer, názov portálu, verejný kľúč, základ federovaného API, podporované schopnosti a voliteľné emailové domény portálu."
+          preview_api:
+            label: "API požiadavka na náhľad"
+            description: "`GET /api/federation/v1/requests/:recipient_uuid` používa domáci portál na získanie čitateľného náhľadu požiadavky ešte pred jej prevzatím."
+          claim_api:
+            label: "API požiadavka na prevzatie"
+            description: "`POST /api/federation/v1/requests/:recipient_uuid/claim` používa domáci portál na výmenu lokálne prihláseného používateľa za krátkodobú podpisovú URL na pôvodnom portáli."
+          grant_url:
+            label: "Podpisová URL s grantom"
+            description: "Odpoveď na prevzatie vracia podpisovú URL s parametrom `grant=...`. Táto URL má krátku platnosť a overuje sa voči uloženému prístupovému grantu na pôvodnom portáli."
+        security_title: "Pravidlá dôvery a bezpečnosti"
+        security_points:
+          explicit_trust: "Smerovanie od odosielateľa používa explicitne nakonfigurovaný zoznam dôveryhodných portálov. Takto pôvodný portál rozhoduje, ktorý domáci portál smie prevziať federovaného adresáta."
+          dynamic_opening: "Otvorenie vloženého cudzieho odkazu na domácom portáli je voľnejšie: domáci portál si môže pôvodný portál objaviť dynamicky cez jeho metadátový dokument aj bez lokálneho záznamu dôvery."
+          portal_auth: "Portálové API volania sú autentifikované samostatným JWT tvrdením s issuerom, audience, exspiráciou, unikátnym ID a federovaným scope."
+          recipient_binding: "Pôvodný portál overuje, že preberajúci portál sa zhoduje s portálom priradeným adresátovi a že email preberajúceho používateľa sa stále zhoduje s emailom adresáta."
+          source_of_truth: "Dokončenie balíka, stiahnutie adresáta, superseding aj uloženie podpísaných dokumentov zostávajú vždy na pôvodnom portáli."
+          revocation: "Krátkodobé prístupové granty sa rušia automaticky, keď požiadavka už pre daného adresáta nie je platná."
+        current_scope_title: "Rozsah aktuálnej implementácie"
+        current_scope_description: "Federácia dnes umožňuje adresátovi vložiť a prevziať cudziu požiadavku na vlastnom portáli aj vtedy, keď pôvodný portál nebol lokálne vopred nastavený, ale samotné podpisovanie sa stále dokončuje na pôvodnom portáli."
       integration:
         title: "API a SDK"
         intro: "Ak chcete Autogram Portal integrovať do vlastnej aplikácie, použite SDK ukážku a API dokumentáciu."

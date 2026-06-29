@@ -1,0 +1,57 @@
+<div class="mx-auto max-w-3xl space-y-6 px-4 py-8">
+  <div>
+    <h1 class="text-2xl font-semibold text-gray-900"><%= t('.title') %></h1>
+    <p class="mt-1 text-sm text-gray-600"><%= t('.subtitle') %></p>
+  </div>
+
+  <%= form_with url: federation_requests_open_path, method: :get, class: "space-y-3" do |form| %>
+    <div>
+      <%= form.label :url, t('.url_label'), class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.url_field :url, value: @request_url, placeholder: t('.url_placeholder'), class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    </div>
+    <%= form.submit t('.preview'), class: "inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+  <% end %>
+
+  <% if @preview_error.present? %>
+    <div class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"><%= @preview_error %></div>
+  <% end %>
+
+  <% if @request_preview.present? %>
+    <div class="space-y-4 rounded-lg border border-gray-200 bg-white p-5">
+      <div>
+        <p class="text-sm text-gray-500"><%= t('.portal') %></p>
+        <p class="text-base font-medium text-gray-900"><%= @request_preview.dig("originPortal", "name") || @origin_portal&.name || @origin_portal&.base_url %></p>
+      </div>
+
+      <div>
+        <p class="text-sm text-gray-500"><%= t('.author') %></p>
+        <p class="text-base text-gray-900"><%= @request_preview["authorName"] %></p>
+      </div>
+
+      <div>
+        <p class="text-sm text-gray-500"><%= t('.documents') %></p>
+        <ul class="mt-2 list-disc pl-5 text-sm text-gray-900">
+          <% Array(@request_preview["contracts"]).each do |contract| %>
+            <li><%= contract["displayName"] %></li>
+          <% end %>
+        </ul>
+      </div>
+
+      <% if @request_preview["note"].present? %>
+        <div>
+          <p class="text-sm text-gray-500"><%= t('.note') %></p>
+          <p class="text-sm text-gray-900"><%= @request_preview["note"] %></p>
+        </div>
+      <% end %>
+
+      <% if user_signed_in? %>
+        <%= form_with url: federation_requests_claim_path, method: :post do |form| %>
+          <%= form.hidden_field :url, value: @request_url %>
+          <%= form.submit t('.claim'), class: "inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700" %>
+        <% end %>
+      <% else %>
+        <p class="text-sm text-gray-600"><%= t('.sign_in_required') %></p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

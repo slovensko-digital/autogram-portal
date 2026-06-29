@@ -143,6 +143,20 @@
           url: bundle_recipients_path(@bundle),
           method: :post,
           data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } do |form| %>
+      <% if @portal_instances.any? %>
+        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5m10 0v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5m10 0H7"/>
+          </svg>
+          <%= t('.portal_label') %>
+        </label>
+        <%= form.select :portal_instance_uuid,
+              options_from_collection_for_select(@portal_instances, :uuid, :name),
+              { include_blank: t('.portal_blank_option') },
+              class: "w-full mb-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        <p class="mt-0 mb-4 text-sm text-gray-500"><%= t('.portal_help') %></p>
+      <% end %>
+
       <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
