@@ -141,6 +141,16 @@ class Contract < ApplicationRecord
     [ latest_content_version.document ]
   end
 
+  def documents_to_sign_for(signer_contract: nil)
+    source_documents = documents_to_sign
+    return source_documents unless signer_contract && source_documents.one? && !signed_document_attached?
+
+    prepared_stamp = signer_contract.latest_qes_visual_stamp_for(documents.first)
+    return source_documents unless prepared_stamp&.file&.attached?
+
+    [ prepared_stamp.stamped_document ]
+  end
+
   def awaiting_signature?
     !signed_document_attached? || bundle&.awaiting_recipients?(contract: self)
   end

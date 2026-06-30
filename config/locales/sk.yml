@@ -831,6 +831,10 @@ sk:
       electronic_description: "Podpíšte digitálne pomocou vašho občianskeho preukazu a podpisovej aplikácie"
       physical_label: "Fyzické podpisovanie"
       physical_description: "Vytlačte, podpíšte ručne a pošlite poštou"
+      visual_label: "Vizuálna pečiatka"
+      visual_description: "Pridajte do PDF vizuálnu pečiatku bez vytvorenia kvalifikovaného elektronického podpisu"
+      qes_visual_stamp_button: "Najprv pridať vizuálnu pečiatku"
+      qes_visual_stamp_description: "Podpisovanie cez QES/PAdES môže pred vytvorením kvalifikovaného podpisu obsahovať voliteľnú vizuálnu pečiatku."
       continue: "Pokračovať"
     physical_signing:
       title: "Fyzický podpis"
@@ -842,16 +846,31 @@ sk:
       confirmation_message: "Po odoslaní dostanete potvrdenie. Odosielateľ dokumentu bude upovedomený o vašom fyzickom podpise."
       back: "Späť"
       submit: "Odoslať fyzický podpis"
+    visual_signing:
+      title: "Vizuálna pečiatka"
+      subtitle: "Pridajte do PDF vizuálnu pečiatku"
+      placement_help: "Presuňte a upravte veľkosť pečiatky na prvej strane. Táto vizuálna pečiatka sa vloží do PDF pred ďalším krokom."
+      placement_title: "Umiestnenie pečiatky"
+      placement_description: "Potiahnutím obdĺžnika vyberte miesto, kde sa pečiatka zobrazí. Veľkosť upravíte rohovým úchytom."
+      preview_title: "Náhľad PDF"
+      preview_unavailable: "Náhľad PDF nie je dostupný."
+      resize_handle: "Zmeniť veľkosť pečiatky"
+      stamp_text_label: "Text pečiatky"
+      position_label: "Pozícia"
+      back: "Späť"
+      submit: "Vytvoriť vizuálnu pečiatku"
     allowed_methods:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
       ses: Elektronický podpis nakreslením podpisu a overením cez SMS
       scan: Vytlačiť, ručne podpísať a naskenovať
+      visual: Pridať do PDF vizuálnu pečiatku
       notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
       short:
         qes: Kvalifikovaný elektronický podpis
         ses: Jednoduchý elektronický podpis
         scan: Sken podpísaného dokumentu
+        visual: Vizuálna pečiatka
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
 

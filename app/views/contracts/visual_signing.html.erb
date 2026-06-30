@@ -1,0 +1,104 @@
+<%= turbo_stream_from @contract %>
+<% document = @contract.documents_to_sign.first %>
+<% preview_path = document&.blob&.attached? ? rails_blob_path(document.blob, disposition: "inline") : nil %>
+<main>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex flex-col items-center max-w-6xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
+      <div class="w-full">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+        <p class="text-gray-600"><%= t('.subtitle') %></p>
+      </div>
+
+      <div class="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <%= form_with url: visual_signing_contract_path(@contract), method: :post, local: true, class: "space-y-6", data: {
+          controller: "visual-stamp",
+          visual_stamp_page_width_value: 595,
+          visual_stamp_page_height_value: 842,
+          visual_stamp_x_value: 40,
+          visual_stamp_y_value: 40,
+          visual_stamp_width_value: 260,
+          visual_stamp_height_value: 52
+        } do |f| %>
+          <%= hidden_field_tag :recipient, @recipient&.uuid %>
+          <%= hidden_field_tag :iframe, params[:iframe] %>
+          <%= hidden_field_tag :purpose, params[:purpose].presence || "visual_method" %>
+          <%= hidden_field_tag "stamp[page]", 1, data: { visual_stamp_target: "pageField" } %>
+          <%= hidden_field_tag "stamp[x]", 40, data: { visual_stamp_target: "xField" } %>
+          <%= hidden_field_tag "stamp[y]", 40, data: { visual_stamp_target: "yField" } %>
+          <%= hidden_field_tag "stamp[width]", 260, data: { visual_stamp_target: "widthField" } %>
+          <%= hidden_field_tag "stamp[height]", 52, data: { visual_stamp_target: "heightField" } %>
+          <%= hidden_field_tag "stamp[text]", VisualStamp::DEFAULT_TEXT, data: { visual_stamp_target: "textField" } %>
+
+          <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-blue-800"><%= t('.placement_help') %></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+            <div class="rounded-lg border border-gray-200 bg-gray-100 p-4">
+              <div class="mx-auto max-w-[680px]">
+                <div class="relative mx-auto aspect-[595/842] overflow-hidden rounded-sm bg-white shadow" data-visual-stamp-target="page">
+                  <% if preview_path %>
+                    <iframe src="<%= preview_path %>#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+                            title="<%= t('.preview_title') %>"
+                            class="absolute inset-0 h-full w-full border-0 pointer-events-none"></iframe>
+                  <% else %>
+                    <div class="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-gray-500">
+                      <%= t('.preview_unavailable') %>
+                    </div>
+                  <% end %>
+
+                  <div data-visual-stamp-target="stamp"
+                       data-action="pointerdown->visual-stamp#startDrag"
+                       class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 shadow-lg ring-2 ring-white/70">
+                    <div class="flex h-full items-center text-xs font-medium leading-tight text-gray-800">
+                      <%= VisualStamp::DEFAULT_TEXT %>
+                    </div>
+                    <button type="button"
+                            aria-label="<%= t('.resize_handle') %>"
+                            data-visual-stamp-handle="resize"
+                            data-action="pointerdown->visual-stamp#startResize"
+                            class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600 shadow"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900"><%= t('.placement_title') %></h2>
+                <p class="mt-1 text-sm text-gray-600"><%= t('.placement_description') %></p>
+              </div>
+
+              <div class="rounded-md bg-white p-3 text-sm text-gray-700 shadow-sm">
+                <div class="font-medium text-gray-900"><%= t('.stamp_text_label') %></div>
+                <p class="mt-1 text-xs leading-5 text-gray-600"><%= VisualStamp::DEFAULT_TEXT %></p>
+              </div>
+
+              <div class="rounded-md bg-white p-3 text-sm text-gray-700 shadow-sm">
+                <div class="font-medium text-gray-900"><%= t('.position_label') %></div>
+                <p class="mt-1 text-xs text-gray-600" data-visual-stamp-target="summary"></p>
+              </div>
+            </aside>
+          </div>
+
+          <div class="flex justify-between items-center pt-4">
+            <% back_path = @contract.bundle ? sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe]) : sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe]) %>
+            <%= link_to t('.back'), back_path,
+                class: "px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" %>
+            <%= f.submit t('.submit'),
+                class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</main>

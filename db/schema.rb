@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_26_143000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_30_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -413,6 +413,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_26_143000) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  create_table "visual_stamps", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "document_id", null: false
+    t.decimal "height", precision: 10, scale: 2, null: false
+    t.integer "page", default: 1, null: false
+    t.string "purpose", null: false
+    t.bigint "signer_contract_id", null: false
+    t.text "text"
+    t.datetime "updated_at", null: false
+    t.decimal "width", precision: 10, scale: 2, null: false
+    t.decimal "x", precision: 10, scale: 2, null: false
+    t.decimal "y", precision: 10, scale: 2, null: false
+    t.index ["document_id"], name: "index_visual_stamps_on_document_id"
+    t.index ["signer_contract_id", "document_id", "purpose"], name: "idx_on_signer_contract_id_document_id_purpose_d86ba1c031"
+    t.index ["signer_contract_id"], name: "index_visual_stamps_on_signer_contract_id"
+  end
+
   create_table "webhooks", force: :cascade do |t|
     t.bigint "bundle_id", null: false
     t.datetime "created_at", null: false
@@ -467,6 +484,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_26_143000) do
   add_foreign_key "signers", "recipients"
   add_foreign_key "signers", "users"
   add_foreign_key "user_policy_consents", "users"
+  add_foreign_key "visual_stamps", "documents"
+  add_foreign_key "visual_stamps", "signer_contracts"
   add_foreign_key "webhooks", "bundles"
   add_foreign_key "xdc_parameters", "documents"
 end

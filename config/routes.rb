@@ -85,6 +85,8 @@ Rails.application.routes.draw do
       get :signature_apps
       get :physical_signing
       post :physical_signing, action: :create_physical_session
+      get :visual_signing
+      post :visual_signing, action: :create_visual_session
       get :show_bundle
     end
 

@@ -31,6 +31,33 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "download uses signer prepared qes visual stamp" do
+    visual_stamp = @session.signer_contract.visual_stamps.create!(
+      document: @contract.documents.first,
+      purpose: :qes_preparation,
+      page: 1,
+      x: 40,
+      y: 40,
+      width: 260,
+      height: 52,
+      text: VisualStamp::DEFAULT_TEXT
+    )
+    visual_stamp.file.attach(
+      io: StringIO.new("prepared qes pdf"),
+      filename: "prepared.pdf",
+      content_type: "application/pdf"
+    )
+
+    token = SessionAccessToken.generate(contract: @contract, session: @session)
+
+    get "/contracts/#{@contract.uuid}/sessions/#{@session.id}/download", params: {
+      session_token: token
+    }
+
+    assert_response :success
+    assert_equal "prepared qes pdf", response.body
+  end
+
   test "create stores iframe mode on autogram sessions" do
     contract = create_contract_without_session
 
@@ -45,7 +72,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     started_at = Time.current.change(usec: 0)
 
     with_avm_service(Struct.new(:started_at) do
-      def initiate_signing(_contract)
+      def initiate_signing(_contract, signer_contract: nil)
         {
           document_identifier: "guid-123",
           encryption_key: "secret-key-456",
@@ -72,7 +99,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     contract = create_contract_without_session
 
     with_avm_service(Struct.new(:message) do
-      def initiate_signing(_contract)
+      def initiate_signing(_contract, signer_contract: nil)
         { error: message }
       end
     end.new("AVM temporarily unavailable")) do

@@ -136,6 +136,23 @@ class AutogramService
     end
   end
 
+  def stamp_pdf(document, stamp:)
+    return nil if document.content.nil?
+
+    file_content = Base64.strict_encode64(document.content)
+    response = call_autogram_stamp_pdf_api(file_content, document, stamp: stamp)
+
+    if response.success?
+      data = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
+      return Base64.strict_decode64(data["content"])
+    end
+
+    raise AutogramServiceError, "Error communicating with Autogram service: #{response.status}: #{response.body}"
+  rescue StandardError => e
+    Rails.logger.warn "Autogram stamp PDF service not available: #{e.message}"
+    raise ServiceUnavailableError
+  end
+
   class AutogramServiceError < StandardError
     def message
       I18n.t("autogram_service.errors.#{self.class.name.demodulize.underscore}", default: super)
@@ -230,6 +247,26 @@ class AutogramService
     }
 
     connection.post("/visualization", payload)
+  end
+
+  def call_autogram_stamp_pdf_api(file_content, document, stamp:)
+    connection = Faraday.new(url: AUTOGRAM_BASE_URL) do |faraday|
+      faraday.request :json
+      faraday.response :json
+      faraday.adapter Faraday.default_adapter
+      faraday.options.timeout = 30
+    end
+
+    payload = {
+      document: {
+        filename: document.filename,
+        content: file_content,
+        mimeType: determine_payload_mime_type(document)
+      },
+      stamp: stamp
+    }
+
+    connection.post("/stamp-pdf", payload)
   end
 
   def call_autogram_extend_api(file_content, target_level: "T")

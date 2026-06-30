@@ -6,5 +6,5 @@ json.signature_parameters do
   json.en319132 @contract.signature_parameters&.en319132
   json.add_content_timestamp @contract.signature_parameters&.add_content_timestamp
 end
-json.documents @contract.documents_to_sign, partial: "api/v1/documents/document", as: :document
+json.documents @contract.documents_to_sign_for(signer_contract: @session.signer_contract), partial: "api/v1/documents/document", as: :document
 json.multiple_documents @contract.documents.many?

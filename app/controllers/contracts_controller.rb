@@ -1,9 +1,9 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
-  before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
-  before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
-  before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
+  before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
+  before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
 
   def index
@@ -111,6 +111,9 @@ class ContractsController < ApplicationController
   def physical_signing
   end
 
+  def visual_signing
+  end
+
   def create_physical_session
     physical_session = PhysicalSession.create!(
       signer_contract: @signer_contract,
@@ -123,6 +126,50 @@ class ContractsController < ApplicationController
   rescue ActiveRecord::RecordInvalid => e
     redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid),
                 alert: "Failed to submit: #{e.message}"
+  end
+
+  def create_visual_session
+    documents = @contract.documents_to_sign
+    document = documents.first
+    raise ActiveRecord::RecordInvalid unless documents.one? && document&.is_pdf?
+
+    purpose = visual_stamp_purpose
+    stamp_attributes = visual_stamp_attributes.merge(purpose: purpose)
+    visual_stamp = @signer_contract.visual_stamps.build(stamp_attributes.merge(document: document))
+    raise ActiveRecord::RecordInvalid, visual_stamp unless visual_stamp.valid?
+
+    stamped_content = AutogramEnvironment.autogram_service.stamp_pdf(document, stamp: visual_stamp_service_params(visual_stamp))
+
+    visual_stamp.save!
+    visual_stamp.file.attach(
+      io: StringIO.new(stamped_content),
+      filename: visual_stamp_filename(document),
+      content_type: "application/pdf"
+    )
+
+    if visual_stamp.qes_preparation?
+      return redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+    end
+
+    session = @signer_contract.sessions.create!(
+      type: "VisualSession",
+      signing_started_at: Time.current
+    )
+    @contract.add_signed_content_version!(
+      content: stamped_content,
+      filename: visual_stamp_filename(document),
+      content_type: "application/pdf",
+      origin: "visual"
+    )
+    session.signed!
+
+    redirect_to sign_contract_path(@contract, recipient: @recipient&.uuid)
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid),
+                alert: "Failed to submit: #{e.message}"
+  rescue AutogramService::ServiceUnavailableError => e
+    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid),
+                alert: e.message
   end
 
   def signed_document
@@ -213,7 +260,7 @@ class ContractsController < ApplicationController
   end
 
   def set_recipient
-    if params[:recipient]
+    if params[:recipient].present?
       @recipient = @contract.recipients.active.find_by(uuid: params[:recipient])
 
       return if @recipient
@@ -279,6 +326,44 @@ class ContractsController < ApplicationController
       documents_attributes: [ :id, :blob, :_destroy ],
       signature_parameters_attributes: [ :id, :add_content_timestamp, :level, :format, :container, :en319132 ]
     )
+  end
+
+  def visual_stamp_purpose
+    params[:purpose].presence_in(%w[visual_method qes_preparation]) || "visual_method"
+  end
+
+  def default_visual_stamp_attributes
+    {
+      page: 1,
+      x: 40,
+      y: 40,
+      width: 260,
+      height: 52,
+      text: VisualStamp::DEFAULT_TEXT
+    }
+  end
+
+  def visual_stamp_attributes
+    default_visual_stamp_attributes.merge(visual_stamp_params.to_h.symbolize_keys)
+  end
+
+  def visual_stamp_params
+    params.fetch(:stamp, {}).permit(:page, :x, :y, :width, :height, :text)
+  end
+
+  def visual_stamp_service_params(visual_stamp)
+    {
+      page: visual_stamp.page,
+      x: visual_stamp.x.to_f,
+      y: visual_stamp.y.to_f,
+      width: visual_stamp.width.to_f,
+      height: visual_stamp.height.to_f,
+      text: visual_stamp.text
+    }
+  end
+
+  def visual_stamp_filename(document)
+    "#{File.basename(document.filename, '.*')}-visual.pdf"
   end
 
   def signed_document_param

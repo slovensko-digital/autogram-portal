@@ -907,6 +907,10 @@ en:
       electronic_description: "Sign digitally using your eID card and a signing application"
       physical_label: "Physical Signing"
       physical_description: "Print, sign by hand, and send via post office"
+      visual_label: "Visual stamp"
+      visual_description: "Add a visual stamp to the PDF without creating a qualified electronic signature"
+      qes_visual_stamp_button: "Add visual stamp first"
+      qes_visual_stamp_description: "Signing with QES/PAdES can include an optional visual stamp before the qualified signature is created."
       continue: "Continue"
     physical_signing:
       title: "Physical Signing"
@@ -918,16 +922,31 @@ en:
       confirmation_message: "After submitting, you will receive a confirmation. The document sender will be notified about your physical signature."
       back: "Back"
       submit: "Submit Physical Signing"
+    visual_signing:
+      title: "Visual stamp"
+      subtitle: "Add a visual stamp to the PDF"
+      placement_help: "Move and resize the stamp on the first page. This visual stamp is placed into the PDF before the next step."
+      placement_title: "Stamp placement"
+      placement_description: "Drag the rectangle to choose where the stamp will appear. Use the corner handle to resize it."
+      preview_title: "PDF preview"
+      preview_unavailable: "PDF preview is not available."
+      resize_handle: "Resize stamp"
+      stamp_text_label: "Stamp text"
+      position_label: "Position"
+      back: "Back"
+      submit: "Create visual stamp"
     allowed_methods:
       qes: Qualified electronic signature
       ses: Simple electronic signature
       scan: Print, sign by hand, and scan
+      visual: Add a visual stamp to the PDF
       notary-post: Document signed at a notary and original sent via post office
       notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
       short:
         qes: Qualified electronic signature
         ses: Simple electronic signature
         scan: Print, sign by hand, and scan
+        visual: Visual stamp
         notary-post: Notary signature with postal delivery
         notary-conversion: Notary signature with conversion to QES
 

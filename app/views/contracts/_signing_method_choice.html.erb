@@ -39,6 +39,20 @@ end %>
                 action: 'change->signing-method#handleMethodSelection'
               } %>
       <% end %>
+
+      <% if contract.allowed_methods.include?('visual') %>
+        <%= render 'shared/radio_button_card',
+              name: "signing_method_#{contract.uuid}",
+              value: 'visual',
+              label: t('.visual_label'),
+              description: t('.visual_description'),
+              checked: !contract.allowed_methods.include?('qes') && !contract.allowed_methods.include?('scan'),
+              icon: 'pencil',
+              data_attributes: {
+                signing_method_target: 'methodRadio',
+                action: 'change->signing-method#handleMethodSelection'
+              } %>
+      <% end %>
     </div>
 
     <div class="hidden">
@@ -56,7 +70,25 @@ end %>
             physical_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
             data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
       <% end %>
+
+      <% if contract.allowed_methods.include?('visual') %>
+        <%= link_to "",
+            visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
+            data: { signing_method_target: 'visualButton', turbo_frame: "_top" } %>
+      <% end %>
     </div>
+
+    <% if contract.allowed_methods.include?('qes') && contract.signature_parameters&.format == 'PAdES' %>
+      <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-sm text-blue-900"><%= t('.qes_visual_stamp_description') %></p>
+          <%= link_to t('.qes_visual_stamp_button'),
+              visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], purpose: 'qes_preparation'),
+              class: "inline-flex items-center justify-center rounded-md border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50",
+              data: { turbo_frame: "_top" } %>
+        </div>
+      </div>
+    <% end %>
 
     <div class="flex justify-end">
       <button type="button"

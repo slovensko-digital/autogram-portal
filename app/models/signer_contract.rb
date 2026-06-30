@@ -29,6 +29,7 @@ class SignerContract < ApplicationRecord
   belongs_to :signer
   belongs_to :contract
   has_many :sessions, dependent: :destroy
+  has_many :visual_stamps, dependent: :destroy
 
   validates :signer, uniqueness: { scope: :contract_id }
 
@@ -55,5 +56,9 @@ class SignerContract < ApplicationRecord
 
   def recipient
     signer.recipient if signer.is_a?(RecipientSigner)
+  end
+
+  def latest_qes_visual_stamp_for(document)
+    visual_stamps.qes_preparation.where(document: document).with_attached_file.order(created_at: :desc).first
   end
 end
