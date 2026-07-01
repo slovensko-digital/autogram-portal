@@ -20,7 +20,7 @@ end %>
         <p class="text-gray-600"><%= t('.subtitle') %></p>
       </div>
 
-      <div class="w-full bg-white rounded-lg border border-gray-200 p-6">
+      <div class="w-full">
         <%= form_with url: visual_signing_contract_path(@contract), method: :post, local: true, html: { multipart: true }, class: "space-y-6", data: {
           controller: "visual-stamp",
           visual_stamp_preview_url_value: preview_path,
@@ -46,17 +46,8 @@ end %>
           <%= hidden_field_tag "stamp[width]", @visual_stamp&.width || (@assigned_signature_field_preparation&.width || VisualStamp::MAX_WIDTH), data: { visual_stamp_target: "widthField" } %>
           <%= hidden_field_tag "stamp[height]", @visual_stamp&.height || (@assigned_signature_field_preparation&.height || 52), data: { visual_stamp_target: "heightField" } %>
 
-          <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-              <div class="ml-3">
-                <p class="text-sm text-blue-800"><%= signature_field_appearance ? t('.signature_field_help', page: preview_page) : t('.placement_help') %></p>
-              </div>
-            </div>
+          <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            <%= signature_field_appearance ? t('.signature_field_help', page: preview_page) : t('.placement_help') %>
           </div>
 
           <% if signature_field_appearance %>
@@ -70,7 +61,7 @@ end %>
               <p class="mb-3 text-xs text-gray-600 sm:hidden"><%= t('.mobile_preview_hint') %></p>
               <div class="w-full max-w-full overflow-hidden pb-2">
                 <div class="mx-auto w-full max-w-[680px]">
-                  <div class="relative mx-auto aspect-[595/842] w-full overflow-hidden rounded-sm bg-white shadow" data-visual-stamp-target="page">
+                  <div class="relative mx-auto aspect-[595/842] w-full overflow-hidden rounded-sm bg-white" data-visual-stamp-target="page">
                   <% if preview_path %>
                     <canvas data-visual-stamp-target="pdfCanvas" class="block h-full w-full bg-white"></canvas>
                     <div data-visual-stamp-target="previewFallback" class="absolute inset-0 hidden flex items-center justify-center bg-white/90 p-6 text-center text-sm text-gray-600">
@@ -103,7 +94,7 @@ end %>
                               aria-label="<%= t('.resize_handle') %>"
                               data-visual-stamp-handle="resize"
                               data-action="pointerdown->visual-stamp#startResize"
-                              class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600 shadow"></button>
+                              class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600"></button>
                     <% end %>
                   </div>
                 </div>
@@ -177,7 +168,7 @@ end %>
             <% back_path = @contract.bundle ? sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe]) : sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe]) %>
             <%= link_to t('.back'), back_path,
                 class: "px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" %>
-            <%= f.submit signature_field_appearance ? t('.signature_field_submit') : t('.submit'),
+            <%= f.submit signature_field_appearance ? t('actions.continue') : t('.submit'),
                 class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
           </div>
         <% end %>
