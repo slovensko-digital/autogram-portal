@@ -314,19 +314,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "sign advanced settings do not offer visual method for pades" do
-    with_allowed_methods(%w[qes visual]) do
-      contract = create_pdf_contract(allowed_methods: [ "qes", "visual" ])
-
-      get "/contracts/#{contract.uuid}/signature_parameters", params: { target_step: "sign" }
-
-      assert_response :success
-      assert_select "input[name='contract[allowed_methods][]'][value='visual']", count: 0
-      assert_select "input[name='contract[allowed_methods][]'][value='qes']", count: 0
-    end
-  end
-
-  test "sign advanced settings sanitize visual method for pades on update" do
+  test "sign advanced settings sanitize visual method for pades on update leaves visual before any signature" do
     with_allowed_methods(%w[qes visual]) do
       contract = create_pdf_contract(allowed_methods: [ "qes", "visual" ])
 
@@ -343,7 +331,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       }
 
       assert_redirected_to sign_contract_path(contract)
-      assert_equal [ "qes" ], contract.reload.allowed_methods
+      assert_equal [ "qes", "visual" ], contract.reload.allowed_methods
     end
   end
 
