@@ -64,6 +64,30 @@ class BundlesControllerTest < ActionController::TestCase
     assert_includes response.body, I18n.t("contracts.signature_extension.levels.lta.title")
   end
 
+  test "bundle show offers signature field preparation link for eligible unsigned contract" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    contract = bundle.contracts.first
+    original_autogram_service = AutogramEnvironment.method(:autogram_service)
+    fake_service = fake_unsigned_pades_validation_service
+
+    AutogramEnvironment.singleton_class.define_method(:autogram_service) { fake_service }
+
+    begin
+      contracts_controller = ContractsController.new
+      author = @author
+      contracts_controller.singleton_class.define_method(:current_user) { author }
+      contracts_controller.singleton_class.define_method(:user_signed_in?) { true }
+      @controller = contracts_controller
+
+      get :show_bundle, params: { id: contract.uuid }
+    ensure
+      AutogramEnvironment.singleton_class.define_method(:autogram_service) { original_autogram_service.call }
+    end
+
+    assert_response :success
+    assert_select "a[href='#{contract_signature_field_preparations_path(contract)}']"
+  end
+
   private
 
   def create_bundle_with_contracts(author:, count:, signed: false)
@@ -112,5 +136,19 @@ class BundlesControllerTest < ActionController::TestCase
         )
       end
     end.new(signatures)
+  end
+
+  def fake_unsigned_pades_validation_service
+    Struct.new(:validation_result) do
+      def validate_signatures(_document)
+        validation_result
+      end
+    end.new(
+      AutogramService::ValidationResult.new(
+        hasSignatures: false,
+        signatures: [],
+        documentInfo: { signatureForm: "PAdES" }
+      )
+    )
   end
 end

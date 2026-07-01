@@ -144,20 +144,115 @@ class ContractTest < ActiveSupport::TestCase
         extended_content
       end
     end.new("signed v2")
-    environment_singleton = AutogramEnvironment.singleton_class
-    environment_singleton.send(:alias_method, :__original_autogram_service, :autogram_service)
-    environment_singleton.send(:define_method, :autogram_service) { fake_service }
+    with_autogram_service(fake_service) do
+      contract.extend_signatures!(target_level: "LTA", source_content_version: initial_version)
 
-    contract.extend_signatures!(target_level: "LTA", source_content_version: initial_version)
+      contract.reload
+      assert_equal 2, contract.content_versions.count
+      assert_equal "signed v1", initial_version.reload.content
+      assert_equal "signed v2", contract.latest_content_version.content
+    end
+  end
 
-    contract.reload
-    assert_equal 2, contract.content_versions.count
-    assert_equal "signed v1", initial_version.reload.content
-    assert_equal "signed v2", contract.latest_content_version.content
-  ensure
-    environment_singleton.send(:remove_method, :autogram_service)
-    environment_singleton.send(:alias_method, :autogram_service, :__original_autogram_service)
-    environment_singleton.send(:remove_method, :__original_autogram_service)
+  test "pades_signed returns true only for signed pades content versions" do
+    contract = Contract.create!(
+      user: @user,
+      documents_attributes: [ { blob: pdf_blob("original.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    contract.add_signed_content_version!(
+      content: "%PDF-1.4 signed",
+      filename: "original-signed.pdf",
+      content_type: "application/pdf",
+      origin: "signing"
+    )
+
+    fake_service = Struct.new(:validation_result) do
+      def validate_signatures(_document)
+        validation_result
+      end
+    end.new(AutogramService::ValidationResult.new(hasSignatures: true, documentInfo: { signatureForm: "PAdES" }))
+
+    with_autogram_service(fake_service) do
+      assert contract.pades_signed?
+      assert_not contract.visual_signing_allowed?
+    end
+  end
+
+  test "pades field preparation is allowed for unsigned bundled pades contracts" do
+    contract = Contract.create!(
+      documents_attributes: [ { blob: pdf_blob("bundle-contract.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    Bundle.create!(author: @user, contracts: [ contract ])
+
+    fake_service = Struct.new(:validation_result) do
+      def validate_signatures(_document)
+        validation_result
+      end
+    end.new(AutogramService::ValidationResult.new(hasSignatures: false, documentInfo: { signatureForm: "PAdES" }))
+
+    with_autogram_service(fake_service) do
+      assert contract.reload.pades_field_preparation_allowed?
+    end
+  end
+
+  test "pades field preparation is not allowed for standalone contracts" do
+    contract = Contract.create!(
+      user: @user,
+      documents_attributes: [ { blob: pdf_blob("standalone.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+
+    fake_service = Struct.new(:validation_result) do
+      def validate_signatures(_document)
+        validation_result
+      end
+    end.new(AutogramService::ValidationResult.new(hasSignatures: false, documentInfo: { signatureForm: "PAdES" }))
+
+    with_autogram_service(fake_service) do
+      assert_not contract.pades_field_preparation_allowed?
+    end
+  end
+
+  test "pades field preparation is allowed only for the bundle author" do
+    contract = Contract.create!(
+      documents_attributes: [ { blob: pdf_blob("bundle-author.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    bundle = Bundle.create!(author: @user, contracts: [ contract ])
+    other_user = users(:two)
+
+    fake_service = Struct.new(:validation_result) do
+      def validate_signatures(_document)
+        validation_result
+      end
+    end.new(AutogramService::ValidationResult.new(hasSignatures: false, documentInfo: { signatureForm: "PAdES" }))
+
+    with_autogram_service(fake_service) do
+      assert contract.reload.pades_field_preparation_allowed_for?(bundle.author)
+      assert_not contract.pades_field_preparation_allowed_for?(other_user)
+      assert_not contract.pades_field_preparation_allowed_for?(nil)
+    end
+  end
+
+  test "prepared signature fields source is used for signing without marking contract signed" do
+    contract = Contract.create!(
+      documents_attributes: [ { blob: pdf_blob("bundle-author.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    Bundle.create!(author: @user, contracts: [ contract ])
+
+    contract.add_prepared_signature_fields_content_version!(
+      content: "%PDF-1.4 prepared source",
+      filename: "bundle-author-prepared-fields.pdf",
+      content_type: "application/pdf"
+    )
+
+    assert contract.source_document_attached?
+    assert contract.prepared_signature_fields_source_attached?
+    assert_not contract.signed_document_attached?
+    assert_equal "%PDF-1.4 prepared source", contract.documents_to_sign.first.content
   end
 
   private
@@ -203,5 +298,13 @@ class ContractTest < ActiveSupport::TestCase
       filename: filename,
       type: "application/vnd.etsi.asic-e+zip"
     )
+  end
+
+  def with_autogram_service(service)
+    original_autogram_service = AutogramEnvironment.method(:autogram_service)
+    AutogramEnvironment.singleton_class.define_method(:autogram_service) { service }
+    yield
+  ensure
+    AutogramEnvironment.singleton_class.define_method(:autogram_service) { original_autogram_service.call }
   end
 end

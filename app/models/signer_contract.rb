@@ -61,4 +61,8 @@ class SignerContract < ApplicationRecord
   def latest_qes_visual_stamp_for(document)
     visual_stamps.qes_preparation.where(document: document).with_attached_file.order(created_at: :desc).first
   end
+
+  def latest_signature_field_appearance_for(document)
+    visual_stamps.signature_field_appearance.where(document: document).with_attached_image.order(created_at: :desc).first
+  end
 end

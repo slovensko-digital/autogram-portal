@@ -27,20 +27,31 @@
 #  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class VisualStamp < ApplicationRecord
-  DEFAULT_TEXT = "This document is signed electronically. Validate signatures in a PDF viewer or trusted validator.".freeze
+  QES_MANDATORY_TEXT = "This document is signed electronically. Validate signatures in a PDF viewer or trusted validator.".freeze
+  PADES_VISUAL_SIGNATURE_TEXT = "Electronically signed".freeze
+  PADES_VISUAL_SIGNATURE_BY_PREFIX = "Electronically signed by".freeze
+  DEFAULT_TEXT = QES_MANDATORY_TEXT
+  MAX_WIDTH = 256
+  MAX_HEIGHT = 200
 
   belongs_to :signer_contract
   belongs_to :document
   has_one_attached :file
+  has_one_attached :image
 
-  enum :purpose, { visual_method: "visual_method", qes_preparation: "qes_preparation" }
+  enum :purpose, {
+    visual_method: "visual_method",
+    qes_preparation: "qes_preparation",
+    signature_field_appearance: "signature_field_appearance"
+  }
 
   validates :page, numericality: { only_integer: true, greater_than: 0 }
   validates :x, :y, numericality: { greater_than_or_equal_to: 0 }
-  validates :width, :height, numericality: { greater_than: 0 }
+  validates :width, numericality: { greater_than: 0, less_than_or_equal_to: MAX_WIDTH }
+  validates :height, numericality: { greater_than: 0, less_than_or_equal_to: MAX_HEIGHT }
   validates :text, length: { maximum: 500 }, allow_blank: true
-
-  before_validation :set_default_text
+  validate :text_or_image_present
+  validate :acceptable_image_type
 
   def stamped_document
     return unless file.attached?
@@ -48,9 +59,51 @@ class VisualStamp < ApplicationRecord
     Document.new(blob: file.blob)
   end
 
+  def custom_text
+    if qes_preparation?
+      return text.to_s.delete_prefix(QES_MANDATORY_TEXT).strip
+    end
+
+    if signature_field_appearance?
+      if text.to_s.start_with?("#{PADES_VISUAL_SIGNATURE_BY_PREFIX}\n")
+        return text.to_s.delete_prefix("#{PADES_VISUAL_SIGNATURE_BY_PREFIX}\n").strip
+      end
+
+      if text.to_s.start_with?("#{PADES_VISUAL_SIGNATURE_BY_PREFIX} ")
+        return text.to_s.delete_prefix("#{PADES_VISUAL_SIGNATURE_BY_PREFIX} ").strip
+      end
+
+      return "" if text.to_s == PADES_VISUAL_SIGNATURE_TEXT
+
+      lines = text.to_s.split("\n")
+
+      if lines.first == "Electronically signed" && lines.last == "Validate signatures in a PDF viewer or trusted validator."
+        return lines[1...-1].join("\n").strip
+      end
+    end
+
+    text.to_s
+  end
+
+  def self.pades_visible_signature_text(custom_text = nil)
+    custom_text = custom_text.to_s.strip
+    return PADES_VISUAL_SIGNATURE_TEXT if custom_text.blank?
+
+    [ PADES_VISUAL_SIGNATURE_BY_PREFIX, custom_text ].join("\n")
+  end
+
   private
 
-  def set_default_text
-    self.text = DEFAULT_TEXT if text.blank?
+  def text_or_image_present
+    return if text.present? || image.attached?
+
+    errors.add(:base, "Stamp text or image is required")
+  end
+
+  def acceptable_image_type
+    return unless image.attached?
+    return if image.blob.content_type.in?(%w[image/png image/jpeg])
+
+    errors.add(:image, "must be a PNG or JPEG image")
   end
 end

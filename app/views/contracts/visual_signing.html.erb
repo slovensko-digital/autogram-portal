@@ -1,6 +1,17 @@
 <%= turbo_stream_from @contract %>
-<% document = @contract.documents_to_sign.first %>
+<% document = @visual_stamp_document || @contract.documents.first %>
 <% preview_path = document&.blob&.attached? ? rails_blob_path(document.blob, disposition: "inline") : nil %>
+<% purpose = @visual_stamp_purpose || params[:purpose].presence || "visual_method" %>
+<% signature_field_appearance = purpose == "signature_field_appearance" %>
+<% preview_page = @assigned_signature_field_preparation&.page || @visual_stamp&.page || 1 %>
+<% image_mode = @visual_stamp&.image&.attached? %>
+<% existing_image_path = image_mode ? rails_blob_path(@visual_stamp.image, disposition: "inline") : nil %>
+<% custom_text = @visual_stamp_custom_text.to_s %>
+<% stamp_box_classes = if signature_field_appearance
+  "absolute z-10 select-none cursor-default"
+else
+  "absolute z-10 select-none rounded bg-white/90 p-2 shadow-lg cursor-move"
+end %>
 <main>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col items-center max-w-6xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
@@ -10,24 +21,28 @@
       </div>
 
       <div class="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <%= form_with url: visual_signing_contract_path(@contract), method: :post, local: true, class: "space-y-6", data: {
+        <%= form_with url: visual_signing_contract_path(@contract), method: :post, local: true, html: { multipart: true }, class: "space-y-6", data: {
           controller: "visual-stamp",
           visual_stamp_page_width_value: 595,
           visual_stamp_page_height_value: 842,
-          visual_stamp_x_value: 40,
-          visual_stamp_y_value: 40,
-          visual_stamp_width_value: 260,
-          visual_stamp_height_value: 52
+          visual_stamp_x_value: (@visual_stamp&.x || @assigned_signature_field_preparation&.x || 40),
+          visual_stamp_y_value: (@visual_stamp&.y || @assigned_signature_field_preparation&.y || 40),
+          visual_stamp_width_value: (@visual_stamp&.width || @assigned_signature_field_preparation&.width || VisualStamp::MAX_WIDTH),
+          visual_stamp_height_value: (@visual_stamp&.height || @assigned_signature_field_preparation&.height || 52),
+          visual_stamp_mandatory_text_value: (purpose == "qes_preparation" ? VisualStamp::QES_MANDATORY_TEXT : (signature_field_appearance ? VisualStamp::PADES_VISUAL_SIGNATURE_BY_PREFIX : "")),
+          visual_stamp_mandatory_text_joiner_value: "\n",
+          visual_stamp_locked_value: @visual_stamp_locked,
+          visual_stamp_max_width_value: VisualStamp::MAX_WIDTH,
+          visual_stamp_max_height_value: VisualStamp::MAX_HEIGHT
         } do |f| %>
           <%= hidden_field_tag :recipient, @recipient&.uuid %>
           <%= hidden_field_tag :iframe, params[:iframe] %>
-          <%= hidden_field_tag :purpose, params[:purpose].presence || "visual_method" %>
-          <%= hidden_field_tag "stamp[page]", 1, data: { visual_stamp_target: "pageField" } %>
-          <%= hidden_field_tag "stamp[x]", 40, data: { visual_stamp_target: "xField" } %>
-          <%= hidden_field_tag "stamp[y]", 40, data: { visual_stamp_target: "yField" } %>
-          <%= hidden_field_tag "stamp[width]", 260, data: { visual_stamp_target: "widthField" } %>
-          <%= hidden_field_tag "stamp[height]", 52, data: { visual_stamp_target: "heightField" } %>
-          <%= hidden_field_tag "stamp[text]", VisualStamp::DEFAULT_TEXT, data: { visual_stamp_target: "textField" } %>
+          <%= hidden_field_tag :purpose, purpose %>
+          <%= hidden_field_tag "stamp[page]", @visual_stamp&.page || preview_page, data: { visual_stamp_target: "pageField" } %>
+          <%= hidden_field_tag "stamp[x]", @visual_stamp&.x || (@assigned_signature_field_preparation&.x || 40), data: { visual_stamp_target: "xField" } %>
+          <%= hidden_field_tag "stamp[y]", @visual_stamp&.y || (@assigned_signature_field_preparation&.y || 40), data: { visual_stamp_target: "yField" } %>
+          <%= hidden_field_tag "stamp[width]", @visual_stamp&.width || (@assigned_signature_field_preparation&.width || VisualStamp::MAX_WIDTH), data: { visual_stamp_target: "widthField" } %>
+          <%= hidden_field_tag "stamp[height]", @visual_stamp&.height || (@assigned_signature_field_preparation&.height || 52), data: { visual_stamp_target: "heightField" } %>
 
           <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
             <div class="flex">
@@ -37,17 +52,23 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm text-blue-800"><%= t('.placement_help') %></p>
+                <p class="text-sm text-blue-800"><%= signature_field_appearance ? t('.signature_field_help', page: preview_page) : t('.placement_help') %></p>
               </div>
             </div>
           </div>
+
+          <% if signature_field_appearance %>
+            <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <%= t('.signature_field_locked_notice') %>
+            </div>
+          <% end %>
 
           <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
             <div class="rounded-lg border border-gray-200 bg-gray-100 p-4">
               <div class="mx-auto max-w-[680px]">
                 <div class="relative mx-auto aspect-[595/842] overflow-hidden rounded-sm bg-white shadow" data-visual-stamp-target="page">
                   <% if preview_path %>
-                    <iframe src="<%= preview_path %>#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+                    <iframe src="<%= preview_path %>#page=<%= preview_page %>&toolbar=0&navpanes=0&scrollbar=0&view=FitH"
                             title="<%= t('.preview_title') %>"
                             class="absolute inset-0 h-full w-full border-0 pointer-events-none"></iframe>
                   <% else %>
@@ -56,17 +77,23 @@
                     </div>
                   <% end %>
 
-                  <div data-visual-stamp-target="stamp"
+                     <div data-visual-stamp-target="stamp"
                        data-action="pointerdown->visual-stamp#startDrag"
-                       class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 shadow-lg ring-2 ring-white/70">
-                    <div class="flex h-full items-center text-xs font-medium leading-tight text-gray-800">
-                      <%= VisualStamp::DEFAULT_TEXT %>
+                       class="<%= stamp_box_classes %>">
+                    <div class="flex h-full flex-col justify-center gap-1 overflow-hidden text-xs font-medium leading-tight text-gray-800">
+                      <div data-visual-stamp-target="stampText"></div>
+                      <img data-visual-stamp-target="imagePreview"
+                           src="<%= existing_image_path %>"
+                           alt=""
+                           class="<%= existing_image_path ? '' : 'hidden' %> max-h-full max-w-full object-contain">
                     </div>
-                    <button type="button"
-                            aria-label="<%= t('.resize_handle') %>"
-                            data-visual-stamp-handle="resize"
-                            data-action="pointerdown->visual-stamp#startResize"
-                            class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600 shadow"></button>
+                    <% unless signature_field_appearance %>
+                      <button type="button"
+                              aria-label="<%= t('.resize_handle') %>"
+                              data-visual-stamp-handle="resize"
+                              data-action="pointerdown->visual-stamp#startResize"
+                              class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600 shadow"></button>
+                    <% end %>
                   </div>
                 </div>
               </div>
@@ -74,13 +101,39 @@
 
             <aside class="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div>
-                <h2 class="text-base font-semibold text-gray-900"><%= t('.placement_title') %></h2>
-                <p class="mt-1 text-sm text-gray-600"><%= t('.placement_description') %></p>
+                <h2 class="text-base font-semibold text-gray-900"><%= signature_field_appearance ? t('.signature_field_title') : t('.placement_title') %></h2>
+                <p class="mt-1 text-sm text-gray-600"><%= signature_field_appearance ? t('.signature_field_description') : t('.placement_description') %></p>
               </div>
 
               <div class="rounded-md bg-white p-3 text-sm text-gray-700 shadow-sm">
                 <div class="font-medium text-gray-900"><%= t('.stamp_text_label') %></div>
-                <p class="mt-1 text-xs leading-5 text-gray-600"><%= VisualStamp::DEFAULT_TEXT %></p>
+                <% if purpose == "qes_preparation" %>
+                  <p class="mt-1 text-xs leading-5 text-gray-600"><%= VisualStamp::QES_MANDATORY_TEXT %></p>
+                <% elsif signature_field_appearance %>
+                  <p class="mt-1 text-xs leading-5 text-gray-600"><%= VisualStamp.pades_visible_signature_text(custom_text.presence) %></p>
+                <% end %>
+                <div class="mt-3 space-y-3">
+                  <label class="flex items-center gap-2 text-sm text-gray-700">
+                    <%= radio_button_tag "stamp[content_mode]", "text", !image_mode, data: { visual_stamp_target: "contentMode", action: "change->visual-stamp#updateContent" } %>
+                    <span><%= t('.custom_text_mode') %></span>
+                  </label>
+                  <%= text_field_tag "stamp[custom_text]", custom_text,
+                      placeholder: t('.custom_text_placeholder'),
+                      class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500",
+                      data: { visual_stamp_target: "customText", action: "input->visual-stamp#updateContent" } %>
+
+                  <label class="flex items-center gap-2 text-sm text-gray-700">
+                    <%= radio_button_tag "stamp[content_mode]", "image", image_mode, data: { visual_stamp_target: "contentMode", action: "change->visual-stamp#updateContent" } %>
+                    <span><%= t('.image_mode') %></span>
+                  </label>
+                  <%= file_field_tag "stamp[image]",
+                      accept: "image/png,image/jpeg",
+                      class: "block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100",
+                      data: { visual_stamp_target: "imageInput", action: "change->visual-stamp#imageChanged" } %>
+                  <% if existing_image_path %>
+                    <p class="text-xs text-gray-500"><%= t('.existing_image_hint') %></p>
+                  <% end %>
+                </div>
               </div>
 
               <div class="rounded-md bg-white p-3 text-sm text-gray-700 shadow-sm">
@@ -94,7 +147,7 @@
             <% back_path = @contract.bundle ? sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe]) : sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe]) %>
             <%= link_to t('.back'), back_path,
                 class: "px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" %>
-            <%= f.submit t('.submit'),
+            <%= f.submit signature_field_appearance ? t('.signature_field_submit') : t('.submit'),
                 class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
           </div>
         <% end %>

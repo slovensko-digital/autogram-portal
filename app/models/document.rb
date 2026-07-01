@@ -38,6 +38,7 @@ class Document < ApplicationRecord
 
   has_one :xdc_parameters, class_name: "XdcParameters", dependent: :destroy
   has_one_attached :blob
+  has_many :signature_field_preparations, dependent: :destroy
   has_many :visual_stamps, dependent: :destroy
 
   accepts_nested_attributes_for :xdc_parameters

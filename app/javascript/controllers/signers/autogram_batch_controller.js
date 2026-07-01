@@ -69,15 +69,25 @@ export default class extends Controller {
 
         const autogramParameters = await this.loadAutogramParameters(item.parameters_path)
         const signRequest = await this.prepareSigningRequestBody(autogramParameters)
-        const signedDocument = await client.sign(
-          signRequest.document,
-          signRequest.parameters,
-          signRequest.payloadMimeType,
-          {
-            abortController: this.abortController,
-            batchId: batchId
-          }
-        )
+        const signedDocument = signRequest.useVersionedSigning
+          ? await client.signV1(
+            signRequest.documents,
+            autogramParameters.signature_parameters,
+            {
+              abortController: this.abortController,
+              batchId: batchId,
+              onStateChange: (state) => this.handleDesktopState(state)
+            }
+          )
+          : await client.sign(
+            signRequest.document,
+            signRequest.parameters,
+            signRequest.payloadMimeType,
+            {
+              abortController: this.abortController,
+              batchId: batchId
+            }
+          )
         await this.uploadSignedDocument(item.upload_path, signedDocument.content)
 
         this.updateProgress(index + 1, this.items.length, item.contract_name)
@@ -232,12 +242,14 @@ export default class extends Controller {
     const document = documents[0]
 
     return {
+      documents: documents.map((document) => this.buildVersionedDocument(document)),
       document: {
         filename: document.filename,
         content: document.content
       },
       parameters: await this.signatureParameters(autogramParameters.signature_parameters, document.xdc_parameters),
-      payloadMimeType: document.payloadMimeType
+      payloadMimeType: document.payloadMimeType,
+      useVersionedSigning: documents.some((item) => item.visible_signature)
     }
   }
 
@@ -290,6 +302,39 @@ export default class extends Controller {
     }
 
     return result
+  }
+
+  buildVersionedDocument(document) {
+    return {
+      content: document.content,
+      filename: document.filename,
+      mimeType: document.payloadMimeType,
+      xdcParameters: document.xdc_parameters ? {
+        autoLoadEform: document.xdc_parameters.auto_load_eform,
+        containerXmlns: document.xdc_parameters.container_xmlns,
+        embedUsedSchemas: document.xdc_parameters.embed_used_schemas,
+        fsFormIdentifier: document.xdc_parameters.fs_form_identifier,
+        identifier: document.xdc_parameters.identifier,
+        packaging: document.xdc_parameters.packaging,
+        schema: document.xdc_parameters.schema,
+        schemaIdentifier: document.xdc_parameters.schema_identifier,
+        schemaMimeType: document.xdc_parameters.schema_mime_type,
+        transformation: document.xdc_parameters.transformation,
+        transformationIdentifier: document.xdc_parameters.transformation_identifier,
+        transformationLanguage: document.xdc_parameters.transformation_language,
+        transformationMediaDestinationTypeDescription: document.xdc_parameters.transformation_media_destination_type_description,
+        transformationTargetEnvironment: document.xdc_parameters.transformation_target_environment
+      } : undefined,
+      visibleSignature: document.visible_signature ? {
+        fieldId: document.visible_signature.field_id,
+        text: document.visible_signature.text,
+        image: document.visible_signature.image ? {
+          filename: document.visible_signature.image.filename,
+          content: document.visible_signature.image.content,
+          mimeType: document.visible_signature.image.mime_type
+        } : undefined
+      } : undefined
+    }
   }
 
   async uploadSignedDocument(path, content) {

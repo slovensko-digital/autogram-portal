@@ -26,6 +26,8 @@
 #
 class Contract < ApplicationRecord
   ValidationEntry = Struct.new(:label, :validation_result, keyword_init: true)
+  PREPARED_SIGNATURE_FIELDS_ORIGIN = "prepared_signature_fields".freeze
+  NON_FINALIZED_CONTENT_VERSION_ORIGINS = [ PREPARED_SIGNATURE_FIELDS_ORIGIN ].freeze
   MissingSignedDocument = Struct.new(:contract) do
     def attached?
       false
@@ -50,6 +52,7 @@ class Contract < ApplicationRecord
   has_many :contract_validation_records, dependent: :nullify
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
   has_many :documents, dependent: :destroy
+  has_many :signature_field_preparations, dependent: :destroy
   has_many :sessions, through: :signer_contracts
 
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
@@ -89,6 +92,10 @@ class Contract < ApplicationRecord
     ALLOWED_METHODS
   end
 
+  def available_signature_methods_for(next_step:, signature_format: signature_parameters&.format)
+    available_signature_methods.dup
+  end
+
   def notify_signed!(signer: nil)
     Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_user?(signer: signer)
 
@@ -109,12 +116,31 @@ class Contract < ApplicationRecord
     association(:content_versions).loaded? ? content_versions.sort_by { |version| [ -version.version_number.to_i, -version.id.to_i ] } : content_versions
   end
 
+  def latest_source_content_version
+    latest_content_version
+  end
+
+  def latest_finalized_content_version
+    version = latest_source_content_version
+    return if version.blank? || NON_FINALIZED_CONTENT_VERSION_ORIGINS.include?(version.origin)
+
+    version
+  end
+
   def signed_document
-    latest_content_version&.file || MissingSignedDocument.new(self)
+    latest_finalized_content_version&.file || MissingSignedDocument.new(self)
   end
 
   def signed_document_attached?
-    latest_content_version&.file&.attached? || false
+    latest_finalized_content_version&.file&.attached? || false
+  end
+
+  def source_document_attached?
+    latest_source_content_version&.file&.attached? || false
+  end
+
+  def prepared_signature_fields_source_attached?
+    latest_prepared_signature_fields_content_version&.file&.attached? || false
   end
 
   def add_signed_content_version!(content:, filename:, content_type:, origin:, created_at: Time.current)
@@ -136,14 +162,72 @@ class Contract < ApplicationRecord
   end
 
   def documents_to_sign
-    return documents unless signed_document_attached?
+    return documents unless source_document_attached?
 
-    [ latest_content_version.document ]
+    [ latest_source_content_version.document ]
+  end
+
+  def signature_validation_results
+    if source_document_attached?
+      [ latest_source_content_version&.validation_result ]
+    else
+      documents.order(:id).map(&:validation_result)
+    end.compact
+  end
+
+  def has_cryptographic_signatures?
+    signature_validation_results.any?(&:has_signatures?)
+  rescue StandardError
+    false
+  end
+
+  def pades_signed?
+    signature_validation_results.any? do |validation_result|
+      validation_result.has_signatures? && validation_result.documentInfo[:signatureForm] == "PAdES"
+    end
+  rescue StandardError
+    false
+  end
+
+  def pades_field_preparation_allowed?
+    bundle.present? && documents.one? && documents.first.is_pdf? && signature_parameters&.format == "PAdES" && !has_cryptographic_signatures?
+  end
+
+  def pades_field_preparation_allowed_for?(user)
+    pades_field_preparation_allowed? && bundle&.author == user
+  end
+
+  def prepared_signature_field_preparation_for(recipient:)
+    return if recipient.blank? || !prepared_signature_fields_source_attached?
+
+    signature_field_preparations.find_by(recipient: recipient, document: documents.first)
+  end
+
+  def prepared_signature_field_appearance_required_for?(recipient: nil, signer_contract: nil)
+    recipient ||= signer_contract&.recipient
+    preparation = prepared_signature_field_preparation_for(recipient: recipient)
+    return false if preparation.blank?
+
+    signer_contract ||= recipient&.recipient_signer&.signer_contracts&.find_by(contract: self)
+    return true if signer_contract.blank?
+
+    signer_contract.latest_signature_field_appearance_for(preparation.document).blank?
+  end
+
+  def visual_signing_allowed?
+    !pades_signed?
+  end
+
+  def latest_visual_signature_stamps
+    VisualStamp.joins(:signer_contract)
+               .where(signer_contracts: { contract_id: id }, purpose: VisualStamp.purposes[:visual_method])
+               .includes(signer_contract: :signer, image_attachment: :blob)
+               .order(created_at: :desc)
   end
 
   def documents_to_sign_for(signer_contract: nil)
     source_documents = documents_to_sign
-    return source_documents unless signer_contract && source_documents.one? && !signed_document_attached?
+    return source_documents unless signer_contract && source_documents.one? && !source_document_attached?
 
     prepared_stamp = signer_contract.latest_qes_visual_stamp_for(documents.first)
     return source_documents unless prepared_stamp&.file&.attached?
@@ -153,6 +237,10 @@ class Contract < ApplicationRecord
 
   def awaiting_signature?
     !signed_document_attached? || bundle&.awaiting_recipients?(contract: self)
+  end
+
+  def visual_signed?
+    signed_document_attached? && latest_finalized_content_version&.origin == "visual"
   end
 
   def extendable_signatures?(target_level: "T")
@@ -232,16 +320,31 @@ class Contract < ApplicationRecord
   end
 
   def validation_results
-    if signed_document_attached?
+    if source_document_attached?
       [ ValidationEntry.new(
-          label: latest_content_version.filename.to_s,
-          validation_result: latest_content_version.validation_result
+          label: latest_source_content_version.filename.to_s,
+          validation_result: latest_source_content_version.validation_result
         ) ]
     else
       documents.order(:id).map do |document|
         ValidationEntry.new(label: document.filename.to_s, validation_result: document.validation_result)
       end
     end
+  end
+
+  def replace_prepared_signature_field_content_versions!
+    content_versions.where(origin: PREPARED_SIGNATURE_FIELDS_ORIGIN).destroy_all
+  end
+
+  def add_prepared_signature_fields_content_version!(content:, filename:, content_type:, created_at: Time.current)
+    replace_prepared_signature_field_content_versions!
+    add_signed_content_version!(
+      content: content,
+      filename: filename,
+      content_type: content_type,
+      origin: PREPARED_SIGNATURE_FIELDS_ORIGIN,
+      created_at: created_at
+    )
   end
 
   def persist_validation_record!(contract_content_version: latest_content_version, validation_result: nil, signed_content: nil, filename: nil, session: nil)
@@ -295,6 +398,16 @@ class Contract < ApplicationRecord
 
   def initialize_signature_parameters
     build_signature_parameters unless signature_parameters
+  end
+
+  def latest_prepared_signature_fields_content_version
+    if association(:content_versions).loaded?
+      content_versions
+        .select { |version| version.origin == PREPARED_SIGNATURE_FIELDS_ORIGIN }
+        .max_by { |version| [ version.version_number.to_i, version.id.to_i ] }
+    else
+      content_versions.where(origin: PREPARED_SIGNATURE_FIELDS_ORIGIN).first
+    end
   end
 
   def expand_asice_container_documents

@@ -1,8 +1,11 @@
 <%# locals: (contract:, recipient: nil, bundle_id: nil) %>
 
 <% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
-<% can_render_signature_apps_in_frame = bundle_id.present? && (params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd))) %>
-<% electronic_signature_apps_path = if can_render_signature_apps_in_frame
+<% signature_field_appearance_required = contract.prepared_signature_field_appearance_required_for?(recipient: recipient) %>
+<% can_render_signature_apps_in_frame = !signature_field_appearance_required && bundle_id.present? && (params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd))) %>
+<% electronic_signature_apps_path = if signature_field_appearance_required
+  visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], purpose: 'signature_field_appearance')
+elsif can_render_signature_apps_in_frame
   signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], embedded: true, qscd: signature_apps_qscd.presence)
 else
   signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], qscd: signature_apps_qscd.presence)
@@ -40,7 +43,7 @@ end %>
               } %>
       <% end %>
 
-      <% if contract.allowed_methods.include?('visual') %>
+      <% if contract.allowed_methods.include?('visual') && contract.visual_signing_allowed? %>
         <%= render 'shared/radio_button_card',
               name: "signing_method_#{contract.uuid}",
               value: 'visual',
@@ -71,24 +74,12 @@ end %>
             data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
       <% end %>
 
-      <% if contract.allowed_methods.include?('visual') %>
+      <% if contract.allowed_methods.include?('visual') && contract.visual_signing_allowed? %>
         <%= link_to "",
             visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
             data: { signing_method_target: 'visualButton', turbo_frame: "_top" } %>
       <% end %>
     </div>
-
-    <% if contract.allowed_methods.include?('qes') && contract.signature_parameters&.format == 'PAdES' %>
-      <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p class="text-sm text-blue-900"><%= t('.qes_visual_stamp_description') %></p>
-          <%= link_to t('.qes_visual_stamp_button'),
-              visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], purpose: 'qes_preparation'),
-              class: "inline-flex items-center justify-center rounded-md border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50",
-              data: { turbo_frame: "_top" } %>
-        </div>
-      </div>
-    <% end %>
 
     <div class="flex justify-end">
       <button type="button"

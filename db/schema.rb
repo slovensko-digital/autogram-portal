@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_30_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_30_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -339,6 +339,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_090000) do
     t.index ["type"], name: "index_sessions_on_type"
   end
 
+  create_table "signature_field_preparations", force: :cascade do |t|
+    t.bigint "contract_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "document_id", null: false
+    t.string "field_identifier", null: false
+    t.decimal "height", precision: 10, scale: 2, null: false
+    t.integer "page", default: 1, null: false
+    t.bigint "recipient_id", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "width", precision: 10, scale: 2, null: false
+    t.decimal "x", precision: 10, scale: 2, null: false
+    t.decimal "y", precision: 10, scale: 2, null: false
+    t.index ["contract_id"], name: "index_signature_field_preparations_on_contract_id"
+    t.index ["document_id"], name: "index_signature_field_preparations_on_document_id"
+    t.index ["field_identifier"], name: "index_signature_field_preparations_on_field_identifier", unique: true
+    t.index ["recipient_id", "contract_id", "document_id"], name: "idx_signature_fields_on_recipient_contract_document", unique: true
+    t.index ["recipient_id"], name: "index_signature_field_preparations_on_recipient_id"
+  end
+
   create_table "signer_contracts", force: :cascade do |t|
     t.bigint "contract_id", null: false
     t.datetime "created_at", null: false
@@ -479,6 +498,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_090000) do
   add_foreign_key "recipients", "portal_instances"
   add_foreign_key "recipients", "users"
   add_foreign_key "sessions", "signer_contracts"
+  add_foreign_key "signature_field_preparations", "contracts"
+  add_foreign_key "signature_field_preparations", "documents"
+  add_foreign_key "signature_field_preparations", "recipients"
   add_foreign_key "signer_contracts", "contracts"
   add_foreign_key "signer_contracts", "signers"
   add_foreign_key "signers", "recipients"

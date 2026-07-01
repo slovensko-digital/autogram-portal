@@ -114,10 +114,15 @@
           <% contract_signed_for_viewer = !contract.awaiting_signature? || @recipient&.signed_contract?(contract) %>
           <% first_document = contract.documents.first %>
           <% only_electronic_signing = contract.allowed_methods.one? && contract.allowed_methods.include?('qes') %>
+          <% signature_field_appearance_required = contract.prepared_signature_field_appearance_required_for?(recipient: @recipient) %>
           <% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
-          <% can_render_signature_apps_in_frame = params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd)) %>
+          <% can_render_signature_apps_in_frame = !signature_field_appearance_required && (params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd))) %>
           <% embedded_signature_apps_path = signature_apps_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: true, skip_method_choice: true, qscd: signature_apps_qscd.presence) %>
-          <% full_page_signature_apps_path = signature_apps_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], qscd: signature_apps_qscd.presence) %>
+          <% full_page_signature_apps_path = if signature_field_appearance_required
+            visual_signing_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: 'signature_field_appearance')
+          else
+            signature_apps_contract_path(contract, recipient: @recipient&.uuid, iframe: params[:iframe], qscd: signature_apps_qscd.presence)
+          end %>
           <% contract_status_label = contract_signed_for_viewer ? t('bundles.status.completed') : t('bundles.status.awaiting_signature') %>
           <% contract_status_classes = contract_signed_for_viewer ? 'border-green-200 bg-green-50 text-green-700' : 'border-blue-200 bg-blue-50 text-blue-700' %>
 
@@ -229,6 +234,7 @@
                       <p class="mt-1 text-sm text-blue-800"><%= t('.electronic_setup_description') %></p>
                       <%= link_to t('.electronic_setup_action'),
                             full_page_signature_apps_path,
+                            data: { turbo_frame: "_top" },
                             class: "mt-4 inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700" %>
                     </div>
                   <% elsif contract_signable %>

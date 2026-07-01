@@ -29,7 +29,7 @@
 require "test_helper"
 
 class VisualStampTest < ActiveSupport::TestCase
-  test "defaults stamp text" do
+  test "requires stamp text or image" do
     stamp = VisualStamp.new(
       purpose: "qes_preparation",
       page: 1,
@@ -39,9 +39,8 @@ class VisualStampTest < ActiveSupport::TestCase
       height: 48
     )
 
-    stamp.valid?
-
-    assert_equal VisualStamp::DEFAULT_TEXT, stamp.text
+    assert_not stamp.valid?
+    assert stamp.errors[:base].any?
   end
 
   test "validates positive placement" do
@@ -58,5 +57,40 @@ class VisualStampTest < ActiveSupport::TestCase
     assert stamp.errors[:page].any?
     assert stamp.errors[:x].any?
     assert stamp.errors[:width].any?
+  end
+
+  test "validates maximum visual stamp size" do
+    stamp = VisualStamp.new(
+      purpose: "visual_method",
+      page: 1,
+      x: 0,
+      y: 0,
+      width: VisualStamp::MAX_WIDTH + 1,
+      height: VisualStamp::MAX_HEIGHT + 1,
+      text: "Too large"
+    )
+
+    assert_not stamp.valid?
+    assert stamp.errors[:width].any?
+    assert stamp.errors[:height].any?
+  end
+
+  test "builds pades visible signature text on separate lines" do
+    assert_equal "Electronically signed by\nMarek Celuch", VisualStamp.pades_visible_signature_text("Marek Celuch")
+    assert_equal "Electronically signed", VisualStamp.pades_visible_signature_text(nil)
+  end
+
+  test "extracts editable custom text from newline pades visible signature text" do
+    stamp = VisualStamp.new(
+      purpose: "signature_field_appearance",
+      page: 1,
+      x: 0,
+      y: 0,
+      width: 180,
+      height: 64,
+      text: "Electronically signed by\nMarek Celuch"
+    )
+
+    assert_equal "Marek Celuch", stamp.custom_text
   end
 end

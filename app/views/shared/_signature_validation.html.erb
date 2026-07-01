@@ -1,5 +1,6 @@
 <div class="w-full">
   <% validation_results = local_assigns[:validation_results] || [ local_assigns[:validation_result] || @validation_result ] %>
+  <% visual_signature_stamps = local_assigns[:visual_signature_stamps] || @contract&.latest_visual_signature_stamps || [] %>
 
   <% validation_results.each do |validation_entry| %>
     <% validation_result = validation_entry.validation_result %>
@@ -24,6 +25,7 @@
         </ul>
       </div>
     <% elsif !validation_result.has_signatures? %>
+      <% next if visual_signature_stamps.any? %>
       <%= render 'shared/info', title: t('.no_signatures_title'), content: t('.no_signatures_message') %>
     <% else %>
       <div class="space-y-3 mb-4 last:mb-0">
@@ -180,5 +182,32 @@
         <% end %>
       </div>
     <% end %>
+  <% end %>
+
+  <% if visual_signature_stamps.any? %>
+    <div class="space-y-3 mb-4 last:mb-0">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">
+        <%= t('.visual_signatures_found_title') %> (<%= visual_signature_stamps.length %>)
+      </h3>
+      <% visual_signature_stamps.each do |stamp| %>
+        <div class="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-base font-semibold text-gray-900"><%= stamp.signer_contract.signer.display_name %></div>
+              <div class="mt-1 text-sm text-gray-600"><%= t('.visual_signature_added_at', time: signature_validation_format_datetime(stamp.created_at) || '-') %></div>
+            </div>
+            <%= render 'shared/badge', color: 'blue', label: t('.visual_signature_badge') %>
+          </div>
+          <% if stamp.text.present? %>
+            <div class="mt-3 text-sm whitespace-pre-line text-gray-800"><%= stamp.text %></div>
+          <% end %>
+          <% if stamp.image.attached? %>
+            <div class="mt-3">
+              <img src="<%= rails_blob_path(stamp.image, disposition: 'inline') %>" alt="" class="max-h-36 max-w-full object-contain">
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
   <% end %>
 </div>

@@ -153,6 +153,23 @@ class AutogramService
     raise ServiceUnavailableError
   end
 
+  def prepare_signature_fields(document, fields:)
+    return nil if document.content.nil?
+
+    file_content = Base64.strict_encode64(document.content)
+    response = call_autogram_prepare_signature_fields_api(file_content, document, fields: fields)
+
+    if response.success?
+      data = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
+      return Base64.strict_decode64(data["content"])
+    end
+
+    raise AutogramServiceError, "Error communicating with Autogram service: #{response.status}: #{response.body}"
+  rescue StandardError => e
+    Rails.logger.warn "Autogram prepare signature fields service not available: #{e.message}"
+    raise ServiceUnavailableError
+  end
+
   class AutogramServiceError < StandardError
     def message
       I18n.t("autogram_service.errors.#{self.class.name.demodulize.underscore}", default: super)
@@ -288,6 +305,26 @@ class AutogramService
     }
 
     connection.post("/extend", payload)
+  end
+
+  def call_autogram_prepare_signature_fields_api(file_content, document, fields:)
+    connection = Faraday.new(url: AUTOGRAM_BASE_URL) do |faraday|
+      faraday.request :json
+      faraday.response :json
+      faraday.adapter Faraday.default_adapter
+      faraday.options.timeout = 30
+    end
+
+    payload = {
+      document: {
+        filename: document.filename,
+        content: file_content,
+        mimeType: determine_payload_mime_type(document)
+      },
+      fields: fields
+    }
+
+    connection.post("/prepare-signature-fields", payload)
   end
 
   def call_autogram_compare_api(old_content, new_content)

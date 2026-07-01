@@ -28,6 +28,7 @@ class Bundle < ApplicationRecord
   belongs_to :author, class_name: "User", foreign_key: "user_id"
 
   has_many :contracts, dependent: :destroy
+  has_many :signature_field_preparations, through: :contracts
   has_many :recipients, dependent: :destroy
   has_many :visible_recipients, -> { visible }, class_name: "Recipient", foreign_key: :bundle_id
   has_many :active_recipients, -> { active.visible }, class_name: "Recipient", foreign_key: :bundle_id

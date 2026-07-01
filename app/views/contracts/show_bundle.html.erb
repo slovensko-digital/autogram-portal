@@ -22,6 +22,13 @@
 
   <% if @contract.bundle.author == current_user %>
     <div class="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end sm:items-start">
+      <% if @contract.pades_field_preparation_allowed_for?(current_user) %>
+        <%= link_to contract_signature_field_preparations_path(@contract), data: { turbo_frame: "_top" },
+              class: "inline-flex w-full justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto" do %>
+          <%= t('documents.new.actions.prepare_signature_fields.title') %>
+        <% end %>
+      <% end %>
+
       <% if @contract.signed_document.attached? %>
         <div class="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
           <%= link_to signed_document_contract_path(@contract), data: { turbo: "false" },

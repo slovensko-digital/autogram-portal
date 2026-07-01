@@ -16,6 +16,18 @@
               url: signature_parameters_contract_path(@contract, target_step: 'sign')
             } %>
 
+      <% if @contract.pades_field_preparation_allowed_for?(current_user) %>
+        <%= render 'shared/radio_button_card',
+              name: 'document_action',
+              value: 'prepare_signature_fields',
+              label: t('documents.new.actions.prepare_signature_fields.title'),
+              description: t('documents.new.actions.prepare_signature_fields.subtitle'),
+              checked: false,
+              data_attributes: {
+                url: contract_signature_field_preparations_path(@contract)
+              } %>
+      <% end %>
+
       <% if current_user&.signature_request_allowed? && @contract.bundle.nil? && current_user == @contract.user %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',

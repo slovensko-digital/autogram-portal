@@ -41,6 +41,7 @@ class Recipient < ApplicationRecord
   attr_accessor :portal_instance_uuid
 
   has_one :recipient_signer, dependent: :destroy, class_name: "RecipientSigner", foreign_key: :recipient_id
+  has_many :signature_field_preparations, dependent: :destroy
   has_many :signer_contracts, through: :recipient_signer
   has_many :contracts, through: :signer_contracts
   has_many :sessions, through: :signer_contracts

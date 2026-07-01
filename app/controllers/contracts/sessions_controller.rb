@@ -153,6 +153,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def redirect_if_completed
+    return if params[:show_completed].present?
     return unless @session.not_pending?
 
     redirect_path = if @contract.bundle

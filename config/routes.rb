@@ -91,6 +91,9 @@ Rails.application.routes.draw do
     end
 
     resources :onboarding, only: [ :show, :update ], param: :step, controller: "contracts/onboarding"
+    resources :signature_field_preparations, only: [ :index, :create, :destroy ], controller: "contracts/signature_field_preparations" do
+      post :finalize, on: :collection
+    end
 
     resources :sessions, only: [ :show, :destroy ], controller: "contracts/sessions" do
       member do
