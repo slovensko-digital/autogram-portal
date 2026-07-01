@@ -8,12 +8,12 @@ export default class extends Controller {
     pageHeight: { type: Number, default: 842 },
     x: { type: Number, default: 40 },
     y: { type: Number, default: 40 },
-    width: { type: Number, default: 256 },
+    width: { type: Number, default: 200 },
     height: { type: Number, default: 52 },
     mandatoryText: { type: String, default: "" },
     mandatoryTextJoiner: { type: String, default: "\n" },
     locked: { type: Boolean, default: false },
-    maxWidth: { type: Number, default: 256 },
+    maxWidth: { type: Number, default: 255 },
     maxHeight: { type: Number, default: 200 }
   }
 
