@@ -1,0 +1,190 @@
+<%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
+  <div class="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8" data-signature-field-preparations-layout="page">
+    <div class="text-center lg:text-left">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
+      <p class="text-gray-600"><%= t('.subtitle') %></p>
+    </div>
+
+    <%= render("layouts/flash", flash: flash) %>
+
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+      <p class="font-medium"><%= t('.info_title') %></p>
+      <p class="mt-1"><%= t('.info_body') %></p>
+    </div>
+
+    <% if @recipients.blank? || @documents.blank? %>
+      <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+        <p class="font-medium"><%= t('.empty_state_title') %></p>
+        <p class="mt-1"><%= t('.empty_state_body') %></p>
+      </div>
+    <% else %>
+      <% document = @signature_field_preparation.document || @documents.first %>
+      <% preview_document = @preview_document || document %>
+      <% preview_path = preview_document&.blob&.attached? ? rails_blob_path(preview_document.blob, disposition: "inline") : nil %>
+      <% existing_signature_field_previews = @signature_field_preparations.filter_map do |preparation| %>
+        <% next unless document.present? && preparation.document_id == document.id %>
+        <% {
+          page: preparation.page,
+          x: preparation.x.to_f,
+          y: preparation.y.to_f,
+          width: preparation.width.to_f,
+          height: preparation.height.to_f,
+          recipientName: preparation.recipient.display_name
+        } %>
+      <% end %>
+      <%= form_with scope: :signature_field_preparation,
+                    url: contract_signature_field_preparations_path(@contract),
+                    method: :post,
+                    local: true,
+                    class: "space-y-6",
+                    data: {
+                      controller: "visual-stamp",
+                      visual_stamp_preview_url_value: preview_path,
+                      visual_stamp_existing_fields_value: existing_signature_field_previews.to_json,
+                      visual_stamp_page_width_value: 595,
+                      visual_stamp_page_height_value: 842,
+                      visual_stamp_x_value: @signature_field_preparation.x,
+                      visual_stamp_y_value: @signature_field_preparation.y,
+                      visual_stamp_width_value: @signature_field_preparation.width,
+                      visual_stamp_height_value: @signature_field_preparation.height,
+                      visual_stamp_max_width_value: VisualStamp::MAX_WIDTH,
+                      visual_stamp_max_height_value: VisualStamp::MAX_HEIGHT
+                    } do |form| %>
+        <%= form.hidden_field :document_uuid, value: document&.uuid %>
+        <%= form.hidden_field :x, value: @signature_field_preparation.x, data: { visual_stamp_target: "xField" } %>
+        <%= form.hidden_field :y, value: @signature_field_preparation.y, data: { visual_stamp_target: "yField" } %>
+        <%= form.hidden_field :width, value: @signature_field_preparation.width, data: { visual_stamp_target: "widthField" } %>
+        <%= form.hidden_field :height, value: @signature_field_preparation.height, data: { visual_stamp_target: "heightField" } %>
+        <%= form.hidden_field :page, value: @signature_field_preparation.page, data: { visual_stamp_target: "pageField" } %>
+
+        <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div class="min-w-0 rounded-lg border border-gray-200 bg-gray-100 p-4">
+            <p class="mb-3 text-xs text-gray-600 sm:hidden"><%= t('.preview.mobile_hint') %></p>
+            <div class="w-full max-w-full overflow-hidden pb-2">
+              <div class="mx-auto w-full max-w-[680px]">
+                <div class="relative mx-auto aspect-[595/842] w-full overflow-hidden rounded-sm bg-white" data-visual-stamp-target="page">
+                <% if preview_path %>
+                  <canvas data-visual-stamp-target="pdfCanvas" class="block h-full w-full bg-white"></canvas>
+                  <div data-visual-stamp-target="previewFallback" class="absolute inset-0 hidden flex items-center justify-center bg-white/90 p-6 text-center text-sm text-gray-600">
+                    <div class="space-y-3">
+                      <p><%= t('.preview.render_error') %></p>
+                      <a data-visual-stamp-target="previewLink" href="<%= preview_path %>" target="_blank" rel="noopener" class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"><%= t('.preview.open_pdf') %></a>
+                    </div>
+                  </div>
+                <% else %>
+                  <div class="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-gray-500">
+                    <%= t('.preview.unavailable') %>
+                  </div>
+                <% end %>
+
+                <div class="absolute inset-0 pointer-events-none" data-visual-stamp-target="existingFieldsLayer"></div>
+
+                <div data-visual-stamp-target="stamp"
+                     data-action="pointerdown->visual-stamp#startDrag"
+                     class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 ring-2 ring-white/70 touch-none">
+                  <div class="text-xs font-medium text-gray-800"><%= t('.preview.box_label') %></div>
+                  <button type="button"
+                          aria-label="<%= t('.preview.resize_handle') %>"
+                          data-visual-stamp-handle="resize"
+                          data-action="pointerdown->visual-stamp#startResize"
+                          class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600"></button>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <aside class="min-w-0 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div>
+              <h4 class="text-base font-semibold text-gray-900"><%= t('.form.title') %></h4>
+              <p class="mt-1 text-sm text-gray-600"><%= t('.form.description') %></p>
+            </div>
+
+            <div>
+              <%= form.label :recipient_uuid, t('.form.recipient'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :recipient_uuid,
+                              options_from_collection_for_select(@recipients, :uuid, :display_name, @signature_field_preparation.recipient&.uuid),
+                              {},
+                              class: "block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" %>
+            </div>
+
+            <div class="rounded-md bg-white p-3 text-sm text-gray-700">
+              <div class="font-medium text-gray-900"><%= t('.form.document') %></div>
+              <p class="mt-1 break-words text-sm text-gray-600"><%= document&.filename %></p>
+            </div>
+
+            <div>
+              <%= form.label :page, t('.form.page'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= number_field_tag :signature_field_preparation_page_preview,
+                                   @signature_field_preparation.page,
+                                   min: 1,
+                                   step: 1,
+                                   class: "block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500",
+                                   data: { visual_stamp_target: "pageNumber", action: "input->visual-stamp#pageChanged" } %>
+            </div>
+
+            <div class="rounded-md bg-white p-3 text-sm text-gray-700">
+              <div class="font-medium text-gray-900"><%= t('.form.position') %></div>
+              <p class="mt-1 text-xs text-gray-600" data-visual-stamp-target="summary"></p>
+            </div>
+          </aside>
+        </div>
+
+        <div class="flex justify-end">
+          <%= form.submit t('.form.submit'), class: "inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h4 class="text-base font-semibold text-gray-900"><%= t('.existing.title') %></h4>
+        <span class="text-sm text-gray-500"><%= t('.existing.count', count: @signature_field_preparations.count) %></span>
+      </div>
+
+      <% if @contract.prepared_signature_fields_source_attached? %>
+        <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+          <%= t('.existing.prepared_source_ready') %>
+        </div>
+      <% end %>
+
+      <% if @signature_field_preparations.blank? %>
+        <div class="rounded-lg border border-dashed border-gray-300 bg-white p-4 text-sm text-gray-600">
+          <%= t('.existing.empty') %>
+        </div>
+      <% else %>
+        <% @signature_field_preparations.each do |preparation| %>
+          <div class="rounded-xl border border-gray-200 bg-white p-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="space-y-1 text-sm text-gray-700">
+                <p><span class="font-medium text-gray-900"><%= t('.existing.recipient') %>:</span> <%= preparation.recipient.display_name %></p>
+                <p><span class="font-medium text-gray-900"><%= t('.existing.document') %>:</span> <%= preparation.document.filename %></p>
+                <p><span class="font-medium text-gray-900"><%= t('.existing.page') %>:</span> <%= preparation.page %></p>
+                <p><span class="font-medium text-gray-900"><%= t('.existing.geometry') %>:</span> x=<%= preparation.x.to_f %>, y=<%= preparation.y.to_f %>, w=<%= preparation.width.to_f %>, h=<%= preparation.height.to_f %></p>
+              </div>
+
+              <%= button_to t('actions.delete'),
+                            contract_signature_field_preparation_path(@contract, preparation),
+                            method: :delete,
+                            class: "inline-flex items-center justify-center rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50",
+                            form: { data: { turbo_confirm: t('.existing.delete_confirm', recipient: preparation.recipient.display_name) } } %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+      <% if @signature_field_preparations.any? %>
+        <%= button_to t('.finalize.submit'),
+                      finalize_contract_signature_field_preparations_path(@contract),
+                      method: :post,
+                      class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                      form: { data: { turbo_frame: "_top" } } %>
+      <% end %>
+      <%= link_to bundle_path(@contract.bundle), class: "inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: { turbo_frame: "_top" } do %>
+        <%= t('documents.new.actions.back') %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

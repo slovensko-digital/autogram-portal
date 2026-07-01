@@ -249,6 +249,9 @@ sk:
         sign:
           title: "Podpísať dokument"
           subtitle: "Vyberte formát podpisu a typ podpisu a podpíšte tento dokument."
+        prepare_signature_fields:
+          title: "Pripraviť viditeľné podpisové polia"
+          subtitle: "Priraďte každému príjemcovi v balíku jedno viditeľné PAdES pole ešte pred prvým podpisom."
         request_signature:
           title: "Poslať na podpis"
           subtitle: "Pošlite tento dokument iným na podpisovanie cez e-mail alebo zdieľaný odkaz."
@@ -522,7 +525,13 @@ sk:
   contracts:
     alerts:
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
+      visual_signing_not_available_for_signed_pades: "Po podpísaní dokumentu vo formáte PAdES už nie je možné pridať vizuálny podpis ani pečiatku."
+      signature_field_appearance_unavailable: "Pre tento dokument vám nie je priradené žiadne pripravené podpisové pole."
       missing_policy_agreement: "Musíte súhlasiť s pravidlami a podmienkami, aby ste mohli pokračovať."
+    signature_field_appearance_required:
+      title: "Vyžaduje sa viditeľná podoba podpisu"
+      description: "Pre vás už bolo pripravené viditeľné podpisové pole. Pred pokračovaním na elektronické podpisovanie doplňte text alebo obrázok, ktorý sa má v tomto poli zobraziť."
+      action: "Pridať viditeľnú podobu podpisu"
     index:
       title: "Dokumenty"
       upload_document: "Nahrať dokument"
@@ -654,6 +663,53 @@ sk:
       signature_format: "Formát podpisu"
       signature_level: "Typ podpisu"
       allowed_methods: "Povolené metódy podpisu"
+    signature_field_preparations:
+      index:
+        title: "Pripraviť viditeľné podpisové polia"
+        subtitle: "Vytvorte pre každého príjemcu, ktorý má tento dokument podpísať, jedno viditeľné PDF podpisové pole."
+        info_title: "Čo to robí"
+        info_body: "Tieto polia teraz rezervujú viditeľné miesto v PDF. Každý príjemca neskôr doplní vlastnú vizuálnu podobu, ktorá sa pri podpise naviaže na pridelené pole."
+        empty_state_title: "Chýbajú príjemcovia alebo PDF dokumenty"
+        empty_state_body: "Na prípravu polí musí mať tento dokument aspoň jedného aktívneho príjemcu v balíku a jeden PDF súbor."
+        form:
+          title: "Umiestnenie poľa"
+          description: "Potiahnutím rámika v náhľade PDF určte polohu viditeľného podpisového poľa. Veľkosť upravíte rohovým úchytom."
+          recipient: "Príjemca"
+          document: "Dokument"
+          page: "Strana"
+          position: "Pozícia"
+          submit: "Pridať podpisové pole"
+        preview:
+          title: "Náhľad PDF"
+          unavailable: "Náhľad PDF nie je dostupný."
+          mobile_hint: "Na telefóne pole presúvajte priamo v náhľade pre presnejšie umiestnenie."
+          render_error: "Náhľad sa na tomto zariadení nepodarilo vykresliť. PDF si stále môžete otvoriť priamo."
+          open_pdf: "Otvoriť PDF"
+          box_label: "Podpisové pole"
+          resize_handle: "Zmeniť veľkosť podpisového poľa"
+        existing:
+          title: "Pripravené podpisové polia"
+          count:
+            one: "1 pole"
+            few: "%{count} polia"
+            other: "%{count} polí"
+          empty: "Zatiaľ neboli pripravené žiadne podpisové polia."
+          prepared_source_ready: "Pre aktuálne rozloženie polí už bol vygenerovaný pripravený podpisový PDF súbor."
+          recipient: "Príjemca"
+          document: "Dokument"
+          page: "Strana"
+          geometry: "Geometria"
+          delete_confirm: "Odstrániť pripravené podpisové pole pre %{recipient}?"
+        finalize:
+          submit: "Vygenerovať pripravený podpisový PDF súbor"
+      create:
+        success: "Podpisové pole bolo úspešne pripravené."
+      destroy:
+        success: "Pripravené podpisové pole bolo odstránené."
+      finalize:
+        success: "Pripravený podpisový PDF súbor bol úspešne vygenerovaný."
+        failure: "Pripravený podpisový PDF súbor sa teraz nepodarilo vygenerovať."
+        empty: "Pred vygenerovaním pripraveného podpisového PDF súboru pridajte aspoň jedno podpisové pole."
     signature_extension:
       levels:
         t:
@@ -831,6 +887,12 @@ sk:
       electronic_description: "Podpíšte digitálne pomocou vašho občianskeho preukazu a podpisovej aplikácie"
       physical_label: "Fyzické podpisovanie"
       physical_description: "Vytlačte, podpíšte ručne a pošlite poštou"
+      visual_label: "Vizuálna pečiatka"
+      visual_description: "Pridajte do PDF vizuálnu pečiatku bez vytvorenia kvalifikovaného elektronického podpisu"
+      qes_visual_stamp_button: "Najprv pridať vizuálnu pečiatku"
+      qes_visual_stamp_description: "Podpisovanie cez QES/PAdES môže pred vytvorením kvalifikovaného podpisu obsahovať voliteľnú vizuálnu pečiatku."
+      signature_field_appearance_button: "Pridať viditeľnú podobu podpisu"
+      signature_field_appearance_description: "V tomto PDF je pre vás pripravené viditeľné podpisové pole. Pred pokračovaním na elektronické podpisovanie doplňte jeho textovú alebo obrázkovú podobu."
       continue: "Pokračovať"
     physical_signing:
       title: "Fyzický podpis"
@@ -842,16 +904,48 @@ sk:
       confirmation_message: "Po odoslaní dostanete potvrdenie. Odosielateľ dokumentu bude upovedomený o vašom fyzickom podpise."
       back: "Späť"
       submit: "Odoslať fyzický podpis"
+    visual_signing:
+      title: "Vizuálna pečiatka"
+      subtitle: "Pridajte do PDF vizuálnu pečiatku"
+      placement_help: "Presuňte a upravte veľkosť pečiatky na prvej strane. Táto vizuálna pečiatka sa vloží do PDF pred ďalším krokom."
+      mobile_preview_hint: "Na telefóne pečiatku presúvajte priamo v náhľade pre presnejšie umiestnenie."
+      signature_field_help: "Doplňte text alebo obrázok, ktorý sa má zobraziť vo vašom pripravenom podpisovom poli na strane %{page}."
+      placement_title: "Umiestnenie pečiatky"
+      placement_description: "Potiahnutím obdĺžnika vyberte miesto, kde sa pečiatka zobrazí. Veľkosť upravíte rohovým úchytom."
+      signature_field_title: "Pripravené podpisové pole"
+      signature_field_description: "Táto vizuálna podoba podpisu je viazaná na pole, ktoré bolo pre vás pripravené. Môžete upraviť jej obsah, nie polohu ani veľkosť."
+      signature_field_locked_notice: "Toto viditeľné podpisové pole bolo pripravené vopred. Jeho poloha a veľkosť sú pre váš podpis pevne dané."
+      preview_title: "Náhľad PDF"
+      preview_unavailable: "Náhľad PDF nie je dostupný."
+      preview_render_error: "Náhľad sa na tomto zariadení nepodarilo vykresliť. PDF si stále môžete otvoriť priamo."
+      preview_open_pdf: "Otvoriť PDF"
+      resize_handle: "Zmeniť veľkosť pečiatky"
+      stamp_text_label: "Text pečiatky"
+      custom_text_mode: "Použiť napísané meno"
+      custom_text_placeholder: "Meno zobrazené na pečiatke"
+      image_mode: "Použiť namiesto toho obrázok"
+      draw_mode: "Nakresliť podpis"
+      draw_mode_help: "Kreslite myšou, touchpadom alebo prstom."
+      draw_empty: "Zatiaľ bez kresby"
+      draw_filled: "Kresba je pripravená"
+      draw_clear: "Vymazať"
+      existing_image_hint: "Aktuálny obrázok sa použije znova, ak nenahráte nový."
+      position_label: "Pozícia"
+      back: "Späť"
+      submit: "Vytvoriť vizuálnu pečiatku"
+      signature_field_submit: "Pokračovať na elektronické podpisovanie"
     allowed_methods:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
       ses: Elektronický podpis nakreslením podpisu a overením cez SMS
       scan: Vytlačiť, ručne podpísať a naskenovať
+      visual: Pridať do PDF vizuálnu pečiatku
       notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
       short:
         qes: Kvalifikovaný elektronický podpis
         ses: Jednoduchý elektronický podpis
         scan: Sken podpísaného dokumentu
+        visual: Vizuálna pečiatka
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
 
@@ -1444,6 +1538,9 @@ sk:
       no_signatures_title: "Zatiaľ žiadne elektronické podpisy"
       no_signatures_message: "Tento dokument zatiaľ neobsahuje žiadne elektronické podpisy. Môžete ho podpísať nižšie."
       signatures_found_title: "Dokument už podpísali"
+      visual_signatures_found_title: "Pridané vizuálne podpisy od"
+      visual_signature_badge: "Vizuálny podpis"
+      visual_signature_added_at: "Pridané %{time}"
       qualified_timestamp: "Kvalifikovaná časová pečiatka"
       no_timestamp: "Žiadna časová pečiatka"
       timestamps_count: "(%{count} časových pečiatok)"

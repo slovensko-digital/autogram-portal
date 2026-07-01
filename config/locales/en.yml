@@ -285,6 +285,9 @@ en:
         sign:
           title: "Sign the document"
           subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
+          prepare_signature_fields:
+            title: "Prepare visible signature fields"
+            subtitle: "Assign one visible PAdES field to each bundle recipient before the first signature is added."
         request_signature:
           title: "Request a signature"
           subtitle: "Send document for signing to someone else via email or shared link."
@@ -599,7 +602,13 @@ en:
   contracts:
     alerts:
       unauthorized_edit_attempt: "You are not authorized to edit this contract."
+      visual_signing_not_available_for_signed_pades: "Adding a visual signature or stamp is not allowed after the document has already been signed in PAdES."
+      signature_field_appearance_unavailable: "No prepared signature field is assigned to you for this contract."
       missing_policy_agreement: "You must agree to the policies and terms to continue"
+    signature_field_appearance_required:
+      title: "Visible signature appearance required"
+      description: "A visible signature field has already been prepared for you. Add the text or image that should appear in that field before continuing to electronic signing."
+      action: "Add visible signature appearance"
     visualization_with_toggle:
       hide_document: "Hide document"
       show_document: "Show document"
@@ -733,6 +742,52 @@ en:
       signature_method: "Electronic signature level"
       signature_level: "Electronic signature level"
       allowed_methods: "Allowed signature methods"
+    signature_field_preparations:
+      index:
+        title: "Prepare visible signature fields"
+        subtitle: "Create one visible PDF signature field for each recipient who should sign this contract."
+        info_title: "What this does"
+        info_body: "These fields reserve the visible area in the PDF now. Each recipient will later provide the visual appearance that will be bound to their assigned field during signing."
+        empty_state_title: "No eligible recipients or PDF documents"
+        empty_state_body: "This contract needs at least one active bundle recipient and one PDF document before fields can be prepared."
+        form:
+          title: "Field placement"
+          description: "Drag the box on the PDF preview to place the visible signature field. Use the corner handle to resize it."
+          recipient: "Recipient"
+          document: "Document"
+          page: "Page"
+          position: "Position"
+          submit: "Add signature field"
+        preview:
+          title: "PDF preview"
+          unavailable: "PDF preview is not available."
+          mobile_hint: "On phones, drag the field directly inside the preview for precise placement."
+          render_error: "Preview could not be rendered on this device. You can still open the PDF directly."
+          open_pdf: "Open PDF"
+          box_label: "Signature field"
+          resize_handle: "Resize signature field"
+        existing:
+          title: "Prepared signature fields"
+          count:
+            one: "1 field"
+            other: "%{count} fields"
+          empty: "No signature fields have been prepared yet."
+          prepared_source_ready: "A prepared signing PDF has already been generated for the current field layout."
+          recipient: "Recipient"
+          document: "Document"
+          page: "Page"
+          geometry: "Geometry"
+          delete_confirm: "Delete the prepared signature field for %{recipient}?"
+        finalize:
+          submit: "Generate prepared signing PDF"
+      create:
+        success: "Signature field prepared successfully."
+      destroy:
+        success: "Prepared signature field removed."
+      finalize:
+        success: "Prepared signing PDF generated successfully."
+        failure: "Prepared signing PDF could not be generated right now."
+        empty: "Add at least one signature field before generating the prepared signing PDF."
     signature_extension:
       levels:
         t:
@@ -907,6 +962,12 @@ en:
       electronic_description: "Sign digitally using your eID card and a signing application"
       physical_label: "Physical Signing"
       physical_description: "Print, sign by hand, and send via post office"
+      visual_label: "Visual stamp"
+      visual_description: "Add a visual stamp to the PDF without creating a qualified electronic signature"
+      qes_visual_stamp_button: "Add visual stamp first"
+      qes_visual_stamp_description: "Signing with QES/PAdES can include an optional visual stamp before the qualified signature is created."
+      signature_field_appearance_button: "Add visible signature appearance"
+      signature_field_appearance_description: "A visible signature field is prepared for you in this PDF. Add your text or image appearance before continuing to electronic signing."
       continue: "Continue"
     physical_signing:
       title: "Physical Signing"
@@ -918,16 +979,48 @@ en:
       confirmation_message: "After submitting, you will receive a confirmation. The document sender will be notified about your physical signature."
       back: "Back"
       submit: "Submit Physical Signing"
+    visual_signing:
+      title: "Visual stamp"
+      subtitle: "Add a visual stamp to the PDF"
+      placement_help: "Move and resize the stamp on the first page. This visual stamp is placed into the PDF before the next step."
+      mobile_preview_hint: "On phones, drag the stamp directly inside the preview for precise placement."
+      signature_field_help: "Add the text or image that should appear inside your assigned signature field on page %{page}."
+      placement_title: "Stamp placement"
+      placement_description: "Drag the rectangle to choose where the stamp will appear. Use the corner handle to resize it."
+      signature_field_title: "Prepared signature field"
+      signature_field_description: "This signature appearance is bound to the field that was prepared for you. You can edit its contents, but not its position or size."
+      signature_field_locked_notice: "This visible signature field was prepared in advance. Its position and size are fixed for your signature."
+      preview_title: "PDF preview"
+      preview_unavailable: "PDF preview is not available."
+      preview_render_error: "Preview could not be rendered on this device. You can still open the PDF directly."
+      preview_open_pdf: "Open PDF"
+      resize_handle: "Resize stamp"
+      stamp_text_label: "Stamp text"
+      custom_text_mode: "Use typed name"
+      custom_text_placeholder: "Name shown on the stamp"
+      image_mode: "Use image instead"
+      draw_mode: "Draw signature"
+      draw_mode_help: "Draw with a mouse, trackpad, or your finger."
+      draw_empty: "No drawing yet"
+      draw_filled: "Drawing ready"
+      draw_clear: "Clear"
+      existing_image_hint: "Current image will be reused unless you upload a new one."
+      position_label: "Position"
+      back: "Back"
+      submit: "Create visual stamp"
+      signature_field_submit: "Continue to electronic signing"
     allowed_methods:
       qes: Qualified electronic signature
       ses: Simple electronic signature
       scan: Print, sign by hand, and scan
+      visual: Add a visual stamp to the PDF
       notary-post: Document signed at a notary and original sent via post office
       notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
       short:
         qes: Qualified electronic signature
         ses: Simple electronic signature
         scan: Print, sign by hand, and scan
+        visual: Visual stamp
         notary-post: Notary signature with postal delivery
         notary-conversion: Notary signature with conversion to QES
 
@@ -1521,6 +1614,9 @@ en:
       no_signatures_title: "No electronic signatures yet"
       no_signatures_message: "This document does not contain any electronic signatures yet. You can sign it below."
       signatures_found_title: "Document already signed by"
+      visual_signatures_found_title: "Visual signatures added by"
+      visual_signature_badge: "Visual signature"
+      visual_signature_added_at: "Added on %{time}"
       qualified_timestamp: "Qualified Timestamp"
       no_timestamp: "No timestamp"
       timestamps_count: "(%{count} timestamps)"

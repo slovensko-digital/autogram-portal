@@ -207,7 +207,7 @@ export default class extends Controller {
 
       let signResult;
 
-      if (autogramParameters.multiple_documents === false) {
+      if (autogramParameters.multiple_documents === false && !this.requiresVersionedSigning(autogramParameters.documents)) {
         let signRequestDocument = {
           content: autogramParameters.documents[0].content
         }
@@ -229,27 +229,7 @@ export default class extends Controller {
 
       } else {
         signResult = await client.signV1(
-          autogramParameters.documents.map(doc => ({
-            content: doc.content,
-            filename: doc.filename,
-            mimeType: doc.content_type,
-            xdcParameters: doc.xdc_parameters ? {
-              autoLoadEform: doc.xdc_parameters.auto_load_eform,
-              containerXmlns: doc.xdc_parameters.container_xmlns,
-              embedUsedSchemas: doc.xdc_parameters.embed_used_schemas,
-              fsFormIdentifier: doc.xdc_parameters.fs_form_identifier,
-              identifier: doc.xdc_parameters.identifier,
-              packaging: doc.xdc_parameters.packaging,
-              schema: doc.xdc_parameters.schema,
-              schemaIdentifier: doc.xdc_parameters.schema_identifier,
-              schemaMimeType: doc.xdc_parameters.schema_mime_type,
-              transformation: doc.xdc_parameters.transformation,
-              transformationIdentifier: doc.xdc_parameters.transformation_identifier,
-              transformationLanguage: doc.xdc_parameters.transformation_language,
-              transformationMediaDestinationTypeDescription: doc.xdc_parameters.transformation_media_destination_type_description,
-              transformationTargetEnvironment: doc.xdc_parameters.transformation_target_environment
-            } : undefined
-          })),
+          autogramParameters.documents.map(doc => this.buildVersionedDocument(doc)),
           autogramParameters.signature_parameters,
           states
         )
@@ -373,6 +353,43 @@ export default class extends Controller {
       reader.onerror = () => reject(new Error(i18n.t('errors.file_read_failed')));
       reader.readAsDataURL(blob);
     });
+  }
+
+  requiresVersionedSigning(documents) {
+    return documents.some((document) => document.visible_signature)
+  }
+
+  buildVersionedDocument(document) {
+    return {
+      content: document.content,
+      filename: document.filename,
+      mimeType: document.content_type,
+      xdcParameters: document.xdc_parameters ? {
+        autoLoadEform: document.xdc_parameters.auto_load_eform,
+        containerXmlns: document.xdc_parameters.container_xmlns,
+        embedUsedSchemas: document.xdc_parameters.embed_used_schemas,
+        fsFormIdentifier: document.xdc_parameters.fs_form_identifier,
+        identifier: document.xdc_parameters.identifier,
+        packaging: document.xdc_parameters.packaging,
+        schema: document.xdc_parameters.schema,
+        schemaIdentifier: document.xdc_parameters.schema_identifier,
+        schemaMimeType: document.xdc_parameters.schema_mime_type,
+        transformation: document.xdc_parameters.transformation,
+        transformationIdentifier: document.xdc_parameters.transformation_identifier,
+        transformationLanguage: document.xdc_parameters.transformation_language,
+        transformationMediaDestinationTypeDescription: document.xdc_parameters.transformation_media_destination_type_description,
+        transformationTargetEnvironment: document.xdc_parameters.transformation_target_environment
+      } : undefined,
+      visibleSignature: document.visible_signature ? {
+        fieldId: document.visible_signature.field_id,
+        text: document.visible_signature.text,
+        image: document.visible_signature.image ? {
+          filename: document.visible_signature.image.filename,
+          content: document.visible_signature.image.content,
+          mimeType: document.visible_signature.image.mime_type
+        } : undefined
+      } : undefined
+    }
   }
 
   updateProgress(percent, stage) {

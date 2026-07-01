@@ -1,10 +1,13 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
-  before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
-  before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
-  before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session ]
+  before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
+  before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
+  before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
+  before_action :ensure_prepared_signature_field_appearance_completed, only: [ :sign, :signature_apps ]
   before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
+  before_action :ensure_visual_signing_allowed, only: [ :visual_signing, :create_visual_session ]
+  before_action :ensure_signature_field_appearance_assignment, only: [ :visual_signing, :create_visual_session ]
 
   def index
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
@@ -111,6 +114,15 @@ class ContractsController < ApplicationController
   def physical_signing
   end
 
+  def visual_signing
+    @visual_stamp_purpose = visual_stamp_purpose
+    @visual_stamp_document = visual_stamp_source_document(@visual_stamp_purpose)
+    @assigned_signature_field_preparation = assigned_signature_field_preparation if @visual_stamp_purpose == "signature_field_appearance"
+    @visual_stamp_locked = @assigned_signature_field_preparation.present?
+    @visual_stamp = latest_visual_stamp_for(visual_stamp_record_document, @visual_stamp_purpose) if %w[qes_preparation signature_field_appearance].include?(@visual_stamp_purpose)
+    @visual_stamp_custom_text = @visual_stamp&.custom_text.presence || current_user&.name.to_s
+  end
+
   def create_physical_session
     physical_session = PhysicalSession.create!(
       signer_contract: @signer_contract,
@@ -123,6 +135,72 @@ class ContractsController < ApplicationController
   rescue ActiveRecord::RecordInvalid => e
     redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid),
                 alert: "Failed to submit: #{e.message}"
+  end
+
+  def create_visual_session
+    purpose = visual_stamp_purpose
+    source_document = visual_stamp_source_document(purpose)
+    document = visual_stamp_record_document
+    raise ActiveRecord::RecordInvalid unless source_document&.is_pdf? && document&.is_pdf?
+
+    existing_stamp = latest_visual_stamp_for(document, purpose) if %w[qes_preparation signature_field_appearance].include?(purpose)
+    stamp_attributes = visual_stamp_attributes(purpose).merge(purpose: purpose)
+    visual_stamp = @signer_contract.visual_stamps.build(stamp_attributes.merge(document: document))
+    attach_visual_stamp_image(visual_stamp, existing_stamp)
+    raise ActiveRecord::RecordInvalid, visual_stamp unless visual_stamp.valid?
+
+    if purpose == "signature_field_appearance"
+      ActiveRecord::Base.transaction do
+        replace_existing_visual_stamp!(document, purpose)
+        visual_stamp.save!
+      end
+
+      return redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+    end
+
+    stamped_content = AutogramEnvironment.autogram_service.stamp_pdf(source_document, stamp: visual_stamp_service_params(visual_stamp, existing_stamp))
+
+    session = nil
+
+    ActiveRecord::Base.transaction do
+      replace_existing_visual_stamp!(document, purpose) if purpose == "qes_preparation"
+
+      visual_stamp.save!
+      visual_stamp.file.attach(
+        io: StringIO.new(stamped_content),
+        filename: visual_stamp_filename(document),
+        content_type: "application/pdf"
+      )
+
+      if visual_stamp.visual_method?
+        replace_visual_content_versions!
+
+        session = @signer_contract.sessions.create!(
+          type: "VisualSession",
+          signing_started_at: Time.current
+        )
+        @contract.add_signed_content_version!(
+          content: stamped_content,
+          filename: visual_stamp_filename(document),
+          content_type: "application/pdf",
+          origin: "visual"
+        )
+      end
+    end
+
+    session&.signed!
+
+    if visual_stamp.qes_preparation?
+      return redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+    end
+
+    redirect_to contract_session_path(@contract, session, recipient: @recipient&.uuid, iframe: params[:iframe], show_completed: true)
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose),
+                alert: "Failed to submit: #{e.message}"
+  rescue AutogramService::ServiceUnavailableError => e
+    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose),
+                alert: e.message
   end
 
   def signed_document
@@ -213,7 +291,7 @@ class ContractsController < ApplicationController
   end
 
   def set_recipient
-    if params[:recipient]
+    if params[:recipient].present?
       @recipient = @contract.recipients.active.find_by(uuid: params[:recipient])
 
       return if @recipient
@@ -273,12 +351,176 @@ class ContractsController < ApplicationController
   end
 
   def contract_params
-    params.require(:contract).permit(
+    permitted = params.require(:contract).permit(
       :uuid,
       allowed_methods: [],
       documents_attributes: [ :id, :blob, :_destroy ],
       signature_parameters_attributes: [ :id, :add_content_timestamp, :level, :format, :container, :en319132 ]
     )
+
+    return permitted unless params[:next_step] == "sign"
+
+    signature_format = permitted.dig(:signature_parameters_attributes, :format) || @contract.signature_parameters&.format
+    compatible_methods = @contract.available_signature_methods_for(next_step: params[:next_step], signature_format: signature_format)
+
+    permitted[:allowed_methods] = if compatible_methods.one?
+      compatible_methods
+    else
+      Array(permitted[:allowed_methods]) & compatible_methods
+    end
+
+    permitted
+  end
+
+  def visual_stamp_purpose
+    params[:purpose].presence_in(%w[visual_method qes_preparation signature_field_appearance]) || "visual_method"
+  end
+
+  def default_visual_stamp_attributes
+    if visual_stamp_purpose == "signature_field_appearance" && assigned_signature_field_preparation.present?
+      return {
+        page: assigned_signature_field_preparation.page,
+        x: assigned_signature_field_preparation.x.to_f,
+        y: assigned_signature_field_preparation.y.to_f,
+        width: assigned_signature_field_preparation.width.to_f,
+        height: assigned_signature_field_preparation.height.to_f
+      }
+    end
+
+    {
+      page: 1,
+      x: 40,
+      y: 40,
+      width: VisualStamp::MAX_WIDTH,
+      height: 52
+    }
+  end
+
+  def visual_stamp_attributes(purpose)
+    default_visual_stamp_attributes
+      .merge(visual_stamp_params.except(:text, :custom_text, :content_mode, :image, :drawing_data).to_h.symbolize_keys)
+      .merge(text: visual_stamp_text(purpose))
+  end
+
+  def visual_stamp_params
+    params.fetch(:stamp, {}).permit(:page, :x, :y, :width, :height, :text, :custom_text, :content_mode, :image, :drawing_data)
+  end
+
+  def visual_stamp_text(purpose)
+    custom_text = (visual_stamp_params[:custom_text].presence || visual_stamp_params[:text]).to_s.strip
+    graphic_mode = %w[image draw].include?(visual_stamp_params[:content_mode])
+
+    if purpose == "qes_preparation"
+      return VisualStamp::QES_MANDATORY_TEXT if graphic_mode || custom_text.blank?
+
+      [ VisualStamp::QES_MANDATORY_TEXT, custom_text ].join("\n")
+    elsif graphic_mode
+      nil
+    else
+      custom_text
+    end
+  end
+
+  def attach_visual_stamp_image(visual_stamp, existing_stamp)
+    case visual_stamp_params[:content_mode]
+    when "image"
+      image = visual_stamp_params[:image]
+      if image.present?
+        visual_stamp.image.attach(image)
+      elsif existing_stamp&.image&.attached?
+        visual_stamp.image.attach(existing_stamp.image.blob)
+      end
+    when "draw"
+      content, mime_type = visual_stamp_drawing_payload
+      if content.present? && mime_type.present?
+        visual_stamp.image.attach(
+          io: StringIO.new(content),
+          filename: "signature-drawing.png",
+          content_type: mime_type
+        )
+      elsif existing_stamp&.image&.attached?
+        visual_stamp.image.attach(existing_stamp.image.blob)
+      end
+    end
+  end
+
+  def visual_stamp_drawing_payload
+    drawing_data = visual_stamp_params[:drawing_data].to_s
+    return [ nil, nil ] if drawing_data.blank?
+
+    match = drawing_data.match(%r{\Adata:(image\/[a-zA-Z0-9.+-]+);base64,(.+)\z}m)
+    return [ nil, nil ] unless match
+
+    [ Base64.strict_decode64(match[2]), match[1] ]
+  rescue ArgumentError
+    [ nil, nil ]
+  end
+
+  def visual_stamp_service_params(visual_stamp, existing_stamp = nil)
+    stamp = {
+      page: visual_stamp.page,
+      x: visual_stamp.x.to_f,
+      y: visual_stamp.y.to_f,
+      width: visual_stamp.width.to_f,
+      height: visual_stamp.height.to_f,
+      text: visual_stamp.text
+    }
+
+    if visual_stamp.image.attached?
+      image_content, image_mime_type = visual_stamp_image_payload(existing_stamp)
+      stamp[:imageContent] = Base64.strict_encode64(image_content) if image_content
+      stamp[:imageMimeType] = image_mime_type if image_mime_type
+    end
+
+    stamp
+  end
+
+  def visual_stamp_image_payload(existing_stamp)
+    if visual_stamp_params[:content_mode] == "draw"
+      return visual_stamp_drawing_payload
+    end
+
+    image = visual_stamp_params[:image]
+    if image.present?
+      image.rewind if image.respond_to?(:rewind)
+      content = image.read
+      image.rewind if image.respond_to?(:rewind)
+      return [ content, image.content_type ]
+    end
+
+    return unless existing_stamp&.image&.attached?
+
+    [ existing_stamp.image.download, existing_stamp.image.blob.content_type ]
+  end
+
+  def visual_stamp_source_document(purpose = visual_stamp_purpose)
+    return visual_stamp_record_document if purpose == "qes_preparation"
+
+    @contract.latest_source_content_version&.document || visual_stamp_record_document
+  end
+
+  def visual_stamp_record_document
+    return assigned_signature_field_preparation.document if visual_stamp_purpose == "signature_field_appearance" && assigned_signature_field_preparation.present?
+
+    @contract.documents.first
+  end
+
+  def latest_visual_stamp_for(document, purpose)
+    return unless document && @signer_contract
+
+    @signer_contract.visual_stamps.where(document: document, purpose: purpose).with_attached_image.order(created_at: :desc).first
+  end
+
+  def replace_existing_visual_stamp!(document, purpose)
+    @signer_contract.visual_stamps.where(document: document, purpose: purpose).destroy_all
+  end
+
+  def replace_visual_content_versions!
+    @contract.content_versions.where(origin: "visual").destroy_all
+  end
+
+  def visual_stamp_filename(document)
+    "#{File.basename(document.filename, '.*').sub(/-visual\z/, '')}-visual.pdf"
   end
 
   def signed_document_param
@@ -291,5 +533,59 @@ class ContractsController < ApplicationController
     end
 
     current_user.present? && @contract.user == current_user
+  end
+
+  def ensure_visual_signing_allowed
+    return if visual_stamp_purpose == "signature_field_appearance"
+    return if @contract.visual_signing_allowed?
+
+    redirect_to visual_signing_unavailable_redirect_path, alert: t("contracts.alerts.visual_signing_not_available_for_signed_pades")
+  end
+
+  def ensure_prepared_signature_field_appearance_completed
+    return unless @contract.prepared_signature_field_appearance_required_for?(recipient: @recipient, signer_contract: @signer_contract)
+
+    if signature_apps_frame_request?
+      render partial: "signature_field_appearance_required",
+             locals: {
+               frame_id: request.headers["Turbo-Frame"],
+               contract: @contract,
+               recipient: @recipient
+             }
+      return
+    end
+
+    redirect_to visual_signing_contract_path(
+      @contract,
+      recipient: @recipient&.uuid,
+      iframe: params[:iframe],
+      purpose: "signature_field_appearance"
+    )
+  end
+
+  def ensure_signature_field_appearance_assignment
+    return unless visual_stamp_purpose == "signature_field_appearance"
+    return if assigned_signature_field_preparation.present?
+
+    redirect_to visual_signing_unavailable_redirect_path,
+                alert: t("contracts.alerts.signature_field_appearance_unavailable")
+  end
+
+  def assigned_signature_field_preparation
+    return @assigned_signature_field_preparation if defined?(@assigned_signature_field_preparation)
+
+    @assigned_signature_field_preparation = @contract.prepared_signature_field_preparation_for(recipient: @recipient)
+  end
+
+  def signature_apps_frame_request?
+    action_name == "signature_apps" && request.headers["Turbo-Frame"].present?
+  end
+
+  def visual_signing_unavailable_redirect_path
+    if @contract.bundle
+      sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
+    else
+      sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+    end
   end
 end

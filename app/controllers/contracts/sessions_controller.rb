@@ -49,7 +49,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def download
-    document = @contract.documents_to_sign.first
+    document = @contract.documents_to_sign_for(signer_contract: @session.signer_contract).first
     unless document&.blob&.attached?
       render plain: "Document not found", status: :not_found
       return
@@ -153,6 +153,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def redirect_if_completed
+    return if params[:show_completed].present?
     return unless @session.not_pending?
 
     redirect_path = if @contract.bundle
@@ -182,7 +183,7 @@ class Contracts::SessionsController < ApplicationController
     existing = @signer_contract&.sessions&.pending&.where(type: "AvmSession")&.first
     return persist_session_view_options(existing) if existing
 
-    result = AutogramEnvironment.avm_service.initiate_signing(@contract)
+    result = AutogramEnvironment.avm_service.initiate_signing(@contract, signer_contract: @signer_contract)
     raise SessionCreationError, result[:error] if result[:error]
 
     unless result[:document_identifier].present? && result[:encryption_key].present? && result[:signing_started_at].present?

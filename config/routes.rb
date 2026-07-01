@@ -85,10 +85,15 @@ Rails.application.routes.draw do
       get :signature_apps
       get :physical_signing
       post :physical_signing, action: :create_physical_session
+      get :visual_signing
+      post :visual_signing, action: :create_visual_session
       get :show_bundle
     end
 
     resources :onboarding, only: [ :show, :update ], param: :step, controller: "contracts/onboarding"
+    resources :signature_field_preparations, only: [ :index, :create, :destroy ], controller: "contracts/signature_field_preparations" do
+      post :finalize, on: :collection
+    end
 
     resources :sessions, only: [ :show, :destroy ], controller: "contracts/sessions" do
       member do

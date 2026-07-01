@@ -31,6 +31,33 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "download uses signer prepared qes visual stamp" do
+    visual_stamp = @session.signer_contract.visual_stamps.create!(
+      document: @contract.documents.first,
+      purpose: :qes_preparation,
+      page: 1,
+      x: 40,
+      y: 40,
+      width: 256,
+      height: 52,
+      text: VisualStamp::DEFAULT_TEXT
+    )
+    visual_stamp.file.attach(
+      io: StringIO.new("prepared qes pdf"),
+      filename: "prepared.pdf",
+      content_type: "application/pdf"
+    )
+
+    token = SessionAccessToken.generate(contract: @contract, session: @session)
+
+    get "/contracts/#{@contract.uuid}/sessions/#{@session.id}/download", params: {
+      session_token: token
+    }
+
+    assert_response :success
+    assert_equal "prepared qes pdf", response.body
+  end
+
   test "create stores iframe mode on autogram sessions" do
     contract = create_contract_without_session
 
@@ -40,12 +67,96 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "true", contract.sessions.order(:id).last.options["iframe"]
   end
 
+  test "parameters include visible signature text payload for prepared signature fields" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+    contract.add_signed_content_version!(
+      content: "%PDF-1.4 signed by first recipient",
+      filename: "visual-test-signed-once.pdf",
+      content_type: "application/pdf",
+      origin: "signing"
+    )
+    signer_contract = recipient.signer_contracts.find_by!(contract: contract)
+    signer_contract.visual_stamps.create!(
+      document: contract.documents.first,
+      purpose: :signature_field_appearance,
+      page: 2,
+      x: 42,
+      y: 64,
+      width: 180,
+      height: 64,
+      text: "Prepared signer name"
+    )
+    session = signer_contract.sessions.create!(
+      type: "AutogramSession",
+      signing_started_at: Time.current
+    )
+
+    get "/contracts/#{contract.uuid}/sessions/#{session.id}/parameters", params: {
+      session_token: SessionAccessToken.generate(contract: contract, session: session)
+    }
+
+    assert_response :success
+
+    payload = JSON.parse(response.body)
+    assert_equal false, payload.fetch("multiple_documents")
+
+    visible_signature = payload.fetch("documents").first.fetch("visible_signature")
+    assert_equal contract.signature_field_preparations.first.field_identifier, visible_signature.fetch("field_id")
+    assert_equal VisualStamp.pades_visible_signature_text("Prepared signer name"), visible_signature.fetch("text")
+    assert_not visible_signature.key?("image")
+  end
+
+  test "parameters omit visible signature text for graphic prepared signature fields" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+    contract.add_signed_content_version!(
+      content: "%PDF-1.4 signed by first recipient",
+      filename: "visual-test-signed-once.pdf",
+      content_type: "application/pdf",
+      origin: "signing"
+    )
+    signer_contract = recipient.signer_contracts.find_by!(contract: contract)
+    visual_stamp = signer_contract.visual_stamps.new(
+      document: contract.documents.first,
+      purpose: :signature_field_appearance,
+      page: 2,
+      x: 42,
+      y: 64,
+      width: 180,
+      height: 64,
+      text: nil
+    )
+    visual_stamp.image.attach(
+      io: StringIO.new("fake-png-content"),
+      filename: "signature.png",
+      content_type: "image/png"
+    )
+    visual_stamp.save!
+    session = signer_contract.sessions.create!(
+      type: "AutogramSession",
+      signing_started_at: Time.current
+    )
+
+    get "/contracts/#{contract.uuid}/sessions/#{session.id}/parameters", params: {
+      session_token: SessionAccessToken.generate(contract: contract, session: session)
+    }
+
+    assert_response :success
+
+    payload = JSON.parse(response.body)
+    visible_signature = payload.fetch("documents").first.fetch("visible_signature")
+    assert_equal contract.signature_field_preparations.first.field_identifier, visible_signature.fetch("field_id")
+    assert_not visible_signature.key?("text")
+    assert_equal "signature.png", visible_signature.dig("image", "filename")
+    assert_equal "image/png;base64", visible_signature.dig("image", "mime_type")
+    assert_equal Base64.strict_encode64("fake-png-content"), visible_signature.dig("image", "content")
+  end
+
   test "create stores avm identifiers together with iframe mode" do
     contract = create_contract_without_session
     started_at = Time.current.change(usec: 0)
 
     with_avm_service(Struct.new(:started_at) do
-      def initiate_signing(_contract)
+      def initiate_signing(_contract, signer_contract: nil)
         {
           document_identifier: "guid-123",
           encryption_key: "secret-key-456",
@@ -72,7 +183,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     contract = create_contract_without_session
 
     with_avm_service(Struct.new(:message) do
-      def initiate_signing(_contract)
+      def initiate_signing(_contract, signer_contract: nil)
         { error: message }
       end
     end.new("AVM temporarily unavailable")) do
@@ -92,6 +203,16 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     get "/contracts/#{contract.uuid}/sessions/#{session.id}", params: { session_token: token }
 
     assert_redirected_to sign_bundle_path(contract.bundle, iframe: "true")
+  end
+
+  test "show renders signed session when explicitly requested" do
+    @session.update!(status: :signed, completed_at: Time.current)
+
+    get "/contracts/#{@contract.uuid}/sessions/#{@session.id}", params: { show_completed: "true" }
+
+    assert_response :success
+    assert_includes response.body, I18n.t("contracts.sessions.signed.title")
+    assert_select "a[href='#{contract_path(@contract)}'][data-turbo-frame='_top']"
   end
 
   test "upload succeeds for indeterminate autogram test certificate in test environment" do
@@ -259,5 +380,29 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     )
 
     [ contract.reload, session ]
+  end
+
+  def create_bundle_contract_with_prepared_signature_field
+    contract = create_contract_without_session
+    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+
+    contract.signature_field_preparations.create!(
+      recipient: recipient,
+      document: contract.documents.first,
+      page: 2,
+      x: 42,
+      y: 64,
+      width: 180,
+      height: 64
+    )
+
+    contract.add_prepared_signature_fields_content_version!(
+      content: "%PDF-1.4 prepared source",
+      filename: "visual-test-prepared-fields.pdf",
+      content_type: "application/pdf"
+    )
+
+    [ contract.reload, recipient.reload ]
   end
 end

@@ -22,14 +22,8 @@
 #
 #  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
-class PodpisujSession < Session
+class VisualSession < Session
   def self.model_name
     Session.model_name
-  end
-
-  def self.available?(qscd, contract)
-    return false if contract.documents.count > 1
-    return false if contract.prepared_signature_fields_source_attached?
-    contract.signature_parameters.level == "BASELINE_B"
   end
 end
