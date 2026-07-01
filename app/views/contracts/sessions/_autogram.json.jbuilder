@@ -42,7 +42,6 @@ json.documents documents do |document|
 
   json.visible_signature do
     json.field_id prepared_signature_field.field_identifier
-    json.text VisualStamp.pades_visible_signature_text(prepared_signature_field_appearance.custom_text)
 
     if prepared_signature_field_appearance.image.attached?
       json.image do
@@ -50,6 +49,8 @@ json.documents documents do |document|
         json.content Base64.strict_encode64(prepared_signature_field_appearance.image.download)
         json.mime_type "#{prepared_signature_field_appearance.image.blob.content_type};base64"
       end
+    else
+      json.text VisualStamp.pades_visible_signature_text(prepared_signature_field_appearance.custom_text)
     end
   end
 end

@@ -10,3 +10,4 @@ pin_all_from "app/javascript/utils", under: "utils"
 pin "alpinejs" # @3.14.9
 pin "altcha" # @2.3.0
 pin "autogram-sdk", to: "autogram-sdk.js"
+pin "pdfjs-dist", to: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs"

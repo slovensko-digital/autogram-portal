@@ -39,6 +39,7 @@
                     class: "space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm",
                     data: {
                       controller: "visual-stamp",
+                      visual_stamp_preview_url_value: preview_path,
                       visual_stamp_existing_fields_value: existing_signature_field_previews.to_json,
                       visual_stamp_page_width_value: 595,
                       visual_stamp_page_height_value: 842,
@@ -57,15 +58,19 @@
         <%= form.hidden_field :page, value: @signature_field_preparation.page, data: { visual_stamp_target: "pageField" } %>
 
         <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div class="rounded-lg border border-gray-200 bg-gray-100 p-4">
-            <div class="mx-auto max-w-[680px]">
-              <div class="relative mx-auto aspect-[595/842] overflow-hidden rounded-sm bg-white shadow" data-visual-stamp-target="page">
+          <div class="min-w-0 rounded-lg border border-gray-200 bg-gray-100 p-4">
+            <p class="mb-3 text-xs text-gray-600 sm:hidden"><%= t('.preview.mobile_hint') %></p>
+            <div class="w-full max-w-full overflow-hidden pb-2">
+              <div class="mx-auto w-full max-w-[680px]">
+                <div class="relative mx-auto aspect-[595/842] w-full overflow-hidden rounded-sm bg-white shadow" data-visual-stamp-target="page">
                 <% if preview_path %>
-                  <iframe src="<%= preview_path %>#page=<%= @signature_field_preparation.page %>&toolbar=0&navpanes=0&scrollbar=0&view=FitH"
-                          title="<%= t('.preview.title') %>"
-                          class="absolute inset-0 h-full w-full border-0 pointer-events-none"
-                          data-visual-stamp-target="previewFrame"
-                          data-base-src="<%= preview_path %>"></iframe>
+                  <canvas data-visual-stamp-target="pdfCanvas" class="block h-full w-full bg-white"></canvas>
+                  <div data-visual-stamp-target="previewFallback" class="absolute inset-0 hidden flex items-center justify-center bg-white/90 p-6 text-center text-sm text-gray-600">
+                    <div class="space-y-3">
+                      <p><%= t('.preview.render_error') %></p>
+                      <a data-visual-stamp-target="previewLink" href="<%= preview_path %>" target="_blank" rel="noopener" class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"><%= t('.preview.open_pdf') %></a>
+                    </div>
+                  </div>
                 <% else %>
                   <div class="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-gray-500">
                     <%= t('.preview.unavailable') %>
@@ -76,7 +81,7 @@
 
                 <div data-visual-stamp-target="stamp"
                      data-action="pointerdown->visual-stamp#startDrag"
-                     class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 shadow-lg ring-2 ring-white/70">
+                     class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 shadow-lg ring-2 ring-white/70 touch-none">
                   <div class="text-xs font-medium text-gray-800"><%= t('.preview.box_label') %></div>
                   <button type="button"
                           aria-label="<%= t('.preview.resize_handle') %>"
@@ -86,9 +91,10 @@
                 </div>
               </div>
             </div>
+            </div>
           </div>
 
-          <aside class="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <aside class="min-w-0 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
             <div>
               <h4 class="text-base font-semibold text-gray-900"><%= t('.form.title') %></h4>
               <p class="mt-1 text-sm text-gray-600"><%= t('.form.description') %></p>

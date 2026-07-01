@@ -398,23 +398,23 @@ class ContractsController < ApplicationController
 
   def visual_stamp_attributes(purpose)
     default_visual_stamp_attributes
-      .merge(visual_stamp_params.except(:text, :custom_text, :content_mode, :image).to_h.symbolize_keys)
+      .merge(visual_stamp_params.except(:text, :custom_text, :content_mode, :image, :drawing_data).to_h.symbolize_keys)
       .merge(text: visual_stamp_text(purpose))
   end
 
   def visual_stamp_params
-    params.fetch(:stamp, {}).permit(:page, :x, :y, :width, :height, :text, :custom_text, :content_mode, :image)
+    params.fetch(:stamp, {}).permit(:page, :x, :y, :width, :height, :text, :custom_text, :content_mode, :image, :drawing_data)
   end
 
   def visual_stamp_text(purpose)
     custom_text = (visual_stamp_params[:custom_text].presence || visual_stamp_params[:text]).to_s.strip
-    image_mode = visual_stamp_params[:content_mode] == "image"
+    graphic_mode = %w[image draw].include?(visual_stamp_params[:content_mode])
 
     if purpose == "qes_preparation"
-      return VisualStamp::QES_MANDATORY_TEXT if image_mode || custom_text.blank?
+      return VisualStamp::QES_MANDATORY_TEXT if graphic_mode || custom_text.blank?
 
       [ VisualStamp::QES_MANDATORY_TEXT, custom_text ].join("\n")
-    elsif image_mode
+    elsif graphic_mode
       nil
     else
       custom_text
@@ -422,14 +422,38 @@ class ContractsController < ApplicationController
   end
 
   def attach_visual_stamp_image(visual_stamp, existing_stamp)
-    return unless visual_stamp_params[:content_mode] == "image"
-
-    image = visual_stamp_params[:image]
-    if image.present?
-      visual_stamp.image.attach(image)
-    elsif existing_stamp&.image&.attached?
-      visual_stamp.image.attach(existing_stamp.image.blob)
+    case visual_stamp_params[:content_mode]
+    when "image"
+      image = visual_stamp_params[:image]
+      if image.present?
+        visual_stamp.image.attach(image)
+      elsif existing_stamp&.image&.attached?
+        visual_stamp.image.attach(existing_stamp.image.blob)
+      end
+    when "draw"
+      content, mime_type = visual_stamp_drawing_payload
+      if content.present? && mime_type.present?
+        visual_stamp.image.attach(
+          io: StringIO.new(content),
+          filename: "signature-drawing.png",
+          content_type: mime_type
+        )
+      elsif existing_stamp&.image&.attached?
+        visual_stamp.image.attach(existing_stamp.image.blob)
+      end
     end
+  end
+
+  def visual_stamp_drawing_payload
+    drawing_data = visual_stamp_params[:drawing_data].to_s
+    return [ nil, nil ] if drawing_data.blank?
+
+    match = drawing_data.match(%r{\Adata:(image\/[a-zA-Z0-9.+-]+);base64,(.+)\z}m)
+    return [ nil, nil ] unless match
+
+    [ Base64.strict_decode64(match[2]), match[1] ]
+  rescue ArgumentError
+    [ nil, nil ]
   end
 
   def visual_stamp_service_params(visual_stamp, existing_stamp = nil)
@@ -452,6 +476,10 @@ class ContractsController < ApplicationController
   end
 
   def visual_stamp_image_payload(existing_stamp)
+    if visual_stamp_params[:content_mode] == "draw"
+      return visual_stamp_drawing_payload
+    end
+
     image = visual_stamp_params[:image]
     if image.present?
       image.rewind if image.respond_to?(:rewind)

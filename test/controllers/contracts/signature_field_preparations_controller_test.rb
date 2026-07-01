@@ -29,7 +29,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
     assert_select "option[value='#{recipient.uuid}']", text: recipient.display_name
     assert_select "[data-controller='visual-stamp']"
     assert_select "[data-signature-field-preparations-layout='page']"
-    assert_select "iframe[data-visual-stamp-target='previewFrame']"
+    assert_select "canvas[data-visual-stamp-target='pdfCanvas']"
     assert_select "a[href='#{bundle_path(contract.bundle)}']"
   end
 

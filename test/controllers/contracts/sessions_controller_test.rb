@@ -67,7 +67,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "true", contract.sessions.order(:id).last.options["iframe"]
   end
 
-  test "parameters include visible signature payload for prepared signature fields" do
+  test "parameters include visible signature text payload for prepared signature fields" do
     contract, recipient = create_bundle_contract_with_prepared_signature_field
     contract.add_signed_content_version!(
       content: "%PDF-1.4 signed by first recipient",
@@ -85,13 +85,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
       width: 180,
       height: 64,
       text: "Prepared signer name"
-    ).tap do |visual_stamp|
-      visual_stamp.image.attach(
-        io: StringIO.new("fake-png-content"),
-        filename: "signature.png",
-        content_type: "image/png"
-      )
-    end
+    )
     session = signer_contract.sessions.create!(
       type: "AutogramSession",
       signing_started_at: Time.current
@@ -109,6 +103,49 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     visible_signature = payload.fetch("documents").first.fetch("visible_signature")
     assert_equal contract.signature_field_preparations.first.field_identifier, visible_signature.fetch("field_id")
     assert_equal VisualStamp.pades_visible_signature_text("Prepared signer name"), visible_signature.fetch("text")
+    assert_not visible_signature.key?("image")
+  end
+
+  test "parameters omit visible signature text for graphic prepared signature fields" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+    contract.add_signed_content_version!(
+      content: "%PDF-1.4 signed by first recipient",
+      filename: "visual-test-signed-once.pdf",
+      content_type: "application/pdf",
+      origin: "signing"
+    )
+    signer_contract = recipient.signer_contracts.find_by!(contract: contract)
+    visual_stamp = signer_contract.visual_stamps.new(
+      document: contract.documents.first,
+      purpose: :signature_field_appearance,
+      page: 2,
+      x: 42,
+      y: 64,
+      width: 180,
+      height: 64,
+      text: nil
+    )
+    visual_stamp.image.attach(
+      io: StringIO.new("fake-png-content"),
+      filename: "signature.png",
+      content_type: "image/png"
+    )
+    visual_stamp.save!
+    session = signer_contract.sessions.create!(
+      type: "AutogramSession",
+      signing_started_at: Time.current
+    )
+
+    get "/contracts/#{contract.uuid}/sessions/#{session.id}/parameters", params: {
+      session_token: SessionAccessToken.generate(contract: contract, session: session)
+    }
+
+    assert_response :success
+
+    payload = JSON.parse(response.body)
+    visible_signature = payload.fetch("documents").first.fetch("visible_signature")
+    assert_equal contract.signature_field_preparations.first.field_identifier, visible_signature.fetch("field_id")
+    assert_not visible_signature.key?("text")
     assert_equal "signature.png", visible_signature.dig("image", "filename")
     assert_equal "image/png;base64", visible_signature.dig("image", "mime_type")
     assert_equal Base64.strict_encode64("fake-png-content"), visible_signature.dig("image", "content")

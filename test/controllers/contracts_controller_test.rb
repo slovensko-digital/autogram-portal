@@ -182,6 +182,26 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, contract.reload.content_versions.where(origin: "visual").count
   end
 
+  test "prepared signature field appearance with drawing stores image without text" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+
+    with_autogram_service(fake_unsigned_pades_validation_service) do
+      post "/contracts/#{contract.uuid}/visual_signing", params: {
+        recipient: recipient.uuid,
+        purpose: "signature_field_appearance",
+        stamp: { content_mode: "draw", drawing_data: png_data_url }
+      }
+    end
+
+    assert_redirected_to signature_apps_contract_path(contract, recipient: recipient.uuid)
+
+    signer_contract = recipient.recipient_signer.signer_contracts.find_by!(contract: contract)
+    appearance = signer_contract.visual_stamps.signature_field_appearance.last
+    assert appearance.image.attached?
+    assert_nil appearance.text
+    assert_not appearance.file.attached?
+  end
+
   test "prepared signature field request inside signature apps frame renders appearance prompt instead of missing content" do
     contract, recipient = create_bundle_contract_with_prepared_signature_field
 
@@ -244,6 +264,28 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
           stamp: {
             content_mode: "image",
             image: png_upload
+          }
+        }
+      end
+
+      visual_stamp = contract.reload.signer_contracts.last.visual_stamps.visual_method.last
+      assert visual_stamp.image.attached?
+      assert_nil visual_stamp.text
+      assert_equal "image/png", stamp_service.last_stamp[:imageMimeType]
+      assert Base64.strict_decode64(stamp_service.last_stamp[:imageContent]).present?
+    end
+  end
+
+  test "visual signing can use drawing data instead of uploaded image" do
+    with_allowed_methods(%w[visual]) do
+      contract = create_pdf_contract(allowed_methods: [ "visual" ])
+      stamp_service = fake_stamp_service("drawn visual pdf")
+
+      with_autogram_service(stamp_service) do
+        post "/contracts/#{contract.uuid}/visual_signing", params: {
+          stamp: {
+            content_mode: "draw",
+            drawing_data: png_data_url
           }
         }
       end
@@ -465,6 +507,10 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     file.write(Base64.decode64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lwL9NwAAAABJRU5ErkJggg=="))
     file.rewind
     Rack::Test::UploadedFile.new(file.path, "image/png")
+  end
+
+  def png_data_url
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lwL9NwAAAABJRU5ErkJggg=="
   end
 
   def with_autogram_service(fake_service)

@@ -1,7 +1,7 @@
 require "test_helper"
 
 class AvmServiceTest < ActiveSupport::TestCase
-  test "initiate_signing includes visible signature payload for prepared signature fields" do
+  test "initiate_signing includes visible signature text payload for text prepared signature fields" do
     contract, recipient = create_bundle_contract_with_prepared_signature_field
     signer_contract = recipient.signer_contracts.find_by!(contract: contract)
     signer_contract.visual_stamps.create!(
@@ -13,13 +13,7 @@ class AvmServiceTest < ActiveSupport::TestCase
       width: 180,
       height: 64,
       text: "Prepared signer name"
-    ).tap do |visual_stamp|
-      visual_stamp.image.attach(
-        io: StringIO.new("fake-png-content"),
-        filename: "signature.png",
-        content_type: "image/png"
-      )
-    end
+    )
 
     payload = capture_initiate_payload(contract, signer_contract)
 
@@ -27,6 +21,35 @@ class AvmServiceTest < ActiveSupport::TestCase
     assert_not_nil visible_signature
     assert_equal contract.signature_field_preparations.first.field_identifier, visible_signature[:fieldId]
     assert_equal VisualStamp.pades_visible_signature_text("Prepared signer name"), visible_signature[:text]
+    assert_nil visible_signature[:image]
+  end
+
+  test "initiate_signing omits visible signature text for graphic prepared signature fields" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+    signer_contract = recipient.signer_contracts.find_by!(contract: contract)
+    visual_stamp = signer_contract.visual_stamps.new(
+      document: contract.documents.first,
+      purpose: :signature_field_appearance,
+      page: 2,
+      x: 42,
+      y: 64,
+      width: 180,
+      height: 64,
+      text: nil
+    )
+    visual_stamp.image.attach(
+      io: StringIO.new("fake-png-content"),
+      filename: "signature.png",
+      content_type: "image/png"
+    )
+    visual_stamp.save!
+
+    payload = capture_initiate_payload(contract, signer_contract)
+
+    visible_signature = payload.dig(:parameters, :visibleSignature)
+    assert_not_nil visible_signature
+    assert_equal contract.signature_field_preparations.first.field_identifier, visible_signature[:fieldId]
+    refute visible_signature.key?(:text)
     assert_equal "signature.png", visible_signature.dig(:image, :filename)
     assert_equal "image/png;base64", visible_signature.dig(:image, :mimeType)
     assert_equal Base64.strict_encode64("fake-png-content"), visible_signature.dig(:image, :content)

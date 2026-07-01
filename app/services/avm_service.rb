@@ -76,8 +76,7 @@ class AvmService
     return unless appearance.present?
 
     visible_signature = {
-      fieldId: prepared_signature_field.field_identifier,
-      text: VisualStamp.pades_visible_signature_text(appearance.custom_text)
+      fieldId: prepared_signature_field.field_identifier
     }
 
     if appearance.image.attached?
@@ -86,6 +85,8 @@ class AvmService
         content: Base64.strict_encode64(appearance.image.download),
         mimeType: "#{appearance.image.blob.content_type};base64"
       }
+    else
+      visible_signature[:text] = VisualStamp.pades_visible_signature_text(appearance.custom_text)
     end
 
     visible_signature
