@@ -34,6 +34,7 @@
         </h3>
         <% validation_result.signatures.each do |signature| %>
           <% signature_documents = signature_validation_signature_documents(signature, validation_result, @contract) %>
+          <% agp_mapping = signature_validation_agp_mapping(signature, validation_entry) %>
           <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full">
             <button type="button"
                     data-action="click->toggle#toggle"
@@ -54,6 +55,14 @@
                     <%= render 'shared/badge', color: 'blue', label: t(".signature_qualifications.#{signature.qualification_label}") %>
                   <% else %>
                     <%= render 'shared/badge', color: 'yellow', label: t(".signature_qualifications.#{signature.qualification_label}") %>
+                  <% end %>
+
+                  <% if agp_mapping&.dig(:document_hash_matches) == true %>
+                    <%= render 'shared/badge', color: 'green', label: t('.agp_document_match') %>
+                  <% elsif agp_mapping&.dig(:evidence_record).present? %>
+                    <%= render 'shared/badge', color: 'yellow', label: t('.agp_document_mismatch') %>
+                  <% elsif signature.agpReference.present? %>
+                    <%= render 'shared/badge', color: 'blue', label: t('.agp_reference_detected') %>
                   <% end %>
 
                   <% if signature_validation_multiple_documents?(validation_result, @contract) && signature_documents.any? %>
@@ -91,6 +100,37 @@
                           <% end %>
                         </ul>
                       <% end %>
+                    </div>
+                  <% end %>
+
+                  <% if signature.agpReference.present? || signature.agpInstance.present? %>
+                    <div class="mb-3 pb-3 border-b border-gray-200">
+                      <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+                        <div class="text-gray-600"><%= t('.agp_reference') %>:</div>
+                        <div class="text-gray-900 break-all">
+                          <% if signature.agpReference.present? %>
+                            <%= link_to signature.agpReference, signature_evidence_verification_path(reference: signature.agpReference), class: "underline hover:text-gray-700", data: { turbo_frame: "_top" } %>
+                          <% else %>
+                            -
+                          <% end %>
+                        </div>
+
+                        <div class="text-gray-600"><%= t('.agp_instance') %>:</div>
+                        <div class="text-gray-900 break-all"><%= signature.agpInstance.presence || '-' %></div>
+
+                        <div class="text-gray-600"><%= t('.agp_mapping') %>:</div>
+                        <div class="text-gray-900">
+                          <% if agp_mapping&.dig(:document_hash_matches) == true %>
+                            <%= t('.agp_mapping_match') %>
+                          <% elsif agp_mapping&.dig(:evidence_record).present? %>
+                            <%= t('.agp_mapping_mismatch') %>
+                          <% elsif signature.agpReference.present? %>
+                            <%= t('.agp_mapping_missing') %>
+                          <% else %>
+                            -
+                          <% end %>
+                        </div>
+                      </div>
                     </div>
                   <% end %>
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_30_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_01_143000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -304,6 +304,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_120000) do
     t.string "email"
     t.string "federation_mode", default: "local", null: false
     t.string "locale", default: "sk", null: false
+    t.string "mobile_phone"
     t.string "name"
     t.integer "notification_status", default: 0, null: false
     t.bigint "portal_instance_id"
@@ -339,6 +340,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_120000) do
     t.index ["type"], name: "index_sessions_on_type"
   end
 
+  create_table "signature_evidence_records", force: :cascade do |t|
+    t.jsonb "canonical_payload", default: {}, null: false
+    t.bigint "contract_content_version_id"
+    t.datetime "created_at", null: false
+    t.datetime "locked_at"
+    t.string "manifest_sha256"
+    t.string "payload_sha256"
+    t.string "public_reference", null: false
+    t.bigint "session_id", null: false
+    t.text "signed_manifest"
+    t.bigint "signer_contract_id", null: false
+    t.string "state", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["contract_content_version_id"], name: "idx_on_contract_content_version_id_e898efe78b"
+    t.index ["public_reference"], name: "index_signature_evidence_records_on_public_reference", unique: true
+    t.index ["session_id"], name: "index_signature_evidence_records_on_session_id"
+    t.index ["signer_contract_id"], name: "index_signature_evidence_records_on_signer_contract_id"
+    t.index ["state"], name: "index_signature_evidence_records_on_state"
+    t.index ["uuid"], name: "index_signature_evidence_records_on_uuid", unique: true
+  end
+
   create_table "signature_field_preparations", force: :cascade do |t|
     t.bigint "contract_id", null: false
     t.datetime "created_at", null: false
@@ -356,6 +379,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_120000) do
     t.index ["field_identifier"], name: "index_signature_field_preparations_on_field_identifier", unique: true
     t.index ["recipient_id", "contract_id", "document_id"], name: "idx_signature_fields_on_recipient_contract_document", unique: true
     t.index ["recipient_id"], name: "index_signature_field_preparations_on_recipient_id"
+  end
+
+  create_table "signature_verifications", force: :cascade do |t|
+    t.integer "attempts_count", default: 0, null: false
+    t.string "channel", null: false
+    t.string "code_digest", null: false
+    t.datetime "created_at", null: false
+    t.string "destination_digest", null: false
+    t.datetime "expires_at"
+    t.string "last_request_ip"
+    t.string "last_user_agent"
+    t.string "provider_request_id"
+    t.datetime "sent_at"
+    t.bigint "session_id", null: false
+    t.string "state", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "verified_at"
+    t.index ["expires_at"], name: "index_signature_verifications_on_expires_at"
+    t.index ["session_id"], name: "index_signature_verifications_on_session_id"
+    t.index ["state"], name: "index_signature_verifications_on_state"
   end
 
   create_table "signer_contracts", force: :cascade do |t|
@@ -498,9 +541,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_120000) do
   add_foreign_key "recipients", "portal_instances"
   add_foreign_key "recipients", "users"
   add_foreign_key "sessions", "signer_contracts"
+  add_foreign_key "signature_evidence_records", "contract_content_versions"
+  add_foreign_key "signature_evidence_records", "sessions"
+  add_foreign_key "signature_evidence_records", "signer_contracts"
   add_foreign_key "signature_field_preparations", "contracts"
   add_foreign_key "signature_field_preparations", "documents"
   add_foreign_key "signature_field_preparations", "recipients"
+  add_foreign_key "signature_verifications", "sessions"
   add_foreign_key "signer_contracts", "contracts"
   add_foreign_key "signer_contracts", "signers"
   add_foreign_key "signers", "recipients"

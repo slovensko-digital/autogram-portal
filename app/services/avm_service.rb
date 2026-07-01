@@ -1,5 +1,8 @@
 class AvmService
-  AVM_BASE_URL = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital")
+  DEFAULT_INTERACTIVE_BASE_URL = "https://autogram.slovensko.digital".freeze
+  DEFAULT_DETACHED_SIGNING_BASE_URL = "http://localhost:7200".freeze
+
+  class Error < StandardError; end
 
   def initiate_signing(contract, signer_contract: nil)
     documents = contract.documents_to_sign_for(signer_contract: signer_contract)
@@ -63,7 +66,120 @@ class AvmService
     raise "Error communicating with AVM service: #{e.message}"
   end
 
+  def request_data_to_sign(contract, signer_contract: nil, signing_certificate:, signature_reference: nil, signature_instance: nil)
+    request_data_to_sign_from_request(
+      sign_request_body: build_sign_request_payload(
+        contract,
+        signer_contract: signer_contract,
+        signature_reference: signature_reference,
+        signature_instance: signature_instance
+      ),
+      signing_certificate: signing_certificate
+    )
+  end
+
+  def build_signed_document(contract, signer_contract: nil, data_to_sign_structure:, signed_data:, signature_reference: nil, signature_instance: nil)
+    build_signed_document_from_request(
+      sign_request_body: build_sign_request_payload(
+        contract,
+        signer_contract: signer_contract,
+        signature_reference: signature_reference,
+        signature_instance: signature_instance
+      ),
+      data_to_sign_structure: data_to_sign_structure,
+      signed_data: signed_data
+    )
+  end
+
+  def request_data_to_sign_from_request(sign_request_body:, signing_certificate:)
+    payload = {
+      originalSignRequestBody: sign_request_body,
+      signingCertificate: signing_certificate
+    }
+
+    response = call_avm_data_to_sign_api(payload)
+    raise Error, "Error communicating with AVM service: #{response.status}" unless response.success?
+
+    parse_avm_data_to_sign_response(response.body)
+  rescue StandardError => e
+    raise e if e.is_a?(Error)
+
+    raise Error, "Error communicating with AVM service: #{e.message}"
+  end
+
+  def build_signed_document_from_request(sign_request_body:, data_to_sign_structure:, signed_data:)
+    payload = {
+      originalSignRequestBody: sign_request_body,
+      dataToSignStructure: {
+        dataToSign: data_to_sign_structure.fetch(:data_to_sign),
+        signingTime: data_to_sign_structure.fetch(:signing_time),
+        signingCertificate: data_to_sign_structure.fetch(:signing_certificate)
+      },
+      signedData: signed_data
+    }
+
+    response = call_avm_build_signature_api(payload)
+    raise Error, "Error communicating with AVM service: #{response.status}" unless response.success?
+
+    parse_avm_build_signature_response(response.body)
+  rescue StandardError => e
+    raise e if e.is_a?(Error)
+
+    raise Error, "Error communicating with AVM service: #{e.message}"
+  end
+
+  def build_detached_sign_request_payload(filename:, content:, content_type:, level:, container: nil, packaging: nil, signature_reference: nil, signature_instance: nil)
+    parameters = {
+      level: level,
+      container: container,
+      packaging: packaging
+    }
+    parameters[:signatureReference] = signature_reference if signature_reference.present?
+    parameters[:signatureInstance] = signature_instance if signature_instance.present?
+
+    {
+      document: {
+        content: Base64.strict_encode64(content),
+        filename: filename
+      },
+      parameters: parameters.compact,
+      payloadMimeType: "#{content_type};base64"
+    }
+  end
+
   private
+
+  def build_sign_request_payload(contract, signer_contract: nil, signature_reference: nil, signature_instance: nil)
+    documents = contract.documents_to_sign_for(signer_contract: signer_contract)
+    document = documents.first
+    raise Error, "No document to sign" unless document&.blob&.attached?
+
+    file_content = Base64.strict_encode64(document.content)
+
+    parameters = {
+      level: "#{contract.signature_parameters.format}_#{contract.signature_parameters.level}",
+      container: contract.signature_parameters.container,
+      fsFormId: document.xdc_parameters&.fs_form_identifier,
+      autoLoadEform: true
+    }
+    if contract.signature_parameters.format == "XAdES" && contract.signature_parameters.container.present?
+      parameters[:packaging] = "DETACHED"
+    end
+    parameters[:signatureReference] = signature_reference if signature_reference.present?
+    parameters[:signatureInstance] = signature_instance if signature_instance.present?
+
+    visible_signature = avm_visible_signature(contract, signer_contract: signer_contract, documents: documents)
+    parameters[:visibleSignature] = visible_signature if visible_signature
+
+    {
+      document: {
+        content: file_content,
+        filename: document.filename
+      },
+      parameters: parameters,
+      payloadMimeType: document.content_type + ";base64"
+    }
+  end
 
   def avm_visible_signature(contract, signer_contract:, documents:)
     return unless signer_contract && documents.one?
@@ -93,7 +209,7 @@ class AvmService
   end
 
   def call_avm_initiate_api(payload, secret_key)
-    connection = Faraday.new(url: AVM_BASE_URL) do |faraday|
+    connection = Faraday.new(url: interactive_base_url) do |faraday|
       faraday.request :json
       faraday.response :json
       faraday.adapter Faraday.default_adapter
@@ -103,8 +219,30 @@ class AvmService
     connection.post("api/v1/documents?encryptionKey=#{secret_key}", payload)
   end
 
+  def call_avm_data_to_sign_api(payload)
+    connection = Faraday.new(url: detached_signing_base_url) do |faraday|
+      faraday.request :json
+      faraday.response :json
+      faraday.adapter Faraday.default_adapter
+      faraday.options.timeout = 30
+    end
+
+    connection.post("/datatosign", payload)
+  end
+
+  def call_avm_build_signature_api(payload)
+    connection = Faraday.new(url: detached_signing_base_url) do |faraday|
+      faraday.request :json
+      faraday.response :json
+      faraday.adapter Faraday.default_adapter
+      faraday.options.timeout = 30
+    end
+
+    connection.post("/build-signature", payload)
+  end
+
   def call_avm_status_api(document_identifier, if_modified_since, encryption_key)
-    connection = Faraday.new(url: AVM_BASE_URL) do |faraday|
+    connection = Faraday.new(url: interactive_base_url) do |faraday|
       faraday.response :json
       faraday.adapter Faraday.default_adapter
       faraday.options.timeout = 10
@@ -116,7 +254,7 @@ class AvmService
   end
 
   def call_avm_download_api(document_identifier, encryption_key)
-    connection = Faraday.new(url: AVM_BASE_URL) do |faraday|
+    connection = Faraday.new(url: interactive_base_url) do |faraday|
       faraday.response :json
       faraday.adapter Faraday.default_adapter
       faraday.options.timeout = 30
@@ -160,5 +298,32 @@ class AvmService
 
   rescue JSON::ParserError => e
     raise "Failed to parse AVM response: #{e.message}"
+  end
+
+  def parse_avm_data_to_sign_response(response_body)
+    data = response_body.is_a?(Hash) ? response_body : JSON.parse(response_body)
+
+    {
+      data_to_sign: data.fetch("dataToSign"),
+      signing_time: data.fetch("signingTime"),
+      signing_certificate: data.fetch("signingCertificate")
+    }
+  rescue KeyError, JSON::ParserError => e
+    raise Error, "Failed to parse AVM response: #{e.message}"
+  end
+
+  def parse_avm_build_signature_response(response_body)
+    data = response_body.is_a?(Hash) ? response_body : JSON.parse(response_body)
+    data.fetch("content")
+  rescue KeyError, JSON::ParserError => e
+    raise Error, "Failed to parse AVM response: #{e.message}"
+  end
+
+  def interactive_base_url
+    ENV["AVM_URL"].presence || DEFAULT_INTERACTIVE_BASE_URL
+  end
+
+  def detached_signing_base_url
+    ENV["AVM_DETACHED_URL"].presence || ENV["AUTOGRAM_SERVICE_URL"].presence || DEFAULT_DETACHED_SIGNING_BASE_URL
   end
 end

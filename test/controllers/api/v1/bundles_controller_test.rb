@@ -139,6 +139,95 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     assert_nil recipient.user
   end
 
+  test "api bundle creation accepts recipient mobile phone aliases" do
+    post "/api/v1/bundles",
+         params: {
+           id: SecureRandom.uuid,
+           contracts: [
+             {
+               id: SecureRandom.uuid,
+               allowedMethods: [ "ades" ],
+               documents: [
+                 {
+                   filename: "contract.txt",
+                   content: Base64.strict_encode64("Sample text content"),
+                   contentType: "text/plain;base64"
+                 }
+               ],
+               signatureParameters: {
+                 format: "XAdES",
+                 container: "ASiC_E"
+               }
+             }
+           ],
+           recipients: [
+             {
+               name: "API recipient",
+               email: "api.recipient@example.com",
+               mobilePhone: "00421 901 234 567"
+             },
+             {
+               name: "Phone alias recipient",
+               email: "phone.alias@example.com",
+               phoneNumber: "+421 902 222 333"
+             }
+           ]
+         },
+         headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :created
+
+    bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
+    assert_equal "+421901234567", bundle.recipients.visible.find_by!(email: "api.recipient@example.com").mobile_phone
+    assert_equal "+421902222333", bundle.recipients.visible.find_by!(email: "phone.alias@example.com").mobile_phone
+  end
+
+  test "public bundle sign route offers ades signing when recipient has a mobile phone" do
+    post "/api/v1/bundles",
+         params: {
+           id: SecureRandom.uuid,
+           publiclyVisible: true,
+           contracts: [
+             {
+               id: SecureRandom.uuid,
+               allowedMethods: [ "ades" ],
+               documents: [
+                 {
+                   filename: "contract.txt",
+                   content: Base64.strict_encode64("Sample text content"),
+                   contentType: "text/plain;base64"
+                 }
+               ],
+               signatureParameters: {
+                 format: "XAdES",
+                 container: "ASiC_E"
+               }
+             }
+           ],
+           recipients: [
+             {
+               name: "AdES recipient",
+               email: "ades.recipient@example.com",
+               mobilePhone: "+421901234567"
+             }
+           ]
+         },
+         headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :created
+
+    bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
+    contract = bundle.contracts.first
+    recipient = bundle.recipients.visible.find_by!(email: "ades.recipient@example.com")
+
+    get "/bundles/#{bundle.uuid}/sign", params: { recipient: recipient.uuid }
+
+    assert_response :success
+    assert_select "button[data-signing-method-target='continueButton']", count: 1
+    assert_select "a[data-signing-method-target='adesButton'][href='#{ades_contract_sessions_path(contract, recipient: recipient.uuid)}'][data-turbo-frame='_top']"
+    assert_includes response.body, I18n.t("contracts.signing_method_choice.ades_label")
+  end
+
   test "public bundle sign route loads embedded signature apps directly in no_onboarding mode" do
     post "/api/v1/bundles",
          params: {

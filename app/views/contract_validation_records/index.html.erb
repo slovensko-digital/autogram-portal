@@ -28,6 +28,7 @@
       <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="divide-y divide-gray-100">
           <% @contract_validation_records.each do |record| %>
+            <% agp_mapping = signature_validation_agp_mapping_for_record(record) %>
             <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
               <div class="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
                 <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -40,9 +41,25 @@
                   <% if record.signature_levels.any? %>
                     <span class="text-xs text-gray-400"><%= record.signature_levels.map { |level| t("signature_parameters.level.#{level.downcase}", default: level) }.join(', ') %></span>
                   <% end %>
+                  <% if agp_mapping&.dig(:document_hash_matches) == true %>
+                    <%= render 'shared/badge', color: 'green', label: t('shared.signature_validation.agp_document_match') %>
+                  <% elsif agp_mapping&.dig(:evidence_record).present? %>
+                    <%= render 'shared/badge', color: 'yellow', label: t('shared.signature_validation.agp_document_mismatch') %>
+                  <% elsif record.agp_reference.present? %>
+                    <%= render 'shared/badge', color: 'blue', label: t('shared.signature_validation.agp_reference_detected') %>
+                  <% end %>
                 </div>
                 <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-400 flex-wrap">
                   <span><%= t('.version_label') %>: <%= record.source_version_number %></span>
+                  <% if record.agp_reference.present? %>
+                    <span>
+                      <%= t('.agp_reference_label') %>:
+                      <%= link_to record.agp_reference, signature_evidence_verification_path(reference: record.agp_reference), class: "underline hover:text-gray-600" %>
+                    </span>
+                  <% end %>
+                  <% if record.agp_instance.present? %>
+                    <span><%= t('.agp_instance_label') %>: <%= record.agp_instance %></span>
+                  <% end %>
                   <span><%= t('.hash_label') %>: <%= record.document_hash.first(12) %>...</span>
                   <% if record.signer_names.any? %>
                     <span><%= t('.signers_label') %>: <%= record.signer_names.join(', ') %></span>

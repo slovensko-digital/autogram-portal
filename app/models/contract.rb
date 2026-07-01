@@ -25,7 +25,7 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Contract < ApplicationRecord
-  ValidationEntry = Struct.new(:label, :validation_result, keyword_init: true)
+  ValidationEntry = Struct.new(:label, :validation_result, :document_hash, keyword_init: true)
   PREPARED_SIGNATURE_FIELDS_ORIGIN = "prepared_signature_fields".freeze
   NON_FINALIZED_CONTENT_VERSION_ORIGINS = [ PREPARED_SIGNATURE_FIELDS_ORIGIN ].freeze
   MissingSignedDocument = Struct.new(:contract) do
@@ -58,7 +58,7 @@ class Contract < ApplicationRecord
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
   accepts_nested_attributes_for :signature_parameters
 
-  ALLOWED_METHODS = ENV.fetch("ALLOWED_METHODS", "qes").split(",").map(&:strip)
+  ALLOWED_METHODS = ENV.fetch("ALLOWED_METHODS", "qes,ades").split(",").map(&:strip)
   attribute :allowed_methods, default: [ "qes" ]
 
   validate :validate_allowed_methods
@@ -133,6 +133,14 @@ class Contract < ApplicationRecord
 
   def signed_document_attached?
     latest_finalized_content_version&.file&.attached? || false
+  end
+
+  def private_signature_evidence_records
+    SignatureEvidenceRecord
+      .where(session_id: sessions.select(:id))
+      .with_attached_private_evidence_package
+      .order(created_at: :desc)
+      .select { |record| record.private_evidence_package.attached? }
   end
 
   def source_document_attached?
@@ -321,13 +329,19 @@ class Contract < ApplicationRecord
 
   def validation_results
     if source_document_attached?
+      content_version = latest_source_content_version
       [ ValidationEntry.new(
-          label: latest_source_content_version.filename.to_s,
-          validation_result: latest_source_content_version.validation_result
+          label: content_version.filename.to_s,
+          validation_result: content_version.validation_result,
+          document_hash: Digest::SHA256.hexdigest(content_version.content)
         ) ]
     else
       documents.order(:id).map do |document|
-        ValidationEntry.new(label: document.filename.to_s, validation_result: document.validation_result)
+        ValidationEntry.new(
+          label: document.filename.to_s,
+          validation_result: document.validation_result,
+          document_hash: Digest::SHA256.hexdigest(document.content)
+        )
       end
     end
   end

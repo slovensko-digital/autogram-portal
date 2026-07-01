@@ -78,6 +78,33 @@ class AutogramServiceTest < ActiveSupport::TestCase
     assert_equal "2030-06-02T12:26:52 +0000", signature.timestampInfo[:timestamps].first.notAfter
   end
 
+  test "parse_validation_response extracts AGP reference metadata" do
+    response = {
+      "signatures" => [
+        {
+          "validationResult" => "TOTAL_PASSED",
+          "level" => "PAdES_BASELINE_B",
+          "claimedSigningTime" => "2026-06-02T12:25:52 +0000",
+          "agpReference" => "PUBLIC-REF-123",
+          "agpInstance" => "agp.example.test",
+          "signingCertificate" => {
+            "qualification" => "QESIG",
+            "issuerDN" => "CN=Issuer",
+            "subjectDN" => "CN=Autogram Test"
+          },
+          "areQualifiedTimestamps" => false,
+          "timestamps" => []
+        }
+      ]
+    }
+
+    validation_result = AutogramService.new.send(:parse_validation_response, response)
+    signature = validation_result.signatures.first
+
+    assert_equal "PUBLIC-REF-123", signature.agpReference
+    assert_equal "agp.example.test", signature.agpInstance
+  end
+
   class AutogramValidationResultTest < ActiveSupport::TestCase
     test "qualified? returns true for valid qualified signature" do
       signature = AutogramService::ValidationSignature.new(

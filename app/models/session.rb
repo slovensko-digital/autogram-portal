@@ -115,6 +115,10 @@ class Session < ApplicationRecord
     is_a?(PodpisujSession)
   end
 
+  def ades_evidence?
+    is_a?(AdesEvidenceSession)
+  end
+
   def self.old_card?(qscd)
     return false unless qscd.present?
 

@@ -1,4 +1,5 @@
 <%# locals: (contract:, default_collapsed: true) %>
+<% default_collapsed = local_assigns.fetch(:default_collapsed, true) %>
 
 <div class="mb-6 space-y-4 w-full">
   <% if contract.source_document_attached? %>
@@ -28,7 +29,9 @@
 
       <div data-toggle-target="content" class="<%= 'hidden ' if default_collapsed %>mt-2">
         <div class="rounded-lg border border-gray-200 bg-white p-2">
-          <iframe src="<%= rails_blob_path(content_version.file, disposition: 'inline') %>#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+          <iframe <%= 'src="' + rails_blob_path(content_version.file, disposition: 'inline') + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH"' unless default_collapsed %>
+                  data-toggle-target="iframe"
+                  data-src="<%= rails_blob_path(content_version.file, disposition: 'inline') %>#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
                   title="<%= content_version.filename %>"
                   class="h-[720px] w-full rounded border-0"></iframe>
         </div>

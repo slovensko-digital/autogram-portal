@@ -23,6 +23,7 @@ class ContractContentVersion < ApplicationRecord
   READ_RETRY_DELAY = 0.05
 
   belongs_to :contract
+  has_one :contract_validation_record, dependent: :nullify
   has_one_attached :file
 
   validates :version_number, presence: true, uniqueness: { scope: :contract_id }

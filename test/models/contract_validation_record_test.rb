@@ -106,6 +106,31 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     assert_equal contract.uuid, record.source_contract_uuid
   end
 
+  test "capture stores AGP reference metadata in signature snapshots" do
+    contract = create_contract(user: users(:one))
+    version = contract.add_signed_content_version!(
+      content: "signed-pdf-content",
+      filename: "contract-signed.pdf",
+      content_type: "application/pdf",
+      origin: "uploaded_signed"
+    )
+
+    record = ContractValidationRecord.capture!(
+      contract: contract,
+      contract_content_version: version,
+      validation_result: validation_result(
+        certificate_not_after: "2028-06-02T12:25:52 +0000",
+        agp_reference: "PUBLIC-REF-123",
+        agp_instance: "agp.example.test"
+      ),
+      signed_content: "signed-pdf-content",
+      filename: "contract-signed.pdf"
+    )
+
+    assert_equal "PUBLIC-REF-123", record.validation_details.dig("signatures", 0, "agp_reference")
+    assert_equal "agp.example.test", record.validation_details.dig("signatures", 0, "agp_instance")
+  end
+
   test "latest_per_contract returns only the newest record for each contract" do
     contract = create_contract(user: users(:one))
     old_version = contract.add_signed_content_version!(
@@ -174,7 +199,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     )
   end
 
-  def validation_result(certificate_not_after:, timestamps: [])
+  def validation_result(certificate_not_after:, timestamps: [], agp_reference: nil, agp_instance: nil)
     AutogramService::ValidationResult.new(
       hasSignatures: true,
       signatures: [
@@ -190,6 +215,8 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
             qualification: "QESIG",
             notAfter: certificate_not_after
           },
+          agpReference: agp_reference,
+          agpInstance: agp_instance,
           timestampInfo: {
             count: timestamps.length,
             qualified: timestamps.any?(&:qualified?),

@@ -147,7 +147,38 @@ module ApplicationHelper
     nil
   end
 
+  def signature_validation_agp_mapping(signature, validation_entry = nil)
+    return unless signature.agpReference.present?
+
+    signature_validation_agp_reference_mapping(signature.agpReference, validation_entry&.document_hash)
+  end
+
+  def signature_validation_agp_mapping_for_record(record)
+    return unless record.agp_reference.present?
+
+    signature_validation_agp_reference_mapping(record.agp_reference, record.document_hash)
+  end
+
   private
+
+  def signature_validation_agp_reference_mapping(agp_reference, document_hash)
+    return if agp_reference.blank?
+
+    @signature_validation_agp_mapping_cache ||= {}
+    cache_key = [ agp_reference, document_hash ]
+    @signature_validation_agp_mapping_cache[cache_key] ||= begin
+      evidence_record = SignatureEvidenceRecord
+        .includes(:session, contract_content_version: [ :contract, :contract_validation_record ])
+        .find_by(public_reference: agp_reference)
+
+      expected_document_hash = signature_validation_evidence_document_hash(evidence_record)
+
+      {
+        evidence_record: evidence_record,
+        document_hash_matches: expected_document_hash.present? && document_hash.present? ? expected_document_hash == document_hash : nil
+      }
+    end
+  end
 
   def signature_validation_contract_documents(contract)
     Array(contract&.documents).map { |document| signature_validation_object_name(document.filename) }.compact_blank.uniq
@@ -158,5 +189,19 @@ module ApplicationHelper
     return if value.blank?
 
     value.split(/[\\\/]/).last
+  end
+
+  def signature_validation_evidence_document_hash(evidence_record)
+    return if evidence_record.blank?
+
+    stored_validation_record = evidence_record.contract_content_version&.contract_validation_record
+    return stored_validation_record.document_hash if stored_validation_record.present?
+
+    content_version = evidence_record.contract_content_version
+    return if content_version.blank?
+
+    Digest::SHA256.hexdigest(content_version.content)
+  rescue StandardError
+    nil
   end
 end

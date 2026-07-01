@@ -7,6 +7,7 @@
 #  email                   :string
 #  federation_mode         :string           default("local"), not null
 #  locale                  :string           default("sk"), not null
+#  mobile_phone            :string
 #  name                    :string
 #  notification_status     :integer          default("not_notified"), not null
 #  remote_claimed_at       :datetime
@@ -38,6 +39,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Recipient < ApplicationRecord
+  MOBILE_PHONE_FORMAT = /\A\+[1-9]\d{7,14}\z/
+
   attr_accessor :portal_instance_uuid
 
   has_one :recipient_signer, dependent: :destroy, class_name: "RecipientSigner", foreign_key: :recipient_id
@@ -49,6 +52,8 @@ class Recipient < ApplicationRecord
   belongs_to :bundle
   belongs_to :user, optional: true
   belongs_to :portal_instance, optional: true
+
+  encrypts :mobile_phone
 
   enum :federation_mode, { local: "local", federated: "federated" }, scopes: false
   enum :notification_status, { not_notified: 0, sending: 1, notified: 2 }, scopes: false
@@ -65,6 +70,7 @@ class Recipient < ApplicationRecord
   }
 
   before_validation :ensure_uuid, on: :create
+  before_validation :normalize_mobile_phone
   validates :uuid, presence: true, uniqueness: true
   validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :email,
@@ -73,6 +79,9 @@ class Recipient < ApplicationRecord
   validates :email,
     uniqueness: { scope: :bundle_id, conditions: -> { where(withdrawn_at: nil) } },
     format: { with: URI::MailTo::EMAIL_REGEXP },
+    allow_blank: true
+  validates :mobile_phone,
+    format: { with: MOBILE_PHONE_FORMAT, message: "must be in E.164 format" },
     allow_blank: true
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
   validate :portal_instance_reference_must_exist
@@ -108,6 +117,16 @@ class Recipient < ApplicationRecord
 
   def display_name
     name.presence || user&.display_name || email
+  end
+
+  def mobile_phone?
+    mobile_phone.present?
+  end
+
+  def masked_mobile_phone
+    return if mobile_phone.blank?
+
+    "#{mobile_phone.first(4)}***#{mobile_phone.last(3)}"
   end
 
   def active?
@@ -200,6 +219,14 @@ class Recipient < ApplicationRecord
   end
 
   private
+
+  def normalize_mobile_phone
+    normalized_phone = mobile_phone.to_s.strip
+    normalized_phone = normalized_phone.gsub(/[\s\-()]/, "")
+    normalized_phone = "+#{normalized_phone.delete_prefix('00')}" if normalized_phone.start_with?("00")
+
+    self.mobile_phone = normalized_phone.presence
+  end
 
   def assign_identity
     RecipientResolver.assign_identity(self)

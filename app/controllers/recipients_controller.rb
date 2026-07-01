@@ -42,6 +42,6 @@ class RecipientsController < ApplicationController
   end
 
   def recipient_params
-    params.require(:recipient).permit(:email, :portal_instance_uuid)
+    params.require(:recipient).permit(:email, :mobile_phone, :portal_instance_uuid)
   end
 end

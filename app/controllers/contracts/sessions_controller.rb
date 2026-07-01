@@ -3,9 +3,10 @@ class Contracts::SessionsController < ApplicationController
 
   before_action :set_contract
   before_action :set_session, except: [ :create ]
-  before_action :set_signer_contract, only: [ :create, :show ]
+  before_action :set_signer_contract, only: [ :create, :show, :request_verification, :verify_verification, :complete_signing ]
   before_action :authorize_session_access!, only: [ :parameters, :download, :upload ]
   before_action :authorize_session_destroy!, only: [ :destroy ]
+  before_action :ensure_session_matches_signer_contract!, only: [ :request_verification, :verify_verification, :complete_signing ]
   before_action :redirect_if_completed, only: [ :show ]
   skip_before_action :verify_authenticity_token, only: [ :upload, :get_webhook, :standard_webhook ]
   before_action :allow_iframe
@@ -14,6 +15,8 @@ class Contracts::SessionsController < ApplicationController
     session_type = params[:type] || params[:application]
 
     @session = case session_type
+    when "ades"
+      create_ades_session
     when "eidentita"
       create_eidentita_session
     when "avm"
@@ -26,7 +29,7 @@ class Contracts::SessionsController < ApplicationController
       return render plain: "Invalid session type", status: :bad_request
     end
 
-    render @session
+    render :show
   rescue SessionCreationError, ActiveRecord::RecordInvalid => e
     Rails.logger.warn("Failed to create signing session for contract #{@contract.uuid}: #{e.message}")
     @session_error_message = e.message
@@ -34,6 +37,53 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def show
+  end
+
+  def request_verification
+    return head :not_found unless @session.ades_evidence?
+
+    SignatureVerificationService.new.request_code!(
+      session: @session,
+      ip_address: request.remote_ip,
+      user_agent: request.user_agent
+    )
+
+    render :show
+  rescue SignatureVerificationService::Error => e
+    @session.update!(error_message: e.message)
+    render :show, status: :unprocessable_entity
+  end
+
+  def verify_verification
+    return head :not_found unless @session.ades_evidence?
+
+    SignatureVerificationService.new.verify_code!(
+      session: @session,
+      code: params[:verification_code],
+      ip_address: request.remote_ip,
+      user_agent: request.user_agent
+    )
+
+    render :show
+  rescue SignatureVerificationService::Error => e
+    @session.update!(error_message: e.message)
+    render :show, status: :unprocessable_entity
+  end
+
+  def complete_signing
+    return head :not_found unless @session.ades_evidence?
+
+    AutogramEnvironment.ades_signing_service.sign!(
+      session: @session,
+      ip_address: request.remote_ip,
+      user_agent: request.user_agent,
+      app_host: request.host
+    )
+
+    render :show
+  rescue AdesServerSigningService::Error => e
+    @session.update!(error_message: e.message)
+    render :show, status: :unprocessable_entity
   end
 
   def destroy
@@ -110,6 +160,10 @@ class Contracts::SessionsController < ApplicationController
     @session = @contract.sessions.find(params[:id])
   end
 
+  def ensure_session_matches_signer_contract!
+    head :forbidden unless @session.signer_contract == @signer_contract
+  end
+
   def set_signer_contract
     if params[:recipient]
       @recipient = @contract.recipients.active.find_by_uuid(params[:recipient])
@@ -176,6 +230,23 @@ class Contracts::SessionsController < ApplicationController
       type: "EidentitaSession",
       signing_started_at: result[:signing_started_at],
       options: session_view_options
+    ))
+  end
+
+  def create_ades_session
+    existing = @signer_contract&.sessions&.pending&.where(type: "AdesEvidenceSession")&.first
+    return persist_session_view_options(existing) if existing
+
+    unless AdesEvidenceSession.available?(@contract, recipient: @recipient)
+      raise SessionCreationError, t("contracts.sessions.ades_evidence.missing_phone")
+    end
+
+    persist_session_view_options(@signer_contract.sessions.create!(
+      type: "AdesEvidenceSession",
+      signing_started_at: Time.current,
+      options: session_view_options.merge(
+        "verification_channel" => "sms"
+      )
     ))
   end
 
