@@ -29,6 +29,7 @@ class PodpisujSession < Session
 
   def self.available?(qscd, contract)
     return false if contract.documents.count > 1
+    return false if contract.prepared_signature_fields_source_attached?
     contract.signature_parameters.level == "BASELINE_B"
   end
 end

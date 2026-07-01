@@ -2,22 +2,28 @@ class AvmService
   AVM_BASE_URL = ENV.fetch("AVM_URL", "https://autogram.slovensko.digital")
 
   def initiate_signing(contract, signer_contract: nil)
-    document = contract.documents_to_sign_for(signer_contract: signer_contract).first
+    documents = contract.documents_to_sign_for(signer_contract: signer_contract)
+    document = documents.first
     return { error: "No document to sign" } unless document&.blob&.attached?
 
     file_content = Base64.strict_encode64(document.content)
+
+    parameters = {
+      level: "#{contract.signature_parameters.format}_#{contract.signature_parameters.level}",
+      container: contract.signature_parameters.container,
+      fsFormId: document.xdc_parameters&.fs_form_identifier,
+      autoLoadEform: true
+    }
+
+    visible_signature = avm_visible_signature(contract, signer_contract: signer_contract, documents: documents)
+    parameters[:visibleSignature] = visible_signature if visible_signature
 
     payload = {
       document: {
         content: file_content,
         filename: document.filename
       },
-      parameters: {
-        level: "#{contract.signature_parameters.format}_#{contract.signature_parameters.level}",
-        container: contract.signature_parameters.container,
-        fsFormId: document.xdc_parameters&.fs_form_identifier,
-        autoLoadEform: true
-      },
+      parameters: parameters,
       payloadMimeType: document.content_type + ";base64"
     }
 
@@ -58,6 +64,32 @@ class AvmService
   end
 
   private
+
+  def avm_visible_signature(contract, signer_contract:, documents:)
+    return unless signer_contract && documents.one?
+
+    recipient = signer_contract.recipient
+    prepared_signature_field = contract.prepared_signature_field_preparation_for(recipient: recipient)
+    return unless prepared_signature_field.present?
+
+    appearance = signer_contract.latest_signature_field_appearance_for(prepared_signature_field.document)
+    return unless appearance.present?
+
+    visible_signature = {
+      fieldId: prepared_signature_field.field_identifier,
+      text: VisualStamp.pades_visible_signature_text(appearance.custom_text)
+    }
+
+    if appearance.image.attached?
+      visible_signature[:image] = {
+        filename: appearance.image.filename.to_s,
+        content: Base64.strict_encode64(appearance.image.download),
+        mimeType: "#{appearance.image.blob.content_type};base64"
+      }
+    end
+
+    visible_signature
+  end
 
   def call_avm_initiate_api(payload, secret_key)
     connection = Faraday.new(url: AVM_BASE_URL) do |faraday|
