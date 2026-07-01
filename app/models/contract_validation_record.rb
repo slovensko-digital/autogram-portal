@@ -162,6 +162,14 @@ class ContractValidationRecord < ApplicationRecord
     Array(validation_details["signatures"]).filter_map { |signature| signature["signer_name"].presence }.uniq
   end
 
+  def agp_reference
+    Array(validation_details["signatures"]).filter_map { |signature| signature["agp_reference"].presence }.first
+  end
+
+  def agp_instance
+    Array(validation_details["signatures"]).filter_map { |signature| signature["agp_instance"].presence }.first
+  end
+
   class << self
     private
 
@@ -177,6 +185,8 @@ class ContractValidationRecord < ApplicationRecord
           "signature_level" => signature.signatureLevel,
           "validation_result" => signature.validationResult,
           "valid" => signature.valid,
+          "agp_reference" => signature.agpReference,
+          "agp_instance" => signature.agpInstance,
           "certificate" => {
             "subject" => signature.certificateInfo[:subject],
             "issuer" => signature.certificateInfo[:issuer],

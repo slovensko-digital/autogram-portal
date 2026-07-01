@@ -338,6 +338,80 @@ class ContractsValidationTest < ActionController::TestCase
     assert_select "li", text: "PdfDocument.pdf", count: 1
   end
 
+  test "validate maps AGP reference to local evidence record for uploaded signed documents" do
+    contract = Contract.new(
+      allowed_methods: [ "qes" ],
+      signature_parameters_attributes: {
+        level: "BASELINE_B",
+        format: "XAdES"
+      }
+    )
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new("contract-a.txt content"),
+      filename: "contract-a.txt",
+      content_type: "text/plain"
+    )
+    contract.documents.build(blob: blob)
+    contract.save!
+    contract.add_signed_content_version!(
+      content: "signed container content",
+      filename: "contract-signed.asice",
+      content_type: "application/vnd.etsi.asic-e+zip",
+      origin: "uploaded_signed"
+    )
+    create_signature_evidence_record_for(
+      public_reference: "PUBLIC-REF-123",
+      signed_content: "signed container content"
+    )
+
+    service = RecordingValidationService.new(
+      "contract-signed.asice" => AutogramService::ValidationResult.new(
+        hasSignatures: true,
+        signatures: [
+          AutogramService::ValidationSignature.new(
+            signerName: "Autogram Test",
+            signingTime: Time.utc(2026, 6, 5, 10, 43, 47),
+            signatureLevel: "BASELINE_T",
+            validationResult: "TOTAL_PASSED",
+            valid: true,
+            agpReference: "PUBLIC-REF-123",
+            agpInstance: "agp.example.test",
+            certificateInfo: {
+              subject: "CN=Autogram Test",
+              issuer: "CN=Test Issuer",
+              qualification: "QESIG"
+            },
+            signedObjects: [
+              { filename: "contract-a.txt" }
+            ],
+            unsignedObjects: [],
+            timestampInfo: nil
+          )
+        ],
+        documentInfo: {
+          containerType: "ASiC_E",
+          signatureForm: "XAdES",
+          signedObjectsCount: 1,
+          unsignedObjectsCount: 0,
+          signedObjects: [
+            { filename: "contract-a.txt" }
+          ],
+          unsignedObjects: []
+        }
+      )
+    )
+
+    with_autogram_service(service) do
+      get :validate, params: { id: contract.uuid }
+    end
+
+    assert_response :success
+    assert_includes response.body, "PUBLIC-REF-123"
+    assert_includes response.body, "agp.example.test"
+    assert_includes response.body, I18n.t("shared.signature_validation.agp_document_match")
+    assert_includes response.body, I18n.t("shared.signature_validation.agp_mapping_match")
+  end
+
   private
 
   def create_contract_with_documents(document_names:, signed_document_name: nil)
@@ -399,5 +473,47 @@ class ContractsValidationTest < ActionController::TestCase
         AutogramService::ValidationResult.new(hasSignatures: false)
       end
     end
+  end
+
+  def create_signature_evidence_record_for(public_reference:, signed_content:)
+    source_contract = Contract.create!(
+      allowed_methods: [ "qes" ],
+      documents_attributes: [
+        {
+          blob: ActiveStorage::Blob.create_and_upload!(
+            io: StringIO.new("original content"),
+            filename: "source-document.txt",
+            content_type: "text/plain"
+          )
+        }
+      ],
+      signature_parameters_attributes: {
+        level: "BASELINE_B",
+        format: "XAdES"
+      }
+    )
+    version = source_contract.add_signed_content_version!(
+      content: signed_content,
+      filename: "source-signed.asice",
+      content_type: "application/vnd.etsi.asic-e+zip",
+      origin: "signing"
+    )
+    bundle = Bundle.create!(author: users(:one), contracts: [ source_contract ])
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+    signer_contract = recipient.signer_contracts.find_by!(contract: source_contract)
+    session = signer_contract.sessions.create!(
+      type: "AdesEvidenceSession",
+      signing_started_at: Time.current,
+      options: { "verification_channel" => "sms" }
+    )
+
+    SignatureEvidenceRecord.create!(
+      session: session,
+      signer_contract: signer_contract,
+      contract_content_version: version,
+      public_reference: public_reference,
+      state: "signed",
+      canonical_payload: {}
+    )
   end
 end

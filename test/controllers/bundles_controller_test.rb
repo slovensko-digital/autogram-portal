@@ -58,6 +58,9 @@ class BundlesControllerTest < ActionController::TestCase
     end
 
     assert_response :success
+    signed_preview_src = rails_blob_path(contract.latest_source_content_version.file, disposition: "inline")
+    assert_select "iframe[src='#{signed_preview_src}#toolbar=0&navpanes=0&scrollbar=0&view=FitH']", count: 0
+    assert_includes response.body, "data-src=\"#{signed_preview_src}#toolbar=0&navpanes=0&scrollbar=0&view=FitH\""
     assert_select "form[action='#{extend_signatures_contract_path(contract)}']"
     assert_select "input[name='target_level'][value='LTA']", count: 1
     assert_select "input[name='target_level'][value='T']", count: 0
@@ -86,6 +89,38 @@ class BundlesControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select "a[href='#{contract_signature_field_preparations_path(contract)}']"
+  end
+
+  test "bundle show offers private evidence download for signed contract with evidence package" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1, signed: true)
+    contract = bundle.contracts.first
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en", mobile_phone: "+421901234567")
+    signer_contract = recipient.recipient_signer.signer_contracts.find_by!(contract: contract)
+    session = signer_contract.sessions.create!(
+      type: "AdesEvidenceSession",
+      signing_started_at: Time.current,
+      status: :signed,
+      options: { "verification_channel" => "sms" }
+    )
+    evidence_record = session.create_signature_evidence_record!(
+      signer_contract: signer_contract,
+      state: "signed",
+      contract_content_version: contract.latest_content_version,
+      canonical_payload: { "verification_channel" => "sms", "events" => [] }
+    )
+    evidence_record.attach_private_evidence_package!("signed-evidence-asice")
+
+    contracts_controller = ContractsController.new
+    author = @author
+    contracts_controller.singleton_class.define_method(:current_user) { author }
+    contracts_controller.singleton_class.define_method(:user_signed_in?) { true }
+    @controller = contracts_controller
+
+    get :show_bundle, params: { id: contract.uuid }
+
+    assert_response :success
+    assert_select "a[href='#{download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)}']", count: 1
+    assert_includes response.body, I18n.t("contracts.show_bundle.private_evidence_download_button")
   end
 
   private

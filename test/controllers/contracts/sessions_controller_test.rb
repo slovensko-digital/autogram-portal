@@ -67,6 +67,96 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "true", contract.sessions.order(:id).last.options["iframe"]
   end
 
+  test "create stores iframe mode on ades evidence sessions" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient
+
+    get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid, iframe: "true" }
+
+    assert_response :success
+
+    session = contract.sessions.order(:id).last
+    assert_instance_of AdesEvidenceSession, session
+    assert_equal "true", session.options["iframe"]
+    assert_equal "sms", session.verification_channel
+  end
+
+  test "ades evidence session create renders full session page on direct visit" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient
+
+    get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid }
+
+    assert_response :success
+    assert_select "html"
+    assert_select "head title", /Autogram Portal/
+    assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}"
+  end
+
+  test "ades evidence session creation renders inline error when recipient phone is missing" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient(mobile_phone: nil)
+
+    get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid, embedded: true }
+
+    assert_response :unprocessable_entity
+    assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}"
+    assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.missing_phone")
+  end
+
+  test "ades evidence session can request verification code" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient
+    session = create_ades_session_for(contract: contract, recipient: recipient)
+    sms_provider = fake_sms_provider
+
+    with_sms_provider(sms_provider) do
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/request_verification", params: { recipient: recipient.uuid }
+    end
+
+    assert_response :success
+    assert session.reload.signature_verification.sent?
+    assert_equal "requested", session.signature_evidence_record.reload.state
+    assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.sms_sent_title")
+  end
+
+  test "ades evidence session verifies submitted code" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient
+    session = create_ades_session_for(contract: contract, recipient: recipient)
+    sms_provider = fake_sms_provider
+
+    with_sms_provider(sms_provider) do
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/request_verification", params: { recipient: recipient.uuid }
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/verify_verification", params: { recipient: recipient.uuid, verification_code: "000000" }
+    end
+
+    assert_response :success
+    assert session.reload.signature_verification.verified?
+    assert_equal "verified", session.signature_evidence_record.reload.state
+    assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.verified_title")
+  end
+
+  test "ades evidence session can complete server-side signing after verification" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient
+    session = create_ades_session_for(contract: contract, recipient: recipient)
+    sms_provider = fake_sms_provider
+    fake_signing_service = Class.new do
+      def sign!(session:, ip_address:, user_agent:, app_host: nil)
+        session.ensure_signature_evidence_record!.update!(state: "signed")
+        session.signed!
+      end
+    end.new
+
+    with_sms_provider(sms_provider) do
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/request_verification", params: { recipient: recipient.uuid }
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/verify_verification", params: { recipient: recipient.uuid, verification_code: "000000" }
+    end
+
+    with_ades_signing_service(fake_signing_service) do
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/complete_signing", params: { recipient: recipient.uuid }
+    end
+
+    assert_response :success
+    assert session.reload.signed?
+    assert_includes response.body, I18n.t("contracts.sessions.signed.title")
+  end
+
   test "parameters include visible signature text payload for prepared signature fields" do
     contract, recipient = create_bundle_contract_with_prepared_signature_field
     contract.add_signed_content_version!(
@@ -334,6 +424,26 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     job_singleton.send(:remove_method, :__original_perform_later)
   end
 
+  def with_sms_provider(fake_provider)
+    environment_singleton = AutogramEnvironment.singleton_class
+    original_sms_provider = AutogramEnvironment.method(:sms_provider)
+    environment_singleton.define_method(:sms_provider) { fake_provider }
+
+    yield
+  ensure
+    environment_singleton.define_method(:sms_provider) { original_sms_provider.call }
+  end
+
+  def with_ades_signing_service(fake_service)
+    environment_singleton = AutogramEnvironment.singleton_class
+    original_ades_signing_service = AutogramEnvironment.method(:ades_signing_service)
+    environment_singleton.define_method(:ades_signing_service) { fake_service }
+
+    yield
+  ensure
+    environment_singleton.define_method(:ades_signing_service) { original_ades_signing_service.call }
+  end
+
   def create_contract_with_session
     contract = create_contract_without_session
 
@@ -404,5 +514,37 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     )
 
     [ contract.reload, recipient.reload ]
+  end
+
+  def create_bundle_contract_with_mobile_recipient(mobile_phone: "+421901234567")
+    contract = create_contract_without_session
+    contract.update!(allowed_methods: [ "ades" ])
+    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(
+      email: "recipient-#{SecureRandom.hex(4)}@example.com",
+      locale: "en",
+      mobile_phone: mobile_phone
+    )
+
+    [ contract.reload, recipient.reload ]
+  end
+
+  def create_ades_session_for(contract:, recipient:)
+    recipient.recipient_signer.signer_contracts.find_by!(contract: contract).sessions.create!(
+      type: "AdesEvidenceSession",
+      signing_started_at: Time.current,
+      options: { "verification_channel" => "sms" }
+    )
+  end
+
+  def fake_sms_provider
+    Class.new do
+      attr_reader :last_code
+
+      def deliver_code(phone_number:, code:, context: {})
+        @last_code = code
+        "req-#{SecureRandom.hex(4)}"
+      end
+    end.new
   end
 end

@@ -1,6 +1,23 @@
 require "test_helper"
 
 class AvmServiceTest < ActiveSupport::TestCase
+  test "detached signing base url falls back to autogram service url" do
+    service = AvmService.new
+
+    with_env("AUTOGRAM_SERVICE_URL" => "http://127.0.0.1:7200", "AVM_DETACHED_URL" => nil, "AVM_URL" => nil) do
+      assert_equal "http://127.0.0.1:7200", service.send(:detached_signing_base_url)
+      assert_equal "https://autogram.slovensko.digital", service.send(:interactive_base_url)
+    end
+  end
+
+  test "detached signing base url prefers dedicated env override" do
+    service = AvmService.new
+
+    with_env("AUTOGRAM_SERVICE_URL" => "http://127.0.0.1:7200", "AVM_DETACHED_URL" => "https://detached.example.test") do
+      assert_equal "https://detached.example.test", service.send(:detached_signing_base_url)
+    end
+  end
+
   test "initiate_signing includes visible signature text payload for text prepared signature fields" do
     contract, recipient = create_bundle_contract_with_prepared_signature_field
     signer_contract = recipient.signer_contracts.find_by!(contract: contract)
@@ -64,6 +81,55 @@ class AvmServiceTest < ActiveSupport::TestCase
     assert_nil payload[:parameters][:visibleSignature]
   end
 
+  test "detached signing payload includes public signature reference" do
+    contract = Contract.create!(
+      documents_attributes: [ { blob: pdf_blob("sample.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES" }
+    )
+    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+    signer_contract = recipient.signer_contracts.find_by!(contract: contract)
+    service = AvmService.new
+    captured = []
+
+    service.define_singleton_method(:call_avm_data_to_sign_api) do |payload|
+      captured << payload
+      Struct.new(:success?, :body).new(true, {
+        "dataToSign" => Base64.strict_encode64("payload"),
+        "signingTime" => 1_783_000_000_000,
+        "signingCertificate" => "cert"
+      })
+    end
+
+    service.define_singleton_method(:call_avm_build_signature_api) do |payload|
+      captured << payload
+      Struct.new(:success?, :body).new(true, { "content" => Base64.strict_encode64("signed") })
+    end
+
+    data_to_sign = service.request_data_to_sign(
+      contract,
+      signer_contract: signer_contract,
+      signing_certificate: "encoded-cert",
+      signature_reference: "PUBLIC-REF-123",
+      signature_instance: "agp.example.test"
+    )
+    service.build_signed_document(
+      contract,
+      signer_contract: signer_contract,
+      data_to_sign_structure: data_to_sign,
+      signed_data: "signed-data",
+      signature_reference: "PUBLIC-REF-123",
+      signature_instance: "agp.example.test"
+    )
+
+    assert_equal "PUBLIC-REF-123", captured.first.dig(:originalSignRequestBody, :parameters, :signatureReference)
+    assert_equal "PUBLIC-REF-123", captured.last.dig(:originalSignRequestBody, :parameters, :signatureReference)
+    assert_equal "agp.example.test", captured.first.dig(:originalSignRequestBody, :parameters, :signatureInstance)
+    assert_equal "agp.example.test", captured.last.dig(:originalSignRequestBody, :parameters, :signatureInstance)
+    assert_equal "DETACHED", captured.first.dig(:originalSignRequestBody, :parameters, :packaging)
+    assert_equal "DETACHED", captured.last.dig(:originalSignRequestBody, :parameters, :packaging)
+  end
+
   private
 
   def capture_initiate_payload(contract, signer_contract)
@@ -111,5 +177,19 @@ class AvmServiceTest < ActiveSupport::TestCase
       filename: filename,
       content_type: "application/pdf"
     )
+  end
+
+  def with_env(overrides)
+    original_values = overrides.transform_values { |_,| nil }
+    overrides.each_key { |key| original_values[key] = ENV[key] }
+    overrides.each do |key, value|
+      value.nil? ? ENV.delete(key) : ENV[key] = value
+    end
+
+    yield
+  ensure
+    original_values.each do |key, value|
+      value.nil? ? ENV.delete(key) : ENV[key] = value
+    end
   end
 end

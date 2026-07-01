@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="toggle"
 export default class extends Controller {
-  static targets = ["content", "icon", "textExpanded", "textCollapsed"]
+  static targets = ["content", "icon", "textExpanded", "textCollapsed", "iframe"]
   static values = {
     collapsed: { type: Boolean, default: false }
   }
@@ -10,6 +10,8 @@ export default class extends Controller {
   connect() {
     if (this.collapsedValue) {
       this.hide()
+    } else {
+      this.loadDeferredIframe()
     }
   }
 
@@ -24,6 +26,7 @@ export default class extends Controller {
 
   show() {
     this.contentTarget.classList.remove("hidden")
+    this.loadDeferredIframe()
     this.iconTarget.classList.add('rotate-180')
     this.textExpandedTarget.classList.remove("hidden")
     this.textCollapsedTarget.classList.add("hidden")
@@ -36,5 +39,14 @@ export default class extends Controller {
     this.textExpandedTarget.classList.add("hidden")
     this.textCollapsedTarget.classList.remove("hidden")
     this.collapsedValue = true
+  }
+
+  loadDeferredIframe() {
+    if (!this.hasIframeTarget) return
+
+    const src = this.iframeTarget.dataset.src
+    if (!src || this.iframeTarget.getAttribute("src")) return
+
+    this.iframeTarget.setAttribute("src", src)
   }
 }

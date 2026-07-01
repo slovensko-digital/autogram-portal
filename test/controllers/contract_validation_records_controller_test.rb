@@ -100,6 +100,55 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     assert_equal I18n.t("errors.archivation_disabled"), flash[:alert]
   end
 
+  test "index shows AGP reference and mapping match for archived records" do
+    contract = create_contract_with_version(user: @user)
+    content_version = contract.latest_content_version
+
+    record = ContractValidationRecord.create!(
+      user: @user,
+      contract: contract,
+      contract_content_version: content_version,
+      source_contract_uuid: contract.uuid,
+      source_version_number: content_version.version_number,
+      filename: "signed-contract.pdf",
+      document_hash: Digest::SHA256.hexdigest("signed-pdf-content"),
+      signature_levels: [ "BASELINE_T" ],
+      signatures_count: 1,
+      expires_at: 1.month.from_now,
+      validation_details: {
+        "signatures" => [
+          { "agp_reference" => "PUBLIC-REF-123", "agp_instance" => "agp.example.test" }
+        ]
+      }
+    )
+
+    bundle = Bundle.create!(author: @user, contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+    signer_contract = recipient.signer_contracts.find_by!(contract: contract)
+    session = signer_contract.sessions.create!(
+      type: "AdesEvidenceSession",
+      signing_started_at: Time.current,
+      options: { "verification_channel" => "sms" }
+    )
+    SignatureEvidenceRecord.create!(
+      session: session,
+      signer_contract: signer_contract,
+      contract_content_version: content_version,
+      public_reference: "PUBLIC-REF-123",
+      state: "signed",
+      canonical_payload: {}
+    )
+
+    get :index, params: { state: "all" }
+
+    assert_response :success
+    assert_select "a", text: "PUBLIC-REF-123", count: 1
+    assert_includes response.body, "agp.example.test"
+    assert_includes response.body, I18n.t("shared.signature_validation.agp_document_match")
+
+    record.destroy!
+  end
+
   private
 
   def create_record(user:, expires_at: nil, source_contract_uuid: SecureRandom.uuid, source_version_number: 1)

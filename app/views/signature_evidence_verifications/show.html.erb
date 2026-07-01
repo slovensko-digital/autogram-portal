@@ -1,0 +1,193 @@
+<div class="mx-auto max-w-4xl px-6 py-10 space-y-8">
+  <div class="space-y-3">
+    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600"><%= t('.eyebrow') %></p>
+    <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+    <p class="max-w-2xl text-sm text-gray-600"><%= t('.subtitle') %></p>
+  </div>
+
+  <div class="rounded-2xl border border-gray-200 bg-white p-6">
+    <%= form_with url: signature_evidence_verification_path, method: :get, class: "space-y-4" do |form| %>
+      <div>
+        <%= form.label :reference, t('.reference_label'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_field :reference,
+              value: @reference,
+              placeholder: t('.reference_placeholder'),
+              class: "w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" %>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= form.submit t('.submit_button'), class: "inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @lookup_error.present? %>
+    <div class="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">
+      <p class="font-semibold text-red-900"><%= t('.not_found_title') %></p>
+      <p class="mt-2"><%= @lookup_error %></p>
+    </div>
+  <% end %>
+
+  <% if @signature_evidence_record.present? %>
+    <% validation = @signature_evidence_record.validation_summary %>
+    <% evidence_seal = @signature_evidence_record.evidence_seal_summary %>
+    <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <div class="space-y-6">
+        <div class="rounded-2xl border border-gray-200 bg-white p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-medium text-gray-500"><%= t('.reference_card_label') %></p>
+              <p class="mt-2 font-mono text-sm text-gray-900 break-all"><%= @signature_evidence_record.public_reference %></p>
+            </div>
+            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= validation[:all_signatures_valid] ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' %>">
+              <%= validation[:all_signatures_valid] ? t('.status_valid') : t('.status_review') %>
+            </span>
+          </div>
+
+          <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.signed_at_label') %></dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @signature_evidence_record.signed_at ? l(@signature_evidence_record.signed_at, format: :long) : t('.unknown_value') %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.channel_label') %></dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @signature_evidence_record.verification_channel_label || t('.unknown_value') %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.signed_by_label') %></dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @signature_evidence_record.signed_by || t('.unknown_value') %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.issued_by_label') %></dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @signature_evidence_record.issued_by || t('.unknown_value') %></dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 bg-white p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-900"><%= t('.evidence_seal_title') %></h2>
+              <p class="mt-2 text-sm text-gray-600"><%= t('.evidence_seal_body') %></p>
+            </div>
+            <% seal_classes = case evidence_seal[:status]
+               when :valid then 'bg-green-100 text-green-800'
+               when :missing then 'bg-gray-100 text-gray-700'
+               else 'bg-amber-100 text-amber-800'
+               end %>
+            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= seal_classes %>">
+              <%= t(".evidence_seal_status_#{evidence_seal[:status]}") %>
+            </span>
+          </div>
+
+          <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.evidence_seal_reference_label') %></dt>
+              <dd class="mt-1 text-sm text-gray-900 break-all"><%= @signature_evidence_record.public_reference %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.evidence_seal_payload_hash_label') %></dt>
+              <dd class="mt-1 font-mono text-xs text-gray-900 break-all"><%= evidence_seal[:current_payload_sha256] || t('.unknown_value') %></dd>
+            </div>
+            <% if evidence_seal[:certificate_sha256].present? %>
+              <div class="sm:col-span-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.evidence_seal_certificate_hash_label') %></dt>
+                <dd class="mt-1 font-mono text-xs text-gray-900 break-all"><%= evidence_seal[:certificate_sha256] %></dd>
+              </div>
+            <% end %>
+          </dl>
+
+          <% if evidence_seal[:status] == :invalid %>
+            <p class="mt-4 text-sm text-amber-700"><%= t(".evidence_seal_reason_#{evidence_seal[:reason]}") %></p>
+          <% elsif evidence_seal[:status] == :missing %>
+            <p class="mt-4 text-sm text-gray-600"><%= t('.evidence_seal_reason_missing') %></p>
+          <% end %>
+
+          <% if @signature_evidence_record.sealed_evidence.attached? || @signature_evidence_record.signed_manifest.present? %>
+            <div class="mt-4 flex flex-wrap gap-3">
+              <%= link_to t('.evidence_seal_download_button'),
+                    download_signature_evidence_verification_path(reference: @signature_evidence_record.public_reference),
+                    class: "inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+
+              <% if @signature_evidence_record.private_evidence_package.attached? && @signature_evidence_record.private_evidence_accessible_by?(current_user) %>
+                <%= link_to t('.private_evidence_download_button'),
+                      download_private_signature_evidence_verification_path(reference: @signature_evidence_record.public_reference),
+                      class: "inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 bg-white p-6">
+          <h2 class="text-lg font-semibold text-gray-900"><%= t('.signature_details_title') %></h2>
+
+          <% if validation[:error_message].present? %>
+            <p class="mt-4 text-sm text-amber-700"><%= validation[:error_message] %></p>
+          <% elsif validation[:signatures].blank? %>
+            <p class="mt-4 text-sm text-gray-600"><%= t('.no_signature_details') %></p>
+          <% else %>
+            <div class="mt-4 space-y-4">
+              <% validation[:signatures].each do |signature| %>
+                <div class="rounded-xl border border-gray-200 p-4">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900"><%= signature["signer_name"] || signature.dig("certificate", "subject") || t('.unknown_value') %></h3>
+                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold <%= signature["valid"] ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' %>"><%= signature["validation_result"] || t('.unknown_value') %></span>
+                    <% if signature["signature_level"].present? %>
+                      <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700"><%= signature["signature_level"] %></span>
+                    <% end %>
+                  </div>
+
+                  <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.certificate_subject_label') %></dt>
+                      <dd class="mt-1 text-sm text-gray-900 break-all"><%= signature.dig("certificate", "subject") || t('.unknown_value') %></dd>
+                    </div>
+                    <div>
+                      <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.certificate_issuer_label') %></dt>
+                      <dd class="mt-1 text-sm text-gray-900 break-all"><%= signature.dig("certificate", "issuer") || t('.unknown_value') %></dd>
+                    </div>
+                    <div>
+                      <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.certificate_qualification_label') %></dt>
+                      <dd class="mt-1 text-sm text-gray-900"><%= signature.dig("certificate", "qualification") || t('.unknown_value') %></dd>
+                    </div>
+                    <div>
+                      <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= t('.signature_time_label') %></dt>
+                      <dd class="mt-1 text-sm text-gray-900"><%= signature["signing_time"].present? ? l(Time.zone.parse(signature["signing_time"]), format: :long) : t('.unknown_value') %></dd>
+                    </div>
+                  </dl>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="rounded-2xl border border-gray-200 bg-white p-6">
+          <h2 class="text-lg font-semibold text-gray-900"><%= t('.evidence_timeline_title') %></h2>
+          <dl class="mt-4 space-y-4 text-sm text-gray-700">
+            <div>
+              <dt class="font-medium text-gray-900"><%= t('.verification_completed_label') %></dt>
+              <dd class="mt-1"><%= @signature_evidence_record.public_event_time("sms_verified") ? l(@signature_evidence_record.public_event_time("sms_verified"), format: :long) : t('.unknown_value') %></dd>
+            </div>
+            <div>
+              <dt class="font-medium text-gray-900"><%= t('.server_signing_completed_label') %></dt>
+              <dd class="mt-1"><%= @signature_evidence_record.public_event_time("server_signed") ? l(@signature_evidence_record.public_event_time("server_signed"), format: :long) : t('.unknown_value') %></dd>
+            </div>
+            <% if validation[:expires_at].present? %>
+              <div>
+                <dt class="font-medium text-gray-900"><%= t('.validation_expires_at_label') %></dt>
+                <dd class="mt-1"><%= l(validation[:expires_at], format: :long) %></dd>
+              </div>
+            <% end %>
+          </dl>
+        </div>
+
+        <div class="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-sm text-blue-900">
+          <h2 class="font-semibold"><%= t('.help_title') %></h2>
+          <p class="mt-2"><%= t('.help_body') %></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

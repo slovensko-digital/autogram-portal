@@ -168,14 +168,27 @@
           <p class="text-sm text-red-600"><%= recipient_error %></p>
         </div>
       <% end %>
-      <div class="flex items-center gap-2">
-
+      <div class="space-y-3">
         <%= form.email_field :email,
               placeholder: t('.email_placeholder'),
-              class: "flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+              class: "w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
               required: true %>
+        <div>
+          <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2zm2 2h6m-4 12h2"/>
+            </svg>
+            <%= t('.mobile_phone_label') %>
+          </label>
+          <%= form.telephone_field :mobile_phone,
+                placeholder: t('.mobile_phone_placeholder'),
+                class: "w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+          <p class="mt-2 text-sm text-gray-500"><%= t('.mobile_phone_help') %></p>
+        </div>
+        <div class="flex justify-end">
         <%= form.submit t('actions.add'),
               class: "inline-flex items-center px-4 py-2 border border-transparent cursor-pointer text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
       </div>
       <p class="mt-2 text-sm text-gray-500"><%= t('.email_help') %></p>
     <% end %>

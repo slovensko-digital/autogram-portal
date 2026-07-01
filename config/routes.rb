@@ -29,6 +29,9 @@ Rails.application.routes.draw do
   get "sdk.js" => "sdk#sdk", as: :sdk
 
   post "locale/switch" => "locale#switch", as: :switch_locale
+  get "signature-evidence/verify" => "signature_evidence_verifications#show", as: :signature_evidence_verification
+  get "signature-evidence/verify/:reference/download" => "signature_evidence_verifications#download", as: :download_signature_evidence_verification
+  get "signature-evidence/verify/:reference/download-private" => "signature_evidence_verifications#download_private", as: :download_private_signature_evidence_verification
 
   # Defines the root path route ("/")
   root to: "root#index"
@@ -100,11 +103,15 @@ Rails.application.routes.draw do
         get :parameters
         get :download
         post :upload
+        post :request_verification
+        post :verify_verification
+        post :complete_signing
         get :get_webhook
         post :standard_webhook
       end
 
       get :autogram, on: :collection, to: "contracts/sessions#create", defaults: { type: "autogram" }
+      get :ades, on: :collection, to: "contracts/sessions#create", defaults: { type: "ades" }
       get :eidentita, on: :collection, to: "contracts/sessions#create", defaults: { type: "eidentita" }
       get :avm, on: :collection, to: "contracts/sessions#create", defaults: { type: "avm" }
       get :podpisuj, on: :collection, to: "contracts/sessions#create", defaults: { type: "podpisuj" }

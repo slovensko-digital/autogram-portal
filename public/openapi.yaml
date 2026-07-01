@@ -633,6 +633,14 @@ components:
           type: string
           example: john.doe@example.com
           format: email
+        mobilePhone:
+          type: string
+          example: "+421901234567"
+          description: Recipient mobile number in E.164 format. Needed for evidence-based AdES signing with SMS verification.
+        phoneNumber:
+          type: string
+          example: "+421901234567"
+          description: Alias for `mobilePhone` accepted for compatibility with external integrators.
         locale:
           type: string
           default: sk

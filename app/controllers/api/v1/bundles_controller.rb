@@ -80,7 +80,7 @@ class Api::V1::BundlesController < ApiController
       ],
       webhook: [ :url, :method ],
       postalAddress: [ :address, :recipientName ],
-      recipients: [ :name, :email, :locale, :uuid, :portalInstanceId ]
+      recipients: [ :name, :email, :locale, :uuid, :portalInstanceId, :mobilePhone, :phoneNumber ]
     )
 
     attributes = {
@@ -119,6 +119,9 @@ class Api::V1::BundlesController < ApiController
 
         portal_instance_uuid = recipient_attributes.delete("portalInstanceId").presence
         recipient_attributes["portal_instance_uuid"] = portal_instance_uuid if portal_instance_uuid.present?
+
+        mobile_phone = recipient_attributes.delete("mobilePhone").presence || recipient_attributes.delete("phoneNumber").presence
+        recipient_attributes["mobile_phone"] = mobile_phone if mobile_phone.present?
 
         recipient_attributes
       end || []

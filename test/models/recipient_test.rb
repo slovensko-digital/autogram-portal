@@ -7,6 +7,7 @@
 #  email                   :string
 #  federation_mode         :string           default("local"), not null
 #  locale                  :string           default("sk"), not null
+#  mobile_phone            :string
 #  name                    :string
 #  notification_status     :integer          default("not_notified"), not null
 #  remote_claimed_at       :datetime
@@ -121,6 +122,28 @@ class RecipientTest < ActiveSupport::TestCase
 
     assert recipient.persisted?
     assert_nil recipient.email
+  end
+
+  test "mobile phone is normalized to e164" do
+    recipient = bundles(:one).recipients.create!(
+      email: "recipient.mobile@example.com",
+      mobile_phone: "00421 901 234 567",
+      locale: "en"
+    )
+
+    assert_equal "+421901234567", recipient.mobile_phone
+    assert_equal "+421***567", recipient.masked_mobile_phone
+  end
+
+  test "mobile phone must use e164 format after normalization" do
+    recipient = bundles(:one).recipients.build(
+      email: "recipient.invalid@example.com",
+      mobile_phone: "1234",
+      locale: "en"
+    )
+
+    assert_not recipient.valid?
+    assert_includes recipient.errors[:mobile_phone], "must be in E.164 format"
   end
 
   test "local recipients still link to an existing user by email" do

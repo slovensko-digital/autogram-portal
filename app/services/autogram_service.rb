@@ -29,9 +29,9 @@ class AutogramService
   end
 
   class ValidationSignature
-    attr_reader :signerName, :signingTime, :signatureLevel, :validationResult, :valid, :signedObjects, :unsignedObjects, :certificateInfo, :timestampInfo
+    attr_reader :signerName, :signingTime, :signatureLevel, :validationResult, :valid, :signedObjects, :unsignedObjects, :certificateInfo, :timestampInfo, :agpReference, :agpInstance
 
-    def initialize(signerName:, signingTime: nil, signatureLevel: nil, validationResult: nil, valid: false, signedObjects: [], unsignedObjects: [], certificateInfo: {}, timestampInfo: nil)
+    def initialize(signerName:, signingTime: nil, signatureLevel: nil, validationResult: nil, valid: false, signedObjects: [], unsignedObjects: [], certificateInfo: {}, timestampInfo: nil, agpReference: nil, agpInstance: nil)
       @signerName = signerName
       @signingTime = signingTime
       @signatureLevel = signatureLevel
@@ -41,6 +41,8 @@ class AutogramService
       @unsignedObjects = unsignedObjects
       @certificateInfo = certificateInfo
       @timestampInfo = timestampInfo
+      @agpReference = agpReference
+      @agpInstance = agpInstance
     end
 
     def qualified?
@@ -412,6 +414,8 @@ class AutogramService
       signatureLevel: signatures_data["level"]&.gsub(/[XPC]AdES_/, ""),
       validationResult: validation_result,
       valid: accepted_signature_result?(validation_result, signer_name),
+      agpReference: signatures_data["agpReference"],
+      agpInstance: signatures_data["agpInstance"],
       certificateInfo: {
         subject: signing_cert["subjectDN"],
         issuer: signing_cert["issuerDN"],

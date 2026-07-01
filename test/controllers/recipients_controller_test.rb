@@ -46,6 +46,21 @@ class RecipientsControllerTest < ActionController::TestCase
     assert recipient.federated_recipient?
   end
 
+  test "create stores normalized mobile phone" do
+    post :create, params: {
+      bundle_id: bundles(:one).uuid,
+      recipient: {
+        email: "recipient@example.com",
+        mobile_phone: "00421 901 234 567"
+      }
+    }
+
+    assert_response :success
+
+    recipient = bundles(:one).recipients.find_by!(email: "recipient@example.com")
+    assert_equal "+421901234567", recipient.mobile_phone
+  end
+
   private
 
   def create_portal_instance(**attributes)
