@@ -110,7 +110,7 @@ paths:
               allow-postal-signing:
                 summary: Allow sending notarized bundle by post
                 value:
-                  allowedMethods: [ "qes", "ades", "ses", "scan", "paper" ]
+                  allowedMethods: [ "qes", "ades", "visual", "scan", "paper" ]
                   file:
                     content: "base64-encoded-content"
                     contentType: "application/pdf; base64"
@@ -591,14 +591,9 @@ components:
       type: string
       enum:
         - qes
-        - ts-qes
-        - cts-qes
         - ades
-        - ses
-        - click
-        - scan
         - visual
-        - notary
+        - scan
         - paper
 
     Document:
@@ -1010,7 +1005,7 @@ components:
       summary: Multiple users and contracts
       value:
         contracts:
-          - allowedMethods: [ "qes", "ades", "ses", "scan", "paper" ]
+          - allowedMethods: [ "qes", "ades", "visual", "scan", "paper" ]
             documents:
               - filename: "contract.txt"
                 content: "Sample text content"

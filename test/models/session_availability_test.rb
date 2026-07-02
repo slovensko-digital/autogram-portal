@@ -8,7 +8,7 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
   test "eidentita and podpisuj are unavailable when prepared signature fields are attached" do
     contract = contract_with_prepared_signature_fields
 
-    assert AutogramSession.available?(nil, contract)
+    assert_not AutogramSession.available?(nil, contract)
     assert AvmSession.available?(nil, contract)
     assert_not EidentitaSession.available?(nil, contract)
     assert_not PodpisujSession.available?(nil, contract)
@@ -25,7 +25,7 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
     assert PodpisujSession.available?(nil, contract)
   end
 
-  test "ades evidence session requires ades method and recipient mobile phone" do
+  test "ades evidence session is available for recipient mobile phone or email" do
     contract = Contract.create!(
       documents_attributes: [ { blob: pdf_blob("ades.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" },
@@ -34,7 +34,7 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
     bundle = Bundle.create!(author: @user, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "ades@example.com", locale: "en")
 
-    assert_not AdesEvidenceSession.available?(contract, recipient: recipient)
+    assert AdesEvidenceSession.available?(contract, recipient: recipient)
 
     recipient.update!(mobile_phone: "+421901234567")
 

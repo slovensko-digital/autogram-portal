@@ -8,6 +8,17 @@ sk:
       unknown_response_error: "Nepodarilo sa spracovať odpoveď zo služby."
       document_mismatch_error: "Podpisovaný dokument sa nezhoduje s pôvodným dokumentom."
 
+  verification:
+    sms:
+      message: "Overovací kód pre Autogram Portal: %{code}"
+
+  verification_mailer:
+    otp_code:
+      subject: "Váš overovací kód pre Autogram Portal"
+      title: "Váš overovací kód"
+      body: "Na pokračovanie v podpisovaní v Autogram Portal použite tento jednorazový kód:"
+      footer: "Ak ste tento kód neočakávali, tento e-mail môžete ignorovať."
+
   consents:
     must_accept_to_register: "Pre vytvorenie účtu musíte prijať podmienky a zásady ochrany súkromia."
     please_accept_updated_policies: "Prosím, prečítajte si a prijmite aktualizované zásady."
@@ -742,31 +753,44 @@ sk:
       ades_evidence:
         title: "Overené AdES podpisovanie"
         subtitle: "Podpisovanie s evidenčným záznamom a SMS overením"
+        subtitle_email: "Podpisovanie s evidenčným záznamom a e-mailovým overením"
         missing_phone: "Táto metóda podpisovania vyžaduje mobilné číslo príjemcu."
+        missing_contact: "Táto metóda podpisovania vyžaduje e-mailovú adresu príjemcu alebo podporované SMS doručovanie."
         error_title: "Problém s overením"
         step1_title: "Skontrolujte spôsob podpisovania"
         step1_desc: "Táto požiadavka použije elektronické podpisovanie s evidenčným záznamom namiesto kvalifikovanej podpisovej aplikácie."
         step2_title: "Overte telefónne číslo príjemcu"
         step2_desc: "Príjemca potvrdí, že ovláda nastavené mobilné číslo, zadaním SMS kódu."
+        step2_title_email: "Overte e-mailovú adresu príjemcu"
+        step2_desc_email: "Príjemca potvrdí prístup k nastavenej e-mailovej schránke zadaním jednorazového kódu."
         step3_title: "Zaznamenajte dôkazy"
         step3_desc: "AGP uloží časy overenia, identifikátory požiadaviek a súvisiace podpisové dôkazy pre túto reláciu."
         step4_title: "Vytvorte výsledný podpis"
         step4_desc: "Po overení serverové podpisovanie vytvorí podpísaný dokument a pripojí referenciu na evidenčný záznam."
         channel_label: "Overovací kanál"
         channel_sms: "SMS jednorazový kód"
+        channel_email: "E-mailový jednorazový kód"
         recipient_phone_label: "Telefón príjemcu"
         recipient_phone_help: "Overovací kód bude odoslaný na nastavené mobilné číslo tohto príjemcu."
+        recipient_email_label: "E-mail príjemcu"
+        recipient_email_help: "Overovací kód bude odoslaný na nastavenú e-mailovú adresu tohto príjemcu."
         request_code_title: "Odoslať overovací kód"
         request_code_body: "Spustite SMS overenie pre tohto príjemcu."
         request_code_button: "Odoslať SMS kód"
+        request_code_body_email: "Spustite e-mailové overenie pre tohto príjemcu."
+        request_code_button_email: "Odoslať e-mailový kód"
         sms_sent_title: "SMS kód bol odoslaný"
         sms_sent_body: "Zadajte SMS kód doručený na nastavené telefónne číslo."
+        email_sent_title: "E-mailový kód bol odoslaný"
+        email_sent_body: "Zadajte jednorazový kód doručený na nastavenú e-mailovú adresu."
         verification_code_label: "Overovací kód"
         verification_code_placeholder: "123456"
         verify_code_button: "Overiť kód"
         resend_code_button: "Poslať kód znova"
         verified_title: "Telefónne číslo bolo overené"
         verified_body: "Telefónne číslo príjemcu bolo pre túto podpisovú reláciu úspešne overené."
+        verified_title_email: "E-mailová adresa bola overená"
+        verified_body_email: "E-mailová adresa príjemcu bola pre túto podpisovú reláciu úspešne overená."
         evidence_reference_label: "Referencia evidencie"
         complete_signing_title: "Vytvoriť serverový podpis"
         complete_signing_body: "Dokončite túto AdES reláciu vytvorením podpísaného dokumentu na serveri a pripojením referencie na evidenciu."
@@ -775,8 +799,8 @@ sk:
         beta_body: "SMS výzva a workflow evidenčného záznamu sú ďalší krok. Táto obrazovka zatiaľ potvrdzuje príjemcu a prepojenie relácie potrebné pre tento tok."
         beta_body_signing: "Záverečný podpisový krok už prebieha na serveri. Zostáva nahradiť dočasné overenie a podpisové poverenia produkčnými integráciami."
         errors:
-          not_requested: "Najprv požiadajte o SMS overovací kód."
-          not_verified: "Pred vytvorením podpísaného dokumentu overte telefónne číslo príjemcu."
+          not_requested: "Najprv požiadajte o overovací kód."
+          not_verified: "Pred vytvorením podpísaného dokumentu overte kontakt príjemcu."
           invalid_code: "Overovací kód nie je platný."
           expired: "Platnosť overovacieho kódu vypršala. Požiadajte o nový."
           already_verified: "Táto podpisová relácia už bola overená."
@@ -990,14 +1014,14 @@ sk:
       signature_field_submit: "Pokračovať na elektronické podpisovanie"
     allowed_methods:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
-      ses: Elektronický podpis nakreslením podpisu a overením cez SMS
+      ades: Elektronický podpis s evidenčným záznamom a overením cez druhý faktor (SMS alebo e-mail)
       scan: Vytlačiť, ručne podpísať a naskenovať
       visual: Pridať do PDF vizuálnu pečiatku
       notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
       short:
         qes: Kvalifikovaný elektronický podpis
-        ses: Jednoduchý elektronický podpis
+        ades: Jednoduchý elektronický podpis
         scan: Sken podpísaného dokumentu
         visual: Vizuálna pečiatka
         notary-post: Osvedčený podpis u notára

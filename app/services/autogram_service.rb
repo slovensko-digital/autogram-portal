@@ -407,21 +407,23 @@ class AutogramService
     end
 
     has_qualified_timestamps = signatures_data["areQualifiedTimestamps"]
+    certificate_info = {
+      subject: signing_cert["subjectDN"],
+      issuer: signing_cert["issuerDN"],
+      qualification: signing_cert["qualification"],
+      certificateDer: signing_cert["certificateDer"],
+      notAfter: signing_cert["notAfter"]
+    }
 
     ValidationSignature.new(
       signerName: signer_name,
       signingTime: signing_time,
       signatureLevel: signatures_data["level"]&.gsub(/[XPC]AdES_/, ""),
       validationResult: validation_result,
-      valid: accepted_signature_result?(validation_result, signer_name),
+      valid: accepted_signature_result?(validation_result, signer_name, certificate_info),
       agpReference: signatures_data["agpReference"],
       agpInstance: signatures_data["agpInstance"],
-      certificateInfo: {
-        subject: signing_cert["subjectDN"],
-        issuer: signing_cert["issuerDN"],
-        qualification: signing_cert["qualification"],
-        notAfter: signing_cert["notAfter"]
-      },
+      certificateInfo: certificate_info,
       signedObjects: signed_objects,
       unsignedObjects: unsigned_objects,
       timestampInfo: has_qualified_timestamps && timestamps.any? ? {
@@ -473,11 +475,33 @@ class AutogramService
   # The public dev signing flow uses the Autogram test certificate, which the
   # validation service reports as INDETERMINATE because it is not publicly trusted.
   # Accept it only in local/test environments so embedded signing can be exercised.
-  def accepted_signature_result?(validation_result, signer_name)
+  # Also accept the exact certificate configured for ADES server signing, which is
+  # an operator-selected exception rather than a generic self-signed allowance.
+  def accepted_signature_result?(validation_result, signer_name, certificate_info = {})
     return true if validation_result == "TOTAL_PASSED"
+    return true if configured_ades_signing_certificate?(validation_result, certificate_info)
     return false unless allow_indeterminate_test_signatures?
 
     validation_result == "INDETERMINATE" && signer_name == TEST_SIGNER_COMMON_NAME
+  end
+
+  def configured_ades_signing_certificate?(validation_result, certificate_info)
+    return false unless validation_result == "INDETERMINATE"
+
+    certificate_info[:certificateDer].present? && certificate_info[:certificateDer] == configured_ades_signing_certificate_der
+  end
+
+  def configured_ades_signing_certificate_der
+    pkcs12_base64 = ENV["ADES_SIGNING_PKCS12_BASE64"].presence
+    pkcs12_path = ENV["ADES_SIGNING_PKCS12_PATH"].presence
+    return nil if pkcs12_base64.blank? && pkcs12_path.blank?
+
+    raw_pkcs12 = pkcs12_base64.present? ? Base64.strict_decode64(pkcs12_base64) : File.binread(pkcs12_path)
+    pkcs12 = OpenSSL::PKCS12.new(raw_pkcs12, ENV["ADES_SIGNING_PKCS12_PASSWORD"])
+
+    Base64.strict_encode64(pkcs12.certificate.to_der)
+  rescue ArgumentError, OpenSSL::PKCS12::PKCS12Error, Errno::ENOENT
+    nil
   end
 
   def allow_indeterminate_test_signatures?

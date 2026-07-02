@@ -35,7 +35,7 @@ class SignatureVerification < ApplicationRecord
 
   encrypts :destination
 
-  enum :channel, { sms: "sms" }, scopes: false
+  enum :channel, { sms: "sms", email: "email" }, scopes: false
   enum :state, {
     pending: "pending",
     sent: "sent",

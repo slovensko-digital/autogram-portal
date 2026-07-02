@@ -100,6 +100,10 @@ class SignatureEvidenceRecord < ApplicationRecord
     nil
   end
 
+  def verification_completed_at
+    public_event_time("sms_verified") || public_event_time("email_verified")
+  end
+
   def validation_summary
     stored_record = contract_content_version&.contract_validation_record
     return stored_validation_summary(stored_record) if stored_record.present?
