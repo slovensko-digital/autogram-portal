@@ -12,9 +12,7 @@ module AutogramEnvironment
   end
 
   def self.sms_provider
-    return @sms_provider if instance_variable_defined?(:@sms_provider)
-
-    @sms_provider = if aws_sms_configured?
+    @sms_provider ||= if aws_sms_configured?
       Verification::AwsSmsProvider.new
     elsif null_sms_provider_allowed?
       Verification::NullSmsProvider.new
@@ -39,6 +37,8 @@ module AutogramEnvironment
   end
 
   def self.null_sms_provider_allowed?
-    ActiveModel::Type::Boolean.new.cast(ENV["ALLOW_NULL_SMS_PROVIDER"]) || !Rails.env.production?
+    return true if ActiveModel::Type::Boolean.new.cast(ENV["ALLOW_NULL_SMS_PROVIDER"])
+
+    Rails.env.development? || Rails.env.test?
   end
 end
