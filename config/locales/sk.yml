@@ -1014,14 +1014,14 @@ sk:
       signature_field_submit: "Pokračovať na elektronické podpisovanie"
     allowed_methods:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
-      ses: Elektronický podpis nakreslením podpisu a overením cez SMS
+      ades: Elektronický podpis s evidenčným záznamom a overením cez druhý faktor (SMS alebo e-mail)
       scan: Vytlačiť, ručne podpísať a naskenovať
       visual: Pridať do PDF vizuálnu pečiatku
       notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
       short:
         qes: Kvalifikovaný elektronický podpis
-        ses: Jednoduchý elektronický podpis
+        ades: Jednoduchý elektronický podpis
         scan: Sken podpísaného dokumentu
         visual: Vizuálna pečiatka
         notary-post: Osvedčený podpis u notára

@@ -1089,14 +1089,14 @@ en:
       signature_field_submit: "Continue to electronic signing"
     allowed_methods:
       qes: Qualified electronic signature
-      ses: Simple electronic signature
+      ades: Simple electronic signature
       scan: Print, sign by hand, and scan
       visual: Add a visual stamp to the PDF
       notary-post: Document signed at a notary and original sent via post office
       notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
       short:
         qes: Qualified electronic signature
-        ses: Simple electronic signature
+        ades: Simple electronic signature with second factor verification via SMS or email
         scan: Print, sign by hand, and scan
         visual: Visual stamp
         notary-post: Notary signature with postal delivery
