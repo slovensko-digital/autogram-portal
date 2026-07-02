@@ -4,6 +4,7 @@ class Contracts::SessionsController < ApplicationController
   before_action :set_contract
   before_action :set_session, except: [ :create ]
   before_action :set_signer_contract, only: [ :create, :show, :request_verification, :verify_verification, :complete_signing ]
+  before_action :ensure_prepared_signature_field_appearance_completed, only: [ :create, :show, :request_verification, :verify_verification, :complete_signing ]
   before_action :authorize_session_access!, only: [ :parameters, :download, :upload ]
   before_action :authorize_session_destroy!, only: [ :destroy ]
   before_action :ensure_session_matches_signer_contract!, only: [ :request_verification, :verify_verification, :complete_signing ]
@@ -28,6 +29,8 @@ class Contracts::SessionsController < ApplicationController
     else
       return render plain: "Invalid session type", status: :bad_request
     end
+
+    return if performed?
 
     render :show
   rescue SessionCreationError, ActiveRecord::RecordInvalid => e
@@ -219,6 +222,28 @@ class Contracts::SessionsController < ApplicationController
     redirect_to redirect_path
   end
 
+  def ensure_prepared_signature_field_appearance_completed
+    return unless ades_evidence_flow_request?
+    return unless @contract.prepared_signature_field_appearance_required_for?(recipient: @recipient, signer_contract: @signer_contract)
+
+    if request.headers["Turbo-Frame"].present?
+      render partial: "contracts/signature_field_appearance_required",
+             locals: {
+               frame_id: request.headers["Turbo-Frame"],
+               contract: @contract,
+               recipient: @recipient
+             }
+      return
+    end
+
+    redirect_to visual_signing_contract_path(
+      @contract,
+      recipient: @recipient&.uuid,
+      iframe: params[:iframe],
+      purpose: "signature_field_appearance"
+    )
+  end
+
   def create_eidentita_session
     existing = @signer_contract&.sessions&.pending&.where(type: "EidentitaSession")&.first
     return persist_session_view_options(existing) if existing
@@ -247,6 +272,14 @@ class Contracts::SessionsController < ApplicationController
         "verification_channel" => verification_channel
       )
     ))
+  end
+
+  def ades_evidence_flow_request?
+    if action_name == "create"
+      (params[:type] || params[:application]) == "ades"
+    else
+      @session&.ades_evidence?
+    end
   end
 
   def create_avm_session
