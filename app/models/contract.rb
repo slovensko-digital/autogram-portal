@@ -198,7 +198,7 @@ class Contract < ApplicationRecord
   end
 
   def pades_field_preparation_allowed?
-    bundle.present? && documents.one? && documents.first.is_pdf? && signature_parameters&.format == "PAdES" && !has_cryptographic_signatures?
+    bundle.present? && documents.one? && documents.first.is_pdf? && signature_parameters&.format == "PAdES" && !has_cryptographic_signatures? && allowed_methods.include?("qes")
   end
 
   def pades_field_preparation_allowed_for?(user)

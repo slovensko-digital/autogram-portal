@@ -237,15 +237,14 @@ class Contracts::SessionsController < ApplicationController
     existing = @signer_contract&.sessions&.pending&.where(type: "AdesEvidenceSession")&.first
     return persist_session_view_options(existing) if existing
 
-    unless AdesEvidenceSession.available?(@contract, recipient: @recipient)
-      raise SessionCreationError, t("contracts.sessions.ades_evidence.missing_phone")
-    end
+    verification_channel = AdesEvidenceSession.verification_channel_for(@contract, recipient: @recipient)
+    raise SessionCreationError, t("contracts.sessions.ades_evidence.missing_contact") if verification_channel.blank?
 
     persist_session_view_options(@signer_contract.sessions.create!(
       type: "AdesEvidenceSession",
       signing_started_at: Time.current,
       options: session_view_options.merge(
-        "verification_channel" => "sms"
+        "verification_channel" => verification_channel
       )
     ))
   end

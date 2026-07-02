@@ -23,19 +23,39 @@
 #  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class AdesEvidenceSession < Session
+  VERIFICATION_CHANNELS = %w[sms email].freeze
+
   store_accessor :options, :verification_channel
 
   has_one :signature_verification, foreign_key: :session_id, dependent: :destroy
   has_one :signature_evidence_record, foreign_key: :session_id, dependent: :destroy
 
-  validates :verification_channel, inclusion: { in: %w[sms] }
+  validates :verification_channel, inclusion: { in: VERIFICATION_CHANNELS }
 
   def self.model_name
     Session.model_name
   end
 
   def self.available?(contract, recipient: nil)
-    contract.allowed_methods.include?("ades") && recipient&.mobile_phone?
+    verification_channel_for(contract, recipient: recipient).present?
+  end
+
+  def self.verification_channel_for(contract, recipient:, preferred_channel: nil)
+    return if contract.blank? || recipient.blank?
+    return unless contract.allowed_methods.include?("ades")
+
+    channels = [ preferred_channel, "sms", "email" ].compact.uniq
+
+    channels.find do |channel|
+      case channel
+      when "sms"
+        recipient.mobile_phone? && AutogramEnvironment.sms_provider.present?
+      when "email"
+        recipient.email.present?
+      else
+        false
+      end
+    end
   end
 
   def recipient_mobile_phone
@@ -44,6 +64,33 @@ class AdesEvidenceSession < Session
 
   def recipient_masked_mobile_phone
     recipient&.masked_mobile_phone
+  end
+
+  def recipient_email
+    recipient&.email
+  end
+
+  def recipient_masked_email
+    return if recipient_email.blank?
+
+    local_part, domain = recipient_email.split("@", 2)
+    return recipient_email if local_part.blank? || domain.blank?
+
+    masked_local_part = if local_part.length <= 2
+      "#{local_part.first}***"
+    else
+      "#{local_part.first}***#{local_part.last}"
+    end
+
+    "#{masked_local_part}@#{domain}"
+  end
+
+  def effective_verification_channel
+    self.class.verification_channel_for(contract, recipient: recipient, preferred_channel: signature_verification&.channel || verification_channel) || verification_channel
+  end
+
+  def recipient_verification_destination
+    effective_verification_channel == "email" ? recipient_masked_email : recipient_masked_mobile_phone
   end
 
   def verification_requested?
@@ -72,7 +119,7 @@ class AdesEvidenceSession < Session
         "recipient_uuid" => recipient&.uuid,
         "recipient_email" => recipient&.email,
         "recipient_mobile_phone" => recipient_masked_mobile_phone,
-        "verification_channel" => verification_channel,
+        "verification_channel" => effective_verification_channel || verification_channel,
         "events" => []
       }
     )

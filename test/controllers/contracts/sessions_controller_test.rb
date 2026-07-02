@@ -91,14 +91,15 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}"
   end
 
-  test "ades evidence session creation renders inline error when recipient phone is missing" do
+  test "ades evidence session falls back to email when recipient phone is missing" do
     contract, recipient = create_bundle_contract_with_mobile_recipient(mobile_phone: nil)
 
     get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid, embedded: true }
 
-    assert_response :unprocessable_entity
+    assert_response :success
     assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}"
-    assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.missing_phone")
+    assert_equal "email", contract.reload.sessions.order(:id).last.verification_channel
+    assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.channel_email")
   end
 
   test "ades evidence session can request verification code" do
@@ -116,6 +117,22 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.sms_sent_title")
   end
 
+  test "ades evidence session falls back to email verification when sms provider is unavailable" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient
+    session = create_ades_session_for(contract: contract, recipient: recipient)
+    ActionMailer::Base.deliveries.clear
+
+    with_sms_provider(nil) do
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/request_verification", params: { recipient: recipient.uuid }
+    end
+
+    assert_response :success
+    assert_equal "email", session.reload.signature_verification.channel
+    assert_equal "email", session.verification_channel
+    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.email_sent_title")
+  end
+
   test "ades evidence session verifies submitted code" do
     contract, recipient = create_bundle_contract_with_mobile_recipient
     session = create_ades_session_for(contract: contract, recipient: recipient)
@@ -123,7 +140,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
     with_sms_provider(sms_provider) do
       post "/contracts/#{contract.uuid}/sessions/#{session.id}/request_verification", params: { recipient: recipient.uuid }
-      post "/contracts/#{contract.uuid}/sessions/#{session.id}/verify_verification", params: { recipient: recipient.uuid, verification_code: "000000" }
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/verify_verification", params: { recipient: recipient.uuid, verification_code: sms_provider.last_code }
     end
 
     assert_response :success
@@ -145,7 +162,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
     with_sms_provider(sms_provider) do
       post "/contracts/#{contract.uuid}/sessions/#{session.id}/request_verification", params: { recipient: recipient.uuid }
-      post "/contracts/#{contract.uuid}/sessions/#{session.id}/verify_verification", params: { recipient: recipient.uuid, verification_code: "000000" }
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/verify_verification", params: { recipient: recipient.uuid, verification_code: sms_provider.last_code }
     end
 
     with_ades_signing_service(fake_signing_service) do
@@ -155,6 +172,22 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert session.reload.signed?
     assert_includes response.body, I18n.t("contracts.sessions.signed.title")
+  end
+
+  test "ades evidence session rejects invalid verification code" do
+    contract, recipient = create_bundle_contract_with_mobile_recipient
+    session = create_ades_session_for(contract: contract, recipient: recipient)
+    sms_provider = fake_sms_provider
+
+    with_sms_provider(sms_provider) do
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/request_verification", params: { recipient: recipient.uuid }
+      post "/contracts/#{contract.uuid}/sessions/#{session.id}/verify_verification", params: { recipient: recipient.uuid, verification_code: "000000" }
+    end
+
+    assert_response :unprocessable_entity
+    assert session.reload.signature_verification.sent?
+    assert_equal 1, session.signature_verification.attempts_count
+    assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.errors.invalid_code")
   end
 
   test "parameters include visible signature text payload for prepared signature fields" do
@@ -353,6 +386,40 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "upload succeeds for indeterminate configured ades signing certificate" do
+    credential = build_test_credential(common_name: "Autogram Portal Staging Signing")
+    pkcs12 = OpenSSL::PKCS12.create("secret", "agp-test-signing", credential.private_key, credential.certificate)
+
+    with_env(
+      "ADES_SIGNING_PKCS12_BASE64" => Base64.strict_encode64(pkcs12.to_der),
+      "ADES_SIGNING_PKCS12_PASSWORD" => "secret",
+      "ADES_SIGNING_PKCS12_PATH" => nil
+    ) do
+      validation_result = AutogramService::ValidationResult.new(
+        hasSignatures: true,
+        signatures: [
+          parsed_signature(
+            validation_result: "INDETERMINATE",
+            subject_dn: credential.certificate.subject.to_s,
+            certificate_der: Base64.strict_encode64(credential.certificate.to_der)
+          )
+        ],
+        documentInfo: { signed_objects_count: 1 }
+      )
+
+      with_autogram_service(fake_validation_service(validation_result)) do
+        post "/contracts/#{@contract.uuid}/sessions/#{@session.id}/upload", params: {
+          session_token: SessionAccessToken.generate(contract: @contract, session: @session),
+          signed_document: Base64.strict_encode64("signed")
+        }
+
+        assert_response :success
+        assert_equal({ "success" => true }, JSON.parse(response.body))
+        assert @session.reload.signed?
+      end
+    end
+  end
+
   test "destroy is forbidden without authorized user" do
     session_id = @session.id
 
@@ -364,7 +431,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
   private
 
-  def parsed_signature(validation_result:, subject_dn:)
+  def parsed_signature(validation_result:, subject_dn:, certificate_der: nil)
     @autogram_service.send(
       :parse_signature_info,
       {
@@ -372,12 +439,49 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
         "signingCertificate" => {
           "subjectDN" => subject_dn,
           "issuerDN" => subject_dn,
-          "qualification" => "NA"
+          "qualification" => "NA",
+          "certificateDer" => certificate_der
         },
         "timestamps" => []
       },
       {}
     )
+  end
+
+  def build_test_credential(common_name: "Autogram Test")
+    key = OpenSSL::PKey::RSA.new(2048)
+    certificate = OpenSSL::X509::Certificate.new
+    certificate.version = 2
+    certificate.serial = SecureRandom.random_number(2**20)
+    certificate.subject = OpenSSL::X509::Name.parse("/CN=#{common_name}/O=Autogram Development")
+    certificate.issuer = certificate.subject
+    certificate.public_key = key.public_key
+    certificate.not_before = 1.day.ago
+    certificate.not_after = 30.days.from_now
+
+    extension_factory = OpenSSL::X509::ExtensionFactory.new
+    extension_factory.subject_certificate = certificate
+    extension_factory.issuer_certificate = certificate
+    certificate.add_extension(extension_factory.create_extension("basicConstraints", "CA:FALSE", true))
+    certificate.add_extension(extension_factory.create_extension("keyUsage", "digitalSignature", true))
+    certificate.add_extension(extension_factory.create_extension("subjectKeyIdentifier", "hash"))
+    certificate.sign(key, OpenSSL::Digest::SHA256.new)
+
+    AdesServerSigningService::Credential.new(certificate: certificate, private_key: key)
+  end
+
+  def with_env(overrides)
+    original_values = overrides.transform_values { |_,| nil }
+    overrides.each_key { |key| original_values[key] = ENV[key] }
+    overrides.each do |key, value|
+      value.nil? ? ENV.delete(key) : ENV[key] = value
+    end
+
+    yield
+  ensure
+    original_values.each do |key, value|
+      value.nil? ? ENV.delete(key) : ENV[key] = value
+    end
   end
 
   def fake_validation_service(validation_result)
@@ -533,7 +637,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     recipient.recipient_signer.signer_contracts.find_by!(contract: contract).sessions.create!(
       type: "AdesEvidenceSession",
       signing_started_at: Time.current,
-      options: { "verification_channel" => "sms" }
+      options: { "verification_channel" => (recipient.mobile_phone? ? "sms" : "email") }
     )
   end
 
@@ -541,7 +645,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     Class.new do
       attr_reader :last_code
 
-      def deliver_code(phone_number:, code:, context: {})
+      def deliver_code(phone_number:, code:, locale: I18n.default_locale, context: {})
         @last_code = code
         "req-#{SecureRandom.hex(4)}"
       end

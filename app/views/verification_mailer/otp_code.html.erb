@@ -1,0 +1,11 @@
+<p><%= t("verification_mailer.otp_code.title") %></p>
+
+<p><%= t("verification_mailer.otp_code.body") %></p>
+
+<p><strong><%= @code %></strong></p>
+
+<% if @app_host.present? %>
+  <p>@<%= @app_host %> #<%= @code %></p>
+<% end %>
+
+<p><%= t("verification_mailer.otp_code.footer") %></p>

@@ -168,7 +168,7 @@
           <dl class="mt-4 space-y-4 text-sm text-gray-700">
             <div>
               <dt class="font-medium text-gray-900"><%= t('.verification_completed_label') %></dt>
-              <dd class="mt-1"><%= @signature_evidence_record.public_event_time("sms_verified") ? l(@signature_evidence_record.public_event_time("sms_verified"), format: :long) : t('.unknown_value') %></dd>
+              <dd class="mt-1"><%= @signature_evidence_record.verification_completed_at ? l(@signature_evidence_record.verification_completed_at, format: :long) : t('.unknown_value') %></dd>
             </div>
             <div>
               <dt class="font-medium text-gray-900"><%= t('.server_signing_completed_label') %></dt>
