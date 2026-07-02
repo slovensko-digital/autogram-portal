@@ -28,6 +28,7 @@ class AutogramSession < Session
   end
 
   def self.available?(qscd, contract)
+    return false if contract.prepared_signature_fields_source_attached?
     true
   end
 end

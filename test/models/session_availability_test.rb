@@ -8,7 +8,7 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
   test "eidentita and podpisuj are unavailable when prepared signature fields are attached" do
     contract = contract_with_prepared_signature_fields
 
-    assert AutogramSession.available?(nil, contract)
+    assert_not AutogramSession.available?(nil, contract)
     assert AvmSession.available?(nil, contract)
     assert_not EidentitaSession.available?(nil, contract)
     assert_not PodpisujSession.available?(nil, contract)
