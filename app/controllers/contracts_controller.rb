@@ -155,7 +155,7 @@ class ContractsController < ApplicationController
         visual_stamp.save!
       end
 
-      return redirect_to signature_apps_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+      return redirect_to signature_field_appearance_completion_path
     end
 
     stamped_content = AutogramEnvironment.autogram_service.stamp_pdf(source_document, stamp: visual_stamp_service_params(visual_stamp, existing_stamp))
@@ -587,5 +587,19 @@ class ContractsController < ApplicationController
     else
       sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
     end
+  end
+
+  def signature_field_appearance_completion_path
+    if should_resume_ades_after_signature_field_appearance?
+      ades_contract_sessions_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+    else
+      signature_apps_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
+    end
+  end
+
+  def should_resume_ades_after_signature_field_appearance?
+    return true if params[:resume_signing_method] == "ades"
+
+    params[:resume_signing_method].blank? && @contract.allowed_methods == [ "ades" ] && AdesEvidenceSession.available?(@contract, recipient: @recipient)
   end
 end

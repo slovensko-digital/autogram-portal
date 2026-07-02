@@ -96,7 +96,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
     get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid }
 
-    assert_redirected_to visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: "signature_field_appearance")
+    assert_redirected_to visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: "signature_field_appearance", resume_signing_method: "ades")
     assert_equal 0, contract.reload.sessions.where(type: "AdesEvidenceSession").count
   end
 
@@ -109,7 +109,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, "turbo-frame id=\"signature_apps_#{contract.uuid}\""
-    assert_select "a[href='#{visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: 'signature_field_appearance')}'][data-turbo-frame='_top']"
+    assert_select "a[href='#{visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: 'signature_field_appearance', resume_signing_method: 'ades')}'][data-turbo-frame='_top']"
     assert_equal 0, contract.reload.sessions.where(type: "AdesEvidenceSession").count
   end
 
@@ -145,7 +145,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
     get "/contracts/#{contract.uuid}/sessions/#{session.id}", params: { recipient: recipient.uuid }
 
-    assert_redirected_to visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: "signature_field_appearance")
+    assert_redirected_to visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: "signature_field_appearance", resume_signing_method: "ades")
   end
 
   test "ades evidence session falls back to email verification when sms provider is unavailable" do

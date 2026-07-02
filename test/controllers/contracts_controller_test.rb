@@ -182,6 +182,21 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, contract.reload.content_versions.where(origin: "visual").count
   end
 
+  test "prepared signature field appearance resumes ades flow when requested" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field(allowed_methods: [ "ades" ], mobile_phone: "+421901234567")
+
+    with_autogram_service(fake_unsigned_pades_validation_service) do
+      post "/contracts/#{contract.uuid}/visual_signing", params: {
+        recipient: recipient.uuid,
+        purpose: "signature_field_appearance",
+        resume_signing_method: "ades",
+        stamp: { custom_text: "Jane Visible", content_mode: "text" }
+      }
+    end
+
+    assert_redirected_to ades_contract_sessions_path(contract, recipient: recipient.uuid)
+  end
+
   test "prepared signature field appearance with drawing stores image without text" do
     contract, recipient = create_bundle_contract_with_prepared_signature_field
 
@@ -407,10 +422,10 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     contract
   end
 
-  def create_bundle_contract_with_prepared_signature_field
-    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+  def create_bundle_contract_with_prepared_signature_field(allowed_methods: [ "qes" ], mobile_phone: nil)
+    contract = create_pdf_contract(allowed_methods: allowed_methods)
     bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
-    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en", mobile_phone: mobile_phone)
 
     with_autogram_service(fake_unsigned_pades_validation_service) do
       contract.signature_field_preparations.create!(

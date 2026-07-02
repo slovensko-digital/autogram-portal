@@ -40,6 +40,7 @@ end %>
           <%= hidden_field_tag :recipient, @recipient&.uuid %>
           <%= hidden_field_tag :iframe, params[:iframe] %>
           <%= hidden_field_tag :purpose, purpose %>
+          <%= hidden_field_tag :resume_signing_method, params[:resume_signing_method] %>
           <%= hidden_field_tag "stamp[page]", @visual_stamp&.page || preview_page, data: { visual_stamp_target: "pageField" } %>
           <%= hidden_field_tag "stamp[x]", @visual_stamp&.x || (@assigned_signature_field_preparation&.x || 40), data: { visual_stamp_target: "xField" } %>
           <%= hidden_field_tag "stamp[y]", @visual_stamp&.y || (@assigned_signature_field_preparation&.y || 40), data: { visual_stamp_target: "yField" } %>
