@@ -19,9 +19,9 @@ env:
     SMTP_ENABLE_STARTTLS_AUTO: true
     SMTP_TLS: false
     ALLOWED_METHODS: "qes,ades,visual"
-    AWS_ACCESS_KEY_ID: <%= ENV["AWS_ACCESS_KEY_ID"] %>
-    AWS_REGION: <%= ENV["AWS_REGION"] %>
-    AWS_SMS_ENABLED: <%= ENV["AWS_SMS_ENABLED"] %>
+    AWS_ACCESS_KEY_ID: "<%= ENV['AWS_ACCESS_KEY_ID'] %>"
+    AWS_REGION: "<%= ENV['AWS_REGION'] %>"
+    AWS_SMS_ENABLED: "<%= ENV['AWS_SMS_ENABLED'] %>"
 
 proxy:
   host: agp.dev.slovensko.digital
