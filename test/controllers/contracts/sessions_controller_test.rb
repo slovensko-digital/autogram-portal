@@ -91,6 +91,28 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}"
   end
 
+  test "ades evidence session create redirects to prepared signature field appearance when required" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+
+    get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid }
+
+    assert_redirected_to visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: "signature_field_appearance")
+    assert_equal 0, contract.reload.sessions.where(type: "AdesEvidenceSession").count
+  end
+
+  test "ades evidence session create in turbo frame renders prepared signature field appearance prompt when required" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+
+    get "/contracts/#{contract.uuid}/sessions/ades",
+        params: { recipient: recipient.uuid, embedded: true },
+        headers: { "Turbo-Frame" => "signature_apps_#{contract.uuid}" }
+
+    assert_response :success
+    assert_includes response.body, "turbo-frame id=\"signature_apps_#{contract.uuid}\""
+    assert_select "a[href='#{visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: 'signature_field_appearance')}'][data-turbo-frame='_top']"
+    assert_equal 0, contract.reload.sessions.where(type: "AdesEvidenceSession").count
+  end
+
   test "ades evidence session falls back to email when recipient phone is missing" do
     contract, recipient = create_bundle_contract_with_mobile_recipient(mobile_phone: nil)
 
@@ -115,6 +137,15 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert session.reload.signature_verification.sent?
     assert_equal "requested", session.signature_evidence_record.reload.state
     assert_includes response.body, I18n.t("contracts.sessions.ades_evidence.sms_sent_title")
+  end
+
+  test "ades evidence session show redirects to prepared signature field appearance when required" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+    session = create_ades_session_for(contract: contract, recipient: recipient)
+
+    get "/contracts/#{contract.uuid}/sessions/#{session.id}", params: { recipient: recipient.uuid }
+
+    assert_redirected_to visual_signing_contract_path(contract, recipient: recipient.uuid, purpose: "signature_field_appearance")
   end
 
   test "ades evidence session falls back to email verification when sms provider is unavailable" do
@@ -628,6 +659,35 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
       email: "recipient-#{SecureRandom.hex(4)}@example.com",
       locale: "en",
       mobile_phone: mobile_phone
+    )
+
+    [ contract.reload, recipient.reload ]
+  end
+
+  def create_bundle_contract_with_prepared_signature_field
+    contract = create_contract_without_session
+    contract.update!(allowed_methods: [ "ades" ])
+    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(
+      email: "recipient-#{SecureRandom.hex(4)}@example.com",
+      locale: "en",
+      mobile_phone: "+421901234567"
+    )
+
+    contract.signature_field_preparations.create!(
+      recipient: recipient,
+      document: contract.documents.first,
+      page: 2,
+      x: 42,
+      y: 64,
+      width: 180,
+      height: 64
+    )
+
+    contract.add_prepared_signature_fields_content_version!(
+      content: "%PDF-1.4 prepared source",
+      filename: "visual-test-prepared-fields.pdf",
+      content_type: "application/pdf"
     )
 
     [ contract.reload, recipient.reload ]
