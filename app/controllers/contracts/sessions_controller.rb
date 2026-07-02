@@ -231,7 +231,8 @@ class Contracts::SessionsController < ApplicationController
              locals: {
                frame_id: request.headers["Turbo-Frame"],
                contract: @contract,
-               recipient: @recipient
+               recipient: @recipient,
+               resume_signing_method: "ades"
              }
       return
     end
@@ -240,7 +241,8 @@ class Contracts::SessionsController < ApplicationController
       @contract,
       recipient: @recipient&.uuid,
       iframe: params[:iframe],
-      purpose: "signature_field_appearance"
+      purpose: "signature_field_appearance",
+      resume_signing_method: "ades"
     )
   end
 
