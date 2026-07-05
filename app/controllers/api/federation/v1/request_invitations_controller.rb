@@ -22,7 +22,7 @@ class Api::Federation::V1::RequestInvitationsController < FederationApiControlle
   end
 
   def withdraw
-    @invitation.withdraw!
+    @invitation.resolve!(status: resolved_status)
 
     render json: { invitation: invitation_payload(@invitation) }
   end
@@ -66,5 +66,9 @@ class Api::Federation::V1::RequestInvitationsController < FederationApiControlle
       createdAt: invitation.created_at.iso8601,
       withdrawnAt: invitation.withdrawn_at&.iso8601
     }
+  end
+
+  def resolved_status
+    params.permit(:status)[:status].presence || "withdrawn"
   end
 end

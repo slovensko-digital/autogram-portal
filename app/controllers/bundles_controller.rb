@@ -58,8 +58,19 @@ class BundlesController < ApplicationController
     @state = params[:state].presence_in(%w[awaiting signed declined superseded])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    invitation_scope = FederationRequestInvitation.pending.for_user(current_user).includes(:portal_instance).order(created_at: order_dir)
-    @federation_invitations = @state.in?([ nil, "awaiting" ]) ? invitation_scope : FederationRequestInvitation.none
+    invitation_scope = FederationRequestInvitation.visible_in_received.for_user(current_user).includes(:portal_instance).order(created_at: order_dir)
+    @federation_invitations = case @state
+    when "awaiting"
+      invitation_scope.pending
+    when "signed"
+      invitation_scope.where(status: "signed")
+    when "superseded"
+      invitation_scope.where(status: "superseded")
+    when "declined"
+      FederationRequestInvitation.none
+    else
+      invitation_scope
+    end
     recipient_bundles = Bundle.recipient_user(current_user).distinct
 
     awaiting_for_user_scope = Bundle.recipient_user(current_user)

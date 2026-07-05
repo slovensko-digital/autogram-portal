@@ -31,11 +31,12 @@ class Federation::SendRequestInvitationJobTest < ActiveJob::TestCase
     fake_client = WithdrawClientStub.new
 
     with_federation_portal_client(fake_client) do
-      Federation::WithdrawRequestInvitationJob.perform_now(recipient)
+      Federation::WithdrawRequestInvitationJob.perform_now(recipient, status: "signed")
     end
 
     assert_equal recipient.portal_instance, fake_client.portal_instance
     assert_equal recipient.uuid, fake_client.recipient_uuid
+    assert_equal "signed", fake_client.status
   end
 
   private
@@ -52,14 +53,15 @@ class Federation::SendRequestInvitationJobTest < ActiveJob::TestCase
     end
   end
 
-  WithdrawClientStub = Struct.new(:portal_instance, :recipient_uuid) do
+  WithdrawClientStub = Struct.new(:portal_instance, :recipient_uuid, :status) do
     def initialize
-      super(nil, nil)
+      super(nil, nil, nil)
     end
 
-    def withdraw_request_invitation(portal_instance:, recipient_uuid:)
+    def withdraw_request_invitation(portal_instance:, recipient_uuid:, status:)
       self.portal_instance = portal_instance
       self.recipient_uuid = recipient_uuid
+      self.status = status
       { "id" => SecureRandom.uuid }
     end
   end

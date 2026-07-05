@@ -4,13 +4,14 @@ module Federation
 
     retry_on FederationRequestBroker::Error, wait: :polynomially_longer, attempts: 5
 
-    def perform(recipient)
+    def perform(recipient, status: "withdrawn")
       return unless recipient.federated_recipient?
       return unless recipient.remote_notified_at.present?
 
       FederationPortalClient.new.withdraw_request_invitation(
         portal_instance: recipient.portal_instance,
-        recipient_uuid: recipient.uuid
+        recipient_uuid: recipient.uuid,
+        status: status
       )
     end
   end

@@ -181,7 +181,7 @@ class Bundle < ApplicationRecord
 
       Recipient.where(id: affected_recipient_ids).find_each do |recipient|
         recipient.revoke_active_access_grants!
-        Federation::WithdrawRequestInvitationJob.perform_later(recipient) if recipient.federated_recipient? && recipient.remote_notified_at.present?
+        Federation::WithdrawRequestInvitationJob.perform_later(recipient, status: "superseded") if recipient.federated_recipient? && recipient.remote_notified_at.present?
         Notification::RecipientNoLongerRequiredJob.perform_later(recipient)
       end
     end
@@ -225,7 +225,7 @@ class Bundle < ApplicationRecord
     return unless recipient.remote_notified_at.present?
     return unless recipient.signed?
 
-    Federation::WithdrawRequestInvitationJob.perform_later(recipient)
+    Federation::WithdrawRequestInvitationJob.perform_later(recipient, status: "signed")
   end
 
   def rules_changed?

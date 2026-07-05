@@ -118,7 +118,7 @@ class BundleTest < ActiveSupport::TestCase
     signer_contract = recipient.signer_contracts.find_by!(contract: bundle.contracts.first)
     signer_contract.update!(signed_at: Time.current)
 
-    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ recipient ]) do
+    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ recipient, { status: "signed" } ]) do
       bundle.notify_contract_signed(bundle.contracts.first, recipient.recipient_signer)
     end
   end
@@ -137,7 +137,7 @@ class BundleTest < ActiveSupport::TestCase
 
     first_recipient.signer_contracts.find_by!(contract: bundle.contracts.first).update!(signed_at: Time.current)
 
-    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ second_recipient ]) do
+    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ second_recipient, { status: "superseded" } ]) do
       bundle.notify_contract_signed(bundle.contracts.first, first_recipient.recipient_signer)
     end
   end

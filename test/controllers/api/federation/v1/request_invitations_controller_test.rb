@@ -74,6 +74,26 @@ class Api::Federation::V1::RequestInvitationsControllerTest < ActionDispatch::In
     assert_not_nil invitation.withdrawn_at
   end
 
+  test "withdraw can mark invitation as signed" do
+    invitation = FederationRequestInvitation.create!(
+      portal_instance: @portal_instance,
+      origin_recipient_uuid: invitation_params[:recipientId],
+      origin_bundle_uuid: invitation_params[:bundleId],
+      recipient_email: invitation_params[:recipientEmail],
+      payload: invitation_params
+    )
+
+    post "/api/federation/v1/request_invitations/#{invitation.origin_recipient_uuid}/withdraw",
+         params: { status: "signed" },
+         headers: portal_headers(scope: "federation.request.invitation.withdraw")
+
+    assert_response :success
+
+    invitation.reload
+    assert_equal "signed", invitation.status
+    assert_not_nil invitation.withdrawn_at
+  end
+
   private
 
   def invitation_params

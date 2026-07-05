@@ -29,12 +29,15 @@
 #  fk_rails_...  (recipient_user_id => users.id)
 #
 class FederationRequestInvitation < ApplicationRecord
+  RESOLVED_STATUSES = %w[signed superseded withdrawn].freeze
+
   belongs_to :portal_instance
   belongs_to :recipient_user, class_name: "User", optional: true
 
-  enum :status, { pending: "pending", withdrawn: "withdrawn" }, scopes: false
+  enum :status, { pending: "pending", signed: "signed", superseded: "superseded", withdrawn: "withdrawn" }, scopes: false
 
   scope :pending, -> { where(status: "pending") }
+  scope :visible_in_received, -> { where.not(status: "withdrawn") }
   scope :for_user, ->(user) {
     where(recipient_email: user.email)
       .or(where(recipient_user: user))
@@ -55,10 +58,12 @@ class FederationRequestInvitation < ApplicationRecord
     uuid
   end
 
-  def withdraw!
-    return if withdrawn?
+  def resolve!(status:)
+    normalized_status = status.to_s
+    raise ArgumentError, "Unsupported invitation status" unless RESOLVED_STATUSES.include?(normalized_status)
+    return if self.status == normalized_status
 
-    update!(status: "withdrawn", withdrawn_at: Time.current)
+    update!(status: normalized_status, withdrawn_at: Time.current)
   end
 
   private

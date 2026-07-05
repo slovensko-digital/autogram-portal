@@ -32,6 +32,7 @@
         <div class="divide-y divide-gray-100">
           <% @federation_invitations.each do |invitation| %>
             <% payload = invitation.payload %>
+            <% invitation_status = invitation.status %>
             <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
               <div class="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
                 <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -66,12 +67,20 @@
                 <% end %>
               </div>
               <div class="hidden md:flex flex-1">
-                <%= render 'shared/badge', color: 'yellow', label: t('.state_awaiting') %>
+                <% if invitation_status == "signed" %>
+                  <%= render 'shared/badge', color: 'green', label: t('.state_signed') %>
+                <% elsif invitation_status == "superseded" %>
+                  <%= render 'shared/badge', color: 'gray', label: t('.state_superseded') %>
+                <% else %>
+                  <%= render 'shared/badge', color: 'yellow', label: t('.state_awaiting') %>
+                <% end %>
               </div>
               <div class="flex items-center gap-0.5 w-20 shrink-0 justify-end">
-                <%= link_to t('actions.view'), federation_requests_open_path(url: payload["openUrl"]),
-                            class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors",
-                            title: t('actions.view') %>
+                <% if invitation_status == "pending" %>
+                  <%= link_to t('actions.view'), federation_requests_open_path(url: payload["openUrl"]),
+                              class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors",
+                              title: t('actions.view') %>
+                <% end %>
               </div>
             </div>
           <% end %>

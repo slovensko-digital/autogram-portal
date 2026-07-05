@@ -120,7 +120,7 @@ class RecipientTest < ActiveSupport::TestCase
     )
     recipient.update!(notification_status: :notified, remote_notified_at: Time.current)
 
-    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ recipient ]) do
+    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ recipient, { status: "withdrawn" } ]) do
       recipient.withdraw!
     end
   end

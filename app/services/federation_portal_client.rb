@@ -49,11 +49,12 @@ class FederationPortalClient
     parse_response(response).fetch("invitation")
   end
 
-  def withdraw_request_invitation(portal_instance:, recipient_uuid:)
+  def withdraw_request_invitation(portal_instance:, recipient_uuid:, status: "withdrawn")
     response = connection(portal_instance.base_url).post(withdraw_request_invitation_path(recipient_uuid)) do |request|
       request.headers["Authorization"] = bearer_token(portal_instance: portal_instance, scope: "federation.request.invitation.withdraw")
       request.headers["Accept"] = "application/json"
       request.headers["Content-Type"] = "application/json"
+      request.body = { status: status }
     end
 
     parse_response(response).fetch("invitation")

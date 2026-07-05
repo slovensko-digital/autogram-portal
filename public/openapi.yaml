@@ -553,6 +553,17 @@ paths:
             type: string
             format: uuid
           description: The recipient UUID on the origin portal.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ signed, superseded, withdrawn ]
+                  description: Optional terminal invitation status to persist on the home portal. Defaults to `withdrawn`.
       responses:
         "200":
           description: Invitation withdrawn.
@@ -1017,7 +1028,7 @@ components:
           format: email
         status:
           type: string
-          enum: [ pending, withdrawn ]
+          enum: [ pending, signed, superseded, withdrawn ]
         createdAt:
           type: string
           format: date-time

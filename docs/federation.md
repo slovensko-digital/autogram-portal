@@ -230,7 +230,7 @@ Purpose:
 
 - accept pushed signing-request invitations from a trusted origin portal
 - store them locally so they appear in the existing received-bundles experience
-- mark previously pushed invitations as withdrawn without deleting audit history
+- resolve previously pushed invitations as signed, superseded, or withdrawn without deleting audit history
 
 Served by:
 
@@ -500,7 +500,7 @@ Current limitations:
 - the home portal stores and surfaces pushed invitations, but does not host the contract signing session itself
 - sender-side federation still depends on a preconfigured trusted home-portal list
 - the origin portal still requires a configured `PortalInstance` for the assigned home portal; only the home-side origin discovery is dynamic
-- pushed invitations do not yet receive a separate remote "completed" status update after signing; they disappear only when explicitly withdrawn or filtered out by later logic
+- pushed invitations now preserve `signed` and `superseded` terminal states for home-portal filtering, but they still do not synchronize richer post-signing history beyond those states
 
 ## Extension Points
 
