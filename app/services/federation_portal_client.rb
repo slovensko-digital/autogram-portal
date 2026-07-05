@@ -38,6 +38,27 @@ class FederationPortalClient
     parse_response(response).fetch("claim").fetch("signUrl")
   end
 
+  def send_request_invitation(portal_instance:, invitation:)
+    response = connection(portal_instance.base_url).post(request_invitations_path) do |request|
+      request.headers["Authorization"] = bearer_token(portal_instance: portal_instance, scope: "federation.request.invitation.send")
+      request.headers["Accept"] = "application/json"
+      request.headers["Content-Type"] = "application/json"
+      request.body = { invitation: invitation }
+    end
+
+    parse_response(response).fetch("invitation")
+  end
+
+  def withdraw_request_invitation(portal_instance:, recipient_uuid:)
+    response = connection(portal_instance.base_url).post(withdraw_request_invitation_path(recipient_uuid)) do |request|
+      request.headers["Authorization"] = bearer_token(portal_instance: portal_instance, scope: "federation.request.invitation.withdraw")
+      request.headers["Accept"] = "application/json"
+      request.headers["Content-Type"] = "application/json"
+    end
+
+    parse_response(response).fetch("invitation")
+  end
+
   private
 
   def connection(base_url)
@@ -63,6 +84,14 @@ class FederationPortalClient
 
   def claim_path(recipient_uuid)
     "/api/federation/v1/requests/#{recipient_uuid}/claim"
+  end
+
+  def request_invitations_path
+    "/api/federation/v1/request_invitations"
+  end
+
+  def withdraw_request_invitation_path(recipient_uuid)
+    "/api/federation/v1/request_invitations/#{recipient_uuid}/withdraw"
   end
 
   def parse_response(response)

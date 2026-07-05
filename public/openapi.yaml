@@ -504,6 +504,69 @@ paths:
           description: Recipient not found.
         "409":
           description: Request is no longer claimable.
+
+  /federation/v1/request_invitations:
+    post:
+      tags:
+        - Federation
+      security:
+        - PortalJWT: []
+      summary: Push a federated signing request invitation to a trusted portal
+      description: Stores or updates a pending signing invitation on the recipient home portal so it can be shown in the received-bundles experience.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invitation:
+                  $ref: "#/components/schemas/FederationRequestInvitationPayload"
+              required:
+                - invitation
+      responses:
+        "201":
+          description: Invitation stored.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invitation:
+                    $ref: "#/components/schemas/FederationRequestInvitation"
+        "401":
+          description: Invalid portal assertion.
+
+  /federation/v1/request_invitations/{recipientUuid}/withdraw:
+    post:
+      tags:
+        - Federation
+      security:
+        - PortalJWT: []
+      summary: Withdraw a previously pushed federated signing request invitation
+      description: Marks an existing pushed invitation as withdrawn on the recipient home portal.
+      parameters:
+        - name: recipientUuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The recipient UUID on the origin portal.
+      responses:
+        "200":
+          description: Invitation withdrawn.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invitation:
+                    $ref: "#/components/schemas/FederationRequestInvitation"
+        "401":
+          description: Invalid portal assertion.
+        "404":
+          description: Invitation not found.
         "422":
           description: Claimant email does not match recipient.
 
@@ -883,6 +946,86 @@ components:
         openUrl:
           type: string
           format: uri
+
+    FederationRequestInvitationPayload:
+      type: object
+      properties:
+        recipientId:
+          type: string
+          format: uuid
+        bundleId:
+          type: string
+          format: uuid
+        originPortal:
+          type: object
+          properties:
+            issuer:
+              type: string
+              format: uri
+            name:
+              type: string
+        authorName:
+          type: string
+        recipientEmail:
+          type: string
+          format: email
+        status:
+          type: string
+        contracts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              displayName:
+                type: string
+        signingRule:
+          type: string
+        requiredSignatures:
+          type:
+            - integer
+            - "null"
+        note:
+          type:
+            - string
+            - "null"
+        openUrl:
+          type: string
+          format: uri
+      required:
+        - recipientId
+        - bundleId
+        - recipientEmail
+        - openUrl
+
+    FederationRequestInvitation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        recipientId:
+          type: string
+          format: uuid
+        bundleId:
+          type: string
+          format: uuid
+        recipientEmail:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [ pending, withdrawn ]
+        createdAt:
+          type: string
+          format: date-time
+        withdrawnAt:
+          type:
+            - string
+            - "null"
+          format: date-time
 
 
   securitySchemes:

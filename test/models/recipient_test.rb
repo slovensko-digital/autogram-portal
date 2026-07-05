@@ -96,6 +96,35 @@ class RecipientTest < ActiveSupport::TestCase
     assert_not_nil grant.revoked_at
   end
 
+  test "notify enqueues portal invitation job for federated recipients" do
+    portal_instance = create_portal_instance
+    recipient = bundles(:one).recipients.create!(
+      email: "recipient@example.com",
+      locale: "en",
+      portal_instance_uuid: portal_instance.uuid
+    )
+
+    assert_enqueued_with(job: Federation::SendRequestInvitationJob, args: [ recipient ]) do
+      recipient.notify!
+    end
+
+    assert recipient.reload.sending?
+  end
+
+  test "withdraw enqueues portal invitation withdrawal for remotely notified federated recipients" do
+    portal_instance = create_portal_instance
+    recipient = bundles(:one).recipients.create!(
+      email: "recipient@example.com",
+      locale: "en",
+      portal_instance_uuid: portal_instance.uuid
+    )
+    recipient.update!(notification_status: :notified, remote_notified_at: Time.current)
+
+    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ recipient ]) do
+      recipient.withdraw!
+    end
+  end
+
   test "same email can be added again after withdrawal" do
     email = "recipient-#{SecureRandom.hex(6)}@example.com"
     recipient = create_recipient(notification_status: :notified, email: email)

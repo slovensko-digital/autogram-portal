@@ -27,9 +27,55 @@
       </div>
     <% end %>
 
-    <% if @bundles.any? %>
+    <% if @federation_invitations.any? || @bundles.any? %>
       <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="divide-y divide-gray-100">
+          <% @federation_invitations.each do |invitation| %>
+            <% payload = invitation.payload %>
+            <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+              <div class="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15A1.5 1.5 0 0121 4.5v12A1.5 1.5 0 0119.5 18h-15A1.5 1.5 0 013 16.5v-12A1.5 1.5 0 014.5 3zm4.5 18v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0 space-y-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-semibold text-gray-900"><%= t('.external_invitation_title') %></span>
+                  <%= render 'shared/badge', color: 'indigo', label: t('.external_portal_badge') %>
+                </div>
+                <div class="text-sm text-gray-700"><%= payload["authorName"] %></div>
+                <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+                  <span class="flex items-center gap-1">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5V4H2v16h5m10 0v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5m10 0H7" />
+                    </svg>
+                    <%= t('.from_portal', name: invitation.portal_instance.name) %>
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+                    </svg>
+                    <%= invitation.created_at.strftime("%d.%m.%Y") %>
+                  </span>
+                  <% if payload["contracts"].present? %>
+                    <span><%= payload["contracts"].map { |contract| contract["displayName"] }.join(", ") %></span>
+                  <% end %>
+                </div>
+                <% if payload["note"].present? %>
+                  <div class="text-sm text-gray-500"><%= payload["note"] %></div>
+                <% end %>
+              </div>
+              <div class="hidden md:flex flex-1">
+                <%= render 'shared/badge', color: 'yellow', label: t('.state_awaiting') %>
+              </div>
+              <div class="flex items-center gap-0.5 w-20 shrink-0 justify-end">
+                <%= link_to t('actions.view'), federation_requests_open_path(url: payload["openUrl"]),
+                            class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors",
+                            title: t('actions.view') %>
+              </div>
+            </div>
+          <% end %>
+
           <% @bundles.each do |bundle| %>
             <% recipient = @recipients_by_bundle[bundle.id] %>
             <% personally_signed = recipient&.signed? %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_01_143000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -107,12 +107,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_143000) do
     t.boolean "author_notifications_enabled", default: false, null: false
     t.bigint "bundle_id"
     t.datetime "created_at", null: false
-    t.string "temporary_storage_reason"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.string "uuid", null: false
     t.index ["bundle_id"], name: "index_contracts_on_bundle_id"
-    t.index ["temporary_storage_reason"], name: "index_contracts_on_temporary_storage_reason"
     t.index ["user_id"], name: "index_contracts_on_user_id"
     t.index ["uuid"], name: "index_contracts_on_uuid"
   end
@@ -126,6 +124,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_143000) do
     t.string "uuid", null: false
     t.index ["contract_id"], name: "index_documents_on_contract_id"
     t.index ["uuid"], name: "index_documents_on_uuid"
+  end
+
+  create_table "federation_request_invitations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "origin_bundle_uuid", null: false
+    t.uuid "origin_recipient_uuid", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.bigint "portal_instance_id", null: false
+    t.string "recipient_email", null: false
+    t.bigint "recipient_user_id"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
+    t.datetime "withdrawn_at"
+    t.index ["portal_instance_id", "origin_recipient_uuid"], name: "index_federation_request_invitations_on_portal_and_recipient", unique: true
+    t.index ["portal_instance_id"], name: "index_federation_request_invitations_on_portal_instance_id"
+    t.index ["recipient_email"], name: "index_federation_request_invitations_on_recipient_email"
+    t.index ["recipient_user_id"], name: "index_federation_request_invitations_on_recipient_user_id"
+    t.index ["status"], name: "index_federation_request_invitations_on_status"
+    t.index ["uuid"], name: "index_federation_request_invitations_on_uuid", unique: true
   end
 
   create_table "good_job_batches", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -258,17 +276,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_143000) do
     t.index ["bundle_id"], name: "index_postal_addresses_on_bundle_id"
   end
 
-  create_table "push_subscriptions", force: :cascade do |t|
-    t.string "auth", null: false
-    t.datetime "created_at", null: false
-    t.text "endpoint", null: false
-    t.string "p256dh", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
-    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
-    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
-  end
-
   create_table "recipient_access_grants", force: :cascade do |t|
     t.string "claim_jti", null: false
     t.string "claimed_by_email", null: false
@@ -310,6 +317,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_143000) do
     t.bigint "portal_instance_id"
     t.datetime "remote_claimed_at"
     t.string "remote_claimed_by_email"
+    t.datetime "remote_notified_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
@@ -532,9 +540,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_143000) do
   add_foreign_key "contracts", "bundles"
   add_foreign_key "contracts", "users"
   add_foreign_key "documents", "contracts"
+  add_foreign_key "federation_request_invitations", "portal_instances"
+  add_foreign_key "federation_request_invitations", "users", column: "recipient_user_id"
   add_foreign_key "identities", "users"
   add_foreign_key "postal_addresses", "bundles"
-  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "recipient_access_grants", "portal_instances"
   add_foreign_key "recipient_access_grants", "recipients"
   add_foreign_key "recipients", "bundles"

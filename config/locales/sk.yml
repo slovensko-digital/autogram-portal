@@ -273,7 +273,7 @@ sk:
           subtitle: "Rozšíri podpisy na úroveň T pridaním kvalifikovanej časovej pečiatky."
         archive:
           title: "Archivovať dokument"
-          subtitle: "Rozšíri podpisy na úroveň LTA archívnou časovou pečiatkou pre dlhodobé overenie."
+          subtitle: "Rozšíri podpisy na úroveň LTA pridaním archívnej časovej pečiatky pre dlhodobé overenie."
     actions_error:
       title: "Chyba pri načítavaní akcií dokumentu"
     visualize:
@@ -316,6 +316,9 @@ sk:
     received:
       title: "Prijaté na podpis"
       subtitle: "Balíky, ktoré vám odoslali iní na podpis."
+      external_invitation_title: "Požiadavka na podpis z dôveryhodného portálu"
+      external_portal_badge: "Externý portál"
+      from_portal: "Z portálu %{name}"
       filter_state: "Stav"
       filter_sort: "Zoradiť"
       state_all: "Všetky"
@@ -458,6 +461,7 @@ sk:
       title: "Poslať na podpis"
       subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
       send_invitation: "Odoslať email"
+      send_to_portal: "Odoslať do portálu"
       portal_label: "Portál adresáta"
       portal_blank_option: "Tento portál"
       portal_help: "Vyberte dôveryhodný partnerský portál, ak má adresát otvoriť požiadavku cez inú inštanciu Autogram Portálu."
@@ -537,6 +541,7 @@ sk:
         untrusted_portal: "Táto požiadavka smeruje na portál, ktorý nie je v zozname dôveryhodných portálov."
         unsupported_portal: "Pôvodný portál neposkytuje federované metadáta alebo API endpointy potrebné pre tento scenár."
         private_key_missing: "Na tomto portáli nie je nakonfigurovaný súkromný kľúč pre federáciu."
+        private_key_invalid: "Súkromný kľúč pre federáciu je nakonfigurovaný, ale nepodarilo sa ho načítať. Skontrolujte prosím FEDERATION_PRIVATE_KEY_PEM."
         remote_request_failed: "Požiadavka na vzdialený portál zlyhala."
   contracts:
     alerts:
@@ -684,7 +689,7 @@ sk:
     signature_field_preparations:
       index:
         title: "Pripraviť viditeľné podpisové polia"
-        subtitle: "Vytvorte pre každého príjemcu, ktorý má tento dokument podpísať, jedno viditeľné PDF podpisové pole."
+        subtitle: "Vytvorte pre každého príjemca, ktorý má tento dokument podpísať, jedno viditeľné PDF podpisové pole."
         info_title: "Čo to robí"
         info_body: "Tieto polia teraz rezervujú viditeľné miesto v PDF. Každý príjemca neskôr doplní vlastnú vizuálnu podobu, ktorá sa pri podpise naviaže na pridelené pole."
         empty_state_title: "Chýbajú príjemcovia alebo PDF dokumenty"
@@ -758,7 +763,7 @@ sk:
         missing_contact: "Táto metóda podpisovania vyžaduje e-mailovú adresu príjemcu alebo podporované SMS doručovanie."
         error_title: "Problém s overením"
         step1_title: "Skontrolujte spôsob podpisovania"
-        step1_desc: "Táto požiadavka použije elektronické podpisovanie s evidenčným záznamom namiesto kvalifikovanej podpisovej aplikácie."
+        step1_desc: "Táto požiadavka použije elektronické podpisovanie s evidenčným záznamom namiesto kvalifikovaného podpisovej aplikácie."
         step2_title: "Overte telefónne číslo príjemcu"
         step2_desc: "Príjemca potvrdí, že ovláda nastavené mobilné číslo, zadaním SMS kódu."
         step2_title_email: "Overte e-mailovú adresu príjemcu"
@@ -896,7 +901,7 @@ sk:
         title: "Podpíšte dokument vo vlastnej aplikácii"
         subtitle: "Stiahnite dokument, podpíšte ho lokálne a nahrajte podpísaný dokument späť"
         instructions_title: "Ako podpísať dokument"
-        instructions: "Stiahnite si dokument, podpíšte ho vo vašej preferovanej aplikácii (napr. Podpisuj) priamo na počítači a podpísaný dokument nahrajte späť na dokončenie."
+        instructions: "Stiahnite si dokument, podpíšte ho vo vašej preferovanej aplikácii (napr. Podpisuj) priamo na počítači a podpísaný dokument nahrajte späť."
         download_title: "Stiahnite dokument"
         download_desc: "Stiahnite si dokument, ktorý chcete podpísať."
         download_button: "Stiahnuť dokument"
@@ -926,7 +931,7 @@ sk:
         dpb_cards: Doklady o povolení na pobyt
         show_dpb: Zobraziť doklady o pobyte
         hide_dpb: Skryť doklady o pobyte
-        invalid_selection: "Vyberte typ občianského preukazu."
+        invalid_selection: "Vyberte typ občianskeho preukazu."
       pin_check:
         title: "Poznáte váš BOK?"
         description_a: "Na použitie elektronického občianskeho preukazu je potrebné poznať bezpečnostný osobný kód (BOK). Tento kód sa nastavuje pri vydávaní nového občianskeho preukazu na úrade."
@@ -966,7 +971,7 @@ sk:
       physical_label: "Fyzické podpisovanie"
       physical_description: "Vytlačte, podpíšte ručne a pošlite poštou"
       visual_label: "Vizuálna pečiatka"
-      visual_description: "Pridajte do PDF vizuálnu pečiatku bez vytvorenia kvalifikovaného elektronického podpisu"
+      visual_description: "Pridajte do PDF vizuálnu pečiatku bez vytvoreného kvalifikovaného elektronického podpisu"
       qes_visual_stamp_button: "Najprv pridať vizuálnu pečiatku"
       qes_visual_stamp_description: "Podpisovanie cez QES/PAdES môže pred vytvorením kvalifikovaného podpisu obsahovať voliteľnú vizuálnu pečiatku."
       signature_field_appearance_button: "Pridať viditeľnú podobu podpisu"
@@ -1125,9 +1130,9 @@ sk:
       features:
         subtitle: "eIDAS-kompatibilná platforma"
         title: "Kompletný pracovný tok podpisovania dokumentov"
-        description: "Preklenieme priepasť medzi eGovernment a komerčným podpisovaním dokumentov. Posielajte dokumenty na podpisovanie, integrujte podpisovanie do existujúcich aplikácií a využívajte kvalifikované zariadenia na vytváranie podpisov pre právne platné elektronické podpisy."
+        description: "Preklenieme priepasť medzi eGovernment a komerčným podpisovanie dokumentov. Posielajte dokumenty na podpisovanie, integrujte podpisovanie do existujúcich aplikácií a využívajte kvalifikované zariadenia na vytváranie podpisov pre právne platné elektronické podpisy."
         send_documents:
-          title: "Posielajte dokumenty na podpísanie"
+          title: "Posielajte dokumenty na podpisovanie"
           description: "Požiadajte o podpisy od iných ľudí cez e-mail alebo zdieľanie odkazu. Príjemcovia môžu podpisovať dokumenty pomocou svojich kvalifikovaných zariadení na vytváranie podpisov bez potreby vytvárať účet."
         api_integration:
           title: "API a iframe integrácia"
@@ -1196,7 +1201,7 @@ sk:
         title: "Časté otázky"
         items:
           account:
-            question: "Potrebujem účet na podpísanie dokumentu?"
+            question: "Potrebujem účet na podpisovanie dokumentu?"
             answer: "Nie. Príjemcovia môžu dokumenty podpisovať bez registrácie priamo cez odkaz, ktorý dostanú emailom. Účet je potrebný len pre odosielateľov, ktorí chcú sledovať históriu dokumentov, posielať žiadosti o podpis a využívať pokročilé funkcie. Rovnako nie je účet potrebný, ak chcete iba vy sami podpisovať a overovať dokumenty."
           formats:
             question: "Aké formáty súborov sú podporované?"
@@ -1246,7 +1251,7 @@ sk:
       evidence_seal_status_missing: "Evidencia chýba"
       evidence_seal_reference_label: "Naviazaná referencia"
       evidence_seal_payload_hash_label: "SHA-256 evidenčného obsahu"
-      evidence_seal_certificate_hash_label: "SHA-256 pečatiaceho certifikátu"
+      evidence_seal_certificate_hash_label: "SHA-256 pečiatky"
       evidence_seal_download_button: "Stiahnuť evidenčný súbor"
       private_evidence_download_button: "Stiahnuť súkromnú evidenciu (.asice)"
       evidence_seal_reason_missing: "Táto referencia zatiaľ neobsahuje podpísaný evidenčný obal."
@@ -1484,7 +1489,7 @@ sk:
                 url: "https://play.google.com/store/apps/details?id=sk.minv.eidentita"
           podpisuj:
             label: "Podpisuj alebo iné samostatné aplikácie"
-            description: "Dostupné len pri podpisovaní jednotlivých dokumentov bez časovej pečiatky a iba na počítači. Stiahnite si dokument, podpíšte ho v samostatnej aplikácii (napr. Podpisuj) a podpísaný dokument nahrajte späť."
+            description: "Dostupné len pri podpisovaní jednotlivých dokumentov bez časovej pečiatky a iba na počítači. Stiahnite si dokument, podpíšte ho vo vašej preferovanej aplikácii (napr. Podpisuj) priamo na počítači a podpísaný dokument nahrajte späť."
             links:
               download:
                 label: "Stiahnuť Podpisuj"
@@ -1526,12 +1531,12 @@ sk:
             label: "Občiansky preukaz vydaný pred 21.6.2021"
             mode: "Legacy — nepodporované"
             badge_class: "bg-red-100 text-red-800"
-            description: "Tento typ karty už nie je kompatibilný s kvalifikovaným podpisovaním."
+            description: "Tento typ karty už nie je kompatibilný s kvalifikovaným podpisovanie."
           dpb_2014:
             label: "Doklad o povolení na pobyt vydaný pred 10.7.2020"
             mode: "Legacy — nepodporované"
             badge_class: "bg-red-100 text-red-800"
-            description: "Tento typ karty už nie je kompatibilný s kvalifikovaným podpisovaním."
+            description: "Tento typ karty už nie je kompatibilný s kvalifikovaným podpisovanie."
         screenshot_title: "Ukážka obrazovky"
         screenshot_description: "Odporúčame sem doplniť screenshot výberu aplikácie a kroku podpisovania dokumentu."
         screenshot_file_hint: "Súbor: /public/docs/screenshots/signing-app-selection.png"
@@ -1542,7 +1547,7 @@ sk:
         items:
           name:
             label: "Meno"
-            description: "Vaše zobrazované meno, ktoré vidia odosielatelia a príjemcovia v notifikačných emailoch."
+            description: "Vaše zobrazované meno, ktoré vidia odosielateľa a príjemcovia v notifikačných emailoch."
           email:
             label: "Email"
             description: "Prihlasovací email je v nastaveniach iba zobrazený (read-only) a nie je možné ho meniť."
@@ -1569,7 +1574,7 @@ sk:
             description: "Portál, na ktorom sa adresát preferuje prihlasovať. Vie zobraziť náhľad požiadavky z iného portálu a prevziať ju v mene lokálne prihláseného používateľa."
           trust:
             label: "Zoznam dôveryhodných portálov"
-            description: "Administrátorom spravovaný zoznam externých inštancií Autogram Portálu používaný vtedy, keď odosielateľ cielene priraďuje adresáta na iný portál."
+            description: "Administrátorom spravovaný zoznam externých inštancí Autogram Portálu používaný vtedy, keď odosielateľ cielene priraďuje adresáta na iný portál."
         flow_title: "Ako celý proces funguje"
         flow:
           setup:
@@ -1767,7 +1772,7 @@ sk:
       signed_by: "Podpísal: %{signer_name}"
       timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
       timestamp_non_qualified: "Negarantovný dátum a čas (bez časovej pečiatky): %{signing_time}"
-      view_bundle: "Zobraziť balík dokumentov"
+      view_bundle: "Zobraziť balík"
     bundle_completed:
       subject: "Váš balík dokumentov bol podpísaný"
       title: "Balík dokumentov bol dokončený"
@@ -1818,11 +1823,11 @@ sk:
       dpb_2020: "Doklad o povolení na pobyt vydaný po 10.7.2020"
       dpb_2023: "Doklad o povolení na pobyt vydaný po 18.10.2023"
     description:
-      eid_2013: "Tento občiansky preukaz obsahuje čip, ktorý nie už je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový občiansky preukaz."
+      eid_2013: "Tento občiansky preukaz obsahuje čip, ktorý nie už je kompatibilný s kvalifikovaným podpisovanie. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový občiansky preukaz."
       eid_2021: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími preukazmi."
       eid_2022: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
       eid_2024: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
-      dpb_2014: "Tento doklad o povolení na pobyt obsahuje čip, ktorý už nie je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový doklad o povolení na pobyt."
+      dpb_2014: "Tento doklad o povolení na pobyt obsahuje čip, ktorý už nie je kompatibilný s kvalifikovaným podpisovanie. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový doklad o povolení na pobyt."
       dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
       dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
 

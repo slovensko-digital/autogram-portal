@@ -7,6 +7,7 @@ class DashboardControllerTest < ActionController::TestCase
 
   setup do
     @user = users(:one)
+    @user.update_column(:email, "dashboard@example.com")
     @user.update_column(:features, [ "archivation" ])
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
@@ -37,6 +38,28 @@ class DashboardControllerTest < ActionController::TestCase
     assert_response :success
     assert_not_includes response.body, I18n.t("dashboard.index.validation_warning.title")
     assert_not_includes response.body, I18n.t("dashboard.index.quick_actions.validation_archive")
+  end
+
+  test "index counts pending invitations from trusted portals in awaiting signature total" do
+    portal_instance = PortalInstance.create!(
+      name: "Partner portal",
+      base_url: "https://example.com",
+      issuer: "https://partner.example/#{SecureRandom.hex(4)}",
+      public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
+      allowed_email_domains: [ "example.com" ]
+    )
+    FederationRequestInvitation.create!(
+      portal_instance: portal_instance,
+      origin_recipient_uuid: SecureRandom.uuid,
+      origin_bundle_uuid: SecureRandom.uuid,
+      recipient_email: @user.email,
+      payload: { "openUrl" => "https://origin.example/bundles/123/sign?recipient=abc" }
+    )
+
+    get :index
+
+    assert_response :success
+    assert_equal 1, @controller.instance_variable_get(:@awaiting_my_signature_count)
   end
 
   private

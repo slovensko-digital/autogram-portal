@@ -194,8 +194,14 @@ class Recipient < ApplicationRecord
 
   def notify!
     return unless notifiable?
+
     sending!
-    Notification::RecipientSignatureRequestedJob.perform_later(self)
+
+    if federated_recipient?
+      Federation::SendRequestInvitationJob.perform_later(self)
+    else
+      Notification::RecipientSignatureRequestedJob.perform_later(self)
+    end
   end
 
   def removable?
@@ -212,6 +218,7 @@ class Recipient < ApplicationRecord
       signer_contracts.where(signed_at: nil).update_all(declined_at: nil, superseded_at: now, updated_at: now)
       update!(withdrawn_at: now)
       revoke_active_access_grants!
+      Federation::WithdrawRequestInvitationJob.perform_later(self) if federated_recipient? && remote_notified_at.present?
       Notification::RecipientSignatureWithdrawnJob.perform_later(self) if notified?
     end
 

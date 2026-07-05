@@ -133,6 +133,10 @@ Rails.application.routes.draw do
         resources :requests, only: [ :show ], controller: "requests" do
           post :claim, on: :member
         end
+
+        resources :request_invitations, only: [ :create ], param: :recipient_uuid, controller: "request_invitations" do
+          post :withdraw, on: :member
+        end
       end
     end
 

@@ -1,7 +1,11 @@
 class FederationConfiguration
   class << self
+    def static_base_url
+      ENV["FEDERATION_BASE_URL"].presence || ENV["FEDERATION_ISSUER"].presence || "http://www.example.com"
+    end
+
     def static_issuer
-      ENV["FEDERATION_ISSUER"].presence || ENV["FEDERATION_BASE_URL"].presence || "http://www.example.com"
+      ENV["FEDERATION_ISSUER"].presence || static_base_url
     end
 
     def issuer(request:)
@@ -28,6 +32,8 @@ class FederationConfiguration
       {
         requestPreview: true,
         requestClaim: true,
+        requestInvitationSend: true,
+        requestInvitationWithdraw: true,
         specVersion: "1"
       }
     end
