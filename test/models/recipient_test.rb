@@ -12,6 +12,7 @@
 #  notification_status     :integer          default("not_notified"), not null
 #  remote_claimed_at       :datetime
 #  remote_claimed_by_email :string
+#  remote_notified_at      :datetime
 #  uuid                    :uuid             not null
 #  withdrawn_at            :datetime
 #  created_at              :datetime         not null

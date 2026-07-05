@@ -18,6 +18,7 @@
 # Indexes
 #
 #  index_federation_request_invitations_on_portal_and_recipient  (portal_instance_id,origin_recipient_uuid) UNIQUE
+#  index_federation_request_invitations_on_portal_instance_id    (portal_instance_id)
 #  index_federation_request_invitations_on_recipient_email       (recipient_email)
 #  index_federation_request_invitations_on_recipient_user_id     (recipient_user_id)
 #  index_federation_request_invitations_on_status                (status)

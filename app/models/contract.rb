@@ -5,6 +5,7 @@
 #  id                           :bigint           not null, primary key
 #  allowed_methods              :string           default(["qes"]), is an Array
 #  author_notifications_enabled :boolean          default(FALSE), not null
+#  temporary_storage_reason     :string
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
@@ -13,9 +14,10 @@
 #
 # Indexes
 #
-#  index_contracts_on_bundle_id  (bundle_id)
-#  index_contracts_on_user_id    (user_id)
-#  index_contracts_on_uuid       (uuid)
+#  index_contracts_on_bundle_id                 (bundle_id)
+#  index_contracts_on_temporary_storage_reason  (temporary_storage_reason)
+#  index_contracts_on_user_id                   (user_id)
+#  index_contracts_on_uuid                      (uuid)
 #
 # Foreign Keys
 #
