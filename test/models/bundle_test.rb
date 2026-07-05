@@ -106,6 +106,42 @@ class BundleTest < ActiveSupport::TestCase
     assert_not_nil grant.revoked_at
   end
 
+  test "signing the final contract for a federated recipient withdraws the portal invitation" do
+    bundle = create_bundle_with_contract(author: @author)
+    portal_instance = create_portal_instance
+    recipient = bundle.recipients.create!(
+      email: "recipient@example.com",
+      locale: "en",
+      portal_instance_uuid: portal_instance.uuid
+    )
+    recipient.update!(remote_notified_at: Time.current)
+    signer_contract = recipient.signer_contracts.find_by!(contract: bundle.contracts.first)
+    signer_contract.update!(signed_at: Time.current)
+
+    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ recipient, { status: "signed" } ]) do
+      bundle.notify_contract_signed(bundle.contracts.first, recipient.recipient_signer)
+    end
+  end
+
+  test "superseding a federated recipient withdraws the portal invitation" do
+    bundle = create_bundle_with_contract(author: @author)
+    bundle.update!(signing_rule: "any")
+
+    first_recipient = bundle.recipients.create!(email: "first@example.com", locale: "en")
+    second_recipient = bundle.recipients.create!(
+      email: "second@example.com",
+      locale: "en",
+      portal_instance_uuid: create_portal_instance.uuid
+    )
+    second_recipient.update!(remote_notified_at: Time.current)
+
+    first_recipient.signer_contracts.find_by!(contract: bundle.contracts.first).update!(signed_at: Time.current)
+
+    assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ second_recipient, { status: "superseded" } ]) do
+      bundle.notify_contract_signed(bundle.contracts.first, first_recipient.recipient_signer)
+    end
+  end
+
   private
 
   def create_bundle_with_contract(author:)

@@ -221,6 +221,23 @@ Served by:
 
 - `Federation::RequestsController`
 
+### Home-portal inbound invitation API
+
+- `POST /api/federation/v1/request_invitations`
+- `POST /api/federation/v1/request_invitations/:recipient_uuid/withdraw`
+
+Purpose:
+
+- accept pushed signing-request invitations from a trusted origin portal
+- store them locally so they appear in the existing received-bundles experience
+- resolve previously pushed invitations as signed, superseded, or withdrawn without deleting audit history
+
+Served by:
+
+- `Api::Federation::V1::RequestInvitationsController`
+- authenticated by `FederationApiController`
+- stored in `FederationRequestInvitation`
+
 ### Origin federation API
 
 - `GET /api/federation/v1/requests/:recipient_uuid`
@@ -370,6 +387,19 @@ Responsibilities:
 - issue short-lived access grants
 - return the origin-side sign URL
 
+### `Api::Federation::V1::RequestInvitationsController`
+
+File: `app/controllers/api/federation/v1/request_invitations_controller.rb`
+
+Home-portal inbound federation API.
+
+Responsibilities:
+
+- accept idempotent invitation pushes from a trusted origin portal
+- match invitations to a local user by email when possible
+- keep the full invitation payload for display in the received-bundles UI
+- mark invitations withdrawn when the origin portal retracts them
+
 ### `BundlesController`
 
 File: `app/controllers/bundles_controller.rb`
@@ -381,6 +411,10 @@ Federation-specific responsibility:
 - continue into the standard signing UI without introducing a separate signing controller path
 
 This is an important design choice: federation reuses the existing signing flow instead of creating a parallel one.
+
+Federation-specific received-flow responsibility:
+
+- mix locally owned received bundles with pushed `FederationRequestInvitation` records in the same user-facing list
 
 ## Data Model Summary
 
@@ -404,6 +438,22 @@ Federation-specific fields:
 - `portal_instance_id`
 - `remote_claimed_at`
 - `remote_claimed_by_email`
+- `remote_notified_at`
+
+### `federation_request_invitations`
+
+Used by the home portal to persist invitations pushed from trusted origin portals.
+
+Important fields:
+
+- `portal_instance_id`
+- `origin_recipient_uuid`
+- `origin_bundle_uuid`
+- `recipient_email`
+- `recipient_user_id`
+- `status`
+- `withdrawn_at`
+- `payload`
 
 ### `recipient_access_grants`
 
@@ -447,9 +497,10 @@ The current implementation intentionally stops short of full remote signing orch
 Current limitations:
 
 - the actual signing still completes on the origin portal
-- the home portal does not host the contract signing session itself
+- the home portal stores and surfaces pushed invitations, but does not host the contract signing session itself
 - sender-side federation still depends on a preconfigured trusted home-portal list
 - the origin portal still requires a configured `PortalInstance` for the assigned home portal; only the home-side origin discovery is dynamic
+- pushed invitations now preserve `signed` and `superseded` terminal states for home-portal filtering, but they still do not synchronize richer post-signing history beyond those states
 
 ## Extension Points
 

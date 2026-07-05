@@ -101,6 +101,7 @@ class Bundle < ApplicationRecord
 
   def notify_contract_signed(contract, signer)
     Notification::BundleContractSignedJob.perform_later(self, contract, signer: signer)
+    withdraw_federation_invitation_for_signed_recipient(signer)
 
     supersede_pending_recipients! if threshold_met? && !completed?
 
@@ -180,6 +181,7 @@ class Bundle < ApplicationRecord
 
       Recipient.where(id: affected_recipient_ids).find_each do |recipient|
         recipient.revoke_active_access_grants!
+        Federation::WithdrawRequestInvitationJob.perform_later(recipient, status: "superseded") if recipient.federated_recipient? && recipient.remote_notified_at.present?
         Notification::RecipientNoLongerRequiredJob.perform_later(recipient)
       end
     end
@@ -215,6 +217,16 @@ class Bundle < ApplicationRecord
   end
 
   private
+
+  def withdraw_federation_invitation_for_signed_recipient(signer)
+    recipient = signer&.recipient&.reload
+    return unless recipient.is_a?(Recipient)
+    return unless recipient.federated_recipient?
+    return unless recipient.remote_notified_at.present?
+    return unless recipient.signed?
+
+    Federation::WithdrawRequestInvitationJob.perform_later(recipient, status: "signed")
+  end
 
   def rules_changed?
     will_save_change_to_signing_rule? || will_save_change_to_required_signatures?

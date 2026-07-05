@@ -108,7 +108,7 @@
                             method: :post,
                             class: "text-blue-600 underline hover:text-blue-800 hover:underline cursor-pointer font-medium",
                             form: { data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } } do %>
-                        <%= t('.send_invitation') %>
+                        <%= recipient.federated_recipient? ? t('.send_to_portal') : t('.send_invitation') %>
                       <% end %>
                     <% end %>
 

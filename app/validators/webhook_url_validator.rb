@@ -97,6 +97,8 @@ class WebhookUrlValidator < ActiveModel::EachValidator
   end
 
   def private_address?(address)
+    return false if Rails.env.development?
+
     PRIVATE_IP_RANGES.any? { |range| range.include?(address) }
   end
 

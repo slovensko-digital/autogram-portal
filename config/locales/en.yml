@@ -376,6 +376,9 @@ en:
     received:
       title: "Received for Signing"
       subtitle: "Bundles sent to you by others for signing."
+      external_invitation_title: "Signing request from trusted portal"
+      external_portal_badge: "External portal"
+      from_portal: "From %{name}"
       filter_state: "Status"
       filter_sort: "Sort"
       state_all: "All"
@@ -530,6 +533,7 @@ en:
       title: "Send for Signature"
       subtitle: "Send this bundle to others for signing via email."
       send_invitation: "Send email"
+      send_to_portal: "Send to portal"
       portal_label: "Recipient portal"
       portal_blank_option: "Current portal"
       portal_help: "Choose a trusted partner portal when the recipient should open the request through another Autogram Portal instance."
@@ -609,6 +613,7 @@ en:
         untrusted_portal: "This request points to a portal that is not in the trusted portal list."
         unsupported_portal: "The origin portal does not expose the federation metadata or request APIs needed for this flow."
         private_key_missing: "Federation private key is not configured on this portal."
+        private_key_invalid: "Federation private key is configured but could not be parsed. Please check FEDERATION_PRIVATE_KEY_PEM."
         remote_request_failed: "The remote portal request failed."
 
   contracts:

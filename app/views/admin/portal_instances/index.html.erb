@@ -29,10 +29,10 @@
               <div class="flex items-center justify-end gap-3">
                 <%= link_to t('.edit'), edit_admin_portal_instance_path(portal_instance), class: "text-blue-600 hover:text-blue-800" %>
                 <% unless portal_instance.verified? %>
-                  <%= button_to t('.verify'), verify_admin_portal_instance_path(portal_instance), method: :post, class: "text-green-600 hover:text-green-800 cursor-pointer" %>
+                  <%= button_to t('.verify'), verify_admin_portal_instance_path(portal_instance.uuid), method: :post, class: "text-green-600 hover:text-green-800 cursor-pointer" %>
                 <% end %>
                 <% unless portal_instance.revoked? %>
-                  <%= button_to t('.revoke'), revoke_admin_portal_instance_path(portal_instance), method: :post, class: "text-red-600 hover:text-red-800 cursor-pointer" %>
+                  <%= button_to t('.revoke'), revoke_admin_portal_instance_path(portal_instance.uuid), method: :post, class: "text-red-600 hover:text-red-800 cursor-pointer" %>
                 <% end %>
               </div>
             </td>

@@ -123,6 +123,66 @@ class BundlesControllerTest < ActionController::TestCase
     assert_includes response.body, I18n.t("contracts.show_bundle.private_evidence_download_button")
   end
 
+  test "received lists pending invitations from trusted portals" do
+    @author.update_column(:email, "recipient@example.com")
+    portal_instance = PortalInstance.create!(
+      name: "Partner portal",
+      base_url: "https://example.com",
+      issuer: "https://partner.example/#{SecureRandom.hex(4)}",
+      public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
+      allowed_email_domains: [ "example.com" ]
+    )
+    invitation = FederationRequestInvitation.create!(
+      portal_instance: portal_instance,
+      origin_recipient_uuid: SecureRandom.uuid,
+      origin_bundle_uuid: SecureRandom.uuid,
+      recipient_email: @author.email,
+      payload: {
+        "authorName" => "Remote sender",
+        "openUrl" => "https://origin.example/bundles/123/sign?recipient=abc",
+        "contracts" => [ { "displayName" => "Remote Contract" } ],
+        "note" => "Please sign remotely"
+      }
+    )
+
+    get :received
+
+    assert_response :success
+    assert_includes response.body, I18n.t("bundles.received.external_invitation_title")
+    assert_includes response.body, portal_instance.name
+    assert_includes response.body, federation_requests_open_path(url: invitation.payload["openUrl"])
+  end
+
+  test "received signed filter lists signed invitations from trusted portals" do
+    @author.update_column(:email, "recipient@example.com")
+    portal_instance = PortalInstance.create!(
+      name: "Partner portal",
+      base_url: "https://example.com",
+      issuer: "https://partner.example/#{SecureRandom.hex(4)}",
+      public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
+      allowed_email_domains: [ "example.com" ]
+    )
+    FederationRequestInvitation.create!(
+      portal_instance: portal_instance,
+      origin_recipient_uuid: SecureRandom.uuid,
+      origin_bundle_uuid: SecureRandom.uuid,
+      recipient_email: @author.email,
+      status: "signed",
+      withdrawn_at: Time.current,
+      payload: {
+        "authorName" => "Remote sender",
+        "openUrl" => "https://origin.example/bundles/123/sign?recipient=abc",
+        "contracts" => [ { "displayName" => "Remote Contract" } ]
+      }
+    )
+
+    get :received, params: { state: "signed" }
+
+    assert_response :success
+    assert_includes response.body, I18n.t("bundles.received.external_invitation_title")
+    assert_includes response.body, I18n.t("bundles.received.state_signed")
+  end
+
   private
 
   def create_bundle_with_contracts(author:, count:, signed: false)

@@ -21,6 +21,7 @@ class DashboardController < ApplicationController
                                     .where.not(user_id: current_user.id)
                                     .distinct
                                     .count
+    @awaiting_my_signature_count += FederationRequestInvitation.pending.for_user(current_user).count
     @sent_for_signing_count = current_user.bundles
                                           .joins(recipients: { recipient_signer: :signer_contracts })
                   .merge(Recipient.active.visible)
