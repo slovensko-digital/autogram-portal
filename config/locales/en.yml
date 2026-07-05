@@ -332,10 +332,6 @@ en:
     visualize_error:
       title: "Could not load document content"
       trust_warning: "Make sure you trust the source of this document before proceeding."
-    visualization_with_toggle:
-      hide_document: "Hide document"
-      show_document: "Show document"
-      loading_content: "Loading document content..."
     alerts:
       no_file_attached: "No file attached to this document."
       already_part_of_contract: "This document is already part of a contract."
@@ -752,6 +748,9 @@ en:
       old_card_warning_title: "Limitation"
       old_card_warning: "%{qscd} requires a desktop computer with a physical card reader. Mobile signing apps (Autogram Mobile, eIdentita) are not compatible with your card/document."
       old_card_mobile_warning: "%{qscd} requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
+      multiple_files_in_contract_warning_title: "Multiple files in the document"
+      multiple_files_in_contract_warning: "This document contains multiple files. Only the desktop Autogram application, which supports working with multiple files, can be used for signing."
+      multiple_files_in_contract_mobile_warning: "This document contains multiple files. Signing such a document requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
