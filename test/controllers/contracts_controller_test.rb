@@ -1,6 +1,9 @@
 require "test_helper"
+require "zip"
 
 class ContractsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
   setup do
     @tempfiles = []
   end
@@ -392,6 +395,33 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "show renders a visualization toggle per document for uploaded ASiC-E" do
+    contract = Contract.new(
+      documents: [ Document.new(blob: asice_blob("container.asice", {
+        "contract-a.txt" => "alpha",
+        "contract-b.txt" => "beta",
+        "META-INF/signatures.xml" => "<signature/>"
+      })) ]
+    )
+    assert contract.save, contract.errors.full_messages.to_sentence
+
+    get "/contracts/#{contract.uuid}"
+
+    assert_response :success
+    assert_select "turbo-frame[id^='document_visualization_']", count: 2
+    assert_select "iframe[data-src]", count: 0
+  end
+
+  test "show renders direct iframe for signed PDF source" do
+    contract = create_pades_signed_contract(allowed_methods: [ "qes" ])
+
+    get "/contracts/#{contract.uuid}"
+
+    assert_response :success
+    assert_select "iframe[data-src='#{rails_blob_path(contract.latest_source_content_version.file, disposition: 'inline')}#toolbar=0&navpanes=0&scrollbar=0&view=FitH']", count: 1
+    assert_select "turbo-frame[id^='document_visualization_']", count: 0
+  end
+
   private
 
   def create_pdf_contract(allowed_methods:)
@@ -420,6 +450,21 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       origin: "signing"
     )
     contract
+  end
+
+  def asice_blob(filename, entries)
+    buffer = Zip::OutputStream.write_buffer do |zip|
+      entries.each do |path, content|
+        zip.put_next_entry(path)
+        zip.write(content)
+      end
+    end
+
+    ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new(buffer.string),
+      filename: filename,
+      content_type: "application/vnd.etsi.asic-e+zip"
+    )
   end
 
   def create_bundle_contract_with_prepared_signature_field(allowed_methods: [ "qes" ], mobile_phone: nil)

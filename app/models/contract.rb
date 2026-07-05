@@ -147,6 +147,14 @@ class Contract < ApplicationRecord
     latest_source_content_version&.file&.attached? || false
   end
 
+  def source_document_is_pdf?
+    latest_source_content_version&.content_type == "application/pdf"
+  end
+
+  def source_document_is_asice?
+    latest_source_content_version&.content_type == "application/vnd.etsi.asic-e+zip"
+  end
+
   def prepared_signature_fields_source_attached?
     latest_prepared_signature_fields_content_version&.file&.attached? || false
   end

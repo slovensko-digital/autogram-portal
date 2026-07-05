@@ -255,6 +255,41 @@ class ContractTest < ActiveSupport::TestCase
     assert_equal "%PDF-1.4 prepared source", contract.documents_to_sign.first.content
   end
 
+  test "source_document_is_pdf? is true only for PDF content versions" do
+    pdf_contract = Contract.create!(
+      user: @user,
+      documents_attributes: [ { blob: pdf_blob("original.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    pdf_contract.add_signed_content_version!(
+      content: "%PDF-1.4 signed content",
+      filename: "original-signed.pdf",
+      content_type: "application/pdf",
+      origin: "signing"
+    )
+    assert pdf_contract.source_document_is_pdf?
+    assert_not pdf_contract.source_document_is_asice?
+
+    asice_contract = Contract.new(
+      user: @user,
+      documents: [ Document.new(blob: asice_blob("container.asice", {
+        "contract-a.txt" => "alpha",
+        "META-INF/signatures.xml" => "<signature/>"
+      })) ]
+    )
+    assert asice_contract.save, asice_contract.errors.full_messages.to_sentence
+    assert asice_contract.source_document_is_asice?
+    assert_not asice_contract.source_document_is_pdf?
+
+    unsigned_contract = Contract.create!(
+      user: @user,
+      documents_attributes: [ { blob: pdf_blob("unsigned.pdf", "%PDF-1.4 unsigned") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    assert_not unsigned_contract.source_document_is_pdf?
+    assert_not unsigned_contract.source_document_is_asice?
+  end
+
   private
 
   def pdf_blob(filename, content)

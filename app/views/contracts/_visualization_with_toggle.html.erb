@@ -2,7 +2,7 @@
 <% default_collapsed = local_assigns.fetch(:default_collapsed, true) %>
 
 <div class="mb-6 space-y-4 w-full">
-  <% if contract.source_document_attached? %>
+  <% if contract.source_document_attached? && contract.source_document_is_pdf? %>
     <% content_version = contract.latest_source_content_version %>
     <div data-controller="toggle" data-toggle-collapsed-value="<%= default_collapsed %>">
       <button type="button"
