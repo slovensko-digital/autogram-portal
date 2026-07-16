@@ -92,7 +92,7 @@ module ApplicationHelper
   def signature_validation_signature_documents(signature, validation_result = nil, contract = nil)
     signed_objects = Array(signature.signedObjects)
     if signed_objects.blank? && validation_result&.signatures&.length == 1
-      signed_objects = Array(validation_result.document_info[:signed_objects])
+      signed_objects = Array(validation_result.documentInfo[:signed_objects])
     end
 
     document_names = signed_objects.map { |object| signature_validation_object_name(object) }.compact_blank.uniq
@@ -127,7 +127,7 @@ module ApplicationHelper
     visible_documents = signature_validation_contract_documents(contract)
     return visible_documents if visible_documents.any?
 
-    document_info = validation_result&.document_info || {}
+    document_info = validation_result&.documentInfo || {}
     Array(document_info[:signed_objects]).map { |object| signature_validation_object_name(object) }.compact_blank +
       Array(document_info[:unsigned_objects]).map { |object| signature_validation_object_name(object) }.compact_blank
   end
