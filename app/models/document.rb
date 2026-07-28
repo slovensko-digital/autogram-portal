@@ -59,7 +59,9 @@ class Document < ApplicationRecord
   end
 
   def content
-    blob.attached? ? blob.download : nil
+    return unless blob.attached?
+
+    pending_upload_content || blob.download
   end
 
   def content_type
@@ -187,6 +189,16 @@ class Document < ApplicationRecord
     unless acceptable_types.include?(blob.content_type)
       errors.add(:blob, "This file type is not supported. Supported types are: PDF, XML, XDCF, ASIC, TXT, PNG, JPG, JPEG.")
     end
+  end
+
+  def pending_upload_content
+    attachment_change = attachment_changes["blob"]
+    upload = attachment_change&.attachable
+    return unless upload.respond_to?(:tempfile)
+
+    upload.tempfile.binmode
+    upload.tempfile.rewind
+    upload.tempfile.read.tap { upload.tempfile.rewind }
   end
 
   def get_new_validation_result

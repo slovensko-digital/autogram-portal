@@ -100,6 +100,28 @@ class ContractTest < ActiveSupport::TestCase
     uploaded_file&.tempfile&.close!
   end
 
+  test "saves a pending uploaded PDF before signature parameters validate it" do
+    uploaded_file = uploaded_pdf_file("pending.pdf", "%PDF-1.4 pending document")
+    contract = Contract.new(
+      user: @user,
+      documents: [ Document.new(blob: uploaded_file) ]
+    )
+    fake_service = Struct.new(:validation_result) do
+      def validate_signatures(_document)
+        validation_result
+      end
+    end.new(AutogramService::ValidationResult.new(hasSignatures: false))
+
+    with_autogram_service(fake_service) do
+      assert contract.save, contract.errors.full_messages.to_sentence
+    end
+
+    assert_equal "PAdES", contract.signature_parameters.format
+    assert_equal "%PDF-1.4 pending document", contract.documents.first.content
+  ensure
+    uploaded_file&.tempfile&.close!
+  end
+
   test "extend_signatures creates a new content version without overwriting the previous one" do
     contract = Contract.create!(
       user: @user,
@@ -333,6 +355,19 @@ class ContractTest < ActiveSupport::TestCase
       tempfile: tempfile,
       filename: filename,
       type: "application/vnd.etsi.asic-e+zip"
+    )
+  end
+
+  def uploaded_pdf_file(filename, content)
+    tempfile = Tempfile.new([ File.basename(filename, ".pdf"), ".pdf" ])
+    tempfile.binmode
+    tempfile.write(content)
+    tempfile.rewind
+
+    ActionDispatch::Http::UploadedFile.new(
+      tempfile: tempfile,
+      filename: filename,
+      type: "application/pdf"
     )
   end
 
