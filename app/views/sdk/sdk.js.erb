@@ -54,6 +54,7 @@
             iframe.style.height = config.height;
             iframe.style.border = config.border;
             iframe.setAttribute('data-agp-session', sessionId);
+            iframe.setAttribute('allow', 'local-network-access');
 
             // Set up message listener
             this._setupMessageListener(config, iframe);
@@ -186,6 +187,7 @@
                 width: 100%;
             `;
             iframe.setAttribute('data-agp-session', sessionId);
+            iframe.setAttribute('allow', 'local-network-access');
 
             popupContent.appendChild(header);
             iframeDiv.appendChild(iframe);

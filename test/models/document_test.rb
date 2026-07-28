@@ -22,6 +22,25 @@
 require "test_helper"
 
 class DocumentTest < ActiveSupport::TestCase
+  test "content reads a pending uploaded file before it is saved" do
+    tempfile = Tempfile.new([ "pending-document", ".pdf" ])
+    tempfile.binmode
+    tempfile.write("%PDF-1.4 pending document")
+    tempfile.rewind
+
+    document = Document.new(
+      blob: ActionDispatch::Http::UploadedFile.new(
+        tempfile: tempfile,
+        filename: "pending-document.pdf",
+        type: "application/pdf"
+      )
+    )
+
+    assert_equal "%PDF-1.4 pending document", document.content
+  ensure
+    tempfile&.close!
+  end
+
   test "validation_result does not cache transient file-missing errors" do
     cache_store = ActiveSupport::Cache::MemoryStore.new
     blob = Struct.new(:checksum).new("transient-checksum")
