@@ -280,6 +280,7 @@ class ContractTest < ActiveSupport::TestCase
     assert asice_contract.save, asice_contract.errors.full_messages.to_sentence
     assert asice_contract.source_document_is_asice?
     assert_not asice_contract.source_document_is_pdf?
+    assert_predicate asice_contract.latest_source_content_version.content, :present?
 
     unsigned_contract = Contract.create!(
       user: @user,

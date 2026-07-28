@@ -187,7 +187,7 @@ class Contract < ApplicationRecord
     if source_document_attached?
       [ latest_source_content_version&.validation_result ]
     else
-      documents.order(:id).map(&:validation_result)
+      documents.map(&:validation_result)
     end.compact
   end
 
@@ -344,7 +344,7 @@ class Contract < ApplicationRecord
           document_hash: Digest::SHA256.hexdigest(content_version.content)
         ) ]
     else
-      documents.order(:id).map do |document|
+      documents.map do |document|
         ValidationEntry.new(
           label: document.filename.to_s,
           validation_result: document.validation_result,
@@ -468,17 +468,19 @@ class Contract < ApplicationRecord
   end
 
   def build_signed_content_version(content:, filename:, content_type:, origin:, created_at: Time.current)
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new(content),
+      filename: filename,
+      content_type: content_type
+    )
+
     content_versions.build(
       version_number: next_content_version_number,
       origin: origin,
       created_at: created_at,
       updated_at: created_at
     ).tap do |version|
-      version.file.attach(
-        io: StringIO.new(content),
-        filename: filename,
-        content_type: content_type
-      )
+      version.file.attach(blob)
     end
   end
 
