@@ -26,6 +26,7 @@ class Ades::SignatureParametersTest < ActiveSupport::TestCase
     document = Document.new
     document.define_singleton_method(:has_signatures?) { true }
     document.define_singleton_method(:validation_result) { validation_result }
+    document.define_singleton_method(:content) { "%PDF-1.4 signed content" }
 
     contract.define_singleton_method(:documents) { [ document ] }
 

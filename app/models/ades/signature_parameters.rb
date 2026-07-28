@@ -39,15 +39,12 @@ module Ades
       return [ "XAdES", "CAdES" ] if contract.documents.size > 1
 
       document = contract.documents.first
-      unless document.has_signatures?
+      unless contract.validation_result&.has_signatures?
         return [ document.is_pdf? ? "PAdES" : nil, "XAdES", "CAdES" ].compact
       end
 
-      result = document.validation_result.documentInfo
-      signature_form = result[:signatureForm] || result[:signature_form]
-      container_type = result[:containerType] || result[:container_type]
-
-      case [ signature_form, container_type ]
+      result = contract.validation_result.documentInfo
+      case [ result[:signatureForm], result[:containerType] ]
       when [ "PAdES", nil ]
         [ "PAdES" ]
       when [ "XAdES", "ASiC_E" ]
