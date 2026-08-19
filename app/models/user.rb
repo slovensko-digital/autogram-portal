@@ -3,7 +3,7 @@
 # Table name: users
 #
 #  id                     :bigint           not null, primary key
-#  api_token_public_key   :string
+#  admin                  :boolean          default(FALSE), not null
 #  completed_onboardings  :jsonb            not null
 #  confirmation_sent_at   :datetime
 #  confirmation_token     :string
@@ -13,7 +13,6 @@
 #  email                  :string
 #  encrypted_password     :string           default(""), not null
 #  failed_attempts        :integer          default(0), not null
-#  features               :text             default([]), is an Array
 #  last_sign_in_at        :datetime
 #  last_sign_in_ip        :string
 #  locale                 :string           default("sk")
@@ -28,24 +27,30 @@
 #  unlock_token           :string
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
+#  current_tenant_id      :bigint
 #
 # Indexes
 #
 #  index_users_on_confirmation_token    (confirmation_token) UNIQUE
+#  index_users_on_current_tenant_id     (current_tenant_id)
 #  index_users_on_email                 (email) UNIQUE
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
 #  index_users_on_unlock_token          (unlock_token) UNIQUE
 #
+# Foreign Keys
+#
+#  fk_rails_...  (current_tenant_id => tenants.id) ON DELETE => nullify
+#
 class User < ApplicationRecord
   devise :magic_link_authenticatable, :omniauthable, :registerable, :confirmable, :rememberable, :validatable, :lockable
 
-  attribute :features, :string, array: true, default: []
-  AVAILABLE_FEATURES = %w[admin archivation api federation].freeze
+  belongs_to :current_tenant, class_name: "Tenant", optional: true
 
-  has_many :bundles, foreign_key: "user_id", dependent: :destroy
+  has_many :tenant_users, dependent: :destroy
+  has_many :tenants, through: :tenant_users
+  has_many :admin_tenant_users, -> { admin }, class_name: "TenantUser"
+  has_many :admin_tenants, through: :admin_tenant_users, source: :tenant
   has_many :identities, dependent: :destroy
-  has_many :contracts, dependent: :destroy
-  has_many :contract_validation_records, dependent: :destroy
   has_many :policy_consents, class_name: "UserPolicyConsent", dependent: :destroy
 
   enum :qscd, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
@@ -53,6 +58,12 @@ class User < ApplicationRecord
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
   validates :agree_to_policies, acceptance: true, on: :create
+  validate :current_tenant_membership
+
+  after_create :create_personal_tenant!
+  before_destroy :destroy_personal_tenants, prepend: true
+
+  scope :with_feature, ->(feature) { joins(:current_tenant).merge(Tenant.with_feature(feature)) }
 
   # Returns the User record for the given OmniAuth payload, or nil for a brand-new
   # email address that still needs consent collection.
@@ -92,13 +103,7 @@ class User < ApplicationRecord
   end
 
   def feature_enabled?(feature)
-    features.include? feature.to_s
-  end
-
-  scope :with_feature, ->(feature) { where("? = ANY(features)", feature.to_s) }
-
-  def admin?
-    feature_enabled?(:admin)
+    current_tenant&.feature_enabled?(feature) || false
   end
 
   def archivation_enabled?
@@ -134,5 +139,28 @@ class User < ApplicationRecord
 
   def self.mobile_qscd?(qscd)
     qscd.present? && qscd.in?(MOBILE_QSCDS)
+  end
+
+  private
+
+  def create_personal_tenant!
+    tenant = Tenant.create!(name: name.presence || email, kind: :freemium)
+    tenant.tenant_users.create!(user: self, role: :admin)
+    update_column(:current_tenant_id, tenant.id)
+    self.current_tenant = tenant
+  end
+
+  def destroy_personal_tenants
+    personal_tenants = admin_tenants.freemium.to_a
+    update_column(:current_tenant_id, nil) if current_tenant_id.in?(personal_tenants.map(&:id))
+    personal_tenants.each(&:destroy!)
+  end
+
+  def current_tenant_membership
+    return if current_tenant.blank?
+    return if tenant_users.any? { |membership| membership.tenant_id == current_tenant_id && !membership.marked_for_destruction? }
+    return if persisted? && tenant_users.where(tenant_id: current_tenant_id).exists?
+
+    errors.add(:current_tenant, "must be one of the user's tenants")
   end
 end

@@ -7,7 +7,7 @@
 #  error_message      :text
 #  options            :jsonb
 #  signing_started_at :datetime
-#  status             :integer          default("pending"), not null
+#  status             :integer          default(0), not null
 #  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null

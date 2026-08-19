@@ -23,19 +23,6 @@
                   class: "block w-full rounded-md border-gray-300 bg-gray-50 sm:text-sm py-2 px-3 border text-gray-500 cursor-not-allowed" %>
               </div>
 
-              <div>
-                <%= f.label :api_token_public_key, t('.api_token_public_key'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-                <% if resource.feature_enabled? :api %>
-                  <%= f.text_area :api_token_public_key, rows: 5,
-                    class: "block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border" %>
-                  <p class="mt-1 text-xs text-gray-500"><%= t('.api_token_help') %></p>
-                <% else %>
-                  <%= f.text_area :api_token_public_key, rows: 5, disabled: true,
-                    class: "block w-full rounded-md border-gray-300 bg-gray-50 sm:text-sm py-2 px-3 border text-gray-500 cursor-not-allowed" %>
-                  <p class="mt-1 text-xs text-gray-500"><%= t('.api_token_help') %></p>
-                <% end %>
-              </div>
-
               <% if resource.pending_reconfirmation? %>
                 <div class="rounded-md bg-yellow-50 p-4">
                   <div class="flex">
@@ -101,36 +88,40 @@
                     class: "mt-4 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
             </div>
           </div>
+        <% end %>
 
+        <% if current_tenant_admin? %>
           <div class="mt-10 rounded-md border border-gray-200 bg-white overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100">
               <h3 class="text-xl font-semibold text-gray-900"><%= t('.features') %></h3>
             </div>
 
             <div class="px-5 py-6">
-              <h4 class="text-xl font-medium text-gray-900"><%= t('.features_title') %></h4>
+              <h4 class="text-xl font-medium text-gray-900"><%= t('.features_title', tenant: current_tenant.name) %></h4>
               <p class="mt-1 text-md"><%= t('.features_description') %></p>
 
-              <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "mt-6 space-y-4" }) do |f| %>
-                <% User::AVAILABLE_FEATURES.each do |feature| %>
-                  <% checked = resource.feature_enabled?(feature) %>
-                  <% locked = feature == "admin" %>
+              <%= form_with model: current_tenant, url: tenant_settings_path, method: :patch, class: "mt-6 space-y-4" do |f| %>
+                <div>
+                  <%= f.label :api_token_public_key, t('.api_token_public_key'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <%= f.text_area :api_token_public_key, rows: 5,
+                    class: "block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border" %>
+                  <p class="mt-1 text-xs text-gray-500"><%= t('.api_token_help') %></p>
+                </div>
+
+                <%= hidden_field_tag "tenant[features][]", "" %>
+                <% Tenant::AVAILABLE_FEATURES.each do |feature| %>
+                  <% checked = current_tenant.feature_enabled?(feature) %>
                   <div class="rounded-lg border border-gray-200 px-4 py-3">
                     <div class="flex items-start gap-3">
                       <div class="pt-0.5">
-                        <%= hidden_field_tag "user[features][]", feature if locked && checked %>
-                        <%= check_box_tag "user[features][]",
+                        <%= check_box_tag "tenant[features][]",
                               feature,
                               checked,
-                              disabled: locked,
-                              class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 #{'cursor-not-allowed opacity-60' if locked}" %>
+                              class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
                       </div>
                       <div>
                         <p class="text-sm font-semibold text-gray-900"><%= t("devise.registrations.edit.feature_labels.#{feature}") %></p>
                         <p class="text-sm text-gray-500"><%= t("devise.registrations.edit.feature_descriptions.#{feature}") %></p>
-                        <% if locked %>
-                          <p class="mt-1 text-xs font-medium text-violet-700"><%= t('.admin_feature_locked') %></p>
-                        <% end %>
                       </div>
                     </div>
                   </div>

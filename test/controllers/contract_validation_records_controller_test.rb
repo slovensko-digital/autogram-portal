@@ -7,7 +7,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
 
   setup do
     @user = users(:one)
-    @user.update_column(:features, [ "archivation" ])
+    @user.current_tenant.update!(features: [ "archivation" ])
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
 
@@ -18,11 +18,11 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     @controller.singleton_class.define_method(:user_signed_in?) { true }
   end
 
-  test "index shows only current user's expiring records" do
-    expiring_record = create_record(user: @user, expires_at: 1.month.from_now)
-    create_record(user: @user, expires_at: 2.weeks.from_now, source_contract_uuid: expiring_record.source_contract_uuid, source_version_number: 0)
-    create_record(user: @user, expires_at: 6.months.from_now)
-    create_record(user: users(:two), expires_at: 1.month.from_now)
+  test "index shows only current tenant's expiring records" do
+    expiring_record = create_record(tenant: @user.current_tenant, expires_at: 1.month.from_now)
+    create_record(tenant: @user.current_tenant, expires_at: 2.weeks.from_now, source_contract_uuid: expiring_record.source_contract_uuid, source_version_number: 0)
+    create_record(tenant: @user.current_tenant, expires_at: 6.months.from_now)
+    create_record(tenant: users(:two).current_tenant, expires_at: 1.month.from_now)
 
     get :index, params: { state: "expiring" }
 
@@ -31,8 +31,8 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
   end
 
   test "index does not trigger live validation checks" do
-    record = create_record(user: @user, expires_at: 1.month.from_now)
-    contract = create_contract_with_version(user: @user)
+    record = create_record(tenant: @user.current_tenant, expires_at: 1.month.from_now)
+    contract = create_contract_with_version(tenant: @user.current_tenant)
     record.update!(contract: contract, contract_content_version: contract.latest_content_version, source_contract_uuid: contract.uuid, source_version_number: contract.latest_content_version.version_number)
 
     raising_service = Class.new do
@@ -49,7 +49,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
   end
 
   test "destroy deletes current user's record" do
-    record = create_record(user: @user, expires_at: 1.month.from_now)
+    record = create_record(tenant: @user.current_tenant, expires_at: 1.month.from_now)
 
     delete :destroy, params: { id: record.id }
 
@@ -57,10 +57,19 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     assert_not ContractValidationRecord.exists?(record.id)
   end
 
+  test "destroy rejects another tenant's record" do
+    record = create_record(tenant: users(:two).current_tenant, expires_at: 1.month.from_now)
+
+    delete :destroy, params: { id: record.id }
+
+    assert_response :not_found
+    assert ContractValidationRecord.exists?(record.id)
+  end
+
   test "refresh enqueues archive refresh for refreshable current records" do
     ActiveJob::Base.queue_adapter = :test
-    record = create_record(user: @user, expires_at: 1.month.from_now)
-    contract = create_contract_with_version(user: @user)
+    record = create_record(tenant: @user.current_tenant, expires_at: 1.month.from_now)
+    contract = create_contract_with_version(tenant: @user.current_tenant)
     record.update!(contract: contract, contract_content_version: contract.latest_content_version, source_contract_uuid: contract.uuid, source_version_number: contract.latest_content_version.version_number)
 
     contract_content_version = contract.latest_content_version
@@ -92,7 +101,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
   end
 
   test "index redirects to root without archivation feature" do
-    @user.update_column(:features, [])
+    @user.current_tenant.update!(features: [])
 
     get :index
 
@@ -101,11 +110,10 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
   end
 
   test "index shows AGP reference and mapping match for archived records" do
-    contract = create_contract_with_version(user: @user)
+    contract = create_contract_with_version(tenant: @user.current_tenant)
     content_version = contract.latest_content_version
 
     record = ContractValidationRecord.create!(
-      user: @user,
       contract: contract,
       contract_content_version: content_version,
       source_contract_uuid: contract.uuid,
@@ -122,7 +130,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
       }
     )
 
-    bundle = Bundle.create!(author: @user, contracts: [ contract ])
+    bundle = Bundle.create!(tenant: @user.current_tenant, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     signer_contract = recipient.signer_contracts.find_by!(contract: contract)
     session = signer_contract.sessions.create!(
@@ -151,9 +159,9 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
 
   private
 
-  def create_record(user:, expires_at: nil, source_contract_uuid: SecureRandom.uuid, source_version_number: 1)
+  def create_record(tenant:, expires_at: nil, source_contract_uuid: SecureRandom.uuid, source_version_number: 1)
     ContractValidationRecord.create!(
-      user: user,
+      tenant: tenant,
       source_contract_uuid: source_contract_uuid,
       source_version_number: source_version_number,
       filename: "signed-contract.pdf",
@@ -165,7 +173,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     )
   end
 
-  def create_contract_with_version(user:)
+  def create_contract_with_version(tenant:)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
       filename: "validation-record-controller.pdf",
@@ -173,7 +181,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     )
 
     Contract.create!(
-      user: user,
+      tenant: tenant,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     ).tap do |contract|

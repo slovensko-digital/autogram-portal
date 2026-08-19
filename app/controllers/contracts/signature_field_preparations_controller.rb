@@ -60,7 +60,7 @@ module Contracts
     end
 
     def ensure_author_can_prepare_fields
-      return head :forbidden unless current_user.present? && @contract.bundle&.author == current_user
+      return head :forbidden unless current_user.present? && @contract.tenant == current_tenant
       return if @contract.pades_field_preparation_allowed?
 
       head :unprocessable_entity

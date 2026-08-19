@@ -14,7 +14,7 @@ class ContractsController < ApplicationController
     @state = params[:state].presence_in(%w[awaiting completed])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    contracts = current_user.contracts.standalone
+    contracts = current_tenant.contracts.standalone
     contracts = case @state
     when "awaiting"
       contracts.left_outer_joins(:content_versions).where(contract_content_versions: { id: nil })
@@ -24,7 +24,7 @@ class ContractsController < ApplicationController
       contracts
     end
 
-    @contracts = contracts.includes(:user, :documents).order(created_at: order_dir)
+    @contracts = contracts.includes(:documents).order(created_at: order_dir)
   end
 
   def new
@@ -34,7 +34,7 @@ class ContractsController < ApplicationController
 
   def create
     @contract = Contract.new(
-      user: current_user,
+      tenant: current_tenant,
       author_notifications_enabled: true,
       documents: [ Document.new(params.require(:document).permit(:blob)) ]
     )
@@ -63,7 +63,7 @@ class ContractsController < ApplicationController
   end
 
   def content_versions
-    return head :forbidden unless author_of_contract? && current_user&.archivation_enabled?
+    return head :forbidden unless manages_contract? && current_tenant&.archivation_enabled?
 
     @content_versions = @contract.signed_document_versions.with_attached_file
   end
@@ -73,7 +73,7 @@ class ContractsController < ApplicationController
   end
 
   def signature_extension
-    return head :forbidden unless author_of_contract?
+    return head :forbidden unless manages_contract?
 
     target_level = params[:target_level].presence&.upcase || "T"
     return head :unprocessable_entity unless @contract.extendable_signatures?(target_level: target_level)
@@ -82,7 +82,7 @@ class ContractsController < ApplicationController
   end
 
   def signature_parameters
-    if params[:target_step] == "request_signature" && !author_of_contract?
+    if params[:target_step] == "request_signature" && !manages_contract?
       return head :forbidden
     end
 
@@ -91,7 +91,7 @@ class ContractsController < ApplicationController
   end
 
   def extend_signatures
-    return head :forbidden unless author_of_contract?
+    return head :forbidden unless manages_contract?
 
     target_level = params[:target_level].presence&.upcase || "T"
     return_url = @contract.bundle ? show_bundle_contract_path(@contract) : contract_path(@contract)
@@ -243,14 +243,18 @@ class ContractsController < ApplicationController
   end
 
   def update
-    if params[:next_step] == "request_signature" && !author_of_contract?
+    if params[:next_step] == "request_signature" && !manages_contract?
       return head :forbidden
     end
 
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
-        bundle = Bundle.create!(contracts: [ @contract ], author: current_user, author_notifications_enabled: true)
+        bundle = Bundle.create!(
+          tenant: current_tenant,
+          contracts: [ @contract ],
+          author_notifications_enabled: true
+        )
         redirect_to bundle
       elsif params[:next_step] == "sign"
         redirect_to sign_contract_path(@contract)
@@ -281,9 +285,10 @@ class ContractsController < ApplicationController
   private
 
   def verify_author
-    if @contract.user && @contract.user != current_user
-      redirect_to new_contract_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
-    end
+    return if @contract.tenant.nil?
+    return if @contract.tenant == current_tenant
+
+    raise ActiveRecord::RecordNotFound
   end
 
   def set_contract
@@ -307,7 +312,7 @@ class ContractsController < ApplicationController
       @recipient = @contract.recipients.active.find_by(user: current_user) ||
                    @contract.recipients.active.find_by(email: current_user.email)
 
-      if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
+      if @recipient.nil? && @contract.bundle.present? && manages_contract?
         @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
@@ -320,7 +325,7 @@ class ContractsController < ApplicationController
     elsif current_user
       user_signer = UserSigner.find_or_create_by!(user: current_user)
       @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
-    elsif @contract.user.nil?
+    elsif @contract.tenant.nil?
       @signer_contract = @contract.signer_contracts
                                   .joins(:signer)
                                   .find_by(signers: { type: "AnonymousSigner" })
@@ -527,12 +532,8 @@ class ContractsController < ApplicationController
     params.require(:signed_document)
   end
 
-  def author_of_contract?
-    if @contract.bundle
-      return current_user.present? && @contract.bundle.author == current_user
-    end
-
-    current_user.present? && @contract.user == current_user
+  def manages_contract?
+    current_user.present? && current_tenant.present? && @contract.tenant == current_tenant
   end
 
   def ensure_visual_signing_allowed

@@ -17,28 +17,27 @@
 #  updated_at                          :datetime         not null
 #  contract_content_version_id         :bigint
 #  contract_id                         :bigint
-#  user_id                             :bigint           not null
+#  tenant_id                           :bigint           not null
 #
 # Indexes
 #
-#  idx_on_contract_content_version_id_7e3d0b9366                   (contract_content_version_id)
-#  index_contract_validation_records_on_contract_id                (contract_id)
-#  index_contract_validation_records_on_document_hash              (document_hash)
-#  index_contract_validation_records_on_user_contract_and_version  (user_id,source_contract_uuid,source_version_number) UNIQUE
-#  index_contract_validation_records_on_user_id                    (user_id)
-#  index_contract_validation_records_on_user_id_and_expires_at     (user_id,expires_at)
+#  idx_on_contract_content_version_id_7e3d0b9366                 (contract_content_version_id)
+#  index_contract_validation_records_on_contract_id              (contract_id)
+#  index_contract_validation_records_on_document_hash            (document_hash)
+#  index_contract_validation_records_on_tenant_contract_version  (tenant_id,source_contract_uuid,source_version_number) UNIQUE
+#  index_contract_validation_records_on_tenant_id                (tenant_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (contract_content_version_id => contract_content_versions.id) ON DELETE => nullify
 #  fk_rails_...  (contract_id => contracts.id) ON DELETE => nullify
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id) ON DELETE => cascade
 #
 require "test_helper"
 
 class ContractValidationRecordTest < ActiveSupport::TestCase
   test "capture uses the earliest relevant expiry when no archive timestamp is present" do
-    contract = create_contract(user: users(:one))
+    contract = create_contract(tenant: tenants(:one))
     version = contract.add_signed_content_version!(
       content: "signed-pdf-content",
       filename: "contract-signed.pdf",
@@ -71,7 +70,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
   end
 
   test "capture prefers archive timestamp expiry and survives contract deletion" do
-    contract = create_contract(user: users(:one))
+    contract = create_contract(tenant: tenants(:one))
     version = contract.add_signed_content_version!(
       content: "signed-pdf-content",
       filename: "contract-signed.pdf",
@@ -107,7 +106,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
   end
 
   test "capture stores AGP reference metadata in signature snapshots" do
-    contract = create_contract(user: users(:one))
+    contract = create_contract(tenant: tenants(:one))
     version = contract.add_signed_content_version!(
       content: "signed-pdf-content",
       filename: "contract-signed.pdf",
@@ -132,7 +131,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
   end
 
   test "latest_per_contract returns only the newest record for each contract" do
-    contract = create_contract(user: users(:one))
+    contract = create_contract(tenant: tenants(:one))
     old_version = contract.add_signed_content_version!(
       content: "signed-pdf-content-v1",
       filename: "contract-signed-v1.pdf",
@@ -147,7 +146,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     )
 
     old_record = ContractValidationRecord.create!(
-      user: users(:one),
+      tenant: contract.tenant,
       contract: contract,
       contract_content_version: old_version,
       source_contract_uuid: contract.uuid,
@@ -160,7 +159,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
       validation_details: {}
     )
     new_record = ContractValidationRecord.create!(
-      user: users(:one),
+      tenant: contract.tenant,
       contract: contract,
       contract_content_version: new_version,
       source_contract_uuid: contract.uuid,
@@ -178,10 +177,61 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     assert_equal [ new_record.id ], latest_ids
   end
 
+  test "uniqueness is scoped to tenant" do
+    attributes = {
+      source_contract_uuid: "tenant-scoped-contract",
+      source_version_number: 1,
+      filename: "tenant-scoped.pdf",
+      document_hash: Digest::SHA256.hexdigest("tenant-scoped"),
+      validation_details: {}
+    }
+
+    first = ContractValidationRecord.create!(attributes.merge(tenant: tenants(:one)))
+    second = ContractValidationRecord.create!(attributes.merge(tenant: tenants(:two)))
+    duplicate = ContractValidationRecord.new(attributes.merge(tenant: tenants(:one)))
+
+    assert_predicate first, :persisted?
+    assert_predicate second, :persisted?
+    assert_not duplicate.valid?
+    assert_predicate duplicate.errors[:source_contract_uuid], :any?
+  end
+
+  test "tenant must match the source contract tenant" do
+    contract = create_contract(tenant: tenants(:one))
+    record = ContractValidationRecord.new(
+      tenant: tenants(:two),
+      contract: contract,
+      source_contract_uuid: contract.uuid,
+      source_version_number: 1,
+      filename: "mismatch.pdf",
+      document_hash: Digest::SHA256.hexdigest("mismatch"),
+      validation_details: {}
+    )
+
+    assert_not record.valid?
+    assert_includes record.errors[:tenant], "must match the contract tenant"
+  end
+
+  test "inherits tenant from the source contract" do
+    contract = create_contract(tenant: tenants(:one))
+    record = ContractValidationRecord.new(
+      contract: contract,
+      source_contract_uuid: contract.uuid,
+      source_version_number: 1,
+      filename: "inherited.pdf",
+      document_hash: Digest::SHA256.hexdigest("inherited"),
+      validation_details: {}
+    )
+
+    record.valid?
+
+    assert_equal contract.tenant, record.tenant
+  end
+
   private
 
-  def create_contract(user: nil)
-    user&.update_column(:features, [ "archivation" ])
+  def create_contract(tenant: nil)
+    tenant&.update!(features: [ "archivation" ])
 
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
@@ -190,7 +240,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     )
 
     Contract.create!(
-      user: user,
+      tenant: tenant,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",

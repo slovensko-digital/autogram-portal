@@ -9,6 +9,22 @@ class BundlesControllerTest < ActionController::TestCase
     @controller.singleton_class.define_method(:user_signed_in?) { true }
   end
 
+  test "index lists bundles for the current tenant only" do
+    get :index
+
+    assert_response :success
+    assert_equal [ bundles(:one) ], @controller.instance_variable_get(:@bundles).to_a
+  end
+
+  test "owner actions return not found for another tenant bundle" do
+    other_bundle = bundles(:two)
+    other_bundle.update_column(:uuid, SecureRandom.uuid)
+
+    get :show, params: { id: other_bundle.uuid }
+
+    assert_response :not_found
+  end
+
   test "author bundle sign route offers autogram batch signing for multiple qes contracts" do
     bundle = create_bundle_with_contracts(author: @author, count: 2)
 

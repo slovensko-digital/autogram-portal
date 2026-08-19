@@ -1,0 +1,54 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: contract_validation_records
+#
+#  id                                  :bigint           not null, primary key
+#  document_hash                       :string           not null
+#  expires_at                          :datetime
+#  filename                            :string           not null
+#  latest_archive_timestamp_expires_at :datetime
+#  signature_levels                    :string           default([]), not null, is an Array
+#  signatures_count                    :integer          default(0), not null
+#  source_bundle_uuid                  :string
+#  source_contract_uuid                :string           not null
+#  source_version_number               :integer          not null
+#  validation_details                  :jsonb            not null
+#  created_at                          :datetime         not null
+#  updated_at                          :datetime         not null
+#  contract_content_version_id         :bigint
+#  contract_id                         :bigint
+#  tenant_id                           :bigint           not null
+#
+# Indexes
+#
+#  idx_on_contract_content_version_id_7e3d0b9366                 (contract_content_version_id)
+#  index_contract_validation_records_on_contract_id              (contract_id)
+#  index_contract_validation_records_on_document_hash            (document_hash)
+#  index_contract_validation_records_on_tenant_contract_version  (tenant_id,source_contract_uuid,source_version_number) UNIQUE
+#  index_contract_validation_records_on_tenant_id                (tenant_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (contract_content_version_id => contract_content_versions.id) ON DELETE => nullify
+#  fk_rails_...  (contract_id => contracts.id) ON DELETE => nullify
+#  fk_rails_...  (tenant_id => tenants.id) ON DELETE => cascade
+#
+one:
+  tenant_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  contract_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  source_contract_uuid: MyString
+  source_version_number: 1
+  filename: fixture-one.pdf
+  document_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  validation_details: {}
+
+two:
+  tenant_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  contract_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  source_contract_uuid: MyString
+  source_version_number: 1
+  filename: fixture-two.pdf
+  document_hash: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  validation_details: {}

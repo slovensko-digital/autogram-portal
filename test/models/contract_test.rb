@@ -3,26 +3,26 @@
 # Table name: contracts
 #
 #  id                           :bigint           not null, primary key
-#  allowed_methods              :string           default(["qes"]), is an Array
+#  allowed_methods              :string           default([]), is an Array
 #  author_notifications_enabled :boolean          default(FALSE), not null
 #  temporary_storage_reason     :string
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
 #  bundle_id                    :bigint
-#  user_id                      :bigint
+#  tenant_id                    :bigint
 #
 # Indexes
 #
 #  index_contracts_on_bundle_id                 (bundle_id)
 #  index_contracts_on_temporary_storage_reason  (temporary_storage_reason)
-#  index_contracts_on_user_id                   (user_id)
+#  index_contracts_on_tenant_id                 (tenant_id)
 #  index_contracts_on_uuid                      (uuid)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (bundle_id => bundles.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id) ON DELETE => cascade
 #
 require "test_helper"
 require "tempfile"
@@ -30,34 +30,59 @@ require "zip"
 
 class ContractTest < ActiveSupport::TestCase
   setup do
-    @user = users(:one)
+    @tenant = tenants(:one)
   end
 
-  test "does not notify standalone contract author by default" do
-    contract = Contract.new(user: @user)
+  test "does not notify standalone contract by default" do
+    contract = Contract.new
     contract.define_singleton_method(:awaiting_signature?) { false }
 
     assert_not contract.should_notify_user?
   end
 
-  test "notifies standalone contract author when enabled" do
-    contract = Contract.new(user: @user, author_notifications_enabled: true)
+  test "does not notify standalone contract even when author notifications enabled" do
+    contract = Contract.new(author_notifications_enabled: true)
     contract.define_singleton_method(:awaiting_signature?) { false }
 
-    assert contract.should_notify_user?
+    assert_not contract.should_notify_user?
   end
 
-  test "does not notify author when signer is the author" do
-    contract = Contract.new(user: @user, author_notifications_enabled: true)
-    signer = Struct.new(:user).new(@user)
+  test "does not notify when signer is present" do
+    contract = Contract.new(author_notifications_enabled: true)
+    signer = Struct.new(:user).new(users(:one))
     contract.define_singleton_method(:awaiting_signature?) { false }
 
     assert_not contract.should_notify_user?(signer: signer)
   end
 
+  test "standalone contract without a bundle has no tenant by default" do
+    contract = Contract.new
+    contract.send(:assign_tenant)
+
+    assert_nil contract.tenant
+  end
+
+  test "anonymous standalone contract can remain tenantless" do
+    contract = Contract.new
+
+    contract.send(:assign_tenant)
+    contract.send(:validate_tenant)
+
+    assert_nil contract.tenant
+    assert_empty contract.errors[:tenant]
+  end
+
+  test "contract tenant must match its bundle tenant" do
+    bundle = Bundle.new(tenant: tenants(:one))
+    contract = Contract.new(bundle: bundle, tenant: tenants(:two))
+
+    contract.send(:validate_tenant)
+
+    assert_predicate contract.errors[:tenant], :any?
+  end
+
   test "expands uploaded asice container into contract documents and preserves signed container" do
     contract = Contract.new(
-      user: @user,
       documents: [ Document.new(blob: asice_blob("container.asice", {
         "contract-a.txt" => "alpha",
         "nested/contract-b.txt" => "beta",
@@ -84,7 +109,6 @@ class ContractTest < ActiveSupport::TestCase
     })
 
     contract = Contract.new(
-      user: @user,
       documents: [ Document.new(blob: uploaded_file) ]
     )
 
@@ -103,7 +127,6 @@ class ContractTest < ActiveSupport::TestCase
   test "saves a pending uploaded PDF before signature parameters validate it" do
     uploaded_file = uploaded_pdf_file("pending.pdf", "%PDF-1.4 pending document")
     contract = Contract.new(
-      user: @user,
       documents: [ Document.new(blob: uploaded_file) ]
     )
     fake_service = Struct.new(:validation_result) do
@@ -124,7 +147,7 @@ class ContractTest < ActiveSupport::TestCase
 
   test "extend_signatures creates a new content version without overwriting the previous one" do
     contract = Contract.create!(
-      user: @user,
+      tenant: @tenant,
       documents_attributes: [ { blob: pdf_blob("original.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
@@ -178,7 +201,7 @@ class ContractTest < ActiveSupport::TestCase
 
   test "pades_signed returns true only for signed pades content versions" do
     contract = Contract.create!(
-      user: @user,
+      tenant: @tenant,
       documents_attributes: [ { blob: pdf_blob("original.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
@@ -206,7 +229,7 @@ class ContractTest < ActiveSupport::TestCase
       documents_attributes: [ { blob: pdf_blob("bundle-contract.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
-    Bundle.create!(author: @user, contracts: [ contract ])
+    Bundle.create!(tenant: @tenant, contracts: [ contract ])
 
     fake_service = Struct.new(:validation_result) do
       def validate_signatures(_document)
@@ -221,7 +244,7 @@ class ContractTest < ActiveSupport::TestCase
 
   test "pades field preparation is not allowed for standalone contracts" do
     contract = Contract.create!(
-      user: @user,
+      tenant: @tenant,
       documents_attributes: [ { blob: pdf_blob("standalone.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
@@ -237,12 +260,13 @@ class ContractTest < ActiveSupport::TestCase
     end
   end
 
-  test "pades field preparation is allowed only for the bundle author" do
+  test "pades field preparation is allowed only for bundle tenant members" do
     contract = Contract.create!(
       documents_attributes: [ { blob: pdf_blob("bundle-author.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
-    bundle = Bundle.create!(author: @user, contracts: [ contract ])
+    bundle = Bundle.create!(tenant: @tenant, contracts: [ contract ])
+    tenant_member = users(:one)
     other_user = users(:two)
 
     fake_service = Struct.new(:validation_result) do
@@ -252,7 +276,7 @@ class ContractTest < ActiveSupport::TestCase
     end.new(AutogramService::ValidationResult.new(hasSignatures: false, documentInfo: { signatureForm: "PAdES" }))
 
     with_autogram_service(fake_service) do
-      assert contract.reload.pades_field_preparation_allowed_for?(bundle.author)
+      assert contract.reload.pades_field_preparation_allowed_for?(tenant_member)
       assert_not contract.pades_field_preparation_allowed_for?(other_user)
       assert_not contract.pades_field_preparation_allowed_for?(nil)
     end
@@ -263,7 +287,7 @@ class ContractTest < ActiveSupport::TestCase
       documents_attributes: [ { blob: pdf_blob("bundle-author.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
-    Bundle.create!(author: @user, contracts: [ contract ])
+    Bundle.create!(tenant: @tenant, contracts: [ contract ])
 
     contract.add_prepared_signature_fields_content_version!(
       content: "%PDF-1.4 prepared source",
@@ -279,7 +303,7 @@ class ContractTest < ActiveSupport::TestCase
 
   test "source_document_is_pdf? is true only for PDF content versions" do
     pdf_contract = Contract.create!(
-      user: @user,
+      tenant: @tenant,
       documents_attributes: [ { blob: pdf_blob("original.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
@@ -293,7 +317,6 @@ class ContractTest < ActiveSupport::TestCase
     assert_not pdf_contract.source_document_is_asice?
 
     asice_contract = Contract.new(
-      user: @user,
       documents: [ Document.new(blob: asice_blob("container.asice", {
         "contract-a.txt" => "alpha",
         "META-INF/signatures.xml" => "<signature/>"
@@ -305,7 +328,7 @@ class ContractTest < ActiveSupport::TestCase
     assert_predicate asice_contract.latest_source_content_version.content, :present?
 
     unsigned_contract = Contract.create!(
-      user: @user,
+      tenant: @tenant,
       documents_attributes: [ { blob: pdf_blob("unsigned.pdf", "%PDF-1.4 unsigned") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )

@@ -1,13 +1,14 @@
 require "test_helper"
-require "jwt"
-require "openssl"
+require_relative "api_test_helper"
 
 class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
+  include ApiTestHelper
+
   setup do
     @owner = users(:one)
     @owner.update_column(:email, "owner@example.com")
-    @owner_key = OpenSSL::PKey::RSA.generate(2048)
-    @owner.update_column(:api_token_public_key, @owner_key.public_to_pem)
+    enable_api_for!(@owner.current_tenant)
+    @owner_key = attach_api_key!(tenant: @owner.current_tenant)
   end
 
   test "public bundle sign route falls back to full-page electronic setup when onboarding is still needed" do
@@ -33,12 +34,14 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            ]
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
     bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
     assert bundle.publicly_visible?
+    assert_equal @owner.current_tenant, bundle.tenant
+    assert bundle.contracts.all? { |contract| contract.tenant == @owner.current_tenant }
 
     get "/bundles/#{bundle.uuid}/sign"
 
@@ -79,7 +82,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            ]
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -127,7 +130,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            ]
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -173,7 +176,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            ]
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -212,7 +215,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            ]
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -251,7 +254,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            ]
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -289,7 +292,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            ]
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -327,7 +330,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            end
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -398,7 +401,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              }
            end
          },
-         headers: bearer_headers_for(@owner, @owner_key)
+         headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
     assert_response :created
 
@@ -440,7 +443,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
                }
              ]
            },
-           headers: bearer_headers_for(@owner, @owner_key)
+           headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
       assert_response :created
 
@@ -479,7 +482,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
                }
              ]
            },
-           headers: bearer_headers_for(@owner, @owner_key)
+           headers: bearer_headers_for(@owner.current_tenant, @owner_key)
 
       assert_response :created
 
@@ -505,22 +508,5 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
   ensure
     Contract.send(:remove_const, :ALLOWED_METHODS)
     Contract.const_set(:ALLOWED_METHODS, original_allowed_methods)
-  end
-
-  def bearer_headers_for(user, key)
-    token = JWT.encode(
-      {
-        sub: user.id.to_s,
-        exp: 10.minutes.from_now.to_i,
-        jti: SecureRandom.hex(16)
-      },
-      key,
-      "RS256"
-    )
-
-    {
-      "Authorization" => "Bearer #{token}",
-      "Accept" => "application/json"
-    }
   end
 end

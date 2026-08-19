@@ -612,9 +612,8 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def create_bundle_contract_with_session(options: nil)
-    author = users(:one)
     contract = create_contract_without_session
-    bundle = Bundle.create!(author: author, contracts: [ contract ], publicly_visible: true)
+    bundle = Bundle.create!(tenant: users(:one).current_tenant, contracts: [ contract ], publicly_visible: true)
 
     signer = AnonymousSigner.create!
     signer_contract = signer.signer_contracts.create!(contract: contract)
@@ -629,7 +628,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
   def create_bundle_contract_with_prepared_signature_field
     contract = create_contract_without_session
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: users(:one).current_tenant, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 
     contract.signature_field_preparations.create!(

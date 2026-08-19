@@ -3,7 +3,7 @@ class Api::V1::ContractsController < ApiController
 
   def create
     @contract = Contract.new(contract_params)
-    @contract.user = current_user
+    @contract.tenant = current_tenant
     if @contract.save
       render status: :created
     else
@@ -17,7 +17,7 @@ class Api::V1::ContractsController < ApiController
 
   def destroy
     if @contract.destroy
-      render head :no_content
+      head :no_content
     else
       render json: { errors: @contract.errors.full_messages }, status: :unprocessable_entity
     end
@@ -43,14 +43,8 @@ class Api::V1::ContractsController < ApiController
   private
 
   def set_contract
-    @contract = accessible_contracts.find_by(uuid: params[:id])
+    @contract = current_tenant.contracts.find_by(uuid: params[:id])
     render json: { error: "Contract not found" }, status: :not_found unless @contract
-  end
-
-  def accessible_contracts
-    Contract
-      .left_outer_joins(:bundle)
-      .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
   end
 
   def contract_params

@@ -1,0 +1,30 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: tenants
+#
+#  id                   :bigint           not null, primary key
+#  api_token_identifier :string           not null
+#  api_token_public_key :text
+#  features             :text             default([]), not null, is an Array
+#  kind                 :string           default("freemium"), not null
+#  name                 :string           not null
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#
+# Indexes
+#
+#  index_tenants_on_api_token_identifier  (api_token_identifier) UNIQUE
+#
+one:
+  name: Personal tenant one
+  kind: freemium
+  features: []
+  api_token_identifier: "<%= ActiveRecord::FixtureSet.identify(:one) %>"
+
+two:
+  name: Personal tenant two
+  kind: freemium
+  features: []
+  api_token_identifier: "<%= ActiveRecord::FixtureSet.identify(:two) %>"

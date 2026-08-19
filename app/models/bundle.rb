@@ -11,23 +11,23 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
-#  user_id                      :bigint           not null
+#  tenant_id                    :bigint           not null
 #
 # Indexes
 #
-#  index_bundles_on_user_id  (user_id)
-#  index_bundles_on_uuid     (uuid)
+#  index_bundles_on_tenant_id  (tenant_id)
+#  index_bundles_on_uuid       (uuid)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id) ON DELETE => cascade
 #
 class Bundle < ApplicationRecord
   attr_accessor :allow_blank_recipient_emails
 
-  belongs_to :author, class_name: "User", foreign_key: "user_id"
+  belongs_to :tenant
 
-  has_many :contracts, dependent: :destroy
+  has_many :contracts, dependent: :destroy, inverse_of: :bundle
   has_many :signature_field_preparations, through: :contracts
   has_many :recipients, dependent: :destroy
   has_many :visible_recipients, -> { visible }, class_name: "Recipient", foreign_key: :bundle_id
@@ -42,6 +42,8 @@ class Bundle < ApplicationRecord
   accepts_nested_attributes_for :recipients, allow_destroy: true
 
   before_validation :ensure_uuid, on: :create
+  before_validation :assign_tenant_to_contracts
+  validates :tenant, presence: true
   validates :uuid, presence: true, uniqueness: true
   validates :uuid, format: { with: /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/, message: "must be a valid UUID" }
   validates :contracts, presence: true
@@ -49,6 +51,7 @@ class Bundle < ApplicationRecord
   validates :required_signatures, presence: true,
                                   numericality: { only_integer: true, greater_than: 0 },
                                   if: -> { signing_rule == "threshold" }
+  validate :contracts_belong_to_tenant
 
   # TODO: add a method to notify recipients later via API
   # after_create :notify_recipients
@@ -58,7 +61,7 @@ class Bundle < ApplicationRecord
   scope :recipient_user, ->(user) {
     joins(:recipients)
       .merge(Recipient.active.visible)
-      .where.not(author: user)
+      .where.not(tenant_id: user.current_tenant_id)
       .where(recipients: { user: user })
   }
 
@@ -118,14 +121,7 @@ class Bundle < ApplicationRecord
   end
 
   def should_notify_author?(contract: nil, signer: nil)
-    return false unless author_notifications_enabled?
-    return false if webhook.present?
-
-    if signer
-      return false if author == signer.user
-    end
-
-    true
+    false
   end
 
   def notify_recipients
@@ -217,6 +213,16 @@ class Bundle < ApplicationRecord
   end
 
   private
+
+  def assign_tenant_to_contracts
+    contracts.each { |contract| contract.tenant ||= tenant }
+  end
+
+  def contracts_belong_to_tenant
+    contracts.reject(&:marked_for_destruction?).each do |contract|
+      errors.add(:contracts, "must belong to the same tenant") if tenant.present? && contract.tenant != tenant
+    end
+  end
 
   def withdraw_federation_invitation_for_signed_recipient(signer)
     recipient = signer&.recipient&.reload

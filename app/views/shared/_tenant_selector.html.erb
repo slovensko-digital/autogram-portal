@@ -1,0 +1,32 @@
+<% if current_user.tenants.limit(2).count > 1 %>
+  <% mobile = local_assigns.fetch(:mobile, false) %>
+  <% selector_id = mobile ? "tenant-selector-mobile" : "tenant-selector-desktop" %>
+
+  <div class="relative" x-data="{ tenantOpen: false }" @click.away="tenantOpen = false" @keydown.escape.window="tenantOpen = false">
+    <button type="button"
+            @click="tenantOpen = !tenantOpen"
+            :aria-expanded="tenantOpen"
+            aria-controls="<%= selector_id %>"
+            aria-label="<%= t('tenant_switcher.label') %>"
+            class="<%= mobile ? 'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-semibold text-white hover:bg-blue-700' : 'group flex w-full items-center justify-between gap-x-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700' %> transition-colors cursor-pointer">
+      <span class="truncate"><%= current_tenant.name %></span>
+      <svg class="h-4 w-4 shrink-0 transition-transform" :class="{ 'rotate-180': tenantOpen }" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+      </svg>
+    </button>
+    <div id="<%= selector_id %>"
+         x-show="tenantOpen"
+         x-transition
+         class="<%= mobile ? 'mt-1 overflow-hidden rounded-lg border border-blue-600 bg-blue-900' : 'absolute bottom-full left-0 z-10 mb-1 w-full min-w-56 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg' %>"
+         style="display: none;">
+      <% current_user.tenants.order(:name, :id).each do |tenant| %>
+        <%= button_to tenant.name,
+              switch_tenant_path,
+              params: { tenant_id: tenant.id },
+              method: :post,
+              title: t("tenant_switcher.switch_to", tenant: tenant.name),
+              class: "block w-full px-4 py-2.5 text-left text-sm transition-colors cursor-pointer #{mobile ? 'text-white hover:bg-blue-700' : 'text-gray-700 hover:bg-blue-50'} #{tenant == current_tenant ? (mobile ? 'bg-blue-700 font-semibold' : 'bg-blue-50 font-semibold text-blue-700') : ''}" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

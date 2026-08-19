@@ -47,6 +47,8 @@ Rails.application.routes.draw do
 
   authenticate(:user) do
     get "/dashboard", to: "dashboard#index", as: :dashboard
+    post "/tenants/switch", to: "tenants#switch", as: :switch_tenant
+    patch "/tenant/settings", to: "tenants#update_settings", as: :tenant_settings
 
     resources :contracts, only: [ :index, :destroy ]
     resources :contract_validation_records, only: [ :index, :destroy ] do

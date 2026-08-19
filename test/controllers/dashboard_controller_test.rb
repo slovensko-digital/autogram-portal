@@ -8,7 +8,7 @@ class DashboardControllerTest < ActionController::TestCase
   setup do
     @user = users(:one)
     @user.update_column(:email, "dashboard@example.com")
-    @user.update_column(:features, [ "archivation" ])
+    @user.current_tenant.update!(features: [ "archivation" ])
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
 
@@ -19,8 +19,8 @@ class DashboardControllerTest < ActionController::TestCase
   end
 
   test "index renders validation warning for records expiring within two months" do
-    create_record(user: @user, expires_at: 3.weeks.from_now)
-    create_record(user: @user, expires_at: 8.months.from_now)
+    create_record(expires_at: 3.weeks.from_now)
+    create_record(expires_at: 8.months.from_now)
 
     get :index
 
@@ -30,8 +30,8 @@ class DashboardControllerTest < ActionController::TestCase
   end
 
   test "index hides archivation widgets when feature is disabled" do
-    @user.update_column(:features, [])
-    create_record(user: @user, expires_at: 3.weeks.from_now)
+    @user.current_tenant.update!(features: [])
+    create_record(expires_at: 3.weeks.from_now)
 
     get :index
 
@@ -62,11 +62,41 @@ class DashboardControllerTest < ActionController::TestCase
     assert_equal 1, @controller.instance_variable_get(:@awaiting_my_signature_count)
   end
 
+  test "selector is hidden for a single tenant membership" do
+    get :index
+
+    assert_response :success
+    assert_select "#tenant-selector-desktop", count: 0
+    assert_select "#tenant-selector-mobile", count: 0
+  end
+
+  test "selector shows desktop and mobile dropdowns for two memberships" do
+    organization = Tenant.create!(name: "Second org", kind: :organization)
+    organization.tenant_users.create!(user: @user, role: :member)
+
+    get :index
+
+    assert_response :success
+    assert_select "#tenant-selector-desktop", count: 1
+    assert_select "#tenant-selector-mobile", count: 1
+    assert_select "form[action='#{switch_tenant_path}'] input[name='tenant_id'][value='#{@user.current_tenant.id}']", count: 2
+    assert_select "form[action='#{switch_tenant_path}'] input[name='tenant_id'][value='#{organization.id}']", count: 2
+  end
+
+  test "dashboard owner counts are isolated to the current tenant" do
+    get :index
+
+    assert_equal @user.current_tenant.bundles.count, @controller.instance_variable_get(:@bundles_count)
+    assert_equal @user.current_tenant.contracts.standalone.count, @controller.instance_variable_get(:@contracts_count)
+    assert_equal @user.current_tenant.bundles.order(created_at: :desc).limit(5),
+                 @controller.instance_variable_get(:@recent_bundles)
+  end
+
   private
 
-  def create_record(user:, expires_at: nil)
+  def create_record(tenant: @user.current_tenant, expires_at: nil)
     ContractValidationRecord.create!(
-      user: user,
+      tenant: tenant,
       source_contract_uuid: SecureRandom.uuid,
       source_version_number: 1,
       filename: "signed-contract.pdf",

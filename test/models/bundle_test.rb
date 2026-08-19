@@ -11,16 +11,16 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
-#  user_id                      :bigint           not null
+#  tenant_id                    :bigint           not null
 #
 # Indexes
 #
-#  index_bundles_on_user_id  (user_id)
-#  index_bundles_on_uuid     (uuid)
+#  index_bundles_on_tenant_id  (tenant_id)
+#  index_bundles_on_uuid       (uuid)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id) ON DELETE => cascade
 #
 require "test_helper"
 require "openssl"
@@ -29,8 +29,8 @@ class BundleTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   setup do
-    @author = users(:one)
-    @author.update_column(:email, "owner@example.com")
+    @tenant = users(:one).current_tenant
+    @tenant.update_column(:email, nil) rescue nil
     @queue_adapter = ActiveJob::Base.queue_adapter
     ActiveJob::Base.queue_adapter = :test
     clear_enqueued_jobs
@@ -42,9 +42,10 @@ class BundleTest < ActiveSupport::TestCase
   end
 
   test "author proxy recipients do not count as bundle recipients" do
-    bundle = create_bundle_with_contract(author: @author)
+    bundle = create_bundle_with_contract(tenant: @tenant)
+    author_user = users(:one)
 
-    Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: @author)
+    Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: author_user)
 
     assert_empty bundle.visible_recipients
     assert_empty bundle.active_recipients
@@ -53,27 +54,27 @@ class BundleTest < ActiveSupport::TestCase
   end
 
   test "does not notify author by default" do
-    bundle = Bundle.new(author: @author)
+    bundle = Bundle.new(tenant: @tenant)
 
     assert_not bundle.should_notify_author?
   end
 
-  test "notifies author when enabled for web bundles" do
-    bundle = Bundle.new(author: @author, author_notifications_enabled: true)
+  test "does not notify author even when author notifications enabled" do
+    bundle = Bundle.new(tenant: @tenant, author_notifications_enabled: true)
 
-    assert bundle.should_notify_author?
+    assert_not bundle.should_notify_author?
   end
 
-  test "does not notify author for webhook-managed bundles even when enabled" do
-    bundle = Bundle.new(author: @author, author_notifications_enabled: true)
+  test "does not notify author for webhook-managed bundles" do
+    bundle = Bundle.new(tenant: @tenant, author_notifications_enabled: true)
     bundle.build_webhook(url: "https://example.com/webhook", method: :standard)
 
     assert_not bundle.should_notify_author?
   end
 
   test "author signing one contract does not enqueue signature no longer required notification" do
-    bundle = create_bundle_with_contracts(author: @author, count: 3)
-    author_proxy = Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: @author)
+    bundle = create_bundle_with_contracts(tenant: @tenant, count: 3)
+    author_proxy = Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: users(:one))
     signer_contract = author_proxy.signer_contracts.find_by!(contract: bundle.contracts.first)
     signer_contract.update!(signed_at: Time.current)
 
@@ -83,7 +84,7 @@ class BundleTest < ActiveSupport::TestCase
   end
 
   test "superseding recipients revokes their active access grants" do
-    bundle = create_bundle_with_contract(author: @author)
+    bundle = create_bundle_with_contract(tenant: @tenant)
     bundle.update!(signing_rule: "any")
 
     first_recipient = bundle.recipients.create!(email: "first@example.com", locale: "en")
@@ -107,7 +108,7 @@ class BundleTest < ActiveSupport::TestCase
   end
 
   test "signing the final contract for a federated recipient withdraws the portal invitation" do
-    bundle = create_bundle_with_contract(author: @author)
+    bundle = create_bundle_with_contract(tenant: @tenant)
     portal_instance = create_portal_instance
     recipient = bundle.recipients.create!(
       email: "recipient@example.com",
@@ -124,7 +125,7 @@ class BundleTest < ActiveSupport::TestCase
   end
 
   test "superseding a federated recipient withdraws the portal invitation" do
-    bundle = create_bundle_with_contract(author: @author)
+    bundle = create_bundle_with_contract(tenant: @tenant)
     bundle.update!(signing_rule: "any")
 
     first_recipient = bundle.recipients.create!(email: "first@example.com", locale: "en")
@@ -142,13 +143,40 @@ class BundleTest < ActiveSupport::TestCase
     end
   end
 
-  private
+  test "nested contracts inherit the bundle tenant" do
+    bundle = create_bundle_with_contract(tenant: @tenant)
 
-  def create_bundle_with_contract(author:)
-    create_bundle_with_contracts(author: author, count: 1)
+    assert_equal @tenant, bundle.tenant
+    assert bundle.contracts.all? { |contract| contract.tenant == bundle.tenant }
   end
 
-  def create_bundle_with_contracts(author:, count:)
+  test "rejects contracts from another tenant" do
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new("%PDF-1.4 tenant mismatch"),
+      filename: "tenant-mismatch.pdf",
+      content_type: "application/pdf"
+    )
+    contract = Contract.new(
+      tenant: tenants(:two),
+      documents_attributes: [ { blob: blob } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    bundle = Bundle.new(
+      tenant: @tenant,
+      contracts: [ contract ]
+    )
+
+    assert_not bundle.valid?
+    assert_includes bundle.errors[:contracts], "must belong to the same tenant"
+  end
+
+  private
+
+  def create_bundle_with_contract(tenant:)
+    create_bundle_with_contracts(tenant: tenant, count: 1)
+  end
+
+  def create_bundle_with_contracts(tenant:, count:)
     contracts = count.times.map do |index|
       blob = ActiveStorage::Blob.create_and_upload!(
         io: StringIO.new("%PDF-1.4 test content #{index}"),
@@ -165,7 +193,7 @@ class BundleTest < ActiveSupport::TestCase
       )
     end
 
-    Bundle.create!(author: author, contracts: contracts)
+    Bundle.create!(tenant: tenant, contracts: contracts)
   end
 
   def create_portal_instance

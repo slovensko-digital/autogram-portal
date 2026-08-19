@@ -1,21 +1,18 @@
 module ApiEnvironment
   def self.token_authenticator
     @token_authenticator ||= use_dummy_authenticator? ? DummyAuthenticator.new : ApiTokenAuthenticator.new(
-      public_key_reader: API_USER_PUBLIC_KEY_READER,
-      return_handler: API_USER_BY_IDENTITY_FINDER,
+      public_key_reader: API_TOKEN_PUBLIC_KEY_READER,
+      return_handler: TENANT_BY_API_TOKEN_IDENTIFIER,
     )
   end
 
-  API_USER_PUBLIC_KEY_READER = ->(sub) { OpenSSL::PKey.read(API_USER_BY_IDENTITY_FINDER.call(sub).api_token_public_key) }
-  API_USER_BY_IDENTITY_FINDER = ->(sub) do
-    raise unless sub&.to_i
+  TENANT_BY_API_TOKEN_IDENTIFIER = ->(sub) do
+    tenant = Tenant.find_by!(api_token_identifier: sub.to_s)
+    raise JWT::InvalidSubError unless tenant.api_enabled? && tenant.api_token_public_key.present?
 
-    user = User.find(sub&.to_i)
-
-    raise unless user
-
-    user
+    tenant
   end
+  API_TOKEN_PUBLIC_KEY_READER = ->(sub) { OpenSSL::PKey.read(TENANT_BY_API_TOKEN_IDENTIFIER.call(sub).api_token_public_key) }
 
   def self.use_dummy_authenticator?
     Rails.env == "development" && ENV["API_SKIP_AUTH"] == "true"
@@ -23,7 +20,9 @@ module ApiEnvironment
 
   class DummyAuthenticator
     def verify_token(_token)
-      User.second || raise("No users in DB")
+      Tenant.with_feature(:api)
+            .where.not(api_token_public_key: [ nil, "" ])
+            .first || raise(JWT::InvalidSubError)
     end
   end
 end

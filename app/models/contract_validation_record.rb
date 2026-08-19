@@ -17,33 +17,35 @@
 #  updated_at                          :datetime         not null
 #  contract_content_version_id         :bigint
 #  contract_id                         :bigint
-#  user_id                             :bigint           not null
+#  tenant_id                           :bigint           not null
 #
 # Indexes
 #
-#  idx_on_contract_content_version_id_7e3d0b9366                   (contract_content_version_id)
-#  index_contract_validation_records_on_contract_id                (contract_id)
-#  index_contract_validation_records_on_document_hash              (document_hash)
-#  index_contract_validation_records_on_user_contract_and_version  (user_id,source_contract_uuid,source_version_number) UNIQUE
-#  index_contract_validation_records_on_user_id                    (user_id)
-#  index_contract_validation_records_on_user_id_and_expires_at     (user_id,expires_at)
+#  idx_on_contract_content_version_id_7e3d0b9366                 (contract_content_version_id)
+#  index_contract_validation_records_on_contract_id              (contract_id)
+#  index_contract_validation_records_on_document_hash            (document_hash)
+#  index_contract_validation_records_on_tenant_contract_version  (tenant_id,source_contract_uuid,source_version_number) UNIQUE
+#  index_contract_validation_records_on_tenant_id                (tenant_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (contract_content_version_id => contract_content_versions.id) ON DELETE => nullify
 #  fk_rails_...  (contract_id => contracts.id) ON DELETE => nullify
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id) ON DELETE => cascade
 #
 class ContractValidationRecord < ApplicationRecord
   WARNING_WINDOW = 2.months
 
-  belongs_to :user
+  belongs_to :tenant
   belongs_to :contract, optional: true
   belongs_to :contract_content_version, optional: true
 
   validates :source_contract_uuid, :source_version_number, :filename, :document_hash, presence: true
-  validates :source_contract_uuid, uniqueness: { scope: [ :user_id, :source_version_number ] }
+  validates :source_contract_uuid, uniqueness: { scope: [ :tenant_id, :source_version_number ] }
   validates :document_hash, format: { with: /\A\h{64}\z/ }
+  validate :tenant_matches_contract
+
+  before_validation :assign_tenant
 
   scope :recent, -> { order(updated_at: :desc) }
   scope :expiring_before, ->(time) { where.not(expires_at: nil).where(expires_at: Time.current..time) }
@@ -51,8 +53,8 @@ class ContractValidationRecord < ApplicationRecord
   scope :expired, -> { where.not(expires_at: nil).where("expires_at < ?", Time.current) }
   scope :latest_per_contract, -> {
     latest_records = except(:select, :order)
-      .select("DISTINCT ON (#{table_name}.user_id, #{table_name}.source_contract_uuid) #{table_name}.*")
-      .order(Arel.sql("#{table_name}.user_id, #{table_name}.source_contract_uuid, #{table_name}.source_version_number DESC, #{table_name}.updated_at DESC"))
+      .select("DISTINCT ON (#{table_name}.tenant_id, #{table_name}.source_contract_uuid) #{table_name}.*")
+      .order(Arel.sql("#{table_name}.tenant_id, #{table_name}.source_contract_uuid, #{table_name}.source_version_number DESC, #{table_name}.updated_at DESC"))
 
     from("(#{latest_records.to_sql}) #{table_name}")
   }
@@ -62,12 +64,12 @@ class ContractValidationRecord < ApplicationRecord
   scope :unknown, -> { where(expires_at: nil) }
 
   def self.capture!(contract:, contract_content_version:, validation_result:, signed_content:, filename:, session: nil)
-    owner = contract.user || contract.bundle&.author
-    return if owner.blank? || !owner.archivation_enabled?
+    tenant = contract.tenant
+    return if tenant.blank? || !tenant.archivation_enabled?
 
     signature_snapshots = build_signature_snapshots(validation_result)
     record = find_or_initialize_by(
-      user: owner,
+      tenant: tenant,
       source_contract_uuid: contract.uuid,
       source_version_number: contract_content_version.version_number
     )
@@ -124,7 +126,7 @@ class ContractValidationRecord < ApplicationRecord
   end
 
   def refreshable?(target_level: "LTA")
-    return false unless user&.archivation_enabled?
+    return false unless tenant.archivation_enabled?
 
     source_contract_available? &&
       source_content_available? &&
@@ -135,7 +137,7 @@ class ContractValidationRecord < ApplicationRecord
   end
 
   def refresh_action_available?(reference_time = Time.current)
-    return false unless user&.archivation_enabled?
+    return false unless tenant.archivation_enabled?
 
     source_contract_available? &&
       source_content_available? &&
@@ -168,6 +170,18 @@ class ContractValidationRecord < ApplicationRecord
 
   def agp_instance
     Array(validation_details["signatures"]).filter_map { |signature| signature["agp_instance"].presence }.first
+  end
+
+  private
+
+  def assign_tenant
+    self.tenant ||= contract&.tenant
+  end
+
+  def tenant_matches_contract
+    return if contract.blank? || tenant == contract.tenant
+
+    errors.add(:tenant, "must match the contract tenant")
   end
 
   class << self

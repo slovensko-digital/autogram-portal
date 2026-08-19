@@ -102,6 +102,10 @@ sk:
       en: "English"
       sk: "Slovenčina"
 
+  tenant_switcher:
+    label: "Vybrať organizáciu"
+    switch_to: "Prepnúť na %{tenant}"
+
   helpers:
     recipients:
       status:
@@ -132,7 +136,7 @@ sk:
         name: "Meno"
         email: "Email"
         api_token_public_key: "Verejný kľúč API tokenu"
-        api_token_help: "Toto je váš verejný RSA kľúč pre autentifikáciu."
+        api_token_help: "Toto je verejný kľúč aktuálnej organizácie pre API autentifikáciu."
         api_token_admin_help: "API funkcie sú pre váš účet momentálne vypnuté. Kontaktujte administrátora."
         currently_waiting_confirmation_for_email: "Momentálne čakáme na potvrdenie pre: %{email}"
         update: "Aktualizovať"
@@ -150,20 +154,20 @@ sk:
         manage_portal_instances_description: "Spravujte externé inštancie Autogram Portálu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
         manage_portal_instances_link: "Spravovať dôveryhodné portály"
         features: "Funkcie"
-        features_title: "Funkcie aktuálneho používateľa"
-        features_description: "Ako administrátor môžete zapínať alebo vypínať funkcie dostupné na vašom vlastnom účte. Funkcia administrátora tu zostáva vždy zapnutá."
-        admin_feature_locked: "Funkciu administrátora nie je možné na tomto účte tu odobrať."
+        features_title: "Funkcie pre %{tenant}"
+        features_description: "Ako administrátor organizácie môžete zapínať alebo vypínať funkcie aktuálnej organizácie."
         save_features: "Uložiť funkcie"
         feature_labels:
-          admin: "Administrátorský prístup"
           archivation: "Archív podpisov"
           api: "API prístup"
           federation: "Federácia"
         feature_descriptions:
-          admin: "Umožňuje prístup do administrátorských častí, napríklad správy dôveryhodných portálov a administrácie úloh."
           archivation: "Zapína archív podpisov a funkcie správy záznamov dlhodobého overovania."
           api: "Umožňuje upravovať verejný kľúč pre API a používať autentifikované integračné endpointy."
-          federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portálu."
+  tenants:
+    update_settings:
+      success: "Nastavenia organizácie boli aktualizované."
+      federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portálu."
     confirmations:
       new:
         resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"
@@ -1830,4 +1834,3 @@ sk:
       dpb_2014: "Tento doklad o povolení na pobyt obsahuje čip, ktorý už nie je kompatibilný s kvalifikovaným podpisovanie. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový doklad o povolení na pobyt."
       dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
       dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
-

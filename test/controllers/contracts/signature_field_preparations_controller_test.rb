@@ -18,7 +18,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "index renders signature field preparation form for eligible author" do
-    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+    contract, recipient = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
 
     with_autogram_service(fake_validation_service(has_signatures: false)) do
       get :index, params: { contract_id: contract.uuid }
@@ -34,7 +34,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "index preview uses latest source document when a visual version already exists" do
-    contract, = create_bundle_contract_with_recipient(author: @user)
+    contract, = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     contract.add_signed_content_version!(
       content: "%PDF-1.4 visually stamped content",
       filename: "signature-field-test-visual.pdf",
@@ -52,7 +52,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "index hides recipients that already have linked signature fields and exposes existing preview data" do
-    contract, first_recipient = create_bundle_contract_with_recipient(author: @user)
+    contract, first_recipient = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     second_recipient = contract.bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     contract.signature_field_preparations.create!(
       recipient: first_recipient,
@@ -76,7 +76,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "create stores a prepared signature field" do
-    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+    contract, recipient = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
 
     with_autogram_service(fake_validation_service(has_signatures: false)) do
       post :create, params: {
@@ -104,7 +104,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "destroy removes a prepared signature field" do
-    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+    contract, recipient = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     preparation = nil
 
     with_autogram_service(fake_validation_service(has_signatures: false)) do
@@ -126,7 +126,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "finalize generates prepared signing pdf and redirects to bundle" do
-    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+    contract, recipient = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     contract.signature_field_preparations.create!(
       recipient: recipient,
       document: contract.documents.first,
@@ -152,7 +152,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "finalize prepares signature fields from latest source version" do
-    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+    contract, recipient = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     contract.add_signed_content_version!(
       content: "%PDF-1.4 visually stamped content",
       filename: "signature-field-test-visual.pdf",
@@ -179,7 +179,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "create invalidates prepared signing pdf" do
-    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+    contract, recipient = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     second_recipient = contract.bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     contract.add_prepared_signature_fields_content_version!(
       content: "prepared pdf content",
@@ -207,7 +207,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "non-author cannot manage signature field preparations" do
-    contract, = create_bundle_contract_with_recipient(author: @user)
+    contract, = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     other_user = users(:two)
     other_user.define_singleton_method(:accepted_current_policies?) { true }
     @controller.singleton_class.define_method(:current_user) { other_user }
@@ -220,7 +220,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   test "signed pades contract cannot manage signature field preparations" do
-    contract, = create_bundle_contract_with_recipient(author: @user)
+    contract, = create_bundle_contract_with_recipient(tenant: @user.current_tenant)
     contract.add_signed_content_version!(
       content: "%PDF-1.4 signed content",
       filename: "signed.pdf",
@@ -237,7 +237,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
 
   private
 
-  def create_bundle_contract_with_recipient(author:)
+  def create_bundle_contract_with_recipient(tenant:)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
       filename: "signature-field-test.pdf",
@@ -251,7 +251,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
         format: "PAdES"
       }
     )
-    bundle = Bundle.create!(author: author, contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenant, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 
     [ contract.reload, recipient ]

@@ -20,7 +20,7 @@
 
   <%= render("layouts/flash", flash: flash) %>
 
-  <% if @contract.bundle.author == current_user %>
+  <% if @contract.bundle.tenant == current_tenant %>
     <div class="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end sm:items-start">
       <% if @contract.pades_field_preparation_allowed_for?(current_user) %>
         <%= link_to contract_signature_field_preparations_path(@contract), data: { turbo_frame: "_top" },

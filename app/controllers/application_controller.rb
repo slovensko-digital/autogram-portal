@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
 
   before_action :set_locale
   before_action :enforce_current_policy_consent, if: :user_signed_in?
+  helper_method :current_tenant, :current_tenant_membership, :current_tenant_admin?
 
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActionController::RoutingError, with: :render_not_found
@@ -38,6 +39,27 @@ class ApplicationController < ActionController::Base
     }
 
     render json: config
+  end
+
+  def current_tenant
+    return unless user_signed_in?
+
+    @current_tenant ||= begin
+      tenant = current_user.tenants.find_by(id: current_user.current_tenant_id)
+      tenant ||= current_user.tenants.order(:id).first
+      current_user.update_column(:current_tenant_id, tenant.id) if tenant && current_user.current_tenant_id != tenant.id
+      tenant
+    end
+  end
+
+  def current_tenant_membership
+    return unless current_tenant
+
+    @current_tenant_membership ||= current_user.tenant_users.find_by(tenant: current_tenant)
+  end
+
+  def current_tenant_admin?
+    current_tenant_membership&.admin? || false
   end
 
   private

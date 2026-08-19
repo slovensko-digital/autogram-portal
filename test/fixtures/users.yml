@@ -5,7 +5,7 @@
 # Table name: users
 #
 #  id                     :bigint           not null, primary key
-#  api_token_public_key   :string
+#  admin                  :boolean          default(FALSE), not null
 #  completed_onboardings  :jsonb            not null
 #  confirmation_sent_at   :datetime
 #  confirmation_token     :string
@@ -15,7 +15,6 @@
 #  email                  :string
 #  encrypted_password     :string           default(""), not null
 #  failed_attempts        :integer          default(0), not null
-#  features               :text             default([]), is an Array
 #  last_sign_in_at        :datetime
 #  last_sign_in_ip        :string
 #  locale                 :string           default("sk")
@@ -30,18 +29,28 @@
 #  unlock_token           :string
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
+#  current_tenant_id      :bigint
 #
 # Indexes
 #
 #  index_users_on_confirmation_token    (confirmation_token) UNIQUE
+#  index_users_on_current_tenant_id     (current_tenant_id)
 #  index_users_on_email                 (email) UNIQUE
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
 #  index_users_on_unlock_token          (unlock_token) UNIQUE
 #
+# Foreign Keys
+#
+#  fk_rails_...  (current_tenant_id => tenants.id) ON DELETE => nullify
+#
 one:
   name: MyString
   email: MyString
+  admin: true
+  current_tenant_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
 
 two:
   name: MyString2
   email: MyString2
+  admin: false
+  current_tenant_id: <%= ActiveRecord::FixtureSet.identify(:two) %>

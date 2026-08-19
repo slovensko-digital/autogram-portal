@@ -124,6 +124,10 @@ en:
       en: "English"
       sk: "Slovenčina"
 
+  tenant_switcher:
+    label: "Select organization"
+    switch_to: "Switch to %{tenant}"
+
   helpers:
     recipients:
       status:
@@ -166,7 +170,7 @@ en:
         name: "Name"
         email: "Email"
         api_token_public_key: "API Token Public Key"
-        api_token_help: "This is your public RSA key for authentication."
+        api_token_help: "This is the current organization's public key for API authentication."
         api_token_admin_help: "API features are currently disabled for your account. Please contact the administrator."
         currently_waiting_confirmation_for_email: "Currently waiting confirmation for: %{email}"
         update: "Update"
@@ -184,20 +188,20 @@ en:
         manage_portal_instances_description: "Manage the external Autogram Portal instances that can exchange federated requests with this portal."
         manage_portal_instances_link: "Manage trusted portals"
         features: "Features"
-        features_title: "Current user features"
-        features_description: "As an admin, you can enable or disable the features available on your own account. The admin feature is always kept enabled here."
-        admin_feature_locked: "The admin feature cannot be removed from your current account here."
+        features_title: "Features for %{tenant}"
+        features_description: "As a tenant admin, you can enable or disable features for the current organization."
         save_features: "Save features"
         feature_labels:
-          admin: "Admin access"
           archivation: "Validation archive"
           api: "API access"
           federation: "Federation"
         feature_descriptions:
-          admin: "Allows access to administration-only areas such as trusted portal management and job administration."
           archivation: "Enables the validation archive and long-term validation record management features."
           api: "Allows editing the API public key and using authenticated integration endpoints."
-          federation: "Allows managing federated requests and integrations with other Autogram Portal instances."
+  tenants:
+    update_settings:
+      success: "Tenant settings were updated."
+      federation: "Allows managing federated requests and integrations with other Autogram Portal instances."
     confirmations:
       new:
         resend_confirmation_instructions: "Resend confirmation instructions"

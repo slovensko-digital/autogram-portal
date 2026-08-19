@@ -3,26 +3,26 @@
 # Table name: contracts
 #
 #  id                           :bigint           not null, primary key
-#  allowed_methods              :string           default(["qes"]), is an Array
+#  allowed_methods              :string           default([]), is an Array
 #  author_notifications_enabled :boolean          default(FALSE), not null
 #  temporary_storage_reason     :string
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
 #  bundle_id                    :bigint
-#  user_id                      :bigint
+#  tenant_id                    :bigint
 #
 # Indexes
 #
 #  index_contracts_on_bundle_id                 (bundle_id)
 #  index_contracts_on_temporary_storage_reason  (temporary_storage_reason)
-#  index_contracts_on_user_id                   (user_id)
+#  index_contracts_on_tenant_id                 (tenant_id)
 #  index_contracts_on_uuid                      (uuid)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (bundle_id => bundles.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id) ON DELETE => cascade
 #
 class Contract < ApplicationRecord
   ValidationEntry = Struct.new(:label, :validation_result, :document_hash, keyword_init: true)
@@ -42,8 +42,8 @@ class Contract < ApplicationRecord
     end
   end
 
-  belongs_to :user, optional: true
-  belongs_to :bundle, optional: true
+  belongs_to :bundle, optional: true, inverse_of: :contracts
+  belongs_to :tenant, optional: true
 
   has_many :signer_contracts, dependent: :destroy
   has_many :signers, through: :signer_contracts
@@ -62,6 +62,7 @@ class Contract < ApplicationRecord
   attribute :allowed_methods, default: [ "qes" ]
 
   validate :validate_allowed_methods
+  validate :validate_tenant
   validates :signature_parameters, presence: true, if: -> { allowed_methods.present? && allowed_methods.include?("qes") }
   validate :validate_documents
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
@@ -69,12 +70,13 @@ class Contract < ApplicationRecord
   validates_associated :signature_parameters
 
   before_validation :ensure_uuid, on: :create
+  before_validation :assign_tenant
   before_validation :expand_asice_container_documents, on: :create
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
   after_commit :schedule_existing_signed_content_capture, on: :create
 
-  scope :anonymous, -> { where(user_id: nil).where(bundle_id: nil) }
+  scope :anonymous, -> { where(tenant_id: nil, bundle_id: nil) }
   scope :awaiting_signature_for, ->(user) {
     joins(signer_contracts: { signer: :recipient })
       .where(signer_contracts: { signed_at: nil, declined_at: nil })
@@ -210,7 +212,7 @@ class Contract < ApplicationRecord
   end
 
   def pades_field_preparation_allowed_for?(user)
-    pades_field_preparation_allowed? && bundle&.author == user
+    pades_field_preparation_allowed? && user&.current_tenant == bundle&.tenant
   end
 
   def prepared_signature_field_preparation_for(recipient:)
@@ -318,9 +320,7 @@ class Contract < ApplicationRecord
   end
 
   def should_notify_user?(signer: nil)
-    return false unless author_notifications_enabled?
-
-    user.present? && bundle.nil? && !awaiting_signature? && user != signer&.user
+    false
   end
 
   def short_uuid
@@ -370,8 +370,7 @@ class Contract < ApplicationRecord
   end
 
   def persist_validation_record!(contract_content_version: latest_content_version, validation_result: nil, signed_content: nil, filename: nil, session: nil)
-    owner = user || bundle&.author
-    return if owner.blank? || !owner.archivation_enabled?
+    return unless tenant&.archivation_enabled?
     # return if contract_content_version.blank?
 
     signed_content ||= contract_content_version.content
@@ -393,6 +392,14 @@ class Contract < ApplicationRecord
 
   private
 
+  def assign_tenant
+    self.tenant ||= bundle&.tenant
+  end
+
+  def validate_tenant
+    errors.add(:tenant, "must match the bundle tenant") if bundle&.tenant.present? && tenant != bundle.tenant
+  end
+
   def ensure_uuid
     self.uuid ||= SecureRandom.uuid
   end
@@ -412,10 +419,6 @@ class Contract < ApplicationRecord
 
   def validate_signature_parameters
     signature_parameters.validate(errors)
-  end
-
-  def ensure_uuid
-    self.uuid ||= SecureRandom.uuid
   end
 
   def initialize_signature_parameters
@@ -512,8 +515,7 @@ class Contract < ApplicationRecord
   end
 
   def schedule_existing_signed_content_capture
-    owner = user || bundle&.author
-    return if owner.blank? || !owner.archivation_enabled?
+    return unless tenant&.archivation_enabled?
     return unless latest_content_version.present? || documents.one?
 
     ContractValidationRecordCaptureJob.perform_later(id)

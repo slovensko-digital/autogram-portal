@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_19_095309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,10 +61,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
     t.boolean "publicly_visible", default: false, null: false
     t.integer "required_signatures"
     t.string "signing_rule", default: "all", null: false
+    t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
     t.string "uuid", null: false
-    t.index ["user_id"], name: "index_bundles_on_user_id"
+    t.index ["tenant_id"], name: "index_bundles_on_tenant_id"
     t.index ["uuid"], name: "index_bundles_on_uuid"
   end
 
@@ -91,15 +91,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
     t.string "source_bundle_uuid"
     t.string "source_contract_uuid", null: false
     t.integer "source_version_number", null: false
+    t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
     t.jsonb "validation_details", default: {}, null: false
     t.index ["contract_content_version_id"], name: "idx_on_contract_content_version_id_7e3d0b9366"
     t.index ["contract_id"], name: "index_contract_validation_records_on_contract_id"
     t.index ["document_hash"], name: "index_contract_validation_records_on_document_hash"
-    t.index ["user_id", "expires_at"], name: "index_contract_validation_records_on_user_id_and_expires_at"
-    t.index ["user_id", "source_contract_uuid", "source_version_number"], name: "index_contract_validation_records_on_user_contract_and_version", unique: true
-    t.index ["user_id"], name: "index_contract_validation_records_on_user_id"
+    t.index ["tenant_id", "source_contract_uuid", "source_version_number"], name: "index_contract_validation_records_on_tenant_contract_version", unique: true
+    t.index ["tenant_id"], name: "index_contract_validation_records_on_tenant_id"
   end
 
   create_table "contracts", force: :cascade do |t|
@@ -107,11 +106,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
     t.boolean "author_notifications_enabled", default: false, null: false
     t.bigint "bundle_id"
     t.datetime "created_at", null: false
+    t.string "temporary_storage_reason"
+    t.bigint "tenant_id"
     t.datetime "updated_at", null: false
-    t.bigint "user_id"
     t.string "uuid", null: false
     t.index ["bundle_id"], name: "index_contracts_on_bundle_id"
-    t.index ["user_id"], name: "index_contracts_on_user_id"
+    t.index ["temporary_storage_reason"], name: "index_contracts_on_temporary_storage_reason"
+    t.index ["tenant_id"], name: "index_contracts_on_tenant_id"
     t.index ["uuid"], name: "index_contracts_on_uuid"
   end
 
@@ -276,6 +277,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
     t.index ["bundle_id"], name: "index_postal_addresses_on_bundle_id"
   end
 
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.string "auth", null: false
+    t.datetime "created_at", null: false
+    t.text "endpoint", null: false
+    t.string "p256dh", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
   create_table "recipient_access_grants", force: :cascade do |t|
     t.string "claim_jti", null: false
     t.string "claimed_by_email", null: false
@@ -436,6 +448,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
     t.index ["user_id"], name: "index_signers_on_user_id"
   end
 
+  create_table "tenant_users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "role", default: "member", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["tenant_id", "user_id"], name: "index_tenant_users_on_tenant_id_and_user_id", unique: true
+    t.index ["tenant_id"], name: "index_tenant_users_on_tenant_id"
+    t.index ["user_id"], name: "index_tenant_users_on_user_id"
+  end
+
+  create_table "tenants", force: :cascade do |t|
+    t.string "api_token_identifier", null: false
+    t.text "api_token_public_key"
+    t.datetime "created_at", null: false
+    t.text "features", default: [], null: false, array: true
+    t.string "kind", default: "freemium", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_token_identifier"], name: "index_tenants_on_api_token_identifier", unique: true
+  end
+
   create_table "user_policy_consents", force: :cascade do |t|
     t.datetime "accepted_at", null: false
     t.datetime "created_at", null: false
@@ -452,7 +486,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "api_token_public_key"
+    t.boolean "admin", default: false, null: false
     t.jsonb "completed_onboardings", default: [], null: false
     t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
@@ -460,10 +494,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
     t.datetime "created_at", null: false
     t.datetime "current_sign_in_at"
     t.string "current_sign_in_ip"
+    t.bigint "current_tenant_id"
     t.string "email"
     t.string "encrypted_password", default: "", null: false
     t.integer "failed_attempts", default: 0, null: false
-    t.text "features", default: [], array: true
     t.datetime "last_sign_in_at"
     t.string "last_sign_in_ip"
     t.string "locale", default: "sk"
@@ -478,6 +512,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
     t.string "unlock_token"
     t.datetime "updated_at", null: false
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["current_tenant_id"], name: "index_users_on_current_tenant_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
@@ -532,18 +567,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ades_signature_parameters", "contracts"
-  add_foreign_key "bundles", "users"
+  add_foreign_key "bundles", "tenants", on_delete: :cascade
   add_foreign_key "contract_content_versions", "contracts"
   add_foreign_key "contract_validation_records", "contract_content_versions", on_delete: :nullify
   add_foreign_key "contract_validation_records", "contracts", on_delete: :nullify
-  add_foreign_key "contract_validation_records", "users"
+  add_foreign_key "contract_validation_records", "tenants", on_delete: :cascade
   add_foreign_key "contracts", "bundles"
-  add_foreign_key "contracts", "users"
+  add_foreign_key "contracts", "tenants", on_delete: :cascade
   add_foreign_key "documents", "contracts"
   add_foreign_key "federation_request_invitations", "portal_instances"
   add_foreign_key "federation_request_invitations", "users", column: "recipient_user_id"
   add_foreign_key "identities", "users"
   add_foreign_key "postal_addresses", "bundles"
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "recipient_access_grants", "portal_instances"
   add_foreign_key "recipient_access_grants", "recipients"
   add_foreign_key "recipients", "bundles"
@@ -561,7 +597,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_194508) do
   add_foreign_key "signer_contracts", "signers"
   add_foreign_key "signers", "recipients"
   add_foreign_key "signers", "users"
+  add_foreign_key "tenant_users", "tenants", on_delete: :cascade
+  add_foreign_key "tenant_users", "users", on_delete: :cascade
   add_foreign_key "user_policy_consents", "users"
+  add_foreign_key "users", "tenants", column: "current_tenant_id", on_delete: :nullify
   add_foreign_key "visual_stamps", "documents"
   add_foreign_key "visual_stamps", "signer_contracts"
   add_foreign_key "webhooks", "bundles"

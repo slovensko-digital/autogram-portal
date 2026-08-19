@@ -56,7 +56,7 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
     assert_response :forbidden
   end
 
-  test "private evidence is accessible to bundle author" do
+  test "private evidence is accessible to bundle tenant member" do
     evidence_record = create_public_evidence_record(attach_private_package: true)
 
     assert evidence_record.private_evidence_accessible_by?(users(:one))

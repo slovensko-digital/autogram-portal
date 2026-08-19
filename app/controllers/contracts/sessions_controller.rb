@@ -184,7 +184,7 @@ class Contracts::SessionsController < ApplicationController
       @recipient = @contract.recipients.active.find_by(user: current_user) ||
                    @contract.recipients.active.find_by(email: current_user.email)
 
-      if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
+      if @recipient.nil? && @contract.bundle.present? && @contract.tenant == current_tenant
         @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
@@ -352,8 +352,7 @@ class Contracts::SessionsController < ApplicationController
 
   def allowed_user_for_session?
     return false unless current_user
-    return true if @contract.user == current_user
-    return true if @contract.bundle&.author == current_user
+    return true if @contract.tenant.present? && @contract.tenant == current_tenant
 
     signer = @session.signer
 

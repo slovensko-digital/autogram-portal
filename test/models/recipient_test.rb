@@ -9,7 +9,7 @@
 #  locale                  :string           default("sk"), not null
 #  mobile_phone            :string
 #  name                    :string
-#  notification_status     :integer          default("not_notified"), not null
+#  notification_status     :integer          default(0), not null
 #  remote_claimed_at       :datetime
 #  remote_claimed_by_email :string
 #  remote_notified_at      :datetime

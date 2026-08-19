@@ -7,7 +7,7 @@ class Admin::PortalInstancesControllerTest < ActionController::TestCase
   setup do
     @user = users(:one)
     @user.update_column(:email, "admin@example.com")
-    @user.update_column(:features, [ "admin" ])
+    @user.update_column(:admin, true)
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
 
@@ -55,7 +55,7 @@ class Admin::PortalInstancesControllerTest < ActionController::TestCase
   end
 
   test "non-admin users are forbidden" do
-    @user.update_column(:features, [])
+    @user.update_column(:admin, false)
 
     get :index
 

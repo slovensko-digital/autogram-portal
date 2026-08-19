@@ -1,4 +1,4 @@
-<% if current_user != @bundle.author %>
+<% if @bundle.tenant != current_tenant %>
   <div class="w-full bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
     <div class="flex items-start">
       <div class="flex-shrink-0">
@@ -8,7 +8,7 @@
       </div>
       <div class="ml-3">
         <p class="text-sm text-yellow-800">
-          <span class="font-semibold"><%= t('.sender') %>:</span> <%= @bundle.author.display_name %>
+          <span class="font-semibold"><%= t('.sender') %>:</span> <%= @bundle.tenant.name %>
         </p>
       </div>
     </div>

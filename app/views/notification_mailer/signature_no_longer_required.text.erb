@@ -1,7 +1,7 @@
 <%= t('notification_mailer.greeting') %>
 
 <%= t('.title') %>
-<%= t('.message', author_name: @bundle.author.display_name) %>
+<%= t('.message', author_name: @bundle.tenant.name) %>
 
 <%= t('.details_title') %>
 <% @bundle.contracts.each do |contract| %>

@@ -7,7 +7,7 @@
 #  error_message      :text
 #  options            :jsonb
 #  signing_started_at :datetime
-#  status             :integer          default("pending"), not null
+#  status             :integer          default(0), not null
 #  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
@@ -58,7 +58,7 @@ class SessionTest < ActiveSupport::TestCase
   end
 
   test "accept_signed_file persists validation metadata for authored contracts" do
-    users(:one).update_column(:features, [ "archivation" ])
+    users(:one).current_tenant.update!(features: [ "archivation" ])
     contract = create_contract(user: users(:one))
     session = create_session_for(contract)
     validation_result = AutogramService::ValidationResult.new(

@@ -164,9 +164,10 @@ class SignatureEvidenceRecord < ApplicationRecord
     return false unless user
 
     contract = session.contract
-    return contract.bundle.author == user if contract.bundle.present?
+    tenant = contract.bundle&.tenant || contract.tenant
+    return false unless tenant
 
-    contract.user == user
+    tenant == user.current_tenant
   end
 
   def canonical_payload_for_sealing

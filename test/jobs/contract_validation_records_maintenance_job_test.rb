@@ -7,6 +7,7 @@ class ContractValidationRecordsMaintenanceJobTest < ActiveJob::TestCase
     contract = create_contract_with_versions
     old_record = create_record_for(contract: contract, version: contract.content_versions.last, source_version_number: 1)
     latest_record = create_record_for(contract: contract, version: contract.content_versions.first, source_version_number: 2)
+    latest_record.update_column(:user_id, nil)
 
     service = counting_validation_service
 
@@ -28,7 +29,7 @@ class ContractValidationRecordsMaintenanceJobTest < ActiveJob::TestCase
   private
 
   def create_contract_with_versions
-    users(:one).update_column(:features, [ "archivation" ])
+    users(:one).current_tenant.update!(features: [ "archivation" ])
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
       filename: "maintenance-job-contract.pdf",

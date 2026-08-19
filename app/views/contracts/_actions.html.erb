@@ -28,7 +28,7 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_request_allowed? && @contract.bundle.nil? && current_user == @contract.user %>
+      <% if current_user&.signature_request_allowed? && @contract.bundle.nil? && @contract.tenant == current_tenant %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'request_signature',
@@ -40,7 +40,7 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') && current_user == @contract.user %>
+      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') && @contract.tenant == current_tenant %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',
@@ -52,7 +52,7 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') && current_user == @contract.user %>
+      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') && @contract.tenant == current_tenant %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'archive_signature',

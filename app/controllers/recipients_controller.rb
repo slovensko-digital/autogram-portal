@@ -30,7 +30,7 @@ class RecipientsController < ApplicationController
   private
 
   def set_bundle
-    @bundle = current_user.bundles.find_by_uuid!(params[:bundle_id])
+    @bundle = current_tenant.bundles.find_by_uuid!(params[:bundle_id])
   end
 
   def set_recipient
