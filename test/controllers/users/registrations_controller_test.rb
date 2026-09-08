@@ -50,7 +50,7 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
   end
 
   test "destroy removes user signers" do
-    signer = UserSigner.create!(user: @user)
+    signer = signers(:one)
 
     delete :destroy, params: { delete_confirmation: I18n.t("devise.registrations.edit.delete_confirmation_phrase") }
 
