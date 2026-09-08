@@ -29,12 +29,29 @@ class BundlesControllerTest < ActionController::TestCase
     assert_response :success
     assert_equal "Employment agreement", bundle.reload.name
     assert_select "turbo-frame#bundle_name_#{bundle.uuid}"
+    assert_select "[role='status'][aria-live='polite']", text: I18n.t("bundles.name_form.success")
+    assert_select "[data-notification-overlay][data-controller='notification'].fixed"
+    assert_select "form[data-controller='form-submit'][data-form-submit-pending-text-value=?]", I18n.t("actions.saving")
 
     put :update, params: { id: bundle.uuid, bundle: { name: "", step: "name" } }
 
     assert_response :success
     assert_nil bundle.reload.name.presence
     assert_select "input[name='bundle[name]'][placeholder=?]", bundle.display_name
+    assert_select "[role='status'][aria-live='polite']", text: I18n.t("bundles.name_form.success")
+  end
+
+  test "author receives a success notification after updating a bundle note" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    put :update, params: { id: bundle.uuid, bundle: { note: "Please sign by Friday.", step: "note" } }
+
+    assert_response :success
+    assert_equal "Please sign by Friday.", bundle.reload.note
+    assert_select "turbo-frame#bundle_note_#{bundle.uuid}"
+    assert_select "[role='status'][aria-live='polite']", text: I18n.t("bundles.note_form.success")
+    assert_select "[data-notification-overlay][data-controller='notification'].fixed"
+    assert_select "form[data-controller='form-submit'][data-form-submit-pending-text-value=?]", I18n.t("actions.saving")
   end
 
   test "bundle show offers archive extension for signed contracts" do

@@ -1,5 +1,15 @@
 <%= turbo_frame_tag "bundle_name_#{@bundle.uuid}", class: "w-full" do %>
-  <%= form_with model: @bundle, method: :put, local: true do |form| %>
+  <% if @success_message.present? %>
+    <%= render "save_notification", message: @success_message %>
+  <% end %>
+  <%= form_with model: @bundle,
+                method: :put,
+                local: true,
+                data: {
+                  controller: "form-submit",
+                  action: "submit->form-submit#handleSubmit",
+                  form_submit_pending_text_value: t("actions.saving")
+                } do |form| %>
     <%= form.hidden_field :step, value: "name" %>
     <%= form.label :name, class: "flex items-center text-sm font-medium text-gray-700 mb-2" do %>
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

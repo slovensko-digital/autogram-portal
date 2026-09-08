@@ -1,0 +1,21 @@
+<div class="fixed inset-x-4 top-4 z-50 border-l-4 border-green-600 bg-green-50 p-4 text-green-900 shadow-lg transition duration-200 motion-reduce:transition-none sm:left-auto sm:right-6 sm:w-full sm:max-w-sm"
+     role="status"
+     aria-live="polite"
+     data-controller="notification"
+     data-notification-overlay
+     data-action="mouseenter->notification#pause mouseleave->notification#resume focusin->notification#pause focusout->notification#resume">
+  <div class="flex items-center">
+    <svg class="mr-3 h-6 w-6 flex-shrink-0 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+    </svg>
+    <p class="flex-1 font-semibold"><%= message %></p>
+    <button type="button"
+            class="ml-3 inline-flex p-1 text-green-800 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-700"
+            data-action="notification#close"
+            aria-label="<%= t('actions.close') %>">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+</div>

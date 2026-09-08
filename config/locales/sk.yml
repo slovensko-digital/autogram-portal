@@ -65,6 +65,7 @@ sk:
     delete: "Zmazať"
     remove: "Odstrániť"
     save: "Uložiť"
+    saving: "Ukladá sa..."
     add: "Pridať"
     edit: "Upraviť"
     sign: "Podpísať"
@@ -366,10 +367,12 @@ sk:
       title: "Názov balíka"
       label: "Názov"
       placeholder: "Voliteľný názov pre tento balík"
+      success: "Názov balíka bol uložený"
     note_form:
       title: "Poznámka"
       placeholder: "Voliteľná správa pre adresátov"
       label: "Správa pre adresátov"
+      success: "Poznámka bola uložená"
     destroy:
       success: "Balík dokumentov bol úspešne zmazaný."
       failure: "Nepodarilo sa zmazať balík dokumentov."

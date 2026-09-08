@@ -126,8 +126,10 @@ class BundlesController < ApplicationController
     if @bundle.update(bundle_params)
       case params[:bundle][:step]
       when "name"
+        @success_message = t("bundles.name_form.success")
         render partial: "name_form"
       when "note"
+        @success_message = t("bundles.note_form.success")
         render partial: "note_form"
       when "public_link"
         render partial: "public_link_form"
