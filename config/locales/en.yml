@@ -1291,16 +1291,16 @@ en:
           description: "Web-based platform for managing the complete document signing lifecycle in commercial applications. Provides validation, workflow management, and API integration for business processes."
       standards:
         title: "Built on Open Standards for Maximum Security"
-        description: "Autogram Portal is fully open-source and built on proven technologies, meeting the highest security standards while enabling transparency and community collaboration."
+        description: "Autogram Portal is built on open technologies and proven standards. The highest level of security is guaranteed through transparency and collaboration with the community."
         eidas:
-          title: "eIDAS Regulation"
-          description: "Qualified electronic signatures according to EU eIDAS have strong legal validity across all member states, bridging the gap between eGovernment and commercial use."
+          title: "eIDAS"
+          description: "Qualified electronic signatures under the eIDAS regulation have strong legal validity in all member states. In Slovakia, they carry the same weight as a certified signature."
         open_source:
-          title: "Open Source"
-          description: "Fully open-source platform supported by NLNet organization. Transparent, auditable, and community-driven development ensuring trust and continuous improvement."
+          title: "Open-source"
+          description: "We have nothing to hide. Our code is open, publicly available, and auditable. This gives you complete confidence that we do nothing with your documents behind your back."
         api:
-          title: "REST API & Webhooks"
-          description: "Comprehensive REST API for seamless integration into your applications. Standard Webhooks support enables real-time notifications for signature events and workflow automation."
+          title: "REST API"
+          description: "Integrate signing directly into your own company systems through the REST API and Standard Webhooks. This makes workflow automation simple and efficient."
       how_it_works:
         subtitle: "Process"
         title: "How it works"

@@ -8,11 +8,13 @@
         <p class="mt-6 text-lg leading-8 text-gray-600">
           <%= t('.hero.description_html').html_safe %>
         </p>
-        <div class="mt-8">
-          <%= link_to new_user_session_path, class: "inline-flex items-center text-base font-semibold leading-6 text-blue-600 hover:text-blue-500" do %>
-            <%= t('.hero.log_in') %> <span aria-hidden="true" class="ml-1">→</span>
-          <% end %>
-        </div>
+        <% unless @current_user %>
+          <div class="mt-8">
+            <%= link_to new_user_session_path, class: "inline-flex items-center text-base font-semibold leading-6 text-blue-600 hover:text-blue-500" do %>
+              <%= t('.hero.log_in') %> <span aria-hidden="true" class="ml-1">→</span>
+            <% end %>
+          </div>
+        <% end %>
       </div>
       <div>
         <%= form_with model: Contract.new, url: contracts_path, local: true, multipart: true,
@@ -58,62 +60,109 @@
         </h2>
       </div>
       <div class="mx-auto grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-3">
-        <% %i[anonymous basic pro].each do |plan| %>
-          <% card_class = case plan
-                          when :anonymous then "bg-white/10 text-white ring-white/25"
-                          when :basic then "bg-white text-gray-900 ring-white lg:-translate-y-3"
-                          when :pro then "bg-gray-900 text-white ring-white/30"
-                          end %>
-          <% heading_class = plan == :basic ? "text-blue-700" : "text-white" %>
-          <% price_class = plan == :basic ? "bg-blue-100 text-blue-700" : "bg-white/10 text-white ring-1 ring-inset ring-white/20" %>
-          <% price_size_class = plan == :pro ? "px-3 py-1.5 text-base" : "px-2.5 py-1 text-sm" %>
-          <% audience_class = plan == :basic ? "text-gray-600" : "text-blue-100" %>
-          <% excluded_class = plan == :basic ? "text-gray-500" : "text-blue-100" %>
-          <div class="flex flex-col rounded-lg p-6 ring-1 ring-inset <%= card_class %>">
-            <div class="flex items-baseline justify-between gap-4">
-              <h3 class="text-xl font-semibold <%= heading_class %>"><%= t(".start_using.#{plan}.title") %></h3>
-              <p class="shrink-0 rounded font-semibold <%= price_class %> <%= price_size_class %>"><%= t(".start_using.#{plan}.price") %></p>
-            </div>
-            <p class="mt-4 text-base leading-7 <%= audience_class %>"><%= t(".start_using.#{plan}.audience") %></p>
-            <ul class="mt-6 flex-1 space-y-3 text-base leading-7">
-              <% t(".start_using.#{plan}.included").each do |feature| %>
-                <li class="flex gap-x-3">
-                  <svg class="mt-1 h-5 w-5 flex-none <%= plan == :basic ? 'text-green-600' : 'text-green-300' %>" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                  </svg>
-                  <span><%= feature %></span>
-                </li>
-              <% end %>
-              <% t(".start_using.#{plan}.excluded", default: []).each do |feature| %>
-                <li class="flex gap-x-3 <%= excluded_class %>">
-                  <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                  </svg>
-                  <span><%= feature %></span>
-                </li>
-              <% end %>
-            </ul>
-            <% if plan == :anonymous %>
-              <div class="mt-8 border-t border-white/20 pt-5">
-                <%= link_to t('.start_using.anonymous.upload_document'), '#document-upload',
-                            class: "inline-flex rounded-md bg-white px-4 py-2 text-base font-semibold text-blue-700 hover:bg-gray-100" %>
-              </div>
-            <% elsif plan == :basic %>
-              <div class="mt-8 flex items-center gap-4 border-t border-gray-200 pt-5">
+        <div class="flex flex-col rounded-lg bg-white/10 p-6 text-white ring-1 ring-inset ring-white/25">
+          <div class="flex items-baseline justify-between gap-4">
+            <h3 class="text-xl font-semibold text-white"><%= t('.start_using.anonymous.title') %></h3>
+            <p class="shrink-0 rounded bg-white/10 px-2.5 py-1 text-sm font-semibold text-white ring-1 ring-inset ring-white/20"><%= t('.start_using.anonymous.price') %></p>
+          </div>
+          <p class="mt-4 text-base leading-7 text-blue-100"><%= t('.start_using.anonymous.audience') %></p>
+          <ul class="mt-6 flex-1 space-y-3 text-base leading-7">
+            <li class="flex gap-x-3">
+              <svg class="mt-1 h-5 w-5 flex-none text-green-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+              <span><%= t('.start_using.anonymous.included').first %></span>
+            </li>
+            <li class="flex gap-x-3 text-blue-100">
+              <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+              <span><%= t('.start_using.anonymous.excluded').first %></span>
+            </li>
+            <li class="flex gap-x-3 text-blue-100">
+              <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+              <span><%= t('.start_using.anonymous.excluded').second %></span>
+            </li>
+          </ul>
+          <div class="mt-8 border-t border-white/20 pt-5">
+            <%= link_to t('.start_using.anonymous.upload_document'), new_contract_path,
+                        class: "inline-flex rounded-md bg-white px-4 py-2 text-base font-semibold text-blue-700 hover:bg-gray-100" %>
+          </div>
+        </div>
+
+        <div class="flex flex-col rounded-lg bg-white p-6 text-gray-900 ring-1 ring-inset ring-white lg:-translate-y-3">
+          <div class="flex items-baseline justify-between gap-4">
+            <h3 class="text-xl font-semibold text-blue-700"><%= t('.start_using.basic.title') %></h3>
+            <p class="shrink-0 rounded bg-blue-100 px-2.5 py-1 text-sm font-semibold text-blue-700"><%= t('.start_using.basic.price') %></p>
+          </div>
+          <p class="mt-4 text-base leading-7 text-gray-600"><%= t('.start_using.basic.audience') %></p>
+          <ul class="mt-6 flex-1 space-y-3 text-base leading-7">
+            <li class="flex gap-x-3">
+              <svg class="mt-1 h-5 w-5 flex-none text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+              <span><%= t('.start_using.basic.included').first %></span>
+            </li>
+            <li class="flex gap-x-3">
+              <svg class="mt-1 h-5 w-5 flex-none text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+              <span><%= t('.start_using.basic.included').second %></span>
+            </li>
+            <li class="flex gap-x-3 text-gray-500">
+              <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+              <span><%= t('.start_using.basic.excluded').first %></span>
+            </li>
+          </ul>
+          <div class="mt-8 flex items-center gap-4 border-t border-gray-200 pt-5">
+            <% unless @current_user %>
                 <%= link_to t('.start_using.basic.start'), new_user_registration_path,
                             class: "rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white hover:bg-blue-500" %>
                 <%= link_to t('.start_using.basic.log_in'), new_user_session_path,
                             class: "text-base font-semibold text-blue-700 hover:text-blue-500" %>
-              </div>
-            <% elsif plan == :pro %>
-              <% support_email = Rails.application.config.footer[:support_email] %>
-              <div class="mt-8 border-t border-white/15 pt-5">
-                <p class="text-base text-gray-300"><%= t('.start_using.pro.contact') %></p>
-                <p class="mt-1 select-all break-all text-base font-semibold text-white"><%= support_email %></p>
-              </div>
+            <% else %>
+              <%= link_to t('.start_using.basic.start'), dashboard_path,
+                          class: "rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white hover:bg-blue-500" %>
             <% end %>
           </div>
-        <% end %>
+        </div>
+
+        <div class="flex flex-col rounded-lg bg-gray-900 p-6 text-white ring-1 ring-inset ring-white/30">
+          <div class="flex items-baseline justify-between gap-4">
+            <h3 class="text-xl font-semibold text-white"><%= t('.start_using.pro.title') %></h3>
+            <p class="shrink-0 rounded bg-white/10 px-3 py-1.5 text-base font-semibold text-white ring-1 ring-inset ring-white/20"><%= t('.start_using.pro.price') %></p>
+          </div>
+          <p class="mt-4 text-base leading-7 text-blue-100"><%= t('.start_using.pro.audience') %></p>
+          <ul class="mt-6 flex-1 space-y-3 text-base leading-7">
+            <li class="flex gap-x-3">
+              <svg class="mt-1 h-5 w-5 flex-none text-green-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+              <span><%= t('.start_using.pro.included').first %></span>
+            </li>
+            <li class="flex gap-x-3">
+              <svg class="mt-1 h-5 w-5 flex-none text-green-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+              <span><%= t('.start_using.pro.included').second %></span>
+            </li>
+            <li class="flex gap-x-3">
+              <svg class="mt-1 h-5 w-5 flex-none text-green-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+              <span><%= t('.start_using.pro.included').third %></span>
+            </li>
+          </ul>
+          <% support_email = Rails.application.config.footer[:support_email] %>
+          <div class="mt-8 border-t border-white/15 pt-5">
+            <p class="text-base text-gray-300"><%= t('.start_using.pro.contact') %></p>
+            <p class="mt-1 select-all break-all text-base font-semibold text-white"><%= support_email %></p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

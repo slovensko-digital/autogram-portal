@@ -1216,16 +1216,16 @@ sk:
           description: "Webová platforma na správu kompletného životného cyklu podpisovania dokumentov v komerčných aplikáciách. Poskytuje overovanie, správu pracovných tokov a API integráciu pre obchodné procesy."
       standards:
         title: "Postavené na otvorených štandardoch pre maximálnu bezpečnosť"
-        description: "Autogram Portal je plne open-source a postavený na overených technológiách, spĺňa najvyššie bezpečnostné štandardy a umožňuje transparentnosť a spoluprácu s komunitou."
+        description: "Autogram Portal je postavený na otvorených technológiách a overených štandardoch. Najvyššia úroveň bezpečnosti je garantovaná transparentnosťou a spoluprácou s komunitou."
         eidas:
-          title: "Nariadenie eIDAS"
-          description: "Kvalifikované elektronické podpisy podľa nariadenia EÚ eIDAS majú silnú právnu platnosť vo všetkých členských štátoch a preklenujú priepasť medzi eGovernment a komerčným použitím."
+          title: "eIDAS"
+          description: "Kvalifikované elektronické podpisy podľa nariadenia eIDAS majú silnú právnu platnosť vo všetkých členských štátoch. Na Slovensku majú rovnakú váhu ako osvedčený podpis."
         open_source:
-          title: "Open Source"
-          description: "Plne open-source platforma podporovaná organizáciou NLNet. Transparentný, auditovateľný a komunitou riadený vývoj zabezpečujúci dôveru a neustále zlepšovanie."
+          title: "Open-source"
+          description: "Nemáme čo tajiť. Náš kód je otvorený, verejne dostupný a auditovateľný. Vďaka tomu máte absolútnu istotu, že s vašimi dokumentmi nerobíme nič za vašim chrbtom."
         api:
-          title: "REST API a Webhooky"
-          description: "Komplexné REST API pre bezproblémovú integráciu do vašich aplikácií. Štandardná podpora Webhookov umožňuje notifikácie v reálnom čase pre udalosti podpisovania a automatizáciu pracovných tokov."
+          title: "REST API"
+          description: "Integrujte si podpisovanie priamo do vlastných firemných systémov cez REST API a Standard Webhooks. Automatizácia pracovných postupov je tak jednoduchá a efektívna."
       how_it_works:
         subtitle: "Proces"
         title: "Ako to funguje"
