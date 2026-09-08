@@ -43,7 +43,7 @@
           <%= render 'shared/dropzone', input_name: 'document[blob]' %>
           <% unless @current_user %>
             <div class="flex items-start space-x-3">
-              <%= form.check_box :agree_to_policies, { required: true, class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" } %>
+              <%= form.check_box :agree_to_policies, { required: true, class: "mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" } %>
               <%= form.label :agree_to_policies, class: "text-sm text-gray-700" do %>
                 <%= t('upload_form.agree_to_policies_html',
                       terms_link: link_to(t('upload_form.terms_of_service'), terms_of_service_link, target: "_blank", class: "text-blue-600 underline"),

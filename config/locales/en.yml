@@ -297,8 +297,8 @@ en:
         continue: "Continue"
         back: "Back"
         header: "Choose action"
-        account_required: "Available after signing in or creating an account."
-        account_cta_text: "Sign in or create an account to request signatures, add timestamps, and archive documents."
+        account_required: "Available after signing in"
+        account_cta_text: "Create a free account to access advanced portal features"
         account_cta: "Sign in or register"
         sign:
           title: "Sign the document"

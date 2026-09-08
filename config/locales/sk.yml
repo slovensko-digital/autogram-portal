@@ -261,9 +261,9 @@ sk:
         continue: "Pokračovať"
         back: "Späť"
         header: "Vyberte akciu"
-        account_required: "Dostupné po prihlásení alebo vytvorení účtu."
-        account_cta_text: "Prihláste sa alebo si vytvorte účet a posielajte dokumenty na podpis, pridávajte časové pečiatky a archivujte dokumenty."
-        account_cta: "Prihlásiť alebo registrovať sa"
+        account_required: "Dostupné po prihlásení"
+        account_cta_text: "Vytvorte si bezplatný účet a využívajte pokročilé funkcie portálu"
+        account_cta: "Prihlásiť sa alebo registrovať"
         sign:
           title: "Podpísať dokument"
           subtitle: "Vyberte formát podpisu a typ podpisu a podpíšte tento dokument."
