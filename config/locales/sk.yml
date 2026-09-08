@@ -261,6 +261,9 @@ sk:
         continue: "Pokračovať"
         back: "Späť"
         header: "Vyberte akciu"
+        account_required: "Dostupné po prihlásení alebo vytvorení účtu."
+        account_cta_text: "Prihláste sa alebo si vytvorte účet a posielajte dokumenty na podpis, pridávajte časové pečiatky a archivujte dokumenty."
+        account_cta: "Prihlásiť alebo registrovať sa"
         sign:
           title: "Podpísať dokument"
           subtitle: "Vyberte formát podpisu a typ podpisu a podpíšte tento dokument."
@@ -699,6 +702,12 @@ sk:
       multiple_files_in_contract_warning_title: "Viacero súborov v dokumente"
       multiple_files_in_contract_warning: "Tento dokument obsahuje viac súborov. Pre podpisovanie je možné použiť iba desktopovú aplikáciu Autogram, ktorá podporuje prácu s viacerými súbormi."
       multiple_files_in_contract_mobile_warning: "Tento dokument obsahuje viac súborov. Podpisovanie takéhoto dokumentu vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
+      unavailable_reasons:
+        multiple_files: "Táto aplikácia nepodporuje podpisovanie dokumentov s viacerými súbormi."
+        prepared_signature_fields: "Táto aplikácia nepodporuje pripravené viditeľné podpisové polia."
+        unsupported_qscd: "%{qscd} táto mobilná aplikácia nepodporuje. Vyberte novšie alebo iné zariadenie QSCD."
+        unsupported_signature_level: "Táto aplikácia podporuje iba podpisy BASELINE_B."
+        desktop_only: "Táto aplikácia je dostupná iba na počítači."
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."

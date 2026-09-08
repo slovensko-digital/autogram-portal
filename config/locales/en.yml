@@ -297,6 +297,9 @@ en:
         continue: "Continue"
         back: "Back"
         header: "Choose action"
+        account_required: "Available after signing in or creating an account."
+        account_cta_text: "Sign in or create an account to request signatures, add timestamps, and archive documents."
+        account_cta: "Sign in or register"
         sign:
           title: "Sign the document"
           subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
@@ -776,6 +779,12 @@ en:
       multiple_files_in_contract_warning_title: "Multiple files in the document"
       multiple_files_in_contract_warning: "This document contains multiple files. Only the desktop Autogram application, which supports working with multiple files, can be used for signing."
       multiple_files_in_contract_mobile_warning: "This document contains multiple files. Signing such a document requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
+      unavailable_reasons:
+        multiple_files: "This application cannot sign documents containing multiple files."
+        prepared_signature_fields: "This application cannot use prepared visible signature fields."
+        unsupported_qscd: "%{qscd} is not supported by this mobile application. Select a newer or different QSCD."
+        unsupported_signature_level: "This application supports only BASELINE_B signatures."
+        desktop_only: "This application is available only on a desktop computer."
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."

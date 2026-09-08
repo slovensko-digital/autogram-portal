@@ -3,7 +3,7 @@ import { isMobileDevice } from "utils/device_detection"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["appRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "podpisujSubmitButton", "signButton", "desktopElement", "mobileWarning", "yellowWarning", "appSelectionHeading"]
+  static targets = ["appRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "podpisujSubmitButton", "signButton", "mobileWarning", "yellowWarning", "appSelectionHeading"]
 
   connect() {
     console.log('Signing app selector connected')
@@ -20,50 +20,62 @@ export default class extends Controller {
   }
 
   handleDeviceDetection() {
-    if (isMobileDevice()) {
-      const hasMobileOptions = this.appRadioTargets.some(radio => radio.value !== 'autogram' && radio.value !== 'podpisuj')
+    const mobileDevice = isMobileDevice()
+    if (mobileDevice) {
+      this.appRadioTargets
+        .filter(radio => radio.dataset.desktopOnly === 'true')
+        .forEach(radio => this.disableForDevice(radio))
+    }
 
-      // Always hide desktop option on mobile
-      this.desktopElementTargets.forEach(element => {
-        element.style.display = 'none'
-      })
+    const enabledRadios = this.appRadioTargets.filter(radio => !radio.disabled)
+    if (!enabledRadios.some(radio => radio.checked) && enabledRadios.length > 0) {
+      enabledRadios[0].checked = true
+    }
 
-      if (hasMobileOptions) {
-        // Mobile alternatives exist - auto-select first mobile option
-        const autogramRadio = this.appRadioTargets.find(radio => radio.value === 'autogram')
-        const avmRadio = this.appRadioTargets.find(radio => radio.value === 'avm')
-
-        if (autogramRadio && autogramRadio.checked && avmRadio) {
-          autogramRadio.checked = false
-          avmRadio.checked = true
-        }
-      } else {
-        // No mobile options available - show warning that desktop is required
+    if (enabledRadios.length === 0) {
+      if (mobileDevice) {
         if (this.hasMobileWarningTarget) {
           this.mobileWarningTarget.style.display = 'block'
         }
 
-        // Hide yellow warning on mobile since red warning is shown
         if (this.hasYellowWarningTarget) {
           this.yellowWarningTarget.style.display = 'none'
         }
 
-        // Hide app selection heading since there are no options to select
         if (this.hasAppSelectionHeadingTarget) {
           this.appSelectionHeadingTarget.style.display = 'none'
         }
-
-        // Disable the sign button since no compatible options
-        if (this.hasSignButtonTarget) {
-          this.signButtonTarget.disabled = true
-          this.signButtonTarget.classList.add('opacity-50', 'cursor-not-allowed')
-        }
       }
-    } else {
-      this.desktopElementTargets.forEach(element => {
-        element.style.display = 'block'
-      })
+
+      if (this.hasSignButtonTarget) {
+        this.signButtonTarget.disabled = true
+        this.signButtonTarget.classList.add('opacity-50', 'cursor-not-allowed')
+      }
     }
+  }
+
+  disableForDevice(radio) {
+    const card = radio.closest('label')
+    if (!card) return
+
+    radio.checked = false
+    radio.disabled = true
+    card.tabIndex = 0
+    card.setAttribute('aria-disabled', 'true')
+    card.classList.remove('bg-white', 'hover:border-blue-300', 'hover:bg-blue-50', 'cursor-pointer')
+    card.classList.add('cursor-not-allowed', 'border-gray-200', 'bg-gray-50', 'text-gray-500', 'opacity-75')
+
+    const reasonId = `${radio.id}_device_disabled_reason`
+    if (document.getElementById(reasonId)) return
+
+    const reason = document.createElement('div')
+    reason.id = reasonId
+    reason.className = 'mt-2 text-xs font-medium text-gray-600'
+    reason.textContent = radio.dataset.desktopOnlyReason
+    card.querySelector('.flex-1')?.appendChild(reason)
+
+    const describedBy = [card.getAttribute('aria-describedby'), reasonId].filter(Boolean).join(' ')
+    card.setAttribute('aria-describedby', describedBy)
   }
 
   triggerSign(event) {
@@ -73,11 +85,6 @@ export default class extends Controller {
     console.log('Selected signing app:', selectedApp)
 
     if (selectedApp === 'autogram') {
-      if (isMobileDevice()) {
-        alert('Autogram Desktop is not available on mobile devices. Please use AVM Mobile instead.')
-        return
-      }
-
       if (this.hasAutogramSubmitButtonTarget) {
         this.setSignButtonLoading(true)
         this.autogramSubmitButtonTarget.click()
@@ -93,11 +100,6 @@ export default class extends Controller {
         this.eidentitaSubmitButtonTarget.click()
       }
     } else if (selectedApp === 'podpisuj') {
-      if (isMobileDevice()) {
-        alert('Podpisuj is not available on mobile devices. Please use a desktop computer instead.')
-        return
-      }
-
       if (this.hasPodpisujSubmitButtonTarget) {
         this.setSignButtonLoading(true)
         this.podpisujSubmitButtonTarget.click()
@@ -126,7 +128,7 @@ export default class extends Controller {
   }
 
   getSelectedApp() {
-    const selectedRadio = this.appRadioTargets.find(radio => radio.checked)
+    const selectedRadio = this.appRadioTargets.find(radio => radio.checked && !radio.disabled)
     return selectedRadio ? selectedRadio.value : null
   }
 }

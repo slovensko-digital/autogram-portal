@@ -91,6 +91,7 @@ Rails.application.routes.draw do
       get :visual_signing
       post :visual_signing, action: :create_visual_session
       get :show_bundle
+      post :authenticate_for_actions
     end
 
     resources :onboarding, only: [ :show, :update ], param: :step, controller: "contracts/onboarding"
