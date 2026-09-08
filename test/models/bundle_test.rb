@@ -4,6 +4,7 @@
 #
 #  id                           :bigint           not null, primary key
 #  author_notifications_enabled :boolean          default(FALSE), not null
+#  name                         :string
 #  note                         :text
 #  publicly_visible             :boolean          default(FALSE), not null
 #  required_signatures          :integer
@@ -56,6 +57,19 @@ class BundleTest < ActiveSupport::TestCase
     bundle = Bundle.new(author: @author)
 
     assert_not bundle.should_notify_author?
+  end
+
+  test "display name uses the custom name when present and falls back when blank" do
+    bundle = Bundle.new(author: @author, uuid: "12345678-1234-1234-1234-123456789abc")
+    default_name = "#{I18n.t('bundles.display_name')} 12345678"
+
+    assert_equal default_name, bundle.display_name
+
+    bundle.name = "Employment agreement"
+    assert_equal "Employment agreement", bundle.display_name
+
+    bundle.name = ""
+    assert_equal default_name, bundle.display_name
   end
 
   test "notifies author when enabled for web bundles" do

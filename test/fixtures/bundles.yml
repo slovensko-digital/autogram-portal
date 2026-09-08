@@ -6,6 +6,7 @@
 #
 #  id                           :bigint           not null, primary key
 #  author_notifications_enabled :boolean          default(FALSE), not null
+#  name                         :string
 #  note                         :text
 #  publicly_visible             :boolean          default(FALSE), not null
 #  required_signatures          :integer

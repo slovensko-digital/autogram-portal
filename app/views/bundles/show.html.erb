@@ -49,6 +49,8 @@
         <% end %>
       <% end %>
 
+      <%= render "name_form" %>
+
       <%= turbo_frame_tag "bundle_recipients_#{@bundle.uuid}",
                           src: bundle_recipients_path(@bundle),
                           loading: "lazy",

@@ -362,6 +362,10 @@ sk:
       subtitle: "Zapnite notifikácie, aby ste dostávali emaily o dôležitých udalostiach týkajúcich sa tohto balíka."
       turn_on: "Zapnúť notifikácie"
       turn_off: "Vypnúť notifikácie"
+    name_form:
+      title: "Názov balíka"
+      label: "Názov"
+      placeholder: "Voliteľný názov pre tento balík"
     note_form:
       title: "Poznámka"
       placeholder: "Voliteľná správa pre adresátov"

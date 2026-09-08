@@ -55,6 +55,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     post "/api/v1/bundles",
          params: {
            id: SecureRandom.uuid,
+           name: "API bundle",
            contracts: [
              {
                id: SecureRandom.uuid,
@@ -86,7 +87,13 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
     recipient = bundle.recipients.visible.find_by!(name: "API recipient")
 
+    assert_equal "API bundle", bundle.name
     assert_nil recipient.email
+
+    get "/api/v1/bundles/#{bundle.uuid}", headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :success
+    assert_equal "API bundle", response.parsed_body.fetch("name")
   end
 
   test "api bundle creation accepts federated recipients" do

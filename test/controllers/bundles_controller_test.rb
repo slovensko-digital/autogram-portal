@@ -21,6 +21,22 @@ class BundlesControllerTest < ActionController::TestCase
     assert_equal 1, bundle.recipients.active.author_proxies.where(user: @author).count
   end
 
+  test "author can update and clear the bundle name" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    put :update, params: { id: bundle.uuid, bundle: { name: "Employment agreement", step: "name" } }
+
+    assert_response :success
+    assert_equal "Employment agreement", bundle.reload.name
+    assert_select "turbo-frame#bundle_name_#{bundle.uuid}"
+
+    put :update, params: { id: bundle.uuid, bundle: { name: "", step: "name" } }
+
+    assert_response :success
+    assert_nil bundle.reload.name.presence
+    assert_select "input[name='bundle[name]'][placeholder=?]", bundle.display_name
+  end
+
   test "bundle show offers archive extension for signed contracts" do
     bundle = create_bundle_with_contracts(author: @author, count: 1, signed: true)
     contract = bundle.contracts.first

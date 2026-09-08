@@ -125,6 +125,8 @@ class BundlesController < ApplicationController
   def update
     if @bundle.update(bundle_params)
       case params[:bundle][:step]
+      when "name"
+        render partial: "name_form"
       when "note"
         render partial: "note_form"
       when "public_link"
@@ -240,6 +242,7 @@ class BundlesController < ApplicationController
 
   def bundle_params
     params.require(:bundle).except(:step).permit(
+      :name,
       :note,
       :publicly_visible,
       :signing_rule,

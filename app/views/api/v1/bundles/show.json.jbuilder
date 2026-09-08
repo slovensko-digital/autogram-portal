@@ -1,4 +1,5 @@
 json.id @bundle.uuid
+json.name @bundle.name
 json.contracts @bundle.contracts, partial: "api/v1/contracts/contract", as: :contract
 json.recipients @bundle.visible_recipients, partial: "api/v1/bundles/recipient", as: :recipient if @bundle.visible_recipients.any?
 json.webhook @bundle.webhook, partial: "api/v1/bundles/webhook", as: :webhook if @bundle.webhook.present?

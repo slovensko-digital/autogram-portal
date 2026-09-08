@@ -51,6 +51,7 @@ class Api::V1::BundlesController < ApiController
   def bundle_params
     permitted_params = params.permit(
       :id,
+      :name,
       :publiclyVisible,
       :signingRule,
       :requiredSignatures,
@@ -140,6 +141,7 @@ class Api::V1::BundlesController < ApiController
     end
 
     attributes[:publicly_visible] = permitted_params[:publiclyVisible] if permitted_params.key?(:publiclyVisible)
+    attributes[:name] = permitted_params[:name] if permitted_params.key?(:name)
     attributes[:signing_rule] = permitted_params[:signingRule] if permitted_params[:signingRule].present?
     attributes[:required_signatures] = permitted_params[:requiredSignatures] if permitted_params[:requiredSignatures].present?
     attributes[:author_notifications_enabled] = permitted_params[:authorNotificationsEnabled] if permitted_params.key?(:authorNotificationsEnabled)

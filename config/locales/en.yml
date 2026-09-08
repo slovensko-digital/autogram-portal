@@ -430,6 +430,10 @@ en:
       subtitle: "Enable notifications to receive email updates about important events related to this bundle."
       turn_on: "Turn on notifications"
       turn_off: "Turn off notifications"
+    name_form:
+      title: "Bundle name"
+      label: "Name"
+      placeholder: "Optional name for this bundle"
     note_form:
       title: "Note"
       placeholder: "Optional message for recipients"
