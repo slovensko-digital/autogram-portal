@@ -48,4 +48,14 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     assert_redirected_to edit_user_registration_path
     assert_equal [], @user.reload.features
   end
+
+  test "destroy removes user signers" do
+    signer = UserSigner.create!(user: @user)
+
+    delete :destroy, params: { delete_confirmation: I18n.t("devise.registrations.edit.delete_confirmation_phrase") }
+
+    assert_response :redirect
+    assert_not Signer.exists?(signer.id)
+    assert_not User.exists?(@user.id)
+  end
 end

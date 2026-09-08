@@ -45,6 +45,7 @@ class User < ApplicationRecord
   has_many :bundles, foreign_key: "user_id", dependent: :destroy
   has_many :identities, dependent: :destroy
   has_many :contracts, dependent: :destroy
+  has_many :signers, dependent: :destroy
   has_many :contract_validation_records, dependent: :destroy
   has_many :policy_consents, class_name: "UserPolicyConsent", dependent: :destroy
 
