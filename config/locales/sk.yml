@@ -1143,49 +1143,68 @@ sk:
   about:
     index:
       hero:
-        title: "Kvalifikované elektronické podpisy"
-        title_highlight: "jednoducho"
-        description_html: "<span class=\"font-semibold text-gray-900\">Open-source platforma</span> pre správu <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-kompatibilných</span> elektronických podpisov. <span class=\"font-semibold text-gray-900\">Posielajte dokumenty</span> na podpis, <span class=\"font-semibold text-gray-900\">integrujte pracovné postupy</span> cez <span class=\"font-semibold text-gray-900\">API alebo vložený iframe</span> a <span class=\"font-semibold text-gray-900\">bezproblémovo sa pripojte</span> k viacerým podpisovacím aplikáciám."
+        title: "Elektronické podpisy"
+        title_highlight: "jednoducho a bezpečne"
+        description_html: "Platforma pre správu <span class=\"inline-flex items-center font-semibold text-gray-900\">kvalifikovaných</span> elektronických podpisov. <span class=\"font-semibold text-gray-900\">Posielajte zmluvy</span> na podpis tretím stranám, <span class=\"font-semibold text-gray-900\">archivujte</span> podpísané dokumenty a jednoducho <span class=\"font-semibold text-gray-900\">integrujte</span> do vlastného systému"
         view_on_github: "Zobraziť na GitHube"
+        log_in: "Prihlásiť sa"
       start_using:
-        title: "Začnite používať Autogram Portal dnes"
-        subtitle: "Vyberte si, ako chcete pracovať — s účtom alebo bez neho"
-        no_account:
-          title: "Na začatie nie je potrebný účet"
-          description: "Nahrávajte dokumenty, prezerajte obsah, overujte podpisy a zdieľajte odkazy na podpisovanie — všetko bez registrácie. Ideálne pre rýchle, jednorazové podpisovanie."
-        with_account:
-          title: "Viac s účtom"
-          description: "Prístup k histórii dokumentov, posielanie žiadostí o podpis e-mailom, prijímanie notifikácií a webhookov, keď ostatní podpisujú, integrácia cez REST API a iframe a správa všetkých vašich dokumentov na jednom mieste."
+        title: "Začnite používať Autogram Portal už dnes"
+        anonymous:
+          title: "Anonym"
+          price: "Zadarmo"
+          audience: "Pre každého, kto potrebuje okamžite podpísať alebo overiť dokument"
+          upload_document: "Nahrať dokument"
+          included:
+            - "Nahráte, podpíšete a overíte dokument"
+          excluded:
+            - "Nemôžete odoslať dokument na podpis"
+            - "Nemôžete ukladať dokumenty"
+        basic:
+          title: "BASIC účet"
+          price: "Zadarmo"
+          audience: "Pre všetkých, ktorí podpisujú pravidelne a potrebujú odosielať dokumenty na podpis"
+          start: "Začať"
+          log_in: "Prihlásiť sa"
+          included:
+            - "10 dokumentov mesačne na podpis a uloženie"
+            - "10 kvalifikovaných časových pečiatok"
+          excluded:
+            - "Iba jeden používateľ"
+        pro:
+          title: "PRO účet"
+          price: "19 eur/mesačne"
+          audience: "Komplexný nástroj pre podpisovanie"
+          contact: "Kontaktujte nás na adrese"
+          included:
+            - "Neobmedzený počet používateľov pod jedným firemným účtom"
+            - "Neobmedzené množstvo dokumentov"
+            - "Dlhodobá archivácia dokumentov"
+          excluded: []
       features:
         subtitle: "eIDAS-kompatibilná platforma"
-        title: "Kompletný pracovný tok podpisovania dokumentov"
-        description: "Preklenieme priepasť medzi eGovernment a komerčným podpisovanie dokumentov. Posielajte dokumenty na podpisovanie, integrujte podpisovanie do existujúcich aplikácií a využívajte kvalifikované zariadenia na vytváranie podpisov pre právne platné elektronické podpisy."
+        title: "Spájame bezpečnosť s jednoduchosťou modernej aplikácie"
+        description: "Zabudnite na tlačiareň. Zmluvy riešite iba digitálne - od prvého do posledného podpisu. Váš elektronický podpis spĺňa najvyššiu európsku úroveň (eIDAS) a má rovnakú váhu ako ten overený u notára. Zmluvy podpíšete pomocou občianskeho preukazu (eID), odošlete ich na podpis iným, alebo si celý systém napojíte na vlastné aplikácie."
         send_documents:
-          title: "Posielajte dokumenty na podpisovanie"
-          description: "Požiadajte o podpisy od iných ľudí cez e-mail alebo zdieľanie odkazu. Príjemcovia môžu podpisovať dokumenty pomocou svojich kvalifikovaných zariadení na vytváranie podpisov bez potreby vytvárať účet."
+          title: "Posielajte dokumenty na podpis"
+          description: "Požiadajte druhú stranu o podpis cez e-mail. Naživo viete sledovať, kto už dokument podpísal."
         api_integration:
-          title: "API a iframe integrácia"
-          description: "Vložte pracovné toky podpisovania priamo do svojich aplikácií pomocou jednoduchej iframe integrácie alebo komplexného REST API. Automatizujte procesy podpisovania dokumentov vo vašich obchodných systémoch."
+          title: "Prepojenie s vaším systémom cez API"
+          description: "Vložte si podpisovanie priamo do vašej vlastnej aplikácie či firemného systému."
         qualified_signatures:
           title: "Kvalifikované eIDAS podpisy"
-          description: "Vytvárajte kvalifikované elektronické podpisy pomocou vládou vydaných eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Bezproblémová integrácia s aplikáciami Autogram a Autogram v mobile."
+          description: "Na vytvorenie kvalifikovaného elektronického podpisu vám stačí občiansky preukaz s čipom."
         validation:
           title: "Overovanie dokumentov"
-          description: "Okamžite overujte platnosť a integritu podpísaných dokumentov. Systém automaticky kontroluje certifikáty, podpisy a časové pečiatky, aby zabezpečil súlad."
-        multi_party:
-          title: "Viacstranné pracovné toky"
-          description: "Spravujte zložité scenáre podpisovania s viacerými účastníkmi. Sledujte stav podpisov, posielajte pripomienky a koordinujte sekvenčné alebo paralelné pracovné toky podpisovania."
-        visualization:
-          title: "Vizualizácia dokumentov"
-          description: "Prezerajte a prechádzajte obsah ASiC kontajnerov a slovenské elektronické formuláre vo formáte XML priamo v prehliadači. Náhľad dokumentov pred podpísaním s jasným, užívateľsky prívetivým zobrazením."
+          description: "Nahrajte dokument, o ktorom neviete, či je elektronicky podpísaný, a náš systém preverí certifikáty a časové pečiatky za vás."
       ecosystem:
         subtitle: "Ekosystém Autogram"
-        title: "Kompletná infraštruktúra na podpisovanie"
-        description: "Autogram Portal je súčasťou komplexného open-source portfólia pre kvalifikované elektronické podpisy, ktoré bezproblémovo funguje s podpisovacími aplikáciami Autogram."
+        title: "Sme vaša kompletná podpisová výbava"
+        description: "Autogram Portal je súčasťou balíka nástrojov pre počítač, mobil aj webový prehliadač. Všetko je navrhnuté tak, aby ste mohli vytvárať právne platné podpisy rýchlo a bezpečne."
+        learn_more: "Dozvedieť sa viac"
         desktop:
           title: "Autogram na počítači"
           description: "Desktopová aplikácia pre Windows, macOS a Linux, ktorá vytvára kvalifikované podpisy pomocou eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Pripája sa priamo k portálu pre bezproblémové pracovné toky podpisovania."
-          learn_more: "Dozvedieť sa viac"
         mobile:
           title: "Autogram v mobile"
           description: "Mobilné aplikácie pre iOS a Android, ktoré umožňujú kvalifikované podpisy pomocou mobilných eID riešení a kvalifikovaných zariadení na vytváranie podpisov. Podpisujte dokumenty na cestách s plnou integráciou portálu."
@@ -1196,7 +1215,7 @@ sk:
           title: "Autogram Portal"
           description: "Webová platforma na správu kompletného životného cyklu podpisovania dokumentov v komerčných aplikáciách. Poskytuje overovanie, správu pracovných tokov a API integráciu pre obchodné procesy."
       standards:
-        title: "Postavené na otvorených štandardoch"
+        title: "Postavené na otvorených štandardoch pre maximálnu bezpečnosť"
         description: "Autogram Portal je plne open-source a postavený na overených technológiách, spĺňa najvyššie bezpečnostné štandardy a umožňuje transparentnosť a spoluprácu s komunitou."
         eidas:
           title: "Nariadenie eIDAS"
@@ -1214,11 +1233,11 @@ sk:
           title: "Nahrajte dokument"
           description: "Vyberte PDF alebo iný dokument, ktorý chcete podpísať."
         step_2:
-          title: "Pridajte príjemcov"
-          description: "Zadajte e-mailové adresy osôb, ktoré majú dokument podpísať."
-        step_3:
           title: "Vyberte typ podpisu"
           description: "Zvoľte kvalifikovaný elektronický podpis s časovou pečiatkou alebo bez nej."
+        step_3:
+          title: "Pridajte príjemcov"
+          description: "Zadajte e-mailové adresy osôb, ktoré majú dokument podpísať."
         step_4:
           title: "Odošlite a čakajte"
           description: "Odošlite balík adresátom a počkajte, kým ho podpíše požadovaný počet."

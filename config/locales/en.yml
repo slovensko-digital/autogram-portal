@@ -1218,49 +1218,68 @@ en:
   about:
     index:
       hero:
-        title: "Qualified Electronic Signatures"
-        title_highlight: "Made Simple"
-        description_html: "<span class=\"font-semibold text-gray-900\">Open-source platform</span> for managing up to <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-compliant</span> electronic signatures. <span class=\"font-semibold text-gray-900\">Send documents</span> for signing, <span class=\"font-semibold text-gray-900\">integrate workflows</span> via <span class=\"font-semibold text-gray-900\">API or embedded iframe</span>, and <span class=\"font-semibold text-gray-900\">connect seamlessly</span> with multiple signing apps."
+        title: "Electronic Signatures"
+        title_highlight: "Simple and Secure"
+        description_html: "A platform for managing <span class=\"inline-flex items-center font-semibold text-gray-900\">qualified</span> electronic signatures. <span class=\"font-semibold text-gray-900\">Send contracts</span> to third parties for signing, <span class=\"font-semibold text-gray-900\">archive</span> signed documents, and easily <span class=\"font-semibold text-gray-900\">integrate</span> with your own system."
         view_on_github: "View on GitHub"
+        log_in: "Log in"
       start_using:
         title: "Start using Autogram Portal today"
-        subtitle: "Choose how you want to work — with or without an account"
-        no_account:
-          title: "No account needed to start"
-          description: "Upload documents, view content, validate signatures, and share signing links — all without registration. Perfect for quick, one-time signing tasks."
-        with_account:
-          title: "More with an account"
-          description: "Access document history, send signature requests via email, receive notifications and webhooks when others sign, integrate via REST API and iframes, and manage all your documents in one place."
+        anonymous:
+          title: "Anonymous"
+          price: "Free"
+          audience: "For anyone who needs to sign or validate a document immediately"
+          upload_document: "Upload document"
+          included:
+            - "Upload, sign, and validate documents"
+          excluded:
+            - "Cannot send documents for signing"
+            - "Cannot save documents"
+        basic:
+          title: "BASIC account"
+          price: "Free"
+          audience: "For everyone who signs regularly and needs to send documents for signing"
+          start: "Get started"
+          log_in: "Log in"
+          included:
+            - "10 documents per month for signing and storage"
+            - "10 qualified timestamps"
+          excluded:
+            - "One user only"
+        pro:
+          title: "PRO account"
+          price: "EUR 19/month"
+          audience: "A comprehensive signing tool"
+          contact: "Contact us at"
+          included:
+            - "Unlimited users under one company account"
+            - "Unlimited documents"
+            - "Long-term document archiving"
+          excluded: []
       features:
         subtitle: "eIDAS-Compatible Platform"
-        title: "Complete document signing workflow"
-        description: "Bridging the gap between eGovernment and commercial document signing. Send documents for signature requests, integrate signing into your existing applications, and leverage qualified signature creation devices for legally valid electronic signatures."
+        title: "Bridging Security with Modern Application Simplicity"
+        description: "Forget the printer. Handle contracts entirely digitally - from the first to the last signature. Your electronic signature meets the highest European standard (eIDAS) and carries the same weight as one verified by a notary. Sign contracts using your eID card, send them for signing to others, or integrate the entire system into your own applications."
         send_documents:
           title: "Send Documents for Signing"
-          description: "Request signatures from other people via email or link sharing. Recipients can sign documents using their qualified signature creation devices without needing to create an account."
+          description: "Request the other party's signature by email. Track who has already signed the document in real time."
         api_integration:
-          title: "API & Iframe Integration"
-          description: "Embed signing workflows directly into your applications using simple iframe integration or comprehensive REST API. Automate document signing processes in your business systems."
+          title: "Connect Your System via API"
+          description: "Embed signing directly into your own application or company system."
         qualified_signatures:
           title: "Qualified eIDAS Signatures"
-          description: "Create qualified electronic signatures using government-issued eID cards and other qualified signature creation devices. Seamless integration with Autogram Desktop and Mobile apps."
+          description: "All you need to create a qualified electronic signature is an electronic ID card with a chip."
         validation:
           title: "Document Validation"
-          description: "Instantly verify the validity and integrity of signed documents. The system automatically checks certificates, signatures, and timestamps to ensure compliance."
-        multi_party:
-          title: "Multi-Party Workflows"
-          description: "Manage complex signing scenarios with multiple participants. Track signature status, send reminders, and coordinate sequential or parallel signing workflows."
-        visualization:
-          title: "Document Visualization"
-          description: "View and navigate ASiC container contents and Slovak electronic forms in XML format directly in the browser. Preview documents before signing with clear, user-friendly rendering."
+          description: "Upload a document when you are unsure whether it has been electronically signed, and our system will check its certificates and timestamps for you."
       ecosystem:
         subtitle: "The Autogram Ecosystem"
-        title: "Complete signing infrastructure"
-        description: "Autogram Portal is part of a comprehensive open-source portfolio for qualified electronic signatures, working seamlessly with Autogram signing applications."
+        title: "Your complete signing toolkit"
+        description: "Autogram Portal is part of a suite of tools for desktop, mobile, and web browsers. Everything is designed to help you create legally valid signatures quickly and securely."
+        learn_more: "Learn more"
         desktop:
           title: "Autogram Desktop"
           description: "Desktop application for Windows, macOS, and Linux that creates qualified signatures using eID cards and other qualified signature creation devices. Connects directly to the portal for seamless signing workflows."
-          learn_more: "Learn more"
         mobile:
           title: "Autogram Mobile"
           description: "Mobile applications for iOS and Android that enable qualified signatures using mobile eID solutions and qualified signature creation devices. Sign documents on the go with full portal integration."
@@ -1271,7 +1290,7 @@ en:
           title: "Autogram Portal"
           description: "Web-based platform for managing the complete document signing lifecycle in commercial applications. Provides validation, workflow management, and API integration for business processes."
       standards:
-        title: "Built on Open Standards"
+        title: "Built on Open Standards for Maximum Security"
         description: "Autogram Portal is fully open-source and built on proven technologies, meeting the highest security standards while enabling transparency and community collaboration."
         eidas:
           title: "eIDAS Regulation"
@@ -1289,11 +1308,11 @@ en:
           title: "Upload your document"
           description: "Select the PDF or other document you want to have signed."
         step_2:
-          title: "Add recipients"
-          description: "Enter the email addresses of the people who need to sign the document."
-        step_3:
           title: "Choose signature type"
           description: "Choose between a qualified electronic signature with or without a timestamp."
+        step_3:
+          title: "Add recipients"
+          description: "Enter the email addresses of the people who need to sign the document."
         step_4:
           title: "Send and wait"
           description: "Send the document to recipients and wait for required amount of signatures."
