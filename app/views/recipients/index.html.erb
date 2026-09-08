@@ -1,4 +1,9 @@
 <%= turbo_frame_tag "bundle_recipients_#{@bundle.uuid}" do %>
+  <% if @success_message.present? %>
+    <%= render "bundles/save_notification", message: @success_message %>
+  <% elsif @error_message.present? %>
+    <%= render "bundles/save_notification", message: @error_message, type: :error %>
+  <% end %>
   <div class="space-y-6">
     <div class="md:flex items-center justify-between gap-4">
       <div class="flex-1 text-left">
@@ -33,8 +38,13 @@
       </button>
 
       <div data-toggle-target="content" class="hidden mt-2">
-        <%= form_with model: @bundle, url: bundle_path(@bundle), method: :patch,
-              data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } do |f| %>
+          <%= form_with model: @bundle, url: bundle_path(@bundle), method: :patch,
+            data: {
+              turbo_frame: "bundle_recipients_#{@bundle.uuid}",
+              controller: "form-submit",
+              action: "submit->form-submit#handleSubmit",
+              form_submit_pending_text_value: t("actions.saving")
+            } do |f| %>
           <%= f.hidden_field :step, value: "signing_rule" %>
           <div class="rounded-lg border border-gray-200 p-4 space-y-3"
                data-controller="signing-rule"
@@ -75,7 +85,8 @@
               </div>
             </div>
             <%= f.submit t('actions.save'),
-                  class: "inline-flex items-center px-3 py-1.5 border border-transparent cursor-pointer text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+              class: "inline-flex items-center px-3 py-1.5 border border-transparent cursor-pointer text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+              data: { "form-submit-target": "submitButton" } %>
           </div>
         <% end %>
       </div>
@@ -107,7 +118,13 @@
                       <%= button_to notify_bundle_recipient_path(@bundle, recipient),
                             method: :post,
                             class: "text-blue-600 underline hover:text-blue-800 hover:underline cursor-pointer font-medium",
-                            form: { data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } } do %>
+                            data: { "form-submit-target": "submitButton" },
+                            form: { data: {
+                              turbo_frame: "bundle_recipients_#{@bundle.uuid}",
+                              controller: "form-submit",
+                              action: "submit->form-submit#handleSubmit",
+                              form_submit_pending_text_value: t("actions.sending")
+                            } } do %>
                         <%= recipient.federated_recipient? ? t('.send_to_portal') : t('.send_invitation') %>
                       <% end %>
                     <% end %>
@@ -116,7 +133,13 @@
                       <%= button_to bundle_recipient_path(@bundle, recipient),
                             method: :delete,
                             class: "text-red-600 underline hover:text-red-800 hover:underline cursor-pointer font-medium",
-                            form: { data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } } do %>
+                            data: { "form-submit-target": "submitButton" },
+                            form: { data: {
+                              turbo_frame: "bundle_recipients_#{@bundle.uuid}",
+                              controller: "form-submit",
+                              action: "submit->form-submit#handleSubmit",
+                              form_submit_pending_text_value: t("actions.removing")
+                            } } do %>
                         <%= t('actions.remove') %>
                       <% end %>
                     <% end %>
@@ -142,8 +165,13 @@
     <%= form_with model: @bundle.recipients.build,
           url: bundle_recipients_path(@bundle),
           method: :post,
-          data: { turbo_frame: "bundle_recipients_#{@bundle.uuid}" } do |form| %>
-      <% if @portal_instances.any? %>
+          data: {
+            turbo_frame: "bundle_recipients_#{@bundle.uuid}",
+            controller: "form-submit",
+            action: "submit->form-submit#handleSubmit",
+            form_submit_pending_text_value: t("actions.adding")
+          } do |form| %>
+      <% if @portal_instances&.any? %>
         <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5m10 0v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5m10 0H7"/>
@@ -187,7 +215,8 @@
         </div>
         <div class="flex justify-end">
         <%= form.submit t('actions.add'),
-              class: "inline-flex items-center px-4 py-2 border border-transparent cursor-pointer text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            class: "inline-flex items-center px-4 py-2 border border-transparent cursor-pointer text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+            data: { "form-submit-target": "submitButton" } %>
         </div>
       </div>
       <p class="mt-2 text-sm text-gray-500"><%= t('.email_help') %></p>

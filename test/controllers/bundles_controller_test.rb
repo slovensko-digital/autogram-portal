@@ -54,6 +54,50 @@ class BundlesControllerTest < ActionController::TestCase
     assert_select "form[data-controller='form-submit'][data-form-submit-pending-text-value=?]", I18n.t("actions.saving")
   end
 
+  test "author receives state-specific notifications when toggling bundle settings" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    put :update, params: { id: bundle.uuid, bundle: { author_notifications_enabled: true, step: "author_notifications" } }
+
+    assert_response :success
+    assert bundle.reload.author_notifications_enabled?
+    assert_select "turbo-frame#bundle_notifications_#{bundle.uuid}"
+    assert_select "[role='status']", text: I18n.t("bundles.author_notifications_form.enabled")
+    assert_select "form[data-controller='form-submit'][data-form-submit-pending-text-value=?]", I18n.t("actions.saving")
+
+    put :update, params: { id: bundle.uuid, bundle: { publicly_visible: true, step: "public_link" } }
+
+    assert_response :success
+    assert bundle.reload.publicly_visible?
+    assert_select "turbo-frame#bundle_public_link_#{bundle.uuid}"
+    assert_select "[role='status']", text: I18n.t("bundles.public_link_form.enabled")
+    assert_select "form[data-controller='form-submit'][data-form-submit-pending-text-value=?]", I18n.t("actions.saving")
+
+    put :update, params: { id: bundle.uuid, bundle: { author_notifications_enabled: false, step: "author_notifications" } }
+
+    assert_response :success
+    assert_not bundle.reload.author_notifications_enabled?
+    assert_select "[role='status']", text: I18n.t("bundles.author_notifications_form.disabled")
+
+    put :update, params: { id: bundle.uuid, bundle: { publicly_visible: false, step: "public_link" } }
+
+    assert_response :success
+    assert_not bundle.reload.publicly_visible?
+    assert_select "[role='status']", text: I18n.t("bundles.public_link_form.disabled")
+  end
+
+  test "author receives a success notification after updating the signing rule" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    patch :update, params: { id: bundle.uuid, bundle: { signing_rule: "any", step: "signing_rule" } }
+
+    assert_response :success
+    assert_equal "any", bundle.reload.signing_rule
+    assert_select "turbo-frame#bundle_recipients_#{bundle.uuid}"
+    assert_select "[role='status']", text: I18n.t("recipients.index.signing_rule_updated")
+    assert_select "form[data-controller='form-submit'][data-form-submit-pending-text-value=?]", I18n.t("actions.saving")
+  end
+
   test "bundle show offers archive extension for signed contracts" do
     bundle = create_bundle_with_contracts(author: @author, count: 1, signed: true)
     contract = bundle.contracts.first

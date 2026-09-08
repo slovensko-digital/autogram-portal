@@ -8,7 +8,11 @@ export default class extends Controller {
     const turboFrame = this.element.closest('turbo-frame')
 
     if (this.hasSubmitButtonTarget && this.hasPendingTextValue) {
-      this.submitButtonTarget.value = this.pendingTextValue
+      if (this.submitButtonTarget.matches('input')) {
+        this.submitButtonTarget.value = this.pendingTextValue
+      } else {
+        this.submitButtonTarget.textContent = this.pendingTextValue
+      }
     }
 
     if (turboFrame) {

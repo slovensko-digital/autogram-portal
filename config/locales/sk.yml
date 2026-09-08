@@ -67,6 +67,9 @@ sk:
     save: "Uložiť"
     saving: "Ukladá sa..."
     add: "Pridať"
+    adding: "Pridáva sa..."
+    sending: "Odosiela sa..."
+    removing: "Odstraňuje sa..."
     edit: "Upraviť"
     sign: "Podpísať"
     change_selection: "Zmeniť výber"
@@ -358,11 +361,15 @@ sk:
       label: "Kopírovať odkaz do schránky"
       turn_on: "Zapnúť verejný odkaz"
       turn_off: "Vypnúť verejný odkaz"
+      enabled: "Verejný odkaz na podpisovanie bol zapnutý"
+      disabled: "Verejný odkaz na podpisovanie bol vypnutý"
     author_notifications_form:
       title: "Notifikácie pre autora"
       subtitle: "Zapnite notifikácie, aby ste dostávali emaily o dôležitých udalostiach týkajúcich sa tohto balíka."
       turn_on: "Zapnúť notifikácie"
       turn_off: "Vypnúť notifikácie"
+      enabled: "Notifikácie boli zapnuté"
+      disabled: "Notifikácie boli vypnuté"
     name_form:
       title: "Názov balíka"
       label: "Názov"
@@ -486,9 +493,15 @@ sk:
       signing_rule_any_description: "Balík je dokončený hneď po prvom podpise."
       signing_rule_threshold: "Určitý počet adresátov musí podpísať"
       signing_rule_threshold_description: "Balík je dokončený, keď podpíše zadaný počet adresátov."
+      signing_rule_updated: "Pravidlo podpisovania bolo uložené"
       required_signatures_label: "Počet vyžadovaných podpisov"
       required_signatures_of: "z %{count} adresátov"
       request_withdrawn: "Požiadavka na podpis bola stiahnutá"
+      added: "%{recipient} bol pridaný ako adresát"
+      invitation_sending: "Pozvánka pre %{recipient} sa odosiela"
+      invitation_failed: "Pozvánku pre %{recipient} sa nepodarilo odoslať"
+      withdrawn: "Požiadavka na podpis pre %{recipient} bola stiahnutá"
+      withdraw_failed: "Požiadavku na podpis pre %{recipient} sa nepodarilo stiahnuť"
 
   admin:
     portal_instances:

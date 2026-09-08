@@ -132,9 +132,14 @@ class BundlesController < ApplicationController
         @success_message = t("bundles.note_form.success")
         render partial: "note_form"
       when "public_link"
+        @success_message = t("bundles.public_link_form.#{@bundle.publicly_visible? ? 'enabled' : 'disabled'}")
         render partial: "public_link_form"
       when "signing_rule"
+        @success_message = t("recipients.index.signing_rule_updated")
         render "recipients/index"
+      when "author_notifications"
+        @success_message = t("bundles.author_notifications_form.#{@bundle.author_notifications_enabled? ? 'enabled' : 'disabled'}")
+        render partial: "author_notifications_form"
       else
         redirect_to @bundle
       end

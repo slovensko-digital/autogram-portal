@@ -1,5 +1,15 @@
 <%= turbo_frame_tag "bundle_public_link_#{@bundle.uuid}", class: "w-full" do %>
-  <%= form_with model: @bundle, method: :put, local: true do |form| %>
+  <% if @success_message.present? %>
+    <%= render "bundles/save_notification", message: @success_message %>
+  <% end %>
+  <%= form_with model: @bundle,
+                method: :put,
+                local: true,
+                data: {
+                  controller: "form-submit",
+                  action: "submit->form-submit#handleSubmit",
+                  form_submit_pending_text_value: t("actions.saving")
+                } do |form| %>
     <%= form.hidden_field :step, value: "public_link" %>
     <%= form.hidden_field :publicly_visible, value: !@bundle.publicly_visible? %>
     <h3 class="text-xl font-semibold text-gray-900 mb-4"><%= t('.title') %></h3>

@@ -89,6 +89,9 @@ en:
     save: "Save"
     saving: "Saving..."
     add: "Add"
+    adding: "Adding..."
+    sending: "Sending..."
+    removing: "Removing..."
     edit: "Edit"
     sign: "Sign"
     change_selection: "Change selection"
@@ -426,11 +429,15 @@ en:
       label: "Copy link to clipboard"
       turn_on: "Enable public link"
       turn_off: "Disable public link"
+      enabled: "Public signing link enabled"
+      disabled: "Public signing link disabled"
     author_notifications_form:
       title: "Author notifications"
       subtitle: "Enable notifications to receive email updates about important events related to this bundle."
       turn_on: "Turn on notifications"
       turn_off: "Turn off notifications"
+      enabled: "Notifications enabled"
+      disabled: "Notifications disabled"
     name_form:
       title: "Bundle name"
       label: "Name"
@@ -558,9 +565,15 @@ en:
       signing_rule_any_description: "The bundle is complete after the very first signature."
       signing_rule_threshold: "A specific number of recipients must sign"
       signing_rule_threshold_description: "The bundle is complete once the specified number of recipients have signed."
+      signing_rule_updated: "Signing rule updated"
       required_signatures_label: "Required number of signatures"
       required_signatures_of: "of %{count} recipients"
       request_withdrawn: "Signature request withdrawn"
+      added: "%{recipient} added as a recipient"
+      invitation_sending: "Invitation is being sent to %{recipient}"
+      invitation_failed: "Invitation could not be sent to %{recipient}"
+      withdrawn: "Signature request for %{recipient} withdrawn"
+      withdraw_failed: "Signature request for %{recipient} could not be withdrawn"
 
   admin:
     portal_instances:
