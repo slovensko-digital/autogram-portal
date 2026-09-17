@@ -124,25 +124,7 @@ class BundlesController < ApplicationController
 
   def update
     if @bundle.update(bundle_params)
-      case params[:bundle][:step]
-      when "name"
-        @success_message = t("bundles.name_form.success")
-        render partial: "name_form"
-      when "note"
-        @success_message = t("bundles.note_form.success")
-        render partial: "note_form"
-      when "public_link"
-        @success_message = t("bundles.public_link_form.#{@bundle.publicly_visible? ? 'enabled' : 'disabled'}")
-        render partial: "public_link_form"
-      when "signing_rule"
-        @success_message = t("recipients.index.signing_rule_updated")
-        render "recipients/index"
-      when "author_notifications"
-        @success_message = t("bundles.author_notifications_form.#{@bundle.author_notifications_enabled? ? 'enabled' : 'disabled'}")
-        render partial: "author_notifications_form"
-      else
-        redirect_to @bundle
-      end
+      redirect_to @bundle, notice: t(".success")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -248,7 +230,7 @@ class BundlesController < ApplicationController
   end
 
   def bundle_params
-    params.require(:bundle).except(:step).permit(
+    params.require(:bundle).permit(
       :name,
       :note,
       :publicly_visible,

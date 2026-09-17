@@ -211,6 +211,20 @@ class Contract < ApplicationRecord
     pades_field_preparation_allowed? && bundle&.author == user
   end
 
+  # True once every recipient still awaiting this contract has a prepared signature field,
+  # so the author no longer needs to be prompted to create them.
+  def pades_signature_fields_prepared_for_all_recipients?
+    return false if bundle.blank?
+
+    prepared_recipient_ids = signature_field_preparations.pluck(:recipient_id)
+    return false if prepared_recipient_ids.empty?
+
+    awaiting_recipient_ids = bundle.active_recipients.awaiting_contract(self).pluck(:id)
+    return false if awaiting_recipient_ids.empty?
+
+    (awaiting_recipient_ids - prepared_recipient_ids).empty?
+  end
+
   def prepared_signature_field_preparation_for(recipient:)
     return if recipient.blank? || !prepared_signature_fields_source_attached?
 

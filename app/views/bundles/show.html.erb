@@ -1,78 +1,91 @@
+<% content_for :title, @bundle.display_name %>
+
 <%= turbo_stream_from @bundle %>
 <% @bundle.contracts.each do |contract| %>
   <%= turbo_stream_from contract %>
 <% end %>
 
 <main>
-  <div class="relative isolate overflow-hidden">
-    <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
-      <% if @bundle.author == current_user %>
-        <div class="w-full">
-          <%= link_to bundles_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline" do %>
-            <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
-            <%= t('.all_bundles') %>
-          <% end %>
-        </div>
+  <div class="mx-auto max-w-4xl space-y-8 px-6 pb-24 pt-10 lg:px-8">
+    <div>
+      <%= link_to bundles_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline" do %>
+        <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        <%= t('.all_bundles') %>
       <% end %>
-      <div class="w-full">
-        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div class="flex-1">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+
+      <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-3">
+            <h1 class="text-3xl font-bold text-gray-900 break-words"><%= @bundle.display_name %></h1>
+            <% case @bundle.bundle_state
+               when :completed %>
+              <%= render 'shared/badge', color: 'green', label: t('bundles.status.completed') %>
+            <% when :declined %>
+              <%= render 'shared/badge', color: 'red', label: t('bundles.status.declined') %>
+            <% when :no_recipients %>
+              <%= render 'shared/badge', color: 'gray', label: t('bundles.status.no_recipients') %>
+            <% else %>
+              <%= render 'shared/badge', color: 'yellow', label: t('bundles.status.awaiting_signature') %>
+            <% end %>
           </div>
-          <%= link_to sign_bundle_path(@bundle),
-                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-            <%= t('actions.sign') %>
-          <% end %>
-          <%= button_to bundle_path(@bundle),
+          <p class="mt-1 text-sm text-gray-500">
+            #<%= @bundle.short_uuid %>
+            &middot; <%= t('.created', date: @bundle.created_at.strftime("%d.%m.%Y")) %>
+            &middot; <%= @bundle.contracts.size %> <%= t('document', count: @bundle.contracts.size) %>
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:flex-row sm:shrink-0">
+          <%= link_to t('actions.edit'), edit_bundle_path(@bundle),
+                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <%= link_to t('actions.sign'), sign_bundle_path(@bundle),
+                class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <%= button_to t('actions.delete'), bundle_path(@bundle),
                 method: :delete,
                 form: { data: { turbo_confirm: t('bundles.destroy.confirm') } },
-                class: "w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
-            <%= t('actions.delete') %>
-          <% end %>
+                class: "w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
         </div>
       </div>
+    </div>
+
+    <% if @bundle.note.present? %>
+      <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+        <h2 class="text-sm font-medium text-gray-700"><%= t('.note_title') %></h2>
+        <p class="mt-1 text-gray-900 whitespace-pre-line"><%= @bundle.note %></p>
+      </div>
+    <% end %>
+
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold text-gray-900"><%= t('.contracts_title') %></h2>
       <% @bundle.contracts.each do |contract| %>
-        <%= turbo_frame_tag contract, src: show_bundle_contract_path(contract), loading: "lazy", class: "w-full border border-gray-200 p-4 rounded-lg bg-white" do %>
-          <div class="w-full">
-            <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
-              <div class="flex items-center">
-                <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span class="text-gray-600"><%= t('contracts.loading') %></span>
-              </div>
-            </div>
-          </div>
+        <%= turbo_frame_tag contract, src: show_bundle_contract_path(contract), loading: "lazy", class: "block w-full border border-gray-200 p-4 rounded-lg bg-white" do %>
+          <%= render "bundles/loading", message: t('.loading_documents') %>
         <% end %>
       <% end %>
+    </section>
 
-      <%= render "name_form" %>
-
-      <%= turbo_frame_tag "bundle_recipients_#{@bundle.uuid}",
-                          src: bundle_recipients_path(@bundle),
-                          loading: "lazy",
-                          class: "w-full" do %>
-        <div class="w-full">
-          <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
-            <div class="flex items-center">
-              <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span class="text-gray-600"><%= t('bundles.recipients.loading') %></span>
-            </div>
-          </div>
-        </div>
+    <section class="rounded-lg border border-gray-200 bg-white p-6">
+      <%= turbo_frame_tag "bundle_recipients_#{@bundle.uuid}", src: bundle_recipients_path(@bundle), loading: "lazy", class: "block w-full" do %>
+        <%= render "bundles/loading", message: t('.loading_recipients') %>
       <% end %>
+    </section>
 
-      <%= render "author_notifications_form" %>
-      <%= render "public_link_form" %>
-      <%= render "note_form" %>
-    </div>
+    <% if @bundle.publicly_visible? %>
+      <section class="rounded-lg border border-gray-200 bg-white p-6">
+        <h2 class="text-xl font-semibold text-gray-900"><%= t('.public_link_title') %></h2>
+        <p class="mt-1 text-sm text-gray-600"><%= t('.public_link_subtitle') %></p>
+        <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center"
+             data-controller="clipboard"
+             data-clipboard-text-value="<%= sign_bundle_url(@bundle) %>">
+          <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>" onclick="this.select();"
+                 class="w-full flex-1 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <%= button_tag t('.copy_link'), type: "button",
+                data: { action: "clipboard#copyToClipboard" },
+                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      </section>
+    <% end %>
   </div>
 </main>
-
-<% content_for :title, t(".title") + " ##{@bundle.short_uuid}" %>

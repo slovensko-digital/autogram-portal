@@ -64,7 +64,7 @@
     <div class="text-sm font-medium <%= disabled ? 'text-gray-600' : 'text-gray-900' %>"><%= label %></div>
       <div class="text-xs text-gray-500 mt-1<%= ' hidden sm:block' if image.present? %>"><%= description %></div>
     <% if disabled && disabled_reasons.any? %>
-      <div id="<%= reason_id %>" class="mt-2 text-xs font-medium text-gray-600 sm:sr-only">
+      <div id="<%= reason_id %>" class="mt-2 text-xs font-medium text-gray-600">
         <%= safe_join(disabled_reasons, tag.br) %>
       </div>
     <% end %>
@@ -75,10 +75,4 @@
       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
     </svg>
   </div>
-
-  <% if disabled && disabled_reasons.any? %>
-    <div aria-hidden="true" class="absolute bottom-full left-4 right-4 z-20 mb-2 hidden rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white shadow-lg sm:group-hover:block sm:group-focus:block">
-      <%= safe_join(disabled_reasons, tag.br) %>
-    </div>
-  <% end %>
 </label>

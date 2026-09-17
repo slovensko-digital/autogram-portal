@@ -52,7 +52,7 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
   test "destroy removes user signers" do
     signer = signers(:one)
 
-    delete :destroy, params: { delete_confirmation: I18n.t("devise.registrations.edit.delete_confirmation_phrase") }
+    delete :destroy, params: { delete_confirmation: I18n.t("devise.registrations.edit.delete_confirmation_phrase", locale: :en) }
 
     assert_response :redirect
     assert_not Signer.exists?(signer.id)
