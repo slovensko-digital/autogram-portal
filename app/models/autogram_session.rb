@@ -7,7 +7,7 @@
 #  error_message      :text
 #  options            :jsonb
 #  signing_started_at :datetime
-#  status             :integer          default("pending"), not null
+#  status             :integer          default(0), not null
 #  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
@@ -28,7 +28,12 @@ class AutogramSession < Session
   end
 
   def self.available?(qscd, contract)
-    return false if contract.prepared_signature_fields_source_attached?
-    true
+    unavailability_reasons(qscd, contract).empty?
+  end
+
+  def self.unavailability_reasons(_qscd, contract)
+    reasons = []
+    reasons << :prepared_signature_fields if contract.prepared_signature_fields_source_attached?
+    reasons
   end
 end

@@ -4,6 +4,7 @@
 #
 #  id                           :bigint           not null, primary key
 #  author_notifications_enabled :boolean          default(FALSE), not null
+#  name                         :string
 #  note                         :text
 #  publicly_visible             :boolean          default(FALSE), not null
 #  required_signatures          :integer
@@ -67,7 +68,7 @@ class Bundle < ApplicationRecord
   end
 
   def display_name
-    "#{I18n.t('bundles.display_name')} #{short_uuid}"
+    name.presence || "#{I18n.t('bundles.display_name')} #{short_uuid}"
   end
 
   def completed?

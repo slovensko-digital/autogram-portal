@@ -8,7 +8,7 @@ const MIN_HEIGHT = 36
 pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL
 
 export default class extends Controller {
-  static targets = ["page", "stamp", "pageField", "pageNumber", "xField", "yField", "widthField", "heightField", "summary", "customText", "contentMode", "stampText", "imageInput", "imagePreview", "existingFieldsLayer", "pdfCanvas", "previewFallback", "previewLink", "drawingPanel", "drawingPad", "drawingData", "drawingStatus"]
+  static targets = ["page", "stamp", "pageField", "pageNumber", "xField", "yField", "widthField", "heightField", "summary", "customText", "contentMode", "stampText", "imageInput", "imagePreview", "existingFieldsLayer", "pdfCanvas", "previewFallback", "previewLink", "pageCount", "previousPageButton", "nextPageButton", "boxLabel", "recipientSelect", "drawingPanel", "drawingPad", "drawingData", "drawingStatus"]
   static values = {
     existingFields: { type: Array, default: [] },
     pageWidth: { type: Number, default: 595 },
@@ -44,6 +44,8 @@ export default class extends Controller {
     this.updateContent()
     this.setupDrawingPad()
     this.renderExistingFields()
+    this.updateBoxLabel()
+    this.updatePageControls()
     this.loadPdfPreview()
 
     window.addEventListener("resize", this.handleWindowResize)
@@ -191,6 +193,7 @@ export default class extends Controller {
 
   pageChanged() {
     this.syncPageNumber(this.currentPageNumber())
+    this.updatePageControls()
 
     if (this.hasPdfCanvasTarget && this.previewUrlValue) {
       this.loadPdfPreview()
@@ -198,6 +201,53 @@ export default class extends Controller {
     }
 
     this.renderExistingFields()
+  }
+
+  previousPage() {
+    this.goToPage(Number(this.currentPageNumber()) - 1)
+  }
+
+  nextPage() {
+    this.goToPage(Number(this.currentPageNumber()) + 1)
+  }
+
+  goToPage(pageNumber) {
+    const lastPage = this.pdfDocument?.numPages || 1
+    this.syncPageNumber(this.clamp(pageNumber || 1, 1, lastPage))
+    this.pageChanged()
+  }
+
+  updatePageControls() {
+    const lastPage = this.pdfDocument?.numPages
+    const currentPage = Number(this.currentPageNumber()) || 1
+
+    if (this.hasPageCountTarget) {
+      this.pageCountTarget.textContent = lastPage ? lastPage.toString() : "–"
+    }
+
+    if (this.hasPreviousPageButtonTarget) {
+      this.previousPageButtonTarget.disabled = currentPage <= 1
+    }
+
+    if (this.hasNextPageButtonTarget) {
+      this.nextPageButtonTarget.disabled = !lastPage || currentPage >= lastPage
+    }
+  }
+
+  recipientChanged() {
+    this.updateBoxLabel()
+  }
+
+  // Shows whose field is being placed, so the author can tell the box apart from already placed ones.
+  updateBoxLabel() {
+    if (!this.hasBoxLabelTarget || !this.hasRecipientSelectTarget) return
+
+    const select = this.recipientSelectTarget
+    const label = select.options[select.selectedIndex]?.text
+
+    if (label) {
+      this.boxLabelTarget.textContent = label
+    }
   }
 
   renderExistingFields() {
@@ -215,8 +265,15 @@ export default class extends Controller {
     this.existingFieldsValue
       .filter((field) => Number(field.page) === currentPage)
       .forEach((field) => {
-        const overlay = document.createElement("div")
-        overlay.className = "absolute rounded border border-amber-500 bg-amber-100/80 p-2 shadow-sm"
+        // A saved field opens for editing when the author clicks it; the layer itself stays click-through.
+        const overlay = document.createElement(field.editUrl ? "a" : "div")
+        overlay.className = "absolute rounded border border-amber-500 bg-amber-100/80 p-2"
+
+        if (field.editUrl) {
+          overlay.href = field.editUrl
+          overlay.title = field.editLabel || ""
+          overlay.className += " pointer-events-auto cursor-pointer hover:bg-amber-200"
+        }
         overlay.style.left = `${Number(field.x) * scaleX}px`
         overlay.style.top = `${pageRect.height - ((Number(field.y) + Number(field.height)) * scaleY)}px`
         overlay.style.width = `${Number(field.width) * scaleX}px`
@@ -401,6 +458,7 @@ export default class extends Controller {
       this.renderFromPdfValues()
       this.updateFields()
       this.renderExistingFields()
+      this.updatePageControls()
     } catch (error) {
       if (error?.name === "RenderingCancelledException") return
 

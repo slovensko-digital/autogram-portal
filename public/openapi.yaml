@@ -599,6 +599,10 @@ components:
           type: string
           example: 69393b49-c34f-438f-ad7c-4b78db3932be
           description: Unique identifier for the bundle. If not provided, a new UUID will be generated.
+        name:
+          type: string
+          nullable: true
+          description: Optional custom name for the bundle.
         publiclyVisible:
           type: boolean
           default: false

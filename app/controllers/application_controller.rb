@@ -40,7 +40,18 @@ class ApplicationController < ActionController::Base
     render json: config
   end
 
+  protected
+
+  def after_sign_in_path_for(resource)
+    stored_location_for(resource) || pending_contract_path || super
+  end
+
   private
+
+  def pending_contract_path
+    contract_uuid = session[:pending_contract_claim_uuid]
+    contract_path(contract_uuid) if contract_uuid.present?
+  end
 
   def set_locale
     I18n.locale = params[:locale] || session[:locale] || cookies[:locale] || current_user.try(:locale) || I18n.default_locale

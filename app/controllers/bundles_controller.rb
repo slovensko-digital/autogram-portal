@@ -124,16 +124,7 @@ class BundlesController < ApplicationController
 
   def update
     if @bundle.update(bundle_params)
-      case params[:bundle][:step]
-      when "note"
-        render partial: "note_form"
-      when "public_link"
-        render partial: "public_link_form"
-      when "signing_rule"
-        render "recipients/index"
-      else
-        redirect_to @bundle
-      end
+      redirect_to @bundle, notice: t(".success")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -239,7 +230,8 @@ class BundlesController < ApplicationController
   end
 
   def bundle_params
-    params.require(:bundle).except(:step).permit(
+    params.require(:bundle).permit(
+      :name,
       :note,
       :publicly_visible,
       :signing_rule,

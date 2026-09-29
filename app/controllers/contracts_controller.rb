@@ -1,5 +1,6 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
+  before_action :claim_pending_anonymous_contract, only: [ :show, :actions ]
   before_action :verify_author, only: [ :show, :update, :destroy ]
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
@@ -70,6 +71,15 @@ class ContractsController < ApplicationController
 
   def actions
     render partial: "actions", locals: { previous_page: params[:previous_page] }
+  end
+
+  def authenticate_for_actions
+    return redirect_to actions_contract_path(@contract) if current_user.present?
+    return head :forbidden unless @contract.user.nil? && @contract.bundle.nil?
+
+    session[:pending_contract_claim_uuid] = @contract.uuid
+    store_location_for(:user, contract_path(@contract))
+    redirect_to new_user_session_path
   end
 
   def signature_extension
@@ -279,6 +289,17 @@ class ContractsController < ApplicationController
   end
 
   private
+
+  def claim_pending_anonymous_contract
+    return unless current_user.present?
+    return unless session[:pending_contract_claim_uuid] == @contract.uuid
+
+    session.delete(:pending_contract_claim_uuid)
+    @contract.with_lock do
+      @contract.reload
+      @contract.update!(user: current_user) if @contract.user.nil? && @contract.bundle.nil?
+    end
+  end
 
   def verify_author
     if @contract.user && @contract.user != current_user

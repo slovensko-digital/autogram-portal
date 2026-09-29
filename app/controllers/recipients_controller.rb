@@ -10,6 +10,7 @@ class RecipientsController < ApplicationController
     @recipient = @bundle.recipients.build(recipient_params)
 
     if @recipient.save
+      @success_message = t("recipients.index.added", recipient: @recipient.display_name)
       render "index"
     else
       render "index", locals: { recipient_error: @recipient.errors.full_messages.join(", ") }
@@ -17,13 +18,24 @@ class RecipientsController < ApplicationController
   end
 
   def destroy
-    @recipient.withdraw!
+    if @recipient.removable?
+      @recipient.withdraw!
+      @success_message = t("recipients.index.withdrawn", recipient: @recipient.display_name)
+    else
+      @error_message = t("recipients.index.withdraw_failed", recipient: @recipient.display_name)
+    end
 
     render "index"
   end
 
   def notify
-    @recipient.notify!
+    if @recipient.notifiable?
+      @recipient.notify!
+      @success_message = t("recipients.index.invitation_sending", recipient: @recipient.display_name)
+    else
+      @error_message = t("recipients.index.invitation_failed", recipient: @recipient.display_name)
+    end
+
     render "index"
   end
 

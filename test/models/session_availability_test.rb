@@ -12,6 +12,10 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
     assert AvmSession.available?(nil, contract)
     assert_not EidentitaSession.available?(nil, contract)
     assert_not PodpisujSession.available?(nil, contract)
+    assert_equal [ :prepared_signature_fields ], AutogramSession.unavailability_reasons(nil, contract)
+    assert_empty AvmSession.unavailability_reasons(nil, contract)
+    assert_equal [ :prepared_signature_fields ], EidentitaSession.unavailability_reasons(nil, contract)
+    assert_equal [ :prepared_signature_fields ], PodpisujSession.unavailability_reasons(nil, contract)
   end
 
   test "eidentita and podpisuj remain available without prepared signature fields" do
@@ -23,6 +27,34 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
 
     assert EidentitaSession.available?(nil, contract)
     assert PodpisujSession.available?(nil, contract)
+  end
+
+  test "mobile apps report unsupported qscd" do
+    contract = plain_contract
+
+    assert_equal [ :unsupported_qscd ], AvmSession.unavailability_reasons("eid_2021", contract)
+    assert_equal [ :unsupported_qscd ], EidentitaSession.unavailability_reasons("eid_2021", contract)
+    assert_not AvmSession.available?("eid_2021", contract)
+    assert_not EidentitaSession.available?("eid_2021", contract)
+    assert_empty AvmSession.unavailability_reasons("eid_2024", contract)
+    assert_empty EidentitaSession.unavailability_reasons("eid_2024", contract)
+  end
+
+  test "document constraints return all applicable reasons" do
+    contract = multiple_file_contract
+
+    assert_empty AutogramSession.unavailability_reasons("eid_2021", contract)
+    assert_equal [ :multiple_files, :unsupported_qscd ], AvmSession.unavailability_reasons("eid_2021", contract)
+    assert_equal [ :multiple_files, :unsupported_qscd ], EidentitaSession.unavailability_reasons("eid_2021", contract)
+    assert_equal [ :multiple_files ], PodpisujSession.unavailability_reasons("eid_2021", contract)
+  end
+
+  test "podpisuj reports unsupported signature level" do
+    contract = plain_contract
+    contract.signature_parameters.update!(level: "BASELINE_T")
+
+    assert_equal [ :unsupported_signature_level ], PodpisujSession.unavailability_reasons(nil, contract)
+    assert_not PodpisujSession.available?(nil, contract)
   end
 
   test "ades evidence session is available for recipient mobile phone or email" do
@@ -43,6 +75,23 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
   end
 
   private
+
+  def plain_contract
+    Contract.create!(
+      documents_attributes: [ { blob: pdf_blob("plain.pdf", "%PDF-1.4 original") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+  end
+
+  def multiple_file_contract
+    Contract.create!(
+      documents_attributes: [
+        { blob: pdf_blob("first.pdf", "%PDF-1.4 first") },
+        { blob: pdf_blob("second.pdf", "%PDF-1.4 second") }
+      ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES" }
+    )
+  end
 
   def contract_with_prepared_signature_fields
     contract = Contract.create!(

@@ -65,7 +65,11 @@ sk:
     delete: "Zmazať"
     remove: "Odstrániť"
     save: "Uložiť"
+    saving: "Ukladá sa..."
     add: "Pridať"
+    adding: "Pridáva sa..."
+    sending: "Odosiela sa..."
+    removing: "Odstraňuje sa..."
     edit: "Upraviť"
     sign: "Podpísať"
     change_selection: "Zmeniť výber"
@@ -257,6 +261,9 @@ sk:
         continue: "Pokračovať"
         back: "Späť"
         header: "Vyberte akciu"
+        account_required: "Dostupné po prihlásení"
+        account_cta_text: "Vytvorte si bezplatný účet a využívajte pokročilé funkcie portálu"
+        account_cta: "Prihlásiť sa alebo registrovať"
         sign:
           title: "Podpísať dokument"
           subtitle: "Vyberte formát podpisu a typ podpisu a podpíšte tento dokument."
@@ -349,23 +356,32 @@ sk:
         signed: "Podpísané"
         declined: "Odmietnuté"
       no_note: "Žiadna poznámka"
+      note_title: "Poznámka"
+      created: "Vytvorený %{date}"
+      loading_documents: "Načítavam dokumenty..."
+      loading_recipients: "Načítavam adresátov..."
+      public_link_title: "Verejný odkaz na podpisovanie"
+      public_link_subtitle: "Ktokoľvek s týmto odkazom môže podpísať dokumenty v tomto balíku."
+      copy_link: "Kopírovať odkaz"
       request_signature_title: "Požiadať o podpisy"
       signed: "Podpísané"
-    public_link_form:
-      title: "Verejný odkaz na balík dokumentov"
-      subtitle: "Zdieľajte priamo tento odkaz s príjemcami, aby mohli podpísať dokumenty v balíku."
-      label: "Kopírovať odkaz do schránky"
-      turn_on: "Zapnúť verejný odkaz"
-      turn_off: "Vypnúť verejný odkaz"
-    author_notifications_form:
-      title: "Notifikácie pre autora"
-      subtitle: "Zapnite notifikácie, aby ste dostávali emaily o dôležitých udalostiach týkajúcich sa tohto balíka."
-      turn_on: "Zapnúť notifikácie"
-      turn_off: "Vypnúť notifikácie"
-    note_form:
-      title: "Poznámka"
-      placeholder: "Voliteľná správa pre adresátov"
-      label: "Správa pre adresátov"
+    edit:
+      title: "Upraviť balík"
+      back: "Späť na balík"
+      errors_title: "Balík sa nepodarilo uložiť"
+      name_label: "Názov"
+      note_label: "Správa pre adresátov"
+      note_placeholder: "Voliteľná správa pre adresátov"
+      signing_rule_label: "Pravidlo podpisovania"
+      required_signatures_label: "Požadovaný počet podpisov"
+      required_signatures_of: "z %{count} adresátov"
+      public_link_label: "Verejný odkaz na podpisovanie"
+      public_link_description: "Ktokoľvek s odkazom môže podpísať dokumenty v tomto balíku bez pozvánky."
+      author_notifications_label: "Notifikácie pre autora"
+      author_notifications_description: "Dostávajte emaily o dôležitých udalostiach týkajúcich sa tohto balíka."
+      cancel: "Zrušiť"
+    update:
+      success: "Balík bol uložený"
     destroy:
       success: "Balík dokumentov bol úspešne zmazaný."
       failure: "Nepodarilo sa zmazať balík dokumentov."
@@ -479,9 +495,16 @@ sk:
       signing_rule_any_description: "Balík je dokončený hneď po prvom podpise."
       signing_rule_threshold: "Určitý počet adresátov musí podpísať"
       signing_rule_threshold_description: "Balík je dokončený, keď podpíše zadaný počet adresátov."
+      signing_rule_summary_threshold: "Musí podpísať %{required} z %{count} adresátov"
+      change_signing_rule: "Zmeniť"
       required_signatures_label: "Počet vyžadovaných podpisov"
       required_signatures_of: "z %{count} adresátov"
       request_withdrawn: "Požiadavka na podpis bola stiahnutá"
+      added: "%{recipient} bol pridaný ako adresát"
+      invitation_sending: "Pozvánka pre %{recipient} sa odosiela"
+      invitation_failed: "Pozvánku pre %{recipient} sa nepodarilo odoslať"
+      withdrawn: "Požiadavka na podpis pre %{recipient} bola stiahnutá"
+      withdraw_failed: "Požiadavku na podpis pre %{recipient} sa nepodarilo stiahnuť"
 
   admin:
     portal_instances:
@@ -603,6 +626,7 @@ sk:
       destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
       update_contract: "Aktualizovať dokument"
     show_bundle:
+      edit_signature_fields: "Upraviť podpisové polia"
       private_evidence_download_button: "Súkromná evidencia (.asice)"
     content_versions:
       back_to_contract: "Späť na dokument"
@@ -679,6 +703,12 @@ sk:
       multiple_files_in_contract_warning_title: "Viacero súborov v dokumente"
       multiple_files_in_contract_warning: "Tento dokument obsahuje viac súborov. Pre podpisovanie je možné použiť iba desktopovú aplikáciu Autogram, ktorá podporuje prácu s viacerými súbormi."
       multiple_files_in_contract_mobile_warning: "Tento dokument obsahuje viac súborov. Podpisovanie takéhoto dokumentu vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
+      unavailable_reasons:
+        multiple_files: "Nepodporuje dokumenty s viacerými súbormi."
+        prepared_signature_fields: "Nepodporuje pripravené podpisové polia."
+        unsupported_qscd: "Vaša karta nemá NFC čip – vyžaduje preukaz vydaný po 1.12.2022."
+        unsupported_signature_level: "Podporuje iba podpisy BASELINE_B."
+        desktop_only: "Dostupné iba na počítači."
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
@@ -689,44 +719,53 @@ sk:
     signature_field_preparations:
       index:
         title: "Pripraviť viditeľné podpisové polia"
-        subtitle: "Vytvorte pre každého príjemca, ktorý má tento dokument podpísať, jedno viditeľné PDF podpisové pole."
-        info_title: "Čo to robí"
-        info_body: "Tieto polia teraz rezervujú viditeľné miesto v PDF. Každý príjemca neskôr doplní vlastnú vizuálnu podobu, ktorá sa pri podpise naviaže na pridelené pole."
+        subtitle: "Dva kroky: pre každého príjemcu umiestnite jedno podpisové pole a potom vygenerujte podpisový PDF súbor, aby sa polia k nim dostali."
+        back: "Späť na balík"
         empty_state_title: "Chýbajú príjemcovia alebo PDF dokumenty"
         empty_state_body: "Na prípravu polí musí mať tento dokument aspoň jedného aktívneho príjemcu v balíku a jeden PDF súbor."
+        empty_state_link: "Prejsť na balík"
+        status:
+          none: "Zatiaľ nie je umiestnené žiadne podpisové pole. Nižšie umiestnite jedno pre každého príjemcu."
+          stale_title: "Podpisový PDF súbor nie je aktuálny"
+          stale_body: "Kým nevygenerujete podpisový PDF súbor pre aktuálne polia, príjemcovia podpisujú predchádzajúcu verziu."
+          ready_title: "Podpisový PDF súbor je aktuálny"
+          ready_body: "Príjemcovia budú podpisovať pripravený PDF súbor s vlastným podpisovým poľom."
+          back_to_bundle: "Späť na balík"
         form:
-          title: "Umiestnenie poľa"
-          description: "Potiahnutím rámika v náhľade PDF určte polohu viditeľného podpisového poľa. Veľkosť upravíte rohovým úchytom."
           recipient: "Príjemca"
-          document: "Dokument"
           page: "Strana"
-          position: "Pozícia"
+          hint: "Potiahnutím rámika v náhľade umiestnite pole, veľkosť upravíte rohovým úchytom."
           submit: "Pridať podpisové pole"
+          editing_title: "Upraviť podpisové pole"
+          update_submit: "Uložiť zmeny"
+          cancel: "Zrušiť"
+          all_assigned_title: "Každý príjemca má podpisové pole"
+          all_assigned_body: "Vyššie vygenerujte podpisový PDF súbor, aby sa aktuálne rozloženie použilo."
         preview:
-          title: "Náhľad PDF"
           unavailable: "Náhľad PDF nie je dostupný."
-          mobile_hint: "Na telefóne pole presúvajte priamo v náhľade pre presnejšie umiestnenie."
           render_error: "Náhľad sa na tomto zariadení nepodarilo vykresliť. PDF si stále môžete otvoriť priamo."
           open_pdf: "Otvoriť PDF"
           box_label: "Podpisové pole"
           resize_handle: "Zmeniť veľkosť podpisového poľa"
-        existing:
-          title: "Pripravené podpisové polia"
-          count:
-            one: "1 pole"
-            few: "%{count} polia"
-            other: "%{count} polí"
-          empty: "Zatiaľ neboli pripravené žiadne podpisové polia."
-          prepared_source_ready: "Pre aktuálne rozloženie polí už bol vygenerovaný pripravený podpisový PDF súbor."
-          recipient: "Príjemca"
-          document: "Dokument"
           page: "Strana"
-          geometry: "Geometria"
-          delete_confirm: "Odstrániť pripravené podpisové pole pre %{recipient}?"
+          page_of: "z"
+          previous_page: "Predchádzajúca strana"
+          next_page: "Ďalšia strana"
+          edit_field: "Upraviť pole pre %{recipient}"
+        recipients:
+          title: "Príjemcovia"
+          progress: "Umiestnené: %{placed} z %{total}"
+          placed: "Strana %{page}"
+          edit: "Upraviť"
+          not_placed: "Zatiaľ bez poľa"
+          empty: "Tento balík nemá príjemcov, ktorí by čakali na podpis tohto dokumentu."
+          remove_confirm: "Odstrániť podpisové pole pre %{recipient}?"
         finalize:
-          submit: "Vygenerovať pripravený podpisový PDF súbor"
+          submit: "Dokončiť a vygenerovať podpisový PDF"
       create:
         success: "Podpisové pole bolo úspešne pripravené."
+      update:
+        success: "Podpisové pole bolo upravené."
       destroy:
         success: "Pripravené podpisové pole bolo odstránené."
       finalize:
@@ -1114,49 +1153,68 @@ sk:
   about:
     index:
       hero:
-        title: "Kvalifikované elektronické podpisy"
-        title_highlight: "jednoducho"
-        description_html: "<span class=\"font-semibold text-gray-900\">Open-source platforma</span> pre správu <span class=\"inline-flex items-center font-semibold text-gray-900\">eIDAS-kompatibilných</span> elektronických podpisov. <span class=\"font-semibold text-gray-900\">Posielajte dokumenty</span> na podpis, <span class=\"font-semibold text-gray-900\">integrujte pracovné postupy</span> cez <span class=\"font-semibold text-gray-900\">API alebo vložený iframe</span> a <span class=\"font-semibold text-gray-900\">bezproblémovo sa pripojte</span> k viacerým podpisovacím aplikáciám."
+        title: "Elektronické podpisy"
+        title_highlight: "jednoducho a bezpečne"
+        description_html: "Platforma pre správu <span class=\"inline-flex items-center font-semibold text-gray-900\">kvalifikovaných</span> elektronických podpisov. <span class=\"font-semibold text-gray-900\">Posielajte zmluvy</span> na podpis tretím stranám, <span class=\"font-semibold text-gray-900\">archivujte</span> podpísané dokumenty a jednoducho <span class=\"font-semibold text-gray-900\">integrujte</span> do vlastného systému"
         view_on_github: "Zobraziť na GitHube"
+        log_in: "Prihlásiť sa"
       start_using:
-        title: "Začnite používať Autogram Portal dnes"
-        subtitle: "Vyberte si, ako chcete pracovať — s účtom alebo bez neho"
-        no_account:
-          title: "Na začatie nie je potrebný účet"
-          description: "Nahrávajte dokumenty, prezerajte obsah, overujte podpisy a zdieľajte odkazy na podpisovanie — všetko bez registrácie. Ideálne pre rýchle, jednorazové podpisovanie."
-        with_account:
-          title: "Viac s účtom"
-          description: "Prístup k histórii dokumentov, posielanie žiadostí o podpis e-mailom, prijímanie notifikácií a webhookov, keď ostatní podpisujú, integrácia cez REST API a iframe a správa všetkých vašich dokumentov na jednom mieste."
+        title: "Začnite používať Autogram Portal už dnes"
+        anonymous:
+          title: "Anonym"
+          price: "Zadarmo"
+          audience: "Pre každého, kto potrebuje okamžite podpísať alebo overiť dokument"
+          upload_document: "Nahrať dokument"
+          included:
+            - "Nahráte, podpíšete a overíte dokument"
+          excluded:
+            - "Nemôžete odoslať dokument na podpis"
+            - "Nemôžete ukladať dokumenty"
+        basic:
+          title: "BASIC účet"
+          price: "Zadarmo"
+          audience: "Pre všetkých, ktorí podpisujú pravidelne a potrebujú odosielať dokumenty na podpis"
+          start: "Začať"
+          log_in: "Prihlásiť sa"
+          included:
+            - "10 dokumentov mesačne na podpis a uloženie"
+            - "10 kvalifikovaných časových pečiatok"
+          excluded:
+            - "Iba jeden používateľ"
+        pro:
+          title: "PRO účet"
+          price: "19 eur/mesačne"
+          audience: "Komplexný nástroj pre podpisovanie"
+          contact: "Kontaktujte nás na adrese"
+          included:
+            - "Neobmedzený počet používateľov pod jedným firemným účtom"
+            - "Neobmedzené množstvo dokumentov"
+            - "Dlhodobá archivácia dokumentov"
+          excluded: []
       features:
         subtitle: "eIDAS-kompatibilná platforma"
-        title: "Kompletný pracovný tok podpisovania dokumentov"
-        description: "Preklenieme priepasť medzi eGovernment a komerčným podpisovanie dokumentov. Posielajte dokumenty na podpisovanie, integrujte podpisovanie do existujúcich aplikácií a využívajte kvalifikované zariadenia na vytváranie podpisov pre právne platné elektronické podpisy."
+        title: "Spájame bezpečnosť s jednoduchosťou modernej aplikácie"
+        description: "Zabudnite na tlačiareň. Zmluvy riešite iba digitálne - od prvého do posledného podpisu. Váš elektronický podpis spĺňa najvyššiu európsku úroveň (eIDAS) a má rovnakú váhu ako ten overený u notára. Zmluvy podpíšete pomocou občianskeho preukazu (eID), odošlete ich na podpis iným, alebo si celý systém napojíte na vlastné aplikácie."
         send_documents:
-          title: "Posielajte dokumenty na podpisovanie"
-          description: "Požiadajte o podpisy od iných ľudí cez e-mail alebo zdieľanie odkazu. Príjemcovia môžu podpisovať dokumenty pomocou svojich kvalifikovaných zariadení na vytváranie podpisov bez potreby vytvárať účet."
+          title: "Posielajte dokumenty na podpis"
+          description: "Požiadajte druhú stranu o podpis cez e-mail. Naživo viete sledovať, kto už dokument podpísal."
         api_integration:
-          title: "API a iframe integrácia"
-          description: "Vložte pracovné toky podpisovania priamo do svojich aplikácií pomocou jednoduchej iframe integrácie alebo komplexného REST API. Automatizujte procesy podpisovania dokumentov vo vašich obchodných systémoch."
+          title: "Prepojenie s vaším systémom cez API"
+          description: "Vložte si podpisovanie priamo do vašej vlastnej aplikácie či firemného systému."
         qualified_signatures:
           title: "Kvalifikované eIDAS podpisy"
-          description: "Vytvárajte kvalifikované elektronické podpisy pomocou vládou vydaných eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Bezproblémová integrácia s aplikáciami Autogram a Autogram v mobile."
+          description: "Na vytvorenie kvalifikovaného elektronického podpisu vám stačí občiansky preukaz s čipom."
         validation:
           title: "Overovanie dokumentov"
-          description: "Okamžite overujte platnosť a integritu podpísaných dokumentov. Systém automaticky kontroluje certifikáty, podpisy a časové pečiatky, aby zabezpečil súlad."
-        multi_party:
-          title: "Viacstranné pracovné toky"
-          description: "Spravujte zložité scenáre podpisovania s viacerými účastníkmi. Sledujte stav podpisov, posielajte pripomienky a koordinujte sekvenčné alebo paralelné pracovné toky podpisovania."
-        visualization:
-          title: "Vizualizácia dokumentov"
-          description: "Prezerajte a prechádzajte obsah ASiC kontajnerov a slovenské elektronické formuláre vo formáte XML priamo v prehliadači. Náhľad dokumentov pred podpísaním s jasným, užívateľsky prívetivým zobrazením."
+          description: "Nahrajte dokument, o ktorom neviete, či je elektronicky podpísaný, a náš systém preverí certifikáty a časové pečiatky za vás."
       ecosystem:
         subtitle: "Ekosystém Autogram"
-        title: "Kompletná infraštruktúra na podpisovanie"
-        description: "Autogram Portal je súčasťou komplexného open-source portfólia pre kvalifikované elektronické podpisy, ktoré bezproblémovo funguje s podpisovacími aplikáciami Autogram."
+        title: "Sme vaša kompletná podpisová výbava"
+        description: "Autogram Portal je súčasťou balíka nástrojov pre počítač, mobil aj webový prehliadač. Všetko je navrhnuté tak, aby ste mohli vytvárať právne platné podpisy rýchlo a bezpečne."
+        learn_more: "Dozvedieť sa viac"
         desktop:
           title: "Autogram na počítači"
           description: "Desktopová aplikácia pre Windows, macOS a Linux, ktorá vytvára kvalifikované podpisy pomocou eID kariet a iných kvalifikovaných zariadení na vytváranie podpisov. Pripája sa priamo k portálu pre bezproblémové pracovné toky podpisovania."
-          learn_more: "Dozvedieť sa viac"
         mobile:
           title: "Autogram v mobile"
           description: "Mobilné aplikácie pre iOS a Android, ktoré umožňujú kvalifikované podpisy pomocou mobilných eID riešení a kvalifikovaných zariadení na vytváranie podpisov. Podpisujte dokumenty na cestách s plnou integráciou portálu."
@@ -1167,17 +1225,17 @@ sk:
           title: "Autogram Portal"
           description: "Webová platforma na správu kompletného životného cyklu podpisovania dokumentov v komerčných aplikáciách. Poskytuje overovanie, správu pracovných tokov a API integráciu pre obchodné procesy."
       standards:
-        title: "Postavené na otvorených štandardoch"
-        description: "Autogram Portal je plne open-source a postavený na overených technológiách, spĺňa najvyššie bezpečnostné štandardy a umožňuje transparentnosť a spoluprácu s komunitou."
+        title: "Postavené na otvorených štandardoch pre maximálnu bezpečnosť"
+        description: "Autogram Portal je postavený na otvorených technológiách a overených štandardoch. Najvyššia úroveň bezpečnosti je garantovaná transparentnosťou a spoluprácou s komunitou."
         eidas:
-          title: "Nariadenie eIDAS"
-          description: "Kvalifikované elektronické podpisy podľa nariadenia EÚ eIDAS majú silnú právnu platnosť vo všetkých členských štátoch a preklenujú priepasť medzi eGovernment a komerčným použitím."
+          title: "eIDAS"
+          description: "Kvalifikované elektronické podpisy podľa nariadenia eIDAS majú silnú právnu platnosť vo všetkých členských štátoch. Na Slovensku majú rovnakú váhu ako osvedčený podpis."
         open_source:
-          title: "Open Source"
-          description: "Plne open-source platforma podporovaná organizáciou NLNet. Transparentný, auditovateľný a komunitou riadený vývoj zabezpečujúci dôveru a neustále zlepšovanie."
+          title: "Open-source"
+          description: "Nemáme čo tajiť. Náš kód je otvorený, verejne dostupný a auditovateľný. Vďaka tomu máte absolútnu istotu, že s vašimi dokumentmi nerobíme nič za vašim chrbtom."
         api:
-          title: "REST API a Webhooky"
-          description: "Komplexné REST API pre bezproblémovú integráciu do vašich aplikácií. Štandardná podpora Webhookov umožňuje notifikácie v reálnom čase pre udalosti podpisovania a automatizáciu pracovných tokov."
+          title: "REST API"
+          description: "Integrujte si podpisovanie priamo do vlastných firemných systémov cez REST API a Standard Webhooks. Automatizácia pracovných postupov je tak jednoduchá a efektívna."
       how_it_works:
         subtitle: "Proces"
         title: "Ako to funguje"
@@ -1185,11 +1243,11 @@ sk:
           title: "Nahrajte dokument"
           description: "Vyberte PDF alebo iný dokument, ktorý chcete podpísať."
         step_2:
-          title: "Pridajte príjemcov"
-          description: "Zadajte e-mailové adresy osôb, ktoré majú dokument podpísať."
-        step_3:
           title: "Vyberte typ podpisu"
           description: "Zvoľte kvalifikovaný elektronický podpis s časovou pečiatkou alebo bez nej."
+        step_3:
+          title: "Pridajte príjemcov"
+          description: "Zadajte e-mailové adresy osôb, ktoré majú dokument podpísať."
         step_4:
           title: "Odošlite a čakajte"
           description: "Odošlite balík adresátom a počkajte, kým ho podpíše požadovaný počet."

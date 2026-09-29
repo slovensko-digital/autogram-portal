@@ -15,6 +15,117 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "anonymous actions show disabled account features and authentication CTA" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get actions_contract_path(contract)
+
+    assert_response :success
+    assert_select "input[type='radio'][disabled][value='request_signature']", count: 1
+    assert_select "input[type='radio'][disabled][value='add_timestamp']", count: 1
+    assert_select "input[type='radio'][disabled][value='archive_signature']", count: 1
+    assert_select "form[action='#{authenticate_for_actions_contract_path(contract)}'][data-turbo-frame='_top']", count: 1
+  end
+
+  test "authentication claims pending anonymous contract and returns to its actions" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    user = users(:one)
+    user.update_columns(confirmed_at: Time.current)
+
+    post authenticate_for_actions_contract_path(contract)
+    assert_redirected_to new_user_session_path
+
+    sign_in user
+    get contract_path(contract)
+
+    assert_response :success
+    assert_equal user, contract.reload.user
+  end
+
+  test "pending claim only applies to the selected contract" do
+    pending_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    other_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    user = users(:one)
+    user.update_columns(confirmed_at: Time.current)
+
+    post authenticate_for_actions_contract_path(pending_contract)
+    sign_in user
+
+    get contract_path(other_contract)
+    assert_nil other_contract.reload.user
+
+    get contract_path(pending_contract)
+    assert_equal user, pending_contract.reload.user
+  end
+
+  test "owned and bundled contracts cannot enter anonymous claim flow" do
+    owned_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    owned_contract.update!(user: users(:one))
+    bundled_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    Bundle.create!(author: users(:one), contracts: [ bundled_contract ])
+
+    post authenticate_for_actions_contract_path(owned_contract)
+    assert_response :forbidden
+
+    post authenticate_for_actions_contract_path(bundled_contract)
+    assert_response :forbidden
+
+    get actions_contract_path(owned_contract)
+    assert_response :success
+    assert_select "form[action='#{authenticate_for_actions_contract_path(owned_contract)}']", count: 0
+
+    get actions_contract_path(bundled_contract)
+    assert_response :success
+    assert_select "form[action='#{authenticate_for_actions_contract_path(bundled_contract)}']", count: 0
+  end
+
+  test "pending claim survives required policy consent" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    user = users(:two)
+    user.update_columns(confirmed_at: Time.current)
+
+    post authenticate_for_actions_contract_path(contract)
+    sign_in user
+    get actions_contract_path(contract)
+    assert_redirected_to new_consent_path
+
+    post consent_path, params: { agree_to_policies: "1" }
+    assert_redirected_to contract_path(contract)
+
+    follow_redirect!
+    assert_equal user, contract.reload.user
+  end
+
+  test "signature apps show incompatible qscd choices disabled without launch links" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "eid_2021")
+
+    assert_response :success
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
+    assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 2
+    assert_select "input[value='avm'][disabled]", count: 1
+    assert_select "input[value='eidentita'][disabled]", count: 1
+    assert_select "label[aria-disabled='true']", minimum: 2
+    assert_select "a[data-signing-app-selector-target='autogramSubmitButton']", count: 1
+    assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
+    assert_select "a[data-signing-app-selector-target='avmSubmitButton']", count: 0
+    assert_select "a[data-signing-app-selector-target='eidentitaSubmitButton']", count: 0
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021"))
+  end
+
+  test "embedded signature apps enable all compatible choices" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024", embedded: true)
+
+    assert_response :success
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
+    assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 0
+    assert_select "input[data-desktop-only='true']", count: 2
+    assert_select "a[data-signing-app-selector-target$='SubmitButton']", count: 4
+  end
+
   test "visual signing creates stamped content and marks signer signed" do
     with_allowed_methods(%w[visual]) do
       contract = create_pdf_contract(allowed_methods: [ "visual" ])

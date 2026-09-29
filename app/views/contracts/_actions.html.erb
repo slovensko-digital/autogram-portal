@@ -1,6 +1,7 @@
 <%# locals: (previous_page: root_path) %>
 
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
+  <% anonymous_account_teaser = current_user.nil? && @contract.user.nil? && @contract.bundle.nil? %>
   <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
     <div class="mb-6 text-center lg:text-left">
       <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.new.actions.header') %></h3>
@@ -28,7 +29,31 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_request_allowed? && @contract.bundle.nil? && current_user == @contract.user %>
+      <% if anonymous_account_teaser %>
+        <%= render 'shared/radio_button_card',
+          name: 'document_action',
+          value: 'request_signature',
+          label: t('documents.new.actions.request_signature.title'),
+          description: t('documents.new.actions.request_signature.subtitle'),
+          disabled: true,
+          disabled_reasons: [t('documents.new.actions.account_required')] %>
+
+        <%= render 'shared/radio_button_card',
+          name: 'document_action',
+          value: 'add_timestamp',
+          label: t('documents.new.actions.add_timestamp.title'),
+          description: t('documents.new.actions.add_timestamp.subtitle'),
+          disabled: true,
+          disabled_reasons: [t('documents.new.actions.account_required')] %>
+
+        <%= render 'shared/radio_button_card',
+          name: 'document_action',
+          value: 'archive_signature',
+          label: t('documents.new.actions.archive.title'),
+          description: t('documents.new.actions.archive.subtitle'),
+          disabled: true,
+          disabled_reasons: [t('documents.new.actions.account_required')] %>
+      <% elsif current_user&.signature_request_allowed? && @contract.bundle.nil? && current_user == @contract.user %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'request_signature',
@@ -62,6 +87,16 @@
               data_attributes: {
                 url: signature_extension_contract_path(@contract, target_level: 'LTA')
               } %>
+      <% end %>
+
+      <% if anonymous_account_teaser %>
+        <div class="rounded-md border border-blue-200 bg-blue-50 px-4 py-3">
+          <p class="text-sm text-gray-700"><%= t('documents.new.actions.account_cta_text') %></p>
+          <%= button_to t('documents.new.actions.account_cta'),
+                authenticate_for_actions_contract_path(@contract),
+                class: "mt-3 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto",
+                form: { data: { turbo_frame: "_top" } } %>
+        </div>
       <% end %>
     </div>
     <div class="py-8">

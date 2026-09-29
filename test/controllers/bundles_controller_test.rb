@@ -21,6 +21,96 @@ class BundlesControllerTest < ActionController::TestCase
     assert_equal 1, bundle.recipients.active.author_proxies.where(user: @author).count
   end
 
+  test "bundle show renders overview with edit link and lazy frames" do
+    bundle = create_bundle_with_contracts(author: @author, count: 2)
+    bundle.update!(name: "Employment agreement", note: "Please sign by Friday.", publicly_visible: true)
+
+    get :show, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "h1", text: "Employment agreement"
+    assert_select "a[href=?]", edit_bundle_path(bundle)
+    assert_select "a[href=?]", sign_bundle_path(bundle)
+    assert_select "turbo-frame#bundle_recipients_#{bundle.uuid}[src=?]", bundle_recipients_path(bundle)
+    bundle.contracts.each do |contract|
+      assert_select "turbo-frame##{dom_id(contract)}[src=?]", show_bundle_contract_path(contract)
+    end
+    assert_select "p", text: /Please sign by Friday\./
+    assert_select "input[readonly][value=?]", sign_bundle_url(bundle)
+    assert_select "form[action=?]", bundle_path(bundle) do
+      assert_select "input[name='_method'][value='delete']"
+    end
+  end
+
+  test "author can open the edit form" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    get :edit, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "form[action=?]", bundle_path(bundle) do
+      assert_select "input[name='bundle[name]'][placeholder=?]", bundle.display_name
+      assert_select "textarea[name='bundle[note]']"
+      assert_select "input[type='radio'][name='bundle[signing_rule]']", count: 3
+      assert_select "input[name='bundle[required_signatures]']"
+      assert_select "input[type='checkbox'][name='bundle[publicly_visible]']"
+      assert_select "input[type='checkbox'][name='bundle[author_notifications_enabled]']"
+    end
+  end
+
+  test "author can update bundle settings" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    patch :update, params: {
+      id: bundle.uuid,
+      bundle: {
+        name: "Employment agreement",
+        note: "Please sign by Friday.",
+        signing_rule: "any",
+        publicly_visible: "1",
+        author_notifications_enabled: "1"
+      }
+    }
+
+    assert_redirected_to bundle_path(bundle)
+    assert_equal I18n.t("bundles.update.success"), flash[:notice]
+
+    bundle.reload
+    assert_equal "Employment agreement", bundle.name
+    assert_equal "Please sign by Friday.", bundle.note
+    assert_equal "any", bundle.signing_rule
+    assert bundle.publicly_visible?
+    assert bundle.author_notifications_enabled?
+  end
+
+  test "author can clear the bundle name and disable settings" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    bundle.update!(name: "Employment agreement", publicly_visible: true, author_notifications_enabled: true)
+
+    patch :update, params: {
+      id: bundle.uuid,
+      bundle: { name: "", publicly_visible: "0", author_notifications_enabled: "0" }
+    }
+
+    assert_redirected_to bundle_path(bundle)
+
+    bundle.reload
+    assert_nil bundle.name.presence
+    assert_not bundle.publicly_visible?
+    assert_not bundle.author_notifications_enabled?
+  end
+
+  test "invalid bundle settings re-render the edit form" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    patch :update, params: { id: bundle.uuid, bundle: { signing_rule: "threshold", required_signatures: 0 } }
+
+    assert_response :unprocessable_entity
+    assert_equal "all", bundle.reload.signing_rule
+    assert_select "form[action=?]", bundle_path(bundle)
+    assert_select "[role='alert'], .bg-red-50", minimum: 1
+  end
+
   test "bundle show offers archive extension for signed contracts" do
     bundle = create_bundle_with_contracts(author: @author, count: 1, signed: true)
     contract = bundle.contracts.first
@@ -89,6 +179,42 @@ class BundlesControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select "a[href='#{contract_signature_field_preparations_path(contract)}']"
+  end
+
+  test "bundle show replaces the prepare fields call to action once every recipient has a field" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    contract = bundle.contracts.first
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+    contract.signature_field_preparations.create!(
+      recipient: recipient,
+      document: contract.documents.first,
+      page: 1,
+      x: 42,
+      y: 64,
+      width: 180,
+      height: 64
+    )
+
+    original_autogram_service = AutogramEnvironment.method(:autogram_service)
+    fake_service = fake_unsigned_pades_validation_service
+
+    AutogramEnvironment.singleton_class.define_method(:autogram_service) { fake_service }
+
+    begin
+      contracts_controller = ContractsController.new
+      author = @author
+      contracts_controller.singleton_class.define_method(:current_user) { author }
+      contracts_controller.singleton_class.define_method(:user_signed_in?) { true }
+      @controller = contracts_controller
+
+      get :show_bundle, params: { id: contract.uuid }
+    ensure
+      AutogramEnvironment.singleton_class.define_method(:autogram_service) { original_autogram_service.call }
+    end
+
+    assert_response :success
+    assert_select "a[href=?]", contract_signature_field_preparations_path(contract), text: I18n.t("contracts.show_bundle.edit_signature_fields")
+    assert_select "a", text: I18n.t("documents.new.actions.prepare_signature_fields.title"), count: 0
   end
 
   test "bundle show offers private evidence download for signed contract with evidence package" do

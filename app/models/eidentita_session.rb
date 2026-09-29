@@ -7,7 +7,7 @@
 #  error_message      :text
 #  options            :jsonb
 #  signing_started_at :datetime
-#  status             :integer          default("pending"), not null
+#  status             :integer          default(0), not null
 #  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
@@ -28,11 +28,15 @@ class EidentitaSession < Session
   end
 
   def self.available?(qscd, contract)
-    return false if contract.documents.count > 1
-    return false if contract.prepared_signature_fields_source_attached?
-    return User.mobile_qscd?(qscd) if qscd.present?
+    unavailability_reasons(qscd, contract).empty?
+  end
 
-    true
+  def self.unavailability_reasons(qscd, contract)
+    reasons = []
+    reasons << :multiple_files if contract.documents.count > 1
+    reasons << :prepared_signature_fields if contract.prepared_signature_fields_source_attached?
+    reasons << :unsupported_qscd if qscd.present? && !User.mobile_qscd?(qscd)
+    reasons
   end
 
   def eidentita_url

@@ -7,7 +7,7 @@
 #  error_message      :text
 #  options            :jsonb
 #  signing_started_at :datetime
-#  status             :integer          default("pending"), not null
+#  status             :integer          default(0), not null
 #  type               :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
@@ -28,8 +28,14 @@ class PodpisujSession < Session
   end
 
   def self.available?(qscd, contract)
-    return false if contract.documents.count > 1
-    return false if contract.prepared_signature_fields_source_attached?
-    contract.signature_parameters.level == "BASELINE_B"
+    unavailability_reasons(qscd, contract).empty?
+  end
+
+  def self.unavailability_reasons(_qscd, contract)
+    reasons = []
+    reasons << :multiple_files if contract.documents.count > 1
+    reasons << :prepared_signature_fields if contract.prepared_signature_fields_source_attached?
+    reasons << :unsupported_signature_level unless contract.signature_parameters.level == "BASELINE_B"
+    reasons
   end
 end

@@ -2,11 +2,18 @@ module Contracts
   class SignatureFieldPreparationsController < ApplicationController
     before_action :set_contract
     before_action :ensure_author_can_prepare_fields
-    before_action :set_signature_field_preparation, only: :destroy
+    before_action :set_signature_field_preparation, only: [ :edit, :update, :destroy ]
     before_action :load_collections
+
+    helper_method :prepared_pdf_state
 
     def index
       @signature_field_preparation = build_signature_field_preparation
+    end
+
+    # The placement page doubles as the edit form for an already placed field.
+    def edit
+      render :index
     end
 
     def create
@@ -14,10 +21,17 @@ module Contracts
 
       if @signature_field_preparation.save
         @contract.replace_prepared_signature_field_content_versions!
-        flash.now[:notice] = t("contracts.signature_field_preparations.create.success")
-        load_collections
-        @signature_field_preparation = build_signature_field_preparation
-        render :index
+        redirect_to contract_signature_field_preparations_path(@contract), notice: t(".success")
+      else
+        flash.now[:alert] = @signature_field_preparation.errors.full_messages.to_sentence
+        render :index, status: :unprocessable_entity
+      end
+    end
+
+    def update
+      if @signature_field_preparation.update(signature_field_geometry_attributes)
+        @contract.replace_prepared_signature_field_content_versions!
+        redirect_to contract_signature_field_preparations_path(@contract), notice: t(".success")
       else
         flash.now[:alert] = @signature_field_preparation.errors.full_messages.to_sentence
         render :index, status: :unprocessable_entity
@@ -27,11 +41,8 @@ module Contracts
     def destroy
       @signature_field_preparation.destroy!
       @contract.replace_prepared_signature_field_content_versions!
-      flash.now[:notice] = t("contracts.signature_field_preparations.destroy.success")
-      load_collections
-      @signature_field_preparation = build_signature_field_preparation
 
-      render :index
+      redirect_to contract_signature_field_preparations_path(@contract), notice: t(".success")
     end
 
     def finalize
@@ -74,8 +85,17 @@ module Contracts
       @documents = @contract.documents.select(&:is_pdf?)
       @preview_document = @contract.documents_to_sign.first
       @signature_field_preparations = @contract.signature_field_preparations.includes(:document, :recipient).order(:created_at)
-      assigned_recipient_ids = @signature_field_preparations.map(&:recipient_id)
-      @recipients = @contract.bundle.active_recipients.awaiting_contract(@contract).where.not(id: assigned_recipient_ids).order(:created_at)
+      @preparations_by_recipient_id = @signature_field_preparations.index_by(&:recipient_id)
+      @awaiting_recipients = @contract.bundle.active_recipients.awaiting_contract(@contract).order(:created_at)
+      @recipients = @awaiting_recipients.reject { |recipient| @preparations_by_recipient_id.key?(recipient.id) }
+    end
+
+    # Tells the author how far along the two-step flow they are: place fields, then generate the signing PDF.
+    def prepared_pdf_state
+      return :none if @signature_field_preparations.blank?
+      return :ready if @contract.prepared_signature_fields_source_attached?
+
+      :stale
     end
 
     def build_signature_field_preparation
@@ -105,6 +125,11 @@ module Contracts
 
     def prepared_signature_fields_filename(document)
       "#{File.basename(document.filename, '.*')}-prepared-fields.pdf"
+    end
+
+    # Editing only moves or resizes the field; the recipient and document stay as placed.
+    def signature_field_geometry_attributes
+      params.require(:signature_field_preparation).permit(:page, :x, :y, :width, :height)
     end
 
     def signature_field_preparation_attributes

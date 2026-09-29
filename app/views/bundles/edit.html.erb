@@ -1,0 +1,90 @@
+<% content_for :title, t('.title') %>
+
+<% input_class = "w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+<% recipients_count = @bundle.visible_recipients.size %>
+
+<main>
+  <div class="mx-auto max-w-4xl px-6 pb-24 pt-10 lg:px-8">
+    <%= link_to bundle_path(@bundle), class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline" do %>
+      <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+      </svg>
+      <%= t('.back') %>
+    <% end %>
+
+    <div class="mt-4 mb-6">
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+      <p class="mt-1 text-sm text-gray-500"><%= @bundle.display_name %></p>
+    </div>
+
+    <% if @bundle.errors.any? %>
+      <%= render "shared/error", title: t('.errors_title'), content: @bundle.errors.full_messages.to_sentence %>
+    <% end %>
+
+    <%= form_with model: @bundle do |form| %>
+      <div class="rounded-lg border border-gray-200 bg-white divide-y divide-gray-200">
+        <div class="p-6">
+          <%= form.label :name, t('.name_label'), class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :name, placeholder: @bundle.display_name, class: "mt-2 #{input_class}" %>
+        </div>
+
+        <div class="p-6">
+          <%= form.label :note, t('.note_label'), class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_area :note, rows: 5, placeholder: t('.note_placeholder'), class: "mt-2 #{input_class}" %>
+        </div>
+
+        <div class="p-6" data-controller="signing-rule" data-action="change->signing-rule#change">
+          <h2 class="text-sm font-medium text-gray-700"><%= t('.signing_rule_label') %></h2>
+          <div class="mt-2 grid grid-cols-1 gap-2">
+            <% %w[all any threshold].each do |rule| %>
+              <%= render 'shared/radio_button_card',
+                    form: form,
+                    name: :signing_rule,
+                    value: rule,
+                    label: t("recipients.index.signing_rule_#{rule}"),
+                    description: t("recipients.index.signing_rule_#{rule}_description"),
+                    checked: @bundle.signing_rule == rule %>
+            <% end %>
+          </div>
+          <div data-signing-rule-target="thresholdField"
+               class="<%= 'hidden ' unless @bundle.signing_rule == 'threshold' %>mt-3 rounded-lg bg-gray-50 px-4 py-3">
+            <%= form.label :required_signatures, t('.required_signatures_label'), class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-2 flex items-center gap-2">
+              <%= form.number_field :required_signatures, min: 1, max: [recipients_count, 1].max,
+                    class: "w-20 px-2 py-1.5 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+              <span class="text-sm text-gray-500"><%= t('.required_signatures_of', count: recipients_count) %></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div class="flex items-start gap-3">
+            <%= form.check_box :publicly_visible, class: "mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+            <div>
+              <%= form.label :publicly_visible, t('.public_link_label'), class: "block text-sm font-medium text-gray-900" %>
+              <p class="text-sm text-gray-500"><%= t('.public_link_description') %></p>
+              <% if @bundle.publicly_visible? %>
+                <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>" onclick="this.select();"
+                       class="mt-2 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <% end %>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <%= form.check_box :author_notifications_enabled, class: "mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+            <div>
+              <%= form.label :author_notifications_enabled, t('.author_notifications_label'), class: "block text-sm font-medium text-gray-900" %>
+              <p class="text-sm text-gray-500"><%= t('.author_notifications_description') %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <%= link_to t('.cancel'), bundle_path(@bundle),
+              class: "inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        <%= form.submit t('actions.save'),
+              class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      </div>
+    <% end %>
+  </div>
+</main>

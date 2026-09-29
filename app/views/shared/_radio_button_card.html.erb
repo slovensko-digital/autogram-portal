@@ -1,4 +1,4 @@
-<%# locals: (name:, value:, label:, description:, checked: false, form: nil, wrapper_class: "", data_attributes: {}, icon: nil, image: nil) %>
+<%# locals: (name:, value:, label:, description:, checked: false, form: nil, wrapper_class: "", data_attributes: {}, icon: nil, image: nil, disabled: false, disabled_reasons: []) %>
 
 <%#
   Reusable radio button card component
@@ -14,17 +14,26 @@
   - data_attributes: hash of data attributes for the radio input (optional)
   - icon: the icon type to display (optional, 'mobile' or 'desktop')
   - image: image to display on the left side of the card (optional, overrides icon if present)
+  - disabled: whether this option is unavailable (optional, defaults to false)
+  - disabled_reasons: explanations shown when the option is disabled (optional)
 %>
 
-<label class="group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2 <%= wrapper_class %>">
+<% disabled_reasons = Array(disabled_reasons).compact_blank %>
+<% reason_id = "#{name}_#{value}_disabled_reason".parameterize(separator: "_") %>
+<% enabled_classes = "hover:border-blue-300 hover:bg-blue-50 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" %>
+<% disabled_classes = "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500 opacity-75 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2" %>
+
+<label class="group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> border rounded-lg transition-colors <%= disabled ? disabled_classes : "bg-white border-gray-200 #{enabled_classes}" %> <%= wrapper_class %>"
+       <%= 'tabindex="0" aria-disabled="true"'.html_safe if disabled %>
+       <%= "aria-describedby=\"#{reason_id}\"".html_safe if disabled && disabled_reasons.any? %>>
   <% if form %>
-    <%= form.radio_button name, value, { checked: checked, class: "sr-only", data: data_attributes } %>
+    <%= form.radio_button name, value, { checked: checked && !disabled, disabled: disabled, class: "sr-only", data: data_attributes } %>
   <% else %>
-    <%= radio_button_tag name, value, checked, { class: "sr-only", data: data_attributes } %>
+    <%= radio_button_tag name, value, checked && !disabled, { disabled: disabled, class: "sr-only", data: data_attributes } %>
   <% end %>
 
   <div class="flex-shrink-0">
-    <div class="w-4 h-4 border border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors">
+    <div class="w-4 h-4 border border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors <%= 'bg-gray-100' if disabled %>">
       <div class="hidden group-has-[:checked]:block w-2 h-2 bg-blue-500 rounded-full"></div>
     </div>
   </div>
@@ -52,8 +61,13 @@
   <% end %>
 
   <div class="flex-1">
-    <div class="text-sm font-medium text-gray-900"><%= label %></div>
+    <div class="text-sm font-medium <%= disabled ? 'text-gray-600' : 'text-gray-900' %>"><%= label %></div>
       <div class="text-xs text-gray-500 mt-1<%= ' hidden sm:block' if image.present? %>"><%= description %></div>
+    <% if disabled && disabled_reasons.any? %>
+      <div id="<%= reason_id %>" class="mt-2 text-xs font-medium text-gray-600">
+        <%= safe_join(disabled_reasons, tag.br) %>
+      </div>
+    <% end %>
   </div>
 
   <div class="hidden has-[:checked]:block absolute top-4 right-4">

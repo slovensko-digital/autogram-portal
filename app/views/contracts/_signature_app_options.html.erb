@@ -1,0 +1,86 @@
+<%# locals: () %>
+
+<%
+  signing_apps = [
+    {
+      session_class: AutogramSession,
+      value: "autogram",
+      label: t("contracts.signature_apps.autogram_desktop_label"),
+      description: t("contracts.signature_apps.autogram_desktop_description"),
+      icon: "desktop",
+      desktop_only: true
+    },
+    {
+      session_class: PodpisujSession,
+      value: "podpisuj",
+      label: t("contracts.signature_apps.podpisuj_label"),
+      description: t("contracts.signature_apps.podpisuj_description"),
+      icon: "pencil",
+      desktop_only: true
+    },
+    {
+      session_class: AvmSession,
+      value: "avm",
+      label: t("contracts.signature_apps.autogram_mobile_label"),
+      description: t("contracts.signature_apps.autogram_mobile_description"),
+      icon: "mobile",
+      desktop_only: false
+    },
+    {
+      session_class: EidentitaSession,
+      value: "eidentita",
+      label: t("contracts.signature_apps.eidentita_label"),
+      description: t("contracts.signature_apps.eidentita_description"),
+      icon: "mobile",
+      desktop_only: false
+    }
+  ]
+  first_available_app = signing_apps.find { |app| app[:session_class].available?(@qscd, @contract) }
+%>
+
+<div class="space-y-3">
+  <% signing_apps.each do |app| %>
+    <%
+      reason_keys = app[:session_class].unavailability_reasons(@qscd, @contract)
+      reasons = reason_keys.map do |reason|
+        t("contracts.signature_apps.unavailable_reasons.#{reason}", qscd: (@qscd.present? ? t("qscd.title.#{@qscd}") : nil))
+      end
+    %>
+    <%= render "shared/radio_button_card",
+          name: "signing_app_#{@contract.uuid}",
+          value: app[:value],
+          label: app[:label],
+          description: app[:description],
+          checked: app == first_available_app,
+          disabled: reasons.any?,
+          disabled_reasons: reasons,
+          icon: app[:icon],
+          data_attributes: {
+            signing_app_selector_target: "appRadio",
+            desktop_only: app[:desktop_only],
+            desktop_only_reason: t("contracts.signature_apps.unavailable_reasons.desktop_only")
+          } %>
+  <% end %>
+</div>
+
+<% if (AvmSession.available?(@qscd, @contract) || EidentitaSession.available?(@qscd, @contract)) && !params[:iframe] %>
+  <%= render "shared/info",
+        title: t("contracts.signature_apps.third_party_notice_title"),
+        content: t("contracts.signature_apps.third_party_notice") %>
+<% end %>
+
+<div class="hidden">
+  <% signing_apps.each do |app| %>
+    <% next unless app[:session_class].available?(@qscd, @contract) %>
+    <%= link_to "",
+          public_send("#{app[:value]}_contract_sessions_path", @contract,
+            recipient: @recipient,
+            iframe: params[:iframe],
+            embedded: params[:embedded],
+            skip_method_choice: params[:skip_method_choice]),
+          data: {
+            turbo_frame: "signature_apps_#{@contract.uuid}",
+            signing_app_selector_target: "#{app[:value]}SubmitButton"
+          } %>
+  <% end %>
+</div>
