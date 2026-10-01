@@ -101,6 +101,19 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     end
   end
 
+  test "signing apps that cannot create the requested signature level are not offered" do
+    contract = qes_contract("zmluva.pdf").merge(signature_parameters_attributes: { level: "BASELINE_T", format: "PAdES" })
+    bundle = create_bundle(contracts: [ contract ], recipients: [ { email: "signer@example.com" } ])
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding"
+
+    within_portal_frame do
+      assert_text I18n.t("contracts.signature_apps.autogram_desktop_label")
+      assert_no_text I18n.t("contracts.signature_apps.podpisuj_label")
+      assert_no_text I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
+    end
+  end
+
   test "default embedding walks the signer through onboarding inside the iframe" do
     bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ])
 

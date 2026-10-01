@@ -219,6 +219,46 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[data-signing-app-selector-target$='SubmitButton']", count: 4
   end
 
+  test "signature apps of a standalone contract show apps that cannot sign its level disabled" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.signature_parameters.update!(level: "BASELINE_T")
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024")
+
+    assert_response :success
+    assert_select "input[value='podpisuj'][disabled]", count: 1
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
+  end
+
+  test "signature apps leave out apps that cannot sign the requested format in an iframe" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.signature_parameters.update!(level: "BASELINE_T")
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024", iframe: "true")
+
+    assert_response :success
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 3
+    assert_select "input[value='podpisuj']", count: 0
+    assert_not_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
+  end
+
+  test "signature apps of a bundled contract leave out apps that cannot sign its format but keep card restrictions" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.signature_parameters.update!(level: "BASELINE_T")
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    get signature_apps_contract_path(contract, recipient: recipient.uuid, qscd: "eid_2021")
+
+    assert_response :success
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 3
+    assert_select "input[value='podpisuj']", count: 0
+    assert_select "input[value='autogram']:not([disabled])", count: 1
+    assert_select "input[value='avm'][disabled]", count: 1
+    assert_select "input[value='eidentita'][disabled]", count: 1
+    assert_not_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
+  end
+
   test "visual signing creates stamped content and marks signer signed" do
     with_allowed_methods(%w[visual]) do
       contract = create_pdf_contract(allowed_methods: [ "visual" ])

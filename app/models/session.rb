@@ -29,6 +29,11 @@ class Session < ApplicationRecord
     end
   end
 
+  # Reasons a signing app cannot sign the document as it was requested (its
+  # signature level, its files or prepared fields), as opposed to reasons on the
+  # signer's side such as the ID card.
+  SIGNATURE_FORMAT_UNAVAILABILITY_REASONS = %i[multiple_files unsupported_signature_level prepared_signature_fields].freeze
+
   belongs_to :signer_contract
 
   delegate :contract, to: :signer_contract
