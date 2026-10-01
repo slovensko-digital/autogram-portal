@@ -1837,7 +1837,7 @@ sk:
       certificate: "Certifikát"
       signature_qualifications:
         qesig: "Vlastnoručný podpis"
-        qesig_ts: "Osvečený podpis"
+        qesig_ts: "Osvedčený podpis"
         qeseal: "Kvalifikovaná elektronická pečať"
         qeseal_ts: "Kvalifikovaná elektronická pečať s časovou pečiatkou"
         adesig_qc_qc: "Zdokonalený elektronický podpis založený na kvalifikovanom certifikáte"

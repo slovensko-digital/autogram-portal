@@ -1,4 +1,5 @@
 class AutogramService
+  SIGNATURE_TIME_TIMESTAMP_TYPES = %w[ SIGNATURE_TIMESTAMP DOCUMENT_TIMESTAMP ].freeze
   AUTOGRAM_BASE_URL = ENV.fetch("AUTOGRAM_SERVICE_URL", "http://localhost:7200")
   TEST_SIGNER_COMMON_NAME = "Autogram Test".freeze
   EXTENSION_LEVELS = %w[T LT LTA].freeze
@@ -397,7 +398,8 @@ class AutogramService
     signer_name = extract_cn_from_dn(subject_dn)
     validation_result = signatures_data["validationResult"]
 
-    first_timestamp = timestamps.find { |ts| ts["timestampType"] == "SIGNATURE_TIMESTAMP" }
+    # PAdES signatures are usually timestamped by a document timestamp (DOCUMENT_TIMESTAMP) rather than a signature timestamp.
+    first_timestamp = timestamps.find { |ts| ts["timestampType"].in?(SIGNATURE_TIME_TIMESTAMP_TYPES) }
     signing_time = if first_timestamp
       Time.parse(first_timestamp["productionTime"])
     elsif signatures_data["claimedSigningTime"]
