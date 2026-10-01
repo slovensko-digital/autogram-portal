@@ -5,15 +5,17 @@ class ApiPolicyTest < ActiveSupport::TestCase
     @context = AuthorizationContext::TenantApi.new(tenant: tenants(:one))
   end
 
-  test "API contract and document ownership differs from web ownership" do
-    contract = Contract.new(tenant: tenants(:two), bundle: bundles(:one))
+  test "API contract and document access follows the contract tenant" do
+    contract = Contract.new(tenant: tenants(:one), bundle: bundles(:one))
     document = Document.new(contract: contract)
 
     assert Api::V1::ContractPolicy.new(@context, contract).show?
     assert Api::V1::ContractPolicy.new(@context, contract).destroy?
     assert Api::V1::DocumentPolicy.new(@context, document).show?
-    web_context = AuthorizationContext::Web.new(user: users(:one), tenant: tenants(:one))
-    assert_not ContractPolicy.new(web_context, contract).show?
+
+    other_context = AuthorizationContext::TenantApi.new(tenant: tenants(:two))
+    assert_not Api::V1::ContractPolicy.new(other_context, contract).show?
+    assert_not Api::V1::DocumentPolicy.new(other_context, document).show?
   end
 
   test "bundle policies ignore public visibility and user admin privileges" do
@@ -32,12 +34,12 @@ class ApiPolicyTest < ActiveSupport::TestCase
     assert_not Api::V1::DocumentPolicy.new(@context, Document.new).show?
   end
 
-  test "web and pending contexts cannot impersonate tenant API" do
+  test "web contexts cannot impersonate tenant API" do
     contexts = [
       nil,
       AuthorizationContext::TenantApi.new(tenant: nil),
       AuthorizationContext::Web.new(user: users(:one), tenant: tenants(:one)),
-      AuthorizationContext::PendingTenantSelection.new(user: users(:one))
+      AuthorizationContext::Web.new(user: users(:one), tenant: nil)
     ]
     contract = Contract.new(tenant: tenants(:one))
     document = Document.new(contract: contract)
@@ -54,24 +56,21 @@ class ApiPolicyTest < ActiveSupport::TestCase
     end
   end
 
-  test "API scopes retain constrained input and the direct or bundle ownership union" do
+  test "API scopes retain constrained input and the tenant ownership" do
     contract = contracts(:one)
-    contract.update_columns(tenant_id: tenants(:two).id, bundle_id: bundles(:one).id)
 
     assert_includes Api::V1::ContractPolicy::Scope.new(@context, Contract.all).resolve, contract
+    assert_not_includes Api::V1::ContractPolicy::Scope.new(@context, Contract.all).resolve, contracts(:two)
     assert_empty Api::V1::ContractPolicy::Scope.new(@context, Contract.where(id: nil)).resolve
     assert_empty Api::V1::BundlePolicy::Scope.new(@context, Bundle.where(id: bundles(:two).id)).resolve
   end
 
   test "document scopes share contract ownership without widening the input scope" do
-    contract = contracts(:one)
-    contract.update_columns(tenant_id: tenants(:two).id, bundle_id: bundles(:one).id)
     document = documents(:one)
 
-    [ tenants(:one), tenants(:two) ].each do |tenant|
-      context = AuthorizationContext::TenantApi.new(tenant: tenant)
-      assert_includes Api::V1::DocumentPolicy::Scope.new(context, Document.all).resolve, document
-    end
+    assert_includes Api::V1::DocumentPolicy::Scope.new(@context, Document.all).resolve, document
+    other_context = AuthorizationContext::TenantApi.new(tenant: tenants(:two))
+    assert_not_includes Api::V1::DocumentPolicy::Scope.new(other_context, Document.all).resolve, document
 
     assert_empty Api::V1::DocumentPolicy::Scope.new(@context, Document.where(id: nil)).resolve
 

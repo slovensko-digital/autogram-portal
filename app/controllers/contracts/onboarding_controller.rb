@@ -7,6 +7,7 @@ module Contracts
     before_action :check_onboarding_status
     before_action :allow_iframe
     skip_before_action :verify_authenticity_token
+    skip_before_action :ensure_tenant_selected, if: -> { params[:iframe].present? }
 
     VALID_STEPS = %w[qscd_check legacy_eid_card pin_check certificate_check physical_instructions].freeze
 

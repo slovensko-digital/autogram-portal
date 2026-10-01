@@ -31,9 +31,10 @@ class BackfillPersonalTenants < ActiveRecord::Migration[8.1]
     execute "UPDATE users SET last_tenant_id = id"
 
     execute "UPDATE bundles SET tenant_id = user_id"
+    # Bundled contracts always belong to the tenant of their bundle.
     execute <<~SQL
       UPDATE contracts
-      SET tenant_id = COALESCE(contracts.user_id, bundles.user_id)
+      SET tenant_id = bundles.tenant_id
       FROM bundles
       WHERE bundles.id = contracts.bundle_id
     SQL

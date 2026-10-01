@@ -37,7 +37,8 @@ module SigningFlowHelper
     end
 
     base.teardown do
-      Rails.application.config.action_controller.default_url_options = @original_default_url_options
+      # The option is unset (nil) by default, but controllers merge it into every URL.
+      Rails.application.config.action_controller.default_url_options = @original_default_url_options || {}
       restore_autogram
     end
   end

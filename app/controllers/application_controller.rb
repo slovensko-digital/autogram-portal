@@ -72,23 +72,15 @@ class ApplicationController < ActionController::Base
     @current_tenant = resolve_current_tenant
   end
 
-  # A user is signed in only together with a tenant. Someone who authenticated
-  # but still has to pick one (or create one) is signed out again and waits on
-  # the tenant selection page, which completes the sign-in.
+  # Signed-in users work in a tenant. Until they pick one (or create one when
+  # they have none) they are sent to the tenant selection page, which then
+  # returns them to the page they asked for.
   def ensure_tenant_selected
-    return if devise_controller? || params[:iframe].present? || current_tenant
+    return if devise_controller? || current_tenant
 
-    session[:tenant_return_to] = request.fullpath if request.get? && request.format.html?
-    defer_sign_in_until_tenant_selected!
+    store_location_for(:user, request.fullpath) if request.get? && request.format.html?
+    flash.keep
     redirect_to tenant_selection_path
-  end
-
-  def defer_sign_in_until_tenant_selected!
-    session[:pending_tenant_user_id] = current_user.id
-    session[:pending_tenant_user_at] = Time.current.to_i
-    flash.delete(:notice)
-    sign_out(:user)
-    pundit_reset!
   end
 
   # Picks the tenant for the rest of the session; it stays until sign out.
@@ -105,10 +97,10 @@ class ApplicationController < ActionController::Base
   end
 
   def redirect_for_other_tenant(record)
-    owning_tenant = record.respond_to?(:owning_tenant) ? record.owning_tenant : record.try(:tenant)
-    return false unless current_user&.member_of?(owning_tenant)
+    tenant = record.try(:tenant)
+    return false unless current_user&.member_of?(tenant)
 
-    render_other_tenant_record(OtherTenantRecord.new(owning_tenant))
+    render_other_tenant_record(OtherTenantRecord.new(tenant))
     true
   end
 

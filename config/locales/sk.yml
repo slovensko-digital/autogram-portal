@@ -67,6 +67,8 @@ sk:
               last_tenant_owner: "Účet nemožno zmazať, kým ste jediným vlastníkom organizácie s ďalšími členmi. Najprv odovzdajte vlastníctvo alebo odstráňte členov."
         contract:
           attributes:
+            tenant:
+              bundle_mismatch: "musí byť organizácia balíka"
             agree_to_policies:
               blank: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
               acceptance: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
@@ -2001,7 +2003,7 @@ sk:
     update:
       success: "Organizácia bola uložená"
     leave:
-      success: "Opustili ste organizáciu %{name} a boli ste odhlásený."
+      success: "Opustili ste organizáciu %{name}."
     memberships:
       create:
         success: "Pozvánka pre %{email} bola odoslaná"

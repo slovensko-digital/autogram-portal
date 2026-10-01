@@ -4,7 +4,12 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @contract, @session = create_contract_with_session
     @autogram_service = AutogramService.new
+    @original_default_url_options = Rails.application.config.action_controller.default_url_options
     Rails.application.config.action_controller.default_url_options = { host: "example.com" }
+  end
+
+  teardown do
+    Rails.application.config.action_controller.default_url_options = @original_default_url_options || {}
   end
 
   test "download is forbidden without token or authorized user" do

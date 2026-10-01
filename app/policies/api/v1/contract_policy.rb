@@ -4,7 +4,7 @@ class Api::V1::ContractPolicy < Api::V1::ApplicationPolicy
   end
 
   def show?
-    authenticated? && (record.tenant == context.tenant || record.bundle&.tenant == context.tenant)
+    authenticated? && record.tenant == context.tenant
   end
 
   def status?
@@ -23,8 +23,7 @@ class Api::V1::ContractPolicy < Api::V1::ApplicationPolicy
     def resolve
       return scope.none unless context.is_a?(AuthorizationContext::TenantApi) && context.tenant.present?
 
-      scope.left_outer_joins(:bundle)
-           .where("contracts.tenant_id = :tenant_id OR bundles.tenant_id = :tenant_id", tenant_id: context.tenant.id)
+      scope.where(tenant: context.tenant)
     end
   end
 end

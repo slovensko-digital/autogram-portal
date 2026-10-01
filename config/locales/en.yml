@@ -94,6 +94,10 @@ en:
           attributes:
             base:
               last_tenant_owner: "The account cannot be deleted while you are the only owner of an organization with other members. Transfer ownership or remove the members first."
+        contract:
+          attributes:
+            tenant:
+              bundle_mismatch: "must be the organization of the bundle"
 
   errors:
     archivation_disabled: "Document archivation feature is currently disabled for your organization. Please contact the administrator."
@@ -2076,7 +2080,7 @@ en:
     update:
       success: "The organization was saved"
     leave:
-      success: "You left %{name} and were signed out."
+      success: "You left %{name}."
     memberships:
       create:
         success: "An invitation was sent to %{email}"

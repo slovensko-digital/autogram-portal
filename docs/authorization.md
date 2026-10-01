@@ -8,15 +8,15 @@ preserved. Delivery is incremental; installing Pundit does not migrate an endpoi
 
 Implemented application authorization:
 
-- Pundit 2.5.2, a default-deny `ApplicationPolicy`, and explicit web/pending contexts.
+- Pundit 2.5.2, a default-deny `ApplicationPolicy`, and explicit principal contexts.
 - Organization updates, API-key editability, membership management and leaving.
-- Tenant selection after the existing pending-session validation.
+- Tenant selection for signed-in users without a selected tenant.
 - Admin controller access. The admin route and GoodJob guards remain unchanged.
 - Organization view owner/API-key permissions and focused parity tests.
 - Bundle, contract and recipient management; selected-tenant lists and dashboard.
 - Person-scoped received bundles and federation invitations.
 - Archivation records, signed-content history and private evidence downloads.
-- Tenant API policies/scopes with the existing direct-tenant OR bundle-tenant rule.
+- Tenant API policies/scopes on the contract tenant (bundled contracts share the bundle tenant).
 - Bound bundle/session signing subjects and explicit UUID-public permissions.
 - Federation portal policies/scopes, public preview and authenticated broker claim.
 - Self-account management, admin-only feature editing and permission-bearing views.
@@ -51,9 +51,11 @@ guards were removed.
 substitute `User#default_tenant` or a request-supplied tenant. Ordinary tenant
 policies do not grant administrators a global ownership bypass.
 
-`AuthorizationContext::PendingTenantSelection` is constructed only after the
-controller verifies the existing pending user and 15-minute expiry. It is not a
-signed-in principal and cannot use ordinary tenant/admin policies.
+A signed-in user without a selected tenant is a `Web` context with a nil tenant.
+`ensure_tenant_selected` redirects such users to tenant selection, except on
+Devise pages and on embedded (`iframe`) signing actions, where recipients sign as
+themselves. Tenant policies deny a nil tenant, so these users only reach
+person-level permissions.
 
 `AuthorizationContext::TenantApi` contains the tenant returned by the existing JWT
 authenticator. API policies do not require a user or reimplement API-feature/token
@@ -119,11 +121,10 @@ the leave button, while endpoints allow attempts subject to model safeguards.
 Do not strengthen endpoint permissions merely to match button visibility.
 
 Pundit caches policies within a request. Reset it when the principal changes.
-`pundit_reset!` also clears verification flags: tenant selection and account deletion
-use `prepend_after_action` for their resets. Rails runs after callbacks in reverse
+`pundit_reset!` also clears verification flags: account deletion uses
+`prepend_after_action` for its reset. Rails runs after callbacks in reverse
 registration order, so inherited verification executes first, then reset.
-Deferring sign-in also resets the cache. Authentication redirects that halt before
-an action do not require a policy call.
+Authentication redirects that halt before an action do not require a policy call.
 
 ## Migrated action matrix
 
@@ -134,9 +135,9 @@ an action do not require a policy call.
 | `Tenants#leave` | Web, current tenant membership | `TenantPolicy#leave?`: selected-tenant member | Last owner gets the model error and remains signed in; success signs out |
 | `Tenants::Memberships#create` | Web, current tenant | `TenantPolicy#manage_memberships?`: owner | Owner redirect precedes inviting; capacity/role checks stay in models |
 | `Tenants::Memberships#destroy` | Web, child found through current tenant | Same parent policy | Non-owner redirect precedes child lookup; foreign child 404; last-owner model error preserved |
-| `TenantSelections#show` | Validated pending user | `TenantSelection::TenantPolicy#show?` | Missing/expired pending session redirects to login before authorization |
-| `TenantSelections#update` | Pending user, `@user.tenants.find` | `TenantSelection::TenantPolicy#update?`: membership | Foreign tenant 404; existing selection cannot be switched until sign-out |
-| `TenantSelections#create` | Pending user | `TenantSelection::TenantPolicy#create?`: no existing tenant | Existing-tenant branch redirects without mutation and explicitly skips verification |
+| `TenantSelections#show` | Signed-in user without selected tenant | `TenantSelection::TenantPolicy#show?` | Signed-out users redirect to login; a selected tenant redirects to the dashboard before authorization |
+| `TenantSelections#update` | Same, `current_user.tenants.find` | `TenantSelection::TenantPolicy#update?`: membership | Foreign tenant 404; existing selection cannot be switched until sign-out |
+| `TenantSelections#create` | Same | `TenantSelection::TenantPolicy#create?`: no existing tenant | Users with tenants get 404 without mutation |
 | `Admin::Tenants#index/new/create/edit/update/add_member` | Web user, existing admin lookups | `AdminPolicy#access?`: admin feature | Controller 403 and existing route authentication preserved |
 | `Admin::PortalInstances#index/new/create/edit/update/verify/revoke` | Same | Same headless admin policy | Same; portal/service validation remains unchanged |
 
@@ -155,7 +156,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Contracts#show/update/destroy` | Web, global UUID; anonymous claim before management authorization | Anonymous or selected-tenant management | Foreign edit redirect; another own tenant gets guidance; bundled-delete/state checks retained |
 | `Contracts#signature_parameters/update` request-signature branch | Web, existing contract | `request_signatures?`: selected-tenant management | 403 for anonymous/non-manager; ordinary signing branch remains UUID-accessible |
 | `Contracts#signature_extension/extend_signatures` | Web, global UUID | Selected-tenant management | 403; extension eligibility and service errors retain their own responses |
-| `Contracts#content_versions` | Web, global UUID | Management AND owning-tenant archivation | 403; direct tenant takes precedence over bundle tenant |
+| `Contracts#content_versions` | Web, global UUID | Management AND contract-tenant archivation | 403 |
 | `Contracts::SignatureFieldPreparations#index/edit/create/update/destroy/finalize` | Web, contract UUID and parent-scoped preparation ID | `prepare_signature_fields?`: bundle management | Foreign 403, another own bundle tenant guidance, ineligible format/state 422 |
 | `ContractValidationRecords#index/destroy/refresh` | Web, feature gate and selected-tenant policy scope | Archivation and record tenant | Disabled-feature root redirect; foreign ID 404; refreshability remains workflow rule |
 | `Contracts#show_bundle/actions/sign/signature_apps/physical_signing/create_physical_session/visual_signing/create_visual_session/signed_document/validate` | Web, UUID lookup; existing recipient/preparation resolution | Explicit `public_access?` | Existing UUID accessibility, onboarding, signer, appearance and state constraints preserved |
@@ -171,8 +172,8 @@ in integration tests. They are not a replacement for controller authorization.
 | `Documents#visualize/pdf_preview/download` | Web, global document UUID | Explicit public operation queries | Numeric IDs 404; owned documents remain UUID-accessible anonymously; visualization errors unchanged |
 | `SignatureEvidenceVerifications#show/download` | Web, public reference | Explicit public access | Missing reference/detail/download outcomes and manifest fallback unchanged |
 | `SignatureEvidenceVerifications#download_private` | Web, public reference | Existing private-evidence predicate | Missing record/attachment 404; denied access 403; absent-record branch explicitly skips authorization |
-| `Api::V1::Contracts#create/show/status/signed_document/destroy` | TenantApi; API contract scope for existing records | Direct tenant OR bundle tenant | Existing `Contract not found`, CRUD bodies, polling headers and redirects |
-| `Api::V1::Documents#show` | TenantApi, API document scope | Parent contract direct OR bundle tenant | Existing `Document not found`; orphan documents excluded |
+| `Api::V1::Contracts#create/show/status/signed_document/destroy` | TenantApi; API contract scope for existing records | Contract tenant | Existing `Contract not found`, CRUD bodies, polling headers and redirects |
+| `Api::V1::Documents#show` | TenantApi, API document scope | Parent contract tenant | Existing `Document not found`; orphan documents excluded |
 | `Api::V1::Bundles#create/show/status/destroy` | TenantApi, tenant bundle scope | Bundle tenant, not public visibility | Existing `Bundle not found`, duplicate UUID conflict, bodies and polling headers |
 | `Api::V1::Hello#show/show_auth` | Public / TenantApi | Explicit public skip / API hello policy | Existing public message and authenticated tenant message |
 | `Api::Federation::V1::Requests#show/claim` | Verified Portal and recipient UUID | Federated recipient assigned to caller | Portal mismatch 403, state 409, claimant mismatch 422, bundle mismatch 404; grants unchanged |
@@ -212,7 +213,7 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 | --- | --- |
 | Bundles management and recipients | Policy management, OtherTenantRecord presentation, parent-scoped recipient lookup |
 | Bundle received and dashboard | Person-scoped invitations/received requests; selected-tenant sent records; existing state/count filters |
-| Contracts CRUD/actions | `owning_tenant` precedence, anonymous permissions, anonymous-claim ordering, per-action denial responses |
+| Contracts CRUD/actions | Contract tenant ownership, anonymous permissions, anonymous-claim ordering, per-action denial responses |
 | Contract validation history/records and evidence-private download | Selected tenant and archivation feature; refreshability and attachment errors remain distinct |
 | Contract signing, onboarding and visual/physical signing | Existing user/recipient/anonymous resolution, withdrawal/superseding responses and preparation guards |
 | Session parameters/download/upload | Bound, valid session token OR existing allowed-user checks; expiry and withdrawal remain validated by SessionAccessToken |
@@ -222,12 +223,12 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 | Bundle sign/batch/accept/decline | Existing grant/UUID/user/public/manager resolution precedence; each action retains its own rules |
 | Documents preview/download and contract validation/signed download | Existing UUID-accessible behavior; no new blanket tenant scope |
 | Evidence public lookup/download | Public reference access; distinct private-package permission |
-| Tenant API contracts/documents | Existing direct tenant OR bundle tenant SQL; not web `owning_tenant` precedence |
+| Tenant API contracts/documents | Contract tenant scope, shared by document scopes |
 | Tenant API bundles and hello | Tenant-owned CRUD/status, API-feature token authentication; hello remains public |
 | Federation API requests | Assigned portal binding (403), claimability (409), claimant validation (422), show bundle mismatch (404) |
 | Federation API invitations | Caller-portal-scoped creation/withdrawal; existing assertion scopes and payload responses |
 | Federation web | Preview public, claim authenticated; broker/remote errors and ordinary signing continuation |
-| Devise, consent, OAuth consent, tenant selection | Authentication/session/consent constraints remain in place; pending user is not a signed-in user |
+| Devise, consent, OAuth consent, tenant selection | Authentication/session/consent constraints remain in place; users without a selected tenant hold no tenant permissions |
 | Root/about/docs/SDK/locale/ALTCHA/metadata/devtools/health/PWA | Intentional public or authentication-dependent utility behavior, not tenant resource access |
 | GoodJob/LetterOpener/ActiveStorage | Existing engine/environment/token controls; app-controller policy hooks do not secure mounted engines or issued blob URLs |
 

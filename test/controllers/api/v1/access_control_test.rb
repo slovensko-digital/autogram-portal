@@ -29,17 +29,18 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "api contract and document access use direct or bundle tenant ownership" do
-    Bundle.create!(tenant: @owner, contracts: [ @other_contract ])
-    @other_contract.update_column(:tenant_id, @other.id)
+  test "api access to bundled contracts and documents follows the bundle tenant" do
+    Bundle.create!(tenant: @owner, contracts: [ @owner_contract ])
 
-    [ [ @owner, @owner_key ], [ @other, @other_key ] ].each do |tenant, key|
-      get "/api/v1/contracts/#{@other_contract.uuid}", headers: bearer_headers_for(tenant, key)
-      assert_response :success
+    get "/api/v1/contracts/#{@owner_contract.uuid}", headers: bearer_headers_for(@owner, @owner_key)
+    assert_response :success
+    get "/api/v1/documents/#{@owner_document.uuid}", headers: bearer_headers_for(@owner, @owner_key)
+    assert_response :success
 
-      get "/api/v1/documents/#{@other_document.uuid}", headers: bearer_headers_for(tenant, key)
-      assert_response :success
-    end
+    get "/api/v1/contracts/#{@owner_contract.uuid}", headers: bearer_headers_for(@other, @other_key)
+    assert_response :not_found
+    get "/api/v1/documents/#{@owner_document.uuid}", headers: bearer_headers_for(@other, @other_key)
+    assert_response :not_found
   end
 
   test "api contract deletion rejects foreign tenant without mutation" do

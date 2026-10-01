@@ -1,17 +1,17 @@
 require "test_helper"
 
 class TenantSelectionPolicyTest < ActiveSupport::TestCase
-  test "pending user can view and choose only their own tenant" do
-    context = AuthorizationContext::PendingTenantSelection.new(user: users(:one))
+  test "user without a selected tenant can view and choose only their own tenant" do
+    context = AuthorizationContext::Web.new(user: users(:one), tenant: nil)
 
     assert TenantSelection::TenantPolicy.new(context, :tenant).show?
     assert TenantSelection::TenantPolicy.new(context, tenants(:one)).update?
     assert_not TenantSelection::TenantPolicy.new(context, tenants(:two)).update?
   end
 
-  test "pending user can create a tenant only when they have none" do
+  test "user can create a tenant only when they have none" do
     user = users(:one)
-    context = AuthorizationContext::PendingTenantSelection.new(user: user)
+    context = AuthorizationContext::Web.new(user: user, tenant: nil)
     policy = TenantSelection::TenantPolicy.new(context, :tenant)
 
     assert_not policy.create?
@@ -19,11 +19,12 @@ class TenantSelectionPolicyTest < ActiveSupport::TestCase
     assert policy.create?
   end
 
-  test "signed in and anonymous contexts cannot act as pending users" do
+  test "selected tenant, anonymous and non-web contexts cannot choose a tenant" do
     contexts = [
       nil,
-      AuthorizationContext::PendingTenantSelection.new(user: nil),
-      AuthorizationContext::Web.new(user: users(:one), tenant: tenants(:one))
+      AuthorizationContext::Web.new(user: nil, tenant: nil),
+      AuthorizationContext::Web.new(user: users(:one), tenant: tenants(:one)),
+      AuthorizationContext::TenantApi.new(tenant: tenants(:one))
     ]
 
     contexts.each do |context|
@@ -34,12 +35,11 @@ class TenantSelectionPolicyTest < ActiveSupport::TestCase
     end
   end
 
-  test "pending context does not grant normal tenant or admin permissions" do
-    users(:one).update_column(:features, [ "admin" ])
-    context = AuthorizationContext::PendingTenantSelection.new(user: users(:one))
+  test "a user without a selected tenant has no tenant permissions" do
+    context = AuthorizationContext::Web.new(user: users(:one), tenant: nil)
 
     assert_not TenantPolicy.new(context, tenants(:one)).update?
     assert_not TenantPolicy.new(context, tenants(:one)).leave?
-    assert_not AdminPolicy.new(context, :admin).access?
+    assert_not BundlePolicy.new(context, bundles(:one)).show?
   end
 end

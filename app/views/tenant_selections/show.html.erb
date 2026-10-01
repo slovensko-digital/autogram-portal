@@ -8,10 +8,10 @@
         <% @tenants.each do |tenant| %>
           <li>
             <%= button_to tenant_selection_path(tenant_id: tenant.id), method: :post,
-                  class: "flex w-full items-center justify-between gap-4 rounded-lg border bg-white px-5 py-4 text-left transition-colors cursor-pointer hover:border-blue-400 hover:bg-blue-50 #{tenant.id == @user.last_tenant_id ? 'border-blue-300' : 'border-gray-200'}" do %>
+                  class: "flex w-full items-center justify-between gap-4 rounded-lg border bg-white px-5 py-4 text-left transition-colors cursor-pointer hover:border-blue-400 hover:bg-blue-50 #{tenant.id == current_user.last_tenant_id ? 'border-blue-300' : 'border-gray-200'}" do %>
               <span class="min-w-0">
                 <span class="block truncate text-base font-semibold text-gray-900"><%= tenant.name %></span>
-                <% if tenant.id == @user.last_tenant_id %>
+                <% if tenant.id == current_user.last_tenant_id %>
                   <span class="block text-xs text-gray-500"><%= t('.last_used') %></span>
                 <% end %>
               </span>

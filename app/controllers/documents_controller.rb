@@ -2,6 +2,7 @@ class DocumentsController < ApplicationController
   before_action :set_document
   before_action :authorize_document!
   before_action :allow_iframe, only: [ :pdf_preview ]
+  skip_before_action :ensure_tenant_selected, only: [ :pdf_preview ], if: -> { params[:iframe].present? }
 
   def visualize
     @visualization_result = @document.visualize

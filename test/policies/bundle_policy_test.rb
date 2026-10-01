@@ -48,12 +48,11 @@ class BundlePolicyTest < ActiveSupport::TestCase
     assert_empty Received::FederationRequestInvitationPolicy::Scope.new(nil, FederationRequestInvitation.all).resolve
   end
 
-  test "missing and pending principals neither manage nor list tenant bundles" do
+  test "missing principals and users without a selected tenant neither manage nor list tenant bundles" do
     contexts = [
       nil,
       AuthorizationContext::Web.new(user: nil, tenant: tenants(:one)),
-      AuthorizationContext::Web.new(user: users(:one), tenant: nil),
-      AuthorizationContext::PendingTenantSelection.new(user: users(:one))
+      AuthorizationContext::Web.new(user: users(:one), tenant: nil)
     ]
 
     contexts.each do |context|

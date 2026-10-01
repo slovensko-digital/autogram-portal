@@ -63,7 +63,7 @@ class ContractValidationRecord < ApplicationRecord
   scope :unknown, -> { where(expires_at: nil) }
 
   def self.capture!(contract:, contract_content_version:, validation_result:, signed_content:, filename:, session: nil)
-    tenant = contract.owning_tenant
+    tenant = contract.tenant
     return unless tenant&.archivation_enabled?
 
     signature_snapshots = build_signature_snapshots(validation_result)

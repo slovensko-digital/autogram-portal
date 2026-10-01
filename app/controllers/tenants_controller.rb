@@ -18,8 +18,8 @@ class TenantsController < ApplicationController
 
     if membership.destroy
       current_user.update_column(:last_tenant_id, nil)
-      sign_out(current_user)
-      redirect_to new_user_session_path, notice: t(".success", name: @tenant.name)
+      session.delete(:current_tenant_id)
+      redirect_to dashboard_path, notice: t(".success", name: @tenant.name)
     else
       redirect_to tenant_settings_path, alert: membership.errors.full_messages.to_sentence
     end

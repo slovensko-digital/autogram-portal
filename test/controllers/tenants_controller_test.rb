@@ -62,11 +62,11 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a[href='#{dashboard_path}']", count: 0
     assert_select "a[href='#{edit_user_registration_path}']", count: 0
-    assert_select "a[href='#{destroy_user_session_path}']", count: 0
-    assert_select "a[href='#{new_user_session_path}']"
+    assert_select "a[href='#{new_user_session_path}']", count: 0
+    assert_select "a[href='#{destroy_user_session_path}']"
   end
 
-  test "user is not signed in until a tenant is chosen" do
+  test "user works only with account pages until a tenant is chosen" do
     tenants(:two).update!(plan: :pro)
     tenants(:two).memberships.create!(user: @owner)
     sign_in @owner
@@ -75,28 +75,38 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to tenant_selection_path
 
     get edit_user_registration_path
-    assert_redirected_to new_user_session_path
+    assert_response :success
+    assert_select "section#account"
+    assert_select "section#organization", count: 0
 
     post tenant_selection_path(tenant_id: @tenant.id)
     assert_redirected_to dashboard_path
-    assert_equal I18n.t("devise.sessions.signed_in"), flash[:notice]
 
     get edit_user_registration_path
-    assert_response :success
+    assert_select "section#organization"
   end
 
-  test "pending tenant selection expires" do
+  test "embedded signing works before a tenant is chosen" do
+    tenants(:two).update!(plan: :pro)
+    tenants(:two).memberships.create!(user: @owner)
+    bundle = create_bundle(tenant: Tenant.create!(name: "Sender"), name: "Public bundle")
+    bundle.update!(publicly_visible: true)
+    sign_in @owner
+
+    get sign_bundle_path(bundle, iframe: 1)
+
+    assert_response :success
+    assert_nil session[:current_tenant_id]
+  end
+
+  test "iframe signing does not skip tenant selection on other pages" do
     tenants(:two).update!(plan: :pro)
     tenants(:two).memberships.create!(user: @owner)
     sign_in @owner
-    get dashboard_path
 
-    travel 20.minutes do
-      post tenant_selection_path(tenant_id: @tenant.id)
-    end
+    get dashboard_path(iframe: 1)
 
-    assert_redirected_to new_user_session_path
-    assert_nil session[:current_tenant_id]
+    assert_redirected_to tenant_selection_path
   end
 
   test "tenant selection without signing in sends to sign in" do
@@ -160,7 +170,7 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     get dashboard_path
 
     assert_redirected_to tenant_selection_path
-    assert_nil request.env["warden"].user(:user)
+    assert_equal @owner, request.env["warden"].user(:user)
 
     post tenant_selection_path(tenant_id: @tenant.id)
 
@@ -339,10 +349,12 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
 
     post leave_tenant_path
 
-    assert_redirected_to new_user_session_path
+    assert_redirected_to dashboard_path
     assert_not Membership.exists?(membership.id)
-    get dashboard_path
-    assert_redirected_to new_user_session_path
+    follow_redirect!
+    assert_response :success
+    assert_equal I18n.t("tenants.leave.success", name: @tenant.name), flash[:notice]
+    assert_equal tenants(:two).id, session[:current_tenant_id]
   end
 
   test "owner update without api access succeeds without permitting attributes" do

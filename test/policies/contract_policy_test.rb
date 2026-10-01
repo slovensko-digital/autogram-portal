@@ -22,7 +22,6 @@ class ContractPolicyTest < ActiveSupport::TestCase
     contexts = [
       nil,
       AuthorizationContext::TenantApi.new(tenant: tenants(:one)),
-      AuthorizationContext::PendingTenantSelection.new(user: users(:one)),
       AuthorizationContext::Portal.new(portal_instance: nil)
     ]
 
@@ -35,7 +34,7 @@ class ContractPolicyTest < ActiveSupport::TestCase
     end
   end
 
-  test "intentional UUID-public access requires web context rather than API or pending principal" do
+  test "intentional UUID-public access requires web context rather than API principal" do
     contract = Contract.new(tenant: tenants(:two))
     anonymous = AuthorizationContext::Web.new(user: nil, tenant: nil)
 
@@ -55,7 +54,7 @@ class ContractPolicyTest < ActiveSupport::TestCase
     tenants(:one).memberships.create!(user: users(:two))
     context = AuthorizationContext::Web.new(user: users(:two), tenant: tenants(:one))
 
-    [ Contract.new(tenant: tenants(:one)), Contract.new(bundle: bundles(:one)) ].each do |contract|
+    [ Contract.new(tenant: tenants(:one)), Contract.new(tenant: tenants(:one), bundle: bundles(:one)) ].each do |contract|
       policy = ContractPolicy.new(context, contract)
       assert policy.show?
       assert policy.update?
@@ -63,16 +62,6 @@ class ContractPolicyTest < ActiveSupport::TestCase
       assert policy.request_signatures?
       assert policy.extend_signatures?
     end
-  end
-
-  test "web ownership prioritizes direct tenant while field preparation uses bundle ownership" do
-    contract = Contract.new(tenant: tenants(:two), bundle: bundles(:one))
-    policy = ContractPolicy.new(@context, contract)
-
-    assert_not policy.show?
-    assert_not policy.update?
-    assert_not policy.request_signatures?
-    assert policy.prepare_signature_fields?
   end
 
   test "archive history requires management and the tenant archivation feature" do
@@ -119,7 +108,7 @@ class ContractPolicyTest < ActiveSupport::TestCase
     assert_equal expected, ContractPolicy::Scope.new(@context, Contract.all).resolve.order(:id).to_a
     assert_empty ContractPolicy::Scope.new(@context, Contract.where(tenant: tenants(:two))).resolve
     assert_empty ContractPolicy::Scope.new(nil, Contract.all).resolve
-    pending_context = AuthorizationContext::PendingTenantSelection.new(user: users(:one))
-    assert_empty ContractPolicy::Scope.new(pending_context, Contract.all).resolve
+    without_tenant = AuthorizationContext::Web.new(user: users(:one), tenant: nil)
+    assert_empty ContractPolicy::Scope.new(without_tenant, Contract.all).resolve
   end
 end

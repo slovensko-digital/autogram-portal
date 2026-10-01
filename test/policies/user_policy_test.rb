@@ -26,9 +26,9 @@ class UserPolicyTest < ActiveSupport::TestCase
     assert UserPolicy.new(@context, users(:one)).edit_features?
   end
 
-  test "missing and pending principals cannot manage accounts" do
+  test "missing and non-web principals cannot manage accounts" do
     assert_not UserPolicy.new(nil, users(:one)).manage_account?
-    context = AuthorizationContext::PendingTenantSelection.new(user: users(:one))
+    context = AuthorizationContext::TenantApi.new(tenant: tenants(:one))
     assert_not UserPolicy.new(context, users(:one)).edit_features?
   end
 end

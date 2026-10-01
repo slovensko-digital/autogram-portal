@@ -9,7 +9,7 @@
       <ul role="list" class="flex flex-1 flex-col gap-y-7">
         <li>
           <ul role="list" class="-mx-2 space-y-1">
-            <% if current_user %>
+            <% if current_tenant %>
               <li>
                 <%= render "shared/left_menu_item", path: dashboard_path, label: t('header.links.home'), icon: :home %>
               </li>
@@ -144,7 +144,7 @@
        x-transition:leave-end="opacity-0 -translate-y-1"
        style="display: none;">
     <div class="space-y-2 px-6 pb-6 pt-2">
-      <% if current_user %>
+      <% if current_tenant %>
         <%= link_to dashboard_path,
             class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(dashboard_path)}" do %>
           <%= t('header.links.home') %>

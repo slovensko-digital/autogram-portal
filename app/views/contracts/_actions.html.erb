@@ -55,7 +55,7 @@
           description: t('documents.new.actions.archive.subtitle'),
           disabled: true,
           disabled_reasons: [t('documents.new.actions.account_required')] %>
-      <% elsif managed_contract && @contract.bundle.nil? && @contract.owning_tenant.signature_request_allowed? %>
+      <% elsif managed_contract && @contract.bundle.nil? && @contract.tenant.signature_request_allowed? %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'request_signature',
@@ -67,7 +67,7 @@
               } %>
       <% end %>
 
-      <% if managed_contract && @contract.owning_tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') %>
+      <% if managed_contract && @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',
@@ -79,7 +79,7 @@
               } %>
       <% end %>
 
-      <% if managed_contract && @contract.owning_tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
+      <% if managed_contract && @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'archive_signature',

@@ -86,7 +86,6 @@ class SessionPolicyTest < ActiveSupport::TestCase
     contexts = [
       nil,
       AuthorizationContext::TenantApi.new(tenant: tenants(:one)),
-      AuthorizationContext::PendingTenantSelection.new(user: users(:one)),
       AuthorizationContext::Portal.new(portal_instance: nil)
     ]
 

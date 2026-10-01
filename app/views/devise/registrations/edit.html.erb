@@ -84,9 +84,11 @@
         </div>
         </section>
 
-        <section id="organization" class="mt-14 scroll-mt-6">
-          <%= render "tenants/settings", tenant: current_tenant, memberships: current_tenant.memberships.includes(:user).order(:created_at) %>
-        </section>
+        <% if current_tenant %>
+          <section id="organization" class="mt-14 scroll-mt-6">
+            <%= render "tenants/settings", tenant: current_tenant, memberships: current_tenant.memberships.includes(:user).order(:created_at) %>
+          </section>
+        <% end %>
 
         <% if policy(:admin).access? %>
           <div class="mt-10 rounded-md border border-gray-200 bg-white overflow-hidden">

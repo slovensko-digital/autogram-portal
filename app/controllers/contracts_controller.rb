@@ -6,6 +6,7 @@ class ContractsController < ApplicationController
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
+  skip_before_action :ensure_tenant_selected, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ], if: -> { params[:iframe].present? }
   before_action :ensure_prepared_signature_field_appearance_completed, only: [ :sign, :signature_apps ]
   before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
   before_action :ensure_visual_signing_allowed, only: [ :visual_signing, :create_visual_session ]
@@ -266,7 +267,7 @@ class ContractsController < ApplicationController
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
-        bundle = Bundle.create!(contracts: [ @contract ], tenant: @contract.owning_tenant, author_notifications_enabled: true)
+        bundle = Bundle.create!(contracts: [ @contract ], tenant: @contract.tenant, author_notifications_enabled: true)
         redirect_to bundle
       elsif params[:next_step] == "sign"
         redirect_to sign_contract_path(@contract)

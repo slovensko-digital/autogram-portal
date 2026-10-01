@@ -1,19 +1,20 @@
 class TenantSelection::TenantPolicy < ApplicationPolicy
   def show?
-    pending_user?
+    choosing_tenant?
   end
 
   def update?
-    pending_user? && record.is_a?(Tenant) && context.user.member_of?(record)
+    choosing_tenant? && record.is_a?(Tenant) && context.user.member_of?(record)
   end
 
   def create?
-    pending_user? && context.user.tenants.none?
+    choosing_tenant? && context.user.tenants.none?
   end
 
   private
 
-  def pending_user?
-    context.is_a?(AuthorizationContext::PendingTenantSelection) && context.user.present?
+  # The tenant is chosen once per sign-in and cannot be switched afterwards.
+  def choosing_tenant?
+    context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant.nil?
   end
 end

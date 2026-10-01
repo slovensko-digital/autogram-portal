@@ -59,6 +59,21 @@ class ContractTest < ActiveSupport::TestCase
     assert_not contract.should_notify_author?
   end
 
+  test "bundled contracts take the tenant of their bundle" do
+    contract = Contract.new(bundle: bundles(:one), documents_attributes: [ { blob: pdf_blob("bundled.pdf", "%PDF-1.4 original") } ])
+    contract.validate
+
+    assert_equal bundles(:one).tenant, contract.tenant
+    assert_not contract.errors.include?(:tenant)
+  end
+
+  test "bundled contracts cannot belong to another tenant" do
+    contract = Contract.new(tenant: tenants(:two), bundle: bundles(:one), documents_attributes: [ { blob: pdf_blob("foreign.pdf", "%PDF-1.4 original") } ])
+    contract.validate
+
+    assert contract.errors.added?(:tenant, :bundle_mismatch)
+  end
+
   test "expands uploaded asice container into contract documents and preserves signed container" do
     contract = Contract.new(
       tenant: @user.default_tenant,

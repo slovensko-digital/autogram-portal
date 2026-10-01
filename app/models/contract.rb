@@ -65,6 +65,7 @@ class Contract < ApplicationRecord
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
   validates :uuid, presence: true, uniqueness: true
   validates_associated :signature_parameters
+  validate :tenant_matches_bundle, if: :bundle
 
   before_validation :ensure_uuid, on: :create
   before_validation :inherit_tenant_from_bundle
@@ -73,7 +74,7 @@ class Contract < ApplicationRecord
   after_create :associate_with_bundle_recipients
   after_commit :schedule_existing_signed_content_capture, on: :create
 
-  scope :anonymous, -> { where(tenant_id: nil).where(bundle_id: nil) }
+  scope :anonymous, -> { where(tenant_id: nil) }
   scope :awaiting_signature_for, ->(user) {
     joins(signer_contracts: { signer: :recipient })
       .where(signer_contracts: { signed_at: nil, declined_at: nil })
@@ -91,17 +92,15 @@ class Contract < ApplicationRecord
     ALLOWED_METHODS
   end
 
-  def owning_tenant
-    tenant || bundle&.tenant
-  end
-
+  # Contracts without a tenant were uploaded without an account. Bundled
+  # contracts always belong to the tenant of their bundle.
   def anonymous?
-    owning_tenant.nil?
+    tenant.nil?
   end
 
   # True when +tenant+ (the tenant the user works in) owns the contract.
   def managed_by?(tenant)
-    tenant.present? && owning_tenant == tenant
+    tenant.present? && self.tenant == tenant
   end
 
   def available_signature_methods_for(next_step:, signature_format: signature_parameters&.format)
@@ -398,7 +397,7 @@ class Contract < ApplicationRecord
   end
 
   def persist_validation_record!(contract_content_version: latest_content_version, validation_result: nil, signed_content: nil, filename: nil, session: nil)
-    return unless owning_tenant&.archivation_enabled?
+    return unless tenant&.archivation_enabled?
     # return if contract_content_version.blank?
 
     signed_content ||= contract_content_version.content
@@ -451,6 +450,10 @@ class Contract < ApplicationRecord
 
   def inherit_tenant_from_bundle
     self.tenant ||= bundle&.tenant
+  end
+
+  def tenant_matches_bundle
+    errors.add(:tenant, :bundle_mismatch) unless tenant == bundle.tenant
   end
 
   def latest_prepared_signature_fields_content_version
@@ -543,7 +546,7 @@ class Contract < ApplicationRecord
   end
 
   def schedule_existing_signed_content_capture
-    return unless owning_tenant&.archivation_enabled?
+    return unless tenant&.archivation_enabled?
     return unless latest_content_version.present? || documents.one?
 
     ContractValidationRecordCaptureJob.perform_later(id)

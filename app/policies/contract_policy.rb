@@ -44,7 +44,7 @@ class ContractPolicy < ApplicationPolicy
   end
 
   def content_versions?
-    manage? && record.owning_tenant.archivation_enabled?
+    manage? && record.tenant.archivation_enabled?
   end
 
   def prepare_signature_fields?

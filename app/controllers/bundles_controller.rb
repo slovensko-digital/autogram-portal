@@ -8,6 +8,7 @@ class BundlesController < ApplicationController
   rescue_from Pundit::NotAuthorizedError, with: :render_tenant_record_denial
 
   skip_before_action :verify_authenticity_token, only: [ :sign ], if: -> { params[:iframe].present? }
+  skip_before_action :ensure_tenant_selected, only: [ :sign, :autogram_batch ], if: -> { params[:iframe].present? }
   before_action :allow_iframe, only: [ :sign, :autogram_batch ], if: -> { params[:iframe].present? }
   before_action :load_signing_bundle_context, only: [ :sign, :autogram_batch ]
   before_action :authorize_signing_bundle!, only: [ :sign, :autogram_batch ]
