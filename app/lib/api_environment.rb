@@ -1,20 +1,20 @@
 module ApiEnvironment
   def self.token_authenticator
     @token_authenticator ||= use_dummy_authenticator? ? DummyAuthenticator.new : ApiTokenAuthenticator.new(
-      public_key_reader: API_USER_PUBLIC_KEY_READER,
-      return_handler: API_USER_BY_IDENTITY_FINDER,
+      public_key_reader: API_TENANT_PUBLIC_KEY_READER,
+      return_handler: API_TENANT_BY_IDENTITY_FINDER,
     )
   end
 
-  API_USER_PUBLIC_KEY_READER = ->(sub) { OpenSSL::PKey.read(API_USER_BY_IDENTITY_FINDER.call(sub).api_token_public_key) }
-  API_USER_BY_IDENTITY_FINDER = ->(sub) do
+  API_TENANT_PUBLIC_KEY_READER = ->(sub) { OpenSSL::PKey.read(API_TENANT_BY_IDENTITY_FINDER.call(sub).api_token_public_key) }
+  API_TENANT_BY_IDENTITY_FINDER = ->(sub) do
     raise unless sub&.to_i
 
-    user = User.find(sub&.to_i)
+    tenant = Tenant.find(sub&.to_i)
 
-    raise unless user
+    raise unless tenant&.api_enabled?
 
-    user
+    tenant
   end
 
   def self.use_dummy_authenticator?
@@ -23,7 +23,7 @@ module ApiEnvironment
 
   class DummyAuthenticator
     def verify_token(_token)
-      User.second || raise("No users in DB")
+      Tenant.second || raise("No tenants in DB")
     end
   end
 end

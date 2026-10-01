@@ -424,7 +424,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
         format: "PAdES"
       }
     )
-    bundle = Bundle.create!(author: author, contracts: [ contract ])
+    bundle = Bundle.create!(tenant: author.tenants.sole, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 
     [ contract.reload, recipient ]

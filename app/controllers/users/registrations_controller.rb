@@ -2,6 +2,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
   include VerifiesAltchaCaptcha
 
   before_action :configure_permitted_parameters
+  before_action :authorize_account!, only: [ :edit, :update, :destroy ]
+  before_action :skip_authorization, only: [ :new, :create, :cancel ]
+  before_action :set_tenant_memberships, only: [ :edit, :update ]
+  prepend_after_action :pundit_reset!, only: [ :destroy ]
 
   def create
     super do |resource|
@@ -19,7 +23,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
 
     resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
-    resource.destroy
+    unless resource.destroy
+      redirect_to edit_user_registration_path, alert: resource.errors.full_messages.to_sentence
+      return
+    end
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
     set_flash_message! :notice, :destroyed
     yield resource if block_given?
@@ -28,16 +35,26 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   protected
 
+  def authorize_account!
+    authorize current_user, :manage_account?
+  end
+
+  # The settings page also shows the organization the user works in.
+  def set_tenant_memberships
+    @tenant_memberships = current_tenant&.memberships&.includes(:user)&.order(:created_at)
+  end
+
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :agree_to_policies ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, :api_token_public_key, { features: [] } ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, { features: [] } ])
   end
 
   def update_resource(resource, params)
     params = params.except(:current_password, :password, :password_confirmation)
-    params = params.except(:features) unless resource.admin?
+    can_edit_features = policy(resource).edit_features?
+    params = params.except(:features) unless can_edit_features
 
-    if resource.admin?
+    if can_edit_features
       submitted_features = Array(params[:features]).map(&:to_s).reject(&:blank?)
       submitted_features |= [ "admin" ]
       params[:features] = submitted_features & User::AVAILABLE_FEATURES

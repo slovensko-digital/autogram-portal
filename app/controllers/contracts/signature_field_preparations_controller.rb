@@ -4,6 +4,9 @@ module Contracts
     before_action :ensure_author_can_prepare_fields
     before_action :set_signature_field_preparation, only: [ :edit, :update, :destroy ]
     before_action :load_collections
+    before_action :skip_policy_scope, only: [ :index ]
+
+    rescue_from Pundit::NotAuthorizedError, with: :render_preparation_denial
 
     helper_method :prepared_pdf_state
 
@@ -71,10 +74,14 @@ module Contracts
     end
 
     def ensure_author_can_prepare_fields
-      return head :forbidden unless current_user.present? && @contract.bundle&.author == current_user
+      authorize @contract, :prepare_signature_fields?
       return if @contract.pades_field_preparation_allowed?
 
       head :unprocessable_entity
+    end
+
+    def render_preparation_denial(error)
+      head :forbidden unless redirect_for_other_tenant(error.record.bundle)
     end
 
     def set_signature_field_preparation

@@ -1,5 +1,6 @@
 class Api::V1::DocumentsController < ApiController
   before_action :set_document, only: [ :show ]
+  after_action :verify_policy_scoped
 
   def show
     if @document&.blob&.attached?
@@ -12,14 +13,11 @@ class Api::V1::DocumentsController < ApiController
   private
 
   def set_document
-    @document = accessible_documents.find_by(uuid: params[:id])
-    render json: { error: "Document not found" }, status: :not_found unless @document
-  end
-
-  def accessible_documents
-    Document
-      .joins(:contract)
-      .left_outer_joins(contract: :bundle)
-      .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
+    @document = policy_scope([ :api, :v1, Document ]).find_by(uuid: params[:id])
+    if @document
+      authorize [ :api, :v1, @document ]
+    else
+      render json: { error: "Document not found" }, status: :not_found
+    end
   end
 end

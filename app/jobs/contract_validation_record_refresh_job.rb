@@ -4,7 +4,7 @@ class ContractValidationRecordRefreshJob < ApplicationJob
   def perform(record_id)
     record = ContractValidationRecord.includes(:contract, :contract_content_version).find_by(id: record_id)
     return if record.blank?
-    return unless record.user&.archivation_enabled?
+    return unless record.tenant&.archivation_enabled?
     return unless record.refreshable?
 
     record.contract.with_lock do

@@ -160,13 +160,8 @@ class SignatureEvidenceRecord < ApplicationRecord
     )
   end
 
-  def private_evidence_accessible_by?(user)
-    return false unless user
-
-    contract = session.contract
-    return contract.bundle.author == user if contract.bundle.present?
-
-    contract.user == user
+  def private_evidence_accessible_by?(tenant)
+    session.contract.managed_by?(tenant)
   end
 
   def canonical_payload_for_sealing

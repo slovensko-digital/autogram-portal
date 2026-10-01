@@ -498,7 +498,7 @@ class ContractsValidationTest < ActionController::TestCase
       content_type: "application/vnd.etsi.asic-e+zip",
       origin: "signing"
     )
-    bundle = Bundle.create!(author: users(:one), contracts: [ source_contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ source_contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     signer_contract = recipient.signer_contracts.find_by!(contract: source_contract)
     session = signer_contract.sessions.create!(

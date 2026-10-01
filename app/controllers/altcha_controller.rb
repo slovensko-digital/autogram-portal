@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class AltchaController < ApplicationController
+  before_action :skip_authorization, only: [ :challenge ]
+
   def challenge
     render json: AltchaService.create_challenge(hmac_key: altcha_hmac_key)
   end

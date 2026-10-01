@@ -35,6 +35,14 @@
       desktop_only: false
     }
   ]
+
+  # Only the author of a standalone contract can change its signature format, so
+  # apps that cannot sign the requested format are shown (disabled) only to them.
+  unless @contract.bundle.nil? && params[:iframe].blank?
+    signing_apps.reject! do |app|
+      app[:session_class].unavailability_reasons(@qscd, @contract).intersect?(Session::SIGNATURE_FORMAT_UNAVAILABILITY_REASONS)
+    end
+  end
   first_available_app = signing_apps.find { |app| app[:session_class].available?(@qscd, @contract) }
 %>
 

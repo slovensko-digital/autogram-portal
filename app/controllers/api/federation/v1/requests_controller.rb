@@ -3,6 +3,8 @@ class Api::Federation::V1::RequestsController < FederationApiController
   before_action :authorize_portal_for_recipient!
   before_action :ensure_claimable_state!, only: [ :show, :claim ]
 
+  rescue_from Pundit::NotAuthorizedError, with: :render_portal_denial
+
   def show
     if params[:bundleId].present? && @recipient.bundle.uuid != params[:bundleId]
       return render json: { message: "Not found" }, status: :not_found
@@ -53,8 +55,10 @@ class Api::Federation::V1::RequestsController < FederationApiController
   end
 
   def authorize_portal_for_recipient!
-    return if @recipient.federated_recipient? && @recipient.portal_instance == current_portal_instance
+    authorize [ :api, :federation, :v1, @recipient ]
+  end
 
+  def render_portal_denial
     render json: { message: "Portal is not authorized for this recipient" }, status: :forbidden
   end
 
@@ -72,7 +76,7 @@ class Api::Federation::V1::RequestsController < FederationApiController
         issuer: FederationConfiguration.issuer(request: request),
         name: FederationConfiguration.portal_name
       },
-      authorName: @recipient.bundle.author.display_name,
+      authorName: @recipient.bundle.sender_display_name,
       recipientEmail: @recipient.email,
       recipientPortalId: @recipient.portal_instance.uuid,
       status: "awaiting",

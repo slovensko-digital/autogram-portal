@@ -124,6 +124,45 @@ class RecipientsControllerTest < ActionController::TestCase
     assert_select "[role='status']", count: 0
   end
 
+  test "admin cannot create recipients in another tenant bundle" do
+    @user.update_column(:features, [ "admin" ])
+    foreign_bundle = bundles(:two)
+    foreign_bundle.update_column(:uuid, SecureRandom.uuid)
+
+    assert_no_difference -> { Recipient.count } do
+      post :create, params: { bundle_id: foreign_bundle.uuid, recipient: { email: "foreign@example.com" } }
+    end
+
+    assert_response :not_found
+  end
+
+  test "recipient management in another own tenant keeps tenant guidance" do
+    tenants(:two).update!(plan: :pro)
+    tenants(:two).memberships.create!(user: @user)
+    session[:current_tenant_id] = tenants(:one).id
+    foreign_bundle = bundles(:two)
+    foreign_bundle.update_column(:uuid, SecureRandom.uuid)
+
+    assert_no_difference -> { Recipient.count } do
+      post :create, params: { bundle_id: foreign_bundle.uuid, recipient: { email: "foreign@example.com" } }
+    end
+
+    assert_redirected_to dashboard_path
+    assert_equal I18n.t("tenants.alerts.other_tenant_record", name: tenants(:two).name), flash[:alert]
+    assert_equal tenants(:one).id, session[:current_tenant_id]
+  end
+
+  test "recipient lookup remains scoped to its parent bundle" do
+    foreign_bundle = bundles(:two)
+    foreign_bundle.update_column(:uuid, SecureRandom.uuid)
+    recipient = foreign_bundle.recipients.create!(email: "foreign@example.com")
+
+    delete :destroy, params: { bundle_id: bundles(:one).uuid, id: recipient.uuid }
+
+    assert_response :not_found
+    assert_not recipient.reload.withdrawn?
+  end
+
   private
 
   def create_portal_instance(**attributes)

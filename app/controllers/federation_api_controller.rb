@@ -1,11 +1,15 @@
 class FederationApiController < ActionController::API
+  include Pundit::Authorization
+
   before_action :authenticate_portal!
   before_action :set_json_format
+  after_action :verify_authorized
 
   rescue_from JWT::DecodeError, with: :render_unauthorized
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
   rescue_from ActionDispatch::Http::Parameters::ParseError, with: :render_bad_request
+  rescue_from Pundit::NotAuthorizedError, with: :render_not_found
 
   attr_reader :current_portal_assertion
 
@@ -14,6 +18,10 @@ class FederationApiController < ActionController::API
   end
 
   private
+
+  def pundit_user
+    AuthorizationContext::Portal.new(portal_instance: current_portal_instance)
+  end
 
   def authenticate_portal!
     @current_portal_assertion = PortalAssertionAuthenticator.new.verify_token(

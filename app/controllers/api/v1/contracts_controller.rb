@@ -1,9 +1,11 @@
 class Api::V1::ContractsController < ApiController
   before_action :set_contract, only: [ :show, :signed_document, :status, :destroy ]
+  after_action :verify_policy_scoped, except: [ :create ]
 
   def create
+    authorize [ :api, :v1, Contract ]
     @contract = Contract.new(contract_params)
-    @contract.user = current_user
+    @contract.tenant = current_tenant
     if @contract.save
       render status: :created
     else
@@ -43,14 +45,12 @@ class Api::V1::ContractsController < ApiController
   private
 
   def set_contract
-    @contract = accessible_contracts.find_by(uuid: params[:id])
-    render json: { error: "Contract not found" }, status: :not_found unless @contract
-  end
-
-  def accessible_contracts
-    Contract
-      .left_outer_joins(:bundle)
-      .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
+    @contract = policy_scope([ :api, :v1, Contract ]).find_by(uuid: params[:id])
+    if @contract
+      authorize [ :api, :v1, @contract ]
+    else
+      render json: { error: "Contract not found" }, status: :not_found
+    end
   end
 
   def contract_params

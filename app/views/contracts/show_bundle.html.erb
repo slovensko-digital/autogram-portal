@@ -10,9 +10,9 @@
 
   <%= render("layouts/flash", flash: flash) %>
 
-  <% if @contract.bundle.author == current_user %>
+  <% if policy(@contract.bundle).manage? %>
     <div class="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end sm:items-start">
-      <% if @contract.pades_field_preparation_allowed_for?(current_user) %>
+      <% if policy(@contract).prepare_signature_fields? && @contract.pades_field_preparation_allowed? %>
         <% if @contract.pades_signature_fields_prepared_for_all_recipients? %>
           <%= link_to t('contracts.show_bundle.edit_signature_fields'),
                 contract_signature_field_preparations_path(@contract),
@@ -38,7 +38,7 @@
               <%= t('contracts.show_bundle.private_evidence_download_button') %>
             <% end %>
           <% end %>
-          <% if current_user&.archivation_enabled? %>
+          <% if @contract.tenant.archivation_enabled? %>
             <%= link_to content_versions_contract_path(@contract), data: { turbo_frame: "_top" },
                   class: "inline-flex w-full justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto" do %>
               <%= t('contracts.show.version_history') %>
@@ -47,7 +47,7 @@
         </div>
       <% end %>
 
-      <% if current_user.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') %>
+      <% if @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') %>
         <%= form_with url: extend_signatures_contract_path(@contract), method: :post, local: true, class: "w-full sm:w-auto" do |form| %>
           <%= form.hidden_field :target_level, value: 'T' %>
           <%= form.submit t('documents.new.actions.add_timestamp.title'),
@@ -56,7 +56,7 @@
         <% end %>
       <% end %>
 
-      <% if current_user.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
+      <% if @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
         <%= form_with url: extend_signatures_contract_path(@contract), method: :post, local: true, class: "w-full sm:w-auto" do |form| %>
           <%= form.hidden_field :target_level, value: 'LTA' %>
           <%= form.submit t('documents.new.actions.archive.title'),

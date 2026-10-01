@@ -1,0 +1,118 @@
+require "test_helper"
+
+class ContractPolicyTest < ActiveSupport::TestCase
+  setup do
+    @context = AuthorizationContext::Web.new(user: users(:one), tenant: tenants(:one))
+  end
+
+  test "anonymous contract management is distinct from account-only actions" do
+    policy = ContractPolicy.new(AuthorizationContext::Web.new(user: nil, tenant: nil), Contract.new)
+
+    assert policy.show?
+    assert policy.update?
+    assert policy.destroy?
+    assert_not policy.request_signatures?
+    assert_not policy.signature_extension?
+    assert_not policy.extend_signatures?
+    assert_not policy.content_versions?
+    assert_not policy.prepare_signature_fields?
+  end
+
+  test "anonymous contracts do not bypass the web principal boundary" do
+    contexts = [
+      nil,
+      AuthorizationContext::TenantApi.new(tenant: tenants(:one)),
+      AuthorizationContext::Portal.new(portal_instance: nil)
+    ]
+
+    contexts.each do |context|
+      policy = ContractPolicy.new(context, Contract.new)
+
+      assert_not policy.show?
+      assert_not policy.update?
+      assert_not policy.destroy?
+    end
+  end
+
+  test "web uploads are open to anyone but tenant contracts are not" do
+    contract = Contract.new(tenant: tenants(:two))
+    anonymous = AuthorizationContext::Web.new(user: nil, tenant: nil)
+
+    assert ContractPolicy.new(anonymous, Contract).create?
+    assert_not ContractPolicy.new(anonymous, contract).show?
+
+    context = AuthorizationContext::TenantApi.new(tenant: tenants(:one))
+    assert_not ContractPolicy.new(context, Contract).create?
+    assert_not SignatureEvidenceRecordPolicy.new(context, SignatureEvidenceRecord.new).download_private?
+  end
+
+  test "bundled contracts without a tenant are not anonymous" do
+    contract = Contract.new(bundle: bundles(:two))
+
+    assert_not contract.anonymous?
+    assert_not ContractPolicy.new(AuthorizationContext::Web.new(user: nil, tenant: nil), contract).show?
+  end
+
+  test "current tenant members can manage standalone and bundled contracts" do
+    tenants(:one).update!(plan: :pro)
+    tenants(:one).memberships.create!(user: users(:two))
+    context = AuthorizationContext::Web.new(user: users(:two), tenant: tenants(:one))
+
+    [ Contract.new(tenant: tenants(:one)), Contract.new(tenant: tenants(:one), bundle: bundles(:one)) ].each do |contract|
+      policy = ContractPolicy.new(context, contract)
+      assert policy.show?
+      assert policy.update?
+      assert policy.destroy?
+      assert policy.request_signatures?
+      assert policy.extend_signatures?
+    end
+  end
+
+  test "archive history requires management and the tenant archivation feature" do
+    contract = Contract.new(tenant: tenants(:one))
+    policy = ContractPolicy.new(@context, contract)
+    assert_not policy.content_versions?
+
+    tenants(:one).update_column(:features, [ "archivation" ])
+    assert policy.content_versions?
+
+    assert_not ContractPolicy.new(@context, Contract.new(tenant: tenants(:two))).content_versions?
+  end
+
+  test "admin does not bypass selected tenant ownership" do
+    users(:one).update_column(:features, [ "admin" ])
+    policy = ContractPolicy.new(@context, Contract.new(tenant: tenants(:two)))
+
+    assert_not policy.show?
+    assert_not policy.request_signatures?
+    assert_not policy.signature_extension?
+  end
+
+  test "validation record permission requires selected tenant and archivation" do
+    record = ContractValidationRecord.new(tenant: tenants(:one))
+    policy = ContractValidationRecordPolicy.new(@context, record)
+    assert_not policy.index?
+    assert_not policy.destroy?
+    assert_not policy.refresh?
+    assert_empty ContractValidationRecordPolicy::Scope.new(@context, ContractValidationRecord.all).resolve
+
+    tenants(:one).update_column(:features, [ "archivation" ])
+    assert policy.index?
+    assert policy.destroy?
+    assert policy.refresh?
+
+    record.tenant = tenants(:two)
+    assert_not policy.destroy?
+    assert_not policy.refresh?
+  end
+
+  test "scope preserves direct tenant association and supplied constraints" do
+    expected = tenants(:one).contracts.order(:id).to_a
+
+    assert_equal expected, ContractPolicy::Scope.new(@context, Contract.all).resolve.order(:id).to_a
+    assert_empty ContractPolicy::Scope.new(@context, Contract.where(tenant: tenants(:two))).resolve
+    assert_empty ContractPolicy::Scope.new(nil, Contract.all).resolve
+    without_tenant = AuthorizationContext::Web.new(user: users(:one), tenant: nil)
+    assert_empty ContractPolicy::Scope.new(without_tenant, Contract.all).resolve
+  end
+end

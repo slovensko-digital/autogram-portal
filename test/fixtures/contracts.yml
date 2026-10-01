@@ -11,27 +11,27 @@
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
 #  bundle_id                    :bigint
-#  user_id                      :bigint
+#  tenant_id                    :bigint
 #
 # Indexes
 #
 #  index_contracts_on_bundle_id  (bundle_id)
-#  index_contracts_on_user_id    (user_id)
+#  index_contracts_on_tenant_id  (tenant_id)
 #  index_contracts_on_uuid       (uuid)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (bundle_id => bundles.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id)
 #
 one:
-  user_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  tenant: one
   uuid: MyString
   bundle_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
   allowed_methods: ['method1', 'method2']
 
 two:
-  user_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  tenant: two
   uuid: MyString
   bundle_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
   allowed_methods: ['method1', 'method2']

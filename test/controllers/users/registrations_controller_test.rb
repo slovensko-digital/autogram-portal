@@ -26,13 +26,12 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     put :update, params: {
       user: {
         name: @user.name,
-        api_token_public_key: @user.api_token_public_key,
-        features: [ "api" ]
+        features: [ "federation" ]
       }
     }
 
     assert_redirected_to edit_user_registration_path
-    assert_equal [ "admin", "api" ], @user.reload.features.sort
+    assert_equal [ "admin", "federation" ], @user.reload.features.sort
   end
 
   test "non-admin feature updates are ignored" do
@@ -41,12 +40,28 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     put :update, params: {
       user: {
         name: @user.name,
-        features: [ "api", "archivation" ]
+        features: [ "federation" ]
       }
     }
 
     assert_redirected_to edit_user_registration_path
     assert_equal [], @user.reload.features
+  end
+
+  test "registration callbacks explicitly skip authorization" do
+    @controller.singleton_class.define_method(:new) { head :ok }
+
+    get :new
+
+    assert_response :success
+  end
+
+  test "account updates still require authorization despite public registration skips" do
+    @controller.singleton_class.define_method(:authorize_account!) { nil }
+
+    assert_raises(Pundit::AuthorizationNotPerformedError) do
+      put :update, params: { user: { name: @user.name } }
+    end
   end
 
   test "destroy removes user signers" do

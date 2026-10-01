@@ -4,11 +4,11 @@
 <%= t('.message', filename: @contract.display_name) %>
 
 <%= t('.details_title') %>
-- <%= t('.signed_by', signer_name: @signature[:signer_name]) %>
-<% if @signature[:timestamp_info] && @signature[:timestamp_info][:qualified] %>
-- <%= t('.timestamp_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %>
+- <%= t('.signed_by', signer_name: @signature.signerName) %>
+<% if @signature.qualified_timestamps? %>
+- <%= t('.timestamp_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %>
 <% else %>
-- <%= t('.timestamp_non_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %>
+- <%= t('.timestamp_non_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %>
 <% end %>
 
 <%= t('.view_contract') %>: <%= url_for(@contract) %>

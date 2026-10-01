@@ -61,7 +61,5 @@
 <% end %>
 
 <% if @session.iframe_param.present? %>
-  <script>
-    window.parent.postMessage(<%= raw(json_escape(@session.completion_event_payload.to_json)) %>, '*')
-  </script>
+  <%= tag.div hidden: true, data: { controller: "parent-message", parent_message_payload_value: @session.completion_event_payload, parent_message_key_value: "session-#{@session.id}-signed" } %>
 <% end %>

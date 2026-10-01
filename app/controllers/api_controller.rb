@@ -1,6 +1,9 @@
 class ApiController < ActionController::API
-  before_action :authenticate_user!
+  include Pundit::Authorization
+
+  before_action :authenticate_tenant!
   before_action :set_json_format
+  after_action :verify_authorized
 
   rescue_from JWT::DecodeError do |error|
     render_unauthorized("API token")
@@ -9,15 +12,20 @@ class ApiController < ActionController::API
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
   rescue_from ActionDispatch::Http::Parameters::ParseError, with: :render_bad_request
+  rescue_from Pundit::NotAuthorizedError, with: :render_not_found
 
-  def current_user
-    @current_user
+  def current_tenant
+    @current_tenant
   end
 
   private
 
-  def authenticate_user!
-    @current_user = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
+  def pundit_user
+    AuthorizationContext::TenantApi.new(tenant: current_tenant)
+  end
+
+  def authenticate_tenant!
+    @current_tenant = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
   rescue JWT::VerificationError, JWT::InvalidSubError => error
     render_unauthorized(error.message)
   end

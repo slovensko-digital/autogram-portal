@@ -273,7 +273,7 @@ class RecipientTest < ActiveSupport::TestCase
       }
     )
 
-    Bundle.create!(author: users(:one), contracts: [ contract ])
+    Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
   end
 
   def create_recipient(notification_status:, email: nil)

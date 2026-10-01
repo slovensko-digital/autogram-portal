@@ -1,7 +1,9 @@
 class Api::V1::BundlesController < ApiController
   before_action :set_bundle, only: [ :show, :status, :destroy ]
+  after_action :verify_policy_scoped, except: [ :create ]
 
   def create
+    authorize [ :api, :v1, Bundle ]
     @bundle = Bundle.new(bundle_params)
     @bundle.allow_blank_recipient_emails = true
 
@@ -11,11 +13,6 @@ class Api::V1::BundlesController < ApiController
       if @bundle.errors.details[:uuid]&.any? { |e| e[:error] == :taken }
         return render json: { error: "Bundle with the given ID already exists" }, status: :conflict
       end
-
-      # contract_uuid_errors = @bundle.errors.details.select { |key, _| key.to_s.start_with?("contracts.") && key.to_s.end_with?(".uuid") }
-      # if contract_uuid_errors.any? { |_, details| details.any? { |e| e[:error] == :taken } }
-      #   return render json: { error: "One or more contracts have a duplicate ID" }, status: :conflict
-      # end
 
       render json: { errors: @bundle.errors.full_messages }, status: :unprocessable_entity
     end
@@ -44,8 +41,12 @@ class Api::V1::BundlesController < ApiController
   private
 
   def set_bundle
-    @bundle = current_user.bundles.find_by(uuid: params[:id])
-    render json: { error: "Bundle not found" }, status: :not_found unless @bundle
+    @bundle = policy_scope([ :api, :v1, Bundle ]).find_by(uuid: params[:id])
+    if @bundle
+      authorize [ :api, :v1, @bundle ]
+    else
+      render json: { error: "Bundle not found" }, status: :not_found
+    end
   end
 
   def bundle_params
@@ -85,7 +86,7 @@ class Api::V1::BundlesController < ApiController
     )
 
     attributes = {
-      author: current_user,
+      tenant: current_tenant,
       contracts_attributes: permitted_params[:contracts]&.map do |contract|
         {
           uuid: contract[:id],

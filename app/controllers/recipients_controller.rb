@@ -2,6 +2,9 @@ class RecipientsController < ApplicationController
   before_action :set_bundle
   before_action :set_portal_instances
   before_action :set_recipient, except: [ :create, :index ]
+  before_action :skip_policy_scope, only: [ :index ]
+
+  rescue_from Pundit::NotAuthorizedError, with: :render_tenant_record_denial
 
   def index
   end
@@ -42,7 +45,8 @@ class RecipientsController < ApplicationController
   private
 
   def set_bundle
-    @bundle = current_user.bundles.find_by_uuid!(params[:bundle_id])
+    @bundle = Bundle.find_by_uuid!(params[:bundle_id])
+    authorize @bundle, :manage_recipients?
   end
 
   def set_recipient

@@ -67,11 +67,40 @@ en:
 
   activerecord:
     attributes:
+      tenant:
+        name: "Name"
+        plan: "Plan"
+        api_token_public_key: "API token public key"
+      membership:
+        role: "Role"
       user:
         agree_to_policies: "Terms and Privacy Policy"
+    errors:
+      models:
+        tenant:
+          attributes:
+            plan:
+              too_many_members: "cannot be Basic while the organization has more than %{count} member"
+            api_token_public_key:
+              invalid: "is not a valid PEM public key"
+        membership:
+          attributes:
+            role:
+              last_owner: "cannot be changed, the organization needs at least one owner"
+            base:
+              plan_member_limit: "The Basic plan allows at most %{count} member. Additional members require the PRO plan."
+              last_owner: "The last owner of an organization cannot be removed."
+        user:
+          attributes:
+            base:
+              last_tenant_owner: "The account cannot be deleted while you are the only owner of an organization with other members. Transfer ownership or remove the members first."
+        contract:
+          attributes:
+            tenant:
+              bundle_mismatch: "must be the organization of the bundle"
 
   errors:
-    archivation_disabled: "Document archivation feature is currently disabled for your account. Please contact the administrator."
+    archivation_disabled: "Document archivation feature is currently disabled for your organization. Please contact the administrator."
 
   common:
     important: "Important"
@@ -104,6 +133,8 @@ en:
     submit: "Upload & Continue"
 
   header:
+    current_tenant:
+      label: "Organization"
     navigation:
       global: "Global"
       toggle_menu: "Toggle menu"
@@ -165,13 +196,12 @@ en:
         or_continue_with: "Or continue with"
         sign_up_with_google: "Continue with Google"
       edit:
-        title: "Edit %{resource}"
-        subtitle: "Update your account information."
+        title: "Settings"
+        subtitle: "Manage your account and the organization you are currently working in."
+        account_section: "User account"
+        account_section_description: "Your personal details and sign-in."
         name: "Name"
         email: "Email"
-        api_token_public_key: "API Token Public Key"
-        api_token_help: "This is your public RSA key for authentication."
-        api_token_admin_help: "API features are currently disabled for your account. Please contact the administrator."
         currently_waiting_confirmation_for_email: "Currently waiting confirmation for: %{email}"
         update: "Update"
         danger_zone: "Danger Zone"
@@ -187,6 +217,10 @@ en:
         manage_portal_instances: "Trusted portals"
         manage_portal_instances_description: "Manage the external Autogram Portal instances that can exchange federated requests with this portal."
         manage_portal_instances_link: "Manage trusted portals"
+        manage_tenants: "Organizations"
+        manage_tenants_description: "Manage plans (Basic/PRO), features and members of organizations."
+        manage_tenants_link: "Manage organizations"
+        delete_blocked_by_tenants: "The account cannot be deleted right now because you are the only owner of an organization with other members: %{tenants}."
         features: "Features"
         features_title: "Current user features"
         features_description: "As an admin, you can enable or disable the features available on your own account. The admin feature is always kept enabled here."
@@ -194,13 +228,9 @@ en:
         save_features: "Save features"
         feature_labels:
           admin: "Admin access"
-          archivation: "Validation archive"
-          api: "API access"
           federation: "Federation"
         feature_descriptions:
           admin: "Allows access to administration-only areas such as trusted portal management and job administration."
-          archivation: "Enables the validation archive and long-term validation record management features."
-          api: "Allows editing the API public key and using authenticated integration endpoints."
           federation: "Allows managing federated requests and integrations with other Autogram Portal instances."
     confirmations:
       new:
@@ -574,6 +604,48 @@ en:
       withdraw_failed: "Signature request for %{recipient} could not be withdrawn"
 
   admin:
+    tenants:
+      index:
+        title: "Organizations"
+        subtitle: "All organizations with their plans and features."
+        search_placeholder: "Name or member email"
+        search: "Search"
+        id: "ID"
+        name: "Name"
+        plan: "Plan"
+        owners: "Owners"
+        members: "Members"
+        features: "Features"
+        actions: "Actions"
+        new: "New organization"
+        edit: "Edit"
+      new:
+        title: "New organization"
+        subtitle: "Set up an organization for a customer. The owner receives an invitation by email."
+      edit:
+        title: "Organization %{name}"
+        subtitle: "Change the plan, features and members of the organization."
+        members: "Members"
+        add_member: "Add member"
+        add_member_placeholder: "Email of an existing user"
+      form:
+        error_title: "The organization could not be saved"
+        name: "Name"
+        owner_email: "Owner email"
+        owner_email_help: "If no account exists for this email, one is created without a personal organization. An empty personal Basic organization of an existing account is deleted."
+        plan: "Plan"
+        features: "Features"
+        create: "Create organization"
+        save: "Save"
+        cancel: "Cancel"
+      create:
+        success: "The organization was created and an invitation was sent to %{email}"
+        owner_email_missing: "Enter the owner's email"
+      update:
+        success: "The organization was updated"
+      add_member:
+        success: "User %{email} was added to the organization"
+        user_not_found: "No user with this email exists"
     portal_instances:
       index:
         title: "Trusted portals"
@@ -1025,6 +1097,8 @@ en:
         bundle_progress_message: "This document is done. Continue with the next document in the bundle."
         view_contract: "View signed document"
         view_bundle: "Return to bundle"
+        evidence_reference_label: "Evidence reference"
+        verify_reference_link: "Verify this reference"
     onboarding:
       electronic_title: "Electronic Signing Setup"
       physical_title: "Physical Signing Setup"
@@ -1962,3 +2036,71 @@ en:
       dpb_2014: "This residence permit card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer residence permit card."
       dpb_2020: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
       dpb_2023: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
+
+  tenants:
+    plans:
+      basic: "Basic"
+      pro: "PRO"
+    roles:
+      owner: "Owner"
+      member: "Member"
+    feature_labels:
+      archivation: "Validation archive"
+      api: "API access"
+    feature_descriptions:
+      archivation: "Enables the validation archive and long-term validation record management features."
+      api: "Allows setting the API public key and using authenticated integration endpoints."
+    alerts:
+      owner_required: "Only an owner of the organization can do this."
+      other_tenant_record: "This record belongs to %{name}. To work with it, sign out and choose that organization when signing in."
+    settings:
+      title: "Organization"
+      subtitle: "Settings of the current organization, its API access and members."
+      plan: "%{plan} plan"
+      name: "Organization name"
+      name_help: "Only an administrator can change the organization name."
+      api_token_public_key: "API token public key"
+      api_token_help: "Public RSA or EC key (PEM) used to verify API tokens. Use sub = %{tenant_id} in the token."
+      api_disabled: "API access is not enabled for this organization. Please contact the administrator."
+      update: "Save"
+      members: "Members"
+      members_limit:
+        one: "The plan allows at most %{count} member."
+        other: "The plan allows at most %{count} members."
+      members_unlimited: "The plan allows an unlimited number of members."
+      remove_member: "Remove"
+      remove_member_confirm: "Do you really want to remove %{email} from the organization?"
+      invite_title: "Invite a member"
+      invite_description: "The invited user gets access to all documents and bundles of the organization."
+      invite_email_placeholder: "email@example.com"
+      invite: "Invite"
+      upgrade_to_invite: "The Basic plan allows a single user only. Inviting more members requires the PRO plan."
+      leave_title: "Leave organization"
+      leave_description: "You will lose access to the documents and bundles of %{name}."
+      leave: "Leave organization"
+      leave_confirm: "Do you really want to leave %{name}?"
+    update:
+      success: "The organization was saved"
+    leave:
+      success: "You left %{name}."
+    memberships:
+      create:
+        success: "An invitation was sent to %{email}"
+        email_missing: "Enter the user's email"
+      destroy:
+        success: "User %{email} was removed from the organization"
+
+  tenant_mailer:
+    invitation:
+      subject: "Invitation to %{tenant} on Autogram Portal"
+      title: "Invitation to %{tenant}"
+      message: "You were added to the organization %{tenant} on Autogram Portal. You now have access to its documents and bundles for signing."
+      accept: "Accept invitation"
+      open_portal: "Open Autogram Portal"
+
+  tenant_selections:
+    show:
+      title: "Choose an organization"
+      subtitle: "You are a member of several organizations. Choose the one to work in. To switch to another organization later, sign out and sign in again."
+      last_used: "Last used"
+      personal: "Personal"

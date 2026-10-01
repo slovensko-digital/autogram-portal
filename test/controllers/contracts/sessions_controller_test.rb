@@ -4,7 +4,12 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @contract, @session = create_contract_with_session
     @autogram_service = AutogramService.new
+    @original_default_url_options = Rails.application.config.action_controller.default_url_options
     Rails.application.config.action_controller.default_url_options = { host: "example.com" }
+  end
+
+  teardown do
+    Rails.application.config.action_controller.default_url_options = @original_default_url_options || {}
   end
 
   test "download is forbidden without token or authorized user" do
@@ -614,7 +619,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   def create_bundle_contract_with_session(options: nil)
     author = users(:one)
     contract = create_contract_without_session
-    bundle = Bundle.create!(author: author, contracts: [ contract ], publicly_visible: true)
+    bundle = Bundle.create!(tenant: author.tenants.sole, contracts: [ contract ], publicly_visible: true)
 
     signer = AnonymousSigner.create!
     signer_contract = signer.signer_contracts.create!(contract: contract)
@@ -629,7 +634,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
   def create_bundle_contract_with_prepared_signature_field
     contract = create_contract_without_session
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 
     contract.signature_field_preparations.create!(
@@ -654,7 +659,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   def create_bundle_contract_with_mobile_recipient(mobile_phone: "+421901234567")
     contract = create_contract_without_session
     contract.update!(allowed_methods: [ "ades" ])
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(
       email: "recipient-#{SecureRandom.hex(4)}@example.com",
       locale: "en",
@@ -667,7 +672,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   def create_bundle_contract_with_prepared_signature_field
     contract = create_contract_without_session
     contract.update!(allowed_methods: [ "ades" ])
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(
       email: "recipient-#{SecureRandom.hex(4)}@example.com",
       locale: "en",

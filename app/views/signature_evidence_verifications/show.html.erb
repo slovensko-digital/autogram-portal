@@ -109,7 +109,7 @@
                     download_signature_evidence_verification_path(reference: @signature_evidence_record.public_reference),
                     class: "inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
 
-              <% if @signature_evidence_record.private_evidence_package.attached? && @signature_evidence_record.private_evidence_accessible_by?(current_user) %>
+              <% if @signature_evidence_record.private_evidence_package.attached? && policy(@signature_evidence_record).download_private? %>
                 <%= link_to t('.private_evidence_download_button'),
                       download_private_signature_evidence_verification_path(reference: @signature_evidence_record.public_reference),
                       class: "inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>

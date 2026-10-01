@@ -12,21 +12,21 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
-#  user_id                      :bigint           not null
+#  tenant_id                    :bigint           not null
 #
 # Indexes
 #
-#  index_bundles_on_user_id  (user_id)
-#  index_bundles_on_uuid     (uuid)
+#  index_bundles_on_tenant_id  (tenant_id)
+#  index_bundles_on_uuid       (uuid)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id)
 #
 class Bundle < ApplicationRecord
   attr_accessor :allow_blank_recipient_emails
 
-  belongs_to :author, class_name: "User", foreign_key: "user_id"
+  belongs_to :tenant
 
   has_many :contracts, dependent: :destroy
   has_many :signature_field_preparations, through: :contracts
@@ -59,12 +59,20 @@ class Bundle < ApplicationRecord
   scope :recipient_user, ->(user) {
     joins(:recipients)
       .merge(Recipient.active.visible)
-      .where.not(author: user)
       .where(recipients: { user: user })
   }
 
   def to_param
     uuid
+  end
+
+  # True when +tenant+ (the tenant the user works in) sent the bundle.
+  def managed_by?(tenant)
+    tenant.present? && self.tenant == tenant
+  end
+
+  def sender_display_name
+    tenant.name
   end
 
   def display_name
@@ -118,15 +126,8 @@ class Bundle < ApplicationRecord
     )
   end
 
-  def should_notify_author?(contract: nil, signer: nil)
-    return false unless author_notifications_enabled?
-    return false if webhook.present?
-
-    if signer
-      return false if author == signer.user
-    end
-
-    true
+  def should_notify_author?
+    author_notifications_enabled? && webhook.blank?
   end
 
   def notify_recipients
@@ -173,6 +174,7 @@ class Bundle < ApplicationRecord
 
       now = Time.current
       SignerContract.where(id: awaiting_sc_ids).update_all(superseded_at: now, updated_at: now)
+      Session.pending.where(signer_contract_id: awaiting_sc_ids).find_each(&:canceled!)
 
       affected_recipient_ids = SignerContract
         .joins(signer: :recipient)

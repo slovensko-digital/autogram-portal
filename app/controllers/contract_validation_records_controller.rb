@@ -2,12 +2,15 @@ class ContractValidationRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_archivation_enabled!
   before_action :set_contract_validation_record, only: [ :destroy, :refresh ]
+  after_action :verify_policy_scoped
+
+  rescue_from Pundit::NotAuthorizedError, with: :render_archivation_denial
 
   def index
     @sort = params[:sort].presence_in(%w[deadline newest oldest]) || "deadline"
     @state = params[:state].presence_in(%w[all expiring expired healthy unknown notexpired]) || "notexpired"
 
-    records = current_user.contract_validation_records
+    records = policy_scope(ContractValidationRecord)
                 .latest_per_contract
                 .includes({ contract: :content_versions }, :contract_content_version)
     records = case @state
@@ -53,10 +56,15 @@ class ContractValidationRecordsController < ApplicationController
   private
 
   def set_contract_validation_record
-    @contract_validation_record = current_user.contract_validation_records.find(params[:id])
+    @contract_validation_record = policy_scope(ContractValidationRecord).find(params[:id])
+    authorize @contract_validation_record
   end
 
   def ensure_archivation_enabled!
-    redirect_to root_path, alert: t("errors.archivation_disabled") unless current_user&.archivation_enabled?
+    authorize ContractValidationRecord, :index?
+  end
+
+  def render_archivation_denial
+    redirect_to root_path, alert: t("errors.archivation_disabled")
   end
 end

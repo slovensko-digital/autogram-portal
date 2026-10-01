@@ -7,7 +7,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
 
   setup do
     @user = users(:one)
-    @user.update_column(:features, [ "archivation" ])
+    @user.tenants.sole.update_column(:features, [ "archivation" ])
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
 
@@ -57,6 +57,29 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     assert_not ContractValidationRecord.exists?(record.id)
   end
 
+  test "foreign tenant records cannot be destroyed or refreshed" do
+    record = create_record(user: users(:two), expires_at: 1.month.from_now)
+
+    delete :destroy, params: { id: record.id }
+    assert_response :not_found
+    assert ContractValidationRecord.exists?(record.id)
+
+    post :refresh, params: { id: record.id }
+    assert_response :not_found
+    assert ContractValidationRecord.exists?(record.id)
+  end
+
+  test "disabled archivation prevents record deletion" do
+    record = create_record(user: @user, expires_at: 1.month.from_now)
+    @user.tenants.sole.update_column(:features, [])
+
+    delete :destroy, params: { id: record.id }
+
+    assert_redirected_to root_path
+    assert_equal I18n.t("errors.archivation_disabled"), flash[:alert]
+    assert ContractValidationRecord.exists?(record.id)
+  end
+
   test "refresh enqueues archive refresh for refreshable current records" do
     ActiveJob::Base.queue_adapter = :test
     record = create_record(user: @user, expires_at: 1.month.from_now)
@@ -92,7 +115,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
   end
 
   test "index redirects to root without archivation feature" do
-    @user.update_column(:features, [])
+    @user.tenants.sole.update_column(:features, [])
 
     get :index
 
@@ -105,7 +128,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     content_version = contract.latest_content_version
 
     record = ContractValidationRecord.create!(
-      user: @user,
+      tenant: @user.tenants.sole,
       contract: contract,
       contract_content_version: content_version,
       source_contract_uuid: contract.uuid,
@@ -122,7 +145,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
       }
     )
 
-    bundle = Bundle.create!(author: @user, contracts: [ contract ])
+    bundle = Bundle.create!(tenant: @user.tenants.sole, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     signer_contract = recipient.signer_contracts.find_by!(contract: contract)
     session = signer_contract.sessions.create!(
@@ -153,7 +176,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
 
   def create_record(user:, expires_at: nil, source_contract_uuid: SecureRandom.uuid, source_version_number: 1)
     ContractValidationRecord.create!(
-      user: user,
+      tenant: user&.tenants&.sole,
       source_contract_uuid: source_contract_uuid,
       source_version_number: source_version_number,
       filename: "signed-contract.pdf",
@@ -173,7 +196,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     )
 
     Contract.create!(
-      user: user,
+      tenant: user&.tenants&.sole,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     ).tap do |contract|

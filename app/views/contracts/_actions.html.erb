@@ -1,7 +1,9 @@
 <%# locals: (previous_page: root_path) %>
 
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
-  <% anonymous_account_teaser = current_user.nil? && @contract.user.nil? && @contract.bundle.nil? %>
+  <% anonymous_account_teaser = current_user.nil? && @contract.anonymous? %>
+  <% contract_policy = policy(@contract) %>
+  <% managed_contract = contract_policy.manage? %>
   <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
     <div class="mb-6 text-center lg:text-left">
       <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.new.actions.header') %></h3>
@@ -17,7 +19,7 @@
               url: signature_parameters_contract_path(@contract, target_step: 'sign')
             } %>
 
-      <% if @contract.pades_field_preparation_allowed_for?(current_user) %>
+      <% if contract_policy.prepare_signature_fields? && @contract.pades_field_preparation_allowed? %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'prepare_signature_fields',
@@ -53,7 +55,7 @@
           description: t('documents.new.actions.archive.subtitle'),
           disabled: true,
           disabled_reasons: [t('documents.new.actions.account_required')] %>
-      <% elsif current_user&.signature_request_allowed? && @contract.bundle.nil? && current_user == @contract.user %>
+      <% elsif managed_contract && @contract.bundle.nil? && @contract.tenant.signature_request_allowed? %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'request_signature',
@@ -65,7 +67,7 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') && current_user == @contract.user %>
+      <% if managed_contract && @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',
@@ -77,7 +79,7 @@
               } %>
       <% end %>
 
-      <% if current_user&.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') && current_user == @contract.user %>
+      <% if managed_contract && @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'archive_signature',

@@ -87,6 +87,7 @@ gem "jwt", "~> 3.1"
 gem "devise", "~> 5.0"
 gem "devise-i18n", "~> 1.15"
 gem "devise-passwordless", "~> 1.1"
+gem "pundit", "~> 2.5"
 
 gem "letter_opener", "~> 1.10", group: :development
 

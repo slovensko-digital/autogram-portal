@@ -3,8 +3,8 @@ class ContractValidationRecordsMaintenanceJob < ApplicationJob
 
   def perform
     ContractValidationRecord
-      .joins(:user)
-      .merge(User.with_feature(:archivation))
+      .joins(:tenant)
+      .merge(Tenant.with_feature(:archivation))
       .latest_per_contract
       .includes(:contract, :contract_content_version)
       .expiring

@@ -23,6 +23,17 @@
 #  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class Session < ApplicationRecord
+  class SignatureNoLongerRequiredError < StandardError
+    def message
+      I18n.t("bundles.sign.signature_no_longer_required")
+    end
+  end
+
+  # Reasons a signing app cannot sign the document as it was requested (its
+  # signature level, its files or prepared fields), as opposed to reasons on the
+  # signer's side such as the ID card.
+  SIGNATURE_FORMAT_UNAVAILABILITY_REASONS = %i[multiple_files unsupported_signature_level prepared_signature_fields].freeze
+
   belongs_to :signer_contract
 
   delegate :contract, to: :signer_contract
@@ -95,6 +106,16 @@ class Session < ApplicationRecord
     }
   end
 
+  def error_event_payload
+    {
+      type: "agp-custom-event",
+      status: "sign-error",
+      contract_id: contract.uuid,
+      bundle_id: contract.bundle&.uuid,
+      error_message: error_message
+    }
+  end
+
   def not_pending?
     !pending?
   end
@@ -139,6 +160,8 @@ class Session < ApplicationRecord
   end
 
   def accept_signed_file(signed_file)
+    raise SignatureNoLongerRequiredError if signer_contract.reload.superseded?
+
     decoded_signed_file = decode_signed_file!(signed_file)
     validation_result = validate_signed_file!(decoded_signed_file)
 

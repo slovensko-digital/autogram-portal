@@ -125,7 +125,7 @@ class SignatureFieldPreparationTest < ActiveSupport::TestCase
         format: "PAdES"
       }
     )
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 
     [ contract.reload, recipient ]

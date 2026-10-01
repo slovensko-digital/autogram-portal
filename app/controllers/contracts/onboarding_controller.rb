@@ -2,10 +2,13 @@ module Contracts
   class OnboardingController < ApplicationController
     before_action :set_contract
     before_action :set_recipient
+    # Onboarding is part of signing, open to anyone with the contract UUID.
+    before_action :skip_authorization
     before_action :validate_method_param
     before_action :check_onboarding_status
     before_action :allow_iframe
     skip_before_action :verify_authenticity_token
+    skip_before_action :ensure_tenant_selected, if: -> { params[:iframe].present? }
 
     VALID_STEPS = %w[qscd_check legacy_eid_card pin_check certificate_check physical_instructions].freeze
 

@@ -1,0 +1,8 @@
+<p class="greeting"><%= t('notification_mailer.greeting') %></p>
+
+<div class="section-card">
+  <h2 class="section-title" style="margin: 0 0 10px 0;"><%= t('.title', tenant: @tenant.name) %></h2>
+  <p class="section-body"><%= t('.message', tenant: @tenant.name) %></p>
+</div>
+
+<%= link_to(@user.confirmed? ? t('.open_portal') : t('.accept'), @url, class: "button") %>

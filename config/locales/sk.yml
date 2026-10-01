@@ -38,18 +38,43 @@ sk:
 
   activerecord:
     attributes:
+      tenant:
+        name: "Názov"
+        plan: "Plán"
+        api_token_public_key: "Verejný kľúč API tokenu"
+      membership:
+        role: "Rola"
       user:
         agree_to_policies: "Podmienky a zásady ochrany súkromia a Všeobecné obchodné podmienky"
     errors:
       models:
+        tenant:
+          attributes:
+            plan:
+              too_many_members: "nemôže byť Basic, kým má organizácia viac ako %{count} člena"
+            api_token_public_key:
+              invalid: "nie je platný verejný kľúč vo formáte PEM"
+        membership:
+          attributes:
+            role:
+              last_owner: "nemožno zmeniť, organizácia musí mať aspoň jedného vlastníka"
+            base:
+              plan_member_limit: "Plán Basic umožňuje najviac %{count} člena. Pre ďalších členov je potrebný plán PRO."
+              last_owner: "Posledného vlastníka organizácie nemožno odstrániť."
+        user:
+          attributes:
+            base:
+              last_tenant_owner: "Účet nemožno zmazať, kým ste jediným vlastníkom organizácie s ďalšími členmi. Najprv odovzdajte vlastníctvo alebo odstráňte členov."
         contract:
           attributes:
+            tenant:
+              bundle_mismatch: "musí byť organizácia balíka"
             agree_to_policies:
               blank: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
               acceptance: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
 
   errors:
-    archivation_disabled: "Funkcia archivácie dokumentov je pre váš účet momentálne vypnutá. Kontaktujte administrátora."
+    archivation_disabled: "Funkcia archivácie dokumentov je pre vašu organizáciu momentálne vypnutá. Kontaktujte administrátora."
 
   common:
     important: "Dôležité"
@@ -82,6 +107,8 @@ sk:
     submit: "Nahrať a pokračovať"
 
   header:
+    current_tenant:
+      label: "Organizácia"
     navigation:
       global: "Globálne"
       toggle_menu: "Otvoriť menu"
@@ -131,13 +158,12 @@ sk:
         or_continue_with: "Alebo pokračovať s"
         sign_up_with_google: "Pokračovať cez Google"
       edit:
-        title: "Upraviť %{resource}"
-        subtitle: "Aktualizujte informácie o svojom účte."
+        title: "Nastavenia"
+        subtitle: "Spravujte svoj účet a organizáciu, v ktorej práve pracujete."
+        account_section: "Účet používateľa"
+        account_section_description: "Vaše osobné údaje a prihlasovanie."
         name: "Meno"
         email: "Email"
-        api_token_public_key: "Verejný kľúč API tokenu"
-        api_token_help: "Toto je váš verejný RSA kľúč pre autentifikáciu."
-        api_token_admin_help: "API funkcie sú pre váš účet momentálne vypnuté. Kontaktujte administrátora."
         currently_waiting_confirmation_for_email: "Momentálne čakáme na potvrdenie pre: %{email}"
         update: "Aktualizovať"
         danger_zone: "Nebezpečná zóna"
@@ -153,6 +179,10 @@ sk:
         manage_portal_instances: "Dôveryhodné portály"
         manage_portal_instances_description: "Spravujte externé inštancie Autogram Portálu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
         manage_portal_instances_link: "Spravovať dôveryhodné portály"
+        manage_tenants: "Organizácie"
+        manage_tenants_description: "Spravujte plány (Basic/PRO), funkcie a členov organizácií."
+        manage_tenants_link: "Spravovať organizácie"
+        delete_blocked_by_tenants: "Účet momentálne nemožno zmazať, pretože ste jediným vlastníkom organizácie s ďalšími členmi: %{tenants}."
         features: "Funkcie"
         features_title: "Funkcie aktuálneho používateľa"
         features_description: "Ako administrátor môžete zapínať alebo vypínať funkcie dostupné na vašom vlastnom účte. Funkcia administrátora tu zostáva vždy zapnutá."
@@ -160,13 +190,9 @@ sk:
         save_features: "Uložiť funkcie"
         feature_labels:
           admin: "Administrátorský prístup"
-          archivation: "Archív podpisov"
-          api: "API prístup"
           federation: "Federácia"
         feature_descriptions:
           admin: "Umožňuje prístup do administrátorských častí, napríklad správy dôveryhodných portálov a administrácie úloh."
-          archivation: "Zapína archív podpisov a funkcie správy záznamov dlhodobého overovania."
-          api: "Umožňuje upravovať verejný kľúč pre API a používať autentifikované integračné endpointy."
           federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portálu."
     confirmations:
       new:
@@ -507,6 +533,48 @@ sk:
       withdraw_failed: "Požiadavku na podpis pre %{recipient} sa nepodarilo stiahnuť"
 
   admin:
+    tenants:
+      index:
+        title: "Organizácie"
+        subtitle: "Prehľad všetkých organizácií, ich plánov a funkcií."
+        search_placeholder: "Názov alebo email člena"
+        search: "Hľadať"
+        id: "ID"
+        name: "Názov"
+        plan: "Plán"
+        owners: "Vlastníci"
+        members: "Členovia"
+        features: "Funkcie"
+        actions: "Akcie"
+        new: "Nová organizácia"
+        edit: "Upraviť"
+      new:
+        title: "Nová organizácia"
+        subtitle: "Založenie organizácie pre zákazníka. Vlastník dostane pozvánku emailom."
+      edit:
+        title: "Organizácia %{name}"
+        subtitle: "Zmena plánu, funkcií a členov organizácie."
+        members: "Členovia"
+        add_member: "Pridať člena"
+        add_member_placeholder: "Email existujúceho používateľa"
+      form:
+        error_title: "Organizáciu sa nepodarilo uložiť"
+        name: "Názov"
+        owner_email: "Email vlastníka"
+        owner_email_help: "Ak účet s týmto emailom neexistuje, vytvorí sa bez osobnej organizácie. Prázdna osobná Basic organizácia existujúceho účtu sa zmaže."
+        plan: "Plán"
+        features: "Funkcie"
+        create: "Založiť organizáciu"
+        save: "Uložiť"
+        cancel: "Zrušiť"
+      create:
+        success: "Organizácia bola založená a pozvánka odoslaná na %{email}"
+        owner_email_missing: "Zadajte email vlastníka"
+      update:
+        success: "Organizácia bola upravená"
+      add_member:
+        success: "Používateľ %{email} bol pridaný do organizácie"
+        user_not_found: "Používateľ s týmto emailom neexistuje"
     portal_instances:
       index:
         title: "Dôveryhodné portály"
@@ -956,6 +1024,8 @@ sk:
         bundle_progress_message: "Tento dokument je hotový. Pokračujte ďalším dokumentom v balíku."
         view_contract: "Zobraziť podpísaný dokument"
         view_bundle: "Späť na balík"
+        evidence_reference_label: "Referencia evidencie"
+        verify_reference_link: "Overiť túto referenciu"
     onboarding:
       electronic_title: "Nastavenie elektronického podpisovania"
       physical_title: "Nastavenie fyzického podpisovania"
@@ -1889,3 +1959,71 @@ sk:
       dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
       dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácii Autogram v Mobile a eIdentita."
 
+  tenants:
+    plans:
+      basic: "Basic"
+      pro: "PRO"
+    roles:
+      owner: "Vlastník"
+      member: "Člen"
+    feature_labels:
+      archivation: "Archív podpisov"
+      api: "API prístup"
+    feature_descriptions:
+      archivation: "Zapína archív podpisov a funkcie správy záznamov dlhodobého overovania."
+      api: "Umožňuje nastaviť verejný kľúč pre API a používať autentifikované integračné endpointy."
+    alerts:
+      owner_required: "Túto akciu môže vykonať iba vlastník organizácie."
+      other_tenant_record: "Tento záznam patrí organizácii %{name}. Ak s ním chcete pracovať, odhláste sa a pri prihlásení vyberte túto organizáciu."
+    settings:
+      title: "Organizácia"
+      subtitle: "Nastavenia aktuálnej organizácie, jej API prístupu a členov."
+      plan: "Plán %{plan}"
+      name: "Názov organizácie"
+      name_help: "Názov organizácie môže zmeniť iba administrátor."
+      api_token_public_key: "Verejný kľúč API tokenu"
+      api_token_help: "Verejný RSA alebo EC kľúč (PEM) na overenie API tokenov. V tokene použite sub = %{tenant_id}."
+      api_disabled: "API prístup nie je pre túto organizáciu zapnutý. Kontaktujte administrátora."
+      update: "Uložiť"
+      members: "Členovia"
+      members_limit:
+        one: "Plán umožňuje najviac %{count} člena."
+        few: "Plán umožňuje najviac %{count} členov."
+        other: "Plán umožňuje najviac %{count} členov."
+      members_unlimited: "Plán umožňuje neobmedzený počet členov."
+      remove_member: "Odstrániť"
+      remove_member_confirm: "Naozaj chcete odstrániť %{email} z organizácie?"
+      invite_title: "Pozvať člena"
+      invite_description: "Pozvaný používateľ získa prístup ku všetkým dokumentom a balíkom organizácie."
+      invite_email_placeholder: "email@example.com"
+      invite: "Pozvať"
+      upgrade_to_invite: "Plán Basic umožňuje iba jedného používateľa. Pre pozývanie ďalších členov je potrebný plán PRO."
+      leave_title: "Opustiť organizáciu"
+      leave_description: "Stratíte prístup k dokumentom a balíkom organizácie %{name}."
+      leave: "Opustiť organizáciu"
+      leave_confirm: "Naozaj chcete opustiť organizáciu %{name}?"
+    update:
+      success: "Organizácia bola uložená"
+    leave:
+      success: "Opustili ste organizáciu %{name}."
+    memberships:
+      create:
+        success: "Pozvánka pre %{email} bola odoslaná"
+        email_missing: "Zadajte email používateľa"
+      destroy:
+        success: "Používateľ %{email} bol odstránený z organizácie"
+
+  tenant_mailer:
+    invitation:
+      subject: "Pozvánka do organizácie %{tenant} v Autogram Portáli"
+      title: "Pozvánka do organizácie %{tenant}"
+      message: "Boli ste pridaný do organizácie %{tenant} v Autogram Portáli. Získate prístup k jej dokumentom a balíkom na podpis."
+      accept: "Prijať pozvánku"
+      open_portal: "Otvoriť Autogram Portál"
+
+  tenant_selections:
+    show:
+      title: "Vyberte organizáciu"
+      subtitle: "Ste členom viacerých organizácií. Vyberte, v ktorej chcete pracovať. Pre prácu v inej organizácii sa budete musieť odhlásiť a prihlásiť znova."
+      last_used: "Naposledy použitá"
+      personal: "Osobná"

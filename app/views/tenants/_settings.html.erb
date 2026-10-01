@@ -1,0 +1,120 @@
+<%# locals: (tenant:, memberships:) %>
+<% tenant_policy = policy(tenant) %>
+<% is_owner = tenant_policy.manage_memberships? %>
+<div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h2 class="text-2xl font-semibold text-gray-900"><%= t('.title') %></h2>
+    <p class="mt-1 text-sm text-gray-600"><%= t('.subtitle') %></p>
+  </div>
+  <%= tenant_plan_badge(tenant, label: t('.plan', plan: t("tenants.plans.#{tenant.plan}")), size: "inline-flex w-fit items-center px-3 py-1 text-sm") %>
+</div>
+
+<div class="bg-white sm:rounded-md border border-gray-200">
+  <div class="px-4 py-5 sm:p-6">
+    <%= form_with model: tenant, url: tenant_path, method: :patch, class: "space-y-6" do |f| %>
+      <% if tenant.errors.any? %>
+        <div class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <ul class="list-disc pl-5">
+            <% tenant.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :name, t('.name'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_field :name, disabled: true,
+              class: "block w-full rounded-md border-gray-300 sm:text-sm py-2 px-3 border bg-gray-50 text-gray-500 cursor-not-allowed" %>
+        <p class="mt-1 text-xs text-gray-500"><%= t('.name_help') %></p>
+      </div>
+
+      <% api_editable = tenant_policy.edit_api_key? %>
+      <div>
+        <%= f.label :api_token_public_key, t('.api_token_public_key'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_area :api_token_public_key, rows: 5, disabled: !api_editable,
+              class: "block w-full rounded-md border-gray-300 sm:text-sm py-2 px-3 border font-mono #{api_editable ? 'focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}" %>
+        <p class="mt-1 text-xs text-gray-500">
+          <% if tenant.api_enabled? %>
+            <%= t('.api_token_help', tenant_id: tenant.id) %>
+          <% else %>
+            <%= t('.api_disabled') %>
+          <% end %>
+        </p>
+      </div>
+
+      <% if api_editable %>
+        <div class="flex items-center justify-end gap-4">
+          <%= f.submit t('.update'),
+                class: "w-full md:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="mt-10 rounded-md border border-gray-200 bg-white overflow-hidden">
+  <div class="px-5 py-4 border-b border-gray-100">
+    <h3 class="text-xl font-semibold text-gray-900"><%= t('.members') %></h3>
+    <p class="mt-1 text-sm text-gray-500">
+      <% if tenant.max_members %>
+        <%= t('.members_limit', count: tenant.max_members) %>
+      <% else %>
+        <%= t('.members_unlimited') %>
+      <% end %>
+    </p>
+  </div>
+
+  <ul role="list" class="divide-y divide-gray-100">
+    <% memberships.each do |membership| %>
+      <li class="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0">
+          <p class="truncate text-sm font-semibold text-gray-900"><%= membership.user.name.presence || membership.user.email %></p>
+          <p class="truncate text-xs text-gray-500"><%= membership.user.email %></p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700"><%= t("tenants.roles.#{membership.role}") %></span>
+          <% if is_owner && membership.user != current_user %>
+            <%= button_to t('.remove_member'), tenant_membership_path(membership), method: :delete,
+                  form: { data: { turbo_confirm: t('.remove_member_confirm', email: membership.user.email) } },
+                  class: "text-sm text-red-600 hover:text-red-800 cursor-pointer" %>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if is_owner %>
+    <div class="border-t border-gray-100 px-5 py-6">
+      <h4 class="text-lg font-medium text-gray-900"><%= t('.invite_title') %></h4>
+      <% if tenant.can_add_member? %>
+        <p class="mt-1 text-sm text-gray-500"><%= t('.invite_description') %></p>
+        <%= form_with scope: :membership, url: tenant_memberships_path, class: "mt-4 flex flex-col gap-3 md:flex-row md:items-center" do |f| %>
+          <%= f.email_field :email, required: true, placeholder: t('.invite_email_placeholder'),
+                class: "w-full md:max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500" %>
+          <%= f.select :role, Membership.roles.keys.map { |role| [ t("tenants.roles.#{role}"), role ] }, { selected: "member" },
+                class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+          <%= f.submit t('.invite'),
+                class: "inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" %>
+        <% end %>
+      <% else %>
+        <p class="mt-1 text-sm text-gray-500"><%= t('.upgrade_to_invite') %></p>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% membership = memberships.find { |m| m.user_id == current_user.id } %>
+<% if membership && !membership.last_owner? && current_user.tenants.many? %>
+  <div class="mt-10 rounded-md border border-red-200 bg-white overflow-hidden">
+    <div class="px-5 py-4 border-b border-red-100">
+      <h3 class="text-xl font-semibold text-red-800"><%= t('.leave_title') %></h3>
+    </div>
+    <div class="px-5 py-6">
+      <p class="text-md"><%= t('.leave_description', name: tenant.name) %></p>
+      <%= button_to t('.leave'), leave_tenant_path, method: :post,
+            form: { data: { turbo_confirm: t('.leave_confirm', name: tenant.name) } },
+            class: "mt-4 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors cursor-pointer" %>
+    </div>
+  </div>
+<% end %>

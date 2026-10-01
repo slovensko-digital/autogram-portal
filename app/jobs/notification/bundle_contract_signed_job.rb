@@ -3,7 +3,11 @@ module Notification
     queue_as :default
 
     def perform(bundle, contract, signer: nil)
-      NotificationMailer.with(user: bundle.author).bundle_contract_signed(bundle, contract, signer).deliver_later if bundle.should_notify_author?(signer: signer) && bundle.completed? == false
+      if bundle.should_notify_author? && bundle.completed? == false
+        bundle.tenant.notification_recipients(except: signer&.user).each do |user|
+          NotificationMailer.with(user: user).bundle_contract_signed(bundle, contract, signer).deliver_later
+        end
+      end
       bundle.webhook&.fire_contract_signed(contract)
     end
   end

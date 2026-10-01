@@ -75,7 +75,8 @@
 
             return {
                 iframe: iframe,
-                destroy: function() {
+                destroy: () => {
+                    this._removeMessageListener(iframe);
                     if (iframe.parentNode) {
                         iframe.parentNode.removeChild(iframe);
                     }
@@ -197,8 +198,27 @@
             // Set up message listener
             this._setupMessageListener(config, iframe);
 
-            // Close popup handlers
+            // Close on ESC key
+            const handleKeyDown = (e) => {
+                if (e.key === 'Escape') {
+                    closePopup();
+                }
+            };
+
+            // Stops listening for this popup without calling onClose
+            let closed = false;
+            const detachPopup = () => {
+                closed = true;
+                document.removeEventListener('keydown', handleKeyDown);
+                this._removeMessageListener(iframe);
+            };
+            popup._agpDetach = detachPopup;
+
+            // Close popup handlers; onClose runs once however the popup is closed
             const closePopup = () => {
+                if (closed) return;
+
+                detachPopup();
                 if (popup.parentNode) {
                     popup.parentNode.removeChild(popup);
                 }
@@ -216,13 +236,6 @@
                 }
             });
 
-            // Close on ESC key
-            const handleKeyDown = (e) => {
-                if (e.key === 'Escape') {
-                    closePopup();
-                    document.removeEventListener('keydown', handleKeyDown);
-                }
-            };
             document.addEventListener('keydown', handleKeyDown);
 
             document.body.appendChild(popup);
@@ -238,6 +251,9 @@
         // Set up message listener
         _setupMessageListener: function (config, iframe) {
             const messageHandler = (event) => {
+                // Only messages from this instance's iframe, not from other AGP iframes on the page
+                if (event.source !== iframe.contentWindow) return;
+
                 if (config.onMessage && typeof config.onMessage === 'function' && event.data && event.data.type === 'agp-custom-event') {
                     config.onMessage(event.data, event.origin, iframe);
                 }
@@ -249,14 +265,19 @@
             iframe._agpMessageHandler = messageHandler;
         },
 
+        _removeMessageListener: function (iframe) {
+            if (iframe._agpMessageHandler) {
+                window.removeEventListener('message', iframe._agpMessageHandler);
+                iframe._agpMessageHandler = null;
+            }
+        },
+
         // Utility method to destroy all AGP instances
         destroyAll: function() {
             // Remove all iframes
             const iframes = document.querySelectorAll('[data-agp-session]');
             iframes.forEach(iframe => {
-                if (iframe._agpMessageHandler) {
-                    window.removeEventListener('message', iframe._agpMessageHandler);
-                }
+                this._removeMessageListener(iframe);
                 if (iframe.parentNode) {
                     iframe.parentNode.removeChild(iframe);
                 }
@@ -265,6 +286,9 @@
             // Remove all popups
             const popups = document.querySelectorAll('[data-agp-popup]');
             popups.forEach(popup => {
+                if (popup._agpDetach) {
+                    popup._agpDetach();
+                }
                 if (popup.parentNode) {
                     popup.parentNode.removeChild(popup);
                 }

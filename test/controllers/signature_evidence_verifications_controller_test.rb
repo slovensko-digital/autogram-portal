@@ -1,6 +1,8 @@
 require "test_helper"
 
 class SignatureEvidenceVerificationsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
   test "show renders lookup form" do
     get signature_evidence_verification_path
 
@@ -56,11 +58,43 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
     assert_response :forbidden
   end
 
+  test "private download returns the package for selected tenant owner" do
+    evidence_record = create_public_evidence_record(attach_private_package: true)
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+
+    get download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)
+
+    assert_response :success
+    assert_equal "private-evidence-package", response.body
+    assert_includes response.headers["Content-Disposition"], "attachment"
+  end
+
+  test "private download is forbidden for unrelated tenant admin" do
+    evidence_record = create_public_evidence_record(attach_private_package: true)
+    users(:two).update_columns(features: [ "admin" ], confirmed_at: Time.current)
+    sign_in users(:two)
+    post consent_path, params: { agree_to_policies: "1" }
+
+    get download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)
+
+    assert_response :forbidden
+    assert_equal users(:two).id, request.env["warden"].user(:user)&.id
+    assert_not_includes response.body, "private-evidence-package"
+  end
+
+  test "private download keeps missing-reference not-found response" do
+    get download_private_signature_evidence_verification_path(reference: "missing-reference")
+
+    assert_response :not_found
+  end
+
   test "private evidence is accessible to bundle author" do
     evidence_record = create_public_evidence_record(attach_private_package: true)
 
-    assert evidence_record.private_evidence_accessible_by?(users(:one))
-    assert_not evidence_record.private_evidence_accessible_by?(users(:two))
+    assert evidence_record.private_evidence_accessible_by?(tenants(:one))
+    assert_not evidence_record.private_evidence_accessible_by?(tenants(:two))
+    assert_not evidence_record.private_evidence_accessible_by?(nil)
   end
 
   test "show renders not found state for unknown reference" do
@@ -87,7 +121,7 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
         format: "PAdES"
       }
     )
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(
       email: "recipient-#{SecureRandom.hex(4)}@example.com",
       locale: "en",
@@ -131,7 +165,7 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
     record.attach_private_evidence_package!("private-evidence-package") if attach_private_package
 
     ContractValidationRecord.create!(
-      user: users(:one),
+      tenant: users(:one).tenants.sole,
       contract: contract,
       contract_content_version: version,
       source_contract_uuid: contract.uuid,

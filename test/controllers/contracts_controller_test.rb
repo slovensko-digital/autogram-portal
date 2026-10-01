@@ -15,6 +15,26 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "index renders standalone contracts only for the selected tenant" do
+    own_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    own_contract.update!(tenant: tenants(:one))
+    foreign_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    foreign_contract.update!(tenant: tenants(:two))
+    bundled_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    Bundle.create!(tenant: tenants(:one), contracts: [ bundled_contract ])
+    user = users(:one)
+    user.update_column(:confirmed_at, Time.current)
+    sign_in user
+
+    get contracts_path
+
+    assert_response :success
+    assert_equal user, request.env["warden"].user(:user)
+    assert_select "a[href=?]", contract_path(own_contract), minimum: 1
+    assert_select "a[href=?]", contract_path(foreign_contract), count: 0
+    assert_select "a[href=?]", contract_path(bundled_contract), count: 0
+  end
+
   test "anonymous actions show disabled account features and authentication CTA" do
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
 
@@ -25,6 +45,79 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type='radio'][disabled][value='add_timestamp']", count: 1
     assert_select "input[type='radio'][disabled][value='archive_signature']", count: 1
     assert_select "form[action='#{authenticate_for_actions_contract_path(contract)}'][data-turbo-frame='_top']", count: 1
+  end
+
+  test "anonymous contract can be viewed but deletion requires route authentication" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get contract_path(contract)
+    assert_response :success
+
+    assert_no_difference -> { Contract.count } do
+      delete contract_path(contract)
+    end
+    assert_redirected_to new_user_session_path
+  end
+
+  test "anonymous contract cannot request signatures" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_parameters_contract_path(contract, target_step: "request_signature")
+    assert_response :forbidden
+
+    assert_no_difference -> { Bundle.count } do
+      patch contract_path(contract), params: { next_step: "request_signature" }
+    end
+    assert_response :forbidden
+    assert_nil contract.reload.tenant
+  end
+
+  test "foreign tenant contract updates retain redirect without mutation" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.update!(tenant: tenants(:two))
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+
+    get contract_path(contract)
+    assert_redirected_to new_contract_path
+    assert_equal I18n.t("contracts.alerts.unauthorized_edit_attempt"), flash[:alert]
+
+    patch contract_path(contract), params: { contract: { allowed_methods: [ "visual" ] } }
+    assert_redirected_to new_contract_path
+    assert_equal [ "qes" ], contract.reload.allowed_methods
+  end
+
+  test "contract of another own tenant keeps selected tenant guidance" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.update!(tenant: tenants(:two))
+    tenants(:two).update!(plan: :pro)
+    tenants(:two).memberships.create!(user: users(:one))
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+    post tenant_selection_path(tenant_id: tenants(:one).id)
+
+    get contract_path(contract)
+
+    assert_redirected_to dashboard_path
+    assert_equal I18n.t("tenants.alerts.other_tenant_record", name: tenants(:two).name), flash[:alert]
+    assert_equal tenants(:one).id, session[:current_tenant_id]
+  end
+
+  test "revoked membership cannot reuse a previously selected tenant" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.update!(tenant: tenants(:one))
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+    get contract_path(contract)
+    assert_response :success
+
+    Membership.where(user: users(:one)).delete_all
+
+    assert_no_difference -> { Contract.count } do
+      delete contract_path(contract)
+    end
+    assert_redirected_to tenant_selection_path
+    assert Contract.exists?(contract.id)
   end
 
   test "authentication claims pending anonymous contract and returns to its actions" do
@@ -39,7 +132,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get contract_path(contract)
 
     assert_response :success
-    assert_equal user, contract.reload.user
+    assert_equal user.tenants.sole, contract.reload.tenant
   end
 
   test "pending claim only applies to the selected contract" do
@@ -52,17 +145,17 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     sign_in user
 
     get contract_path(other_contract)
-    assert_nil other_contract.reload.user
+    assert_nil other_contract.reload.tenant
 
     get contract_path(pending_contract)
-    assert_equal user, pending_contract.reload.user
+    assert_equal user.tenants.sole, pending_contract.reload.tenant
   end
 
   test "owned and bundled contracts cannot enter anonymous claim flow" do
     owned_contract = create_pdf_contract(allowed_methods: [ "qes" ])
-    owned_contract.update!(user: users(:one))
+    owned_contract.update!(tenant: tenants(:one))
     bundled_contract = create_pdf_contract(allowed_methods: [ "qes" ])
-    Bundle.create!(author: users(:one), contracts: [ bundled_contract ])
+    Bundle.create!(tenant: tenants(:one), contracts: [ bundled_contract ])
 
     post authenticate_for_actions_contract_path(owned_contract)
     assert_response :forbidden
@@ -93,7 +186,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to contract_path(contract)
 
     follow_redirect!
-    assert_equal user, contract.reload.user
+    assert_equal user.tenants.sole, contract.reload.tenant
   end
 
   test "signature apps show incompatible qscd choices disabled without launch links" do
@@ -124,6 +217,46 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 0
     assert_select "input[data-desktop-only='true']", count: 2
     assert_select "a[data-signing-app-selector-target$='SubmitButton']", count: 4
+  end
+
+  test "signature apps of a standalone contract show apps that cannot sign its level disabled" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.signature_parameters.update!(level: "BASELINE_T")
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024")
+
+    assert_response :success
+    assert_select "input[value='podpisuj'][disabled]", count: 1
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
+  end
+
+  test "signature apps leave out apps that cannot sign the requested format in an iframe" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.signature_parameters.update!(level: "BASELINE_T")
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024", iframe: "true")
+
+    assert_response :success
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 3
+    assert_select "input[value='podpisuj']", count: 0
+    assert_not_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
+  end
+
+  test "signature apps of a bundled contract leave out apps that cannot sign its format but keep card restrictions" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.signature_parameters.update!(level: "BASELINE_T")
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    get signature_apps_contract_path(contract, recipient: recipient.uuid, qscd: "eid_2021")
+
+    assert_response :success
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 3
+    assert_select "input[value='podpisuj']", count: 0
+    assert_select "input[value='autogram']:not([disabled])", count: 1
+    assert_select "input[value='avm'][disabled]", count: 1
+    assert_select "input[value='eidentita'][disabled]", count: 1
+    assert_not_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
   end
 
   test "visual signing creates stamped content and marks signer signed" do
@@ -580,7 +713,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
   def create_bundle_contract_with_prepared_signature_field(allowed_methods: [ "qes" ], mobile_phone: nil)
     contract = create_pdf_contract(allowed_methods: allowed_methods)
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en", mobile_phone: mobile_phone)
 
     with_autogram_service(fake_unsigned_pades_validation_service) do
@@ -606,7 +739,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
   def create_bundle_contract_with_two_prepared_signature_fields
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     first_recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     second_recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 

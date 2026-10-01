@@ -28,7 +28,7 @@ class SessionTest < ActiveSupport::TestCase
   test "keeps iframe open while public bundle still has unsigned contracts" do
     contract_one = create_contract
     contract_two = create_contract
-    Bundle.create!(author: users(:one), contracts: [ contract_one, contract_two ], publicly_visible: true)
+    Bundle.create!(tenant: tenants(:one), contracts: [ contract_one, contract_two ], publicly_visible: true)
     attach_signed_document(contract_one)
 
     session = create_session_for(contract_one, options: { "iframe" => "true" })
@@ -43,7 +43,7 @@ class SessionTest < ActiveSupport::TestCase
 
   test "closes iframe when public single-contract bundle is fully signed" do
     contract = create_contract
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ], publicly_visible: true)
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ], publicly_visible: true)
     attach_signed_document(contract)
 
     session = create_session_for(contract, options: { "iframe" => "true" })
@@ -58,7 +58,7 @@ class SessionTest < ActiveSupport::TestCase
   end
 
   test "accept_signed_file persists validation metadata for authored contracts" do
-    users(:one).update_column(:features, [ "archivation" ])
+    tenants(:one).update_column(:features, [ "archivation" ])
     contract = create_contract(user: users(:one))
     session = create_session_for(contract)
     validation_result = AutogramService::ValidationResult.new(
@@ -95,7 +95,7 @@ class SessionTest < ActiveSupport::TestCase
 
     record = ContractValidationRecord.find_by!(source_contract_uuid: contract.uuid)
 
-    assert_equal users(:one), record.user
+    assert_equal tenants(:one), record.tenant
     assert_equal "session-test-signed.pdf", record.filename
     assert_equal Digest::SHA256.hexdigest("signed pdf content"), record.document_hash
     assert_equal [ "BASELINE_T" ], record.signature_levels
@@ -172,7 +172,7 @@ class SessionTest < ActiveSupport::TestCase
     )
 
     Contract.create!(
-      user: user,
+      tenant: user&.tenants&.sole,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",

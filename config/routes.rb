@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   devise_for :users,
     controllers: {
       sessions: "users/sessions",
+      magic_links: "users/magic_links",
       registrations: "users/registrations",
       confirmations: "users/confirmations",
       unlocks: "users/unlocks",
@@ -45,8 +46,17 @@ Rails.application.routes.draw do
   get  "oauth_consent" => "oauth_consents#new",    as: :new_oauth_consent
   post "oauth_consent" => "oauth_consents#create", as: :oauth_consent
 
+  # Signing in finishes here once the user has picked a tenant.
+  get "tenant/select" => "tenant_selections#show", as: :tenant_selection
+  post "tenant/select" => "tenant_selections#update"
+
   authenticate(:user) do
     get "/dashboard", to: "dashboard#index", as: :dashboard
+
+    resource :tenant, only: [ :update ] do
+      post :leave
+      resources :memberships, only: [ :create, :destroy ], controller: "tenants/memberships"
+    end
 
     resources :contracts, only: [ :index, :destroy ]
     resources :contract_validation_records, only: [ :index, :destroy ] do
@@ -164,6 +174,9 @@ Rails.application.routes.draw do
 
   authenticate(:user, ->(user) { user.admin? }) do
     namespace :admin do
+      resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
+        post :add_member, on: :member
+      end
       resources :portal_instances, except: [ :show, :destroy ] do
         member do
           post :verify

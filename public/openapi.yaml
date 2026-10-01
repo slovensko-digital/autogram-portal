@@ -1047,6 +1047,9 @@ components:
     JWT:
       description: |
         JWT token must be encoded using RS256 or ES256 and client-specific key matching `sub` claim.
+        API access belongs to an organization (tenant), not to an individual user: `sub` is the organization ID
+        shown in the organization settings, and the token is verified with the public key stored there.
+        The organization must have API access enabled. All created resources belong to that organization.
         Maximum `exp` claim duration is 15 minutes.
         `jti` claim is required and must be unique for the 15 minutes.
         `jti` claim must comply with regular expression: `/\A[0-9a-z\-_]{32,256}\z/i`

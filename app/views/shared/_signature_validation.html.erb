@@ -25,7 +25,7 @@
         </ul>
       </div>
     <% elsif !validation_result.has_signatures? %>
-      <% next if visual_signature_stamps.any? %>
+      <% next if visual_signature_stamps.any? || local_assigns[:hide_empty] %>
       <%= render 'shared/info', title: t('.no_signatures_title'), content: t('.no_signatures_message') %>
     <% else %>
       <div class="space-y-3 mb-4 last:mb-0">
