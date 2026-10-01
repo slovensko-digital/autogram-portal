@@ -78,6 +78,34 @@ class AutogramServiceTest < ActiveSupport::TestCase
     assert_equal "2030-06-02T12:26:52 +0000", signature.timestampInfo[:timestamps].first.notAfter
   end
 
+  test "parse_validation_response uses a PAdES document timestamp as signing time and qualifies it" do
+    response = {
+      "signatures" => [
+        {
+          "validationResult" => "TOTAL_PASSED",
+          "level" => "PAdES_BASELINE_T",
+          "claimedSigningTime" => "2026-10-01T06:42:32 +0000",
+          "signingCertificate" => { "qualification" => "QESIG", "subjectDN" => "CN=Marek" },
+          "areQualifiedTimestamps" => true,
+          "timestamps" => [
+            {
+              "timestampType" => "DOCUMENT_TIMESTAMP",
+              "productionTime" => "2026-10-01T15:18:31 +0000",
+              "qualification" => "QTSA",
+              "subjectDN" => "CN=Timestamp Authority"
+            }
+          ]
+        }
+      ]
+    }
+
+    signature = AutogramService.new.send(:parse_validation_response, response).signatures.first
+
+    assert signature.qualified_timestamps?
+    assert_equal "qesig_ts", signature.qualification_label
+    assert_equal Time.parse("2026-10-01T15:18:31 +0000"), signature.signingTime
+  end
+
   test "parse_validation_response extracts AGP reference metadata" do
     response = {
       "signatures" => [
