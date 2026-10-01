@@ -47,7 +47,7 @@
       <% end %>
 
       <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
-        <%= render 'sender' %>
+        <%= render 'sender' unless embedded_layout %>
 
         <% if @bundle.note.present? %>
           <div class="w-full mb-6">
@@ -126,7 +126,8 @@
           <% contract_status_label = contract_signed_for_viewer ? t('bundles.status.completed') : t('bundles.status.awaiting_signature') %>
           <% contract_status_classes = contract_signed_for_viewer ? 'border-green-200 bg-green-50 text-green-700' : 'border-blue-200 bg-blue-50 text-blue-700' %>
 
-          <section class="border-t border-gray-200 pt-6">
+          <%# Embedded pages have no sender above the first document to divide it from. %>
+          <section class="<%= 'border-t border-gray-200 pt-6' unless embedded_layout && index.zero? && !show_individual_signing_section %>">
             <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
               <div class="min-w-0 flex-1 basis-72">
                 <h2 class="text-xl font-semibold text-gray-900">
@@ -164,21 +165,24 @@
                 <% else %>
                   <%= render 'contracts/visualization_with_toggle', contract: contract %>
                 <% end %>
+                <%# Embedded signers only need to know about existing signatures. %>
                 <%= turbo_frame_tag "signature_validation_#{contract.uuid}",
-                                    src: validate_contract_path(contract),
+                                    src: validate_contract_path(contract, hide_empty: (true if embedded_layout)),
                                     loading: "lazy",
                                     class: "w-full" do %>
-                  <div class="w-full">
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                      <div class="flex items-center">
-                        <svg class="mr-3 h-5 w-5 animate-spin text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
+                  <% unless embedded_layout %>
+                    <div class="w-full">
+                      <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div class="flex items-center">
+                          <svg class="mr-3 h-5 w-5 animate-spin text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span class="text-gray-600"><%= t('contracts.signature_validation.validating') %></span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  <% end %>
                 <% end %>
 
                 <% if @bundle.awaiting_recipients? %>

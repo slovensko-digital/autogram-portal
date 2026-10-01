@@ -38,11 +38,9 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     assert_selector "#agp-container > iframe[data-agp-session='#{bundle.uuid}']"
     assert_equal "600px", iframe.style("height")["height"]
     within_portal_frame do
-      assert_text "#{I18n.t('bundles.sender.sender')}: Firma ABC"
       assert_text "Prosíme o podpis do piatku."
       assert_text "zmluva.pdf"
       assert_selector "a[target='_blank']", text: I18n.t("actions.view")
-      assert_text I18n.t("shared.signature_validation.no_signatures_title")
       assert_text I18n.t("bundles.sign.awaiting_recipients")
       assert_text "signer@example.com"
       assert_text I18n.t("bundles.sign.electronic_setup_title")
@@ -51,6 +49,21 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_no_text "Autogram Portal"
       assert_no_text I18n.t("footer.support")
       assert_no_button I18n.t("bundles.sign.decline")
+      assert_no_text I18n.t("bundles.sender.sender")
+      wait_for_signature_validation
+      assert_no_text I18n.t("shared.signature_validation.no_signatures_title")
+    end
+  end
+
+  test "document that already has signatures shows them in the iframe" do
+    contract = qes_contract("predpodpisana.pdf").merge(documents_attributes: [ { blob: presigned_blob("predpodpisana.pdf") } ])
+    bundle = create_bundle(contracts: [ contract ], recipients: [ { email: "signer@example.com" } ])
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid
+
+    within_portal_frame do
+      assert_text I18n.t("shared.signature_validation.signatures_found_title")
+      assert_text "E2E Signer"
     end
   end
 
@@ -137,7 +150,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, locale: "en"
 
     within_portal_frame do
-      assert_text "#{I18n.t('bundles.sender.sender', locale: :en)}: Firma ABC"
+      assert_text I18n.t("bundles.sign.awaiting_recipients", locale: :en)
       assert_text I18n.t("bundles.sign.electronic_setup_title", locale: :en)
       assert_no_text I18n.t("bundles.sign.electronic_setup_title", locale: :sk)
     end
@@ -226,10 +239,22 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_no_text "Autogram Portal"
 
       wait_for_signature_validation
+      assert_no_text I18n.t("shared.signature_validation.no_signatures_title")
       click_on I18n.t("contracts.signing_method_choice.continue")
 
       assert_text I18n.t("contracts.onboarding.qscd_check.title")
       assert_no_text "Autogram Portal"
+    end
+  end
+
+  test "standalone contract that already has signatures shows them in the iframe" do
+    contract = Contract.create!(qes_contract("predpodpisana.pdf").merge(documents_attributes: [ { blob: presigned_blob("predpodpisana.pdf") } ]))
+
+    embed_with_sdk :initContractIframe, contract.uuid
+
+    within_portal_frame do
+      assert_text I18n.t("shared.signature_validation.signatures_found_title")
+      assert_text "E2E Signer"
     end
   end
 
@@ -455,7 +480,12 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
   # The lazily loaded validation result moves the buttons below it.
   def wait_for_signature_validation
-    assert_text I18n.t("shared.signature_validation.no_signatures_title")
+    assert_selector "turbo-frame[id^='signature_validation_'][complete]"
+  end
+
+  # A document FakeAutogramService reports as already signed.
+  def presigned_blob(filename)
+    ActiveStorage::Blob.create_and_upload!(io: StringIO.new("#{SigningFlowHelper::SIGNED_PREFIX}#{filename}"), filename: filename, content_type: "application/pdf")
   end
 
   def sign_outside_the_portal_frame(contract, recipient)
