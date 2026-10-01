@@ -2101,9 +2101,4 @@ en:
       title: "Choose an organization"
       subtitle: "You are a member of several organizations. Choose the one to work in. To switch to another organization later, sign out and sign in again."
       last_used: "Last used"
-      no_tenant_title: "You are not a member of any organization"
-      no_tenant_message: "Your account does not belong to any organization at the moment, so you have no access to documents or bundles."
-      no_tenant_create_hint: "You can create your own organization on the Basic plan or ask an organization owner for an invitation."
-      create_personal: "Create a personal organization (Basic)"
-    create:
-      success: "Your personal organization was created"
+      personal: "Personal"

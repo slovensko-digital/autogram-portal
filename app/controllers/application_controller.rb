@@ -11,22 +11,10 @@ class ApplicationController < ActionController::Base
   after_action :verify_authorized
   after_action :verify_policy_scoped, if: -> { action_name == "index" }
 
-  # Raised for a record of another tenant the user belongs to; they have to sign
-  # in to that tenant to work with it.
-  class OtherTenantRecord < StandardError
-    attr_reader :tenant
-
-    def initialize(tenant)
-      @tenant = tenant
-      super("Record belongs to tenant #{tenant.id}")
-    end
-  end
-
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
-  rescue_from OtherTenantRecord, with: :render_other_tenant_record
+  rescue_from ActionController::RoutingError, with: :render_not_found
 
   helper_method :current_tenant
-  rescue_from ActionController::RoutingError, with: :render_not_found
 
   def render_not_found
     respond_to do |format|
@@ -67,14 +55,12 @@ class ApplicationController < ActionController::Base
   # in; a single tenant is picked for them.
   def current_tenant
     return unless current_user
-    return @current_tenant if defined?(@current_tenant) && @current_tenant
 
-    @current_tenant = resolve_current_tenant
+    @current_tenant ||= resolve_current_tenant
   end
 
-  # Signed-in users work in a tenant. Until they pick one (or create one when
-  # they have none) they are sent to the tenant selection page, which then
-  # returns them to the page they asked for.
+  # Signed-in users work in a tenant. Until they pick one they are sent to the
+  # tenant selection page, which then returns them to the page they asked for.
   def ensure_tenant_selected
     return if devise_controller? || current_tenant
 
@@ -83,24 +69,21 @@ class ApplicationController < ActionController::Base
     redirect_to tenant_selection_path
   end
 
-  # Picks the tenant for the rest of the session; it stays until sign out.
+  # Picks one of the user's tenants for the rest of the session; it stays until
+  # sign out.
   def select_tenant!(tenant)
-    return unless current_user&.member_of?(tenant)
-
     session[:current_tenant_id] = tenant.id
     current_user.update_column(:last_tenant_id, tenant.id) if current_user.last_tenant_id != tenant.id
     @current_tenant = tenant
   end
 
-  def render_other_tenant_record(error)
-    redirect_to dashboard_path, alert: t("tenants.alerts.other_tenant_record", name: error.tenant.name)
-  end
-
+  # A record of another tenant the user belongs to: they have to sign in to that
+  # tenant to work with it. Returns whether it redirected.
   def redirect_for_other_tenant(record)
     tenant = record.try(:tenant)
     return false unless current_user&.member_of?(tenant)
 
-    render_other_tenant_record(OtherTenantRecord.new(tenant))
+    redirect_to dashboard_path, alert: t("tenants.alerts.other_tenant_record", name: tenant.name)
     true
   end
 
@@ -126,11 +109,7 @@ class ApplicationController < ActionController::Base
     tenants = current_user.tenants
     tenant = tenants.find_by(id: session[:current_tenant_id]) if session[:current_tenant_id]
     tenant ||= tenants.first if tenants.one?
-    return unless tenant
-
-    session[:current_tenant_id] = tenant.id
-    current_user.update_column(:last_tenant_id, tenant.id) if current_user.last_tenant_id != tenant.id
-    tenant
+    select_tenant!(tenant) if tenant
   end
 
   def pending_contract_path

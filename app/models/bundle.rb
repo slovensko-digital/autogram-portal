@@ -75,11 +75,6 @@ class Bundle < ApplicationRecord
     tenant.name
   end
 
-  # Tenant owners get the author notifications, except for whoever caused them.
-  def author_notification_recipients(except: nil)
-    tenant.owners.where.not(id: except&.id).to_a
-  end
-
   def display_name
     name.presence || "#{I18n.t('bundles.display_name')} #{short_uuid}"
   end

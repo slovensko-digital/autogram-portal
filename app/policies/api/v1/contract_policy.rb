@@ -1,10 +1,10 @@
 class Api::V1::ContractPolicy < Api::V1::ApplicationPolicy
   def create?
-    authenticated?
+    tenant_api?
   end
 
   def show?
-    authenticated? && record.tenant == context.tenant
+    tenant_api? && record.tenant == context.tenant
   end
 
   def status?
@@ -19,11 +19,6 @@ class Api::V1::ContractPolicy < Api::V1::ApplicationPolicy
     show?
   end
 
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      return scope.none unless context.is_a?(AuthorizationContext::TenantApi) && context.tenant.present?
-
-      scope.where(tenant: context.tenant)
-    end
+  class Scope < Api::V1::ApplicationPolicy::TenantScope
   end
 end

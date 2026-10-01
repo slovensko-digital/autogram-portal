@@ -34,19 +34,23 @@ class ContractPolicyTest < ActiveSupport::TestCase
     end
   end
 
-  test "intentional UUID-public access requires web context rather than API principal" do
+  test "web uploads are open to anyone but tenant contracts are not" do
     contract = Contract.new(tenant: tenants(:two))
     anonymous = AuthorizationContext::Web.new(user: nil, tenant: nil)
 
-    assert ContractPolicy.new(anonymous, contract).public_access?
-    assert DocumentPolicy.new(anonymous, Document.new).download?
-    assert SignatureEvidenceRecordPolicy.new(anonymous, SignatureEvidenceRecord).public_access?
+    assert ContractPolicy.new(anonymous, Contract).create?
     assert_not ContractPolicy.new(anonymous, contract).show?
 
     context = AuthorizationContext::TenantApi.new(tenant: tenants(:one))
-    assert_not ContractPolicy.new(context, contract).public_access?
-    assert_not DocumentPolicy.new(context, Document.new).download?
-    assert_not SignatureEvidenceRecordPolicy.new(context, SignatureEvidenceRecord).public_access?
+    assert_not ContractPolicy.new(context, Contract).create?
+    assert_not SignatureEvidenceRecordPolicy.new(context, SignatureEvidenceRecord.new).download_private?
+  end
+
+  test "bundled contracts without a tenant are not anonymous" do
+    contract = Contract.new(bundle: bundles(:two))
+
+    assert_not contract.anonymous?
+    assert_not ContractPolicy.new(AuthorizationContext::Web.new(user: nil, tenant: nil), contract).show?
   end
 
   test "current tenant members can manage standalone and bundled contracts" do

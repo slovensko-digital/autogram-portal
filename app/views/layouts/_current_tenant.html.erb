@@ -4,7 +4,5 @@
   </svg>
   <span class="sr-only"><%= t('header.current_tenant.label') %>:</span>
   <span class="min-w-0 flex-1 truncate"><%= current_tenant.name %></span>
-  <span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold <%= current_tenant.pro? ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-600' %>">
-    <%= t("tenants.plans.#{current_tenant.plan}") %>
-  </span>
+  <%= tenant_plan_badge(current_tenant) %>
 </div>

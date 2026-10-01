@@ -48,9 +48,6 @@ class User < ApplicationRecord
   attribute :features, :string, array: true, default: []
   AVAILABLE_FEATURES = %w[admin federation].freeze
 
-  # Set for users created through a tenant invitation, who join that tenant instead.
-  attr_accessor :skip_personal_tenant
-
   has_many :memberships, dependent: :destroy
   has_many :tenants, through: :memberships
   belongs_to :last_tenant, class_name: "Tenant", optional: true
@@ -64,7 +61,8 @@ class User < ApplicationRecord
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
   validates :agree_to_policies, acceptance: true, on: :create
 
-  after_create :create_personal_tenant, unless: :skip_personal_tenant
+  # Every user has a personal Basic tenant, including users invited to an organization.
+  after_create :create_personal_tenant
   before_destroy :release_tenants, prepend: true
 
   # Returns the User record for the given OmniAuth payload, or nil for a brand-new
@@ -104,19 +102,14 @@ class User < ApplicationRecord
     end
   end
 
-  # Finds the user for +email+ or creates one for a tenant invitation. Invited
-  # users join the inviting tenant instead of getting a personal one, and the
-  # invitation email carries their confirmation link instead of Devise's own.
+  # Finds the user for +email+ (normalized like Devise sign-in) or creates one for
+  # a tenant invitation. The invitation email carries the confirmation link
+  # instead of Devise's own.
   def self.find_or_invite!(email, locale: nil)
-    find_by(email: email) || new(email: email, locale: locale.presence || I18n.default_locale.to_s, skip_personal_tenant: true).tap do |user|
+    find_for_authentication(email: email) || new(email: email, locale: locale.presence || I18n.default_locale.to_s).tap do |user|
       user.skip_confirmation_notification!
       user.save!
     end
-  end
-
-  # The tenant the user last worked in, used when nothing more specific is known.
-  def default_tenant
-    last_tenant || tenants.order("memberships.created_at").first
   end
 
   def member_of?(tenant)

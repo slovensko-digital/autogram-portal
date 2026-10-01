@@ -2024,9 +2024,4 @@ sk:
       title: "Vyberte organizáciu"
       subtitle: "Ste členom viacerých organizácií. Vyberte, v ktorej chcete pracovať. Pre prácu v inej organizácii sa budete musieť odhlásiť a prihlásiť znova."
       last_used: "Naposledy použitá"
-      no_tenant_title: "Nie ste členom žiadnej organizácie"
-      no_tenant_message: "Váš účet momentálne nepatrí do žiadnej organizácie, preto nemáte prístup k dokumentom ani balíkom."
-      no_tenant_create_hint: "Môžete si vytvoriť vlastnú organizáciu s plánom Basic alebo požiadať vlastníka organizácie o pozvánku."
-      create_personal: "Vytvoriť osobnú organizáciu (Basic)"
-    create:
-      success: "Osobná organizácia bola vytvorená"
+      personal: "Osobná"

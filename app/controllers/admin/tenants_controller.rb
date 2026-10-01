@@ -6,7 +6,11 @@ class Admin::TenantsController < Admin::BaseController
                      .select("tenants.*, COUNT(memberships.id) AS members_count")
                      .group("tenants.id")
                      .order(:name)
-    @tenants = @tenants.where("tenants.name ILIKE :q OR tenants.id IN (SELECT memberships.tenant_id FROM memberships JOIN users ON users.id = memberships.user_id WHERE users.email ILIKE :q)", q: "%#{Tenant.sanitize_sql_like(params[:q])}%") if params[:q].present?
+    return if params[:q].blank?
+
+    pattern = "%#{Tenant.sanitize_sql_like(params[:q])}%"
+    member_tenant_ids = Membership.joins(:user).where("users.email ILIKE ?", pattern).select(:tenant_id)
+    @tenants = @tenants.where("tenants.name ILIKE ?", pattern).or(@tenants.where(id: member_tenant_ids))
   end
 
   def new
@@ -22,13 +26,12 @@ class Admin::TenantsController < Admin::BaseController
 
     membership = ActiveRecord::Base.transaction do
       @tenant.save!
-      @tenant.add_member!(User.find_or_invite!(@owner_email), role: :owner)
+      @tenant.memberships.create!(user: User.find_or_invite!(@owner_email), role: :owner)
     end
 
     TenantMailer.with(membership: membership).invitation.deliver_later
     redirect_to edit_admin_tenant_path(@tenant), notice: t("admin.tenants.create.success", email: @owner_email)
   rescue ActiveRecord::RecordInvalid => e
-    @tenant = Tenant.new(tenant_params) if @tenant.persisted?
     render_new_with_error(e.record.errors.full_messages.to_sentence)
   end
 
@@ -49,7 +52,7 @@ class Admin::TenantsController < Admin::BaseController
     user = User.find_by(email: params[:email].to_s.strip.downcase)
     return redirect_to edit_admin_tenant_path(@tenant), alert: t("admin.tenants.add_member.user_not_found") unless user
 
-    @tenant.add_member!(user, role: params[:role].presence_in(Membership.roles.keys) || "member")
+    @tenant.memberships.create!(user: user, role: params[:role].presence_in(Membership.roles.keys) || "member")
     redirect_to edit_admin_tenant_path(@tenant), notice: t("admin.tenants.add_member.success", email: user.email)
   rescue ActiveRecord::RecordInvalid => e
     redirect_to edit_admin_tenant_path(@tenant), alert: e.record.errors.full_messages.to_sentence

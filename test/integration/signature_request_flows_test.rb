@@ -40,7 +40,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal colleague, recipient.user
     sign_out @owner
 
-    sign_in colleague
+    sign_in_with_tenant colleague, @organization
     get bundles_path
     assert_includes response.body, bundle_path(bundle)
     get received_bundles_path
@@ -175,7 +175,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
   test "member signs a standalone document of the organization and the owner is notified" do
     member = confirmed_user("member@firma-abc.sk", tenant: @organization)
-    sign_in member
+    sign_in_with_tenant member, @organization
     post contracts_path, params: { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 vlastny"), "application/pdf", original_filename: "vlastny.pdf") } }
     contract = Contract.order(:id).last
     assert_equal @organization, contract.tenant
@@ -197,11 +197,11 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
   # Uploads a PDF, asks for signatures and returns the bundle the web creates.
   def request_signature_from_web(as:, filename:)
-    sign_in as
+    sign_in_with_tenant as, @organization
     post contracts_path, params: { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 #{filename}"), "application/pdf", original_filename: filename) } }
     contract = Contract.order(:id).last
     assert_redirected_to contract_path(contract)
-    assert_equal current_tenant_of(as), contract.tenant
+    assert_equal @organization, contract.tenant
 
     patch contract_path(contract), params: {
       next_step: "request_signature",
@@ -222,9 +222,5 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert recipient.reload.notified?
     recipient
-  end
-
-  def current_tenant_of(user)
-    Tenant.find(session[:current_tenant_id]).tap { |tenant| assert user.member_of?(tenant) }
   end
 end

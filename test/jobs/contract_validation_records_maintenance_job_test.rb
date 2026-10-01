@@ -36,7 +36,7 @@ class ContractValidationRecordsMaintenanceJobTest < ActiveJob::TestCase
     )
 
     Contract.create!(
-      tenant: users(:one).default_tenant,
+      tenant: users(:one).tenants.sole,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     ).tap do |contract|

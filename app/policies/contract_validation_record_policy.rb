@@ -1,6 +1,6 @@
 class ContractValidationRecordPolicy < ApplicationPolicy
   def index?
-    context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant&.archivation_enabled?
+    in_tenant? && context.tenant.archivation_enabled?
   end
 
   def destroy?
@@ -11,11 +11,9 @@ class ContractValidationRecordPolicy < ApplicationPolicy
     destroy?
   end
 
-  class Scope < ApplicationPolicy::Scope
+  class Scope < TenantScope
     def resolve
-      return scope.none unless context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant&.archivation_enabled?
-
-      scope.where(tenant: context.tenant)
+      in_tenant? && context.tenant.archivation_enabled? ? super : scope.none
     end
   end
 end

@@ -1,6 +1,7 @@
 class Federation::RequestsController < ApplicationController
   before_action :authenticate_user!, only: [ :claim ]
-  before_action :authorize_federation_request!
+  before_action :skip_authorization, only: [ :show ]
+  before_action :authorize_federation_request!, only: [ :claim ]
 
   def show
     @request_url = params[:url].to_s

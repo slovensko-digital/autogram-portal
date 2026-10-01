@@ -49,7 +49,6 @@ Rails.application.routes.draw do
   # Signing in finishes here once the user has picked a tenant.
   get "tenant/select" => "tenant_selections#show", as: :tenant_selection
   post "tenant/select" => "tenant_selections#update"
-  post "tenant/personal" => "tenant_selections#create", as: :personal_tenant
 
   authenticate(:user) do
     get "/dashboard", to: "dashboard#index", as: :dashboard

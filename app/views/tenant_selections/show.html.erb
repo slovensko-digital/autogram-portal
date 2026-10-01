@@ -1,36 +1,25 @@
 <main>
   <div class="mx-auto max-w-xl px-6 pb-24 pt-16">
-    <% if @tenants.any? %>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
-      <p class="text-gray-600 mb-8"><%= t('.subtitle') %></p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+    <p class="text-gray-600 mb-8"><%= t('.subtitle') %></p>
 
-      <ul role="list" class="space-y-3">
-        <% @tenants.each do |tenant| %>
-          <li>
-            <%= button_to tenant_selection_path(tenant_id: tenant.id), method: :post,
-                  class: "flex w-full items-center justify-between gap-4 rounded-lg border bg-white px-5 py-4 text-left transition-colors cursor-pointer hover:border-blue-400 hover:bg-blue-50 #{tenant.id == current_user.last_tenant_id ? 'border-blue-300' : 'border-gray-200'}" do %>
-              <span class="min-w-0">
-                <span class="block truncate text-base font-semibold text-gray-900"><%= tenant.name %></span>
-                <% if tenant.id == current_user.last_tenant_id %>
-                  <span class="block text-xs text-gray-500"><%= t('.last_used') %></span>
-                <% end %>
-              </span>
-              <span class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold <%= tenant.pro? ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-600' %>">
-                <%= t("tenants.plans.#{tenant.plan}") %>
-              </span>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.no_tenant_title') %></h1>
-      <p class="text-gray-600"><%= t('.no_tenant_message') %></p>
-      <p class="mt-3 text-gray-600"><%= t('.no_tenant_create_hint') %></p>
-
-      <%= button_to t('.create_personal'), personal_tenant_path, method: :post,
-            class: "mt-8 inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer" %>
-    <% end %>
+    <ul role="list" class="space-y-3">
+      <% @tenants.each do |tenant| %>
+        <li>
+          <%= button_to tenant_selection_path(tenant_id: tenant.id), method: :post,
+                class: "flex w-full items-center justify-between gap-4 rounded-lg border bg-white px-5 py-4 text-left transition-colors cursor-pointer hover:border-blue-400 hover:bg-blue-50 #{tenant.id == current_user.last_tenant_id ? 'border-blue-300' : 'border-gray-200'}" do %>
+            <span class="min-w-0">
+              <span class="block truncate text-base font-semibold text-gray-900"><%= tenant.personal? && tenant.owner?(current_user) ? t('.personal') : tenant.name %></span>
+              <% if tenant.id == current_user.last_tenant_id %>
+                <span class="block text-xs text-gray-500"><%= t('.last_used') %></span>
+              <% end %>
+            </span>
+            <%= tenant_plan_badge(tenant, size: "px-2.5 py-0.5 text-xs") %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
   </div>
 </main>
 
-<% content_for :title, @tenants.any? ? t('.title') : t('.no_tenant_title') %>
+<% content_for :title, t('.title') %>

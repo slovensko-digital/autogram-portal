@@ -35,6 +35,10 @@ class ApplicationControllerTest < ActionController::TestCase
     @controller.singleton_class.define_method(:user_signed_in?) { true }
   end
 
+  test "denials without a controller handler respond with 403" do
+    assert_equal :forbidden, ActionDispatch::ExceptionWrapper.rescue_responses["Pundit::NotAuthorizedError"]
+  end
+
   test "authorization verification is inherited without a local hook" do
     assert_raises(Pundit::AuthorizationNotPerformedError) { get :show }
   end

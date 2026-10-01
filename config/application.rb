@@ -29,6 +29,9 @@ module AutogramPortal
     config.i18n.available_locales = [ :en, :sk ]
     config.i18n.default_locale = :sk
 
+    # Controllers render their own denials; any denial they leave unhandled is a 403, not a 500.
+    config.action_dispatch.rescue_responses["Pundit::NotAuthorizedError"] = :forbidden
+
     config.active_job.queue_adapter = :good_job
     config.good_job.enable_cron = true
 

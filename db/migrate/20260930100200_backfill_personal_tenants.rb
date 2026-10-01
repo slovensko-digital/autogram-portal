@@ -7,11 +7,12 @@ class BackfillPersonalTenants < ActiveRecord::Migration[8.1]
 
   def up
     execute <<~SQL
-      INSERT INTO tenants (id, name, plan, api_token_public_key, features, created_at, updated_at)
+      INSERT INTO tenants (id, name, plan, personal, api_token_public_key, features, created_at, updated_at)
       SELECT
         users.id,
         COALESCE(NULLIF(users.name, ''), users.email, 'Tenant ' || users.id),
         CASE WHEN 'api' = ANY(users.features) THEN 'pro' ELSE 'basic' END,
+        TRUE,
         users.api_token_public_key,
         ARRAY(SELECT unnest(users.features) INTERSECT SELECT unnest(ARRAY[#{quoted_features}]::text[]) ORDER BY 1)::varchar[],
         NOW(),

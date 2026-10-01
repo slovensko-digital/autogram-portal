@@ -50,11 +50,10 @@ class FederationPolicyTest < ActiveSupport::TestCase
     end
   end
 
-  test "web preview is public but broker claim requires a signed-in user" do
+  test "broker claim requires a signed-in user" do
     anonymous = AuthorizationContext::Web.new(user: nil, tenant: nil)
     policy = FederationRequestPolicy.new(anonymous, :federation_request)
 
-    assert policy.show?
     assert_not policy.claim?
     context = AuthorizationContext::Web.new(user: users(:one), tenant: tenants(:one))
     assert FederationRequestPolicy.new(context, :federation_request).claim?

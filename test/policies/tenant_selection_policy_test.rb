@@ -9,16 +9,6 @@ class TenantSelectionPolicyTest < ActiveSupport::TestCase
     assert_not TenantSelection::TenantPolicy.new(context, tenants(:two)).update?
   end
 
-  test "user can create a tenant only when they have none" do
-    user = users(:one)
-    context = AuthorizationContext::Web.new(user: user, tenant: nil)
-    policy = TenantSelection::TenantPolicy.new(context, :tenant)
-
-    assert_not policy.create?
-    Membership.where(user: user).delete_all
-    assert policy.create?
-  end
-
   test "selected tenant, anonymous and non-web contexts cannot choose a tenant" do
     contexts = [
       nil,
@@ -31,7 +21,6 @@ class TenantSelectionPolicyTest < ActiveSupport::TestCase
       policy = TenantSelection::TenantPolicy.new(context, tenants(:one))
       assert_not policy.show?
       assert_not policy.update?
-      assert_not policy.create?
     end
   end
 

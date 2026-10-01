@@ -6,6 +6,7 @@
 #  api_token_public_key :string
 #  features             :string           default([]), not null, is an Array
 #  name                 :string           not null
+#  personal             :boolean          default(FALSE), not null
 #  plan                 :string           default("basic"), not null
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
@@ -18,8 +19,6 @@ class Tenant < ApplicationRecord
   AVAILABLE_FEATURES = %w[archivation api].freeze
   # nil means unlimited
   MAX_MEMBERS = { "basic" => 1, "pro" => nil }.freeze
-
-  attribute :features, :string, array: true, default: []
 
   enum :plan, { basic: "basic", pro: "pro" }, validate: true
 
@@ -41,26 +40,10 @@ class Tenant < ApplicationRecord
 
   def self.create_personal_for!(user)
     transaction do
-      create!(name: user.name.presence || user.email).tap do |tenant|
+      create!(name: user.name.presence || user.email, personal: true).tap do |tenant|
         tenant.memberships.create!(user: user, role: :owner)
       end
     end
-  end
-
-  # Adds +user+ to the tenant. A Basic tenant the user has only by themselves and
-  # never used is pointless once they belong here, so it is removed.
-  def add_member!(user, role: :member)
-    transaction do
-      membership = memberships.create!(user: user, role: role)
-      user.tenants.where.not(id: id).find_each { |tenant| tenant.destroy! if tenant.unused_personal_tenant_of?(user) }
-      membership
-    end
-  end
-
-  def unused_personal_tenant_of?(user)
-    basic? &&
-      memberships.where.not(user_id: user.id).none? &&
-      bundles.none? && contracts.none? && contract_validation_records.none?
   end
 
   def feature_enabled?(feature)
@@ -94,6 +77,12 @@ class Tenant < ApplicationRecord
 
   def owner?(user)
     user.present? && memberships.owner.exists?(user: user)
+  end
+
+  # Owners get the author notifications of the tenant's bundles and contracts,
+  # except for whoever caused them.
+  def notification_recipients(except: nil)
+    owners.where.not(id: except&.id).to_a
   end
 
   private

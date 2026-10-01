@@ -1,26 +1,23 @@
 class ContractPolicy < ApplicationPolicy
   def index?
-    context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant.present?
+    in_tenant?
   end
 
   def manage?
-    index? && record.managed_by?(context.tenant)
+    in_tenant? && record.managed_by?(context.tenant)
   end
 
+  # Anyone may upload, including anonymous visitors.
   def create?
-    public_access?
-  end
-
-  def public_access?
-    context.is_a?(AuthorizationContext::Web)
+    web?
   end
 
   def authenticate_for_actions?
-    public_access? && (context.user.present? || record.anonymous?)
+    web? && (context.user.present? || record.anonymous?)
   end
 
   def show?
-    public_access? && (record.anonymous? || manage?)
+    web? && (record.anonymous? || manage?)
   end
 
   def update?
@@ -51,11 +48,6 @@ class ContractPolicy < ApplicationPolicy
     record.bundle.present? && BundlePolicy.new(context, record.bundle).manage?
   end
 
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      return scope.none unless context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant.present?
-
-      scope.where(tenant: context.tenant)
-    end
+  class Scope < TenantScope
   end
 end

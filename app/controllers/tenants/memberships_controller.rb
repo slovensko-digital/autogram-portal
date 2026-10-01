@@ -11,7 +11,7 @@ class Tenants::MembershipsController < ApplicationController
 
     membership = ActiveRecord::Base.transaction do
       user = User.find_or_invite!(email, locale: current_user.locale)
-      @tenant.add_member!(user, role: params.dig(:membership, :role).presence_in(Membership.roles.keys) || "member")
+      @tenant.memberships.create!(user: user, role: params.dig(:membership, :role).presence_in(Membership.roles.keys) || "member")
     end
 
     TenantMailer.with(membership: membership).invitation.deliver_later

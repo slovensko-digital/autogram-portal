@@ -46,7 +46,7 @@ class Signing::SigningSessionAccessPolicy < ApplicationPolicy
   private
 
   def web_context?
-    context.is_a?(AuthorizationContext::Web) && record.contract.present?
+    web? && record.contract.present?
   end
 
   def bound_session?

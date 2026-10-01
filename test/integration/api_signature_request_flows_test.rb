@@ -82,7 +82,7 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal outsider, by_email[outsider.email].user
     assert_nil by_email["guest@example.com"].user
 
-    sign_in colleague
+    sign_in_with_tenant colleague, @organization
     get bundles_path
     assert_includes response.body, bundle_path(bundle), "organization members see bundles created through the API"
     contracts.each { |contract| sign_with_autogram(contract) }

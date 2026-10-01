@@ -23,7 +23,7 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
       documents_attributes: [ { blob: pdf_blob("plain.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
-    Bundle.create!(tenant: @user.default_tenant, contracts: [ contract ])
+    Bundle.create!(tenant: @user.tenants.sole, contracts: [ contract ])
 
     assert EidentitaSession.available?(nil, contract)
     assert PodpisujSession.available?(nil, contract)
@@ -63,7 +63,7 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" },
       allowed_methods: [ "ades" ]
     )
-    bundle = Bundle.create!(tenant: @user.default_tenant, contracts: [ contract ])
+    bundle = Bundle.create!(tenant: @user.tenants.sole, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "ades@example.com", locale: "en")
 
     assert AdesEvidenceSession.available?(contract, recipient: recipient)
@@ -98,7 +98,7 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
       documents_attributes: [ { blob: pdf_blob("prepared.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
-    Bundle.create!(tenant: @user.default_tenant, contracts: [ contract ])
+    Bundle.create!(tenant: @user.tenants.sole, contracts: [ contract ])
 
     contract.add_prepared_signature_fields_content_version!(
       content: "%PDF-1.4 prepared source",

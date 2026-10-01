@@ -1,10 +1,10 @@
 class BundlePolicy < ApplicationPolicy
   def index?
-    context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant.present?
+    in_tenant?
   end
 
   def manage?
-    index? && record.managed_by?(context.tenant)
+    in_tenant? && record.managed_by?(context.tenant)
   end
 
   def show?
@@ -23,11 +23,6 @@ class BundlePolicy < ApplicationPolicy
     manage?
   end
 
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      return scope.none unless context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant.present?
-
-      scope.where(tenant: context.tenant)
-    end
+  class Scope < TenantScope
   end
 end

@@ -165,7 +165,7 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
     record.attach_private_evidence_package!("private-evidence-package") if attach_private_package
 
     ContractValidationRecord.create!(
-      tenant: users(:one).default_tenant,
+      tenant: users(:one).tenants.sole,
       contract: contract,
       contract_content_version: version,
       source_contract_uuid: contract.uuid,

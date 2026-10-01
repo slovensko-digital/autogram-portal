@@ -6,6 +6,7 @@
 #  api_token_public_key :string
 #  features             :string           default([]), not null, is an Array
 #  name                 :string           not null
+#  personal             :boolean          default(FALSE), not null
 #  plan                 :string           default("basic"), not null
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
@@ -17,7 +18,9 @@
 one:
   name: Tenant One
   plan: basic
+  personal: true
 
 two:
   name: Tenant Two
   plan: basic
+  personal: true

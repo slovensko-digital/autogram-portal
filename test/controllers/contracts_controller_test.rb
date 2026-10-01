@@ -132,7 +132,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get contract_path(contract)
 
     assert_response :success
-    assert_equal user.default_tenant, contract.reload.tenant
+    assert_equal user.tenants.sole, contract.reload.tenant
   end
 
   test "pending claim only applies to the selected contract" do
@@ -148,7 +148,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_nil other_contract.reload.tenant
 
     get contract_path(pending_contract)
-    assert_equal user.default_tenant, pending_contract.reload.tenant
+    assert_equal user.tenants.sole, pending_contract.reload.tenant
   end
 
   test "owned and bundled contracts cannot enter anonymous claim flow" do
@@ -186,7 +186,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to contract_path(contract)
 
     follow_redirect!
-    assert_equal user.default_tenant, contract.reload.tenant
+    assert_equal user.tenants.sole, contract.reload.tenant
   end
 
   test "signature apps show incompatible qscd choices disabled without launch links" do

@@ -40,6 +40,20 @@ class Admin::TenantsControllerTest < ActionDispatch::IntegrationTest
     assert @tenant.owner?(@admin)
   end
 
+  test "admin search matches tenant names and member emails" do
+    users(:two).update_columns(email: "jana@firma-abc.sk")
+    by_name = Tenant.create!(name: "ABC Holding", plan: :pro)
+    other = Tenant.create!(name: "Iná firma", plan: :pro)
+    sign_in @admin
+
+    get admin_tenants_path(q: "abc")
+
+    assert_response :success
+    assert_includes response.body, by_name.name
+    assert_includes response.body, @tenant.name
+    assert_not_includes response.body, other.name
+  end
+
   test "admin edit renders plan, features and members" do
     sign_in @admin
 
@@ -53,7 +67,7 @@ class Admin::TenantsControllerTest < ActionDispatch::IntegrationTest
   test "admin creates an organization for a new customer email" do
     sign_in @admin
 
-    assert_difference -> { Tenant.count } => 1, -> { User.count } => 1 do
+    assert_difference -> { Tenant.count } => 2, -> { User.count } => 1 do
       assert_emails 1 do
         post admin_tenants_path, params: { owner_email: "Owner@Firma-ABC.sk", tenant: { name: "Firma ABC", plan: "pro", features: [ "", "api" ] } }
       end
@@ -65,11 +79,11 @@ class Admin::TenantsControllerTest < ActionDispatch::IntegrationTest
     assert tenant.pro?
     assert_equal [ "api" ], tenant.features
     assert tenant.owner?(owner)
-    assert_equal [ tenant ], owner.tenants.to_a
+    assert owner.tenants.where.not(id: tenant.id).sole.basic?
     assert_not owner.confirmed?
   end
 
-  test "creating an organization for an existing user removes their unused personal tenant" do
+  test "creating an organization for an existing user keeps their personal tenant" do
     customer = User.create!(email: "customer-#{SecureRandom.hex(4)}@example.com")
     personal = customer.tenants.sole
     sign_in @admin
@@ -77,8 +91,7 @@ class Admin::TenantsControllerTest < ActionDispatch::IntegrationTest
     post admin_tenants_path, params: { owner_email: customer.email, tenant: { name: "Firma ABC", plan: "pro" } }
 
     tenant = Tenant.find_by!(name: "Firma ABC")
-    assert_not Tenant.exists?(personal.id)
-    assert_equal [ tenant ], customer.reload.tenants.to_a
+    assert_equal [ personal, tenant ].sort_by(&:id), customer.reload.tenants.sort_by(&:id)
   end
 
   test "creating an organization requires an owner email" do

@@ -1,5 +1,6 @@
 class SignatureEvidenceVerificationsController < ApplicationController
-  before_action :authorize_public_evidence!, only: [ :show, :download ]
+  # Public evidence is looked up by its public reference.
+  before_action :skip_authorization, only: [ :show, :download ]
 
   rescue_from Pundit::NotAuthorizedError, with: -> { head :forbidden }
 
@@ -45,10 +46,6 @@ class SignatureEvidenceVerificationsController < ApplicationController
   end
 
   private
-
-  def authorize_public_evidence!
-    authorize SignatureEvidenceRecord, :public_access?
-  end
 
   def find_signature_evidence_record(reference)
     SignatureEvidenceRecord.includes(:contract_content_version).find_by(public_reference: reference)

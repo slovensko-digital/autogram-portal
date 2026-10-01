@@ -8,7 +8,7 @@ class DashboardControllerTest < ActionController::TestCase
   setup do
     @user = users(:one)
     @user.update_column(:email, "dashboard@example.com")
-    @user.default_tenant.update_column(:features, [ "archivation" ])
+    @user.tenants.sole.update_column(:features, [ "archivation" ])
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
 
@@ -30,7 +30,7 @@ class DashboardControllerTest < ActionController::TestCase
   end
 
   test "index hides archivation widgets when feature is disabled" do
-    @user.default_tenant.update_column(:features, [])
+    @user.tenants.sole.update_column(:features, [])
     create_record(user: @user, expires_at: 3.weeks.from_now)
 
     get :index
@@ -66,7 +66,7 @@ class DashboardControllerTest < ActionController::TestCase
 
   def create_record(user:, expires_at: nil)
     ContractValidationRecord.create!(
-      tenant: user&.default_tenant,
+      tenant: user&.tenants&.sole,
       source_contract_uuid: SecureRandom.uuid,
       source_version_number: 1,
       filename: "signed-contract.pdf",

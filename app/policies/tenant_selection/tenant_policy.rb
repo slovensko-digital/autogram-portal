@@ -7,14 +7,10 @@ class TenantSelection::TenantPolicy < ApplicationPolicy
     choosing_tenant? && record.is_a?(Tenant) && context.user.member_of?(record)
   end
 
-  def create?
-    choosing_tenant? && context.user.tenants.none?
-  end
-
   private
 
   # The tenant is chosen once per sign-in and cannot be switched afterwards.
   def choosing_tenant?
-    context.is_a?(AuthorizationContext::Web) && context.user.present? && context.tenant.nil?
+    signed_in? && context.tenant.nil?
   end
 end

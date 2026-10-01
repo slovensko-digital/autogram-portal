@@ -147,7 +147,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     )
 
     old_record = ContractValidationRecord.create!(
-      tenant: users(:one).default_tenant,
+      tenant: users(:one).tenants.sole,
       contract: contract,
       contract_content_version: old_version,
       source_contract_uuid: contract.uuid,
@@ -160,7 +160,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
       validation_details: {}
     )
     new_record = ContractValidationRecord.create!(
-      tenant: users(:one).default_tenant,
+      tenant: users(:one).tenants.sole,
       contract: contract,
       contract_content_version: new_version,
       source_contract_uuid: contract.uuid,
@@ -181,7 +181,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
   private
 
   def create_contract(user: nil)
-    user&.default_tenant&.update_column(:features, [ "archivation" ])
+    user&.tenants&.sole&.update_column(:features, [ "archivation" ])
 
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
@@ -190,7 +190,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     )
 
     Contract.create!(
-      tenant: user&.default_tenant,
+      tenant: user&.tenants&.sole,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",

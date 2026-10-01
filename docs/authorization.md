@@ -17,7 +17,7 @@ Implemented application authorization:
 - Person-scoped received bundles and federation invitations.
 - Archivation records, signed-content history and private evidence downloads.
 - Tenant API policies/scopes on the contract tenant (bundled contracts share the bundle tenant).
-- Bound bundle/session signing subjects and explicit UUID-public permissions.
+- Bound bundle/session signing subjects; UUID-public actions use explicit `skip_authorization`.
 - Federation portal policies/scopes, public preview and authenticated broker claim.
 - Self-account management, admin-only feature editing and permission-bearing views.
 
@@ -48,8 +48,14 @@ guards were removed.
 ## Policy conventions
 
 `AuthorizationContext::Web` holds the resolved user and selected tenant. Do not
-substitute `User#default_tenant` or a request-supplied tenant. Ordinary tenant
+substitute another of the user's tenants or a request-supplied tenant. Ordinary tenant
 policies do not grant administrators a global ownership bypass.
+
+Policies and scopes check the principal through the `ApplicationPolicy::Principal`
+helpers (`web?`, `signed_in?`, `in_tenant?`, `tenant_api?`, `portal?`). Tenant-owned
+collections use `ApplicationPolicy::TenantScope` (selected tenant) or
+`Api::V1::ApplicationPolicy::TenantScope` (token tenant). Actions open to anyone with a
+UUID or public reference call `skip_authorization` rather than an always-true policy.
 
 A signed-in user without a selected tenant is a `Web` context with a nil tenant.
 `ensure_tenant_selected` redirects such users to tenant selection, except on
@@ -111,7 +117,8 @@ membership policy is unnecessary while all operations have this same parent gate
 
 Denial presentation remains controller-specific. Tenant-owner denials retain the
 organization-settings redirect and translated alert; admin denials retain 403.
-Do not introduce a generic global 403 handler that changes existing responses.
+Do not introduce a generic global handler that changes existing responses; only denials
+a controller leaves unhandled fall back to 403 via `rescue_responses` (instead of 500).
 Normalize `Pundit::NotAuthorizedError#query` before comparing query names: inferred
 controller queries are strings, while explicit queries may be symbols.
 
@@ -131,13 +138,12 @@ Authentication redirects that halt before an action do not require a policy call
 | Controller/action | Principal and lookup | Permission | Existing denial or invariant |
 | --- | --- | --- | --- |
 | `Tenants#update` | Web, `current_tenant` | `TenantPolicy#update?`: selected-tenant owner | Settings redirect, `tenants.alerts.owner_required` |
-| `Tenants#update` attributes | Same | `permitted_attributes_for_update`: API public key only when API enabled | API-disabled owner update still succeeds as a no-op; name/plan/features remain ignored |
+| `Tenants#update` attributes | Same | `permitted_attributes(@tenant)`: API public key only when API enabled | API-disabled owner update succeeds as a no-op; name/plan/features remain ignored; a missing `tenant` param is 400 |
 | `Tenants#leave` | Web, current tenant membership | `TenantPolicy#leave?`: selected-tenant member | Last owner gets the model error and remains signed in; success signs out |
 | `Tenants::Memberships#create` | Web, current tenant | `TenantPolicy#manage_memberships?`: owner | Owner redirect precedes inviting; capacity/role checks stay in models |
 | `Tenants::Memberships#destroy` | Web, child found through current tenant | Same parent policy | Non-owner redirect precedes child lookup; foreign child 404; last-owner model error preserved |
 | `TenantSelections#show` | Signed-in user without selected tenant | `TenantSelection::TenantPolicy#show?` | Signed-out users redirect to login; a selected tenant redirects to the dashboard before authorization |
 | `TenantSelections#update` | Same, `current_user.tenants.find` | `TenantSelection::TenantPolicy#update?`: membership | Foreign tenant 404; existing selection cannot be switched until sign-out |
-| `TenantSelections#create` | Same | `TenantSelection::TenantPolicy#create?`: no existing tenant | Users with tenants get 404 without mutation |
 | `Admin::Tenants#index/new/create/edit/update/add_member` | Web user, existing admin lookups | `AdminPolicy#access?`: admin feature | Controller 403 and existing route authentication preserved |
 | `Admin::PortalInstances#index/new/create/edit/update/verify/revoke` | Same | Same headless admin policy | Same; portal/service validation remains unchanged |
 
@@ -159,9 +165,9 @@ in integration tests. They are not a replacement for controller authorization.
 | `Contracts#content_versions` | Web, global UUID | Management AND contract-tenant archivation | 403 |
 | `Contracts::SignatureFieldPreparations#index/edit/create/update/destroy/finalize` | Web, contract UUID and parent-scoped preparation ID | `prepare_signature_fields?`: bundle management | Foreign 403, another own bundle tenant guidance, ineligible format/state 422 |
 | `ContractValidationRecords#index/destroy/refresh` | Web, feature gate and selected-tenant policy scope | Archivation and record tenant | Disabled-feature root redirect; foreign ID 404; refreshability remains workflow rule |
-| `Contracts#show_bundle/actions/sign/signature_apps/physical_signing/create_physical_session/visual_signing/create_visual_session/signed_document/validate` | Web, UUID lookup; existing recipient/preparation resolution | Explicit `public_access?` | Existing UUID accessibility, onboarding, signer, appearance and state constraints preserved |
+| `Contracts#show_bundle/actions/sign/signature_apps/physical_signing/create_physical_session/visual_signing/create_visual_session/signed_document/validate` | Web, UUID lookup; existing recipient/preparation resolution | `skip_authorization` (UUID-public) | Existing UUID accessibility, onboarding, signer, appearance and state constraints preserved |
 | `Contracts#authenticate_for_actions` | Web, UUID lookup | Signed-in user OR anonymous contract | Existing-user redirect, anonymous pending-claim flow, otherwise 403 |
-| `Contracts::Onboarding#show/update` | Web, UUID and parent-bound active recipient | Contract `public_access?` | Invalid/withdrawn recipient, onboarding state and cookies retain existing behavior |
+| `Contracts::Onboarding#show/update` | Web, UUID and parent-bound active recipient | `skip_authorization` (UUID-public) | Invalid/withdrawn recipient, onboarding state and cookies retain existing behavior |
 | `Bundles#sign/autogram_batch` | Web, bound signing subject | Recipient capability OR public bundle OR selected-tenant manager | Lookup precedence unchanged; invalid grant/mismatch 404, withdrawn signing 410, batch eligibility stays separate |
 | `Bundles#accept/decline` | Web, recipient found through bundle | Bound recipient capability | Existing UUID/user lookup retained; withdrawal/completion/superseding responses unchanged |
 | `Contracts::Sessions#create/show` | Web, bound signing subject | Existing signer resolution / nested session | Creation/preparation/completion redirects unchanged; UUID/session display is not hardened |
@@ -169,8 +175,8 @@ in integration tests. They are not a replacement for controller authorization.
 | `Contracts::Sessions#destroy` | Same | Allowed user only, never token alone | 403; managers and existing signer ownership/email semantics retained |
 | `Contracts::Sessions#request_verification/verify_verification/complete_signing` | Same, resolved signer contract | Session matches resolved signer | 403 on mismatch; AdES type and service errors remain separate |
 | `Contracts::Sessions#get_webhook/standard_webhook` | Web anonymous context, nested session | Explicit bound-session queries | No new user authentication; AVM type/protocol checks and CSRF exceptions preserved |
-| `Documents#visualize/pdf_preview/download` | Web, global document UUID | Explicit public operation queries | Numeric IDs 404; owned documents remain UUID-accessible anonymously; visualization errors unchanged |
-| `SignatureEvidenceVerifications#show/download` | Web, public reference | Explicit public access | Missing reference/detail/download outcomes and manifest fallback unchanged |
+| `Documents#visualize/pdf_preview/download` | Web, global document UUID | `skip_authorization` (UUID-public) | Numeric IDs 404; owned documents remain UUID-accessible anonymously; visualization errors unchanged |
+| `SignatureEvidenceVerifications#show/download` | Web, public reference | `skip_authorization` (public reference) | Missing reference/detail/download outcomes and manifest fallback unchanged |
 | `SignatureEvidenceVerifications#download_private` | Web, public reference | Existing private-evidence predicate | Missing record/attachment 404; denied access 403; absent-record branch explicitly skips authorization |
 | `Api::V1::Contracts#create/show/status/signed_document/destroy` | TenantApi; API contract scope for existing records | Contract tenant | Existing `Contract not found`, CRUD bodies, polling headers and redirects |
 | `Api::V1::Documents#show` | TenantApi, API document scope | Parent contract tenant | Existing `Document not found`; orphan documents excluded |
@@ -178,7 +184,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Api::V1::Hello#show/show_auth` | Public / TenantApi | Explicit public skip / API hello policy | Existing public message and authenticated tenant message |
 | `Api::Federation::V1::Requests#show/claim` | Verified Portal and recipient UUID | Federated recipient assigned to caller | Portal mismatch 403, state 409, claimant mismatch 422, bundle mismatch 404; grants unchanged |
 | `Api::Federation::V1::RequestInvitations#create/withdraw` | Portal, caller-bound lookup/scope | Caller portal ownership | Foreign invitation 404; payload/status behavior unchanged |
-| `Federation::Requests#show/claim` | Web public / authenticated user | Preview / claim policy | Existing broker URL checks, remote errors and signing continuation |
+| `Federation::Requests#show/claim` | Web public / authenticated user | Preview skips authorization / `FederationRequestPolicy#claim?` | Existing broker URL checks, remote errors and signing continuation |
 | `Users::Registrations#edit/update/destroy` | Authenticated Devise self resource | `UserPolicy#manage_account?`; `edit_features?` for admin | Non-admin features ignored, admin flag retained; confirmation phrase and model deletion errors unchanged |
 
 Contract deletion remains behind the existing authenticated route even though the
@@ -211,7 +217,7 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 
 | Surface | Preserve during migration |
 | --- | --- |
-| Bundles management and recipients | Policy management, OtherTenantRecord presentation, parent-scoped recipient lookup |
+| Bundles management and recipients | Policy management, other-own-tenant redirect (`redirect_for_other_tenant`), parent-scoped recipient lookup |
 | Bundle received and dashboard | Person-scoped invitations/received requests; selected-tenant sent records; existing state/count filters |
 | Contracts CRUD/actions | Contract tenant ownership, anonymous permissions, anonymous-claim ordering, per-action denial responses |
 | Contract validation history/records and evidence-private download | Selected tenant and archivation feature; refreshability and attachment errors remain distinct |

@@ -361,7 +361,7 @@ class BundlesControllerTest < ActionController::TestCase
       contract
     end
 
-    Bundle.create!(tenant: author.default_tenant, contracts: contracts)
+    Bundle.create!(tenant: author.tenants.sole, contracts: contracts)
   end
 
   def fake_autogram_service_with_signatures(*signatures)

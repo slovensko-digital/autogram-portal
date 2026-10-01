@@ -33,7 +33,7 @@ class Membership < ApplicationRecord
   before_destroy :ensure_not_last_owner, unless: -> { destroyed_by_association }
 
   def last_owner?
-    owner? && tenant.memberships.owner.where.not(id: id).none?
+    owner? && !other_owners?
   end
 
   private
@@ -45,9 +45,11 @@ class Membership < ApplicationRecord
   end
 
   def keeps_an_owner
-    return unless tenant.memberships.owner.where.not(id: id).none?
+    errors.add(:role, :last_owner) unless other_owners?
+  end
 
-    errors.add(:role, :last_owner)
+  def other_owners?
+    tenant.memberships.owner.where.not(id: id).exists?
   end
 
   def ensure_not_last_owner

@@ -5,7 +5,7 @@ class ContractsVersionHistoryTest < ActionController::TestCase
 
   setup do
     @user = users(:one)
-    @user.default_tenant.update_column(:features, [ "archivation" ])
+    @user.tenants.sole.update_column(:features, [ "archivation" ])
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
 
@@ -28,7 +28,7 @@ class ContractsVersionHistoryTest < ActionController::TestCase
   end
 
   test "content_versions is forbidden without archivation feature" do
-    @user.default_tenant.update_column(:features, [])
+    @user.tenants.sole.update_column(:features, [])
     contract = create_contract_with_versions
 
     get :content_versions, params: { id: contract.uuid }
@@ -46,7 +46,7 @@ class ContractsVersionHistoryTest < ActionController::TestCase
     )
 
     Contract.create!(
-      tenant: @user.default_tenant,
+      tenant: @user.tenants.sole,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     ).tap do |contract|

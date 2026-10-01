@@ -125,8 +125,8 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
 
     follow_redirect!
     assert_response :success
-    assert_select "form[action='#{tenant_selection_path(tenant_id: @tenant.id)}']"
-    assert_select "form[action='#{tenant_selection_path(tenant_id: tenants(:two).id)}']"
+    assert_select "form[action='#{tenant_selection_path(tenant_id: @tenant.id)}']", text: /#{I18n.t("tenant_selections.show.personal")}/
+    assert_select "form[action='#{tenant_selection_path(tenant_id: tenants(:two).id)}']", text: /#{tenants(:two).name}/
 
     post tenant_selection_path(tenant_id: tenants(:two).id)
     assert_redirected_to bundles_path
@@ -242,11 +242,11 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
   end
 
 
-  test "owner of a pro tenant invites a new user without a personal tenant" do
+  test "owner of a pro tenant invites a new user who also gets a personal tenant" do
     @tenant.update!(plan: :pro)
     sign_in @owner
 
-    assert_difference -> { User.count } => 1, -> { Tenant.count } => 0 do
+    assert_difference -> { User.count } => 1, -> { Tenant.count } => 1 do
       assert_emails 1 do
         post tenant_memberships_path, params: { membership: { email: "New.Member@Example.com", role: "member" } }
       end
@@ -254,7 +254,8 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to edit_user_registration_path(anchor: "organization")
     invited = User.find_by!(email: "new.member@example.com")
-    assert_equal [ @tenant ], invited.tenants.to_a
+    assert_includes invited.tenants, @tenant
+    assert invited.tenants.where.not(id: @tenant.id).sole.basic?
     assert_not invited.confirmed?
     mail = ActionMailer::Base.deliveries.last
     assert_equal [ "new.member@example.com" ], mail.to
@@ -370,8 +371,7 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_nil @tenant.api_token_public_key
 
     patch tenant_path
-    assert_redirected_to edit_user_registration_path(anchor: "organization")
-    assert_equal I18n.t("tenants.update.success"), flash[:notice]
+    assert_response :bad_request
   end
 
   test "member cannot remove another membership" do
@@ -441,46 +441,15 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "user without any membership is told so and can create a personal tenant" do
-    Membership.where(user: @colleague).delete_all
-    sign_in @colleague
-
-    assert_no_difference -> { Tenant.count } do
-      get dashboard_path
-    end
-    assert_redirected_to tenant_selection_path
-
-    follow_redirect!
-    assert_select "h1", I18n.t("tenant_selections.show.no_tenant_title")
-    assert_select "form[action='#{personal_tenant_path}']"
-
-    assert_difference -> { Tenant.count } => 1 do
-      post personal_tenant_path
-    end
-    assert_redirected_to dashboard_path
-    tenant = @colleague.reload.tenants.sole
-    assert tenant.basic?
-    assert tenant.owner?(@colleague)
-  end
-
-  test "personal tenant cannot be created while the user has a tenant" do
-    sign_in @owner
-
-    assert_no_difference -> { Tenant.count } do
-      post personal_tenant_path
-    end
-  end
-
-  test "inviting an existing user removes their unused personal tenant" do
+  test "inviting an existing user keeps their personal tenant" do
     @tenant.update!(plan: :pro)
     newcomer = User.create!(email: "newcomer@example.com")
     personal = newcomer.tenants.sole
     sign_in @owner
 
-    post tenant_memberships_path, params: { membership: { email: newcomer.email } }
+    post tenant_memberships_path, params: { membership: { email: " NewComer@example.com " } }
 
-    assert_not Tenant.exists?(personal.id)
-    assert_equal [ @tenant ], newcomer.reload.tenants.to_a
+    assert_equal [ personal, @tenant ].sort_by(&:id), newcomer.reload.tenants.sort_by(&:id)
   end
 
   private

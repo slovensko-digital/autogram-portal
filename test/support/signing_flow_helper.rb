@@ -95,10 +95,16 @@ module SigningFlowHelper
   end
 
   def confirmed_user(email, tenant: nil, role: :member)
-    user = User.create!(email: email, confirmed_at: Time.current, skip_personal_tenant: tenant.present?)
-    tenant&.add_member!(user, role: role)
+    user = User.create!(email: email, confirmed_at: Time.current)
+    tenant&.memberships&.create!(user: user, role: role)
     accept_current_policies!(user)
     user
+  end
+
+  # Signs +user+ in and picks +tenant+, as users with several tenants must.
+  def sign_in_with_tenant(user, tenant)
+    sign_in user
+    post tenant_selection_path(tenant_id: tenant.id)
   end
 
   def accept_current_policies!(user)

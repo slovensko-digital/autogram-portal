@@ -1,13 +1,11 @@
 class Received::BundlePolicy < ApplicationPolicy
   def index?
-    context.is_a?(AuthorizationContext::Web) && context.user.present?
+    signed_in?
   end
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      return scope.none unless context.is_a?(AuthorizationContext::Web) && context.user.present?
-
-      scope.recipient_user(context.user)
+      signed_in? ? scope.recipient_user(context.user) : scope.none
     end
   end
 end

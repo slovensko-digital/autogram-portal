@@ -74,7 +74,7 @@ class Contract < ApplicationRecord
   after_create :associate_with_bundle_recipients
   after_commit :schedule_existing_signed_content_capture, on: :create
 
-  scope :anonymous, -> { where(tenant_id: nil) }
+  scope :anonymous, -> { where(tenant_id: nil, bundle_id: nil) }
   scope :awaiting_signature_for, ->(user) {
     joins(signer_contracts: { signer: :recipient })
       .where(signer_contracts: { signed_at: nil, declined_at: nil })
@@ -92,10 +92,10 @@ class Contract < ApplicationRecord
     ALLOWED_METHODS
   end
 
-  # Contracts without a tenant were uploaded without an account. Bundled
-  # contracts always belong to the tenant of their bundle.
+  # Contracts uploaded without an account. Bundled contracts always belong to
+  # the tenant of their bundle, so they are never anonymous.
   def anonymous?
-    tenant.nil?
+    tenant.nil? && bundle.nil?
   end
 
   # True when +tenant+ (the tenant the user works in) owns the contract.
@@ -344,10 +344,6 @@ class Contract < ApplicationRecord
 
   def should_notify_author?
     author_notifications_enabled? && tenant.present? && bundle.nil? && !awaiting_signature?
-  end
-
-  def author_notification_recipients(except: nil)
-    tenant.owners.where.not(id: except&.id).to_a
   end
 
   def short_uuid

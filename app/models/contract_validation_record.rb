@@ -45,7 +45,6 @@ class ContractValidationRecord < ApplicationRecord
   validates :source_contract_uuid, uniqueness: { scope: [ :tenant_id, :source_version_number ] }
   validates :document_hash, format: { with: /\A\h{64}\z/ }
 
-
   scope :recent, -> { order(updated_at: :desc) }
   scope :expiring_before, ->(time) { where.not(expires_at: nil).where(expires_at: Time.current..time) }
   scope :expiring_within, ->(time = WARNING_WINDOW.from_now) { where.not(expires_at: nil).where(expires_at: Time.current..time) }

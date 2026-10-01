@@ -619,7 +619,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   def create_bundle_contract_with_session(options: nil)
     author = users(:one)
     contract = create_contract_without_session
-    bundle = Bundle.create!(tenant: author.default_tenant, contracts: [ contract ], publicly_visible: true)
+    bundle = Bundle.create!(tenant: author.tenants.sole, contracts: [ contract ], publicly_visible: true)
 
     signer = AnonymousSigner.create!
     signer_contract = signer.signer_contracts.create!(contract: contract)

@@ -22,6 +22,6 @@ class TenantPolicy < ApplicationPolicy
   private
 
   def selected_tenant?
-    context.is_a?(AuthorizationContext::Web) && context.user.present? && record.present? && context.tenant == record
+    in_tenant? && context.tenant == record
   end
 end

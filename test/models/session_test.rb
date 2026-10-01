@@ -172,7 +172,7 @@ class SessionTest < ActiveSupport::TestCase
     )
 
     Contract.create!(
-      tenant: user&.default_tenant,
+      tenant: user&.tenants&.sole,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",

@@ -1,6 +1,7 @@
 class DocumentsController < ApplicationController
   before_action :set_document
-  before_action :authorize_document!
+  # Documents are open to anyone with their UUID.
+  before_action :skip_authorization
   before_action :allow_iframe, only: [ :pdf_preview ]
   skip_before_action :ensure_tenant_selected, only: [ :pdf_preview ], if: -> { params[:iframe].present? }
 
@@ -47,14 +48,6 @@ class DocumentsController < ApplicationController
 
   def set_document
     @document = Document.find_by!(uuid: params[:id])
-  end
-
-  def authorize_document!
-    authorize @document
-  end
-
-  def document_params
-    params.require(:document).permit(:blob)
   end
 
   def visualization_errors(result)

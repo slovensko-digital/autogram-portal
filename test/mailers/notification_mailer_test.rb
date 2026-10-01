@@ -34,7 +34,7 @@ class NotificationMailerTest < ActionMailer::TestCase
     )
 
     contract = Contract.new(
-      tenant: users(:one).default_tenant,
+      tenant: users(:one).tenants.sole,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",

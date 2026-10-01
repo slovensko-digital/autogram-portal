@@ -1,6 +1,7 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
-  before_action :authorize_public_contract!, only: [ :show_bundle, :actions, :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session, :signed_document, :validate ]
+  # Anyone with the contract UUID may view and sign it.
+  before_action :skip_authorization, only: [ :show_bundle, :actions, :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session, :signed_document, :validate ]
   before_action :claim_pending_anonymous_contract, only: [ :show, :actions ]
   before_action :authorize_contract!, only: [ :show, :update, :destroy ]
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
@@ -102,7 +103,7 @@ class ContractsController < ApplicationController
     if params[:target_step] == "request_signature"
       authorize @contract, :request_signatures?
     else
-      authorize @contract, :public_access?
+      skip_authorization
     end
 
     @next_step = params[:target_step]
@@ -310,10 +311,6 @@ class ContractsController < ApplicationController
 
   def authorize_contract!
     authorize @contract
-  end
-
-  def authorize_public_contract!
-    authorize @contract, :public_access?
   end
 
   def render_contract_denial(error)

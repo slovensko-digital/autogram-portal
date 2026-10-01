@@ -8,6 +8,7 @@ require "test_helper"
 #  api_token_public_key :string
 #  features             :string           default([]), not null, is an Array
 #  name                 :string           not null
+#  personal             :boolean          default(FALSE), not null
 #  plan                 :string           default("basic"), not null
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
@@ -27,10 +28,19 @@ class TenantTest < ActiveSupport::TestCase
     assert_equal tenant, user.last_tenant
   end
 
-  test "invited user does not get a personal tenant" do
-    user = User.create!(email: "invited-#{SecureRandom.hex(4)}@example.com", skip_personal_tenant: true)
+  test "invited user gets a personal tenant too" do
+    user = User.find_or_invite!("invited-#{SecureRandom.hex(4)}@example.com")
 
-    assert_empty user.tenants
+    assert user.tenants.sole.basic?
+    assert user.tenants.sole.owner?(user)
+  end
+
+  test "invitation finds an existing user regardless of email case and whitespace" do
+    user = User.create!(email: "existing-#{SecureRandom.hex(4)}@example.com")
+
+    assert_no_difference -> { User.count } do
+      assert_equal user, User.find_or_invite!("  #{user.email.upcase} ")
+    end
   end
 
   test "basic tenant accepts only a single member" do
@@ -74,40 +84,15 @@ class TenantTest < ActiveSupport::TestCase
     assert tenant.update(api_token_public_key: OpenSSL::PKey::RSA.generate(2048).public_to_pem)
   end
 
-  test "adding a member removes their unused personal basic tenant" do
+  test "joining an organization keeps the personal tenant" do
     tenant = tenants(:one)
     tenant.update!(plan: :pro)
     user = User.create!(email: "joining-#{SecureRandom.hex(4)}@example.com")
     personal = user.tenants.sole
 
-    tenant.add_member!(user)
+    tenant.memberships.create!(user: user)
 
-    assert_not Tenant.exists?(personal.id)
-    assert_equal [ tenant ], user.reload.tenants.to_a
-  end
-
-  test "adding a member keeps a personal tenant that holds documents" do
-    tenant = tenants(:one)
-    tenant.update!(plan: :pro)
-    user = User.create!(email: "joining-#{SecureRandom.hex(4)}@example.com")
-    personal = user.tenants.sole
-    create_bundle(tenant: personal)
-
-    tenant.add_member!(user)
-
-    assert Tenant.exists?(personal.id)
-    assert_equal 2, user.reload.tenants.count
-  end
-
-  test "adding a member keeps other shared or pro tenants" do
-    tenant = tenants(:one)
-    tenant.update!(plan: :pro)
-    other = tenants(:two)
-    other.update!(plan: :pro)
-
-    tenant.add_member!(users(:two))
-
-    assert Tenant.exists?(other.id)
+    assert_equal [ personal, tenant ].sort_by(&:id), user.reload.tenants.sort_by(&:id)
   end
 
   test "last owner membership cannot be destroyed" do

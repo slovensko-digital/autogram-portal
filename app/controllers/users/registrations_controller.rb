@@ -4,6 +4,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   before_action :configure_permitted_parameters
   before_action :authorize_account!, only: [ :edit, :update, :destroy ]
   before_action :skip_authorization, only: [ :new, :create, :cancel ]
+  before_action :set_tenant_memberships, only: [ :edit, :update ]
   prepend_after_action :pundit_reset!, only: [ :destroy ]
 
   def create
@@ -36,6 +37,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def authorize_account!
     authorize current_user, :manage_account?
+  end
+
+  # The settings page also shows the organization the user works in.
+  def set_tenant_memberships
+    @tenant_memberships = current_tenant&.memberships&.includes(:user)&.order(:created_at)
   end
 
   def configure_permitted_parameters

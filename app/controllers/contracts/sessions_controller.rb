@@ -339,14 +339,14 @@ class Contracts::SessionsController < ApplicationController
       contract: @contract,
       session: @session,
       signer_contract: @signer_contract,
-      token_authorized: [ "parameters", "download", "upload" ].include?(action_name) && session_token_authorized?
+      token_authorized: session_token_authorized?
     )
     authorize [ :signing, access ]
   end
 
   def session_token_authorized?
     token = params[:session_token].presence
-    return false unless token
+    return false unless token && @session
 
     SessionAccessToken.valid?(token: token, contract: @contract, session: @session)
   end

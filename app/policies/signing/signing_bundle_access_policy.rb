@@ -21,7 +21,7 @@ class Signing::SigningBundleAccessPolicy < ApplicationPolicy
   private
 
   def web_context?
-    context.is_a?(AuthorizationContext::Web) && record.bundle.present?
+    web? && record.bundle.present?
   end
 
   def bound_recipient?
