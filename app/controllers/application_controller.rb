@@ -4,8 +4,23 @@ class ApplicationController < ActionController::Base
 
   before_action :set_locale
   before_action :enforce_current_policy_consent, if: :user_signed_in?
+  before_action :ensure_tenant_selected, if: :user_signed_in?
+
+  # Raised for a record of another tenant the user belongs to; they have to sign
+  # in to that tenant to work with it.
+  class OtherTenantRecord < StandardError
+    attr_reader :tenant
+
+    def initialize(tenant)
+      @tenant = tenant
+      super("Record belongs to tenant #{tenant.id}")
+    end
+  end
 
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+  rescue_from OtherTenantRecord, with: :render_other_tenant_record
+
+  helper_method :current_tenant
   rescue_from ActionController::RoutingError, with: :render_not_found
 
   def render_not_found
@@ -42,11 +57,79 @@ class ApplicationController < ActionController::Base
 
   protected
 
+  # The tenant the signed-in user currently works in. Lists and newly created
+  # records are scoped to it. Users with several tenants pick one after signing
+  # in; a single tenant is picked for them.
+  def current_tenant
+    return unless current_user
+    return @current_tenant if defined?(@current_tenant) && @current_tenant
+
+    @current_tenant = resolve_current_tenant
+  end
+
+  # A user is signed in only together with a tenant. Someone who authenticated
+  # but still has to pick one (or create one) is signed out again and waits on
+  # the tenant selection page, which completes the sign-in.
+  def ensure_tenant_selected
+    return if devise_controller? || params[:iframe].present? || current_tenant
+
+    session[:tenant_return_to] = request.fullpath if request.get? && request.format.html?
+    defer_sign_in_until_tenant_selected!
+    redirect_to tenant_selection_path
+  end
+
+  def defer_sign_in_until_tenant_selected!
+    session[:pending_tenant_user_id] = current_user.id
+    session[:pending_tenant_user_at] = Time.current.to_i
+    flash.delete(:notice)
+    sign_out(:user)
+  end
+
+  # Picks the tenant for the rest of the session; it stays until sign out.
+  def select_tenant!(tenant)
+    return unless current_user&.member_of?(tenant)
+
+    session[:current_tenant_id] = tenant.id
+    current_user.update_column(:last_tenant_id, tenant.id) if current_user.last_tenant_id != tenant.id
+    @current_tenant = tenant
+  end
+
+  # True when the current tenant owns +record+. A record of another tenant the
+  # user belongs to explains which tenant to sign in to instead.
+  def tenant_manages?(record)
+    return false if record.nil?
+    return true if record.managed_by?(current_tenant)
+
+    owning_tenant = record.respond_to?(:owning_tenant) ? record.owning_tenant : record.tenant
+    raise OtherTenantRecord, owning_tenant if current_user&.member_of?(owning_tenant)
+
+    false
+  end
+
+  def render_other_tenant_record(error)
+    redirect_to dashboard_path, alert: t("tenants.alerts.other_tenant_record", name: error.tenant.name)
+  end
+
+  def tenant_settings_path
+    edit_user_registration_path(anchor: "organization")
+  end
+
   def after_sign_in_path_for(resource)
     stored_location_for(resource) || pending_contract_path || super
   end
 
   private
+
+  def resolve_current_tenant
+    tenants = current_user.tenants
+    tenant = tenants.find_by(id: session[:current_tenant_id]) if session[:current_tenant_id]
+    tenant ||= tenants.first if tenants.one?
+    return unless tenant
+
+    session[:current_tenant_id] = tenant.id
+    current_user.update_column(:last_tenant_id, tenant.id) if current_user.last_tenant_id != tenant.id
+    tenant
+  end
 
   def pending_contract_path
     contract_uuid = session[:pending_contract_claim_uuid]

@@ -4,8 +4,8 @@ require "openssl"
 
 class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
   setup do
-    @owner = users(:one)
-    @other = users(:two)
+    @owner = tenants(:one)
+    @other = tenants(:two)
 
     @owner_key = attach_api_public_key!(@owner)
     @other_key = attach_api_public_key!(@other)
@@ -17,7 +17,7 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     @other_document = @other_contract.documents.first
   end
 
-  test "api contract show rejects cross-user access" do
+  test "api contract show rejects cross-tenant access" do
     get "/api/v1/contracts/#{@other_contract.uuid}", headers: bearer_headers_for(@owner, @owner_key)
 
     assert_response :not_found
@@ -29,7 +29,7 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "api document show rejects cross-user access" do
+  test "api document show rejects cross-tenant access" do
     get "/api/v1/documents/#{@other_document.uuid}", headers: bearer_headers_for(@owner, @owner_key)
 
     assert_response :not_found
@@ -55,7 +55,7 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "api returns 401 for token with non matching algorithm to user" do
+  test "api returns 401 for token with non matching algorithm to tenant key" do
     unsupported_key = OpenSSL::PKey::EC.generate("prime256v1")
 
     get "/api/v1/contracts/#{@owner_contract.uuid}", headers: bearer_headers_for(@owner, unsupported_key, algorithm: "ES256")
@@ -63,9 +63,24 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "api returns 401 when the tenant has api access disabled" do
+    @owner.update_column(:features, [])
+
+    get "/api/v1/contracts/#{@owner_contract.uuid}", headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :unauthorized
+  end
+
+  test "api hello_auth identifies the tenant" do
+    get "/api/v1/hello_auth", headers: bearer_headers_for(@owner, @owner_key)
+
+    assert_response :success
+    assert_equal "Hello, #{@owner.id}!", response.parsed_body["message"]
+  end
+
   private
 
-  def attach_api_public_key!(user, algorithm: "RS256")
+  def attach_api_public_key!(tenant, algorithm: "RS256")
     key = case algorithm
     when "ES256"
       OpenSSL::PKey::EC.generate("prime256v1")
@@ -75,14 +90,14 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
       raise ArgumentError, "Unsupported algorithm: #{algorithm}"
     end
 
-    user.update_column(:api_token_public_key, key.public_to_pem)
+    tenant.update_columns(api_token_public_key: key.public_to_pem, features: [ "api" ])
     key
   end
 
-  def bearer_headers_for(user, key, algorithm: "RS256")
+  def bearer_headers_for(tenant, key, algorithm: "RS256")
     token = JWT.encode(
       {
-        sub: user.id.to_s,
+        sub: tenant.id.to_s,
         exp: 10.minutes.from_now.to_i,
         jti: SecureRandom.hex(16)
       },
@@ -96,7 +111,7 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     }
   end
 
-  def create_contract_for(user, filename:)
+  def create_contract_for(tenant, filename:)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
       filename: filename,
@@ -104,7 +119,7 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     )
 
     contract = Contract.new(
-      user: user,
+      tenant: tenant,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",

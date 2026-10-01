@@ -77,7 +77,7 @@ class RecipientAccessGrantTest < ActiveSupport::TestCase
       }
     )
 
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     bundle.recipients.create!(email: "recipient@example.com", locale: "en")
   end
 

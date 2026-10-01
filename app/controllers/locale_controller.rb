@@ -1,4 +1,6 @@
 class LocaleController < ApplicationController
+  skip_before_action :ensure_tenant_selected
+
   def switch
     locale = params[:locale]&.to_sym
 

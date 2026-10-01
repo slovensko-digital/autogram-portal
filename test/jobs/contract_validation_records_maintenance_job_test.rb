@@ -28,7 +28,7 @@ class ContractValidationRecordsMaintenanceJobTest < ActiveJob::TestCase
   private
 
   def create_contract_with_versions
-    users(:one).update_column(:features, [ "archivation" ])
+    tenants(:one).update_column(:features, [ "archivation" ])
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
       filename: "maintenance-job-contract.pdf",
@@ -36,7 +36,7 @@ class ContractValidationRecordsMaintenanceJobTest < ActiveJob::TestCase
     )
 
     Contract.create!(
-      user: users(:one),
+      tenant: users(:one).default_tenant,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     ).tap do |contract|
@@ -58,7 +58,7 @@ class ContractValidationRecordsMaintenanceJobTest < ActiveJob::TestCase
 
   def create_record_for(contract:, version:, source_version_number:)
     ContractValidationRecord.create!(
-      user: contract.user,
+      tenant: contract.tenant,
       contract: contract,
       contract_content_version: version,
       source_contract_uuid: contract.uuid,

@@ -8,7 +8,7 @@
       <% unless params[:iframe].present? %>
         <div class="w-full flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div class="flex-1">
-            <% if @contract.user && (@contract.user != current_user) %>
+            <% if !@contract.anonymous? && !@contract.managed_by?(current_tenant) %>
               <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title_requested') %></h1>
               <p class="text-gray-600"><%= t('.subtitle_requested') %></p>
             <% else %>
@@ -28,7 +28,7 @@
             </div>
           <% end %>
 
-          <% if @contract.user.nil? || current_user == @contract.user %>
+          <% if @contract.anonymous? || @contract.managed_by?(current_tenant) %>
             <%=link_to contract_path(@contract),
                   class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
               <%=  t('actions.edit') %>
@@ -58,7 +58,7 @@
         <% end %>
       <% end %>
 
-      <% if @contract.awaiting_signature? || current_user == @contract.user || @contract.user.nil? %>
+      <% if @contract.awaiting_signature? || @contract.anonymous? || @contract.managed_by?(current_tenant) %>
         <div class="w-full">
           <%= render 'signing_method_choice', contract: @contract, recipient: @recipient %>
         </div>

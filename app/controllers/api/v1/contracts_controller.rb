@@ -3,7 +3,7 @@ class Api::V1::ContractsController < ApiController
 
   def create
     @contract = Contract.new(contract_params)
-    @contract.user = current_user
+    @contract.tenant = current_tenant
     if @contract.save
       render status: :created
     else
@@ -50,7 +50,7 @@ class Api::V1::ContractsController < ApiController
   def accessible_contracts
     Contract
       .left_outer_joins(:bundle)
-      .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
+      .where("contracts.tenant_id = :tenant_id OR bundles.tenant_id = :tenant_id", tenant_id: current_tenant.id)
   end
 
   def contract_params

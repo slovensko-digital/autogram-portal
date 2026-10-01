@@ -15,15 +15,15 @@ class BundlesController < ApplicationController
     @state = params[:state].presence_in(%w[awaiting completed declined no_recipients])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    bundles = current_user.bundles
+    bundles = current_tenant.bundles
 
-    awaiting_scope = current_user.bundles
+    awaiting_scope = current_tenant.bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
                                  .merge(Recipient.active.visible)
                                  .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                  .distinct
 
-    declined_scope = current_user.bundles
+    declined_scope = current_tenant.bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
                                  .merge(Recipient.active.visible)
                                  .where.not(signer_contracts: { declined_at: nil })
@@ -50,7 +50,7 @@ class BundlesController < ApplicationController
       bundles
     end
 
-    @bundles = bundles.includes(:contracts, :author, :recipients).order(created_at: order_dir)
+    @bundles = bundles.includes(:contracts, :tenant, :recipients).order(created_at: order_dir)
   end
 
   def received
@@ -110,7 +110,7 @@ class BundlesController < ApplicationController
       recipient_bundles
     end
 
-    @bundles = @bundles.includes(:contracts, :author).order(created_at: order_dir)
+    @bundles = @bundles.includes(:contracts, :tenant).order(created_at: order_dir)
 
     @recipients_by_bundle = Recipient.active.visible.where(user: current_user, bundle_id: @bundles.map(&:id))
                                      .index_by(&:bundle_id)
@@ -226,7 +226,8 @@ class BundlesController < ApplicationController
   private
 
   def set_bundle
-    @bundle = Bundle.find_by!(uuid: params[:id], author: current_user)
+    @bundle = Bundle.find_by!(uuid: params[:id])
+    raise ActiveRecord::RecordNotFound unless tenant_manages?(@bundle)
   end
 
   def bundle_params
@@ -279,13 +280,18 @@ class BundlesController < ApplicationController
       @recipient = @bundle&.recipients&.active&.find_by(user: current_user) if @bundle
     end
 
-    @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || current_user&.bundles&.find_by_uuid(params[:id])
+    @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || managed_bundle(params[:id])
 
-    if current_user && @bundle && current_user == @bundle.author && @recipient.nil?
+    if @bundle&.managed_by?(current_tenant) && @recipient.nil?
       @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @bundle, user: current_user)
     end
 
     raise ActiveRecord::RecordNotFound unless @bundle
+  end
+
+  def managed_bundle(uuid)
+    bundle = Bundle.find_by_uuid(uuid) if current_user
+    bundle if bundle&.managed_by?(current_tenant)
   end
 
   def render_sign_withdrawn_if_needed

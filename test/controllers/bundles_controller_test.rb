@@ -320,7 +320,6 @@ class BundlesControllerTest < ActionController::TestCase
       )
 
       contract = Contract.create!(
-        user: author,
         allowed_methods: [ "qes" ],
         documents_attributes: [ { blob: blob } ],
         signature_parameters_attributes: {
@@ -341,7 +340,7 @@ class BundlesControllerTest < ActionController::TestCase
       contract
     end
 
-    Bundle.create!(author: author, contracts: contracts)
+    Bundle.create!(tenant: author.default_tenant, contracts: contracts)
   end
 
   def fake_autogram_service_with_signatures(*signatures)

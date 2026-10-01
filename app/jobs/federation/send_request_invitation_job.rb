@@ -28,7 +28,7 @@ module Federation
           issuer: FederationConfiguration.static_issuer,
           name: FederationConfiguration.portal_name
         },
-        authorName: recipient.bundle.author.display_name,
+        authorName: recipient.bundle.sender_display_name,
         recipientEmail: recipient.email,
         status: "awaiting",
         contracts: recipient.bundle.contracts.map do |contract|

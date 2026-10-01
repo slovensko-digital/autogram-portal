@@ -23,6 +23,12 @@
 #  fk_rails_...  (signer_contract_id => signer_contracts.id)
 #
 class Session < ApplicationRecord
+  class SignatureNoLongerRequiredError < StandardError
+    def message
+      I18n.t("bundles.sign.signature_no_longer_required")
+    end
+  end
+
   belongs_to :signer_contract
 
   delegate :contract, to: :signer_contract
@@ -139,6 +145,8 @@ class Session < ApplicationRecord
   end
 
   def accept_signed_file(signed_file)
+    raise SignatureNoLongerRequiredError if signer_contract.reload.superseded?
+
     decoded_signed_file = decode_signed_file!(signed_file)
     validation_result = validate_signed_file!(decoded_signed_file)
 

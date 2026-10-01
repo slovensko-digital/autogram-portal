@@ -28,7 +28,7 @@ class SignatureEvidenceVerificationsController < ApplicationController
     @reference = params[:reference].to_s.strip
     @signature_evidence_record = find_signature_evidence_record(@reference)
     return head :not_found if @signature_evidence_record.blank?
-    return head :forbidden unless @signature_evidence_record.private_evidence_accessible_by?(current_user)
+    return head :forbidden unless @signature_evidence_record.private_evidence_accessible_by?(current_tenant)
     return head :not_found unless @signature_evidence_record.private_evidence_package.attached?
 
     send_data @signature_evidence_record.private_evidence_package.download,

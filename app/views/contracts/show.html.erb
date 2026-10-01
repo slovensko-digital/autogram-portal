@@ -25,7 +25,7 @@
                 </svg>
                 <%= t('actions.download') %>
               <% end %>
-              <% if current_user&.archivation_enabled? %>
+              <% if @contract.managed_by?(current_tenant) && @contract.owning_tenant.archivation_enabled? %>
                 <%= link_to content_versions_contract_path(@contract),
                             class: "inline-flex items-center px-4 py-2 border border-blue-300 rounded-md text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
                   <%= t('.version_history') %>

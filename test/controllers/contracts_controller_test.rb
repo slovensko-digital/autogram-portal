@@ -39,7 +39,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get contract_path(contract)
 
     assert_response :success
-    assert_equal user, contract.reload.user
+    assert_equal user.default_tenant, contract.reload.tenant
   end
 
   test "pending claim only applies to the selected contract" do
@@ -52,17 +52,17 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     sign_in user
 
     get contract_path(other_contract)
-    assert_nil other_contract.reload.user
+    assert_nil other_contract.reload.tenant
 
     get contract_path(pending_contract)
-    assert_equal user, pending_contract.reload.user
+    assert_equal user.default_tenant, pending_contract.reload.tenant
   end
 
   test "owned and bundled contracts cannot enter anonymous claim flow" do
     owned_contract = create_pdf_contract(allowed_methods: [ "qes" ])
-    owned_contract.update!(user: users(:one))
+    owned_contract.update!(tenant: tenants(:one))
     bundled_contract = create_pdf_contract(allowed_methods: [ "qes" ])
-    Bundle.create!(author: users(:one), contracts: [ bundled_contract ])
+    Bundle.create!(tenant: tenants(:one), contracts: [ bundled_contract ])
 
     post authenticate_for_actions_contract_path(owned_contract)
     assert_response :forbidden
@@ -93,7 +93,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to contract_path(contract)
 
     follow_redirect!
-    assert_equal user, contract.reload.user
+    assert_equal user.default_tenant, contract.reload.tenant
   end
 
   test "signature apps show incompatible qscd choices disabled without launch links" do
@@ -580,7 +580,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
   def create_bundle_contract_with_prepared_signature_field(allowed_methods: [ "qes" ], mobile_phone: nil)
     contract = create_pdf_contract(allowed_methods: allowed_methods)
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en", mobile_phone: mobile_phone)
 
     with_autogram_service(fake_unsigned_pades_validation_service) do
@@ -606,7 +606,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
   def create_bundle_contract_with_two_prepared_signature_fields
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     first_recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     second_recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 

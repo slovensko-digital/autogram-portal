@@ -34,7 +34,7 @@ class NotificationMailerTest < ActionMailer::TestCase
     )
 
     contract = Contract.new(
-      user: users(:one),
+      tenant: users(:one).default_tenant,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",
@@ -44,7 +44,7 @@ class NotificationMailerTest < ActionMailer::TestCase
     contract.save!
 
     bundle = Bundle.new(
-      author: users(:one),
+      tenant: tenants(:one),
       uuid: SecureRandom.uuid,
       note: note,
       contracts: [ contract ]

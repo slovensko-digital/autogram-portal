@@ -1,4 +1,5 @@
 class OauthConsentsController < ApplicationController
+  skip_before_action :ensure_tenant_selected
   skip_before_action :authenticate_user!, raise: false
   skip_before_action :enforce_current_policy_consent
 

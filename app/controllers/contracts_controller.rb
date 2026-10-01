@@ -15,7 +15,7 @@ class ContractsController < ApplicationController
     @state = params[:state].presence_in(%w[awaiting completed])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    contracts = current_user.contracts.standalone
+    contracts = current_tenant.contracts.standalone
     contracts = case @state
     when "awaiting"
       contracts.left_outer_joins(:content_versions).where(contract_content_versions: { id: nil })
@@ -35,7 +35,7 @@ class ContractsController < ApplicationController
 
   def create
     @contract = Contract.new(
-      user: current_user,
+      tenant: current_tenant,
       author_notifications_enabled: true,
       documents: [ Document.new(params.require(:document).permit(:blob)) ]
     )
@@ -64,7 +64,7 @@ class ContractsController < ApplicationController
   end
 
   def content_versions
-    return head :forbidden unless author_of_contract? && current_user&.archivation_enabled?
+    return head :forbidden unless author_of_contract? && @contract.owning_tenant.archivation_enabled?
 
     @content_versions = @contract.signed_document_versions.with_attached_file
   end
@@ -75,7 +75,7 @@ class ContractsController < ApplicationController
 
   def authenticate_for_actions
     return redirect_to actions_contract_path(@contract) if current_user.present?
-    return head :forbidden unless @contract.user.nil? && @contract.bundle.nil?
+    return head :forbidden unless @contract.anonymous?
 
     session[:pending_contract_claim_uuid] = @contract.uuid
     store_location_for(:user, contract_path(@contract))
@@ -260,7 +260,7 @@ class ContractsController < ApplicationController
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
-        bundle = Bundle.create!(contracts: [ @contract ], author: current_user, author_notifications_enabled: true)
+        bundle = Bundle.create!(contracts: [ @contract ], tenant: @contract.owning_tenant, author_notifications_enabled: true)
         redirect_to bundle
       elsif params[:next_step] == "sign"
         redirect_to sign_contract_path(@contract)
@@ -297,14 +297,14 @@ class ContractsController < ApplicationController
     session.delete(:pending_contract_claim_uuid)
     @contract.with_lock do
       @contract.reload
-      @contract.update!(user: current_user) if @contract.user.nil? && @contract.bundle.nil?
+      @contract.update!(tenant: current_tenant) if @contract.anonymous?
     end
   end
 
   def verify_author
-    if @contract.user && @contract.user != current_user
-      redirect_to new_contract_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
-    end
+    return if @contract.anonymous? || tenant_manages?(@contract)
+
+    redirect_to new_contract_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
   end
 
   def set_contract
@@ -328,7 +328,7 @@ class ContractsController < ApplicationController
       @recipient = @contract.recipients.active.find_by(user: current_user) ||
                    @contract.recipients.active.find_by(email: current_user.email)
 
-      if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
+      if @recipient.nil? && @contract.bundle.present? && @contract.bundle.managed_by?(current_tenant)
         @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
@@ -341,13 +341,19 @@ class ContractsController < ApplicationController
     elsif current_user
       user_signer = UserSigner.find_or_create_by!(user: current_user)
       @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
-    elsif @contract.user.nil?
+    elsif @contract.anonymous?
       @signer_contract = @contract.signer_contracts
                                   .joins(:signer)
                                   .find_by(signers: { type: "AnonymousSigner" })
       unless @signer_contract
         @signer_contract = AnonymousSigner.create!.signer_contracts.create!(contract: @contract)
       end
+    end
+
+    if @signer_contract&.superseded? && @contract.bundle
+      redirect_to sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe]),
+                  notice: t("bundles.sign.signature_no_longer_required")
+      return
     end
 
     return unless @signer_contract&.signed?
@@ -549,11 +555,7 @@ class ContractsController < ApplicationController
   end
 
   def author_of_contract?
-    if @contract.bundle
-      return current_user.present? && @contract.bundle.author == current_user
-    end
-
-    current_user.present? && @contract.user == current_user
+    @contract.managed_by?(current_tenant)
   end
 
   def ensure_visual_signing_allowed

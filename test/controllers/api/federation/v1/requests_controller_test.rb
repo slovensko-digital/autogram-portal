@@ -121,7 +121,7 @@ class Api::Federation::V1::RequestsControllerTest < ActionDispatch::IntegrationT
       }
     )
 
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ], note: "Please sign")
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ], note: "Please sign")
 
     bundle.recipients.create!(
       email: "recipient@partner.example",

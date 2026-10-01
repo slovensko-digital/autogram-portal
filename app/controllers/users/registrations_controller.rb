@@ -19,7 +19,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
 
     resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
-    resource.destroy
+    unless resource.destroy
+      redirect_to edit_user_registration_path, alert: resource.errors.full_messages.to_sentence
+      return
+    end
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
     set_flash_message! :notice, :destroyed
     yield resource if block_given?
@@ -30,7 +33,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :agree_to_policies ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, :api_token_public_key, { features: [] } ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, { features: [] } ])
   end
 
   def update_resource(resource, params)

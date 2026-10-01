@@ -72,7 +72,7 @@ class Api::Federation::V1::RequestsController < FederationApiController
         issuer: FederationConfiguration.issuer(request: request),
         name: FederationConfiguration.portal_name
       },
-      authorName: @recipient.bundle.author.display_name,
+      authorName: @recipient.bundle.sender_display_name,
       recipientEmail: @recipient.email,
       recipientPortalId: @recipient.portal_instance.uuid,
       status: "awaiting",

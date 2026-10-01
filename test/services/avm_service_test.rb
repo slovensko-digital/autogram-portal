@@ -86,7 +86,7 @@ class AvmServiceTest < ActiveSupport::TestCase
       documents_attributes: [ { blob: pdf_blob("sample.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES" }
     )
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     signer_contract = recipient.signer_contracts.find_by!(contract: contract)
     service = AvmService.new
@@ -149,7 +149,7 @@ class AvmServiceTest < ActiveSupport::TestCase
       documents_attributes: [ { blob: pdf_blob("prepared.pdf", "%PDF-1.4 original") } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     )
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
 
     contract.signature_field_preparations.create!(

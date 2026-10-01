@@ -9,18 +9,18 @@
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
 #  bundle_id                    :bigint
-#  user_id                      :bigint
+#  tenant_id                    :bigint
 #
 # Indexes
 #
 #  index_contracts_on_bundle_id  (bundle_id)
-#  index_contracts_on_user_id    (user_id)
+#  index_contracts_on_tenant_id  (tenant_id)
 #  index_contracts_on_uuid       (uuid)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (bundle_id => bundles.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id)
 #
 class Contract < ApplicationRecord
   ValidationEntry = Struct.new(:label, :validation_result, :document_hash, keyword_init: true)
@@ -40,7 +40,7 @@ class Contract < ApplicationRecord
     end
   end
 
-  belongs_to :user, optional: true
+  belongs_to :tenant, optional: true
   belongs_to :bundle, optional: true
 
   has_many :signer_contracts, dependent: :destroy
@@ -67,12 +67,13 @@ class Contract < ApplicationRecord
   validates_associated :signature_parameters
 
   before_validation :ensure_uuid, on: :create
+  before_validation :inherit_tenant_from_bundle
   before_validation :expand_asice_container_documents, on: :create
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
   after_commit :schedule_existing_signed_content_capture, on: :create
 
-  scope :anonymous, -> { where(user_id: nil).where(bundle_id: nil) }
+  scope :anonymous, -> { where(tenant_id: nil).where(bundle_id: nil) }
   scope :awaiting_signature_for, ->(user) {
     joins(signer_contracts: { signer: :recipient })
       .where(signer_contracts: { signed_at: nil, declined_at: nil })
@@ -90,12 +91,25 @@ class Contract < ApplicationRecord
     ALLOWED_METHODS
   end
 
+  def owning_tenant
+    tenant || bundle&.tenant
+  end
+
+  def anonymous?
+    owning_tenant.nil?
+  end
+
+  # True when +tenant+ (the tenant the user works in) owns the contract.
+  def managed_by?(tenant)
+    tenant.present? && owning_tenant == tenant
+  end
+
   def available_signature_methods_for(next_step:, signature_format: signature_parameters&.format)
     available_signature_methods.dup
   end
 
   def notify_signed!(signer: nil)
-    Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_user?(signer: signer)
+    Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_author?
 
     bundle.notify_contract_signed(self, signer) if bundle.present?
 
@@ -207,8 +221,8 @@ class Contract < ApplicationRecord
     bundle.present? && documents.one? && documents.first.is_pdf? && signature_parameters&.format == "PAdES" && !has_cryptographic_signatures?
   end
 
-  def pades_field_preparation_allowed_for?(user)
-    pades_field_preparation_allowed? && bundle&.author == user
+  def pades_field_preparation_allowed_for?(tenant)
+    pades_field_preparation_allowed? && bundle.present? && bundle.managed_by?(tenant)
   end
 
   # True once every recipient still awaiting this contract has a prepared signature field,
@@ -329,10 +343,12 @@ class Contract < ApplicationRecord
     current_autogram_session.present?
   end
 
-  def should_notify_user?(signer: nil)
-    return false unless author_notifications_enabled?
+  def should_notify_author?
+    author_notifications_enabled? && tenant.present? && bundle.nil? && !awaiting_signature?
+  end
 
-    user.present? && bundle.nil? && !awaiting_signature? && user != signer&.user
+  def author_notification_recipients(except: nil)
+    tenant.owners.where.not(id: except&.id).to_a
   end
 
   def short_uuid
@@ -382,8 +398,7 @@ class Contract < ApplicationRecord
   end
 
   def persist_validation_record!(contract_content_version: latest_content_version, validation_result: nil, signed_content: nil, filename: nil, session: nil)
-    owner = user || bundle&.author
-    return if owner.blank? || !owner.archivation_enabled?
+    return unless owning_tenant&.archivation_enabled?
     # return if contract_content_version.blank?
 
     signed_content ||= contract_content_version.content
@@ -432,6 +447,10 @@ class Contract < ApplicationRecord
 
   def initialize_signature_parameters
     build_signature_parameters unless signature_parameters
+  end
+
+  def inherit_tenant_from_bundle
+    self.tenant ||= bundle&.tenant
   end
 
   def latest_prepared_signature_fields_content_version
@@ -524,8 +543,7 @@ class Contract < ApplicationRecord
   end
 
   def schedule_existing_signed_content_capture
-    owner = user || bundle&.author
-    return if owner.blank? || !owner.archivation_enabled?
+    return unless owning_tenant&.archivation_enabled?
     return unless latest_content_version.present? || documents.one?
 
     ContractValidationRecordCaptureJob.perform_later(id)

@@ -26,13 +26,12 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     put :update, params: {
       user: {
         name: @user.name,
-        api_token_public_key: @user.api_token_public_key,
-        features: [ "api" ]
+        features: [ "federation" ]
       }
     }
 
     assert_redirected_to edit_user_registration_path
-    assert_equal [ "admin", "api" ], @user.reload.features.sort
+    assert_equal [ "admin", "federation" ], @user.reload.features.sort
   end
 
   test "non-admin feature updates are ignored" do
@@ -41,7 +40,7 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     put :update, params: {
       user: {
         name: @user.name,
-        features: [ "api", "archivation" ]
+        features: [ "federation" ]
       }
     }
 

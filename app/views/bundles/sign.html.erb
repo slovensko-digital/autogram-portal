@@ -14,7 +14,7 @@
         <div class="w-full mb-6">
           <div class="md:flex items-center justify-between space-x-4 space-y-4 md:space-y-0">
             <div class="flex-1">
-              <% if current_user == @bundle.author %>
+              <% if @bundle.managed_by?(current_tenant) %>
                 <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
               <% else %>
                 <h1 class="text-3xl font-bold text-gray-900">
@@ -30,13 +30,13 @@
             <div id="bundle_<%= @bundle.uuid %>_status">
               <%= render 'status', bundle: @bundle %>
             </div>
-            <% if current_user == @bundle.author %>
+            <% if @bundle.managed_by?(current_tenant) %>
               <%=link_to bundle_path(@bundle),
                     class: "inline-flex justify-center items-center w-full sm:w-auto px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
                 <%=  t('actions.view') %>
               <% end %>
             <% end %>
-            <% if @recipient && @recipient.pending? && @recipient.user != @bundle.author %>
+            <% if @recipient && @recipient.pending? && !@recipient.author_proxy? %>
               <%= button_to t('.decline'), decline_bundle_path(@bundle, recipient: @recipient.uuid),
                             method: :post,
                             data: { turbo_confirm: t('bundles.sign.decline_confirm') },
@@ -108,7 +108,7 @@
         <div class="w-full space-y-8">
       <% end %>
         <% @bundle.contracts.order(:updated_at).each_with_index do |contract, index| %>
-          <% contract_signable = (current_user == @bundle.author ||
+          <% contract_signable = (@bundle.managed_by?(current_tenant) ||
                                   (contract.awaiting_signature? && @recipient&.pending_contract?(contract)) ||
                                   (public_signing_available && contract.awaiting_signature?)) && !@recipient&.declined? %>
           <% contract_signed_for_viewer = !contract.awaiting_signature? || @recipient&.signed_contract?(contract) %>
@@ -253,7 +253,7 @@
           </div>
         <% end %>
 
-        <% if @recipient&.declined? && current_user != @bundle.author %>
+        <% if @recipient&.declined? && !@bundle.managed_by?(current_tenant) %>
           <%= render 'shared/error',
                 title: t('.declined_info_title'),
                 content: t('.declined_info_message') %>

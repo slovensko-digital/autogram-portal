@@ -81,7 +81,7 @@ class Federation::SendRequestInvitationJobTest < ActiveJob::TestCase
       }
     )
 
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ], note: "Please sign")
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ], note: "Please sign")
     portal_instance = PortalInstance.create!(
       name: "Partner portal",
       base_url: "https://example.com",

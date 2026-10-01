@@ -14,21 +14,21 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
-#  user_id                      :bigint           not null
+#  tenant_id                    :bigint           not null
 #
 # Indexes
 #
-#  index_bundles_on_user_id  (user_id)
-#  index_bundles_on_uuid     (uuid)
+#  index_bundles_on_tenant_id  (tenant_id)
+#  index_bundles_on_uuid       (uuid)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id)
 #
 one:
-  user_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  tenant: one
   uuid: MyString
 
 two:
-  user_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  tenant: two
   uuid: MyString

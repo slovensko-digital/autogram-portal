@@ -20,6 +20,6 @@ class Api::V1::DocumentsController < ApiController
     Document
       .joins(:contract)
       .left_outer_joins(contract: :bundle)
-      .where("contracts.user_id = :user_id OR bundles.user_id = :user_id", user_id: current_user.id)
+      .where("contracts.tenant_id = :tenant_id OR bundles.tenant_id = :tenant_id", tenant_id: current_tenant.id)
   end
 end

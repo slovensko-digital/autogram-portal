@@ -7,7 +7,7 @@ class ContractValidationRecordsController < ApplicationController
     @sort = params[:sort].presence_in(%w[deadline newest oldest]) || "deadline"
     @state = params[:state].presence_in(%w[all expiring expired healthy unknown notexpired]) || "notexpired"
 
-    records = current_user.contract_validation_records
+    records = current_tenant.contract_validation_records
                 .latest_per_contract
                 .includes({ contract: :content_versions }, :contract_content_version)
     records = case @state
@@ -53,10 +53,10 @@ class ContractValidationRecordsController < ApplicationController
   private
 
   def set_contract_validation_record
-    @contract_validation_record = current_user.contract_validation_records.find(params[:id])
+    @contract_validation_record = current_tenant.contract_validation_records.find(params[:id])
   end
 
   def ensure_archivation_enabled!
-    redirect_to root_path, alert: t("errors.archivation_disabled") unless current_user&.archivation_enabled?
+    redirect_to root_path, alert: t("errors.archivation_disabled") unless current_tenant&.archivation_enabled?
   end
 end

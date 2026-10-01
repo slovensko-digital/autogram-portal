@@ -59,8 +59,9 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
   test "private evidence is accessible to bundle author" do
     evidence_record = create_public_evidence_record(attach_private_package: true)
 
-    assert evidence_record.private_evidence_accessible_by?(users(:one))
-    assert_not evidence_record.private_evidence_accessible_by?(users(:two))
+    assert evidence_record.private_evidence_accessible_by?(tenants(:one))
+    assert_not evidence_record.private_evidence_accessible_by?(tenants(:two))
+    assert_not evidence_record.private_evidence_accessible_by?(nil)
   end
 
   test "show renders not found state for unknown reference" do
@@ -87,7 +88,7 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
         format: "PAdES"
       }
     )
-    bundle = Bundle.create!(author: users(:one), contracts: [ contract ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(
       email: "recipient-#{SecureRandom.hex(4)}@example.com",
       locale: "en",
@@ -131,7 +132,7 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
     record.attach_private_evidence_package!("private-evidence-package") if attach_private_package
 
     ContractValidationRecord.create!(
-      user: users(:one),
+      tenant: users(:one).default_tenant,
       contract: contract,
       contract_content_version: version,
       source_contract_uuid: contract.uuid,

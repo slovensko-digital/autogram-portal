@@ -4,7 +4,7 @@
       <h1 class="text-3xl font-bold text-gray-900"><%= t('.title', name: (current_user.name.presence || current_user.email).split(/[\s@]/).first) %></h1>
       <p class="mt-1 text-sm text-gray-500"><%= t('.subtitle') %></p>
     </div>
-    <% if current_user.archivation_enabled? && @expiring_contract_validation_records_count.positive? %>
+    <% if current_tenant.archivation_enabled? && @expiring_contract_validation_records_count.positive? %>
       <%= render 'shared/warning',
           title: t('.validation_warning.title'),
           content: t('.validation_warning.content', count: @expiring_contract_validation_records_count, date: @expiring_contract_validation_records.first.expires_at) %>
@@ -94,7 +94,7 @@
             <p class="text-xs text-gray-500 mt-0.5"><%= t('.quick_actions.verify_signature_subtitle') %></p>
           </div>
         <% end %>
-        <% if current_user.archivation_enabled? %>
+        <% if current_tenant.archivation_enabled? %>
           <%= link_to contract_validation_records_path, class: "bg-white rounded-lg border border-gray-200 p-5 flex items-center gap-4 hover:border-yellow-300 transition-all group has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" do %>
             <div class="h-12 w-12 rounded-lg bg-yellow-500 flex items-center justify-center shrink-0 group-hover:bg-yellow-600 transition-colors">
               <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

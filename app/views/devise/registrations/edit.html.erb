@@ -2,8 +2,14 @@
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:px-8">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title', resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: 'registrations.edit.title')) %></h1>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
           <p class="text-gray-600"><%= t('.subtitle') %></p>
+        </div>
+
+        <section id="account" class="scroll-mt-6">
+        <div class="mb-4">
+          <h2 class="text-2xl font-semibold text-gray-900"><%= t('.account_section') %></h2>
+          <p class="mt-1 text-sm text-gray-600"><%= t('.account_section_description') %></p>
         </div>
 
         <div class="bg-white sm:rounded-md border border-gray-200">
@@ -21,19 +27,6 @@
                 <%= f.label :email, t('.email'), class: "block text-sm font-medium text-gray-700 mb-2" %>
                 <%= f.email_field :email, readonly: true,
                   class: "block w-full rounded-md border-gray-300 bg-gray-50 sm:text-sm py-2 px-3 border text-gray-500 cursor-not-allowed" %>
-              </div>
-
-              <div>
-                <%= f.label :api_token_public_key, t('.api_token_public_key'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-                <% if resource.feature_enabled? :api %>
-                  <%= f.text_area :api_token_public_key, rows: 5,
-                    class: "block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border" %>
-                  <p class="mt-1 text-xs text-gray-500"><%= t('.api_token_help') %></p>
-                <% else %>
-                  <%= f.text_area :api_token_public_key, rows: 5, disabled: true,
-                    class: "block w-full rounded-md border-gray-300 bg-gray-50 sm:text-sm py-2 px-3 border text-gray-500 cursor-not-allowed" %>
-                  <p class="mt-1 text-xs text-gray-500"><%= t('.api_token_help') %></p>
-                <% end %>
               </div>
 
               <% if resource.pending_reconfirmation? %>
@@ -69,6 +62,10 @@
           <div class="px-5 py-6" data-controller="delete-confirmation" data-delete-confirmation-phrase-value="<%= t('.delete_confirmation_phrase') %>">
             <h4 class="text-xl font-medium text-gray-900"><%= t('.cancel_my_account') %></h4>
             <p class="mt-1 text-md"><%= t('.unhappy') %></p>
+            <% blocking_tenants = resource.tenants_blocking_deletion %>
+            <% if blocking_tenants.any? %>
+              <p class="mt-2 text-sm text-red-700"><%= t('.delete_blocked_by_tenants', tenants: blocking_tenants.map(&:name).to_sentence) %></p>
+            <% end %>
 
             <%= form_with url: registration_path(resource_name), method: :delete, class: "mt-4" do %>
               <div class="flex flex-col gap-3 md:flex-row md:items-center">
@@ -85,6 +82,11 @@
             <% end %>
           </div>
         </div>
+        </section>
+
+        <section id="organization" class="mt-14 scroll-mt-6">
+          <%= render "tenants/settings", tenant: current_tenant, memberships: current_tenant.memberships.includes(:user).order(:created_at) %>
+        </section>
 
         <% if current_user&.admin? %>
           <div class="mt-10 rounded-md border border-gray-200 bg-white overflow-hidden">
@@ -98,6 +100,15 @@
 
               <%= link_to t('.manage_portal_instances_link'),
                     admin_portal_instances_path,
+                    class: "mt-4 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+
+            <div class="border-t border-gray-100 px-5 py-6">
+              <h4 class="text-xl font-medium text-gray-900"><%= t('.manage_tenants') %></h4>
+              <p class="mt-1 text-md"><%= t('.manage_tenants_description') %></p>
+
+              <%= link_to t('.manage_tenants_link'),
+                    admin_tenants_path,
                     class: "mt-4 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
             </div>
           </div>
@@ -146,4 +157,4 @@
   </div>
 </main>
 
-<% content_for :title, t('.title', resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: 'registrations.edit.title')) %>
+<% content_for :title, t('.title') %>

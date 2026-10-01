@@ -7,7 +7,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
 
   setup do
     @user = users(:one)
-    @user.update_column(:features, [ "archivation" ])
+    @user.default_tenant.update_column(:features, [ "archivation" ])
     @user.define_singleton_method(:accepted_current_policies?) { true }
     @user.define_singleton_method(:locale) { "en" }
 
@@ -92,7 +92,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
   end
 
   test "index redirects to root without archivation feature" do
-    @user.update_column(:features, [])
+    @user.default_tenant.update_column(:features, [])
 
     get :index
 
@@ -105,7 +105,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     content_version = contract.latest_content_version
 
     record = ContractValidationRecord.create!(
-      user: @user,
+      tenant: @user.default_tenant,
       contract: contract,
       contract_content_version: content_version,
       source_contract_uuid: contract.uuid,
@@ -122,7 +122,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
       }
     )
 
-    bundle = Bundle.create!(author: @user, contracts: [ contract ])
+    bundle = Bundle.create!(tenant: @user.default_tenant, contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
     signer_contract = recipient.signer_contracts.find_by!(contract: contract)
     session = signer_contract.sessions.create!(
@@ -153,7 +153,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
 
   def create_record(user:, expires_at: nil, source_contract_uuid: SecureRandom.uuid, source_version_number: 1)
     ContractValidationRecord.create!(
-      user: user,
+      tenant: user&.default_tenant,
       source_contract_uuid: source_contract_uuid,
       source_version_number: source_version_number,
       filename: "signed-contract.pdf",
@@ -173,7 +173,7 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     )
 
     Contract.create!(
-      user: user,
+      tenant: user&.default_tenant,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
     ).tap do |contract|

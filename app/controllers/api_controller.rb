@@ -1,5 +1,5 @@
 class ApiController < ActionController::API
-  before_action :authenticate_user!
+  before_action :authenticate_tenant!
   before_action :set_json_format
 
   rescue_from JWT::DecodeError do |error|
@@ -10,14 +10,14 @@ class ApiController < ActionController::API
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
   rescue_from ActionDispatch::Http::Parameters::ParseError, with: :render_bad_request
 
-  def current_user
-    @current_user
+  def current_tenant
+    @current_tenant
   end
 
   private
 
-  def authenticate_user!
-    @current_user = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
+  def authenticate_tenant!
+    @current_tenant = ApiEnvironment.token_authenticator.verify_token(authenticity_token)
   rescue JWT::VerificationError, JWT::InvalidSubError => error
     render_unauthorized(error.message)
   end

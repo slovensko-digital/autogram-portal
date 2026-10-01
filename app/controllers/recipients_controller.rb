@@ -42,7 +42,8 @@ class RecipientsController < ApplicationController
   private
 
   def set_bundle
-    @bundle = current_user.bundles.find_by_uuid!(params[:bundle_id])
+    @bundle = Bundle.find_by_uuid!(params[:bundle_id])
+    raise ActiveRecord::RecordNotFound unless tenant_manages?(@bundle)
   end
 
   def set_recipient

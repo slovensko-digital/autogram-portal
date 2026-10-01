@@ -17,22 +17,22 @@
 #  updated_at                          :datetime         not null
 #  contract_content_version_id         :bigint
 #  contract_id                         :bigint
-#  user_id                             :bigint           not null
+#  tenant_id                           :bigint           not null
 #
 # Indexes
 #
-#  idx_on_contract_content_version_id_7e3d0b9366                   (contract_content_version_id)
-#  index_contract_validation_records_on_contract_id                (contract_id)
-#  index_contract_validation_records_on_document_hash              (document_hash)
-#  index_contract_validation_records_on_user_contract_and_version  (user_id,source_contract_uuid,source_version_number) UNIQUE
-#  index_contract_validation_records_on_user_id                    (user_id)
-#  index_contract_validation_records_on_user_id_and_expires_at     (user_id,expires_at)
+#  idx_on_contract_content_version_id_7e3d0b9366                  (contract_content_version_id)
+#  index_contract_validation_records_on_contract_id               (contract_id)
+#  index_contract_validation_records_on_document_hash             (document_hash)
+#  index_contract_validation_records_on_tenant_id                 (tenant_id)
+#  index_contract_validation_records_on_tenant_id_and_expires_at  (tenant_id,expires_at)
+#  index_cvr_on_tenant_contract_and_version                       (tenant_id,source_contract_uuid,source_version_number) UNIQUE
 #
 # Foreign Keys
 #
 #  fk_rails_...  (contract_content_version_id => contract_content_versions.id) ON DELETE => nullify
 #  fk_rails_...  (contract_id => contracts.id) ON DELETE => nullify
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id)
 #
 require "test_helper"
 
@@ -147,7 +147,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     )
 
     old_record = ContractValidationRecord.create!(
-      user: users(:one),
+      tenant: users(:one).default_tenant,
       contract: contract,
       contract_content_version: old_version,
       source_contract_uuid: contract.uuid,
@@ -160,7 +160,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
       validation_details: {}
     )
     new_record = ContractValidationRecord.create!(
-      user: users(:one),
+      tenant: users(:one).default_tenant,
       contract: contract,
       contract_content_version: new_version,
       source_contract_uuid: contract.uuid,
@@ -181,7 +181,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
   private
 
   def create_contract(user: nil)
-    user&.update_column(:features, [ "archivation" ])
+    user&.default_tenant&.update_column(:features, [ "archivation" ])
 
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("%PDF-1.4 test content"),
@@ -190,7 +190,7 @@ class ContractValidationRecordTest < ActiveSupport::TestCase
     )
 
     Contract.create!(
-      user: user,
+      tenant: user&.default_tenant,
       documents_attributes: [ { blob: blob } ],
       signature_parameters_attributes: {
         level: "BASELINE_B",

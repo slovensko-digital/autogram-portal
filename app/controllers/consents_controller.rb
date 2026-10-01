@@ -1,4 +1,5 @@
 class ConsentsController < ApplicationController
+  skip_before_action :ensure_tenant_selected
   before_action :authenticate_user!
   skip_before_action :enforce_current_policy_consent
 

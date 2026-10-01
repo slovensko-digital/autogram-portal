@@ -184,7 +184,7 @@ class Contracts::SessionsController < ApplicationController
       @recipient = @contract.recipients.active.find_by(user: current_user) ||
                    @contract.recipients.active.find_by(email: current_user.email)
 
-      if @recipient.nil? && @contract.bundle.present? && current_user == @contract.bundle.author
+      if @recipient.nil? && @contract.bundle.present? && @contract.bundle.managed_by?(current_tenant)
         @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
@@ -205,6 +205,12 @@ class Contracts::SessionsController < ApplicationController
     end
 
     raise ActiveRecord::RecordNotFound if @signer_contract&.signed? && @contract.bundle.present?
+
+    if @signer_contract&.superseded? && @contract.bundle.present?
+      redirect_to sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe]),
+                  notice: t("bundles.sign.signature_no_longer_required")
+      return
+    end
 
     @signer_contract = AnonymousSigner.create!.signer_contracts.create!(contract: @contract) unless @signer_contract
   end
@@ -352,8 +358,7 @@ class Contracts::SessionsController < ApplicationController
 
   def allowed_user_for_session?
     return false unless current_user
-    return true if @contract.user == current_user
-    return true if @contract.bundle&.author == current_user
+    return true if @contract.managed_by?(current_tenant)
 
     signer = @session.signer
 

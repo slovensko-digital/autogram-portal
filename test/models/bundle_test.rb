@@ -12,16 +12,16 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
-#  user_id                      :bigint           not null
+#  tenant_id                    :bigint           not null
 #
 # Indexes
 #
-#  index_bundles_on_user_id  (user_id)
-#  index_bundles_on_uuid     (uuid)
+#  index_bundles_on_tenant_id  (tenant_id)
+#  index_bundles_on_uuid       (uuid)
 #
 # Foreign Keys
 #
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (tenant_id => tenants.id)
 #
 require "test_helper"
 require "openssl"
@@ -54,13 +54,13 @@ class BundleTest < ActiveSupport::TestCase
   end
 
   test "does not notify author by default" do
-    bundle = Bundle.new(author: @author)
+    bundle = Bundle.new(tenant: @author.default_tenant)
 
     assert_not bundle.should_notify_author?
   end
 
   test "display name uses the custom name when present and falls back when blank" do
-    bundle = Bundle.new(author: @author, uuid: "12345678-1234-1234-1234-123456789abc")
+    bundle = Bundle.new(tenant: @author.default_tenant, uuid: "12345678-1234-1234-1234-123456789abc")
     default_name = "#{I18n.t('bundles.display_name')} 12345678"
 
     assert_equal default_name, bundle.display_name
@@ -73,13 +73,25 @@ class BundleTest < ActiveSupport::TestCase
   end
 
   test "notifies author when enabled for web bundles" do
-    bundle = Bundle.new(author: @author, author_notifications_enabled: true)
+    bundle = Bundle.new(tenant: @author.default_tenant, author_notifications_enabled: true)
 
     assert bundle.should_notify_author?
   end
 
+  test "tenant is the sender and its owners get author notifications except the signer" do
+    tenant = @author.default_tenant
+    tenant.update!(plan: :pro)
+    co_owner = users(:two)
+    tenant.memberships.create!(user: co_owner, role: :owner)
+    bundle = Bundle.new(tenant: tenant)
+
+    assert_equal tenant.name, bundle.sender_display_name
+    assert_equal [ @author, co_owner ].sort_by(&:id), bundle.author_notification_recipients.sort_by(&:id)
+    assert_equal [ co_owner ], bundle.author_notification_recipients(except: @author)
+  end
+
   test "does not notify author for webhook-managed bundles even when enabled" do
-    bundle = Bundle.new(author: @author, author_notifications_enabled: true)
+    bundle = Bundle.new(tenant: @author.default_tenant, author_notifications_enabled: true)
     bundle.build_webhook(url: "https://example.com/webhook", method: :standard)
 
     assert_not bundle.should_notify_author?
@@ -179,7 +191,7 @@ class BundleTest < ActiveSupport::TestCase
       )
     end
 
-    Bundle.create!(author: author, contracts: contracts)
+    Bundle.create!(tenant: author.default_tenant, contracts: contracts)
   end
 
   def create_portal_instance

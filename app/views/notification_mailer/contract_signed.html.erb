@@ -18,11 +18,11 @@
   <div class="details">
     <div class="details-title"><%= t('.details_title') %></div>
     <div class="details-list">
-      <div><%= t('.signed_by', signer_name: @signature[:signer_name]) %></div>
-      <% if @signature[:timestamp_info] && @signature[:timestamp_info][:qualified] %>
-        <div><%= t('.timestamp_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+      <div><%= t('.signed_by', signer_name: @signature.signerName) %></div>
+      <% if @signature.qualified_timestamps? %>
+        <div><%= t('.timestamp_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %></div>
       <% else %>
-        <div><%= t('.timestamp_non_qualified', signing_time: @signature[:signing_time].strftime('%d. %m. %Y %H:%M')) %></div>
+        <div><%= t('.timestamp_non_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %></div>
       <% end %>
     </div>
   </div>
