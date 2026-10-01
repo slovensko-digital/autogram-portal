@@ -10,6 +10,7 @@ bin/rails test                   # whole Minitest suite (parallel)
 bin/rails test test/integration/signature_request_flows_test.rb:42
 bin/rubocop                      # must stay clean (rails-omakase style: `[ "a", "b" ]` with inner spaces)
 bin/brakeman
+bin/rails zeitwerk:check          # verify autoloading after adding/renaming classes
 bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fixtures/tests after schema changes
 ```
 
@@ -32,8 +33,20 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 
 - `current_tenant` comes from `session[:current_tenant_id]` (`ApplicationController#resolve_current_tenant`). A user with exactly one tenant gets it automatically.
 - A user with several tenants is **not signed in** until they pick one: `ensure_tenant_selected` signs them out, stores a pending user in the session (15 min) and `TenantSelectionsController` completes sign-in. The tenant cannot be switched without signing out.
-- Authorization: list from `current_tenant.<association>`; for a single record use `record.managed_by?(current_tenant)` or `tenant_manages?(record)`, which raises `OtherTenantRecord` (redirect with an alert) when the record belongs to another tenant of the same user.
+- Authorization uses Pundit: collections via `policy_scope`, operations via `authorize`. Model ownership predicates are used by policies. Preserve other-own-tenant redirects through `render_tenant_record_denial` / `redirect_for_other_tenant`; `tenant_manages?` was removed.
 - Organization settings live on the user settings page (`edit_user_registration_path(anchor: "organization")`, partial `tenants/_settings`).
+
+## Authorization (Pundit)
+
+- See `docs/authorization.md` for the action matrix, principals, denial responses and intentional exceptions. Policies are read-only; authenticate callers and validate tokens/assertions in the existing layers, and keep workflow/model invariants there.
+- Principals are the `Web`, `PendingTenantSelection`, `TenantApi` and `Portal` types in `AuthorizationContext`. Anonymous web access requires a `Web` context with a nil user, not a nil principal or an API/portal context. Namespace lookup changes the policy, not the principal.
+- Use namespace arrays, e.g. `authorize [ :api, :v1, @bundle ]`, `policy_scope([ :api, :v1, Bundle ])`, `authorize [ :signing, access ]`; avoid `policy_class:` / `policy_scope_class:` overrides. Policy names follow the record or bound subject class.
+- Web contract management uses direct tenant precedence, then bundle tenant. API contract/document access deliberately uses direct tenant **OR** bundle tenant; preserve this difference. Admin features do not bypass ordinary tenant ownership.
+- `ApplicationController` verifies authorization after completed actions and scoping after `index`. Global index callbacks use an `action_name` predicate, not `only: :index`, because Rails validates missing callback actions. API bases inherit `ActionController::API` and retain separate verification hooks.
+- Public/authentication actions declare narrow `skip_authorization` exceptions; public indexes also skip scoping. Admin and parent-authorized indexes use `skip_policy_scope` but still authorize their admin/parent gate. Retain additional scope verification for scoped non-index actions.
+- `pundit_reset!` clears both caches and verification flags. Verify before resetting; Rails runs after callbacks in reverse registration order. Tenant selection and account deletion use `prepend_after_action` for their resets.
+- Preserve controller-specific denials rather than adding a global 403 handler. Compare `Pundit::NotAuthorizedError#query.to_s` (inferred queries can be strings, explicit queries symbols). Put authorization outside broad action rescue blocks so policy denials are not swallowed.
+- Signing policies use bound `SigningBundleAccess` / `SigningSessionAccess` subjects. Session token-only access is limited to parameters/download/upload; deletion requires an allowed user. Keep token validation in `SessionAccessToken` and parent/session/signer binding intact.
 
 ## API
 
@@ -53,3 +66,6 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - End-to-end signing flows: `test/integration/signature_request_flows_test.rb` (web) and `api_signature_request_flows_test.rb` (API). They use `test/support/signing_flow_helper.rb` (require it explicitly), which fakes Autogram validation for the whole test and signs through the real session/upload endpoints (`sign_with_autogram`). Add new signing scenarios there.
 - Signing session pages print `Rails.application.config.action_controller.default_url_options[:host]`; tests rendering them must set it (the helper does).
 - Integration tests sign in with `Devise::Test::IntegrationHelpers#sign_in`; for a user with several tenants, follow with `post tenant_selection_path(tenant_id: ...)`.
+- Authorization request tests need confirmed users; assert the actual Warden actor when a denial could otherwise pass anonymously. Fixture emails are placeholders: replace them locally when email validations are exercised.
+- List tests must include a matching nonempty record set and foreign-record exclusions. Empty results can hide invalid eager loads, such as the removed `Contract.user` association; `Membership.user` remains valid.
+- Use `bin/rails test` for the full suite; editor discovery may cover only a subset. For ActiveJob enqueue assertions, use the test queue adapter locally instead of the default inline GoodJob adapter.
