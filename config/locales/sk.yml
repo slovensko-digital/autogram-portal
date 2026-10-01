@@ -1024,6 +1024,8 @@ sk:
         bundle_progress_message: "Tento dokument je hotový. Pokračujte ďalším dokumentom v balíku."
         view_contract: "Zobraziť podpísaný dokument"
         view_bundle: "Späť na balík"
+        evidence_reference_label: "Referencia evidencie"
+        verify_reference_link: "Overiť túto referenciu"
     onboarding:
       electronic_title: "Nastavenie elektronického podpisovania"
       physical_title: "Nastavenie fyzického podpisovania"

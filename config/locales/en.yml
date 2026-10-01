@@ -1097,6 +1097,8 @@ en:
         bundle_progress_message: "This document is done. Continue with the next document in the bundle."
         view_contract: "View signed document"
         view_bundle: "Return to bundle"
+        evidence_reference_label: "Evidence reference"
+        verify_reference_link: "Verify this reference"
     onboarding:
       electronic_title: "Electronic Signing Setup"
       physical_title: "Physical Signing Setup"

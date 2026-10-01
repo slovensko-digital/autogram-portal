@@ -13,13 +13,4 @@
     </div>
   </div>
 </div>
-<script>
-  window.parent.postMessage(
-    {
-      type: 'agp-custom-event',
-      status: 'sign-error',
-      contract_id: '<%= @session.contract.uuid %>',
-      bundle_id: '<%= @session.contract&.bundle&.uuid %>',
-      error_message: '<%= @session.error_message %>'
-    }, '*');
-</script>
+<%= tag.div hidden: true, data: { controller: "parent-message", parent_message_payload_value: @session.error_event_payload, parent_message_key_value: "session-#{@session.id}-error" } %>

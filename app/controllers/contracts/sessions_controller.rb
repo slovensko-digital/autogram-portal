@@ -8,6 +8,8 @@ class Contracts::SessionsController < ApplicationController
   before_action :authorize_session_operation!
   before_action :redirect_if_completed, only: [ :show ]
   skip_before_action :verify_authenticity_token, only: [ :upload, :get_webhook, :standard_webhook ]
+  # Cross-site iframes do not get the session cookie the token is checked against.
+  skip_before_action :verify_authenticity_token, only: [ :request_verification, :verify_verification, :complete_signing ], if: -> { params[:iframe].present? }
   skip_before_action :ensure_tenant_selected, if: -> { params[:iframe].present? }
   before_action :allow_iframe
 

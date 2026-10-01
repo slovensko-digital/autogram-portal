@@ -101,6 +101,16 @@ class Session < ApplicationRecord
     }
   end
 
+  def error_event_payload
+    {
+      type: "agp-custom-event",
+      status: "sign-error",
+      contract_id: contract.uuid,
+      bundle_id: contract.bundle&.uuid,
+      error_message: error_message
+    }
+  end
+
   def not_pending?
     !pending?
   end
