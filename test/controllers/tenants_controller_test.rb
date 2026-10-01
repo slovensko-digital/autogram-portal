@@ -132,6 +132,43 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @tenant.id, session[:current_tenant_id]
   end
 
+  test "magic-link authentication succeeds with inherited verification enabled" do
+    get user_magic_link_path, params: {
+      user: { email: @owner.email, token: @owner.encode_passwordless_token }
+    }
+
+    assert_response :redirect
+    assert_equal @owner, request.env["warden"].user(:user)
+
+    get dashboard_path
+
+    assert_response :success
+    assert_equal @tenant.id, session[:current_tenant_id]
+  end
+
+  test "magic-link authentication requires tenant selection for multiple tenants" do
+    tenants(:two).update!(plan: :pro)
+    tenants(:two).memberships.create!(user: @owner)
+
+    get user_magic_link_path, params: {
+      user: { email: @owner.email, token: @owner.encode_passwordless_token }
+    }
+
+    assert_response :redirect
+    assert_equal @owner, request.env["warden"].user(:user)
+
+    get dashboard_path
+
+    assert_redirected_to tenant_selection_path
+    assert_nil request.env["warden"].user(:user)
+
+    post tenant_selection_path(tenant_id: @tenant.id)
+
+    assert_redirected_to dashboard_path
+    assert_equal @tenant.id, session[:current_tenant_id]
+    assert_equal @owner, request.env["warden"].user(:user)
+  end
+
   test "lists only bundles of the current tenant" do
     own_bundle = create_bundle(tenant: @tenant, name: "Own bundle")
     create_bundle(tenant: tenants(:two), name: "Foreign bundle")
@@ -250,6 +287,27 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_nil User.find_by(email: "someone@example.com")
   end
 
+  test "member settings remain read only even with api access" do
+    @tenant.update!(plan: :pro, features: [ "api" ])
+    @tenant.memberships.create!(user: @colleague)
+    sign_in @colleague
+    post tenant_selection_path(tenant_id: @tenant.id)
+
+    get edit_user_registration_path
+
+    assert_response :success
+    assert_select "textarea[name='tenant[api_token_public_key]'][disabled]"
+    assert_select "form[action='#{tenant_memberships_path}']", count: 0
+    assert_select "form[action='#{tenant_membership_path(@tenant.memberships.find_by!(user: @owner))}']", count: 0
+
+    assert_no_difference -> { Membership.count } do
+      patch tenant_path, params: { tenant: { api_token_public_key: "ignored" } }
+    end
+    assert_redirected_to edit_user_registration_path(anchor: "organization")
+    assert_equal I18n.t("tenants.alerts.owner_required"), flash[:alert]
+    assert_nil @tenant.reload.api_token_public_key
+  end
+
   test "owner cannot rename the tenant" do
     @tenant.update!(features: [ "api" ])
     sign_in @owner
@@ -285,6 +343,90 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_not Membership.exists?(membership.id)
     get dashboard_path
     assert_redirected_to new_user_session_path
+  end
+
+  test "owner update without api access succeeds without permitting attributes" do
+    sign_in @owner
+
+    patch tenant_path, params: { tenant: { name: "Renamed", plan: "pro", features: [ "api" ], api_token_public_key: "ignored" } }
+
+    assert_redirected_to edit_user_registration_path(anchor: "organization")
+    assert_equal I18n.t("tenants.update.success"), flash[:notice]
+    assert_equal "Tenant One", @tenant.reload.name
+    assert @tenant.basic?
+    assert_empty @tenant.features
+    assert_nil @tenant.api_token_public_key
+
+    patch tenant_path
+    assert_redirected_to edit_user_registration_path(anchor: "organization")
+    assert_equal I18n.t("tenants.update.success"), flash[:notice]
+  end
+
+  test "member cannot remove another membership" do
+    @tenant.update!(plan: :pro)
+    @tenant.memberships.create!(user: @colleague)
+    sign_in @colleague
+    post tenant_selection_path(tenant_id: @tenant.id)
+
+    assert_no_difference -> { Membership.count } do
+      delete tenant_membership_path(@tenant.memberships.find_by!(user: @owner))
+    end
+
+    assert_redirected_to edit_user_registration_path(anchor: "organization")
+    assert_equal I18n.t("tenants.alerts.owner_required"), flash[:alert]
+  end
+
+  test "owner cannot remove a membership from another tenant" do
+    sign_in @owner
+
+    assert_no_difference -> { Membership.count } do
+      delete tenant_membership_path(tenants(:two).memberships.find_by!(user: @colleague))
+    end
+
+    assert_response :not_found
+  end
+
+  test "last owner removal returns the model error" do
+    sign_in @owner
+    membership = @tenant.memberships.find_by!(user: @owner)
+
+    assert_no_difference -> { Membership.count } do
+      delete tenant_membership_path(membership)
+    end
+
+    assert_redirected_to edit_user_registration_path(anchor: "organization")
+    assert_equal I18n.t("activerecord.errors.models.membership.attributes.base.last_owner"), flash[:alert]
+  end
+
+  test "owner can remove their own membership when another owner remains" do
+    @tenant.update!(plan: :pro)
+    @tenant.memberships.create!(user: @colleague, role: :owner)
+    membership = @tenant.memberships.find_by!(user: @owner)
+    sign_in @owner
+
+    get edit_user_registration_path
+    assert_select "form[action='#{tenant_membership_path(membership)}']", count: 0
+
+    assert_difference -> { Membership.count }, -1 do
+      delete tenant_membership_path(membership)
+    end
+
+    assert_redirected_to edit_user_registration_path(anchor: "organization")
+    assert_equal I18n.t("tenants.memberships.destroy.success", email: @owner.email), flash[:notice]
+    assert_not @owner.member_of?(@tenant)
+  end
+
+  test "last owner cannot leave but remains signed in" do
+    sign_in @owner
+
+    assert_no_difference -> { Membership.count } do
+      post leave_tenant_path
+    end
+
+    assert_redirected_to edit_user_registration_path(anchor: "organization")
+    assert_equal I18n.t("activerecord.errors.models.membership.attributes.base.last_owner"), flash[:alert]
+    get dashboard_path
+    assert_response :success
   end
 
   test "user without any membership is told so and can create a personal tenant" do

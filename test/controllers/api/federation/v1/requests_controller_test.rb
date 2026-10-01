@@ -67,6 +67,38 @@ class Api::Federation::V1::RequestsControllerTest < ActionDispatch::IntegrationT
     assert_response :unprocessable_entity
   end
 
+  test "preview keeps not-found response for mismatched bundle ID" do
+    get "/api/federation/v1/requests/#{@recipient.uuid}",
+        params: { bundleId: SecureRandom.uuid },
+        headers: portal_headers(scope: "federation.request.read")
+
+    assert_response :not_found
+    assert_equal({ "message" => "Not found" }, response.parsed_body)
+  end
+
+  test "claimability remains a conflict rather than an authorization denial" do
+    @recipient.update_column(:withdrawn_at, Time.current)
+
+    assert_no_difference -> { RecipientAccessGrant.count } do
+      post "/api/federation/v1/requests/#{@recipient.uuid}/claim",
+           params: { claimant: { email: @recipient.email } },
+           headers: portal_headers(scope: "federation.request.claim")
+    end
+
+    assert_response :conflict
+    assert_equal({ "message" => "Request is no longer claimable" }, response.parsed_body)
+  end
+
+  test "claim still requires claim assertion scope" do
+    assert_no_difference -> { RecipientAccessGrant.count } do
+      post "/api/federation/v1/requests/#{@recipient.uuid}/claim",
+           params: { claimant: { email: @recipient.email } },
+           headers: portal_headers(scope: "federation.request.read")
+    end
+
+    assert_response :unauthorized
+  end
+
   test "preview rejects wrong portal" do
     other_key = OpenSSL::PKey::RSA.generate(2048)
     other_portal = PortalInstance.create!(

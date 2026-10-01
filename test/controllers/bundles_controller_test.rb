@@ -42,6 +42,27 @@ class BundlesControllerTest < ActionController::TestCase
     end
   end
 
+  test "management verification catches a missing authorization call" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    @controller.singleton_class.define_method(:set_bundle) do
+      @bundle = Bundle.find_by!(uuid: params[:id])
+    end
+
+    assert_raises(Pundit::AuthorizationNotPerformedError) do
+      get :show, params: { id: bundle.uuid }
+    end
+  end
+
+  test "list verification catches an unscoped relation" do
+    @controller.singleton_class.define_method(:policy_scope) do |scope|
+      scope.where(tenant: current_tenant)
+    end
+
+    assert_raises(Pundit::PolicyScopingNotPerformedError) do
+      get :index
+    end
+  end
+
   test "author can open the edit form" do
     bundle = create_bundle_with_contracts(author: @author, count: 1)
 

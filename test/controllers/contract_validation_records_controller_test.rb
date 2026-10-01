@@ -57,6 +57,29 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     assert_not ContractValidationRecord.exists?(record.id)
   end
 
+  test "foreign tenant records cannot be destroyed or refreshed" do
+    record = create_record(user: users(:two), expires_at: 1.month.from_now)
+
+    delete :destroy, params: { id: record.id }
+    assert_response :not_found
+    assert ContractValidationRecord.exists?(record.id)
+
+    post :refresh, params: { id: record.id }
+    assert_response :not_found
+    assert ContractValidationRecord.exists?(record.id)
+  end
+
+  test "disabled archivation prevents record deletion" do
+    record = create_record(user: @user, expires_at: 1.month.from_now)
+    @user.default_tenant.update_column(:features, [])
+
+    delete :destroy, params: { id: record.id }
+
+    assert_redirected_to root_path
+    assert_equal I18n.t("errors.archivation_disabled"), flash[:alert]
+    assert ContractValidationRecord.exists?(record.id)
+  end
+
   test "refresh enqueues archive refresh for refreshable current records" do
     ActiveJob::Base.queue_adapter = :test
     record = create_record(user: @user, expires_at: 1.month.from_now)

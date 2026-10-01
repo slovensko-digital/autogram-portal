@@ -15,6 +15,26 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "index renders standalone contracts only for the selected tenant" do
+    own_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    own_contract.update!(tenant: tenants(:one))
+    foreign_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    foreign_contract.update!(tenant: tenants(:two))
+    bundled_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    Bundle.create!(tenant: tenants(:one), contracts: [ bundled_contract ])
+    user = users(:one)
+    user.update_column(:confirmed_at, Time.current)
+    sign_in user
+
+    get contracts_path
+
+    assert_response :success
+    assert_equal user, request.env["warden"].user(:user)
+    assert_select "a[href=?]", contract_path(own_contract), minimum: 1
+    assert_select "a[href=?]", contract_path(foreign_contract), count: 0
+    assert_select "a[href=?]", contract_path(bundled_contract), count: 0
+  end
+
   test "anonymous actions show disabled account features and authentication CTA" do
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
 
@@ -25,6 +45,79 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type='radio'][disabled][value='add_timestamp']", count: 1
     assert_select "input[type='radio'][disabled][value='archive_signature']", count: 1
     assert_select "form[action='#{authenticate_for_actions_contract_path(contract)}'][data-turbo-frame='_top']", count: 1
+  end
+
+  test "anonymous contract can be viewed but deletion requires route authentication" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get contract_path(contract)
+    assert_response :success
+
+    assert_no_difference -> { Contract.count } do
+      delete contract_path(contract)
+    end
+    assert_redirected_to new_user_session_path
+  end
+
+  test "anonymous contract cannot request signatures" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_parameters_contract_path(contract, target_step: "request_signature")
+    assert_response :forbidden
+
+    assert_no_difference -> { Bundle.count } do
+      patch contract_path(contract), params: { next_step: "request_signature" }
+    end
+    assert_response :forbidden
+    assert_nil contract.reload.tenant
+  end
+
+  test "foreign tenant contract updates retain redirect without mutation" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.update!(tenant: tenants(:two))
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+
+    get contract_path(contract)
+    assert_redirected_to new_contract_path
+    assert_equal I18n.t("contracts.alerts.unauthorized_edit_attempt"), flash[:alert]
+
+    patch contract_path(contract), params: { contract: { allowed_methods: [ "visual" ] } }
+    assert_redirected_to new_contract_path
+    assert_equal [ "qes" ], contract.reload.allowed_methods
+  end
+
+  test "contract of another own tenant keeps selected tenant guidance" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.update!(tenant: tenants(:two))
+    tenants(:two).update!(plan: :pro)
+    tenants(:two).memberships.create!(user: users(:one))
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+    post tenant_selection_path(tenant_id: tenants(:one).id)
+
+    get contract_path(contract)
+
+    assert_redirected_to dashboard_path
+    assert_equal I18n.t("tenants.alerts.other_tenant_record", name: tenants(:two).name), flash[:alert]
+    assert_equal tenants(:one).id, session[:current_tenant_id]
+  end
+
+  test "revoked membership cannot reuse a previously selected tenant" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.update!(tenant: tenants(:one))
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+    get contract_path(contract)
+    assert_response :success
+
+    Membership.where(user: users(:one)).delete_all
+
+    assert_no_difference -> { Contract.count } do
+      delete contract_path(contract)
+    end
+    assert_redirected_to tenant_selection_path
+    assert Contract.exists?(contract.id)
   end
 
   test "authentication claims pending anonymous contract and returns to its actions" do

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class SignatureEvidenceVerificationsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
   test "show renders lookup form" do
     get signature_evidence_verification_path
 
@@ -54,6 +56,37 @@ class SignatureEvidenceVerificationsControllerTest < ActionDispatch::Integration
     get download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)
 
     assert_response :forbidden
+  end
+
+  test "private download returns the package for selected tenant owner" do
+    evidence_record = create_public_evidence_record(attach_private_package: true)
+    users(:one).update_column(:confirmed_at, Time.current)
+    sign_in users(:one)
+
+    get download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)
+
+    assert_response :success
+    assert_equal "private-evidence-package", response.body
+    assert_includes response.headers["Content-Disposition"], "attachment"
+  end
+
+  test "private download is forbidden for unrelated tenant admin" do
+    evidence_record = create_public_evidence_record(attach_private_package: true)
+    users(:two).update_columns(features: [ "admin" ], confirmed_at: Time.current)
+    sign_in users(:two)
+    post consent_path, params: { agree_to_policies: "1" }
+
+    get download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)
+
+    assert_response :forbidden
+    assert_equal users(:two).id, request.env["warden"].user(:user)&.id
+    assert_not_includes response.body, "private-evidence-package"
+  end
+
+  test "private download keeps missing-reference not-found response" do
+    get download_private_signature_evidence_verification_path(reference: "missing-reference")
+
+    assert_response :not_found
   end
 
   test "private evidence is accessible to bundle author" do

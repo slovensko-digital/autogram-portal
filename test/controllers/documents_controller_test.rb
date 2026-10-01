@@ -17,6 +17,15 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_response :redirect
   end
 
+  test "UUID download of owned document remains available to anonymous visitor" do
+    document = create_test_document
+    document.update!(contract: contracts(:two))
+
+    get "/documents/#{document.uuid}/download"
+
+    assert_redirected_to rails_blob_url(document.blob, disposition: "attachment")
+  end
+
   private
 
   def create_test_document

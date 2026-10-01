@@ -48,6 +48,22 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     assert_equal [], @user.reload.features
   end
 
+  test "registration callbacks explicitly skip authorization" do
+    @controller.singleton_class.define_method(:new) { head :ok }
+
+    get :new
+
+    assert_response :success
+  end
+
+  test "account updates still require authorization despite public registration skips" do
+    @controller.singleton_class.define_method(:authorize_account!) { nil }
+
+    assert_raises(Pundit::AuthorizationNotPerformedError) do
+      put :update, params: { user: { name: @user.name } }
+    end
+  end
+
   test "destroy removes user signers" do
     signer = signers(:one)
 

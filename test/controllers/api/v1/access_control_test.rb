@@ -29,6 +29,49 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "api contract and document access use direct or bundle tenant ownership" do
+    Bundle.create!(tenant: @owner, contracts: [ @other_contract ])
+    @other_contract.update_column(:tenant_id, @other.id)
+
+    [ [ @owner, @owner_key ], [ @other, @other_key ] ].each do |tenant, key|
+      get "/api/v1/contracts/#{@other_contract.uuid}", headers: bearer_headers_for(tenant, key)
+      assert_response :success
+
+      get "/api/v1/documents/#{@other_document.uuid}", headers: bearer_headers_for(tenant, key)
+      assert_response :success
+    end
+  end
+
+  test "api contract deletion rejects foreign tenant without mutation" do
+    assert_no_difference -> { Contract.count } do
+      delete "/api/v1/contracts/#{@other_contract.uuid}", headers: bearer_headers_for(@owner, @owner_key)
+    end
+
+    assert_response :not_found
+    assert_equal({ "error" => "Contract not found" }, response.parsed_body)
+  end
+
+  test "api bundle access remains tenant scoped even when publicly visible" do
+    bundle = Bundle.create!(tenant: @other, contracts: [ @other_contract ], publicly_visible: true)
+    headers = bearer_headers_for(@owner, @owner_key)
+
+    get "/api/v1/bundles/#{bundle.uuid}", headers: headers
+    assert_response :not_found
+    assert_equal({ "error" => "Bundle not found" }, response.parsed_body)
+
+    assert_no_difference -> { Bundle.count } do
+      delete "/api/v1/bundles/#{bundle.uuid}", headers: headers
+    end
+    assert_response :not_found
+  end
+
+  test "api hello remains public without a tenant token" do
+    get "/api/v1/hello"
+
+    assert_response :success
+    assert_equal({ "message" => "Hello, World!" }, response.parsed_body)
+  end
+
   test "api document show rejects cross-tenant access" do
     get "/api/v1/documents/#{@other_document.uuid}", headers: bearer_headers_for(@owner, @owner_key)
 
