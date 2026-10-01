@@ -4,6 +4,7 @@ class OauthConsentsController < ApplicationController
   skip_before_action :enforce_current_policy_consent
 
   before_action :load_pending_oauth_data
+  before_action :skip_authorization, only: [ :new, :create ]
 
   def new
   end

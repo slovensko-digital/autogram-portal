@@ -1,5 +1,6 @@
 class DocumentsController < ApplicationController
   before_action :set_document
+  before_action :authorize_document!
   before_action :allow_iframe, only: [ :pdf_preview ]
 
   def visualize
@@ -45,6 +46,10 @@ class DocumentsController < ApplicationController
 
   def set_document
     @document = Document.find_by!(uuid: params[:id])
+  end
+
+  def authorize_document!
+    authorize @document
   end
 
   def document_params

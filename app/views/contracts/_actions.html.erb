@@ -2,7 +2,8 @@
 
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
   <% anonymous_account_teaser = current_user.nil? && @contract.anonymous? %>
-  <% managed_contract = @contract.managed_by?(current_tenant) %>
+  <% contract_policy = policy(@contract) %>
+  <% managed_contract = contract_policy.manage? %>
   <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
     <div class="mb-6 text-center lg:text-left">
       <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.new.actions.header') %></h3>
@@ -18,7 +19,7 @@
               url: signature_parameters_contract_path(@contract, target_step: 'sign')
             } %>
 
-      <% if @contract.pades_field_preparation_allowed_for?(current_tenant) %>
+      <% if contract_policy.prepare_signature_fields? && @contract.pades_field_preparation_allowed? %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'prepare_signature_fields',

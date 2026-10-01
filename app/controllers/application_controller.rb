@@ -1,10 +1,15 @@
 class ApplicationController < ActionController::Base
+  include Pundit::Authorization
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
   before_action :set_locale
   before_action :enforce_current_policy_consent, if: :user_signed_in?
   before_action :ensure_tenant_selected, if: :user_signed_in?
+  before_action :skip_authorization, only: [ :devtools_config ]
+  after_action :verify_authorized
+  after_action :verify_policy_scoped, if: -> { action_name == "index" }
 
   # Raised for a record of another tenant the user belongs to; they have to sign
   # in to that tenant to work with it.
@@ -83,6 +88,7 @@ class ApplicationController < ActionController::Base
     session[:pending_tenant_user_at] = Time.current.to_i
     flash.delete(:notice)
     sign_out(:user)
+    pundit_reset!
   end
 
   # Picks the tenant for the rest of the session; it stays until sign out.
@@ -94,20 +100,20 @@ class ApplicationController < ActionController::Base
     @current_tenant = tenant
   end
 
-  # True when the current tenant owns +record+. A record of another tenant the
-  # user belongs to explains which tenant to sign in to instead.
-  def tenant_manages?(record)
-    return false if record.nil?
-    return true if record.managed_by?(current_tenant)
-
-    owning_tenant = record.respond_to?(:owning_tenant) ? record.owning_tenant : record.tenant
-    raise OtherTenantRecord, owning_tenant if current_user&.member_of?(owning_tenant)
-
-    false
-  end
-
   def render_other_tenant_record(error)
     redirect_to dashboard_path, alert: t("tenants.alerts.other_tenant_record", name: error.tenant.name)
+  end
+
+  def redirect_for_other_tenant(record)
+    owning_tenant = record.respond_to?(:owning_tenant) ? record.owning_tenant : record.try(:tenant)
+    return false unless current_user&.member_of?(owning_tenant)
+
+    render_other_tenant_record(OtherTenantRecord.new(owning_tenant))
+    true
+  end
+
+  def render_tenant_record_denial(error)
+    render_not_found unless redirect_for_other_tenant(error.record)
   end
 
   def tenant_settings_path
@@ -119,6 +125,10 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def pundit_user
+    AuthorizationContext::Web.new(user: current_user, tenant: current_tenant)
+  end
 
   def resolve_current_tenant
     tenants = current_user.tenants

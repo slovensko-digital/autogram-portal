@@ -1,6 +1,8 @@
 class Users::SessionsController < Devise::Passwordless::SessionsController
   include VerifiesAltchaCaptcha
 
+  before_action :skip_authorization, only: [ :new, :create, :destroy ]
+
   def create
     if (self.resource = resource_class.find_for_authentication(email: create_params[:email]))
       send_magic_link(resource)

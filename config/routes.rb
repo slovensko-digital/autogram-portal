@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   devise_for :users,
     controllers: {
       sessions: "users/sessions",
+      magic_links: "users/magic_links",
       registrations: "users/registrations",
       confirmations: "users/confirmations",
       unlocks: "users/unlocks",

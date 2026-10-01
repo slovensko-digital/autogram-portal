@@ -2,6 +2,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   include VerifiesAltchaCaptcha
 
   before_action :configure_permitted_parameters
+  before_action :authorize_account!, only: [ :edit, :update, :destroy ]
+  before_action :skip_authorization, only: [ :new, :create, :cancel ]
+  prepend_after_action :pundit_reset!, only: [ :destroy ]
 
   def create
     super do |resource|
@@ -31,6 +34,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   protected
 
+  def authorize_account!
+    authorize current_user, :manage_account?
+  end
+
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :agree_to_policies ])
     devise_parameter_sanitizer.permit(:account_update, keys: [ :name, { features: [] } ])
@@ -38,9 +45,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def update_resource(resource, params)
     params = params.except(:current_password, :password, :password_confirmation)
-    params = params.except(:features) unless resource.admin?
+    can_edit_features = policy(resource).edit_features?
+    params = params.except(:features) unless can_edit_features
 
-    if resource.admin?
+    if can_edit_features
       submitted_features = Array(params[:features]).map(&:to_s).reject(&:blank?)
       submitted_features |= [ "admin" ]
       params[:features] = submitted_features & User::AVAILABLE_FEATURES

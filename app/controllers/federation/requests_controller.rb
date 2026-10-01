@@ -1,5 +1,6 @@
 class Federation::RequestsController < ApplicationController
   before_action :authenticate_user!, only: [ :claim ]
+  before_action :authorize_federation_request!
 
   def show
     @request_url = params[:url].to_s
@@ -28,6 +29,10 @@ class Federation::RequestsController < ApplicationController
   end
 
   private
+
+  def authorize_federation_request!
+    authorize :federation_request
+  end
 
   def federation_request_broker
     @federation_request_broker ||= FederationRequestBroker.new

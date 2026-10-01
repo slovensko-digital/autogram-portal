@@ -2,6 +2,7 @@ module Contracts
   class OnboardingController < ApplicationController
     before_action :set_contract
     before_action :set_recipient
+    before_action :authorize_contract!
     before_action :validate_method_param
     before_action :check_onboarding_status
     before_action :allow_iframe
@@ -38,6 +39,10 @@ module Contracts
 
     def set_contract
       @contract = Contract.find_by!(uuid: params[:contract_id])
+    end
+
+    def authorize_contract!
+      authorize @contract, :public_access?
     end
 
     def set_recipient

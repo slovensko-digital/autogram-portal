@@ -5,12 +5,12 @@ class Contracts::SessionsController < ApplicationController
   before_action :set_session, except: [ :create ]
   before_action :set_signer_contract, only: [ :create, :show, :request_verification, :verify_verification, :complete_signing ]
   before_action :ensure_prepared_signature_field_appearance_completed, only: [ :create, :show, :request_verification, :verify_verification, :complete_signing ]
-  before_action :authorize_session_access!, only: [ :parameters, :download, :upload ]
-  before_action :authorize_session_destroy!, only: [ :destroy ]
-  before_action :ensure_session_matches_signer_contract!, only: [ :request_verification, :verify_verification, :complete_signing ]
+  before_action :authorize_session_operation!
   before_action :redirect_if_completed, only: [ :show ]
   skip_before_action :verify_authenticity_token, only: [ :upload, :get_webhook, :standard_webhook ]
   before_action :allow_iframe
+
+  rescue_from Pundit::NotAuthorizedError, with: -> { head :forbidden }
 
   def create
     session_type = params[:type] || params[:application]
@@ -163,10 +163,6 @@ class Contracts::SessionsController < ApplicationController
     @session = @contract.sessions.find(params[:id])
   end
 
-  def ensure_session_matches_signer_contract!
-    head :forbidden unless @session.signer_contract == @signer_contract
-  end
-
   def set_signer_contract
     if params[:recipient]
       @recipient = @contract.recipients.active.find_by_uuid(params[:recipient])
@@ -184,7 +180,7 @@ class Contracts::SessionsController < ApplicationController
       @recipient = @contract.recipients.active.find_by(user: current_user) ||
                    @contract.recipients.active.find_by(email: current_user.email)
 
-      if @recipient.nil? && @contract.bundle.present? && @contract.bundle.managed_by?(current_tenant)
+      if @recipient.nil? && @contract.bundle.present? && policy(@contract.bundle).manage?
         @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
@@ -337,16 +333,14 @@ class Contracts::SessionsController < ApplicationController
     ))
   end
 
-  def authorize_session_access!
-    return if session_token_authorized? || allowed_user_for_session?
-
-    head :forbidden
-  end
-
-  def authorize_session_destroy!
-    return if allowed_user_for_session?
-
-    head :forbidden
+  def authorize_session_operation!
+    access = SigningSessionAccess.new(
+      contract: @contract,
+      session: @session,
+      signer_contract: @signer_contract,
+      token_authorized: [ "parameters", "download", "upload" ].include?(action_name) && session_token_authorized?
+    )
+    authorize [ :signing, access ]
   end
 
   def session_token_authorized?
@@ -354,25 +348,6 @@ class Contracts::SessionsController < ApplicationController
     return false unless token
 
     SessionAccessToken.valid?(token: token, contract: @contract, session: @session)
-  end
-
-  def allowed_user_for_session?
-    return false unless current_user
-    return true if @contract.managed_by?(current_tenant)
-
-    signer = @session.signer
-
-    case signer
-    when UserSigner
-      signer.user == current_user
-    when RecipientSigner
-      recipient = signer.recipient
-      return false if recipient&.withdrawn?
-
-      recipient&.user == current_user || recipient&.email == current_user.email
-    else
-      false
-    end
   end
 
   def session_view_options

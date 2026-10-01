@@ -1,7 +1,9 @@
 class Tenants::MembershipsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_tenant
-  before_action :ensure_owner!
+  before_action :authorize_membership_management!
+
+  rescue_from Pundit::NotAuthorizedError, with: :render_owner_required
 
   def create
     email = params.dig(:membership, :email).to_s.strip.downcase
@@ -34,7 +36,11 @@ class Tenants::MembershipsController < ApplicationController
     @tenant = current_tenant
   end
 
-  def ensure_owner!
-    redirect_to tenant_settings_path, alert: t("tenants.alerts.owner_required") unless @tenant.owner?(current_user)
+  def authorize_membership_management!
+    authorize @tenant, :manage_memberships?
+  end
+
+  def render_owner_required
+    redirect_to tenant_settings_path, alert: t("tenants.alerts.owner_required")
   end
 end

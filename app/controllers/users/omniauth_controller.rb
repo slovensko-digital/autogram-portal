@@ -1,4 +1,6 @@
 class Users::OmniauthController < Devise::OmniauthCallbacksController
+  before_action :skip_authorization, only: [ :google_oauth2, :failure, :passthru ]
+
   def google_oauth2
     auth = request.env["omniauth.auth"]
 

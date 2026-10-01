@@ -1,4 +1,8 @@
 class SignatureEvidenceVerificationsController < ApplicationController
+  before_action :authorize_public_evidence!, only: [ :show, :download ]
+
+  rescue_from Pundit::NotAuthorizedError, with: -> { head :forbidden }
+
   def show
     @reference = params[:reference].to_s.strip
     return if @reference.blank?
@@ -27,8 +31,11 @@ class SignatureEvidenceVerificationsController < ApplicationController
   def download_private
     @reference = params[:reference].to_s.strip
     @signature_evidence_record = find_signature_evidence_record(@reference)
-    return head :not_found if @signature_evidence_record.blank?
-    return head :forbidden unless @signature_evidence_record.private_evidence_accessible_by?(current_tenant)
+    if @signature_evidence_record.blank?
+      skip_authorization
+      return head :not_found
+    end
+    authorize @signature_evidence_record
     return head :not_found unless @signature_evidence_record.private_evidence_package.attached?
 
     send_data @signature_evidence_record.private_evidence_package.download,
@@ -38,6 +45,10 @@ class SignatureEvidenceVerificationsController < ApplicationController
   end
 
   private
+
+  def authorize_public_evidence!
+    authorize SignatureEvidenceRecord, :public_access?
+  end
 
   def find_signature_evidence_record(reference)
     SignatureEvidenceRecord.includes(:contract_content_version).find_by(public_reference: reference)

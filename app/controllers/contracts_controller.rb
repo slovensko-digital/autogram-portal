@@ -1,7 +1,8 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
+  before_action :authorize_public_contract!, only: [ :show_bundle, :actions, :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session, :signed_document, :validate ]
   before_action :claim_pending_anonymous_contract, only: [ :show, :actions ]
-  before_action :verify_author, only: [ :show, :update, :destroy ]
+  before_action :authorize_contract!, only: [ :show, :update, :destroy ]
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
@@ -10,12 +11,15 @@ class ContractsController < ApplicationController
   before_action :ensure_visual_signing_allowed, only: [ :visual_signing, :create_visual_session ]
   before_action :ensure_signature_field_appearance_assignment, only: [ :visual_signing, :create_visual_session ]
 
+  rescue_from Pundit::NotAuthorizedError, with: :render_contract_denial
+
   def index
+    authorize Contract
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
     @state = params[:state].presence_in(%w[awaiting completed])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    contracts = current_tenant.contracts.standalone
+    contracts = policy_scope(Contract).standalone
     contracts = case @state
     when "awaiting"
       contracts.left_outer_joins(:content_versions).where(contract_content_versions: { id: nil })
@@ -25,15 +29,17 @@ class ContractsController < ApplicationController
       contracts
     end
 
-    @contracts = contracts.includes(:user, :documents).order(created_at: order_dir)
+    @contracts = contracts.includes(:documents).order(created_at: order_dir)
   end
 
   def new
     @contract = Contract.new
+    authorize @contract
     @current_user = current_user
   end
 
   def create
+    authorize Contract
     @contract = Contract.new(
       tenant: current_tenant,
       author_notifications_enabled: true,
@@ -64,7 +70,7 @@ class ContractsController < ApplicationController
   end
 
   def content_versions
-    return head :forbidden unless author_of_contract? && @contract.owning_tenant.archivation_enabled?
+    authorize @contract
 
     @content_versions = @contract.signed_document_versions.with_attached_file
   end
@@ -74,8 +80,8 @@ class ContractsController < ApplicationController
   end
 
   def authenticate_for_actions
+    authorize @contract
     return redirect_to actions_contract_path(@contract) if current_user.present?
-    return head :forbidden unless @contract.anonymous?
 
     session[:pending_contract_claim_uuid] = @contract.uuid
     store_location_for(:user, contract_path(@contract))
@@ -83,7 +89,7 @@ class ContractsController < ApplicationController
   end
 
   def signature_extension
-    return head :forbidden unless author_of_contract?
+    authorize @contract
 
     target_level = params[:target_level].presence&.upcase || "T"
     return head :unprocessable_entity unless @contract.extendable_signatures?(target_level: target_level)
@@ -92,8 +98,10 @@ class ContractsController < ApplicationController
   end
 
   def signature_parameters
-    if params[:target_step] == "request_signature" && !author_of_contract?
-      return head :forbidden
+    if params[:target_step] == "request_signature"
+      authorize @contract, :request_signatures?
+    else
+      authorize @contract, :public_access?
     end
 
     @next_step = params[:target_step]
@@ -101,7 +109,7 @@ class ContractsController < ApplicationController
   end
 
   def extend_signatures
-    return head :forbidden unless author_of_contract?
+    authorize @contract
 
     target_level = params[:target_level].presence&.upcase || "T"
     return_url = @contract.bundle ? show_bundle_contract_path(@contract) : contract_path(@contract)
@@ -253,9 +261,7 @@ class ContractsController < ApplicationController
   end
 
   def update
-    if params[:next_step] == "request_signature" && !author_of_contract?
-      return head :forbidden
-    end
+    authorize @contract, :request_signatures? if params[:next_step] == "request_signature"
 
     if @contract.update(contract_params)
       @contract.save!
@@ -301,10 +307,22 @@ class ContractsController < ApplicationController
     end
   end
 
-  def verify_author
-    return if @contract.anonymous? || tenant_manages?(@contract)
+  def authorize_contract!
+    authorize @contract
+  end
 
-    redirect_to new_contract_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
+  def authorize_public_contract!
+    authorize @contract, :public_access?
+  end
+
+  def render_contract_denial(error)
+    if [ "show?", "update?", "destroy?" ].include?(error.query.to_s)
+      return if redirect_for_other_tenant(error.record)
+
+      redirect_to new_contract_path, alert: t("contracts.alerts.unauthorized_edit_attempt")
+    else
+      head :forbidden
+    end
   end
 
   def set_contract
@@ -328,7 +346,7 @@ class ContractsController < ApplicationController
       @recipient = @contract.recipients.active.find_by(user: current_user) ||
                    @contract.recipients.active.find_by(email: current_user.email)
 
-      if @recipient.nil? && @contract.bundle.present? && @contract.bundle.managed_by?(current_tenant)
+      if @recipient.nil? && @contract.bundle.present? && policy(@contract.bundle).manage?
         @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
@@ -552,10 +570,6 @@ class ContractsController < ApplicationController
 
   def signed_document_param
     params.require(:signed_document)
-  end
-
-  def author_of_contract?
-    @contract.managed_by?(current_tenant)
   end
 
   def ensure_visual_signing_allowed

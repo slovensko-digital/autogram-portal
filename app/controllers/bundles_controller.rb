@@ -3,27 +3,34 @@ class BundlesController < ApplicationController
   helper_method :mobile_device_request?
 
   before_action :set_bundle, only: [ :show, :edit, :update, :destroy ]
+  after_action :verify_policy_scoped, only: [ :index, :received ]
+
+  rescue_from Pundit::NotAuthorizedError, with: :render_tenant_record_denial
+
   skip_before_action :verify_authenticity_token, only: [ :sign ], if: -> { params[:iframe].present? }
   before_action :allow_iframe, only: [ :sign, :autogram_batch ], if: -> { params[:iframe].present? }
   before_action :load_signing_bundle_context, only: [ :sign, :autogram_batch ]
+  before_action :authorize_signing_bundle!, only: [ :sign, :autogram_batch ]
+  before_action :ensure_author_proxy_recipient, only: [ :sign, :autogram_batch ]
   before_action :render_sign_withdrawn_if_needed, only: [ :sign, :autogram_batch ]
   before_action :set_batch_autogram_contracts, only: [ :sign, :autogram_batch ]
   before_action :ensure_batch_autogram_available!, only: [ :autogram_batch ]
 
   def index
+    authorize Bundle
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
     @state = params[:state].presence_in(%w[awaiting completed declined no_recipients])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    bundles = current_tenant.bundles
+    bundles = policy_scope(Bundle)
 
-    awaiting_scope = current_tenant.bundles
+    awaiting_scope = bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
                                  .merge(Recipient.active.visible)
                                  .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                  .distinct
 
-    declined_scope = current_tenant.bundles
+    declined_scope = bundles
                                  .joins(recipients: { recipient_signer: :signer_contracts })
                                  .merge(Recipient.active.visible)
                                  .where.not(signer_contracts: { declined_at: nil })
@@ -54,11 +61,12 @@ class BundlesController < ApplicationController
   end
 
   def received
+    authorize [ :received, Bundle ], :index?
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
     @state = params[:state].presence_in(%w[awaiting signed declined superseded])
 
     order_dir = @sort == "oldest" ? :asc : :desc
-    invitation_scope = FederationRequestInvitation.visible_in_received.for_user(current_user).includes(:portal_instance).order(created_at: order_dir)
+    invitation_scope = policy_scope([ :received, FederationRequestInvitation ]).visible_in_received.includes(:portal_instance).order(created_at: order_dir)
     @federation_invitations = case @state
     when "awaiting"
       invitation_scope.pending
@@ -71,21 +79,21 @@ class BundlesController < ApplicationController
     else
       invitation_scope
     end
-    recipient_bundles = Bundle.recipient_user(current_user).distinct
+    recipient_bundles = policy_scope([ :received, Bundle ]).distinct
 
-    awaiting_for_user_scope = Bundle.recipient_user(current_user)
+    awaiting_for_user_scope = recipient_bundles
                                     .joins(recipients: { recipient_signer: :signer_contracts })
                                     .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
                                     .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
                                     .distinct
 
-    declined_for_user_scope = Bundle.recipient_user(current_user)
+    declined_for_user_scope = recipient_bundles
                                     .joins(recipients: { recipient_signer: :signer_contracts })
                                     .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
                                     .where.not(signer_contracts: { declined_at: nil })
                                     .distinct
 
-    superseded_for_user_scope = Bundle.recipient_user(current_user)
+    superseded_for_user_scope = recipient_bundles
                                       .joins(recipients: { recipient_signer: :signer_contracts })
                                       .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
                                       .where.not(signer_contracts: { superseded_at: nil })
@@ -160,6 +168,7 @@ class BundlesController < ApplicationController
   def decline
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
+    authorize [ :signing, SigningBundleAccess.new(bundle: bundle, recipient: recipient) ]
 
     if recipient.withdrawn?
       return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
@@ -195,6 +204,7 @@ class BundlesController < ApplicationController
   def accept
     bundle = Bundle.find_by_uuid!(params[:id])
     recipient = recipient_for_bundle_action(bundle)
+    authorize [ :signing, SigningBundleAccess.new(bundle: bundle, recipient: recipient) ]
 
     if recipient.withdrawn?
       return redirect_to sign_bundle_path(bundle, recipient: recipient.uuid),
@@ -227,7 +237,7 @@ class BundlesController < ApplicationController
 
   def set_bundle
     @bundle = Bundle.find_by!(uuid: params[:id])
-    raise ActiveRecord::RecordNotFound unless tenant_manages?(@bundle)
+    authorize @bundle
   end
 
   def bundle_params
@@ -282,16 +292,22 @@ class BundlesController < ApplicationController
 
     @bundle ||= Bundle.publicly_visible.find_by_uuid(params[:id]) || managed_bundle(params[:id])
 
-    if @bundle&.managed_by?(current_tenant) && @recipient.nil?
+    raise ActiveRecord::RecordNotFound unless @bundle
+  end
+
+  def authorize_signing_bundle!
+    authorize [ :signing, SigningBundleAccess.new(bundle: @bundle, recipient: @recipient) ]
+  end
+
+  def ensure_author_proxy_recipient
+    if policy(@bundle).manage? && @recipient.nil?
       @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @bundle, user: current_user)
     end
-
-    raise ActiveRecord::RecordNotFound unless @bundle
   end
 
   def managed_bundle(uuid)
     bundle = Bundle.find_by_uuid(uuid) if current_user
-    bundle if bundle&.managed_by?(current_tenant)
+    bundle if bundle && policy(bundle).manage?
   end
 
   def render_sign_withdrawn_if_needed

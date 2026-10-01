@@ -10,9 +10,9 @@
 
   <%= render("layouts/flash", flash: flash) %>
 
-  <% if @contract.bundle.managed_by?(current_tenant) %>
+  <% if policy(@contract.bundle).manage? %>
     <div class="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end sm:items-start">
-      <% if @contract.pades_field_preparation_allowed_for?(current_tenant) %>
+      <% if policy(@contract).prepare_signature_fields? && @contract.pades_field_preparation_allowed? %>
         <% if @contract.pades_signature_fields_prepared_for_all_recipients? %>
           <%= link_to t('contracts.show_bundle.edit_signature_fields'),
                 contract_signature_field_preparations_path(@contract),

@@ -1,7 +1,9 @@
 class TenantsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_tenant, only: [ :update, :leave ]
-  before_action :ensure_owner!, only: [ :update ]
+  before_action :authorize_tenant!
+
+  rescue_from Pundit::NotAuthorizedError, with: :render_owner_required
 
   def update
     if @tenant.update(tenant_params)
@@ -29,14 +31,19 @@ class TenantsController < ApplicationController
     @tenant = current_tenant
   end
 
-  def ensure_owner!
-    redirect_to tenant_settings_path, alert: t("tenants.alerts.owner_required") unless @tenant.owner?(current_user)
+  def authorize_tenant!
+    authorize @tenant
+  end
+
+  def render_owner_required
+    redirect_to tenant_settings_path, alert: t("tenants.alerts.owner_required")
   end
 
   def tenant_params
     # The name and plan are managed by administrators only.
-    return {} unless @tenant.api_enabled?
+    attributes = policy(@tenant).permitted_attributes_for_update
+    return {} if attributes.empty?
 
-    params.require(:tenant).permit(:api_token_public_key)
+    params.require(:tenant).permit(*attributes)
   end
 end

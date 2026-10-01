@@ -1,7 +1,9 @@
 class Api::Federation::V1::RequestInvitationsController < FederationApiController
   before_action :set_invitation, only: [ :withdraw ]
+  after_action :verify_policy_scoped, only: [ :withdraw ]
 
   def create
+    authorize [ :api, :federation, :v1, FederationRequestInvitation ]
     invitation_attributes = invitation_params
 
     @invitation = FederationRequestInvitation.find_or_initialize_by(
@@ -34,10 +36,10 @@ class Api::Federation::V1::RequestInvitationsController < FederationApiControlle
   end
 
   def set_invitation
-    @invitation = FederationRequestInvitation.find_by!(
-      portal_instance: current_portal_instance,
+    @invitation = policy_scope([ :api, :federation, :v1, FederationRequestInvitation ]).find_by!(
       origin_recipient_uuid: params[:recipient_uuid]
     )
+    authorize [ :api, :federation, :v1, @invitation ]
   end
 
   def invitation_params

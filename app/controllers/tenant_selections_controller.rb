@@ -8,22 +8,38 @@ class TenantSelectionsController < ApplicationController
   skip_before_action :ensure_tenant_selected
   before_action :redirect_when_signed_in
   before_action :set_pending_user
+  prepend_after_action :pundit_reset!, only: [ :update, :create ]
+
+  rescue_from Pundit::NotAuthorizedError, with: :render_not_found
 
   def show
+    authorize [ :tenant_selection, :tenant ]
     @tenants = @user.tenants.order(:name)
   end
 
   def update
-    complete_sign_in(@user.tenants.find(params[:tenant_id]))
+    tenant = @user.tenants.find(params[:tenant_id])
+    authorize [ :tenant_selection, tenant ]
+    complete_sign_in(tenant)
   end
 
   def create
-    return redirect_to tenant_selection_path if @user.tenants.exists?
+    if @user.tenants.exists?
+      skip_authorization
+      return redirect_to tenant_selection_path
+    end
 
+    authorize [ :tenant_selection, :tenant ]
     complete_sign_in(Tenant.create_personal_for!(@user))
   end
 
   private
+
+  def pundit_user
+    return super if current_user
+
+    AuthorizationContext::PendingTenantSelection.new(user: @user)
+  end
 
   def redirect_when_signed_in
     return unless current_user
