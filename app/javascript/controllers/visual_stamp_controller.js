@@ -197,10 +197,13 @@ export default class extends Controller {
     this.widthValue = width
     this.heightValue = height
 
-    this.xFieldTarget.value = this.round(x)
-    this.yFieldTarget.value = this.round(y)
-    this.widthFieldTarget.value = this.round(width)
-    this.heightFieldTarget.value = this.round(height)
+    // The geometry fields are not rendered when there is no field left to place.
+    if (this.hasXFieldTarget) {
+      this.xFieldTarget.value = this.round(x)
+      this.yFieldTarget.value = this.round(y)
+      this.widthFieldTarget.value = this.round(width)
+      this.heightFieldTarget.value = this.round(height)
+    }
 
     if (this.hasSummaryTarget) {
       this.summaryTarget.textContent = `${Math.round(width)} x ${Math.round(height)} pt, x ${Math.round(x)}, y ${Math.round(y)}`

@@ -15,6 +15,8 @@ class SkipLinkTest < ApplicationSystemTestCase
       page.execute_script("document.querySelector('a[href=\"#main-content\"]').focus()")
       page.send_keys(:enter)
       assert_equal "main-content", page.evaluate_script("document.activeElement.id")
+      assert_equal "solid", page.evaluate_script("getComputedStyle(document.getElementById('main-content')).outlineStyle"),
+                   "Focused main content should show its focus outline"
 
       page.send_keys(:tab)
       assert page.evaluate_script("document.getElementById('main-content').contains(document.activeElement)"),

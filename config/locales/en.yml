@@ -515,7 +515,7 @@ en:
     destroy:
       success: "Contract bundle was successfully deleted."
       failure: "Failed to delete contract bundle."
-      confirm: "Are you sure you want to delete this contract bundle? This action is irreversible."
+      confirm: "Are you sure you want to delete the contract bundle “%{name}”? This action is irreversible."
     sign:
       title: "Documents bundle"
       title_requested_singular: "You received a document to sign"
@@ -826,7 +826,7 @@ en:
     destroy:
       success: "Contract was successfully deleted."
       failure: "Failed to delete contract."
-      confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
+      confirm: "Are you sure you want to delete the contract “%{name}”? This action is irreversible and will also remove all documents associated with this contract."
       failure_bundle_attached: "Cannot delete contract because it is part of a bundle."
     sign:
       all_contracts: "All documents"
@@ -1291,7 +1291,7 @@ en:
       empty_message: "Validation metadata will appear here after you sign a contract."
     destroy:
       success: "Validation metadata was successfully deleted."
-      confirm: "Are you sure you want to delete this stored validation metadata?"
+      confirm: "Are you sure you want to delete the stored validation metadata of “%{name}”?"
     refresh:
       scheduled: "Archive refresh was scheduled."
       not_refreshable: "This validation record cannot be refreshed anymore."

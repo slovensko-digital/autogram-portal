@@ -67,11 +67,15 @@
                 <% end %>
               </div>
               <div class="flex items-center gap-6 shrink-0 justify-end">
-                <%= link_to t('actions.delete'), contract_path(contract),
-                            data: { turbo_method: :delete, turbo_confirm: t('contracts.destroy.confirm') },
-                            class: "hidden underline sm:inline text-sm text-red-700 hover:text-red-900 transition-colors" %>
-                <%= link_to t('.view'), contract_path(contract),
-                            class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" %>
+                <%= link_to contract_path(contract),
+                            data: { turbo_method: :delete, turbo_confirm: t('contracts.destroy.confirm', name: contract.display_name) },
+                            class: "hidden underline sm:inline text-sm text-red-700 hover:text-red-900 transition-colors" do %>
+                  <%= t('actions.delete') %><span class="sr-only">: <%= contract.display_name %></span>
+                <% end %>
+                <%= link_to contract_path(contract),
+                            class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" do %>
+                  <%= t('.view') %><span class="sr-only">: <%= contract.display_name %></span>
+                <% end %>
               </div>
             </div>
           <% end %>

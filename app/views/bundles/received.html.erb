@@ -79,9 +79,10 @@
               </div>
               <div class="flex items-center gap-0.5 w-20 shrink-0 justify-end">
                 <% if invitation_status == "pending" %>
-                  <%= link_to t('actions.view'), federation_requests_open_path(url: payload["openUrl"]),
-                              class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors",
-                              title: t('actions.view') %>
+                  <%= link_to federation_requests_open_path(url: payload["openUrl"]),
+                              class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" do %>
+                    <%= t('actions.view') %><span class="sr-only">: <%= [ t('.external_invitation_title'), payload["authorName"] ].compact_blank.join(" – ") %></span>
+                  <% end %>
                 <% end %>
               </div>
             </div>
@@ -140,13 +141,15 @@
               </div>
               <div class="flex items-center gap-0.5 w-20 shrink-0 justify-end">
                 <% if recipient && !personally_signed %>
-                  <%= link_to t('actions.view'), sign_bundle_path(bundle, recipient: recipient.uuid),
-                              class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors",
-                              title: t('actions.view') %>
+                  <%= link_to sign_bundle_path(bundle, recipient: recipient.uuid),
+                              class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" do %>
+                    <%= t('actions.view') %><span class="sr-only">: <%= bundle.display_name %></span>
+                  <% end %>
                 <% else %>
-                  <%= link_to t('actions.view'), sign_bundle_path(bundle, recipient: recipient&.uuid),
-                              class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors",
-                              title: t('actions.view') %>
+                  <%= link_to sign_bundle_path(bundle, recipient: recipient&.uuid),
+                              class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" do %>
+                    <%= t('actions.view') %><span class="sr-only">: <%= bundle.display_name %></span>
+                  <% end %>
                 <% end %>
               </div>
 

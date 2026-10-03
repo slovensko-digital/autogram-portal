@@ -138,6 +138,19 @@ class RecipientsControllerTest < ActionController::TestCase
     assert_select "[data-notification-overlay][role='status']", count: 0
   end
 
+  test "index names the recipient in its action buttons" do
+    first = bundles(:one).recipients.create!(email: "first@example.com")
+    second = bundles(:one).recipients.create!(email: "second@example.com")
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    [ first, second ].each do |recipient|
+      assert_select "form[action=?] button .sr-only", bundle_recipient_path(bundles(:one), recipient), text: ": #{recipient.display_name}"
+      assert_select "form[action=?] button .sr-only", notify_bundle_recipient_path(bundles(:one), recipient), text: ": #{recipient.display_name}"
+    end
+  end
+
   test "destroy withdraws the request and reports success" do
     recipient = bundles(:one).recipients.create!(email: "removed@example.com")
 

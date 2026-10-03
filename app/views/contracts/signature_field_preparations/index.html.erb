@@ -1,6 +1,7 @@
 <% content_for :title, t('.title') %>
 
 <% editing = @signature_field_preparation.persisted? %>
+<% placing = @recipients.present? || editing %>
 <% document = @signature_field_preparation.document || @documents.first %>
 <% preview_document = @preview_document || document %>
 <% preview_path = preview_document&.blob&.attached? ? rails_blob_path(preview_document.blob, disposition: "inline") : nil %>
@@ -144,7 +145,7 @@
                      tabindex="0"
                      aria-label="<%= t('shared.stamp_geometry.box_label') %>"
                      aria-describedby="signature_field_preparation_geometry_hint"
-                     class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 ring-2 ring-white/70 touch-none focus:outline-none focus-visible:ring-blue-600 <%= 'hidden' if @recipients.blank? && !editing %>">
+                     class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 ring-2 ring-white/70 touch-none focus:outline-none focus-visible:ring-blue-600 <%= 'hidden' unless placing %>">
                   <div class="text-xs font-medium text-gray-800" data-visual-stamp-target="boxLabel"><%= editing ? @signature_field_preparation.recipient.display_name : t('.preview.box_label') %></div>
                   <button type="button"
                           aria-label="<%= t('.preview.resize_handle') %>"
@@ -156,11 +157,13 @@
               </div>
             </div>
           </div>
-          <%= render "shared/stamp_geometry_fields",
-                name_prefix: "signature_field_preparation",
-                x: @signature_field_preparation.x, y: @signature_field_preparation.y,
-                width: @signature_field_preparation.width, height: @signature_field_preparation.height,
-                invalid: @signature_field_preparation.errors.attribute_names & %i[x y width height] %>
+          <% if placing %>
+            <%= render "shared/stamp_geometry_fields",
+                  name_prefix: "signature_field_preparation",
+                  x: @signature_field_preparation.x, y: @signature_field_preparation.y,
+                  width: @signature_field_preparation.width, height: @signature_field_preparation.height,
+                  invalid: @signature_field_preparation.errors.attribute_names & %i[x y width height] %>
+          <% end %>
         </div>
 
         <aside class="min-w-0 space-y-4 self-start rounded-lg border border-gray-200 bg-white p-4">
@@ -234,14 +237,16 @@
               <div class="min-w-0 flex-1 break-words text-base font-semibold text-gray-900"><%= recipient.display_name %></div>
               <% if preparation %>
                 <%= render 'shared/badge', color: 'green', label: t('.recipients.placed', page: preparation.page) %>
-                <%= link_to t('.recipients.edit'),
-                            edit_contract_signature_field_preparation_path(@contract, preparation),
-                            class: "text-sm font-medium text-blue-600 underline hover:text-blue-800" %>
-                <%= button_to t('actions.remove'),
-                              contract_signature_field_preparation_path(@contract, preparation),
+                <%= link_to edit_contract_signature_field_preparation_path(@contract, preparation),
+                            class: "text-sm font-medium text-blue-600 underline hover:text-blue-800" do %>
+                  <%= t('.recipients.edit') %><span class="sr-only">: <%= recipient.display_name %></span>
+                <% end %>
+                <%= button_to contract_signature_field_preparation_path(@contract, preparation),
                               method: :delete,
                               class: "text-sm font-medium text-red-600 underline cursor-pointer hover:text-red-800",
-                              form: { data: { turbo_confirm: t('.recipients.remove_confirm', recipient: recipient.display_name) } } %>
+                              form: { data: { turbo_confirm: t('.recipients.remove_confirm', recipient: recipient.display_name) } } do %>
+                  <%= t('actions.remove') %><span class="sr-only">: <%= recipient.display_name %></span>
+                <% end %>
               <% else %>
                 <%= render 'shared/badge', color: 'gray', label: t('.recipients.not_placed') %>
               <% end %>

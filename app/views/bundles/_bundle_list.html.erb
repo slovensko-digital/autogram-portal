@@ -57,12 +57,16 @@
           </div>
           <div class="flex items-center gap-6 shrink-0 justify-end">
             <% if show_destroy %>
-              <%= link_to t('actions.delete'), bundle_path(bundle),
-                          data: { turbo_method: :delete, turbo_confirm: t('bundles.destroy.confirm') },
-                          class: "hidden underline sm:inline text-sm text-red-700 hover:text-red-900 transition-colors" %>
+              <%= link_to bundle_path(bundle),
+                          data: { turbo_method: :delete, turbo_confirm: t('bundles.destroy.confirm', name: bundle.display_name) },
+                          class: "hidden underline sm:inline text-sm text-red-700 hover:text-red-900 transition-colors" do %>
+                <%= t('actions.delete') %><span class="sr-only">: <%= bundle.display_name %></span>
+              <% end %>
             <% end %>
-            <%= link_to t('actions.view'), bundle_path(bundle),
-                        class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" %>
+            <%= link_to bundle_path(bundle),
+                        class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" do %>
+              <%= t('actions.view') %><span class="sr-only">: <%= bundle.display_name %></span>
+            <% end %>
           </div>
         </div>
       <% end %>

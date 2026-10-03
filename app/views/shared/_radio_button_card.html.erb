@@ -21,15 +21,14 @@
 <% disabled_reasons = Array(disabled_reasons).compact_blank %>
 <% reason_id = "#{name}_#{value}_disabled_reason".parameterize(separator: "_") %>
 <% enabled_classes = "hover:border-blue-300 hover:bg-blue-50 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" %>
-<% disabled_classes = "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500 opacity-75 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2" %>
+<% disabled_classes = "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500 opacity-75" %>
+<% aria_attributes = disabled && disabled_reasons.any? ? { describedby: reason_id } : {} %>
 
-<label class="choice-card group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> border rounded-lg transition-colors <%= disabled ? disabled_classes : "bg-white border-gray-200 #{enabled_classes}" %> <%= wrapper_class %>"
-       <%= 'tabindex="0" aria-disabled="true"'.html_safe if disabled %>
-       <%= "aria-describedby=\"#{reason_id}\"".html_safe if disabled && disabled_reasons.any? %>>
+<label class="choice-card group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> border rounded-lg transition-colors <%= disabled ? disabled_classes : "bg-white border-gray-200 #{enabled_classes}" %> <%= wrapper_class %>">
   <% if form %>
-    <%= form.radio_button name, value, { checked: checked && !disabled, disabled: disabled, class: "sr-only", data: data_attributes } %>
+    <%= form.radio_button name, value, { checked: checked && !disabled, disabled: disabled, class: "sr-only", data: data_attributes, aria: aria_attributes } %>
   <% else %>
-    <%= radio_button_tag name, value, checked && !disabled, { disabled: disabled, class: "sr-only", data: data_attributes } %>
+    <%= radio_button_tag name, value, checked && !disabled, { disabled: disabled, class: "sr-only", data: data_attributes, aria: aria_attributes } %>
   <% end %>
 
   <div class="flex-shrink-0">

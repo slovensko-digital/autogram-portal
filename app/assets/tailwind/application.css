@@ -34,6 +34,11 @@
 		outline-offset: 2px;
 	}
 
+	label:has(input[type="file"]:focus-visible) {
+		outline: 2px solid Highlight;
+		outline-offset: 2px;
+	}
+
 	.choice-indicator-dot {
 		forced-color-adjust: none;
 		background-color: Highlight;

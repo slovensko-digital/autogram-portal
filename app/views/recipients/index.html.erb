@@ -65,7 +65,7 @@
                               action: "submit->form-submit#handleSubmit",
                               form_submit_pending_text_value: t("actions.sending")
                             } } do %>
-                        <%= recipient.federated_recipient? ? t('.send_to_portal') : t('.send_invitation') %>
+                        <%= recipient.federated_recipient? ? t('.send_to_portal') : t('.send_invitation') %><span class="sr-only">: <%= recipient.display_name %></span>
                       <% end %>
                     <% end %>
 
@@ -80,7 +80,7 @@
                               action: "submit->form-submit#handleSubmit",
                               form_submit_pending_text_value: t("actions.removing")
                             } } do %>
-                        <%= t('actions.remove') %>
+                        <%= t('actions.remove') %><span class="sr-only">: <%= recipient.display_name %></span>
                       <% end %>
                     <% end %>
 

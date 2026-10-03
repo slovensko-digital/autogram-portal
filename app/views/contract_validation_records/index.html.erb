@@ -90,16 +90,22 @@
               </div>
               <div class="flex items-center gap-6 shrink-0 justify-end">
                 <% if record.source_contract_available? %>
-                  <%= link_to t('.view_contract'), contract_path(record.contract), class: "hidden underline sm:inline text-sm text-blue-600 hover:text-blue-700 transition-colors" %>
+                  <%= link_to contract_path(record.contract), class: "hidden underline sm:inline text-sm text-blue-600 hover:text-blue-700 transition-colors" do %>
+                    <%= t('.view_contract') %><span class="sr-only">: <%= record.filename %></span>
+                  <% end %>
                 <% end %>
                 <% if record.refresh_action_available? %>
-                  <%= link_to t('.refresh_archive'), refresh_contract_validation_record_path(record),
+                  <%= link_to refresh_contract_validation_record_path(record),
                               data: { turbo_method: :post, turbo_confirm: t('.refresh_confirm') },
-                              class: "hidden underline sm:inline text-sm text-yellow-700 hover:text-yellow-800 transition-colors" %>
+                              class: "hidden underline sm:inline text-sm text-yellow-700 hover:text-yellow-800 transition-colors" do %>
+                    <%= t('.refresh_archive') %><span class="sr-only">: <%= record.filename %></span>
+                  <% end %>
                 <% end %>
-                <%= link_to t('actions.delete'), contract_validation_record_path(record),
-                            data: { turbo_method: :delete, turbo_confirm: t('contract_validation_records.destroy.confirm') },
-                            class: "underline text-sm font-medium text-red-700 hover:text-red-900 transition-colors" %>
+                <%= link_to contract_validation_record_path(record),
+                            data: { turbo_method: :delete, turbo_confirm: t('contract_validation_records.destroy.confirm', name: record.filename) },
+                            class: "underline text-sm font-medium text-red-700 hover:text-red-900 transition-colors" do %>
+                  <%= t('actions.delete') %><span class="sr-only">: <%= record.filename %></span>
+                <% end %>
               </div>
             </div>
           <% end %>
