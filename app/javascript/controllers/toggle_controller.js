@@ -2,16 +2,22 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="toggle"
 export default class extends Controller {
-  static targets = ["content", "icon", "textExpanded", "textCollapsed", "iframe"]
+  static targets = ["content", "icon", "textExpanded", "textCollapsed", "iframe", "button"]
   static values = {
     collapsed: { type: Boolean, default: false }
   }
 
   connect() {
+    if (this.hasContentTarget) {
+      if (!this.contentTarget.id) this.contentTarget.id = `toggle-content-${Math.random().toString(36).slice(2, 10)}`
+      this.buttonTargets.forEach(button => button.setAttribute("aria-controls", this.contentTarget.id))
+    }
+
     if (this.collapsedValue) {
       this.hide()
     } else {
       this.loadDeferredIframe()
+      this.updateExpanded(true)
     }
   }
 
@@ -31,6 +37,7 @@ export default class extends Controller {
     this.textExpandedTarget.classList.remove("hidden")
     this.textCollapsedTarget.classList.add("hidden")
     this.collapsedValue = false
+    this.updateExpanded(true)
   }
 
   hide() {
@@ -39,6 +46,11 @@ export default class extends Controller {
     this.textExpandedTarget.classList.add("hidden")
     this.textCollapsedTarget.classList.remove("hidden")
     this.collapsedValue = true
+    this.updateExpanded(false)
+  }
+
+  updateExpanded(expanded) {
+    this.buttonTargets.forEach(button => button.setAttribute("aria-expanded", expanded.toString()))
   }
 
   loadDeferredIframe() {

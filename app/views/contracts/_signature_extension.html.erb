@@ -7,7 +7,7 @@
   <div class="w-full">
     <% if current_user && target_level.present? %>
       <div class="mb-6 text-center lg:text-left">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t(".levels.#{target_level.downcase}.title") %></h3>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2"><%= t(".levels.#{target_level.downcase}.title") %></h2>
         <p class="text-gray-600"><%= t(".levels.#{target_level.downcase}.subtitle") %></p>
       </div>
       <%= form_with url: extend_signatures_contract_path(contract),

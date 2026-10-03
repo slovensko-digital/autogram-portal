@@ -1,4 +1,8 @@
 sk:
+  sdk:
+    close_label: "Zavrieť podpisovanie"
+    iframe_title: "Podpísanie dokumentu – Autogram Portal"
+    popup_title: "Podpísanie dokumentu"
   hello: "Ahoj svet"
 
   autogram_service:
@@ -38,6 +42,17 @@ sk:
 
   activerecord:
     attributes:
+      visual_stamp:
+        image: "Obrázok podpisu"
+        text: "Text pečiatky"
+        page: "Strana"
+        height: "Výška pečiatky"
+        width: "Šírka pečiatky"
+        y: "Pozícia Y"
+        x: "Pozícia X"
+      recipient:
+        mobile_phone: "Mobilné číslo"
+        email: "E-mail"
       tenant:
         name: "Názov"
         plan: "Plán"
@@ -48,6 +63,18 @@ sk:
         agree_to_policies: "Podmienky a zásady ochrany súkromia a Všeobecné obchodné podmienky"
     errors:
       models:
+        visual_stamp:
+          attributes:
+            image:
+              invalid_image_type: "musí byť obrázok vo formáte PNG alebo JPEG"
+            base:
+              text_or_image_required: "Text pečiatky – zadajte meno, vyberte obrázok alebo nakreslite podpis."
+        recipient:
+          attributes:
+            mobile_phone:
+              invalid_e164: "musí byť v medzinárodnom tvare, napríklad +421901234567"
+            email:
+              invalid: "musí byť v tvare meno@domena.sk"
         tenant:
           attributes:
             plan:
@@ -81,6 +108,7 @@ sk:
     desktop_required: "Potrebný stolný počítač"
 
   actions:
+    apply_filter: "Použiť filter"
     back: "Späť"
     continue: "Pokračovať"
     continue_signing: "Pokračovať na podpisovanie"
@@ -110,8 +138,8 @@ sk:
     current_tenant:
       label: "Organizácia"
     navigation:
-      global: "Globálne"
-      toggle_menu: "Otvoriť menu"
+      main: "Hlavná navigácia"
+      toggle_menu: "Menu"
     links:
       about: "O portáli"
       home: "Domov"
@@ -158,6 +186,8 @@ sk:
         or_continue_with: "Alebo pokračovať s"
         sign_up_with_google: "Pokračovať cez Google"
       edit:
+        delete_confirmation_hint: "Tlačidlo Zmazať účet sa sprístupní po napísaní frázy."
+        delete_confirmation_label: "Na potvrdenie napíšte frázu „%{phrase}“"
         title: "Nastavenia"
         subtitle: "Spravujte svoj účet a organizáciu, v ktorej práve pracujete."
         account_section: "Účet používateľa"
@@ -220,6 +250,8 @@ sk:
         expiry_notice: "Odkaz je platný %{expiry} minút."
     shared:
       captcha:
+        captcha_link_label: "ALTCHA – webová stránka služby ochrany (otvorí sa v novom okne)"
+        captcha_footer_html: "Chránené službou <a href=\"https://altcha.org/\" target=\"_blank\" rel=\"noopener\">ALTCHA</a>"
         captcha_label: "Nie som robot"
         captcha_verified: "Overené"
         captcha_verifying: "Overujem…"
@@ -310,6 +342,7 @@ sk:
     actions_error:
       title: "Chyba pri načítavaní akcií dokumentu"
     visualize:
+      preview_title: "Náhľad dokumentu %{filename}"
       image_preview: "Náhľad obrázka"
       pdf_load_error: "PDF sa nepodarilo načítať v prehliadači."
       download_pdf: "Stiahnuť PDF"
@@ -635,6 +668,7 @@ sk:
         private_key_invalid: "Súkromný kľúč pre federáciu je nakonfigurovaný, ale nepodarilo sa ho načítať. Skontrolujte prosím FEDERATION_PRIVATE_KEY_PEM."
         remote_request_failed: "Požiadavka na vzdialený portál zlyhala."
   contracts:
+    submit_failed: "Odoslanie zlyhalo: %{errors}"
     alerts:
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
       visual_signing_not_available_for_signed_pades: "Po podpísaní dokumentu vo formáte PAdES už nie je možné pridať vizuálny podpis ani pečiatku."
@@ -802,7 +836,7 @@ sk:
         form:
           recipient: "Príjemca"
           page: "Strana"
-          hint: "Potiahnutím rámika v náhľade umiestnite pole, veľkosť upravíte rohovým úchytom."
+          hint: "Potiahnutím rámika v náhľade umiestnite pole, veľkosť upravíte rohovým úchytom. Polohu a veľkosť môžete zadať aj číselne pod náhľadom."
           submit: "Pridať podpisové pole"
           editing_title: "Upraviť podpisové pole"
           update_submit: "Uložiť zmeny"
@@ -862,6 +896,7 @@ sk:
       show_document: "Zobraziť dokument"
       loading_content: "Načítavam obsah dokumentu..."
     sessions:
+      steps_heading: "Postup podpisu"
       ades_evidence:
         title: "Overené AdES podpisovanie"
         subtitle: "Podpisovanie s evidenčným záznamom a SMS overením"
@@ -958,6 +993,7 @@ sk:
         error_title: "Chyba pri podpisovaní"
         error_desc: "Nastala chyba pri podpisovaní dokumentu."
       avm:
+        qr_link_label: "QR kód na podpis dokumentu v aplikácii Autogram v mobile. Na mobile otvorí aplikáciu priamo."
         title: "Podpíšte dokument v Autograme v mobile"
         subtitle: "Použite mobilnú aplikáciu vo vašom telefóne"
         note: "Na mobile: Naskenujte QR kód alebo naň klepnite"
@@ -981,6 +1017,7 @@ sk:
         not_installed_download_ios: "Stiahnuť z App Store"
         not_installed_download_android: "Stiahnuť z Google Play"
       eidentita:
+        qr_link_label: "QR kód na podpis dokumentu v aplikácii eIdentita. Na mobile otvorí aplikáciu priamo."
         title: "Podpíšte dokument v aplikácii eIdentita"
         subtitle: "Použite mobilnú aplikáciu eIdentita vo vašom telefóne"
         note: "Na mobile: Naskenujte QR kód aplikáciou eIdentita alebo naň klepnite"
@@ -1096,13 +1133,17 @@ sk:
       back: "Späť"
       submit: "Odoslať fyzický podpis"
     visual_signing:
+      invalid_document: "Vizuálnu pečiatku je možné vložiť iba do dokumentu PDF."
+      draw_canvas_label: "Plocha na nakreslenie podpisu"
+      image_label: "Obrázok podpisu (PNG alebo JPEG)"
+      errors_title: "Pečiatku sa nepodarilo uložiť. Opravte tieto údaje:"
       title: "Vizuálna pečiatka"
       subtitle: "Pridajte do PDF vizuálnu pečiatku"
       placement_help: "Presuňte a upravte veľkosť pečiatky na prvej strane. Táto vizuálna pečiatka sa vloží do PDF pred ďalším krokom."
       mobile_preview_hint: "Na telefóne pečiatku presúvajte priamo v náhľade pre presnejšie umiestnenie."
       signature_field_help: "Doplňte text alebo obrázok, ktorý sa má zobraziť vo vašom pripravenom podpisovom poli na strane %{page}."
       placement_title: "Umiestnenie pečiatky"
-      placement_description: "Potiahnutím obdĺžnika vyberte miesto, kde sa pečiatka zobrazí. Veľkosť upravíte rohovým úchytom."
+      placement_description: "Potiahnutím obdĺžnika vyberte miesto, kde sa pečiatka zobrazí. Veľkosť upravíte rohovým úchytom. Polohu a veľkosť môžete zadať aj číselne pod náhľadom."
       signature_field_title: "Pripravené podpisové pole"
       signature_field_description: "Táto vizuálna podoba podpisu je viazaná na pole, ktoré bolo pre vás pripravené. Môžete upraviť jej obsah, nie polohu ani veľkosť."
       signature_field_locked_notice: "Toto viditeľné podpisové pole bolo pripravené vopred. Jeho poloha a veľkosť sú pre váš podpis pevne dané."
@@ -1121,7 +1162,6 @@ sk:
       draw_filled: "Kresba je pripravená"
       draw_clear: "Vymazať"
       existing_image_hint: "Aktuálny obrázok sa použije znova, ak nenahráte nový."
-      position_label: "Pozícia"
       back: "Späť"
       submit: "Vytvoriť vizuálnu pečiatku"
       signature_field_submit: "Pokračovať na elektronické podpisovanie"
@@ -1409,6 +1449,7 @@ sk:
         title: "Dokumentácia pre používateľov"
         subtitle: "Všetko, čo potrebujete vedieť o používaní Autogram Portalu."
       nav:
+        label: "Obsah príručky"
         dashboard: "Prehľad"
         contracts: "Moje dokumenty"
         bundles: "Moje balíky"
@@ -1418,6 +1459,7 @@ sk:
         federation: "Federácia"
         integration: "API a SDK"
       dashboard:
+        screenshot_alt: "Prehľad účtu: počty balíkov, dokumentov, dokumentov čakajúcich na môj podpis, odoslaných a odmietnutých balíkov; rýchle akcie Nahrať nový dokument a Overiť podpis; zoznam posledných balíkov so stavom, počtom podpisov, dátumom a odkazom Zobraziť"
         title: "Prehľad (Dashboard)"
         intro: "Po prihlásení sa zobrazí prehľadová stránka so štatistikami vašich dokumentov a rýchlymi skratkami na najčastejšie akcie."
         stats:
@@ -1567,6 +1609,7 @@ sk:
         decline_title: "Odmietnutie podpisu"
         decline_description: "Pri podpisovaní môžete podpis odmietnuť. Odosielateľ balíka dostane emailovú notifikáciu o odmietnutí."
       signing:
+        screenshot_alt: "Krok Vyberte podpisovú aplikáciu: hore zvolený typ občianskeho preukazu s možnosťou Zmeniť výber, pod ním voľby Autogram na počítači (vybraná), Autogram v mobile a eIdentita a tlačidlá Späť a Pokračovať na podpisovanie"
         title: "Podpisovanie dokumentov"
         intro: "Pri podpisovaní dokumentu vyberiete úroveň podpisu a formát. Následne si zvolíte podporovanú podpisovú aplikáciu."
         signature_levels_title: "Úrovne podpisu"
@@ -1669,6 +1712,7 @@ sk:
         screenshot_file_hint: "Súbor: /public/docs/screenshots/signing-app-selection.png"
         screenshot_placeholder: "Miesto pre screenshot podpisovania"
       account:
+        screenshot_alt: "Sekcia Nebezpečná zóna v nastaveniach: Zrušiť môj účet, pole na napísanie potvrdzujúcej frázy a červené tlačidlo Zmazať účet"
         title: "Nastavenia účtu"
         intro: "V nastaveniach účtu (ikona ozubeného kolieska v ľavom menu) spravujete základné údaje profilu a bezpečnostné možnosti."
         items:
@@ -1792,6 +1836,17 @@ sk:
     terms_of_service: "Všeobecné obchodné podmienky"
 
   shared:
+    stamp_geometry:
+      box_label: "Rámik v náhľade dokumentu"
+      status: "Pozícia x %{x}, y %{y} bodov, veľkosť %{width} × %{height} bodov"
+      height: "Výška"
+      width: "Šírka"
+      y: "Pozícia Y"
+      x: "Pozícia X"
+      locked_hint: "Umiestnenie a veľkosť určil odosielateľ a nedajú sa zmeniť."
+      hint: "Pozícia sa meria od ľavého dolného rohu strany. Rámik v náhľade môžete tiež posúvať šípkami (so Shift o 10 bodov) a úchytom v rohu meniť jeho veľkosť šípkami."
+      legend: "Umiestnenie a veľkosť (v bodoch)"
+    required: "povinné"
     signature_validation:
       error_title: "Chyba pri overovaní podpisov"
       error_message: "Nepodarilo sa overiť elektronické podpisy tohto dokumentu."
@@ -1852,12 +1907,16 @@ sk:
       uploading_text: "Nahrávanie..."
       drop_text: "Pustiť sem"
       remove_file: "Odstrániť súbor"
-      select_another: "Kliknite pre výber iného súboru"
+      select_another: "Vybrať iný súbor"
 
 
   javascript:
+    dropzone:
+      remove_file: "Odstrániť súbor %{filename}"
+      file_removed: "Súbor bol odstránený"
+      file_selected: "Zvolený súbor: %{filename} (%{size})"
     errors:
-      file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty jsou PDF, XML a iné súbory."
+      file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty sú PDF, XML a iné súbory."
       signing_failed: "Nepodarilo sa iniciovať podpisovanie. Skúste to prosím znova."
       network_error: "Vyskytla sa sieťová chyba. Skontrolujte prosím pripojenie a skúste to znova."
       iframe_client_error: "Nepodarilo sa vytvoriť Autogram klienta kompatibilného s iframe"
@@ -1936,6 +1995,7 @@ sk:
       details_title: "Dokumenty v balíku:"
 
   layouts:
+    skip_to_main_content: "Preskočiť na hlavný obsah"
     mailer:
       regards: "S pozdravom,"
       team: "tím Autogram Portal"

@@ -1,45 +1,47 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Copies a value to the clipboard. The button stays enabled (disabling it would drop keyboard focus)
+// and the result is announced through the `status` live region.
 export default class extends Controller {
-    static values = {
-        text: String
-    }
+  static targets = ["label", "status"]
+  static values = {
+    text: String
+  }
 
   copyToClipboard(event) {
     event.preventDefault()
 
-    const button = event.currentTarget
-
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(this.textValue).then(() => {
-        this.showCopiedFeedback(button)
+        this.showFeedback(i18n.t("clipboard.copy_success"))
       }).catch(() => {
-        this.showCopyError(button)
+        this.showFeedback(i18n.t("clipboard.copy_failure"))
       })
     } else {
-      this.showCopyError(button)
+      this.showFeedback(i18n.t("clipboard.copy_failure"))
     }
   }
 
-  showCopiedFeedback(button) {
-    const originalText = button.innerText
-    button.innerText = i18n.t("clipboard.copy_success")
-    button.disabled = true
+  showFeedback(message) {
+    const label = this.hasLabelTarget ? this.labelTarget : null
+    if (label) {
+      this.originalText ??= label.textContent
+      label.textContent = message
+    }
 
-    setTimeout(() => {
-      button.innerText = originalText
-      button.disabled = false
+    if (this.hasStatusTarget) {
+      this.statusTarget.textContent = ""
+      requestAnimationFrame(() => { this.statusTarget.textContent = message })
+    }
+
+    clearTimeout(this.resetTimeout)
+    this.resetTimeout = setTimeout(() => {
+      if (label) label.textContent = this.originalText
+      if (this.hasStatusTarget) this.statusTarget.textContent = ""
     }, 2000)
   }
 
-  showCopyError(button) {
-    const originalText = button.innerText
-    button.innerText = i18n.t("clipboard.copy_failure")
-    button.disabled = true
-
-    setTimeout(() => {
-      button.innerText = originalText
-      button.disabled = false
-    }, 2000)
+  disconnect() {
+    clearTimeout(this.resetTimeout)
   }
 }

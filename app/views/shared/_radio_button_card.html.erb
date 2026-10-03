@@ -23,7 +23,7 @@
 <% enabled_classes = "hover:border-blue-300 hover:bg-blue-50 cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" %>
 <% disabled_classes = "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500 opacity-75 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2" %>
 
-<label class="group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> border rounded-lg transition-colors <%= disabled ? disabled_classes : "bg-white border-gray-200 #{enabled_classes}" %> <%= wrapper_class %>"
+<label class="choice-card group relative flex items-center space-x-3 px-4 py-<%= image.present? ? "2" : "4" %> border rounded-lg transition-colors <%= disabled ? disabled_classes : "bg-white border-gray-200 #{enabled_classes}" %> <%= wrapper_class %>"
        <%= 'tabindex="0" aria-disabled="true"'.html_safe if disabled %>
        <%= "aria-describedby=\"#{reason_id}\"".html_safe if disabled && disabled_reasons.any? %>>
   <% if form %>
@@ -33,27 +33,27 @@
   <% end %>
 
   <div class="flex-shrink-0">
-    <div class="w-4 h-4 border border-gray-300 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors <%= 'bg-gray-100' if disabled %>">
-      <div class="hidden group-has-[:checked]:block w-2 h-2 bg-blue-500 rounded-full"></div>
+    <div class="w-4 h-4 border border-gray-500 rounded-full flex items-center justify-center group-has-[:checked]:border-blue-500 transition-colors <%= 'bg-gray-100' if disabled %>">
+      <div class="choice-indicator-dot hidden group-has-[:checked]:block w-2 h-2 bg-blue-500 rounded-full"></div>
     </div>
   </div>
 
   <% if image.present? %>
     <div class="flex-shrink-0">
-      <%= image_tag(image, alt: label, class: "h-16 sm:h-24") %>
+      <%= image_tag(image, alt: "", class: "h-16 sm:h-24") %>
     </div>
   <% elsif icon.present? %>
     <div class="flex-shrink-0 mt-0.5">
       <% if icon == 'desktop' %>
-        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg aria-hidden="true" class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
       <% elsif icon == 'mobile' %>
-        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg aria-hidden="true" class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
         </svg>
       <% elsif icon == 'pencil' %>
-        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg aria-hidden="true" class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 .375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/>
         </svg>
       <% end %>
@@ -62,7 +62,7 @@
 
   <div class="flex-1">
     <div class="text-sm font-medium <%= disabled ? 'text-gray-600' : 'text-gray-900' %>"><%= label %></div>
-      <div class="text-xs text-gray-500 mt-1<%= ' hidden sm:block' if image.present? %>"><%= description %></div>
+    <div class="text-xs text-gray-600 mt-1<%= ' hidden sm:block' if image.present? %>"><%= description %></div>
     <% if disabled && disabled_reasons.any? %>
       <div id="<%= reason_id %>" class="mt-2 text-xs font-medium text-gray-600">
         <%= safe_join(disabled_reasons, tag.br) %>
@@ -71,7 +71,7 @@
   </div>
 
   <div class="hidden has-[:checked]:block absolute top-4 right-4">
-    <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+    <svg aria-hidden="true" class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
     </svg>
   </div>

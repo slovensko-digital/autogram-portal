@@ -1,3 +1,4 @@
+<% content_for :title, t('.title') unless params[:embedded] %>
 <div data-controller="signers--avm">
 <% if params[:embedded] %>
   <div class="w-full space-y-1">
@@ -5,7 +6,7 @@
     <p class="text-sm text-gray-600"><%= t('.subtitle') %></p>
   </div>
 <% else %>
-  <div class="px-6 py-5 hidden md:block">
+  <div class="sr-only md:not-sr-only md:px-6 md:py-5">
     <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
     <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
   </div>
@@ -13,28 +14,29 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 <%= 'px-6' unless params[:embedded] %>">
   <div class="space-y-6 border border-gray-200 rounded-lg p-6 hidden md:block">
-    <div class="space-y-4">
+    <%= content_tag(params[:embedded] ? :h4 : :h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
+    <ol role="list" class="space-y-4">
       <% (1..7).each do |i| %>
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+        <li class="flex items-start gap-3">
+          <div aria-hidden="true" class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
             <%= i %>
           </div>
           <div class="flex-1">
-            <h3 class="font-semibold text-gray-900"><%= t(".step#{i}_title") %></h3>
+            <%= content_tag(params[:embedded] ? :h5 : :h3, t(".step#{i}_title"), class: "font-semibold text-gray-900") %>
             <p class="text-sm text-gray-600"><%= t(".step#{i}_desc_html", domain: Rails.application.config.action_controller.default_url_options[:host]) %></p>
           </div>
-        </div>
+        </li>
       <% end %>
-    </div>
+    </ol>
   </div>
 
   <div class="space-y-6 md:border md:border-gray-200 md:rounded-lg md:p-6">
     <div class="flex justify-center">
       <a href="<%= @session.avm_custom_url %>"
-        class="block hover:opacity-75 transition-opacity duration-200 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg max-w-full"
+        class="block hover:opacity-75 transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-lg max-w-full"
         target="_blank"
         rel="noopener noreferrer"
-        title="Kliknite pre otvorenie Autogramu v mobile"
+        aria-label="<%= t('.qr_link_label') %>"
         data-signers--avm-target="appUrl">
         <div class="bg-white p-4 rounded-lg border border-4 border-dashed border-black transition-colors duration-200 w-96 max-w-full flex items-center justify-center">
           <%= qr_code_svg(@session.avm_url) %>
@@ -42,7 +44,7 @@
       </a>
     </div>
 
-    <div class="text-center text-sm text-gray-500 space-y-4 px-16 mt-4">
+    <div class="text-center text-sm text-gray-600 space-y-4 px-16 mt-4">
       <p><%= t('.expiry') %></p>
       <p><%= t('.note') %></p>
     </div>
@@ -52,7 +54,7 @@
       <div class="flex flex-col items-center justify-center">
         <div class="mb-4 flex justify-center">
           <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
           </div>
@@ -65,13 +67,13 @@
         </p>
         <div class="flex flex-col sm:flex-row gap-3">
           <a href="https://apps.apple.com/sk/app/autogram-v-mobile/id6479985251" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             <%= t('.not_installed_download_ios') %>
           </a>
           <a href="https://play.google.com/store/apps/details?id=digital.slovensko.avm" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             <%= t('.not_installed_download_android') %>

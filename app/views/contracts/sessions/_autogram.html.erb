@@ -1,3 +1,4 @@
+<% content_for :title, t('.title') unless params[:embedded] %>
 <% session_token = SessionAccessToken.generate(contract: @contract, session: @session) %>
 
 <div
@@ -12,7 +13,7 @@
       <p class="text-sm text-gray-600"><%= t('.subtitle') %></p>
     </div>
   <% else %>
-    <div class="px-6 py-5 hidden md:block">
+    <div class="sr-only md:not-sr-only md:px-6 md:py-5">
       <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
       <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
     </div>
@@ -20,19 +21,20 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 <%= 'px-6' unless params[:embedded] %>">
     <div class="space-y-6 bg-white border border-gray-200 rounded-lg p-6 hidden md:block">
-      <div class="space-y-4">
+      <%= content_tag(params[:embedded] ? :h4 : :h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
+      <ol role="list" class="space-y-4">
         <% (1..6).each do |i| %>
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+          <li class="flex items-start gap-3">
+            <div aria-hidden="true" class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
               <%= i %>
             </div>
             <div class="flex-1">
-              <h3 class="font-semibold text-gray-900"><%= t(".step#{i}_title") %></h3>
+              <%= content_tag(params[:embedded] ? :h5 : :h3, t(".step#{i}_title"), class: "font-semibold text-gray-900") %>
               <p class="text-sm text-gray-600"><%= t(".step#{i}_desc_html", domain: Rails.application.config.action_controller.default_url_options[:host]) %></p>
             </div>
-          </div>
+          </li>
         <% end %>
-      </div>
+      </ol>
     </div>
 
     <div class="md:border md:border-gray-200 bg-white md:rounded-lg md:p-6">
@@ -40,7 +42,7 @@
         <!-- Normal signing state -->
         <div data-signers--autogram-target="stateNormal">
           <div class="mb-4 flex justify-center">
-            <svg class="animate-spin text-blue-600" style="width: 64px; height: 64px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet">
+            <svg aria-hidden="true" class="animate-spin text-blue-600" style="width: 64px; height: 64px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
               <path class="opacity-75" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" d="M12 2 A 10 10 0 0 1 22 12"></path>
             </svg>
@@ -57,7 +59,7 @@
         <div class="hidden" data-signers--autogram-target="stateMaybeNotInstalled">
           <div class="mb-4 flex justify-center">
             <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-amber-600">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-amber-600">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
@@ -70,7 +72,7 @@
               <%= t('.maybe_not_installed_waiting') %>
             </p>
             <a href="https://sluzby.slovensko.digital/autogram/#download" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
               <%= t('.not_installed_download') %>
@@ -82,7 +84,7 @@
         <div class="hidden" data-signers--autogram-target="stateNotInstalled">
           <div class="mb-4 flex justify-center">
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
@@ -95,7 +97,7 @@
               <%= t('.not_installed_desc') %>
             </p>
             <a href="https://sluzby.slovensko.digital/autogram/#download" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
               <%= t('.not_installed_download') %>
@@ -107,7 +109,7 @@
         <div class="hidden" data-signers--autogram-target="stateAppVersionTooLow">
           <div class="mb-4 flex justify-center">
             <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-yellow-600">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-yellow-600">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
@@ -120,7 +122,7 @@
               <%= t('.app_version_too_low_desc') %>
             </p>
             <a href="https://sluzby.slovensko.digital/autogram/#download" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
               <%= t('.app_version_too_low_download') %>
@@ -132,7 +134,7 @@
         <div class="hidden" data-signers--autogram-target="stateCancelled">
           <div class="mb-4 flex justify-center">
             <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-yellow-600">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-yellow-600">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
@@ -149,7 +151,7 @@
         <div class="hidden" data-signers--autogram-target="stateError">
           <div class="mb-4 flex justify-center">
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-red-600">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
@@ -178,7 +180,7 @@
       <div class="space-y-3">
         <div class="flex items-center gap-3 p-3 bg-white border border-blue-200 rounded-lg" data-signers--autogram-target="statusChecking">
           <div class="flex-shrink-0" style="width: 24px; height: 24px;">
-            <svg class="animate-spin text-blue-600" style="width: 24px; height: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet">
+            <svg aria-hidden="true" class="animate-spin text-blue-600" style="width: 24px; height: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>

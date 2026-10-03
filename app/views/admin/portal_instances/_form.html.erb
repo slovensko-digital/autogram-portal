@@ -12,22 +12,22 @@
 
   <div>
     <%= form.label :name, t('.name'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <%= form.text_field :name, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    <%= form.text_field :name, class: "w-full rounded-md border border-gray-500 px-3 py-2 text-sm" %>
   </div>
 
   <div>
     <%= form.label :base_url, t('.base_url'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <%= form.url_field :base_url, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    <%= form.url_field :base_url, class: "w-full rounded-md border border-gray-500 px-3 py-2 text-sm" %>
   </div>
 
   <div>
     <%= form.label :issuer, t('.issuer'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <%= form.url_field :issuer, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    <%= form.url_field :issuer, class: "w-full rounded-md border border-gray-500 px-3 py-2 text-sm" %>
   </div>
 
   <div>
     <%= form.label :public_key_pem, t('.public_key_pem'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <%= form.text_area :public_key_pem, rows: 8, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono" %>
+    <%= form.text_area :public_key_pem, rows: 8, class: "w-full rounded-md border border-gray-500 px-3 py-2 text-sm font-mono" %>
   </div>
 
   <div>
@@ -35,7 +35,7 @@
     <%= form.select :status,
           PortalInstance.statuses.keys.map { |value| [ value.humanize, value ] },
           {},
-          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+          class: "w-full rounded-md border border-gray-500 px-3 py-2 text-sm" %>
   </div>
 
   <div>
@@ -43,7 +43,7 @@
     <%= form.text_field :allowed_email_domains,
           value: @portal_instance.allowed_email_domains.join(", "),
           name: "portal_instance[allowed_email_domains][]",
-          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+          class: "w-full rounded-md border border-gray-500 px-3 py-2 text-sm" %>
     <p class="mt-1 text-sm text-gray-500"><%= t('.allowed_email_domains_help') %></p>
   </div>
 

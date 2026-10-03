@@ -2,7 +2,7 @@
 
 <%= turbo_stream_from @contract %>
 
-<main>
+<div>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col items-center max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <% unless params[:iframe].present? %>
@@ -20,7 +20,7 @@
             <div class="flex-shrink-0">
               <%= link_to signed_document_contract_path(@contract),
                           class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-                <svg class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg aria-hidden="true" class="h-5 w-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                 </svg>
                 <%= t('actions.download') %>
@@ -35,6 +35,8 @@
             <% end %>
           <% end %>
         </div>
+      <% else %>
+        <h1 class="sr-only"><%= t('.title') %></h1>
       <% end %>
 
       <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
@@ -42,14 +44,14 @@
 
         <%# Embedded signers only need to know about existing signatures. %>
         <%= turbo_frame_tag "signature_validation_#{@contract.uuid}",
-                            src: validate_contract_path(@contract, hide_empty: (true if params[:iframe].present?)),
+                            src: validate_contract_path(@contract, hide_empty: (true if params[:iframe].present?), heading_level: 2),
                             loading: "lazy",
                             class: "w-full" do %>
           <% unless params[:iframe].present? %>
             <div class="w-full">
               <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
                 <div class="flex items-center">
-                  <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg aria-hidden="true" class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -63,9 +65,9 @@
 
       <% if @contract.awaiting_signature? || policy(@contract).show? %>
         <div class="w-full">
-          <%= render 'signing_method_choice', contract: @contract, recipient: @recipient %>
+          <%= render 'signing_method_choice', contract: @contract, recipient: @recipient, heading_level: 2 %>
         </div>
       <% end %>
     </div>
   </div>
-</main>
+</div>

@@ -6,20 +6,20 @@
     <% content_version = contract.latest_source_content_version %>
     <div data-controller="toggle" data-toggle-collapsed-value="<%= default_collapsed %>">
       <button type="button"
-              data-action="click->toggle#toggle"
+              data-action="click->toggle#toggle" data-toggle-target="button"
               class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
         <span class="flex items-center gap-2 min-w-0">
-          <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg aria-hidden="true" class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
           </svg>
           <span class="truncate"><%= content_version.filename %></span>
         </span>
         <span class="flex items-center gap-2 shrink-0">
-          <span class="hidden md:inline text-xs text-gray-400">
+          <span class="hidden md:inline text-xs text-gray-600">
             <span data-toggle-target="textCollapsed" class="<%= default_collapsed ? '' : 'hidden' %>"><%= t('.show_document') %></span>
             <span data-toggle-target="textExpanded" class="<%= default_collapsed ? 'hidden' : '' %>"><%= t('.hide_document') %></span>
           </span>
-          <svg data-toggle-target="icon"
+          <svg aria-hidden="true" data-toggle-target="icon"
               class="w-4 h-4 text-gray-400 transition-transform duration-200<%= ' rotate-180' unless default_collapsed %>"
               fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -32,7 +32,7 @@
           <iframe <%= 'src="' + rails_blob_path(content_version.file, disposition: 'inline') + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH"' unless default_collapsed %>
                   data-toggle-target="iframe"
                   data-src="<%= rails_blob_path(content_version.file, disposition: 'inline') %>#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
-                  title="<%= content_version.filename %>"
+                  title="<%= t('documents.visualize.preview_title', filename: content_version.filename) %>"
                   class="h-[720px] w-full rounded border-0"></iframe>
         </div>
       </div>
@@ -41,20 +41,20 @@
   <% contract.documents.each do |document| %>
     <div data-controller="toggle" data-toggle-collapsed-value="<%= default_collapsed %>">
       <button type="button"
-              data-action="click->toggle#toggle"
+              data-action="click->toggle#toggle" data-toggle-target="button"
               class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
         <span class="flex items-center gap-2 min-w-0">
-          <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg aria-hidden="true" class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
           </svg>
           <span class="truncate"><%= document.filename %></span>
         </span>
         <span class="flex items-center gap-2 shrink-0">
-          <span class="hidden md:inline text-xs text-gray-400">
+          <span class="hidden md:inline text-xs text-gray-600">
             <span data-toggle-target="textCollapsed" class="<%= default_collapsed ? '' : 'hidden' %>"><%= t('.show_document') %></span>
             <span data-toggle-target="textExpanded" class="<%= default_collapsed ? 'hidden' : '' %>"><%= t('.hide_document') %></span>
           </span>
-          <svg data-toggle-target="icon"
+          <svg aria-hidden="true" data-toggle-target="icon"
               class="w-4 h-4 text-gray-400 transition-transform duration-200<%= ' rotate-180' unless default_collapsed %>"
               fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -70,7 +70,7 @@
                             data: { pdf_reload_target: "frame" } do %>
           <div class="p-4 h-[300px] flex items-center justify-center">
             <div class="flex items-center">
-              <svg class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="animate-spin h-5 w-5 text-gray-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>

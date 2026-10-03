@@ -111,7 +111,7 @@ class RecipientsControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select ".bg-red-50", text: /Email/
-    assert_select "[role='status']", count: 0
+    assert_select "[data-notification-overlay][role='status']", count: 0
   end
 
   test "notify queues an invitation and reports that sending has started" do
@@ -135,7 +135,7 @@ class RecipientsControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select "[role='alert']", text: I18n.t("recipients.index.invitation_failed", recipient: recipient.display_name)
-    assert_select "[role='status']", count: 0
+    assert_select "[data-notification-overlay][role='status']", count: 0
   end
 
   test "destroy withdraws the request and reports success" do
@@ -151,7 +151,7 @@ class RecipientsControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select "[role='alert']", text: I18n.t("recipients.index.withdraw_failed", recipient: recipient.display_name)
-    assert_select "[role='status']", count: 0
+    assert_select "[data-notification-overlay][role='status']", count: 0
   end
 
   test "admin cannot create recipients in another tenant bundle" do

@@ -24,17 +24,17 @@
 
       <div class="mt-12 xl:mt-0">
         <div class="rounded-lg bg-gray-800/50 p-6 border border-gray-700">
-          <h4 class="text-sm font-semibold text-white mb-3 uppercase tracking-wider"><%= t('footer.service_provider') %></h4>
+          <h3 class="text-sm font-semibold text-white mb-3 uppercase tracking-wider"><%= t('footer.service_provider') %></h3>
           <div class="space-y-2">
             <p class="text-base text-gray-300 font-medium">
               <%= Rails.application.config.footer[:provider_name] %>
             </p>
             <div class="flex items-start gap-2 pt-2">
-              <svg class="h-5 w-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="h-5 w-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
               </svg>
               <div>
-                <p class="text-xs text-gray-400 uppercase tracking-wide"><%= t('footer.support') %></p>
+                <p class="text-xs text-gray-600 uppercase tracking-wide"><%= t('footer.support') %></p>
                 <a href="mailto:<%= Rails.application.config.footer[:support_email] %>"
                    class="text-sm text-gray-300 hover:text-white transition-colors">
                   <%= Rails.application.config.footer[:support_email] %>
@@ -45,13 +45,13 @@
         </div>
       </div>
     </div>
-    <div class="mt-12 mb-60 border-t border-gray-700 pt-8">
-      <p class="text-center text-sm text-gray-400">
-        <%= link_to t('footer.privacy_policy'), privacy_policy_link, class: "underline hover:text-white transition-colors" %>
-      </p>
-      <p class="text-center text-sm text-gray-400">
-        <%= link_to t('footer.terms_of_service'), terms_of_service_link, class: "underline hover:text-white transition-colors" %>
-      </p>
-    </div>
+    <ul role="list" class="mt-12 mb-60 border-t border-gray-700 pt-8 space-y-2 text-center text-sm text-gray-400">
+      <li>
+        <%= link_to t('footer.privacy_policy'), privacy_policy_link, class: "inline-block py-1 underline hover:text-white transition-colors" %>
+      </li>
+      <li>
+        <%= link_to t('footer.terms_of_service'), terms_of_service_link, class: "inline-block py-1 underline hover:text-white transition-colors" %>
+      </li>
+    </ul>
   </div>
 </footer>

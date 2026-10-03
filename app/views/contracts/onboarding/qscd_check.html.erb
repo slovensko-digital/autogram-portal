@@ -1,9 +1,11 @@
+<% content_for :title, t('.title') %>
+
 <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
-<main class="mx-auto max-w-3xl">
+<div class="mx-auto max-w-3xl">
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div>
-        <h3 class="text-4xl font-bold text-gray-900 mb-2"><%= t('.title') %></h3>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
         <p class="text-md text-gray-600 mb-4">
           <%= t('.description') %>
         </p>
@@ -15,6 +17,8 @@
         <%= hidden_field_tag :review, params[:review] if params[:review] %>
         <%= hidden_field_tag :iframe, params[:iframe] %>
 
+        <fieldset>
+        <legend class="sr-only"><%= t('.title') %></legend>
         <div class="space-y-3">
           <% [ "eid_2024", "eid_2022", "eid_2021", "eid_2013" ].each do |value| %>
             <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
@@ -23,17 +27,17 @@
 
         <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full mt-8">
           <button type="button"
-                  data-action="click->toggle#toggle"
+                  data-action="click->toggle#toggle" data-toggle-target="button"
                   class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
             <span class="flex items-center gap-2 min-w-0">
               <span class="whitespace-nowrap"><%= t('.dpb_cards') %></span>
             </span>
             <span class="flex items-center gap-2 shrink-0">
-              <span class="hidden md:inline text-xs text-gray-400">
+              <span class="hidden md:inline text-xs text-gray-600">
                 <span data-toggle-target="textCollapsed"><%= t('.show_dpb') %></span>
                 <span data-toggle-target="textExpanded" class="hidden"><%= t('.hide_dpb') %></span>
               </span>
-              <svg data-toggle-target="icon"
+              <svg aria-hidden="true" data-toggle-target="icon"
                    class="w-4 h-4 text-gray-400 transition-transform duration-200"
                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -47,6 +51,7 @@
             <% end %>
           </div>
         </div>
+        </fieldset>
 
         <div class="mt-8 border-t border-gray-200"></div>
 
@@ -67,5 +72,5 @@
       <% end %>
     </div>
   </div>
-</main>
+</div>
 <% end %>

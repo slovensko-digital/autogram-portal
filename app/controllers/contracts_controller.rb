@@ -154,7 +154,7 @@ class ContractsController < ApplicationController
     redirect_to sign_contract_path(@contract, recipient: @recipient&.uuid)
   rescue ActiveRecord::RecordInvalid => e
     redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid),
-                alert: "Failed to submit: #{e.message}"
+                alert: t("contracts.submit_failed", errors: e.record&.errors&.full_messages&.to_sentence.presence || e.message)
   end
 
   def create_visual_session
@@ -216,8 +216,9 @@ class ContractsController < ApplicationController
 
     redirect_to contract_session_path(@contract, session, recipient: @recipient&.uuid, iframe: params[:iframe], show_completed: true)
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose),
-                alert: "Failed to submit: #{e.message}"
+    flash[:visual_stamp_errors] = visual_stamp_error_messages(e)
+    flash[:visual_stamp_invalid_fields] = visual_stamp_invalid_fields(e)
+    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose)
   rescue AutogramService::ServiceUnavailableError => e
     redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose),
                 alert: e.message
@@ -614,6 +615,18 @@ class ContractsController < ApplicationController
 
   def signature_apps_frame_request?
     action_name == "signature_apps" && request.headers["Turbo-Frame"].present?
+  end
+
+  def visual_stamp_error_messages(error)
+    messages = error.record&.errors&.full_messages.presence
+    messages || [ t("contracts.visual_signing.invalid_document") ]
+  end
+
+  # Form fields to mark as invalid on the visual signing page, in the order they appear there.
+  def visual_stamp_invalid_fields(error)
+    attributes = error.record&.errors&.attribute_names || []
+    fields = attributes.map { |attribute| attribute == :base || attribute == :text ? :custom_text : attribute }
+    (%i[x y width height custom_text image] & fields).map(&:to_s)
   end
 
   def visual_signing_unavailable_redirect_path

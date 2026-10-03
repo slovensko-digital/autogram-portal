@@ -5,10 +5,10 @@
   <% contract_policy = policy(@contract) %>
   <% managed_contract = contract_policy.manage? %>
   <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
-    <div class="mb-6 text-center lg:text-left">
-      <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.new.actions.header') %></h3>
-    </div>
-    <div class="space-y-3">
+    <fieldset class="space-y-3">
+      <legend class="mb-6 w-full text-center lg:text-left">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.new.actions.header') %></h2>
+      </legend>
       <%= render 'shared/radio_button_card',
             name: 'document_action',
             value: 'sign',
@@ -90,17 +90,16 @@
                 url: signature_extension_contract_path(@contract, target_level: 'LTA')
               } %>
       <% end %>
-
-      <% if anonymous_account_teaser %>
-        <div class="rounded-md border border-blue-200 bg-blue-50 px-4 py-3">
-          <p class="text-sm text-gray-700"><%= t('documents.new.actions.account_cta_text') %></p>
-          <%= button_to t('documents.new.actions.account_cta'),
-                authenticate_for_actions_contract_path(@contract),
-                class: "mt-3 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto",
-                form: { data: { turbo_frame: "_top" } } %>
-        </div>
-      <% end %>
-    </div>
+    </fieldset>
+    <% if anonymous_account_teaser %>
+      <div class="mt-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-3">
+        <p class="text-sm text-gray-700"><%= t('documents.new.actions.account_cta_text') %></p>
+        <%= button_to t('documents.new.actions.account_cta'),
+              authenticate_for_actions_contract_path(@contract),
+              class: "mt-3 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto",
+              form: { data: { turbo_frame: "_top" } } %>
+      </div>
+    <% end %>
     <div class="py-8">
       <div class="flex flex-col sm:flex-row gap-8">
         <%= link_to contract_path(@contract), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: {turbo_frame: "_top"} do %>

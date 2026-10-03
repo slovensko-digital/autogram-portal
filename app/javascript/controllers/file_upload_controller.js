@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["dropzone", "fileInput", "documentsContainer", "submitButton", "fileName", "fileSize"]
+  static targets = ["dropzone", "fileInput", "documentsContainer", "submitButton", "fileName", "fileSize", "selectButton", "removeButton", "status", "error"]
   static classes = ["dragging", "uploading"]
   static values = {
     mode: String,
@@ -19,13 +19,6 @@ export default class extends Controller {
   click() {
     if (this.uploading) return
     this.fileInputTarget.click()
-  }
-
-  keydown(event) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      this.click()
-    }
   }
 
   change(event) {
@@ -79,8 +72,24 @@ export default class extends Controller {
 
       this.updateUI()
       this.updateSubmitButton()
+      this.showError('')
+      this.announce(i18n.t('dropzone.file_selected', { filename: file.name, size: this.formatFileSize(file.size) }))
     } else {
-      alert(i18n.t('errors.file_not_supported', { filename: file.name }))
+      this.showError(i18n.t('errors.file_not_supported', { filename: file.name }))
+    }
+  }
+
+  showError(message) {
+    if (this.hasErrorTarget) {
+      this.errorTarget.textContent = message
+    } else if (message) {
+      alert(message)
+    }
+  }
+
+  announce(message) {
+    if (this.hasStatusTarget) {
+      this.statusTarget.textContent = message
     }
   }
 
@@ -100,6 +109,11 @@ export default class extends Controller {
     }
     if (this.hasFileSizeTarget) {
       this.fileSizeTarget.textContent = this.formatFileSize(file.size)
+    }
+    if (this.hasRemoveButtonTarget) {
+      const label = i18n.t('dropzone.remove_file', { filename: file.name })
+      this.removeButtonTarget.setAttribute('aria-label', label)
+      this.removeButtonTarget.title = label
     }
   }
 
@@ -147,6 +161,10 @@ export default class extends Controller {
     this.clearFile()
     this.updateUI()
     this.updateSubmitButton()
+    this.announce(i18n.t('dropzone.file_removed'))
+    if (this.hasSelectButtonTarget) {
+      this.selectButtonTarget.focus()
+    }
   }
 
   formatFileSize(bytes) {

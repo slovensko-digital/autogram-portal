@@ -1,0 +1,6 @@
+<%# locals: path:, label: %>
+
+<% current = current_page?(path) %>
+<%= link_to label, path,
+    "aria-current": (current ? "page" : nil),
+    class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold underline underline-offset-4' if current}" %>
