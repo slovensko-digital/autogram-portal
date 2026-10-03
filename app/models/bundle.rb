@@ -100,6 +100,11 @@ class Bundle < ApplicationRecord
     scope.exists?
   end
 
+  # Recipient mobile phones are only used for SMS verification of AdES signatures.
+  def sms_verification_available?
+    contracts.any?(&:ades_allowed?) && AutogramEnvironment.sms_provider.present?
+  end
+
   def completed_recipients
     not_completed_ids = active_recipients
       .joins(recipient_signer: :signer_contracts)

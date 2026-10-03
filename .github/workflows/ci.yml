@@ -93,15 +93,3 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
-
-  staging-deploy:
-    name: Deploy to STAGING environment
-    if: github.ref == 'refs/heads/main'
-    needs:
-      - scan_ruby
-      - scan_js
-      - lint
-      - test
-
-    uses: ./.github/workflows/staging_deploy.yml
-    secrets: inherit

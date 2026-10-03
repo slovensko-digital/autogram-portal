@@ -228,6 +228,12 @@ class ContractTest < ActiveSupport::TestCase
     end
   end
 
+  test "ades is allowed only when it is among the allowed methods" do
+    assert_not Contract.new(allowed_methods: [ "qes" ]).ades_allowed?
+    assert Contract.new(allowed_methods: [ "ades" ]).ades_allowed?
+    assert Contract.new(allowed_methods: [ "qes", "ades" ]).ades_allowed?
+  end
+
   test "pades field preparation is allowed for unsigned bundled pades contracts" do
     contract = Contract.create!(
       documents_attributes: [ { blob: pdf_blob("bundle-contract.pdf", "%PDF-1.4 original") } ],

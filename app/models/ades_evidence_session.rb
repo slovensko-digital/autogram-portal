@@ -42,7 +42,7 @@ class AdesEvidenceSession < Session
 
   def self.verification_channel_for(contract, recipient:, preferred_channel: nil)
     return if contract.blank? || recipient.blank?
-    return unless contract.allowed_methods.include?("ades")
+    return unless contract.ades_allowed?
 
     channels = [ preferred_channel, "sms", "email" ].compact.uniq
 

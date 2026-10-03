@@ -259,6 +259,10 @@ class Contract < ApplicationRecord
     !pades_signed?
   end
 
+  def ades_allowed?
+    allowed_methods.include?("ades")
+  end
+
   def latest_visual_signature_stamps
     VisualStamp.joins(:signer_contract)
                .where(signer_contracts: { contract_id: id }, purpose: VisualStamp.purposes[:visual_method])
