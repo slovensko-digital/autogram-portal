@@ -38,6 +38,36 @@ class RecipientsControllerTest < ActionController::TestCase
     assert_select "option[value='#{portal_instance.uuid}']", text: "Partner Portal"
   end
 
+  test "index hides mobile phone field when no contract allows ades" do
+    contracts(:one).update_column(:allowed_methods, [ "qes" ])
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_select "input[name='recipient[email]']"
+    assert_select "input[name='recipient[mobile_phone]']", count: 0
+  end
+
+  test "index shows mobile phone field when a contract allows ades" do
+    contracts(:one).update_column(:allowed_methods, [ "qes", "ades" ])
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_select "input[name='recipient[mobile_phone]']"
+  end
+
+  test "index hides mobile phone field when sms verification is unavailable" do
+    contracts(:one).update_column(:allowed_methods, [ "ades" ])
+
+    without_sms_provider do
+      get :index, params: { bundle_id: bundles(:one).uuid }
+    end
+
+    assert_response :success
+    assert_select "input[name='recipient[mobile_phone]']", count: 0
+  end
+
   test "create stores a federated recipient via portal selection" do
     portal_instance = create_portal_instance
 
@@ -173,5 +203,15 @@ class RecipientsControllerTest < ActionController::TestCase
       public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
       allowed_email_domains: [ "partner.example" ]
     }.merge(attributes))
+  end
+
+  def without_sms_provider
+    environment_singleton = AutogramEnvironment.singleton_class
+    original_sms_provider = AutogramEnvironment.method(:sms_provider)
+    environment_singleton.define_method(:sms_provider) { nil }
+
+    yield
+  ensure
+    environment_singleton.define_method(:sms_provider) { original_sms_provider.call }
   end
 end

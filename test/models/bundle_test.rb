@@ -108,6 +108,20 @@ class BundleTest < ActiveSupport::TestCase
     end
   end
 
+  test "sms verification is available when any contract allows ades and sms delivery is configured" do
+    bundle = create_bundle_with_contracts(author: @author, count: 2)
+
+    assert_not bundle.sms_verification_available?
+
+    bundle.contracts.last.update!(allowed_methods: [ "qes", "ades" ])
+
+    assert bundle.reload.sms_verification_available?
+
+    without_sms_provider do
+      assert_not bundle.sms_verification_available?
+    end
+  end
+
   test "superseding recipients revokes their active access grants" do
     bundle = create_bundle_with_contract(author: @author)
     bundle.update!(signing_rule: "any")
@@ -202,5 +216,15 @@ class BundleTest < ActiveSupport::TestCase
       public_key_pem: OpenSSL::PKey::RSA.generate(2048).public_key.to_pem,
       allowed_email_domains: [ "example.com" ]
     )
+  end
+
+  def without_sms_provider
+    environment_singleton = AutogramEnvironment.singleton_class
+    original_sms_provider = AutogramEnvironment.method(:sms_provider)
+    environment_singleton.define_method(:sms_provider) { nil }
+
+    yield
+  ensure
+    environment_singleton.define_method(:sms_provider) { original_sms_provider.call }
   end
 end
