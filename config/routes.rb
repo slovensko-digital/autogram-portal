@@ -15,6 +15,9 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Error pages (config.exceptions_app)
+  match "/:status", to: "errors#show", via: :all, constraints: { status: /[45]\d\d/ }
+
   get "altcha/challenge" => "altcha#challenge", as: :altcha_challenge
 
   # Chrome DevTools configuration for better debugging experience

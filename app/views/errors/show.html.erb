@@ -1,0 +1,21 @@
+<%# locals: (status:) %>
+
+<% key = error_page_key(status) %>
+<% content_for :title, t("error_pages.#{key}.title") %>
+
+<p class="text-sm font-semibold text-blue-700"><%= t("error_pages.code", code: status) %></p>
+<h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= t("error_pages.#{key}.title") %></h1>
+<p class="mt-4 text-base text-gray-700"><%= t("error_pages.#{key}.description") %></p>
+
+<p class="mt-8">
+  <a href="<%= root_path %>"
+     class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+    <%= t("error_pages.home") %>
+  </a>
+</p>
+
+<% support_email = Rails.application.config.footer[:support_email] %>
+<p class="mt-8 text-sm text-gray-700">
+  <%= t("error_pages.help") %>
+  <a href="mailto:<%= support_email %>" class="font-medium text-blue-700 underline hover:text-blue-900"><%= support_email %></a>
+</p>
