@@ -37,10 +37,10 @@
 
   <% no_padding_top = @no_header || flash.any? || current_page?(about_index_path) || current_page?(docs_path) %>
   <body class="<%= 'lg:pt-24' unless no_padding_top %> <%= 'bg-gradient-to-tr from-slate-50 to-gray-50 text-gray-900 antialiased' unless params[:iframe] %>">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[1000] focus:bg-yellow-300 focus:px-4 focus:py-2 focus:text-gray-950 focus:outline-3 focus:outline-yellow-300"><%= t('layouts.skip_to_main_content') %></a>
+    <a href="#main-content" data-turbo="false" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[1000] focus:bg-yellow-300 focus:px-4 focus:py-2 focus:text-gray-950 focus:outline-3 focus:outline-yellow-300"><%= t('layouts.skip_to_main_content') %></a>
     <%= render "layouts/header" unless @no_header %>
 
-    <main id="main-content" tabindex="-1" class="<%= 'min-h-screen' unless @no_footer %> <%= 'lg:pl-64' unless @no_header %> focus:outline-none">
+    <main id="main-content" tabindex="-1" class="<%= 'min-h-screen' unless @no_footer %> <%= 'lg:pl-64' unless @no_header %> focus:outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600">
       <%= render("layouts/flash", flash: flash) unless @no_flash %>
 
       <%= yield %>
