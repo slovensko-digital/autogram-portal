@@ -7,7 +7,7 @@
         <% bundle_state = bundle.bundle_state %>
         <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
           <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-            <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg aria-hidden="true" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
             </svg>
           </div>
@@ -26,15 +26,15 @@
                 <%= render 'shared/badge', color: 'yellow', label: t('bundles.status.awaiting_signature') %>
               <% end %>
             </div>
-            <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+            <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-600 flex-wrap">
               <span class="flex items-center gap-1">
-                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
                 <%= bundle.completed_recipients.size %> / <%= bundle.visible_recipients.size %>
               </span>
               <span class="flex items-center gap-1">
-                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                 </svg>
                 <%= bundle.created_at.strftime("%d.%m.%Y") %>
@@ -57,12 +57,16 @@
           </div>
           <div class="flex items-center gap-6 shrink-0 justify-end">
             <% if show_destroy %>
-              <%= link_to t('actions.delete'), bundle_path(bundle),
-                          data: { turbo_method: :delete, turbo_confirm: t('bundles.destroy.confirm') },
-                          class: "hidden underline sm:inline text-sm text-red-500 hover:text-red-700 transition-colors" %>
+              <%= link_to bundle_path(bundle),
+                          data: { turbo_method: :delete, turbo_confirm: t('bundles.destroy.confirm', name: bundle.display_name) },
+                          class: "hidden underline sm:inline text-sm text-red-700 hover:text-red-900 transition-colors" do %>
+                <%= t('actions.delete') %><span class="sr-only">: <%= bundle.display_name %></span>
+              <% end %>
             <% end %>
-            <%= link_to t('actions.view'), bundle_path(bundle),
-                        class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" %>
+            <%= link_to bundle_path(bundle),
+                        class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors" do %>
+              <%= t('actions.view') %><span class="sr-only">: <%= bundle.display_name %></span>
+            <% end %>
           </div>
         </div>
       <% end %>
@@ -70,7 +74,7 @@
   </div>
 <% else %>
   <div class="bg-white rounded-lg border border-gray-200 text-center py-16">
-    <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <svg aria-hidden="true" class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
     </svg>
     <h3 class="mt-2 text-sm font-semibold text-gray-900"><%= t('.no_bundles') %></h3>

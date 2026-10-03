@@ -1,4 +1,4 @@
-<main>
+<div>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:px-8">
       <div class="mx-auto max-w-md border border-gray-200 rounded-lg px-4 py-5 sm:p-6 bg-white">
@@ -12,7 +12,7 @@
           <div>
             <%= f.label :email, class: "block text-sm font-medium text-gray-700 mb-2" %>
             <%= f.email_field :email, autofocus: true, autocomplete: "email",
-                class: "block w-full rounded-md border-gray-300  focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border" %>
+                class: "block w-full rounded-md border-gray-500  focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border" %>
           </div>
 
           <%= render "devise/shared/captcha" %>
@@ -29,6 +29,6 @@
       </div>
     </div>
   </div>
-</main>
+</div>
 
 <% content_for :title, t('.resend_unlock_instructions') %>

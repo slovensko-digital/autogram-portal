@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Result notifications stay visible until the user closes them or the next notification replaces them,
+// so that users of screen magnifiers or slower readers do not miss them (WCAG 2.2.1).
 export default class extends Controller {
   connect() {
     document.querySelectorAll("[data-notification-overlay]").forEach(notification => {
@@ -12,38 +14,13 @@ export default class extends Controller {
         this.element.classList.remove("opacity-0", "translate-y-2")
       })
     })
-
-    this.remainingTime = 5000
-    this.resume()
   }
 
   disconnect() {
     window.cancelAnimationFrame(this.enterFrame)
-    this.clearTimer()
   }
 
   close() {
     this.element.remove()
-  }
-
-  pause() {
-    if (!this.timeout) return
-
-    this.remainingTime -= Date.now() - this.startedAt
-    this.clearTimer()
-  }
-
-  resume() {
-    if (this.timeout || this.remainingTime <= 0) return
-
-    this.startedAt = Date.now()
-    this.timeout = window.setTimeout(() => this.close(), this.remainingTime)
-  }
-
-  clearTimer() {
-    if (!this.timeout) return
-
-    window.clearTimeout(this.timeout)
-    this.timeout = null
   }
 }

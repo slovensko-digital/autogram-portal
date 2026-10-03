@@ -1,66 +1,69 @@
-<div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
+<header class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
   <div class="flex grow flex-col overflow-y-auto bg-white border-r border-gray-200 pb-4">
     <div class="flex h-16 shrink-0 items-center px-6 border-b border-gray-100">
       <a href="/" class="flex items-center">
         <span class="font-logo text-2xl font-bold text-gray-900" style="background: linear-gradient(to bottom, transparent 90%, #FDE047 10%);">Autogram <span class="font-normal">Portal</span></span>
       </a>
     </div>
-    <nav class="flex flex-1 flex-col px-4 py-6" x-data="{ langOpen: false }" @click.away="langOpen = false">
-      <ul role="list" class="flex flex-1 flex-col gap-y-7">
+    <nav class="flex flex-1 flex-col gap-y-7 px-4 py-6" aria-label="<%= t('header.navigation.main') %>" x-data="{ langOpen: false }" @click.away="langOpen = false" @keydown.escape="if (langOpen) { langOpen = false; $refs.langButton.focus() }">
+      <ul role="list" class="-mx-2 space-y-1">
+        <% if current_tenant %>
+          <li>
+            <%= render "shared/left_menu_item", path: dashboard_path, label: t('header.links.home'), icon: :home %>
+          </li>
+          <li>
+            <%= render "shared/left_menu_item", path: contracts_path, label: t('header.links.contracts'), icon: :paper %>
+          </li>
+          <li>
+            <%= render "shared/left_menu_item", path: bundles_path, label: t('header.links.bundles'), icon: :folder %>
+          </li>
+          <li>
+            <%= render "shared/left_menu_item", path: received_bundles_path, label: t('header.links.received_bundles'), icon: :inbox %>
+          </li>
+          <% if policy(:federation_request).navigation? %>
+            <li>
+              <%= render "shared/left_menu_item", path: federation_requests_open_path, label: t('header.links.open_foreign_request'), icon: :link %>
+            </li>
+          <% end %>
+          <% if policy(ContractValidationRecord).index? %>
+            <li>
+              <%= render "shared/left_menu_item", path: contract_validation_records_path, label: t('header.links.validation_archive'), icon: :shield %>
+            </li>
+          <% end %>
+          <li>
+            <%= render "shared/left_menu_item", path: edit_user_registration_path, label: t('header.links.settings'), icon: :settings %>
+          </li>
+        <% end %>
         <li>
-          <ul role="list" class="-mx-2 space-y-1">
-            <% if current_tenant %>
-              <li>
-                <%= render "shared/left_menu_item", path: dashboard_path, label: t('header.links.home'), icon: :home %>
-              </li>
-              <li>
-                <%= render "shared/left_menu_item", path: contracts_path, label: t('header.links.contracts'), icon: :paper %>
-              </li>
-              <li>
-                <%= render "shared/left_menu_item", path: bundles_path, label: t('header.links.bundles'), icon: :folder %>
-              </li>
-              <li>
-                <%= render "shared/left_menu_item", path: received_bundles_path, label: t('header.links.received_bundles'), icon: :inbox %>
-              </li>
-              <% if policy(:federation_request).navigation? %>
-                <li>
-                  <%= render "shared/left_menu_item", path: federation_requests_open_path, label: t('header.links.open_foreign_request'), icon: :link %>
-                </li>
-              <% end %>
-              <% if policy(ContractValidationRecord).index? %>
-                <li>
-                  <%= render "shared/left_menu_item", path: contract_validation_records_path, label: t('header.links.validation_archive'), icon: :shield %>
-                </li>
-              <% end %>
-              <li>
-                <%= render "shared/left_menu_item", path: edit_user_registration_path, label: t('header.links.settings'), icon: :settings %>
-              </li>
-            <% end %>
-            <li>
-              <%= render "shared/left_menu_item", path: new_contract_path, label: t('header.links.new_contract'), icon: :new_paper %>
-            </li>
-            <li>
-              <%= render "shared/left_menu_item", path: "#", label: t('header.links.electronic_onboarding'), icon: :fingerprint %>
-            </li>
-            <li>
-              <%= render "shared/left_menu_item", path: about_index_path, label: t('header.links.about'), icon: :info %>
-            </li>
-            <li>
-              <%= render "shared/left_menu_item", path: docs_path, label: t('header.links.docs'), icon: :book %>
-            </li>
-          </ul>
+          <%= render "shared/left_menu_item", path: new_contract_path, label: t('header.links.new_contract'), icon: :new_paper %>
         </li>
-        <li class="mt-auto -mx-2 space-y-1">
-          <div class="relative">
+        <li>
+          <%= render "shared/left_menu_item", path: "#", label: t('header.links.electronic_onboarding'), icon: :fingerprint %>
+        </li>
+        <li>
+          <%= render "shared/left_menu_item", path: about_index_path, label: t('header.links.about'), icon: :info %>
+        </li>
+        <li>
+          <%= render "shared/left_menu_item", path: docs_path, label: t('header.links.docs'), icon: :book %>
+        </li>
+      </ul>
+      <div class="mt-auto -mx-2 space-y-1">
+        <ul role="list" class="space-y-1">
+          <li class="relative">
             <button @click="langOpen = !langOpen"
+                    x-ref="langButton"
                     type="button"
+                    :aria-expanded="langOpen.toString()"
+                    aria-expanded="false"
+                    aria-controls="language-menu"
                     class="group flex w-full items-center gap-x-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
-              <svg class="h-5 w-5 shrink-0 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
               </svg>
-              <%= t("language_switcher.languages.#{I18n.locale}") %>
+              <span class="sr-only"><%= t('language_switcher.language') %>: </span><%= t("language_switcher.languages.#{I18n.locale}") %>
             </button>
-            <div x-show="langOpen"
+            <div id="language-menu"
+                 x-show="langOpen"
                  x-transition:enter="transition ease-out duration-100"
                  x-transition:enter-start="transform opacity-0 scale-95"
                  x-transition:enter-end="transform opacity-100 scale-100"
@@ -72,70 +75,79 @@
               <div class="py-1">
                 <% I18n.available_locales.each do |locale| %>
                   <%= button_to t("language_switcher.languages.#{locale}"), switch_locale_path(locale: locale),
-                      class: "block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors cursor-pointer #{'font-semibold bg-blue-50 text-blue-700' if I18n.locale == locale} #{locale == I18n.available_locales.first ? 'rounded-t-lg' : ''} #{locale == I18n.available_locales.last ? 'rounded-b-lg' : ''}" %>
+                      lang: locale, "aria-current": (I18n.locale == locale ? "true" : nil),
+                      class: "block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors cursor-pointer #{'font-semibold bg-blue-50 text-blue-700 underline underline-offset-4' if I18n.locale == locale} #{locale == I18n.available_locales.first ? 'rounded-t-lg' : ''} #{locale == I18n.available_locales.last ? 'rounded-b-lg' : ''}" %>
+                <% end %>
+              </div>
+            </div>
+          </li>
+          <li>
+            <% if current_user %>
+              <%= link_to destroy_user_session_path,
+                  data: { turbo_method: :delete },
+                  class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors" do %>
+                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 group-hover:text-red-500 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
+                </svg>
+                <%= t('header.links.sign_out') %>
+              <% end %>
+            <% else %>
+              <%= link_to new_user_session_path,
+                  class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors" do %>
+                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 group-hover:text-blue-600 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                </svg>
+                <%= t('header.links.sign_in') %>
+              <% end %>
+            <% end %>
+          </li>
+        </ul>
+        <% if current_tenant %>
+          <%= render "layouts/current_tenant" %>
+          <div class="border-t border-gray-100 pt-3 mt-1 px-3">
+            <div class="flex items-center gap-3">
+              <div aria-hidden="true" class="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                <%= (current_user.name.presence || current_user.email).split(/[\s@]/).first(2).map { |n| n[0]&.upcase }.compact.join %>
+              </div>
+              <div class="min-w-0">
+                <% if current_user.name.present? %>
+                  <p class="text-sm font-semibold text-gray-900 truncate"><%= current_user.name %></p>
+                  <p class="text-xs text-gray-500 truncate"><%= current_user.email %></p>
+                <% else %>
+                  <p class="text-sm font-semibold text-gray-900 truncate"><%= current_user.email %></p>
                 <% end %>
               </div>
             </div>
           </div>
-          <% if current_user %>
-            <%= link_to destroy_user_session_path,
-                data: { turbo_method: :delete },
-                class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors" do %>
-              <svg class="h-5 w-5 shrink-0 text-gray-400 group-hover:text-red-500 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
-              </svg>
-              <%= t('header.links.sign_out') %>
-            <% end %>
-          <% else %>
-            <%= link_to new_user_session_path,
-                class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors" do %>
-              <svg class="h-5 w-5 shrink-0 text-gray-400 group-hover:text-blue-600 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-              </svg>
-              <%= t('header.links.sign_in') %>
-            <% end %>
-          <% end %>
-          <% if current_tenant %>
-            <%= render "layouts/current_tenant" %>
-            <div class="border-t border-gray-100 pt-3 mt-1 px-3">
-              <div class="flex items-center gap-3">
-                <div class="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                  <%= (current_user.name.presence || current_user.email).split(/[\s@]/).first(2).map { |n| n[0]&.upcase }.compact.join %>
-                </div>
-                <div class="min-w-0">
-                  <% if current_user.name.present? %>
-                    <p class="text-sm font-semibold text-gray-900 truncate"><%= current_user.name %></p>
-                    <p class="text-xs text-gray-500 truncate"><%= current_user.email %></p>
-                  <% else %>
-                    <p class="text-sm font-semibold text-gray-900 truncate"><%= current_user.email %></p>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          <% end %>
-        </li>
-      </ul>
+        <% end %>
+      </div>
     </nav>
   </div>
-</div>
-<header class="bg-blue-800 lg:hidden" x-data="{ mobileMenuOpen: false }">
-  <nav class="mx-auto flex items-center justify-between p-4 sm:px-6" aria-label="<%= t('header.navigation.global') %>">
+</header>
+<header class="bg-blue-800 lg:hidden" x-data="{ mobileMenuOpen: false }" @keydown.escape.window="if (mobileMenuOpen) { mobileMenuOpen = false; $refs.mobileMenuButton.focus() }">
+  <div class="mx-auto flex items-center justify-between p-4 sm:px-6">
     <a href="/" class="-m-1.5 p-1.5">
       <span class="font-logo text-xl font-bold text-white underline">Autogram <span class="font-normal">Portal</span></span>
     </a>
     <button type="button"
+            x-ref="mobileMenuButton"
             @click="mobileMenuOpen = !mobileMenuOpen"
+            :aria-expanded="mobileMenuOpen.toString()"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
             class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white">
       <span class="sr-only"><%= t('header.navigation.toggle_menu') %></span>
-      <svg x-show="!mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <svg x-show="!mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
       </svg>
-      <svg x-show="mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display: none;">
+      <svg x-show="mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" style="display: none;">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
-  </nav>
-  <div x-show="mobileMenuOpen"
+  </div>
+  <nav id="mobile-menu"
+       aria-label="<%= t('header.navigation.main') %>"
+       x-show="mobileMenuOpen"
        x-transition:enter="transition ease-out duration-200"
        x-transition:enter-start="opacity-0 -translate-y-1"
        x-transition:enter-end="opacity-100 translate-y-0"
@@ -143,73 +155,66 @@
        x-transition:leave-start="opacity-100 translate-y-0"
        x-transition:leave-end="opacity-0 -translate-y-1"
        style="display: none;">
-    <div class="space-y-2 px-6 pb-6 pt-2">
-      <% if current_tenant %>
-        <%= link_to dashboard_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(dashboard_path)}" do %>
-          <%= t('header.links.home') %>
-        <% end %>
-        <%= link_to t('header.links.contracts'), contracts_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(contracts_path)}" %>
-        <%= link_to t('header.links.bundles'), bundles_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(bundles_path)}" %>
-        <%= link_to t('header.links.received_bundles'), received_bundles_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(received_bundles_path)}" %>
-        <% if policy(:federation_request).navigation? %>
-          <%= link_to t('header.links.open_foreign_request'), federation_requests_open_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(federation_requests_open_path)}" %>
-        <% end %>
-        <% if policy(ContractValidationRecord).index? %>
-          <%= link_to t('header.links.validation_archive'), contract_validation_records_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(contract_validation_records_path)}" %>
-        <% end %>
-        <%= link_to t('header.links.settings'), edit_user_registration_path,
-            class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(edit_user_registration_path)}" %>
-      <% end %>
-      <%= link_to t('header.links.new_contract'), new_contract_path,
-          class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(new_contract_path)}" %>
-      <%= link_to t('header.links.electronic_onboarding'), "#",
-          class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if false}" %>
-      <%= link_to t('header.links.about'), about_index_path,
-          class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(about_index_path)}" %>
-      <%= link_to t('header.links.docs'), docs_path,
-          class: "block rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if current_page?(docs_path)}" %>
-      <div class="border-t border-white pt-4 mt-4"></div>
-      <% if current_user %>
+    <div class="px-6 pb-6 pt-2">
+      <ul role="list" class="space-y-2">
         <% if current_tenant %>
-          <div class="flex items-center justify-between gap-2 px-3 py-2 text-sm text-white">
-            <span class="truncate font-semibold"><span class="sr-only"><%= t('header.current_tenant.label') %>: </span><%= current_tenant.name %></span>
-            <span class="shrink-0 text-xs uppercase text-blue-200"><%= t("tenants.plans.#{current_tenant.plan}") %></span>
-          </div>
-          <%= link_to current_user.email, edit_user_registration_path,
-              class: "block rounded-lg px-3 py-2 text-sm text-white underline hover:bg-blue-700 transition-colors" %>
-        <% end %>
-        <%= link_to destroy_user_session_path,
-            data: { turbo_method: :delete },
-            class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm text-white hover:bg-red-50 hover:text-red-700 transition-colors" do %>
-          <svg class="h-5 w-5 shrink-0 text-white group-hover:text-red-500 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
-          </svg>
-          <%= t('header.links.sign_out') %>
-        <% end %>
-      <% else %>
-        <%= link_to new_user_session_path,
-            class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm text-white hover:bg-blue-50 hover:text-blue-700 transition-colors" do %>
-          <svg class="h-5 w-5 shrink-0 text-white group-hover:text-blue-600 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-          </svg>
-          <%= t('header.links.sign_in') %>
-        <% end %>
-      <% end %>
-      <div class="border-t border-white pt-4 mt-4">
-        <div class="text-xs font-semibold text-blue-200 uppercase tracking-wide mb-2 px-3"><%= t('language_switcher.language') %></div>
-        <div class="space-y-1">
-          <% I18n.available_locales.each do |locale| %>
-            <%= button_to t("language_switcher.languages.#{locale}"), switch_locale_path(locale: locale),
-                class: "block w-full text-left rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold' if I18n.locale == locale}" %>
+          <li><%= render "shared/mobile_menu_item", path: dashboard_path, label: t('header.links.home') %></li>
+          <li><%= render "shared/mobile_menu_item", path: contracts_path, label: t('header.links.contracts') %></li>
+          <li><%= render "shared/mobile_menu_item", path: bundles_path, label: t('header.links.bundles') %></li>
+          <li><%= render "shared/mobile_menu_item", path: received_bundles_path, label: t('header.links.received_bundles') %></li>
+          <% if policy(:federation_request).navigation? %>
+            <li><%= render "shared/mobile_menu_item", path: federation_requests_open_path, label: t('header.links.open_foreign_request') %></li>
           <% end %>
-        </div>
+          <% if policy(ContractValidationRecord).index? %>
+            <li><%= render "shared/mobile_menu_item", path: contract_validation_records_path, label: t('header.links.validation_archive') %></li>
+          <% end %>
+          <li><%= render "shared/mobile_menu_item", path: edit_user_registration_path, label: t('header.links.settings') %></li>
+        <% end %>
+        <li><%= render "shared/mobile_menu_item", path: new_contract_path, label: t('header.links.new_contract') %></li>
+        <li><%= render "shared/mobile_menu_item", path: "#", label: t('header.links.electronic_onboarding') %></li>
+        <li><%= render "shared/mobile_menu_item", path: about_index_path, label: t('header.links.about') %></li>
+        <li><%= render "shared/mobile_menu_item", path: docs_path, label: t('header.links.docs') %></li>
+      </ul>
+      <div class="border-t border-white pt-4 mt-4 space-y-2">
+        <% if current_user %>
+          <% if current_tenant %>
+            <div class="flex items-center justify-between gap-2 px-3 py-2 text-sm text-white">
+              <span class="truncate font-semibold"><span class="sr-only"><%= t('header.current_tenant.label') %>: </span><%= current_tenant.name %></span>
+              <span class="shrink-0 text-xs uppercase text-white"><%= t("tenants.plans.#{current_tenant.plan}") %></span>
+            </div>
+            <%= link_to current_user.email, edit_user_registration_path,
+                class: "block rounded-lg px-3 py-2 text-sm text-white underline hover:bg-blue-700 transition-colors" %>
+          <% end %>
+          <%= link_to destroy_user_session_path,
+              data: { turbo_method: :delete },
+              class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm text-white hover:bg-red-50 hover:text-red-700 transition-colors" do %>
+            <svg class="h-5 w-5 shrink-0 text-white group-hover:text-red-700 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
+            </svg>
+            <%= t('header.links.sign_out') %>
+          <% end %>
+        <% else %>
+          <%= link_to new_user_session_path,
+              class: "group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm text-white hover:bg-blue-50 hover:text-blue-800 transition-colors" do %>
+            <svg class="h-5 w-5 shrink-0 text-white group-hover:text-blue-800 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+            </svg>
+            <%= t('header.links.sign_in') %>
+          <% end %>
+        <% end %>
+      </div>
+      <div class="border-t border-white pt-4 mt-4">
+        <p id="mobile-language-heading" class="text-xs font-semibold text-white uppercase tracking-wide mb-2 px-3"><%= t('language_switcher.language') %></p>
+        <ul role="list" class="space-y-1" aria-labelledby="mobile-language-heading">
+          <% I18n.available_locales.each do |locale| %>
+            <li>
+              <%= button_to t("language_switcher.languages.#{locale}"), switch_locale_path(locale: locale),
+                  lang: locale, "aria-current": (I18n.locale == locale ? "true" : nil),
+                  class: "block w-full text-left rounded-lg px-3 py-2 text-sm text-white hover:bg-blue-700 transition-colors #{'bg-blue-700 font-semibold underline underline-offset-4' if I18n.locale == locale}" %>
+            </li>
+          <% end %>
+        </ul>
       </div>
     </div>
-  </div>
+  </nav>
 </header>

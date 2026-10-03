@@ -1,9 +1,11 @@
+<% content_for :title, t('.title') %>
+
 <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
-<main class="mx-auto max-w-3xl">
+<div class="mx-auto max-w-3xl">
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div class="space-y-8">
-        <h3 class="text-4xl font-semibold text-gray-900"><%= t('.title') %></h3>
+        <h1 class="text-4xl font-semibold text-gray-900"><%= t('.title') %></h1>
         <p class="text-md text-gray-600"><%= t('.description_a') %></p>
         <p class="text-md text-gray-600"><%= t('.description_b') %></p>
 
@@ -34,5 +36,5 @@
       <% end %>
     </div>
   </div>
-</main>
+</div>
 <% end %>

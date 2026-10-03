@@ -111,7 +111,7 @@ class RecipientsControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select ".bg-red-50", text: /Email/
-    assert_select "[role='status']", count: 0
+    assert_select "[data-notification-overlay][role='status']", count: 0
   end
 
   test "notify queues an invitation and reports that sending has started" do
@@ -135,7 +135,20 @@ class RecipientsControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select "[role='alert']", text: I18n.t("recipients.index.invitation_failed", recipient: recipient.display_name)
-    assert_select "[role='status']", count: 0
+    assert_select "[data-notification-overlay][role='status']", count: 0
+  end
+
+  test "index names the recipient in its action buttons" do
+    first = bundles(:one).recipients.create!(email: "first@example.com")
+    second = bundles(:one).recipients.create!(email: "second@example.com")
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    [ first, second ].each do |recipient|
+      assert_select "form[action=?] button .sr-only", bundle_recipient_path(bundles(:one), recipient), text: ": #{recipient.display_name}"
+      assert_select "form[action=?] button .sr-only", notify_bundle_recipient_path(bundles(:one), recipient), text: ": #{recipient.display_name}"
+    end
   end
 
   test "destroy withdraws the request and reports success" do
@@ -151,7 +164,7 @@ class RecipientsControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_select "[role='alert']", text: I18n.t("recipients.index.withdraw_failed", recipient: recipient.display_name)
-    assert_select "[role='status']", count: 0
+    assert_select "[data-notification-overlay][role='status']", count: 0
   end
 
   test "admin cannot create recipients in another tenant bundle" do

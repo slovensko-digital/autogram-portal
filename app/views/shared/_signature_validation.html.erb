@@ -1,6 +1,7 @@
 <div class="w-full">
   <% validation_results = local_assigns[:validation_results] || [ local_assigns[:validation_result] || @validation_result ] %>
   <% visual_signature_stamps = local_assigns[:visual_signature_stamps] || @contract&.latest_visual_signature_stamps || [] %>
+  <% heading_tag = local_assigns[:heading_level].to_i == 2 ? :h2 : :h3 %>
 
   <% validation_results.each do |validation_entry| %>
     <% validation_result = validation_entry.validation_result %>
@@ -13,10 +14,10 @@
     <% if validation_result.errors.any? %>
       <div class="rounded-lg bg-red-50 border border-red-200 p-4 mb-4">
         <div class="flex items-center mb-2">
-          <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <svg aria-hidden="true" class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
           </svg>
-          <h3 class="text-red-800 font-semibold"><%= t('.error_title') %></h3>
+          <%= content_tag heading_tag, t('.error_title'), class: "text-red-800 font-semibold" %>
         </div>
         <ul class="text-red-700 text-sm space-y-1">
           <% validation_result.errors.each do |error| %>
@@ -29,15 +30,15 @@
       <%= render 'shared/info', title: t('.no_signatures_title'), content: t('.no_signatures_message') %>
     <% else %>
       <div class="space-y-3 mb-4 last:mb-0">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+        <%= content_tag heading_tag, class: "text-lg font-semibold text-gray-900 mb-4" do %>
           <%= t('.signatures_found_title') %> (<%= validation_result.signatures.length %>)
-        </h3>
+        <% end %>
         <% validation_result.signatures.each do |signature| %>
           <% signature_documents = signature_validation_signature_documents(signature, validation_result, @contract) %>
           <% agp_mapping = signature_validation_agp_mapping(signature, validation_entry) %>
           <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full">
             <button type="button"
-                    data-action="click->toggle#toggle"
+                    data-action="click->toggle#toggle" data-toggle-target="button"
                     class="flex w-full items-start sm:items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
               <span class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <span class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
@@ -73,11 +74,11 @@
                 </span>
               </span>
               <span class="flex items-center gap-2 shrink-0">
-                <span class="hidden md:inline text-xs text-gray-400">
+                <span class="hidden md:inline text-xs text-gray-600">
                   <span data-toggle-target="textCollapsed"><%= t('.open_details') %></span>
                   <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_details') %></span>
                 </span>
-                <svg data-toggle-target="icon"
+                <svg aria-hidden="true" data-toggle-target="icon"
                      class="w-4 h-4 text-gray-400 transition-transform duration-200"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -154,7 +155,7 @@
                     <div class="text-gray-600"><%= t('.format') %>:</div>
                     <div class="text-gray-900 flex items-center justify-between">
                       <span><%= signature_format(validation_result.documentInfo[:signatureForm], validation_result.documentInfo[:containerType]) %></span>
-                      <button data-action="click->toggle#toggle" data-toggle-target="button"
+                      <button type="button" data-action="click->toggle#toggle" data-toggle-target="button"
                         class="inline-flex items-center ml-4 cursor-pointer underline text-gray-900 hover:text-gray-700">
                         <span data-toggle-target="textCollapsed"><%= t('.open_technical_details') %></span>
                         <span data-toggle-target="textExpanded" class="hidden"><%= t('.collapse_technical_details') %></span>
@@ -226,9 +227,9 @@
 
   <% if visual_signature_stamps.any? %>
     <div class="space-y-3 mb-4 last:mb-0">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">
+      <%= content_tag heading_tag, class: "text-lg font-semibold text-gray-900 mb-4" do %>
         <%= t('.visual_signatures_found_title') %> (<%= visual_signature_stamps.length %>)
-      </h3>
+      <% end %>
       <% visual_signature_stamps.each do |stamp| %>
         <div class="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
           <div class="flex items-start justify-between gap-4">

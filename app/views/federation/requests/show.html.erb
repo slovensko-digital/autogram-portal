@@ -1,3 +1,5 @@
+<% content_for :title, t('.title') %>
+
 <div class="mx-auto max-w-3xl space-y-6 px-4 py-8">
   <div>
     <h1 class="text-2xl font-semibold text-gray-900"><%= t('.title') %></h1>
@@ -7,7 +9,7 @@
   <%= form_with url: federation_requests_open_path, method: :get, class: "space-y-3" do |form| %>
     <div>
       <%= form.label :url, t('.url_label'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= form.url_field :url, value: @request_url, placeholder: t('.url_placeholder'), class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+      <%= form.url_field :url, value: @request_url, placeholder: t('.url_placeholder'), class: "w-full rounded-md border border-gray-500 px-3 py-2 text-sm" %>
     </div>
     <%= form.submit t('.preview'), class: "inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
   <% end %>

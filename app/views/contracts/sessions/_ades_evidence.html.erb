@@ -1,3 +1,4 @@
+<% content_for :title, t('.title') unless params[:embedded] %>
 <% verification_channel = @session.signature_verification&.channel.presence || @session.effective_verification_channel || @session.verification_channel || "sms" %>
 <% email_channel = verification_channel == "email" %>
 <% if params[:embedded] %>
@@ -6,7 +7,7 @@
     <p class="text-sm text-gray-600"><%= email_channel ? t('.subtitle_email') : t('.subtitle') %></p>
   </div>
 <% else %>
-  <div class="px-6 py-5 hidden md:block">
+  <div class="sr-only md:not-sr-only md:px-6 md:py-5">
     <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
     <p class="text-sm text-gray-600 mt-1"><%= email_channel ? t('.subtitle_email') : t('.subtitle') %></p>
   </div>
@@ -14,21 +15,22 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 <%= 'px-6' unless params[:embedded] %>">
   <div class="space-y-6 bg-white border border-gray-200 rounded-lg p-6">
-    <div class="space-y-4">
+    <%= content_tag(params[:embedded] ? :h4 : :h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
+    <ol role="list" class="space-y-4">
       <% (1..4).each do |i| %>
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+        <li class="flex items-start gap-3">
+          <div aria-hidden="true" class="flex-shrink-0 w-8 h-8 mt-1 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
             <%= i %>
           </div>
           <div class="flex-1">
             <% title_key = i == 2 && email_channel ? ".step2_title_email" : ".step#{i}_title" %>
             <% description_key = i == 2 && email_channel ? ".step2_desc_email" : ".step#{i}_desc" %>
-            <h3 class="font-semibold text-gray-900"><%= t(title_key) %></h3>
+            <%= content_tag(params[:embedded] ? :h5 : :h3, t(title_key), class: "font-semibold text-gray-900") %>
             <p class="text-sm text-gray-600"><%= t(description_key) %></p>
           </div>
-        </div>
+        </li>
       <% end %>
-    </div>
+    </ol>
   </div>
 
   <div class="space-y-6 md:border md:border-gray-200 bg-white md:rounded-lg md:p-6">
@@ -80,7 +82,7 @@
             <%= form.text_field :verification_code,
                   name: :verification_code,
                   placeholder: t('.verification_code_placeholder'),
-                  class: "w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                  class: "w-full px-3 py-2 text-sm bg-white border border-gray-500 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
                   autocomplete: "one-time-code",
                   inputmode: "numeric" %>
           </div>

@@ -9,7 +9,7 @@ module ApplicationHelper
         content_tag(
           :code,
           fragment[1..-2],
-          class: "rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[0.9em] text-gray-800"
+          class: "rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[0.9em] text-gray-800 [overflow-wrap:anywhere]"
         )
       else
         ERB::Util.html_escape(fragment)
@@ -49,7 +49,7 @@ module ApplicationHelper
       viewbox: true
     )
 
-    svg.html_safe
+    svg.sub("<svg", '<svg aria-hidden="true" focusable="false"').html_safe
   rescue => e
     Rails.logger.error "Failed to generate QR code: #{e.message}"
     %(<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">

@@ -31,6 +31,8 @@ module AutogramPortal
 
     # Controllers render their own denials; any denial they leave unhandled is a 403, not a 500.
     config.action_dispatch.rescue_responses["Pundit::NotAuthorizedError"] = :forbidden
+    # Error pages are rendered by ErrorsController (translated, with a link back to the portal).
+    config.exceptions_app = routes
 
     config.active_job.queue_adapter = :good_job
     config.good_job.enable_cron = true

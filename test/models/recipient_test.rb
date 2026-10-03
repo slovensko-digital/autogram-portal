@@ -173,7 +173,7 @@ class RecipientTest < ActiveSupport::TestCase
     )
 
     assert_not recipient.valid?
-    assert_includes recipient.errors[:mobile_phone], "must be in E.164 format"
+    assert_includes recipient.errors[:mobile_phone], I18n.t("activerecord.errors.models.recipient.attributes.mobile_phone.invalid_e164")
   end
 
   test "local recipients still link to an existing user by email" do

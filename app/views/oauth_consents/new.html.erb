@@ -1,4 +1,4 @@
-<main>
+<div>
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:px-8">
       <div class="mx-auto max-w-md border border-gray-200 rounded-lg px-4 py-5 sm:p-6 bg-white">
@@ -19,7 +19,7 @@
                 <%= t('upload_form.agree_to_policies_html',
                       terms_link: link_to(t('upload_form.terms_of_service'), terms_of_service_link, target: "_blank", class: "text-blue-600 underline"),
                       privacy_link: link_to(t('upload_form.privacy_policy'), privacy_policy_link, target: "_blank", class: "text-blue-600 underline")).html_safe %>
-                <span class="text-red-500">*</span>
+                <span class="text-red-700">(<%= t('shared.required') %>)</span>
             <% end %>
           </div>
 
@@ -35,6 +35,6 @@
       </div>
     </div>
   </div>
-</main>
+</div>
 
 <% content_for :title, t('.title') %>
