@@ -1,7 +1,3 @@
-<p class="greeting"><%= t('devise.mailer.greeting', recipient: @resource.email) %></p>
-
-<p><%= t('.message') %></p>
-
-<p><%= t('.instruction') %></p>
-
-<%= link_to t('.action'), unlock_url(@resource, unlock_token: @token), class: 'button' %>
+<%= render "mailer/badge", label: t(".badge"), tone: :amber %>
+<%= render "mailer/heading", title: t(".title"), message: [ t(".message"), t(".instruction") ] %>
+<%= render "mailer/button", label: t(".action"), url: unlock_url(@resource, unlock_token: @token) %>

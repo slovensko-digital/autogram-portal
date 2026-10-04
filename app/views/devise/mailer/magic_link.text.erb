@@ -1,7 +1,7 @@
-<%= t('devise.mailer.greeting', recipient: @resource.email) %>
+<%= t('.title') %>
 
-<%= t('.instruction') %>
+<%= t('.instruction', recipient: @resource.email) %>
 
-<%= t('.action') %>: <%= magic_link_url(@resource, @scope_name => {email: @resource.email, token: @token, remember_me: @remember_me}) %>
+<%= t('.action') %>: <%= magic_link_url(@resource, @scope_name => { email: @resource.email, token: @token, remember_me: @remember_me }) %>
 
-<%= t('.expiry_notice', expiry: Devise.passwordless_login_within.inspect) %>
+<%= t('.expiry_notice', expiry: Devise.passwordless_login_within.inspect.to_i) %>

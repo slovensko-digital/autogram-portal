@@ -1,0 +1,14 @@
+<%# locals: (contract:, signer_name:, signature:) -%>
+<% rows = [
+     { label: t("notification_mailer.signature_details.document"), value: contract.display_name, strong: true },
+     { label: t("notification_mailer.signature_details.signed_by"), value: signer_name }
+   ] %>
+<% if signature&.signingTime %>
+  <% rows << {
+       label: t("notification_mailer.signature_details.signing_time"),
+       value: signature.signingTime.strftime("%-d. %-m. %Y %H:%M"),
+       note: signature.qualified_timestamps? ? t("notification_mailer.signature_details.timestamp_qualified") : t("notification_mailer.signature_details.timestamp_non_qualified"),
+       note_tone: signature.qualified_timestamps? ? :green : :gray
+     } %>
+<% end %>
+<%= render "mailer/details", rows: rows %>

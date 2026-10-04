@@ -1,9 +1,8 @@
-<%= t('notification_mailer.greeting') %>
-
 <%= t('.title') %>
-<%= t('.message', bundle_count: @bundle.contracts.count) %>
 
-<%= t('.details_title') %>
+<%= t('.message', bundle_name: @bundle.display_name) %>
+
+<%= t('.documents', count: @bundle.contracts.size) %>:
 <% @bundle.contracts.each do |contract| %>
 - <%= contract.display_name %>
 <% end %>

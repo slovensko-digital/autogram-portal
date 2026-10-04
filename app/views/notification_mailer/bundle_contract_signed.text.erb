@@ -1,6 +1,8 @@
-<%= t('notification_mailer.greeting') %>
-
 <%= t('.title') %>
-<%= t('.message', filename: @contract.display_name, signer_name: @signer.display_name) %>
+
+<%= t('.message') %>
+
+<%= t('notification_mailer.signature_details.document') %>: <%= @contract.display_name %>
+<%= t('notification_mailer.signature_details.signed_by') %>: <%= @signer.display_name %>
 
 <%= t('.view_bundle') %>: <%= url_for(@bundle) %>
