@@ -273,7 +273,7 @@ sk:
     shared:
       captcha:
         captcha_link_label: "ALTCHA – webová stránka služby ochrany (otvorí sa v novom okne)"
-        captcha_footer_html: "Chránené službou <a href=\"https://altcha.org/\" target=\"_blank\" rel=\"noopener\">ALTCHA</a>"
+        captcha_footer_html: "Chránené službou <a href=\"https://altcha.org/\" target=\"_blank\" rel=\"noopener\" aria-label=\"%{link_label}\">ALTCHA</a>"
         captcha_label: "Nie som robot"
         captcha_verified: "Overené"
         captcha_verifying: "Overujem…"

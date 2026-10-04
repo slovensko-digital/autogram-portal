@@ -1,6 +1,13 @@
 require "rqrcode"
 
 module ApplicationHelper
+  # Flash entries that carry form state to the next page (shown next to the fields) rather than a message.
+  FLASH_DATA_KEYS = %w[visual_stamp_errors visual_stamp_invalid_fields].freeze
+
+  def flash_messages
+    flash.to_hash.except(*FLASH_DATA_KEYS)
+  end
+
   def render_inline_code(text)
     fragments = text.to_s.split(/(`[^`]+`)/)
 

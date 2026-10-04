@@ -311,7 +311,7 @@ en:
     shared:
       captcha:
         captcha_link_label: "ALTCHA – protection service website (opens in a new window)"
-        captcha_footer_html: "Protected by <a href=\"https://altcha.org/\" target=\"_blank\" rel=\"noopener\">ALTCHA</a>"
+        captcha_footer_html: "Protected by <a href=\"https://altcha.org/\" target=\"_blank\" rel=\"noopener\" aria-label=\"%{link_label}\">ALTCHA</a>"
         captcha_label: "I'm not a robot"
         captcha_verified: "Verified"
         captcha_verifying: "Verifying…"

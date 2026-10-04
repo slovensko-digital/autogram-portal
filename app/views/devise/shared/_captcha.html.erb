@@ -2,7 +2,7 @@
   <altcha-widget
     challengeurl="<%= altcha_challenge_url %>"
     hidelogo
-    strings='<%= { label: t(".captcha_label"), verified: t(".captcha_verified"), verifying: t(".captcha_verifying"), waitAlert: t(".captcha_wait"), error: t(".captcha_error"), footer: t(".captcha_footer_html"), ariaLinkLabel: t(".captcha_link_label") }.to_json %>'
+    strings='<%= { label: t(".captcha_label"), verified: t(".captcha_verified"), verifying: t(".captcha_verifying"), waitAlert: t(".captcha_wait"), error: t(".captcha_error"), footer: t(".captcha_footer_html", link_label: t(".captcha_link_label")), ariaLinkLabel: t(".captcha_link_label") }.to_json %>'
     style="
       --altcha-color-base: #fff;
       --altcha-color-border: #6a7282;

@@ -3,13 +3,14 @@ require "application_system_test_case"
 class SkipLinkTest < ApplicationSystemTestCase
   test "skip link moves focus to the main content repeatedly and after Turbo navigation" do
     visit about_index_path
+    find("body").send_keys(:tab)
+    assert_equal I18n.t("layouts.skip_to_main_content"), active_element_text
+
     click_link I18n.t("header.links.docs")
     assert_selector "h1", text: I18n.t("docs.index.header.title")
     click_link I18n.t("header.links.about")
     assert_current_path about_index_path
-
-    find("body").send_keys(:tab)
-    assert_equal I18n.t("layouts.skip_to_main_content"), active_element_text
+    assert_selector "#main-content h1:focus"
 
     3.times do
       page.execute_script("document.querySelector('a[href=\"#main-content\"]').focus()")

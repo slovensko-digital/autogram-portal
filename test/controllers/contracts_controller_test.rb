@@ -565,6 +565,28 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "visual signing validation errors are shown only next to the form" do
+    with_allowed_methods(%w[visual]) do
+      contract = create_pdf_contract(allowed_methods: [ "visual" ])
+
+      with_autogram_service(fake_stamp_service("unused")) do
+        post "/contracts/#{contract.uuid}/visual_signing", params: {
+          stamp: { page: 1, x: 40, y: 40, width: 200, height: 52, custom_text: "", content_mode: "text" }
+        }
+        assert_redirected_to visual_signing_contract_path(contract, purpose: "visual_method")
+
+        follow_redirect!
+      end
+
+      assert_response :success
+      assert_select "[role='alert']", count: 1
+      assert_select "#visual_stamp_errors[role='alert']", count: 1
+      assert_select "[aria-invalid='true'][aria-describedby~='visual_stamp_errors']", minimum: 1
+      assert_not_includes response.body, "custom_text&quot;]"
+      assert_not_includes response.body, "[&quot;"
+    end
+  end
+
   test "visual signing validation renders remembered visual signature" do
     with_allowed_methods(%w[visual]) do
       contract = create_pdf_contract(allowed_methods: [ "visual" ])

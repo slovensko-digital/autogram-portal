@@ -21,6 +21,11 @@
 	--font-logo: "Source Sans Pro", sans-serif;
 }
 
+/* ALTCHA dims its footer with opacity: 0.7, which lowers the text contrast below 4.5:1 */
+altcha-widget .altcha-footer {
+	opacity: 1;
+}
+
 /* Windows high contrast / forced colors: keep current navigation item and selected cards distinguishable */
 @media (forced-colors: active) {
 	nav [aria-current="page"],
