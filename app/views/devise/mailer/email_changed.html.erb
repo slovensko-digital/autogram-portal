@@ -1,7 +1,6 @@
-<p class="greeting"><%= t('devise.mailer.greeting', recipient: @email) %></p>
-
+<%= render "mailer/badge", label: t(".badge"), tone: :amber %>
 <% if @resource.try(:unconfirmed_email?) %>
-  <p><%= t('.message_unconfirmed', email: @resource.unconfirmed_email) %></p>
+  <%= render "mailer/heading", title: t(".title_unconfirmed"), message: t(".message_unconfirmed", email: @resource.unconfirmed_email) %>
 <% else %>
-  <p><%= t('.message', email: @resource.email) %></p>
+  <%= render "mailer/heading", title: t(".title"), message: t(".message", email: @resource.email) %>
 <% end %>

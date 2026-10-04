@@ -1,0 +1,17 @@
+<%# locals: (rows:) -%>
+<%# rows: [ { label:, value:, note: nil, note_tone: :gray, strong: false } ] -%>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F9FAFB" style="background-color: #F9FAFB; border-radius: 10px; margin: 0 0 28px;">
+  <tr><td colspan="2" style="height: 12px; line-height: 12px; font-size: 0;">&nbsp;</td></tr>
+  <% rows.each do |row| %>
+    <tr>
+      <td class="email-details-label" width="130" valign="top" style="padding: 6px 8px 6px 20px; font-size: 15px; line-height: 1.5; color: #4B5563;"><%= row[:label] %></td>
+      <td class="email-details-value" valign="top" style="padding: 6px 20px 6px 8px; font-size: 15px; line-height: 1.5; color: #111827; word-break: break-word;<%= " font-weight: 600;" if row[:strong] %>">
+        <%= row[:value] %>
+        <% if row[:note].present? %>
+          <br><span style="font-size: 13px; font-weight: 400; color: <%= row[:note_tone] == :green ? "#166534" : "#4B5563" %>;"><%= row[:note] %></span>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  <tr><td colspan="2" style="height: 12px; line-height: 12px; font-size: 0;">&nbsp;</td></tr>
+</table>

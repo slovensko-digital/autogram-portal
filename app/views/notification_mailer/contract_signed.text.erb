@@ -1,14 +1,11 @@
-<%= t('notification_mailer.greeting') %>
-
 <%= t('.title') %>
-<%= t('.message', filename: @contract.display_name) %>
 
-<%= t('.details_title') %>
-- <%= t('.signed_by', signer_name: @signature.signerName) %>
-<% if @signature.qualified_timestamps? %>
-- <%= t('.timestamp_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %>
-<% else %>
-- <%= t('.timestamp_non_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %>
+<%= t('.message') %>
+
+<%= t('notification_mailer.signature_details.document') %>: <%= @contract.display_name %>
+<%= t('notification_mailer.signature_details.signed_by') %>: <%= @signature&.signerName || @signer&.display_name %>
+<% if @signature&.signingTime %>
+<%= t('notification_mailer.signature_details.signing_time') %>: <%= @signature.signingTime.strftime('%-d. %-m. %Y %H:%M') %> (<%= @signature.qualified_timestamps? ? t('notification_mailer.signature_details.timestamp_qualified') : t('notification_mailer.signature_details.timestamp_non_qualified') %>)
 <% end %>
 
 <%= t('.view_contract') %>: <%= url_for(@contract) %>

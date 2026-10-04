@@ -1,11 +1,14 @@
-<p><%= t("verification_mailer.otp_code.title") %></p>
+<%= render "mailer/badge", label: t("verification_mailer.otp_code.badge"), tone: :blue %>
+<%= render "mailer/heading", title: t("verification_mailer.otp_code.title"), message: t("verification_mailer.otp_code.body") %>
 
-<p><%= t("verification_mailer.otp_code.body") %></p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F9FAFB" style="background-color: #F9FAFB; border-radius: 10px; margin: 0 0 28px;">
+  <tr>
+    <td align="center" class="email-code" style="padding: 24px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 40px; font-weight: 700; letter-spacing: 0.3em; line-height: 1.2; color: #111827;"><%= @code %></td>
+  </tr>
+</table>
 
-<p><strong><%= @code %></strong></p>
+<%= render "mailer/hint", text: t("verification_mailer.otp_code.footer") %>
 
 <% if @app_host.present? %>
-  <p>@<%= @app_host %> #<%= @code %></p>
+  <p style="margin: 0 0 28px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5; color: #4B5563;">@<%= @app_host %> #<%= @code %></p>
 <% end %>
-
-<p><%= t("verification_mailer.otp_code.footer") %></p>

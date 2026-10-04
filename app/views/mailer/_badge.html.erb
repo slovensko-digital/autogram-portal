@@ -1,0 +1,10 @@
+<%# locals: (label:, tone: :blue) -%>
+<% colors = {
+     blue:  { bg: "#EFF6FF", fg: "#1D4ED8", dot: "#2563EB" },
+     green: { bg: "#F0FDF4", fg: "#166534", dot: "#16A34A" },
+     amber: { bg: "#FFFBEB", fg: "#92400E", dot: "#D97706" },
+     gray:  { bg: "#F3F4F6", fg: "#374151", dot: "#6B7280" }
+   }.fetch(tone) %>
+<div style="margin: 0 0 16px;">
+  <span style="display: inline-block; padding: 4px 10px; border-radius: 999px; background-color: <%= colors[:bg] %>; color: <%= colors[:fg] %>; font-size: 13px; font-weight: 600; line-height: 18px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 4px; background-color: <%= colors[:dot] %>; margin-right: 6px; vertical-align: 1px;"></span><%= label %></span>
+</div>

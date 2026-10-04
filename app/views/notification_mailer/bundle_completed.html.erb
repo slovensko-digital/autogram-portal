@@ -1,25 +1,4 @@
-<p class="greeting"><%= t('notification_mailer.greeting') %></p>
-
-<div class="section-card">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-    <tr>
-      <td width="56" valign="top" style="padding: 0 12px 10px 0;">
-        <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
-      </td>
-      <td valign="middle" style="padding: 0 0 10px 0;">
-        <h2 class="section-title" style="margin: 0;"><%= t('.title') %></h2>
-      </td>
-    </tr>
-  </table>
-  <p class="section-body"><%= t('.message', bundle_count: @bundle.contracts.count) %></p>
-</div>
-<div class="section-card">
-  <div class="details-title"><%= t('.details_title') %></div>
-  <div class="details-list">
-    <% @bundle.contracts.each do |contract| %>
-      <div><%= contract.display_name %></div>
-    <% end %>
-  </div>
-</div>
-
-<%= link_to t('.view_bundle'), url_for(@bundle), class: "button" %>
+<%= render "mailer/badge", label: t(".badge"), tone: :green %>
+<%= render "mailer/heading", title: t(".title"), message: t(".message", bundle_name: @bundle.display_name) %>
+<%= render "mailer/documents", title: t(".documents", count: @bundle.contracts.size), contracts: @bundle.contracts, checked: true %>
+<%= render "mailer/button", label: t(".view_bundle"), url: url_for(@bundle) %>

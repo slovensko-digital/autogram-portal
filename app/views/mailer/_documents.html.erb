@@ -1,0 +1,26 @@
+<%# locals: (title:, contracts:, struck: false, checked: false) -%>
+<p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563;"><%= title %></p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F9FAFB" style="background-color: #F9FAFB; border-radius: 10px; margin: 0 0 28px;">
+  <tr><td colspan="3" style="height: 6px; line-height: 6px; font-size: 0;">&nbsp;</td></tr>
+  <% contracts.each do |contract| %>
+    <% name = contract.display_name.to_s %>
+    <% extension = File.extname(name).delete(".").upcase %>
+    <% badge = case extension
+               when "PDF" then { bg: "#FEE2E2", fg: "#B91C1C" }
+               when "DOC", "DOCX", "ODT", "RTF", "TXT" then { bg: "#DBEAFE", fg: "#1D4ED8" }
+               else { bg: "#E5E7EB", fg: "#374151" }
+               end %>
+    <tr>
+      <td width="1" valign="middle" style="padding: 10px 0 10px 16px; white-space: nowrap;">
+        <% if extension.present? && extension.length <= 5 %>
+          <span style="display: inline-block; font-size: 11px; font-weight: 700; line-height: 11px; letter-spacing: 0.04em; color: <%= badge[:fg] %>; background-color: <%= badge[:bg] %>; padding: 5px 6px; border-radius: 4px;"><%= extension %></span>
+        <% end %>
+      </td>
+      <td valign="middle" style="padding: 10px 16px 10px 12px; font-size: 16px; line-height: 1.4; word-break: break-word; <%= struck ? "color: #6B7280; text-decoration: line-through;" : "color: #111827;" %>"><%= name %></td>
+      <% if checked %>
+        <td width="1" valign="middle" style="padding: 10px 16px 10px 0; font-size: 15px; font-weight: 700; color: #15803D;">&#10003;</td>
+      <% end %>
+    </tr>
+  <% end %>
+  <tr><td colspan="3" style="height: 6px; line-height: 6px; font-size: 0;">&nbsp;</td></tr>
+</table>
