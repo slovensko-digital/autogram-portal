@@ -79,7 +79,8 @@
         <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center"
              data-controller="clipboard"
              data-clipboard-text-value="<%= sign_bundle_url(@bundle) %>">
-          <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>" onclick="this.select();"
+          <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>"
+                 data-action="click->clipboard#select"
                  aria-label="<%= t('.public_link_title') %>"
                  class="w-full flex-1 rounded-md border border-gray-500 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           <%= button_tag type: "button",

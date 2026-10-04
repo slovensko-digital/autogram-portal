@@ -22,6 +22,11 @@ export default class extends Controller {
     }
   }
 
+  // Selects the whole value of a read-only link field (inline onclick handlers are blocked by the CSP nonce).
+  select(event) {
+    event.currentTarget.select()
+  }
+
   showFeedback(message) {
     const label = this.hasLabelTarget ? this.labelTarget : null
     if (label) {

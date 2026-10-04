@@ -66,7 +66,9 @@
               <%= form.label :publicly_visible, t('.public_link_label'), class: "block text-sm font-medium text-gray-900" %>
               <p class="text-sm text-gray-600"><%= t('.public_link_description') %></p>
               <% if @bundle.publicly_visible? %>
-                <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>" onclick="this.select();"
+                <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>"
+                       data-controller="clipboard" data-action="click->clipboard#select"
+                       aria-label="<%= t('.public_link_label') %>"
                        class="mt-2 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
               <% end %>
             </div>

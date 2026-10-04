@@ -84,14 +84,16 @@
                       <% end %>
                     <% end %>
 
-                    <div data-controller="clipboard" data-clipboard-text-value="<%= sign_bundle_url(@bundle, recipient: recipient.uuid) %>">
-                      <%= button_tag type: "button",
-                            class: "text-gray-600 underline hover:text-gray-800 hover:underline cursor-pointer font-medium",
-                            data: { action: "clipboard#copyToClipboard" } do %>
-                        <span data-clipboard-target="label"><%= t('.copy_to_clipboard') %></span><span class="sr-only">: <%= recipient.display_name %></span>
-                      <% end %>
-                      <span role="status" class="sr-only" data-clipboard-target="status"></span>
-                    </div>
+                    <% if recipient.pending? %>
+                      <div data-controller="clipboard" data-clipboard-text-value="<%= sign_bundle_url(@bundle, recipient: recipient.uuid) %>">
+                        <%= button_tag type: "button",
+                              class: "text-gray-600 underline hover:text-gray-800 hover:underline cursor-pointer font-medium",
+                              data: { action: "clipboard#copyToClipboard" } do %>
+                          <span data-clipboard-target="label"><%= t('.copy_to_clipboard') %></span><span class="sr-only">: <%= recipient.display_name %></span>
+                        <% end %>
+                        <span role="status" class="sr-only" data-clipboard-target="status"></span>
+                      </div>
+                    <% end %>
                   <% else %>
                     <span class="text-gray-600"><%= t('.request_withdrawn') %></span>
                   <% end %>

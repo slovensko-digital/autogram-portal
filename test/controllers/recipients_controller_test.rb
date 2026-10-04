@@ -151,6 +151,22 @@ class RecipientsControllerTest < ActionController::TestCase
     end
   end
 
+  test "index offers the signing link only to recipients who can still sign" do
+    pending = bundles(:one).recipients.create!(email: "pending@example.com")
+    signed = bundles(:one).recipients.create!(email: "signed@example.com")
+    signed.signer_contracts.update_all(signed_at: Time.current)
+    declined = bundles(:one).recipients.create!(email: "declined@example.com")
+    declined.signer_contracts.update_all(declined_at: Time.current)
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_select "[data-clipboard-text-value=?]", sign_bundle_url(bundles(:one), recipient: pending.uuid), count: 1
+    [ signed, declined ].each do |recipient|
+      assert_select "[data-clipboard-text-value=?]", sign_bundle_url(bundles(:one), recipient: recipient.uuid), count: 0
+    end
+  end
+
   test "destroy withdraws the request and reports success" do
     recipient = bundles(:one).recipients.create!(email: "removed@example.com")
 

@@ -1,4 +1,4 @@
-<%# locals: (previous_page: root_path) %>
+<%# locals: () %>
 
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
   <% anonymous_account_teaser = current_user.nil? && @contract.anonymous? %>
@@ -102,7 +102,7 @@
     <% end %>
     <div class="py-8">
       <div class="flex flex-col sm:flex-row gap-8">
-        <%= link_to contract_path(@contract), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: {turbo_frame: "_top"} do %>
+        <%= link_to contract_back_path, class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: {turbo_frame: "_top"} do %>
           <%= t('documents.new.actions.back') %>
         <% end %>
         <%= link_to signature_parameters_contract_path(@contract, target_step: 'sign'),

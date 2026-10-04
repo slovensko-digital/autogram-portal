@@ -15,6 +15,8 @@ class ContractsController < ApplicationController
 
   rescue_from Pundit::NotAuthorizedError, with: :render_contract_denial
 
+  helper_method :contract_back_path
+
   def index
     authorize Contract
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
@@ -64,7 +66,6 @@ class ContractsController < ApplicationController
   end
 
   def show
-    @previous_page = request.referrer
   end
 
   def show_bundle
@@ -78,7 +79,7 @@ class ContractsController < ApplicationController
   end
 
   def actions
-    render partial: "actions", locals: { previous_page: params[:previous_page] }
+    render partial: "actions"
   end
 
   def authenticate_for_actions
@@ -298,6 +299,14 @@ class ContractsController < ApplicationController
   end
 
   private
+
+  # "Back" from the contract actions leads to the screen the contract belongs to, not to the
+  # referrer: the actions are the first step on the contract page itself.
+  def contract_back_path
+    return new_contract_path unless policy(@contract).manage?
+
+    @contract.bundle ? bundle_path(@contract.bundle) : contracts_path
+  end
 
   def claim_pending_anonymous_contract
     return unless current_user.present?

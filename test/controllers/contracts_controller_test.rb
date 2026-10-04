@@ -50,6 +50,33 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{authenticate_for_actions_contract_path(contract)}'][data-turbo-frame='_top']", count: 1
   end
 
+  test "actions back link leaves the contract page" do
+    anonymous_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    own_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    own_contract.update!(tenant: tenants(:one))
+    bundled_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ bundled_contract ])
+    back = I18n.t("documents.new.actions.back")
+
+    get contract_path(anonymous_contract)
+    assert_select "a[href=?]", new_contract_path, text: back
+
+    user = users(:one)
+    user.update_column(:confirmed_at, Time.current)
+    sign_in user
+
+    get contract_path(own_contract)
+    assert_equal user, request.env["warden"].user(:user)
+    assert_select "a[href=?]", contracts_path, text: back
+
+    get actions_contract_path(own_contract)
+    assert_select "a[href=?]", contracts_path, text: back
+
+    get contract_path(bundled_contract)
+    assert_select "a[href=?]", bundle_path(bundle), text: back
+    assert_select "a[href=?]", contract_path(bundled_contract), text: back, count: 0
+  end
+
   test "anonymous contract can be viewed but deletion requires route authentication" do
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
 
