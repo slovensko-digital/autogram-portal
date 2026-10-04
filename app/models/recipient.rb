@@ -82,7 +82,7 @@ class Recipient < ApplicationRecord
     format: { with: URI::MailTo::EMAIL_REGEXP },
     allow_blank: true
   validates :mobile_phone,
-    format: { with: MOBILE_PHONE_FORMAT, message: "must be in E.164 format" },
+    format: { with: MOBILE_PHONE_FORMAT, message: :invalid_e164 },
     allow_blank: true
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
   validate :portal_instance_reference_must_exist

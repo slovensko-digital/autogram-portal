@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>">
   <head>
-    <title><%= content_for(:title) || "Autogram Portal" %></title>
+    <title><%= content_for?(:title) ? "#{content_for(:title)} – Autogram Portal" : "Autogram Portal" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -35,15 +35,16 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <% no_padding_top = @no_header || flash.any? || current_page?(about_index_path) || current_page?(docs_path) %>
+  <% no_padding_top = @no_header || flash_messages.any? || current_page?(about_index_path) || current_page?(docs_path) %>
   <body class="<%= 'lg:pt-24' unless no_padding_top %> <%= 'bg-gradient-to-tr from-slate-50 to-gray-50 text-gray-900 antialiased' unless params[:iframe] %>">
+    <a href="#main-content" data-turbo="false" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[1000] focus:bg-yellow-300 focus:px-4 focus:py-2 focus:text-gray-950 focus:outline-3 focus:outline-yellow-300"><%= t('layouts.skip_to_main_content') %></a>
     <%= render "layouts/header" unless @no_header %>
 
-    <div class="<%= 'min-h-screen' unless @no_footer %> <%= 'lg:pl-64' unless @no_header %>">
+    <main id="main-content" tabindex="-1" class="<%= 'min-h-screen' unless @no_footer %> <%= 'lg:pl-64' unless @no_header %> focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600">
       <%= render("layouts/flash", flash: flash) unless @no_flash %>
 
       <%= yield %>
-    </div>
+    </main>
 
     <%= render "layouts/footer" unless @no_footer %>
   </body>

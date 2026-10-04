@@ -20,7 +20,7 @@ export default class extends Controller {
       allButtons.forEach(button => {
         button.disabled = true
         button.classList.add('opacity-50', 'cursor-not-allowed')
-        button.classList.remove('hover:bg-indigo-700', 'hover:bg-blue-500')
+        button.classList.remove('hover:bg-indigo-700', 'hover:bg-blue-700')
       })
     }
   }

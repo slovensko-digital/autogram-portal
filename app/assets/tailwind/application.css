@@ -20,3 +20,32 @@
 @theme {
 	--font-logo: "Source Sans Pro", sans-serif;
 }
+
+/* ALTCHA dims its footer with opacity: 0.7, which lowers the text contrast below 4.5:1 */
+altcha-widget .altcha-footer {
+	opacity: 1;
+}
+
+/* Windows high contrast / forced colors: keep current navigation item and selected cards distinguishable */
+@media (forced-colors: active) {
+	nav [aria-current="page"],
+	nav [aria-current="true"] {
+		outline: 2px solid Highlight;
+		outline-offset: -2px;
+	}
+
+	.choice-card:has(:checked) {
+		outline: 3px solid Highlight;
+		outline-offset: 2px;
+	}
+
+	label:has(input[type="file"]:focus-visible) {
+		outline: 2px solid Highlight;
+		outline-offset: 2px;
+	}
+
+	.choice-indicator-dot {
+		forced-color-adjust: none;
+		background-color: Highlight;
+	}
+}

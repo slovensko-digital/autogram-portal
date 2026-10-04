@@ -5,11 +5,11 @@
   <%= turbo_stream_from contract %>
 <% end %>
 
-<main>
+<div>
   <div class="mx-auto max-w-4xl space-y-8 px-6 pb-24 pt-10 lg:px-8">
     <div>
-      <%= link_to bundles_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline" do %>
-        <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <%= link_to bundles_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline" do %>
+        <svg aria-hidden="true" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
         <%= t('.all_bundles') %>
@@ -44,7 +44,7 @@
                 class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
           <%= button_to t('actions.delete'), bundle_path(@bundle),
                 method: :delete,
-                form: { data: { turbo_confirm: t('bundles.destroy.confirm') } },
+                form: { data: { turbo_confirm: t('bundles.destroy.confirm', name: @bundle.display_name) } },
                 class: "w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
         </div>
       </div>
@@ -79,13 +79,18 @@
         <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center"
              data-controller="clipboard"
              data-clipboard-text-value="<%= sign_bundle_url(@bundle) %>">
-          <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>" onclick="this.select();"
-                 class="w-full flex-1 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <%= button_tag t('.copy_link'), type: "button",
+          <input type="text" readonly value="<%= sign_bundle_url(@bundle) %>"
+                 data-action="click->clipboard#select"
+                 aria-label="<%= t('.public_link_title') %>"
+                 class="w-full flex-1 rounded-md border border-gray-500 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <%= button_tag type: "button",
                 data: { action: "clipboard#copyToClipboard" },
-                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <span data-clipboard-target="label"><%= t('.copy_link') %></span>
+          <% end %>
+          <span role="status" class="sr-only" data-clipboard-target="status"></span>
         </div>
       </section>
     <% end %>
   </div>
-</main>
+</div>

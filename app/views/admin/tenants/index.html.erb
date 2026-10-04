@@ -1,3 +1,5 @@
+<% content_for :title, t('.title') %>
+
 <div class="mx-auto max-w-5xl space-y-6 px-4 py-8">
   <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
@@ -6,7 +8,7 @@
     </div>
     <div class="flex flex-col gap-2 sm:flex-row">
       <%= form_with url: admin_tenants_path, method: :get, class: "flex gap-2" do |form| %>
-        <%= form.search_field :q, value: params[:q], placeholder: t('.search_placeholder'), class: "w-full sm:w-64 rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+        <%= form.search_field :q, value: params[:q], placeholder: t('.search_placeholder'), class: "w-full sm:w-64 rounded-md border border-gray-500 px-3 py-2 text-sm" %>
         <%= form.submit t('.search'), name: nil, class: "inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer" %>
       <% end %>
       <%= link_to t('.new'), new_admin_tenant_path, class: "inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>

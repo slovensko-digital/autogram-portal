@@ -97,13 +97,13 @@ class VisualStamp < ApplicationRecord
   def text_or_image_present
     return if text.present? || image.attached?
 
-    errors.add(:base, "Stamp text or image is required")
+    errors.add(:base, :text_or_image_required)
   end
 
   def acceptable_image_type
     return unless image.attached?
     return if image.blob.content_type.in?(%w[image/png image/jpeg])
 
-    errors.add(:image, "must be a PNG or JPEG image")
+    errors.add(:image, :invalid_image_type)
   end
 end

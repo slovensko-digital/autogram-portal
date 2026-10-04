@@ -28,6 +28,32 @@
 #       enabled: "ON"
 
 en:
+  error_pages:
+    code: "Error %{code}"
+    home: "Go to the home page"
+    help: "Need help? Write to us at"
+    bad_request:
+      title: "Bad request"
+      description: "The request could not be processed. Check the address and try again."
+    forbidden:
+      title: "Access denied"
+      description: "You do not have permission to view this page or perform this action."
+    not_found:
+      title: "Page not found"
+      description: "The page you are looking for does not exist, has moved, or you do not have access to it. Check the address or sign in."
+    unprocessable:
+      title: "The request could not be completed"
+      description: "The form has probably expired. Go back, reload the page and try again."
+    internal_server_error:
+      title: "Something went wrong on our side"
+      description: "An unexpected error occurred while processing your request. Please try again in a moment."
+    generic:
+      title: "An error occurred"
+      description: "Your request could not be processed."
+  sdk:
+    close_label: "Close signing"
+    iframe_title: "Document signing – Autogram Portal"
+    popup_title: "Document signing"
   hello: "Hello world"
 
   autogram_service:
@@ -67,6 +93,17 @@ en:
 
   activerecord:
     attributes:
+      visual_stamp:
+        image: "Signature image"
+        text: "Stamp text"
+        page: "Page"
+        height: "Stamp height"
+        width: "Stamp width"
+        y: "Position Y"
+        x: "Position X"
+      recipient:
+        mobile_phone: "Mobile phone"
+        email: "Email"
       tenant:
         name: "Name"
         plan: "Plan"
@@ -77,6 +114,18 @@ en:
         agree_to_policies: "Terms and Privacy Policy"
     errors:
       models:
+        visual_stamp:
+          attributes:
+            image:
+              invalid_image_type: "must be a PNG or JPEG image"
+            base:
+              text_or_image_required: "Stamp text – enter a name, choose an image or draw a signature."
+        recipient:
+          attributes:
+            mobile_phone:
+              invalid_e164: "must be in E.164 format"
+            email:
+              invalid: "must be in the format name@example.com"
         tenant:
           attributes:
             plan:
@@ -107,6 +156,7 @@ en:
     desktop_required: "Desktop computer required"
 
   actions:
+    apply_filter: "Apply filter"
     back: "Back"
     continue: "Continue"
     continue_signing: "Continue to signing"
@@ -136,8 +186,8 @@ en:
     current_tenant:
       label: "Organization"
     navigation:
-      global: "Global"
-      toggle_menu: "Toggle menu"
+      main: "Main navigation"
+      toggle_menu: "Menu"
     links:
       home: "Home"
       about: "About"
@@ -148,7 +198,7 @@ en:
       settings: "Settings"
       open_foreign_request: "Open foreign request"
       new_contract: "New contract"
-      electronic_onboarding: "Electronic onboarding"
+      electronic_onboarding: "Electronic signatures"
       docs: "User Guide"
       sign_in: "Sign in"
       sign_out: "Sign out"
@@ -196,6 +246,8 @@ en:
         or_continue_with: "Or continue with"
         sign_up_with_google: "Continue with Google"
       edit:
+        delete_confirmation_hint: "The Delete account button becomes available after you type the phrase."
+        delete_confirmation_label: "To confirm, type the phrase “%{phrase}”"
         title: "Settings"
         subtitle: "Manage your account and the organization you are currently working in."
         account_section: "User account"
@@ -258,6 +310,8 @@ en:
         expiry_notice: "Note that the link will expire in %{expiry} minutes."
     shared:
       captcha:
+        captcha_link_label: "ALTCHA – protection service website (opens in a new window)"
+        captcha_footer_html: "Protected by <a href=\"https://altcha.org/\" target=\"_blank\" rel=\"noopener\" aria-label=\"%{link_label}\">ALTCHA</a>"
         captcha_label: "I'm not a robot"
         captcha_verified: "Verified"
         captcha_verifying: "Verifying…"
@@ -362,6 +416,7 @@ en:
     actions_error:
       title: "Error loading document actions"
     visualize:
+      preview_title: "Preview of document %{filename}"
       image_preview: "Image preview"
       pdf_load_error: "PDF could not be loaded in the browser."
       download_pdf: "Download PDF"
@@ -482,7 +537,7 @@ en:
     destroy:
       success: "Contract bundle was successfully deleted."
       failure: "Failed to delete contract bundle."
-      confirm: "Are you sure you want to delete this contract bundle? This action is irreversible."
+      confirm: "Are you sure you want to delete the contract bundle “%{name}”? This action is irreversible."
     sign:
       title: "Documents bundle"
       title_requested_singular: "You received a document to sign"
@@ -707,6 +762,7 @@ en:
         remote_request_failed: "The remote portal request failed."
 
   contracts:
+    submit_failed: "Submission failed: %{errors}"
     alerts:
       unauthorized_edit_attempt: "You are not authorized to edit this contract."
       visual_signing_not_available_for_signed_pades: "Adding a visual signature or stamp is not allowed after the document has already been signed in PAdES."
@@ -792,7 +848,7 @@ en:
     destroy:
       success: "Contract was successfully deleted."
       failure: "Failed to delete contract."
-      confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
+      confirm: "Are you sure you want to delete the contract “%{name}”? This action is irreversible and will also remove all documents associated with this contract."
       failure_bundle_attached: "Cannot delete contract because it is part of a bundle."
     sign:
       all_contracts: "All documents"
@@ -879,7 +935,7 @@ en:
         form:
           recipient: "Recipient"
           page: "Page"
-          hint: "Drag the box on the preview to place the field and use the corner handle to resize it."
+          hint: "Drag the box on the preview to place the field and use the corner handle to resize it. You can also enter the position and size as numbers below the preview."
           submit: "Add signature field"
           editing_title: "Edit signature field"
           update_submit: "Save changes"
@@ -935,6 +991,7 @@ en:
     signature_validation:
       validating: "Validating electronic signatures..."
     sessions:
+      steps_heading: "Signing steps"
       ades_evidence:
         title: "Verified AdES signing"
         subtitle: "Evidence-backed signing with SMS verification"
@@ -1031,6 +1088,7 @@ en:
         error_title: "Signing error"
         error_desc: "An error occurred while signing the document."
       avm:
+        qr_link_label: "QR code for signing the document in the Autogram Mobile app. On a mobile device, it opens the app directly."
         title: "Sign document in Autogram on mobile"
         subtitle: "Use the mobile application on your phone"
         note: "On mobile: Scan the QR code or tap it"
@@ -1054,6 +1112,7 @@ en:
         not_installed_download_ios: "Download from App Store"
         not_installed_download_android: "Download from Google Play"
       eidentita:
+        qr_link_label: "QR code for signing the document in the eIdentita app. On a mobile device, it opens the app directly."
         title: "Sign document in the eIdentita application"
         subtitle: "Use the eIdentita mobile application on your phone"
         note: "On mobile: Scan the QR code with eIdentita app or tap it"
@@ -1170,13 +1229,17 @@ en:
       back: "Back"
       submit: "Submit Physical Signing"
     visual_signing:
+      invalid_document: "A visual stamp can only be added to a PDF document."
+      draw_canvas_label: "Signature drawing area"
+      image_label: "Signature image (PNG or JPEG)"
+      errors_title: "The stamp could not be saved. Please correct the following:"
       title: "Visual stamp"
       subtitle: "Add a visual stamp to the PDF"
       placement_help: "Move and resize the stamp on the first page. This visual stamp is placed into the PDF before the next step."
       mobile_preview_hint: "On phones, drag the stamp directly inside the preview for precise placement."
       signature_field_help: "Add the text or image that should appear inside your assigned signature field on page %{page}."
       placement_title: "Stamp placement"
-      placement_description: "Drag the rectangle to choose where the stamp will appear. Use the corner handle to resize it."
+      placement_description: "Drag the rectangle to choose where the stamp will appear. Use the corner handle to resize it. You can also enter the position and size as numbers below the preview."
       signature_field_title: "Prepared signature field"
       signature_field_description: "This signature appearance is bound to the field that was prepared for you. You can edit its contents, but not its position or size."
       signature_field_locked_notice: "This visible signature field was prepared in advance. Its position and size are fixed for your signature."
@@ -1195,7 +1258,6 @@ en:
       draw_filled: "Drawing ready"
       draw_clear: "Clear"
       existing_image_hint: "Current image will be reused unless you upload a new one."
-      position_label: "Position"
       back: "Back"
       submit: "Create visual stamp"
       signature_field_submit: "Continue to electronic signing"
@@ -1251,7 +1313,7 @@ en:
       empty_message: "Validation metadata will appear here after you sign a contract."
     destroy:
       success: "Validation metadata was successfully deleted."
-      confirm: "Are you sure you want to delete this stored validation metadata?"
+      confirm: "Are you sure you want to delete the stored validation metadata of “%{name}”?"
     refresh:
       scheduled: "Archive refresh was scheduled."
       not_refreshable: "This validation record cannot be refreshed anymore."
@@ -1484,6 +1546,7 @@ en:
         title: "User Documentation"
         subtitle: "Everything you need to know about using Autogram Portal."
       nav:
+        label: "User guide contents"
         dashboard: "Dashboard"
         contracts: "My Documents"
         bundles: "My Bundles"
@@ -1493,6 +1556,7 @@ en:
         federation: "Federation"
         integration: "API & SDK"
       dashboard:
+        screenshot_alt: "Account overview: counts of bundles, contracts, documents awaiting my signature, sent and declined bundles; quick actions Upload new document and Verify signature; list of recent bundles with status, signature count, date and a View link"
         title: "Dashboard"
         intro: "After logging in, you are shown a dashboard with statistics about your documents and quick shortcuts for the most common actions."
         stats:
@@ -1642,6 +1706,7 @@ en:
         decline_title: "Declining a Signature Request"
         decline_description: "During signing you may decline the signature request. The bundle sender will receive an email notification about the decline."
       signing:
+        screenshot_alt: "Select signing application step: the selected ID card type with a Change selection option at the top, followed by the options Autogram Desktop (selected), Autogram Mobile and eIdentita, and the Back and Continue to signing buttons"
         title: "Signing Documents"
         intro: "When signing a document, you choose the signature level and format. Then you select a supported signing application."
         signature_levels_title: "Signature Levels"
@@ -1744,6 +1809,7 @@ en:
         screenshot_file_hint: "File: /public/docs/screenshots/signing-app-selection.png"
         screenshot_placeholder: "Placeholder for signing screenshot"
       account:
+        screenshot_alt: "Danger zone section in settings: Cancel my account, a field for typing the confirmation phrase and a red Delete account button"
         title: "Account Settings"
         intro: "In account settings (gear icon in the left menu), you manage basic profile details and security options."
         items:
@@ -1867,6 +1933,17 @@ en:
     terms_of_service: "Terms of Service"
 
   shared:
+    stamp_geometry:
+      box_label: "Box in the document preview"
+      status: "Position x %{x}, y %{y} points, size %{width} × %{height} points"
+      height: "Height"
+      width: "Width"
+      y: "Position Y"
+      x: "Position X"
+      locked_hint: "The position and size were set by the sender and cannot be changed."
+      hint: "The position is measured from the bottom left corner of the page. You can also move the box in the preview with the arrow keys (10 points with Shift) and resize it with the arrow keys on the corner handle."
+      legend: "Position and size (in points)"
+    required: "required"
     signature_validation:
       error_title: "Error validating signatures"
       error_message: "Failed to validate the electronic signatures of this document."
@@ -1929,9 +2006,13 @@ en:
       uploading_text: "Uploading..."
       drop_text: "Drop here"
       remove_file: "Remove file"
-      select_another: "Click to select another file"
+      select_another: "Select another file"
 
   javascript:
+    dropzone:
+      remove_file: "Remove file %{filename}"
+      file_removed: "File removed"
+      file_selected: "Selected file: %{filename} (%{size})"
     errors:
       file_not_supported: "File \"%{filename}\" is not supported. Allowed formats are PDF, XML, and other files."
       signing_failed: "Failed to initiate signing. Please try again."
@@ -2014,6 +2095,7 @@ en:
       details_title: "Documents in bundle:"
   
   layouts:
+    skip_to_main_content: "Skip to main content"
     mailer:
       regards: "Best regards,"
       team: "team Autogram Portal"

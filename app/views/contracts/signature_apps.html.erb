@@ -1,3 +1,5 @@
+<% content_for :title, t('.title') %>
+
 <% embedded = params[:embedded].present? %>
 <% skip_method_choice = params[:skip_method_choice].present? %>
 
@@ -16,15 +18,15 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-6">
               <div class="flex-shrink-0">
-                <%= image_tag "qscd/#{@qscd}.png", alt: t('.selected_card_generation', generation: @qscd), class: "h-24 w-auto rounded-md" %>
+                <%= image_tag "qscd/#{@qscd}.png", alt: "", class: "h-24 w-auto rounded-md" %>
               </div>
               <div>
                 <div class="text-sm font-medium text-gray-900"><%= t("qscd.title.#{@qscd}") %></div>
-                <div class="mt-1 text-xs text-gray-500"><%= t('actions.change_selection') %></div>
+                <div class="mt-1 text-xs text-gray-600"><%= t('actions.change_selection') %></div>
               </div>
             </div>
             <div class="flex-shrink-0">
-              <svg class="mx-4 h-6 w-6 text-blue-600 transition-colors group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="mx-4 h-6 w-6 text-blue-600 transition-colors group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
               </svg>
             </div>
@@ -69,7 +71,7 @@
       </div>
     </div>
   <% else %>
-    <main class="mx-auto flex max-w-4xl flex-col items-center space-y-6 lg:flex">
+    <div class="mx-auto flex max-w-4xl flex-col items-center space-y-6 lg:flex">
       <div class="relative isolate overflow-hidden">
         <div class="w-full space-y-8 p-6" data-controller="signing-app-selector">
           <div class="mb-4 w-full">
@@ -83,15 +85,15 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-6">
                   <div class="flex-shrink-0">
-                    <%= image_tag "qscd/#{@qscd}.png", alt: t('.selected_card_generation', generation: @qscd), class: "h-24 w-auto rounded-md" %>
+                    <%= image_tag "qscd/#{@qscd}.png", alt: "", class: "h-24 w-auto rounded-md" %>
                   </div>
                   <div>
                     <div class="text-sm font-medium text-gray-900"><%= t("qscd.title.#{@qscd}") %></div>
-                    <div class="mt-1 text-xs text-gray-500"><%= t('actions.change_selection') %></div>
+                    <div class="mt-1 text-xs text-gray-600"><%= t('actions.change_selection') %></div>
                   </div>
                 </div>
                 <div class="flex-shrink-0">
-                  <svg class="mx-4 h-6 w-6 text-blue-600 transition-colors group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg aria-hidden="true" class="mx-4 h-6 w-6 text-blue-600 transition-colors group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                   </svg>
                 </div>
@@ -146,6 +148,6 @@
           </div>
         </div>
       </div>
-    </main>
+    </div>
   <% end %>
 <% end %>

@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title><%= message.subject %></title>
     <style>
       body {
         margin: 1em;
@@ -94,7 +96,7 @@
         font-size: 14px;
         letter-spacing: 0.07em;
         text-transform: uppercase;
-        color: #9CA3AF;
+        color: #4B5563;
         margin: 0 0 10px;
       }
       .details-list {
@@ -154,7 +156,7 @@
       }
       .footer-provider {
         font-size: 14px;
-        color: #9CA3AF;
+        color: #4B5563;
         margin: 0;
       }
     </style>
@@ -165,7 +167,7 @@
       <div class="top-bar">&nbsp;</div>
 
       <div class="header">
-        <span class="logo-text logo-highlight"><span style="font-weight: 700;">Autogram</span> Portal</span>
+        <h1 class="logo-text logo-highlight" style="display: inline-block; margin: 0; font-weight: 400;"><span style="font-weight: 700;">Autogram</span> Portal</h1>
       </div>
 
       <div class="body">

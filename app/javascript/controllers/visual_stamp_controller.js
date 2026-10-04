@@ -4,11 +4,17 @@ import * as pdfjsLib from "pdfjs-dist"
 const PDFJS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs"
 const MIN_WIDTH = 120
 const MIN_HEIGHT = 36
+const ARROW_DELTAS = {
+  ArrowLeft: [ -1, 0 ],
+  ArrowRight: [ 1, 0 ],
+  ArrowUp: [ 0, 1 ],
+  ArrowDown: [ 0, -1 ]
+}
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL
 
 export default class extends Controller {
-  static targets = ["page", "stamp", "pageField", "pageNumber", "xField", "yField", "widthField", "heightField", "summary", "customText", "contentMode", "stampText", "imageInput", "imagePreview", "existingFieldsLayer", "pdfCanvas", "previewFallback", "previewLink", "pageCount", "previousPageButton", "nextPageButton", "boxLabel", "recipientSelect", "drawingPanel", "drawingPad", "drawingData", "drawingStatus"]
+  static targets = ["page", "stamp", "pageField", "pageNumber", "xField", "yField", "widthField", "heightField", "summary", "customText", "contentMode", "stampText", "imageInput", "imagePreview", "existingFieldsLayer", "pdfCanvas", "previewFallback", "previewLink", "pageCount", "previousPageButton", "nextPageButton", "boxLabel", "recipientSelect", "drawingPanel", "drawingPad", "drawingData", "drawingStatus", "status"]
   static values = {
     existingFields: { type: Array, default: [] },
     pageWidth: { type: Number, default: 595 },
@@ -175,20 +181,118 @@ export default class extends Controller {
     const scaleY = this.pageHeightValue / pageRect.height
     const page = this.currentPageNumber()
 
-    const x = stampRect.left * scaleX
-    const y = this.pageHeightValue - ((stampRect.top + stampRect.height) * scaleY)
-    const width = stampRect.width * scaleX
-    const height = stampRect.height * scaleY
+    const width = Math.min(stampRect.width * scaleX, this.maxWidthValue)
+    const height = Math.min(stampRect.height * scaleY, this.maxHeightValue)
+    const x = Math.max(stampRect.left * scaleX, 0)
+    const y = Math.max(this.pageHeightValue - ((stampRect.top + stampRect.height) * scaleY), 0)
 
     this.pageFieldTarget.value = page
-    this.xFieldTarget.value = this.round(x)
-    this.yFieldTarget.value = this.round(y)
-    this.widthFieldTarget.value = this.round(width)
-    this.heightFieldTarget.value = this.round(height)
+    this.writeGeometry({ x, y, width, height })
+  }
+
+  // Keeps the submitted fields and the values used to re-render the preview (e.g. after a window resize) in sync.
+  writeGeometry({ x, y, width, height }) {
+    this.xValue = x
+    this.yValue = y
+    this.widthValue = width
+    this.heightValue = height
+
+    // The geometry fields are not rendered when there is no field left to place.
+    if (this.hasXFieldTarget) {
+      this.xFieldTarget.value = this.round(x)
+      this.yFieldTarget.value = this.round(y)
+      this.widthFieldTarget.value = this.round(width)
+      this.heightFieldTarget.value = this.round(height)
+    }
 
     if (this.hasSummaryTarget) {
       this.summaryTarget.textContent = `${Math.round(width)} x ${Math.round(height)} pt, x ${Math.round(x)}, y ${Math.round(y)}`
     }
+  }
+
+  currentGeometry() {
+    return {
+      x: this.xValue,
+      y: this.yValue,
+      width: Math.min(this.widthValue, this.maxWidthValue),
+      height: Math.min(this.heightValue, this.maxHeightValue)
+    }
+  }
+
+  // Applies a geometry in PDF points, clamped to the page and the allowed stamp size.
+  setGeometry({ x, y, width, height }) {
+    const nextWidth = this.clamp(width, 1, Math.min(this.maxWidthValue, this.pageWidthValue))
+    const nextHeight = this.clamp(height, 1, Math.min(this.maxHeightValue, this.pageHeightValue))
+    const geometry = {
+      x: this.clamp(x, 0, this.pageWidthValue - nextWidth),
+      y: this.clamp(y, 0, this.pageHeightValue - nextHeight),
+      width: nextWidth,
+      height: nextHeight
+    }
+
+    this.writeGeometry(geometry)
+    this.renderFromPdfValues()
+    return geometry
+  }
+
+  geometryFieldChanged() {
+    if (this.lockedValue) return
+
+    const read = (field, fallback) => {
+      const value = parseFloat(field.value)
+      return Number.isFinite(value) ? value : fallback
+    }
+    const current = this.currentGeometry()
+
+    this.setGeometry({
+      x: read(this.xFieldTarget, current.x),
+      y: read(this.yFieldTarget, current.y),
+      width: read(this.widthFieldTarget, current.width),
+      height: read(this.heightFieldTarget, current.height)
+    })
+  }
+
+  // Arrow keys move the focused box by 1 point (10 with Shift), as an alternative to dragging.
+  moveWithKeyboard(event) {
+    if (event.target !== this.stampTarget) return
+    const delta = ARROW_DELTAS[event.key]
+    if (!delta || this.lockedValue) return
+
+    event.preventDefault()
+    const step = event.shiftKey ? 10 : 1
+    const current = this.currentGeometry()
+    this.announceGeometry(this.setGeometry({
+      ...current,
+      x: current.x + (delta[0] * step),
+      y: current.y + (delta[1] * step)
+    }))
+  }
+
+  // Arrow keys on the corner handle resize the box while keeping its top left corner in place.
+  resizeWithKeyboard(event) {
+    const delta = ARROW_DELTAS[event.key]
+    if (!delta || this.lockedValue) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    const step = event.shiftKey ? 10 : 1
+    const current = this.currentGeometry()
+    const top = current.y + current.height
+    const width = current.width + (delta[0] * step)
+    const height = this.clamp(current.height - (delta[1] * step), 1, Math.min(this.maxHeightValue, top))
+
+    this.announceGeometry(this.setGeometry({ x: current.x, y: top - height, width, height }))
+  }
+
+  announceGeometry({ x, y, width, height }) {
+    if (!this.hasStatusTarget) return
+
+    const template = this.statusTarget.dataset.template || ""
+    this.statusTarget.textContent = template
+      .replace("%{x}", Math.round(x))
+      .replace("%{y}", Math.round(y))
+      .replace("%{width}", Math.round(width))
+      .replace("%{height}", Math.round(height))
   }
 
   pageChanged() {

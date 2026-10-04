@@ -241,7 +241,8 @@ curl -X POST https://agp.dev.slovensko.digital/api/v1/bundles \
   agp.initBundleIframe('500927d7-47fa-43fd-bda4-547e703a3a4b', {
     mode: 'iframe',
     parentElement: '#signing-container',
-    height: '600px'
+    height: '600px',
+    title: 'Sign the employment contract' // accessible name of the iframe (optional)
   });
 </script>
 ```

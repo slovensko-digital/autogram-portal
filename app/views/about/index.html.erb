@@ -1,3 +1,5 @@
+<% content_for :title, t('header.links.about') %>
+
 <div class="relative isolate overflow-hidden bg-white">
   <div class="mx-auto max-w-7xl p-6 lg:py-32 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -10,7 +12,7 @@
         </p>
         <% unless @current_user %>
           <div class="mt-8">
-            <%= link_to new_user_session_path, class: "inline-flex items-center text-base font-semibold leading-6 text-blue-600 hover:text-blue-500" do %>
+            <%= link_to new_user_session_path, class: "inline-flex items-center text-base font-semibold leading-6 text-blue-600 hover:text-blue-800" do %>
               <%= t('.hero.log_in') %> <span aria-hidden="true" class="ml-1">→</span>
             <% end %>
           </div>
@@ -36,13 +38,13 @@
                   <%= t('upload_form.agree_to_policies_html',
                         terms_link: link_to(t('upload_form.terms_of_service'), terms_of_service_link, target: "_blank", class: "text-blue-600 underline"),
                         privacy_link: link_to(t('upload_form.privacy_policy'), privacy_policy_link, target: "_blank", class: "text-blue-600 underline")).html_safe %>
-                  <span class="text-red-500">*</span>
+                  <span class="text-red-700">(<%= t('shared.required') %>)</span>
                 <% end %>
               </div>
             <% end %>
 
             <%= form.submit t('upload_form.submit'),
-                           class: "w-full rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white  hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 opacity-50 cursor-not-allowed transition-all duration-200",
+                           class: "w-full rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white  hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 opacity-50 cursor-not-allowed transition-all duration-200",
                            disabled: true,
                            data: { "file-upload-target": "submitButton" } %>
           </div>
@@ -51,7 +53,7 @@
     </div>
   </div>
 </div>
-<div class="bg-blue-600">
+<div class="bg-blue-700">
   <div class="px-6 py-16 sm:py-24 lg:px-8">
     <div class="mx-auto max-w-7xl">
       <div class="text-center mb-12">
@@ -65,7 +67,7 @@
             <h3 class="text-xl font-semibold text-white"><%= t('.start_using.anonymous.title') %></h3>
             <p class="shrink-0 rounded bg-white/10 px-2.5 py-1 text-sm font-semibold text-white ring-1 ring-inset ring-white/20"><%= t('.start_using.anonymous.price') %></p>
           </div>
-          <p class="mt-4 text-base leading-7 text-blue-100"><%= t('.start_using.anonymous.audience') %></p>
+          <p class="mt-4 text-base leading-7 text-white"><%= t('.start_using.anonymous.audience') %></p>
           <ul class="mt-6 flex-1 space-y-3 text-base leading-7">
             <li class="flex gap-x-3">
               <svg class="mt-1 h-5 w-5 flex-none text-green-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -73,13 +75,13 @@
               </svg>
               <span><%= t('.start_using.anonymous.included').first %></span>
             </li>
-            <li class="flex gap-x-3 text-blue-100">
+            <li class="flex gap-x-3 text-white">
               <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>
               <span><%= t('.start_using.anonymous.excluded').first %></span>
             </li>
-            <li class="flex gap-x-3 text-blue-100">
+            <li class="flex gap-x-3 text-white">
               <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>
@@ -121,12 +123,12 @@
           <div class="mt-8 flex items-center gap-4 border-t border-gray-200 pt-5">
             <% unless @current_user %>
                 <%= link_to t('.start_using.basic.start'), new_user_registration_path,
-                            class: "rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white hover:bg-blue-500" %>
+                            class: "rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white hover:bg-blue-700" %>
                 <%= link_to t('.start_using.basic.log_in'), new_user_session_path,
-                            class: "text-base font-semibold text-blue-700 hover:text-blue-500" %>
+                            class: "text-base font-semibold text-blue-700 hover:text-blue-800" %>
             <% else %>
               <%= link_to t('.start_using.basic.start'), dashboard_path,
-                          class: "rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white hover:bg-blue-500" %>
+                          class: "rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white hover:bg-blue-700" %>
             <% end %>
           </div>
         </div>
@@ -177,33 +179,33 @@
     </div>
     <div class="relative mt-16">
       <div class="absolute top-6 left-[10%] right-[10%] h-px bg-gray-200 hidden lg:block" aria-hidden="true"></div>
-      <div class="relative grid grid-cols-1 gap-y-12 lg:grid-cols-5 lg:gap-x-6">
-        <div class="flex flex-col items-center text-center">
-          <div class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">01</div>
+      <ol role="list" class="relative grid grid-cols-1 gap-y-12 lg:grid-cols-5 lg:gap-x-6">
+        <li class="flex flex-col items-center text-center">
+          <span aria-hidden="true" class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">01</span>
           <h3 class="mt-4 text-sm font-semibold text-gray-900"><%= t('.how_it_works.step_1.title') %></h3>
           <p class="mt-2 text-sm text-gray-500"><%= t('.how_it_works.step_1.description') %></p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-          <div class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">02</div>
+        </li>
+        <li class="flex flex-col items-center text-center">
+          <span aria-hidden="true" class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">02</span>
           <h3 class="mt-4 text-sm font-semibold text-gray-900"><%= t('.how_it_works.step_2.title') %></h3>
           <p class="mt-2 text-sm text-gray-500"><%= t('.how_it_works.step_2.description') %></p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-          <div class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">03</div>
+        </li>
+        <li class="flex flex-col items-center text-center">
+          <span aria-hidden="true" class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">03</span>
           <h3 class="mt-4 text-sm font-semibold text-gray-900"><%= t('.how_it_works.step_3.title') %></h3>
           <p class="mt-2 text-sm text-gray-500"><%= t('.how_it_works.step_3.description') %></p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-          <div class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">04</div>
+        </li>
+        <li class="flex flex-col items-center text-center">
+          <span aria-hidden="true" class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white text-white font-bold text-base">04</span>
           <h3 class="mt-4 text-sm font-semibold text-gray-900"><%= t('.how_it_works.step_4.title') %></h3>
           <p class="mt-2 text-sm text-gray-500"><%= t('.how_it_works.step_4.description') %></p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-          <div class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-green-600 ring-4 ring-white text-white font-bold text-base">05</div>
+        </li>
+        <li class="flex flex-col items-center text-center">
+          <span aria-hidden="true" class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-green-700 ring-4 ring-white text-white font-bold text-base">05</span>
           <h3 class="mt-4 text-sm font-semibold text-gray-900"><%= t('.how_it_works.step_5.title') %></h3>
           <p class="mt-2 text-sm text-gray-500"><%= t('.how_it_works.step_5.description') %></p>
-        </div>
-      </div>
+        </li>
+      </ol>
     </div>
   </div>
 </div>
@@ -224,7 +226,7 @@
         <div class="relative rounded-xl border border-gray-200 bg-white p-6 pl-20">
           <dt class="text-base font-semibold leading-7 text-gray-900">
             <div class="absolute left-6 top-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
               </svg>
             </div>
@@ -237,7 +239,7 @@
         <div class="relative rounded-xl border border-gray-200 bg-white p-6 pl-20">
           <dt class="text-base font-semibold leading-7 text-gray-900">
             <div class="absolute left-6 top-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
               </svg>
             </div>
@@ -250,7 +252,7 @@
         <div class="relative rounded-xl border border-gray-200 bg-white p-6 pl-20">
           <dt class="text-base font-semibold leading-7 text-gray-900">
             <div class="absolute left-6 top-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
               </svg>
             </div>
@@ -263,7 +265,7 @@
         <div class="relative rounded-xl border border-gray-200 bg-white p-6 pl-20">
           <dt class="text-base font-semibold leading-7 text-gray-900">
             <div class="absolute left-6 top-6 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -289,67 +291,67 @@
       </p>
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <dl class="grid max-w-xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-2">
-        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
-          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <ul role="list" class="grid max-w-xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-2">
+        <li class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg aria-hidden="true" class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.desktop.title') %></dt>
-            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+            <h3 class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.desktop.title') %></h3>
+            <div class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
               <p class="flex-auto"><%= t('.ecosystem.desktop.description') %></p>
               <p class="mt-4">
-                <a href="https://sluzby.slovensko.digital/autogram/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                  <%= t('.ecosystem.learn_more') %> <span aria-hidden="true">→</span>
+                <a href="https://sluzby.slovensko.digital/autogram/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-800">
+                  <%= t('.ecosystem.learn_more') %><span class="sr-only">: <%= t('.ecosystem.desktop.title') %></span> <span aria-hidden="true">→</span>
                 </a>
               </p>
-            </dd>
+            </div>
           </div>
-        </div>
-        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
-          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        </li>
+        <li class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg aria-hidden="true" class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.mobile.title') %></dt>
-            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+            <h3 class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.mobile.title') %></h3>
+            <div class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
               <p class="flex-auto"><%= t('.ecosystem.mobile.description') %></p>
               <p class="mt-4">
-                <a href="https://sluzby.slovensko.digital/autogram-v-mobile/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                  <%= t('.ecosystem.learn_more') %> <span aria-hidden="true">→</span>
+                <a href="https://sluzby.slovensko.digital/autogram-v-mobile/" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-800">
+                  <%= t('.ecosystem.learn_more') %><span class="sr-only">: <%= t('.ecosystem.mobile.title') %></span> <span aria-hidden="true">→</span>
                 </a>
               </p>
-            </dd>
+            </div>
           </div>
-        </div>
-        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
-          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        </li>
+        <li class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg aria-hidden="true" class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.extension.title') %></dt>
-            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+            <h3 class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.extension.title') %></h3>
+            <div class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
               <p class="flex-auto"><%= t('.ecosystem.extension.description') %></p>
               <p class="mt-4">
-                <a href="https://sluzby.slovensko.digital/autogram/#download" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                  <%= t('.ecosystem.learn_more') %> <span aria-hidden="true">→</span>
+                <a href="https://sluzby.slovensko.digital/autogram/#download" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-800">
+                  <%= t('.ecosystem.learn_more') %><span class="sr-only">: <%= t('.ecosystem.extension.title') %></span> <span aria-hidden="true">→</span>
                 </a>
               </p>
-            </dd>
+            </div>
           </div>
-        </div>
-        <div class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
-          <svg class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        </li>
+        <li class="flex gap-x-4 rounded-xl bg-white p-6 ring-1 ring-inset ring-gray-200">
+          <svg aria-hidden="true" class="h-7 w-7 flex-none text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
           </svg>
           <div class="text-left">
-            <dt class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.portal.title') %></dt>
-            <dd class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
+            <h3 class="text-base font-semibold leading-7 text-gray-900"><%= t('.ecosystem.portal.title') %></h3>
+            <div class="mt-2 flex flex-auto flex-col text-sm leading-6 text-gray-600">
               <p class="flex-auto"><%= t('.ecosystem.portal.description') %></p>
-            </dd>
+            </div>
           </div>
-        </div>
-      </dl>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
@@ -366,7 +368,7 @@
     <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-center lg:mx-0 lg:max-w-none lg:grid-cols-3">
       <div class="bg-white/5 rounded-2xl p-8 ring-1 ring-white/10">
         <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-500/10">
-          <svg class="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg aria-hidden="true" class="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
         </div>
@@ -377,7 +379,7 @@
       </div>
       <div class="bg-white/5 rounded-2xl p-8 ring-1 ring-white/10">
         <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10">
-          <svg class="h-10 w-10 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg aria-hidden="true" class="h-10 w-10 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
           </svg>
         </div>
@@ -388,7 +390,7 @@
       </div>
       <div class="bg-white/5 rounded-2xl p-8 ring-1 ring-white/10">
         <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-purple-500/10">
-          <svg class="h-10 w-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg aria-hidden="true" class="h-10 w-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
           </svg>
         </div>
@@ -405,7 +407,7 @@
       </p>
       <div class="mt-8 flex items-center justify-center gap-x-6">
         <%= link_to t('.cta.start_signing'), new_contract_path,
-            class: "rounded-md bg-blue-600 px-4 py-3 text-base font-semibold text-white  hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" %>
+            class: "rounded-md bg-blue-600 px-4 py-3 text-base font-semibold text-white  hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" %>
         <a href="https://github.com/slovensko-digital/autogram-portal" class="text-base font-semibold leading-6 text-white hover:text-gray-300">
           <%= t('.cta.view_github') %> <span aria-hidden="true">→</span>
         </a>
@@ -421,12 +423,12 @@
         <%= t('.faq.title') %>
       </p>
     </div>
-    <dl class="mt-16 space-y-4">
+    <div class="mt-16 space-y-4">
       <% t('.faq.items').each do |_key, item| %>
         <details class="group rounded-xl border border-gray-200">
           <summary class="flex cursor-pointer items-center justify-between gap-x-4 px-6 py-5 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-xl [list-style:none] [&::-webkit-details-marker]:hidden">
             <%= item[:question] %>
-            <svg class="h-5 w-5 flex-shrink-0 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <svg aria-hidden="true" class="h-5 w-5 flex-shrink-0 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>
           </summary>
@@ -435,6 +437,6 @@
           </div>
         </details>
       <% end %>
-    </dl>
+    </div>
   </div>
 </div>

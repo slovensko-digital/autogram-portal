@@ -1,3 +1,5 @@
+<% content_for :title, t('.title', name: @tenant.name) %>
+
 <div class="mx-auto max-w-3xl space-y-6 px-4 py-8">
   <div>
     <h1 class="text-2xl font-semibold text-gray-900"><%= t('.title', name: @tenant.name) %></h1>
@@ -19,9 +21,9 @@
       <% end %>
     </ul>
     <%= form_with url: add_member_admin_tenant_path(@tenant), method: :post, class: "flex flex-col gap-3 border-t border-gray-100 px-5 py-4 md:flex-row md:items-center" do |form| %>
-      <%= form.email_field :email, required: true, placeholder: t('.add_member_placeholder'), class: "w-full md:max-w-sm rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+      <%= form.email_field :email, required: true, placeholder: t('.add_member_placeholder'), class: "w-full md:max-w-sm rounded-md border border-gray-500 px-3 py-2 text-sm" %>
       <%= form.select :role, Membership.roles.keys.map { |role| [ t("tenants.roles.#{role}"), role ] }, { selected: "member" },
-            class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+            class: "rounded-md border border-gray-500 px-3 py-2 text-sm" %>
       <%= form.submit t('.add_member'), class: "inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer" %>
     <% end %>
   </div>

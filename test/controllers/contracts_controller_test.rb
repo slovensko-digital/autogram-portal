@@ -31,6 +31,9 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal user, request.env["warden"].user(:user)
     assert_select "a[href=?]", contract_path(own_contract), minimum: 1
+    assert_select "a[href=?] .sr-only", contract_path(own_contract), text: ": #{own_contract.display_name}", count: 2
+    assert_select "a[href=?][data-turbo-method='delete'][data-turbo-confirm=?]", contract_path(own_contract),
+                  I18n.t("contracts.destroy.confirm", name: own_contract.display_name)
     assert_select "a[href=?]", contract_path(foreign_contract), count: 0
     assert_select "a[href=?]", contract_path(bundled_contract), count: 0
   end
@@ -45,6 +48,33 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type='radio'][disabled][value='add_timestamp']", count: 1
     assert_select "input[type='radio'][disabled][value='archive_signature']", count: 1
     assert_select "form[action='#{authenticate_for_actions_contract_path(contract)}'][data-turbo-frame='_top']", count: 1
+  end
+
+  test "actions back link leaves the contract page" do
+    anonymous_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    own_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    own_contract.update!(tenant: tenants(:one))
+    bundled_contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ bundled_contract ])
+    back = I18n.t("documents.new.actions.back")
+
+    get contract_path(anonymous_contract)
+    assert_select "a[href=?]", new_contract_path, text: back
+
+    user = users(:one)
+    user.update_column(:confirmed_at, Time.current)
+    sign_in user
+
+    get contract_path(own_contract)
+    assert_equal user, request.env["warden"].user(:user)
+    assert_select "a[href=?]", contracts_path, text: back
+
+    get actions_contract_path(own_contract)
+    assert_select "a[href=?]", contracts_path, text: back
+
+    get contract_path(bundled_contract)
+    assert_select "a[href=?]", bundle_path(bundle), text: back
+    assert_select "a[href=?]", contract_path(bundled_contract), text: back, count: 0
   end
 
   test "anonymous contract can be viewed but deletion requires route authentication" do
@@ -199,7 +229,9 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 2
     assert_select "input[value='avm'][disabled]", count: 1
     assert_select "input[value='eidentita'][disabled]", count: 1
-    assert_select "label[aria-disabled='true']", minimum: 2
+    assert_select "label[tabindex], label[aria-disabled]", count: 0
+    reason_id = css_select("input[value='avm'][disabled]").first["aria-describedby"]
+    assert_select "[id='#{reason_id}']", text: /\S/, count: 1
     assert_select "a[data-signing-app-selector-target='autogramSubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='avmSubmitButton']", count: 0
@@ -557,6 +589,28 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       assert_nil visual_stamp.text
       assert_equal "image/png", stamp_service.last_stamp[:imageMimeType]
       assert Base64.strict_decode64(stamp_service.last_stamp[:imageContent]).present?
+    end
+  end
+
+  test "visual signing validation errors are shown only next to the form" do
+    with_allowed_methods(%w[visual]) do
+      contract = create_pdf_contract(allowed_methods: [ "visual" ])
+
+      with_autogram_service(fake_stamp_service("unused")) do
+        post "/contracts/#{contract.uuid}/visual_signing", params: {
+          stamp: { page: 1, x: 40, y: 40, width: 200, height: 52, custom_text: "", content_mode: "text" }
+        }
+        assert_redirected_to visual_signing_contract_path(contract, purpose: "visual_method")
+
+        follow_redirect!
+      end
+
+      assert_response :success
+      assert_select "[role='alert']", count: 1
+      assert_select "#visual_stamp_errors[role='alert']", count: 1
+      assert_select "[aria-invalid='true'][aria-describedby~='visual_stamp_errors']", minimum: 1
+      assert_not_includes response.body, "custom_text&quot;]"
+      assert_not_includes response.body, "[&quot;"
     end
   end
 

@@ -1,4 +1,4 @@
-<%# locals: (contract:, recipient: nil, bundle_id: nil) %>
+<%# locals: (contract:, recipient: nil, bundle_id: nil, heading_level: 3) %>
 
 <% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
 <% signature_field_appearance_required = contract.prepared_signature_field_appearance_required_for?(recipient: recipient) %>
@@ -13,64 +13,66 @@ end %>
 
 <%= turbo_frame_tag "signing_method_choice_#{contract.uuid}" do %>
   <div data-controller="signing-method" class="w-full space-y-4">
-    <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
-    <div class="space-y-3">
-      <% if contract.allowed_methods.include?('qes') %>
-        <%= render 'shared/radio_button_card',
-              name: "signing_method_#{contract.uuid}",
-              value: 'electronic',
-              label: t('.electronic_label'),
-              description: t('.electronic_description'),
-              checked: true,
-              icon: 'mobile',
-              data_attributes: {
-                signing_method_target: 'methodRadio',
-                action: 'change->signing-method#handleMethodSelection'
-              } %>
-      <% end %>
+    <fieldset>
+      <legend class="mb-4"><%= content_tag "h#{heading_level}", t('.title'), class: "text-lg font-semibold text-gray-900" %></legend>
+      <div class="space-y-3">
+        <% if contract.allowed_methods.include?('qes') %>
+          <%= render 'shared/radio_button_card',
+                name: "signing_method_#{contract.uuid}",
+                value: 'electronic',
+                label: t('.electronic_label'),
+                description: t('.electronic_description'),
+                checked: true,
+                icon: 'mobile',
+                data_attributes: {
+                  signing_method_target: 'methodRadio',
+                  action: 'change->signing-method#handleMethodSelection'
+                } %>
+        <% end %>
 
-      <% if AdesEvidenceSession.available?(contract, recipient: recipient) %>
-        <%= render 'shared/radio_button_card',
-              name: "signing_method_#{contract.uuid}",
-              value: 'ades',
-              label: t('.ades_label'),
-              description: t('.ades_description'),
-              checked: !contract.allowed_methods.include?('qes') && !contract.allowed_methods.include?('scan') && !contract.allowed_methods.include?('visual'),
-              icon: 'mobile',
-              data_attributes: {
-                signing_method_target: 'methodRadio',
-                action: 'change->signing-method#handleMethodSelection'
-              } %>
-      <% end %>
+        <% if AdesEvidenceSession.available?(contract, recipient: recipient) %>
+          <%= render 'shared/radio_button_card',
+                name: "signing_method_#{contract.uuid}",
+                value: 'ades',
+                label: t('.ades_label'),
+                description: t('.ades_description'),
+                checked: !contract.allowed_methods.include?('qes') && !contract.allowed_methods.include?('scan') && !contract.allowed_methods.include?('visual'),
+                icon: 'mobile',
+                data_attributes: {
+                  signing_method_target: 'methodRadio',
+                  action: 'change->signing-method#handleMethodSelection'
+                } %>
+        <% end %>
 
-      <% if contract.allowed_methods.include?('scan') %>
-        <%= render 'shared/radio_button_card',
-              name: "signing_method_#{contract.uuid}",
-              value: 'physical',
-              label: t('.physical_label'),
-              description: t('.physical_description'),
-              checked: false,
-              icon: 'pencil',
-              data_attributes: {
-                signing_method_target: 'methodRadio',
-                action: 'change->signing-method#handleMethodSelection'
-              } %>
-      <% end %>
+        <% if contract.allowed_methods.include?('scan') %>
+          <%= render 'shared/radio_button_card',
+                name: "signing_method_#{contract.uuid}",
+                value: 'physical',
+                label: t('.physical_label'),
+                description: t('.physical_description'),
+                checked: false,
+                icon: 'pencil',
+                data_attributes: {
+                  signing_method_target: 'methodRadio',
+                  action: 'change->signing-method#handleMethodSelection'
+                } %>
+        <% end %>
 
-      <% if contract.allowed_methods.include?('visual') && contract.visual_signing_allowed? %>
-        <%= render 'shared/radio_button_card',
-              name: "signing_method_#{contract.uuid}",
-              value: 'visual',
-              label: t('.visual_label'),
-              description: t('.visual_description'),
-              checked: !contract.allowed_methods.include?('qes') && !contract.allowed_methods.include?('scan'),
-              icon: 'pencil',
-              data_attributes: {
-                signing_method_target: 'methodRadio',
-                action: 'change->signing-method#handleMethodSelection'
-              } %>
-      <% end %>
-    </div>
+        <% if contract.allowed_methods.include?('visual') && contract.visual_signing_allowed? %>
+          <%= render 'shared/radio_button_card',
+                name: "signing_method_#{contract.uuid}",
+                value: 'visual',
+                label: t('.visual_label'),
+                description: t('.visual_description'),
+                checked: !contract.allowed_methods.include?('qes') && !contract.allowed_methods.include?('scan'),
+                icon: 'pencil',
+                data_attributes: {
+                  signing_method_target: 'methodRadio',
+                  action: 'change->signing-method#handleMethodSelection'
+                } %>
+        <% end %>
+      </div>
+    </fieldset>
 
     <div class="hidden">
       <% if contract.allowed_methods.include?('qes') %>

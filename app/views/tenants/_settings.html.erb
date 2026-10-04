@@ -25,7 +25,7 @@
       <div>
         <%= f.label :name, t('.name'), class: "block text-sm font-medium text-gray-700 mb-2" %>
         <%= f.text_field :name, disabled: true,
-              class: "block w-full rounded-md border-gray-300 sm:text-sm py-2 px-3 border bg-gray-50 text-gray-500 cursor-not-allowed" %>
+              class: "block w-full rounded-md border-gray-500 sm:text-sm py-2 px-3 border bg-gray-50 text-gray-500 cursor-not-allowed" %>
         <p class="mt-1 text-xs text-gray-500"><%= t('.name_help') %></p>
       </div>
 
@@ -33,7 +33,7 @@
       <div>
         <%= f.label :api_token_public_key, t('.api_token_public_key'), class: "block text-sm font-medium text-gray-700 mb-2" %>
         <%= f.text_area :api_token_public_key, rows: 5, disabled: !api_editable,
-              class: "block w-full rounded-md border-gray-300 sm:text-sm py-2 px-3 border font-mono #{api_editable ? 'focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}" %>
+              class: "block w-full rounded-md border-gray-500 sm:text-sm py-2 px-3 border font-mono #{api_editable ? 'focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}" %>
         <p class="mt-1 text-xs text-gray-500">
           <% if tenant.api_enabled? %>
             <%= t('.api_token_help', tenant_id: tenant.id) %>
@@ -91,9 +91,9 @@
         <p class="mt-1 text-sm text-gray-500"><%= t('.invite_description') %></p>
         <%= form_with scope: :membership, url: tenant_memberships_path, class: "mt-4 flex flex-col gap-3 md:flex-row md:items-center" do |f| %>
           <%= f.email_field :email, required: true, placeholder: t('.invite_email_placeholder'),
-                class: "w-full md:max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500" %>
+                class: "w-full md:max-w-md rounded-md border border-gray-500 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500" %>
           <%= f.select :role, Membership.roles.keys.map { |role| [ t("tenants.roles.#{role}"), role ] }, { selected: "member" },
-                class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+                class: "rounded-md border border-gray-500 px-3 py-2 text-sm" %>
           <%= f.submit t('.invite'),
                 class: "inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" %>
         <% end %>

@@ -32,6 +32,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
     assert_select "canvas[data-visual-stamp-target='pdfCanvas']"
     assert_select "[data-visual-stamp-target='pageCount']"
     assert_select "[data-visual-stamp-target='boxLabel']"
+    assert_select "input[data-visual-stamp-target='xField']", count: 1
     assert_select "a[href='#{bundle_path(contract.bundle)}']"
     assert_select "form[action=?]", finalize_contract_signature_field_preparations_path(contract), count: 0
     assert_includes response.body, I18n.t("contracts.signature_field_preparations.index.status.none")
@@ -100,6 +101,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
 
     assert_response :success
     assert_select "select[name='signature_field_preparation[recipient_uuid]']", count: 0
+    assert_select "[data-visual-stamp-target='xField'], [data-visual-stamp-target='yField'], [data-visual-stamp-target='widthField'], [data-visual-stamp-target='heightField']", count: 0
     assert_includes response.body, I18n.t("contracts.signature_field_preparations.index.form.all_assigned_title")
   end
 
@@ -271,7 +273,10 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
     end
 
     assert_response :success
-    assert_select "a[href=?]", edit_contract_signature_field_preparation_path(contract, preparation)
+    assert_select "a[href=?]", edit_contract_signature_field_preparation_path(contract, preparation) do
+      assert_select ".sr-only", text: ": #{recipient.display_name}"
+    end
+    assert_select "form[action=?] button .sr-only", contract_signature_field_preparation_path(contract, preparation), text: ": #{recipient.display_name}"
   end
 
   test "edit prefills the placement form for an existing field" do

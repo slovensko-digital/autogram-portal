@@ -1,4 +1,6 @@
-<main>
+<% content_for :title, t('.title') %>
+
+<div>
   <div class="mx-auto max-w-6xl px-6 pb-24 pt-10 lg:px-8">
 
     <%# Page header %>
@@ -13,20 +15,20 @@
         <%= f.select :state,
               [[t('.state_all'), ""], [t('.state_awaiting'), "awaiting"], [t('.state_completed'), "completed"], [t('.state_declined'), "declined"], [t('.state_no_recipients'), "no_recipients"]],
               { selected: @state.to_s },
-              class: "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
-              onchange: "this.form.submit()" %>
+              class: "rounded-lg border border-gray-500 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
       </div>
       <div class="flex items-center gap-2">
         <%= f.label :sort, t('.filter_sort'), class: "text-sm font-medium text-gray-700 whitespace-nowrap" %>
         <%= f.select :sort,
               [[t('.sort_newest'), "newest"], [t('.sort_oldest'), "oldest"]],
               { selected: @sort },
-              class: "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
-              onchange: "this.form.submit()" %>
+              class: "rounded-lg border border-gray-500 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
       </div>
+      <%= f.submit t('actions.apply_filter'), name: nil,
+            class: "self-start sm:self-auto rounded-lg border border-blue-600 bg-white px-3 py-1.5 text-sm font-medium text-blue-700 cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     <% end %>
 
     <%= render 'bundles/bundle_list', bundles: @bundles, show_destroy: true %>
 
   </div>
-</main>
+</div>

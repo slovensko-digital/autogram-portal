@@ -1,6 +1,6 @@
 <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
   <%=  turbo_stream_from @session %>
-  <main class="mx-auto flex max-w-4xl flex-col items-center space-y-6 lg:flex">
+  <div class="mx-auto flex max-w-4xl flex-col items-center space-y-6 lg:flex">
     <div class="relative isolate overflow-hidden">
       <% if @session.signed? %>
         <%= render "signed" %>
@@ -32,5 +32,5 @@
         <% end %>
       </div>
     </div>
-  </main>
+  </div>
 <% end %>

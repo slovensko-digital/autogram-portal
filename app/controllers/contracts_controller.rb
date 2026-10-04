@@ -15,6 +15,8 @@ class ContractsController < ApplicationController
 
   rescue_from Pundit::NotAuthorizedError, with: :render_contract_denial
 
+  helper_method :contract_back_path
+
   def index
     authorize Contract
     @sort = params[:sort].presence_in(%w[newest oldest]) || "newest"
@@ -64,7 +66,6 @@ class ContractsController < ApplicationController
   end
 
   def show
-    @previous_page = request.referrer
   end
 
   def show_bundle
@@ -78,7 +79,7 @@ class ContractsController < ApplicationController
   end
 
   def actions
-    render partial: "actions", locals: { previous_page: params[:previous_page] }
+    render partial: "actions"
   end
 
   def authenticate_for_actions
@@ -154,7 +155,7 @@ class ContractsController < ApplicationController
     redirect_to sign_contract_path(@contract, recipient: @recipient&.uuid)
   rescue ActiveRecord::RecordInvalid => e
     redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid),
-                alert: "Failed to submit: #{e.message}"
+                alert: t("contracts.submit_failed", errors: e.record&.errors&.full_messages&.to_sentence.presence || e.message)
   end
 
   def create_visual_session
@@ -216,8 +217,9 @@ class ContractsController < ApplicationController
 
     redirect_to contract_session_path(@contract, session, recipient: @recipient&.uuid, iframe: params[:iframe], show_completed: true)
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose),
-                alert: "Failed to submit: #{e.message}"
+    flash[:visual_stamp_errors] = visual_stamp_error_messages(e)
+    flash[:visual_stamp_invalid_fields] = visual_stamp_invalid_fields(e)
+    redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose)
   rescue AutogramService::ServiceUnavailableError => e
     redirect_to visual_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], purpose: purpose),
                 alert: e.message
@@ -297,6 +299,14 @@ class ContractsController < ApplicationController
   end
 
   private
+
+  # "Back" from the contract actions leads to the screen the contract belongs to, not to the
+  # referrer: the actions are the first step on the contract page itself.
+  def contract_back_path
+    return new_contract_path unless policy(@contract).manage?
+
+    @contract.bundle ? bundle_path(@contract.bundle) : contracts_path
+  end
 
   def claim_pending_anonymous_contract
     return unless current_user.present?
@@ -614,6 +624,18 @@ class ContractsController < ApplicationController
 
   def signature_apps_frame_request?
     action_name == "signature_apps" && request.headers["Turbo-Frame"].present?
+  end
+
+  def visual_stamp_error_messages(error)
+    messages = error.record&.errors&.full_messages.presence
+    messages || [ t("contracts.visual_signing.invalid_document") ]
+  end
+
+  # Form fields to mark as invalid on the visual signing page, in the order they appear there.
+  def visual_stamp_invalid_fields(error)
+    attributes = error.record&.errors&.attribute_names || []
+    fields = attributes.map { |attribute| attribute == :base || attribute == :text ? :custom_text : attribute }
+    (%i[x y width height custom_text image] & fields).map(&:to_s)
   end
 
   def visual_signing_unavailable_redirect_path

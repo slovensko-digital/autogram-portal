@@ -1,6 +1,7 @@
 <% content_for :title, t('.title') %>
 
 <% editing = @signature_field_preparation.persisted? %>
+<% placing = @recipients.present? || editing %>
 <% document = @signature_field_preparation.document || @documents.first %>
 <% preview_document = @preview_document || document %>
 <% preview_path = preview_document&.blob&.attached? ? rails_blob_path(preview_document.blob, disposition: "inline") : nil %>
@@ -20,11 +21,11 @@
 <% end %>
 <% placed_count = @awaiting_recipients.count { |recipient| @preparations_by_recipient_id.key?(recipient.id) } %>
 
-<main>
+<div>
   <div class="mx-auto max-w-6xl space-y-6 px-6 pb-24 pt-10 lg:px-8" data-signature-field-preparations-layout="page">
     <div>
-      <%= link_to bundle_path(@contract.bundle), class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline" do %>
-        <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <%= link_to bundle_path(@contract.bundle), class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline" do %>
+        <svg aria-hidden="true" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
         <%= t('.back') %>
@@ -33,7 +34,7 @@
       <h1 class="mt-4 text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
       <p class="mt-1 text-gray-600"><%= t('.subtitle') %></p>
       <% if document %>
-        <p class="mt-1 text-sm text-gray-500"><%= document.filename %></p>
+        <p class="mt-1 text-sm text-gray-600"><%= document.filename %></p>
       <% end %>
     </div>
 
@@ -86,10 +87,6 @@
                     visual_stamp_max_height_value: VisualStamp::MAX_HEIGHT
                   } do |form| %>
       <%= form.hidden_field :document_uuid, value: document&.uuid unless editing %>
-      <%= form.hidden_field :x, value: @signature_field_preparation.x, data: { visual_stamp_target: "xField" } %>
-      <%= form.hidden_field :y, value: @signature_field_preparation.y, data: { visual_stamp_target: "yField" } %>
-      <%= form.hidden_field :width, value: @signature_field_preparation.width, data: { visual_stamp_target: "widthField" } %>
-      <%= form.hidden_field :height, value: @signature_field_preparation.height, data: { visual_stamp_target: "heightField" } %>
       <%= form.hidden_field :page, value: @signature_field_preparation.page, data: { visual_stamp_target: "pageField" } %>
 
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -99,7 +96,7 @@
                   aria: { label: t('.preview.previous_page') },
                   data: { visual_stamp_target: "previousPageButton", action: "visual-stamp#previousPage" },
                   class: "inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 cursor-pointer hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40" do %>
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             <% end %>
@@ -109,7 +106,7 @@
                                    @signature_field_preparation.page,
                                    min: 1,
                                    step: 1,
-                                   class: "w-16 rounded-md border border-gray-300 px-2 py-1 text-sm text-center focus:outline-none focus:border-blue-500 focus:ring-blue-500",
+                                   class: "w-16 rounded-md border border-gray-500 px-2 py-1 text-sm text-center focus:outline-none focus:border-blue-500 focus:ring-blue-500",
                                    data: { visual_stamp_target: "pageNumber", action: "input->visual-stamp#pageChanged" } %>
               <span><%= t('.preview.page_of') %> <span data-visual-stamp-target="pageCount">–</span></span>
             </label>
@@ -117,7 +114,7 @@
                   aria: { label: t('.preview.next_page') },
                   data: { visual_stamp_target: "nextPageButton", action: "visual-stamp#nextPage" },
                   class: "inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 cursor-pointer hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40" do %>
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             <% end %>
@@ -143,18 +140,30 @@
                 <div class="absolute inset-0 pointer-events-none" data-visual-stamp-target="existingFieldsLayer"></div>
 
                 <div data-visual-stamp-target="stamp"
-                     data-action="pointerdown->visual-stamp#startDrag"
-                     class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 ring-2 ring-white/70 touch-none <%= 'hidden' if @recipients.blank? && !editing %>">
+                     data-action="pointerdown->visual-stamp#startDrag keydown->visual-stamp#moveWithKeyboard"
+                     role="group"
+                     tabindex="0"
+                     aria-label="<%= t('shared.stamp_geometry.box_label') %>"
+                     aria-describedby="signature_field_preparation_geometry_hint"
+                     class="absolute z-10 cursor-move select-none rounded border-2 border-blue-600 bg-white/90 p-2 ring-2 ring-white/70 touch-none focus:outline-none focus-visible:ring-blue-600 <%= 'hidden' unless placing %>">
                   <div class="text-xs font-medium text-gray-800" data-visual-stamp-target="boxLabel"><%= editing ? @signature_field_preparation.recipient.display_name : t('.preview.box_label') %></div>
                   <button type="button"
                           aria-label="<%= t('.preview.resize_handle') %>"
                           data-visual-stamp-handle="resize"
-                          data-action="pointerdown->visual-stamp#startResize"
-                          class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600"></button>
+                          aria-describedby="signature_field_preparation_geometry_hint"
+                          data-action="pointerdown->visual-stamp#startResize keydown->visual-stamp#resizeWithKeyboard"
+                          class="absolute -bottom-2 -right-2 h-5 w-5 cursor-se-resize rounded-full border border-blue-700 bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"></button>
                 </div>
               </div>
             </div>
           </div>
+          <% if placing %>
+            <%= render "shared/stamp_geometry_fields",
+                  name_prefix: "signature_field_preparation",
+                  x: @signature_field_preparation.x, y: @signature_field_preparation.y,
+                  width: @signature_field_preparation.width, height: @signature_field_preparation.height,
+                  invalid: @signature_field_preparation.errors.attribute_names & %i[x y width height] %>
+          <% end %>
         </div>
 
         <aside class="min-w-0 space-y-4 self-start rounded-lg border border-gray-200 bg-white p-4">
@@ -179,7 +188,7 @@
               <%= form.select :recipient_uuid,
                               options_from_collection_for_select(@recipients, :uuid, :display_name, @signature_field_preparation.recipient&.uuid),
                               {},
-                              class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500",
+                              class: "block w-full rounded-md border border-gray-500 px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500",
                               data: { visual_stamp_target: "recipientSelect", action: "change->visual-stamp#recipientChanged" } %>
             </div>
 
@@ -209,7 +218,7 @@
     <section class="rounded-lg border border-gray-200 bg-white p-6">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-xl font-semibold text-gray-900"><%= t('.recipients.title') %></h2>
-        <span class="text-sm text-gray-500"><%= t('.recipients.progress', placed: placed_count, total: @awaiting_recipients.size) %></span>
+        <span class="text-sm text-gray-600"><%= t('.recipients.progress', placed: placed_count, total: @awaiting_recipients.size) %></span>
       </div>
 
       <% if @awaiting_recipients.blank? %>
@@ -221,21 +230,23 @@
             <% row_editing = editing && preparation&.id == @signature_field_preparation.id %>
             <div class="flex flex-wrap items-center gap-3 rounded-lg border px-4 py-3 <%= row_editing ? 'border-blue-400 bg-blue-50' : 'border-gray-200' %>">
               <div class="h-9 w-9 shrink-0 rounded-lg bg-blue-50 flex items-center justify-center">
-                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg aria-hidden="true" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 8.25v7.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25v-7.5m19.5 0-8.69 5.216a2.25 2.25 0 01-2.122 0L2.25 8.25m19.5 0A2.25 2.25 0 0019.5 6H4.5a2.25 2.25 0 00-2.25 2.25" />
                 </svg>
               </div>
               <div class="min-w-0 flex-1 break-words text-base font-semibold text-gray-900"><%= recipient.display_name %></div>
               <% if preparation %>
                 <%= render 'shared/badge', color: 'green', label: t('.recipients.placed', page: preparation.page) %>
-                <%= link_to t('.recipients.edit'),
-                            edit_contract_signature_field_preparation_path(@contract, preparation),
-                            class: "text-sm font-medium text-blue-600 underline hover:text-blue-800" %>
-                <%= button_to t('actions.remove'),
-                              contract_signature_field_preparation_path(@contract, preparation),
+                <%= link_to edit_contract_signature_field_preparation_path(@contract, preparation),
+                            class: "text-sm font-medium text-blue-600 underline hover:text-blue-800" do %>
+                  <%= t('.recipients.edit') %><span class="sr-only">: <%= recipient.display_name %></span>
+                <% end %>
+                <%= button_to contract_signature_field_preparation_path(@contract, preparation),
                               method: :delete,
                               class: "text-sm font-medium text-red-600 underline cursor-pointer hover:text-red-800",
-                              form: { data: { turbo_confirm: t('.recipients.remove_confirm', recipient: recipient.display_name) } } %>
+                              form: { data: { turbo_confirm: t('.recipients.remove_confirm', recipient: recipient.display_name) } } do %>
+                  <%= t('actions.remove') %><span class="sr-only">: <%= recipient.display_name %></span>
+                <% end %>
               <% else %>
                 <%= render 'shared/badge', color: 'gray', label: t('.recipients.not_placed') %>
               <% end %>
@@ -245,4 +256,4 @@
       <% end %>
     </section>
   </div>
-</main>
+</div>
