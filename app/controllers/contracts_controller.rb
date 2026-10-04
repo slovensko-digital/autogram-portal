@@ -5,6 +5,7 @@ class ContractsController < ApplicationController
   before_action :claim_pending_anonymous_contract, only: [ :show, :actions ]
   before_action :authorize_contract!, only: [ :show, :update, :destroy ]
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
+  before_action :render_sign_limit_reached_if_needed, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   skip_before_action :ensure_tenant_selected, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ], if: -> { params[:iframe].present? }
@@ -122,6 +123,8 @@ class ContractsController < ApplicationController
     begin
       @contract.extend_signatures!(target_level: target_level)
       redirect_to return_url, notice: t("documents.alerts.signature_extended_successfully", target_level: target_level)
+    rescue PlanLimits::Exceeded => e
+      redirect_to return_url, alert: e.message
     rescue => e
       redirect_to return_url, alert: t("documents.alerts.failed_to_extend_signatures", error: e.message)
     end
@@ -316,7 +319,14 @@ class ContractsController < ApplicationController
     session.delete(:pending_contract_claim_uuid)
     @contract.with_lock do
       @contract.reload
-      @contract.update!(tenant: current_tenant) if @contract.anonymous?
+      next unless @contract.anonymous?
+
+      @contract.tenant = current_tenant
+      next if @contract.save
+
+      # The tenant has no room for it (plan limits): the contract stays anonymous.
+      flash.now[:alert] = t("contracts.alerts.claim_failed", errors: @contract.errors.full_messages.to_sentence)
+      @contract.reload
     end
   end
 
@@ -359,6 +369,13 @@ class ContractsController < ApplicationController
         @recipient = Recipient.find_or_create_author_proxy_for!(bundle: @contract.bundle, user: current_user)
       end
     end
+  end
+
+  def render_sign_limit_reached_if_needed
+    bundle = @contract.bundle
+    return unless bundle&.signature_request_limit_reached_for?(@recipient)
+
+    render "bundles/sign_limit_reached", locals: { bundle: bundle }, status: :forbidden
   end
 
   def set_signer_contract

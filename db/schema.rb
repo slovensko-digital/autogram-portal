@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_120100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -455,8 +455,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_090000) do
     t.string "name", null: false
     t.boolean "personal", default: false, null: false
     t.string "plan", default: "basic", null: false
+    t.datetime "plan_changed_at"
     t.datetime "updated_at", null: false
     t.index ["plan"], name: "index_tenants_on_plan"
+  end
+
+  create_table "usage_records", force: :cascade do |t|
+    t.bigint "contract_id"
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.integer "quantity", default: 1, null: false
+    t.string "source", null: false
+    t.bigint "tenant_id", null: false
+    t.index ["contract_id"], name: "index_usage_records_on_contract_id"
+    t.index ["contract_id"], name: "index_usage_records_on_signature_request_contract", unique: true, where: "((kind)::text = 'signature_request'::text)"
+    t.index ["tenant_id", "kind", "created_at"], name: "index_usage_records_on_tenant_id_and_kind_and_created_at"
   end
 
   create_table "user_policy_consents", force: :cascade do |t|
@@ -588,6 +601,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_090000) do
   add_foreign_key "signer_contracts", "signers"
   add_foreign_key "signers", "recipients"
   add_foreign_key "signers", "users"
+  add_foreign_key "usage_records", "contracts", on_delete: :nullify
+  add_foreign_key "usage_records", "tenants"
   add_foreign_key "user_policy_consents", "users"
   add_foreign_key "users", "tenants", column: "last_tenant_id", on_delete: :nullify
   add_foreign_key "visual_stamps", "documents"

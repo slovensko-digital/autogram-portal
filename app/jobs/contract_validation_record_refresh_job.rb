@@ -11,7 +11,7 @@ class ContractValidationRecordRefreshJob < ApplicationJob
       record.reload
       return unless record.refreshable?
 
-      record.contract.extend_signatures!(target_level: "LTA", source_content_version: record.contract_content_version)
+      record.contract.extend_signatures!(target_level: "LTA", source_content_version: record.contract_content_version, usage_source: :archivation)
     end
   rescue StandardError => e
     Rails.logger.warn("Contract validation record refresh failed for record #{record_id}: #{e.class}: #{e.message}")

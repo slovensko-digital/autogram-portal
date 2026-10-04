@@ -193,9 +193,12 @@ class Recipient < ApplicationRecord
     not_notified?
   end
 
+  # Sending the bundle counts its documents towards the monthly limit of the tenant;
+  # raises PlanLimits::Exceeded when they do not fit.
   def notify!
     return unless notifiable?
 
+    bundle.tenant.record_signature_requests!(bundle.contracts, source: :notification)
     sending!
 
     if federated_recipient?

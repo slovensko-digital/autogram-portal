@@ -60,6 +60,7 @@ class Session < ApplicationRecord
   }
 
   validates :signing_started_at, presence: true
+  validate :bundle_within_signature_request_limit, on: :create
 
   scope :recent, -> { order(created_at: :desc) }
 
@@ -67,6 +68,12 @@ class Session < ApplicationRecord
 
   def recipient
     signer_contract.recipient
+  end
+
+  # Whether the signing app adds a timestamp on the portal's behalf, which counts towards the
+  # monthly limit of the tenant.
+  def adds_portal_timestamp?
+    false
   end
 
   def iframe_param
@@ -191,6 +198,7 @@ class Session < ApplicationRecord
         filename: new_filename,
         session: self
       )
+      contract.tenant&.record_timestamps!(contract, source: :avm_signing, enforce: false) if adds_portal_timestamp?
       save!
     end
 
@@ -252,8 +260,17 @@ class Session < ApplicationRecord
     broadcast_status_change
   end
 
+  # Shared links must not let a bundle be sent for signature beyond the monthly limit of the tenant.
+  def bundle_within_signature_request_limit
+    bundle = signer_contract&.contract&.bundle
+    return unless bundle&.signature_request_limit_reached_for?(signer_contract.recipient)
+
+    errors.add(:base, :signature_request_limit, sender: bundle.sender_display_name)
+  end
+
   def mark_signer_contract_signed
     signer_contract.update_column(:signed_at, completed_at || Time.current)
+    contract.bundle&.record_signature_requests_on_signing!(recipient)
   end
 
   def broadcast_status_change

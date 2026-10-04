@@ -17,6 +17,7 @@ class Contracts::SessionsController < ApplicationController
 
   def create
     session_type = params[:type] || params[:application]
+    ensure_signature_request_limit!
 
     @session = case session_type
     when "ades"
@@ -299,9 +300,20 @@ class Contracts::SessionsController < ApplicationController
     end
   end
 
+  def ensure_signature_request_limit!
+    bundle = @contract.bundle
+    return unless bundle&.signature_request_limit_reached_for?(@signer_contract&.recipient)
+
+    raise SessionCreationError, t("plan_limits.signing_blocked", sender: bundle.sender_display_name)
+  end
+
   def create_avm_session
     existing = @signer_contract&.sessions&.pending&.where(type: "AvmSession")&.first
     return persist_session_view_options(existing) if existing
+
+    if AvmSession.unavailability_reasons(nil, @contract).include?(:timestamp_limit_reached)
+      raise SessionCreationError, t("contracts.signature_apps.unavailable_reasons.timestamp_limit_reached")
+    end
 
     result = AutogramEnvironment.avm_service.initiate_signing(@contract, signer_contract: @signer_contract)
     raise SessionCreationError, result[:error] if result[:error]

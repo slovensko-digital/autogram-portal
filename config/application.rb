@@ -43,8 +43,12 @@ module AutogramPortal
         class: "Eidentita::SessionCleanupJob"
       },
       delete_old_anonymous_contracts: {
-        cron: "every 30 minutes",
+        cron: "every 5 minutes",
         class: "AnonymousContractsCleanupJob"
+      },
+      delete_expired_tenant_documents: {
+        cron: "every day at 2am",
+        class: "TenantRetentionJob"
       },
       contract_validation_records_maintenance: {
         cron: "every monday at 3am",

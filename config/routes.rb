@@ -157,6 +157,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "hello", to: "hello#show"
       get "hello_auth", to: "hello#show_auth"
+      get "usage", to: "usage#show"
 
       resources :contracts, only: [ :create, :show, :destroy ] do
         member do

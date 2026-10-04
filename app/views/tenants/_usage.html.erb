@@ -1,0 +1,56 @@
+<%# locals: (tenant:, compact: false) %>
+<% entries = tenant.usage_summary %>
+<% entries = entries.reject(&:unlimited?) if compact %>
+<% retention = tenant.limits.retention %>
+<% max_document_bytes = PlanLimits.max_document_bytes %>
+<% next_month = Date.current.next_month.beginning_of_month.strftime("%d.%m.%Y") %>
+<% if entries.any? %>
+  <section aria-labelledby="plan-usage-title-<%= compact ? 'compact' : 'full' %>" class="<%= compact ? 'mb-8' : 'mt-10' %> rounded-md border border-gray-200 bg-white overflow-hidden">
+    <div class="px-5 py-4 border-b border-gray-100 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h3 id="plan-usage-title-<%= compact ? 'compact' : 'full' %>" class="<%= compact ? 'text-lg' : 'text-xl' %> font-semibold text-gray-900"><%= t('tenants.usage.title') %></h3>
+        <p class="mt-1 text-sm text-gray-500"><%= t('tenants.usage.subtitle') %></p>
+      </div>
+      <% if compact %>
+        <%= link_to t('tenants.usage.details'), edit_user_registration_path(anchor: "organization"), class: "text-sm font-medium text-blue-700 underline hover:text-blue-900" %>
+      <% end %>
+    </div>
+
+    <ul role="list" class="divide-y divide-gray-100">
+      <% entries.each do |entry| %>
+        <% label = t("tenants.usage.limits.#{entry.limit}") %>
+        <li class="px-5 py-4">
+          <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <p class="text-sm font-medium text-gray-900"><%= label %></p>
+            <p class="text-sm <%= entry.reached? ? 'font-semibold text-red-700' : 'text-gray-700' %>"><%= plan_usage_text(entry) %></p>
+          </div>
+          <% if entry.percentage %>
+            <div class="mt-2 h-2 w-full rounded-full bg-gray-100" role="progressbar" aria-label="<%= label %>"
+                 aria-valuemin="0" aria-valuemax="<%= entry.max %>" aria-valuenow="<%= [ entry.used, entry.max ].min %>"
+                 aria-valuetext="<%= plan_usage_text(entry) %>">
+              <div class="h-2 rounded-full <%= entry.reached? ? 'bg-red-600' : 'bg-blue-600' %>" style="width: <%= entry.percentage %>%"></div>
+            </div>
+          <% end %>
+          <% if entry.reached? %>
+            <p class="mt-2 text-xs text-red-700">
+              <%= Tenant::Usage::MONTHLY_LIMIT_KINDS.key?(entry.limit) ? t('tenants.usage.reached_monthly', date: next_month) : t('tenants.usage.reached') %>
+            </p>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+
+    <% unless compact %>
+      <% if retention || max_document_bytes %>
+        <div class="border-t border-gray-100 px-5 py-4 text-sm text-gray-600 space-y-1">
+          <% if retention %>
+            <p><%= t('tenants.usage.retention', count: retention.in_days.to_i) %></p>
+          <% end %>
+          <% if max_document_bytes %>
+            <p><%= t('tenants.usage.max_document_size', size: PlanLimits::Exceeded.format(:document_size, max_document_bytes)) %></p>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+<% end %>

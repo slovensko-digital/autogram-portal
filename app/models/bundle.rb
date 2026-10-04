@@ -139,6 +139,27 @@ class Bundle < ApplicationRecord
     active_recipients.each(&:notify!)
   end
 
+  # Anyone but the tenant itself signing the bundle means it was sent for signature, even when it
+  # was shared by a link (public bundle, copied recipient link, API) instead of notifying recipients.
+  # Its documents then count towards the monthly limit of the tenant.
+  def signed_as_signature_request?(recipient)
+    !recipient&.author_proxy?
+  end
+
+  def signature_request_limit_reached_for?(recipient)
+    return false unless signed_as_signature_request?(recipient)
+
+    uncounted = contracts.where.not(id: UsageRecord.signature_request.where.not(contract_id: nil).select(:contract_id)).count
+    uncounted.positive? && !tenant.within_limit?(:signature_requests, uncounted)
+  end
+
+  # The signature is already made, so the documents are counted even beyond the limit.
+  def record_signature_requests_on_signing!(recipient)
+    return unless signed_as_signature_request?(recipient)
+
+    tenant.record_signature_requests!(contracts, source: :recipient_signature, enforce: false)
+  end
+
   def short_uuid
     uuid.first(8)
   end

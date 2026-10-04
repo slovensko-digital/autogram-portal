@@ -55,37 +55,45 @@
           description: t('documents.new.actions.archive.subtitle'),
           disabled: true,
           disabled_reasons: [t('documents.new.actions.account_required')] %>
-      <% elsif managed_contract && @contract.bundle.nil? && @contract.tenant.signature_request_allowed? %>
+      <% elsif managed_contract && @contract.bundle.nil? %>
+        <% request_limit_reasons = @contract.tenant.signature_request_allowed? ? [] : [ t('plan_limits.action_unavailable.signature_requests') ] %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'request_signature',
               label: t('documents.new.actions.request_signature.title'),
               description: t('documents.new.actions.request_signature.subtitle'),
               checked: false,
+              disabled: request_limit_reasons.any?,
+              disabled_reasons: request_limit_reasons,
               data_attributes: {
                 url: signature_parameters_contract_path(@contract, target_step: 'request_signature')
               } %>
       <% end %>
 
-      <% if managed_contract && @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') %>
+      <% timestamp_limit_reasons = managed_contract && !@contract.tenant.signature_extension_allowed? ? [ t('plan_limits.action_unavailable.timestamps') ] : [] %>
+      <% if managed_contract && @contract.extendable_signatures?(target_level: 'T') %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',
               label: t('documents.new.actions.add_timestamp.title'),
               description: t('documents.new.actions.add_timestamp.subtitle'),
               checked: false,
+              disabled: timestamp_limit_reasons.any?,
+              disabled_reasons: timestamp_limit_reasons,
               data_attributes: {
                 url: signature_extension_contract_path(@contract, target_level: 'T')
               } %>
       <% end %>
 
-      <% if managed_contract && @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
+      <% if managed_contract && @contract.extendable_signatures?(target_level: 'LTA') %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'archive_signature',
               label: t('documents.new.actions.archive.title'),
               description: t('documents.new.actions.archive.subtitle'),
               checked: false,
+              disabled: timestamp_limit_reasons.any?,
+              disabled_reasons: timestamp_limit_reasons,
               data_attributes: {
                 url: signature_extension_contract_path(@contract, target_level: 'LTA')
               } %>

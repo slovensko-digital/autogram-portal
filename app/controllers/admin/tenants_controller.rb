@@ -37,6 +37,7 @@ class Admin::TenantsController < Admin::BaseController
 
   def edit
     @memberships = @tenant.memberships.includes(:user).order(:created_at)
+    set_usage
   end
 
   def update
@@ -44,6 +45,7 @@ class Admin::TenantsController < Admin::BaseController
       redirect_to admin_tenants_path, notice: t("admin.tenants.update.success")
     else
       @memberships = @tenant.memberships.includes(:user).order(:created_at)
+      set_usage
       render :edit, status: :unprocessable_entity
     end
   end
@@ -62,6 +64,16 @@ class Admin::TenantsController < Admin::BaseController
 
   def set_tenant
     @tenant = Tenant.find(params[:id])
+  end
+
+  # Monthly usage by kind and source, the basis for billing the PRO plan.
+  def set_usage
+    @usage_month = begin
+      Date.strptime(params[:month].to_s, "%Y-%m")
+    rescue Date::Error
+      Date.current.beginning_of_month
+    end
+    @usage_by_kind_and_source = @tenant.usage_records.in_period(@usage_month.all_month).group(:kind, :source).sum(:quantity)
   end
 
   def render_new_with_error(message)

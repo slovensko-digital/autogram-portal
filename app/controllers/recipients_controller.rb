@@ -33,8 +33,12 @@ class RecipientsController < ApplicationController
 
   def notify
     if @recipient.notifiable?
-      @recipient.notify!
-      @success_message = t("recipients.index.invitation_sending", recipient: @recipient.display_name)
+      begin
+        @recipient.notify!
+        @success_message = t("recipients.index.invitation_sending", recipient: @recipient.display_name)
+      rescue PlanLimits::Exceeded => e
+        @error_message = e.message
+      end
     else
       @error_message = t("recipients.index.invitation_failed", recipient: @recipient.display_name)
     end

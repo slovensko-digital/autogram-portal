@@ -14,6 +14,7 @@ class BundlesController < ApplicationController
   before_action :authorize_signing_bundle!, only: [ :sign, :autogram_batch ]
   before_action :ensure_author_proxy_recipient, only: [ :sign, :autogram_batch ]
   before_action :render_sign_withdrawn_if_needed, only: [ :sign, :autogram_batch ]
+  before_action :render_sign_limit_reached_if_needed, only: [ :sign, :autogram_batch ]
   before_action :set_batch_autogram_contracts, only: [ :sign, :autogram_batch ]
   before_action :ensure_batch_autogram_available!, only: [ :autogram_batch ]
 
@@ -101,6 +102,8 @@ class BundlesController < ApplicationController
                                       .where(signer_contracts: { signed_at: nil })
                                       .where(signer_contracts: { declined_at: nil })
                                       .distinct
+
+    recipient_bundles = within_signed_history(recipient_bundles, awaiting: awaiting_for_user_scope)
 
     @bundles = case @state
     when "awaiting"
@@ -315,6 +318,21 @@ class BundlesController < ApplicationController
     return unless @recipient&.withdrawn?
 
     render :sign_withdrawn, status: :gone
+  end
+
+  # Plans with retention keep the history of bundles signed for others only for SIGNED_HISTORY_DAYS;
+  # bundles still awaiting the user's signature are always listed.
+  def within_signed_history(bundles, awaiting:)
+    history = PlanLimits.signed_history
+    return bundles unless history && current_tenant&.limits&.retention
+
+    bundles.where(id: awaiting.select(:id)).or(bundles.where(created_at: history.ago..))
+  end
+
+  def render_sign_limit_reached_if_needed
+    return unless @bundle.signature_request_limit_reached_for?(@recipient)
+
+    render :sign_limit_reached, locals: { bundle: @bundle }, status: :forbidden
   end
 
   def set_batch_autogram_contracts

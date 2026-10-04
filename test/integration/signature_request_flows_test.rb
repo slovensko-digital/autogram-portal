@@ -1,5 +1,6 @@
 require "test_helper"
 require_relative "../support/signing_flow_helper"
+require_relative "../support/plan_limits_helper"
 
 # End-to-end signature requests started from the web: an organization uploads a
 # document, requests signatures and recipients sign it through the real endpoints.
@@ -7,6 +8,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   include ActionMailer::TestHelper
   include SigningFlowHelper
+  include PlanLimitsHelper
 
   setup do
     @organization = Tenant.create!(name: "Firma ABC", plan: :pro)
@@ -193,7 +195,151 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_empty mails_to(member.email)
   end
 
+  test "documents sent to recipients count once towards the monthly limit and sending stops at it" do
+    with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "1") do
+      bundle = request_signature_from_web(as: @owner, filename: "prva.pdf")
+      add_recipient(bundle, "first@example.com")
+      add_recipient(bundle, "second@example.com")
+      assert_equal 1, @organization.usage_of(:signature_requests), "the same document is counted once"
+
+      second_bundle = request_signature_from_web(as: @owner, filename: "druha.pdf")
+      recipient = add_recipient_without_notifying(second_bundle, "third@example.com")
+      post notify_bundle_recipient_path(second_bundle, recipient), as: :turbo_stream
+
+      assert_response :success
+      assert_includes response.body, I18n.t("plan_limits.exceeded.signature_requests", used: 1, max: 1)
+      assert recipient.reload.not_notified?
+      assert_empty mails_to("third@example.com")
+      assert_equal 1, @organization.usage_of(:signature_requests)
+    end
+  end
+
+  test "a bundle shared by a link counts when a recipient signs and cannot be signed beyond the limit" do
+    with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "1") do
+      bundle = request_signature_from_web(as: @owner, filename: "zdielana.pdf")
+      recipient = add_recipient_without_notifying(bundle, "linked@example.com")
+      over_limit = request_signature_from_web(as: @owner, filename: "nad-limit.pdf")
+      over_limit_recipient = add_recipient_without_notifying(over_limit, "other@example.com")
+      sign_out @owner
+
+      sign_with_autogram(bundle.contracts.sole, recipient: recipient)
+
+      assert bundle.reload.completed?
+      assert_equal [ "recipient_signature" ], @organization.usage_records.signature_request.pluck(:source)
+
+      contract = over_limit.contracts.sole
+      get sign_bundle_path(over_limit, recipient: over_limit_recipient.uuid)
+      assert_response :forbidden
+      assert_includes response.body, I18n.t("bundles.sign_limit_reached.title")
+
+      get sign_contract_path(contract, recipient: over_limit_recipient.uuid)
+      assert_response :forbidden
+
+      get autogram_contract_sessions_path(contract, recipient: over_limit_recipient.uuid)
+      assert_response :unprocessable_entity
+      assert_equal 0, contract.sessions.count
+      assert_equal 1, @organization.usage_of(:signature_requests)
+    end
+  end
+
+  test "the organization signing its own bundle does not count it as sent" do
+    with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "0") do
+      bundle = request_signature_from_web(as: @owner, filename: "vlastna.pdf")
+
+      get sign_bundle_path(bundle)
+      assert_response :success
+      sign_with_autogram(bundle.contracts.sole)
+
+      assert bundle.recipients.author_proxies.sole.signed?
+      assert_equal 0, @organization.usage_of(:signature_requests)
+    end
+  end
+
+  test "uploading beyond the stored documents limit explains why" do
+    with_plan_limits("PRO_MAX_STORED_DOCUMENTS" => "1") do
+      sign_in_with_tenant @owner, @organization
+      upload_pdf("prvy.pdf")
+      assert_redirected_to contract_path(Contract.order(:id).last)
+
+      assert_no_difference -> { Contract.count } do
+        upload_pdf("druhy.pdf")
+      end
+      assert_response :unprocessable_entity
+      assert_includes response.body, I18n.t("activerecord.errors.models.contract.attributes.base.stored_documents_limit", max: 1)
+    end
+  end
+
+  test "an anonymous document stays anonymous when the organization has no room for it after sign-in" do
+    with_plan_limits("PRO_MAX_STORED_DOCUMENTS" => "0") do
+      upload_pdf("anonymny.pdf", agree_to_policies: true)
+      contract = Contract.order(:id).last
+      assert contract.anonymous?
+
+      post authenticate_for_actions_contract_path(contract)
+      sign_in_with_tenant @owner, @organization
+      get contract_path(contract)
+
+      assert_response :success
+      assert contract.reload.anonymous?
+      assert_includes response.body, I18n.t("activerecord.errors.models.contract.attributes.base.stored_documents_limit", max: 0)
+    end
+  end
+
+  test "the organization sees its plan usage on the dashboard and in its settings" do
+    with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "10", "PRO_MAX_STORED_DOCUMENTS" => nil, "PRO_STORAGE_GB" => nil, "PRO_MONTHLY_TIMESTAMPS" => nil) do
+      bundle = request_signature_from_web(as: @owner, filename: "pocitana.pdf")
+      add_recipient(bundle, "partner@example.com")
+      other = Tenant.create!(name: "Iná firma", plan: :pro)
+      other.usage_records.create!(kind: :signature_request, source: :notification)
+
+      get dashboard_path
+      assert_response :success
+      assert_select "section", text: /#{I18n.t("tenants.usage.title")}/ do
+        assert_select "li", count: 1
+        assert_select "li", text: /1 \/ 10/
+      end
+
+      get edit_user_registration_path
+      assert_response :success
+      assert_includes response.body, I18n.t("tenants.usage.limits.stored_documents")
+      assert_includes response.body, I18n.t("tenants.usage.unlimited_value", used: 1)
+      assert_select "[role=progressbar][aria-valuenow='1'][aria-valuemax='10']"
+    end
+  end
+
+  test "a Basic organization sees documents it signed for others only within the signed history" do
+    with_plan_limits("BASIC_RETENTION_DAYS" => "60", "SIGNED_HISTORY_DAYS" => "60") do
+      outsider = confirmed_user("outsider@inafirma.sk")
+      old_bundle = request_signature_from_web(as: @owner, filename: "stara.pdf")
+      old_recipient = add_recipient(old_bundle, outsider.email)
+      awaiting_bundle = request_signature_from_web(as: @owner, filename: "cakajuca.pdf")
+      awaiting_recipient = add_recipient(awaiting_bundle, outsider.email)
+      sign_out @owner
+      sign_with_autogram(old_bundle.contracts.sole, recipient: old_recipient)
+      old_bundle.update_column(:created_at, 61.days.ago)
+      awaiting_bundle.update_column(:created_at, 61.days.ago)
+
+      sign_in outsider
+      get received_bundles_path
+
+      assert_not_includes response.body, sign_bundle_path(old_bundle, recipient: old_recipient.uuid)
+      assert_includes response.body, sign_bundle_path(awaiting_bundle, recipient: awaiting_recipient.uuid)
+    end
+  end
+
   private
+
+  def upload_pdf(filename, agree_to_policies: false)
+    params = { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 #{filename}"), "application/pdf", original_filename: filename) } }
+    params[:contract] = { agree_to_policies: "1" } if agree_to_policies
+    post contracts_path, params: params
+  end
+
+  def add_recipient_without_notifying(bundle, email)
+    post bundle_recipients_path(bundle), params: { recipient: { email: email } }, as: :turbo_stream
+    assert_response :success
+    bundle.recipients.active.find_by!(email: email)
+  end
 
   # Uploads a PDF, asks for signatures and returns the bundle the web creates.
   def request_signature_from_web(as:, filename:)

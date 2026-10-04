@@ -71,6 +71,7 @@
         <p class="text-xs text-gray-500 mt-0.5"><%= t('.stats.declined_bundles') %></p>
       <% end %>
     </div>
+    <%= render "tenants/usage", tenant: current_tenant, compact: true %>
     <div class="mb-8">
       <h2 class="text-lg font-semibold text-gray-900 mb-4"><%= t('.quick_actions.title') %></h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

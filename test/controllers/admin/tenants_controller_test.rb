@@ -64,6 +64,23 @@ class Admin::TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=checkbox][name='tenant[features][]']", count: Tenant::AVAILABLE_FEATURES.size
   end
 
+  test "admin sees the monthly usage of a tenant for billing" do
+    @tenant.usage_records.create!(kind: :signature_request, source: :notification, created_at: Time.zone.local(2026, 9, 10))
+    @tenant.usage_records.create!(kind: :timestamp, source: :archivation, quantity: 3, created_at: Time.zone.local(2026, 9, 20))
+    @tenant.usage_records.create!(kind: :timestamp, source: :extension, created_at: Time.zone.local(2026, 8, 31))
+    tenants(:one).usage_records.create!(kind: :timestamp, source: :extension, quantity: 7, created_at: Time.zone.local(2026, 9, 15))
+    sign_in @admin
+
+    get edit_admin_tenant_path(@tenant, month: "2026-09")
+
+    assert_response :success
+    assert_select "input[type=month][value='2026-09']"
+    assert_select "tr", text: /#{I18n.t("admin.tenants.usage.sources.archivation")}\s*3/
+    assert_select "tr", text: /#{I18n.t("admin.tenants.usage.total", kind: I18n.t("admin.tenants.usage.kinds.timestamp"))}\s*3/
+    assert_select "tr", text: /#{I18n.t("admin.tenants.usage.total", kind: I18n.t("admin.tenants.usage.kinds.signature_request"))}\s*1/
+    assert_select "tr", text: /#{I18n.t("admin.tenants.usage.sources.extension")}/, count: 0
+  end
+
   test "admin creates an organization for a new customer email" do
     sign_in @admin
 

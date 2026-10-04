@@ -62,31 +62,14 @@ class Api::V1::ContractsController < ApiController
         xdcParameters: [ :autoLoadEform, :containerXmlns, :embedUsedSchemas, :fsFormIdentifier, :identifier, :schema, :schemaIdentifier, :schemaMimeType, :transformation, :transformationIdentifier, :transformationLanguage, :transformationMediaDestinationTypeDescription, :transformationTargetEnvironment ]
       ]
     )
+    documents = decode_documents(contract[:documents])
+    ensure_documents_fit_limits!([ documents ])
+
     {
       uuid: contract[:id],
       allowed_methods: contract[:allowedMethods] || [],
       signature_parameters_attributes: contract[:signatureParameters]&.transform_keys(&:underscore) || {},
-      documents_attributes: contract[:documents]&.filter_map do |document|
-        doc_attributes = {
-          xdc_parameters_attributes: document[:xdcParameters]&.transform_keys(&:underscore) || {}
-        }
-
-        doc_attributes[:url] = document[:url] if document[:url].present?
-        doc_attributes[:remote_hash] = document[:hash] if document[:hash].present?
-        doc_attributes[:uuid] = document[:id] if document[:id].present?
-
-        content = document[:content]
-        if content.present?
-          content = Base64.decode64(content) if document[:contentType].include?("base64")
-          doc_attributes[:blob] = ActiveStorage::Blob.create_and_upload!(
-            io: StringIO.new(content),
-            filename: document[:filename],
-            content_type: document[:contentType].split(";").first.strip
-          )
-        end
-
-        doc_attributes
-      end || []
+      documents_attributes: documents.map { |document| document_attributes(document) }
     }
   end
 end
