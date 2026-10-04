@@ -102,7 +102,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
   end
 
   test "signing apps that cannot create the requested signature level are not offered" do
-    contract = qes_contract("zmluva.pdf").merge(signature_parameters_attributes: { level: "BASELINE_T", format: "PAdES" })
+    contract = qes_contract("zmluva.pdf").merge(allowed_methods: %w[qes standalone_qes], signature_parameters_attributes: { level: "BASELINE_T", format: "PAdES" })
     bundle = create_bundle(contracts: [ contract ], recipients: [ { email: "signer@example.com" } ])
 
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding"
@@ -411,7 +411,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     message = assert_portal_message("sign-error")
     assert_equal bundle.contracts.sole.uuid, message["contract_id"]
     assert_equal bundle.uuid, message["bundle_id"]
-    assert_equal "Signed document does not contain signatures", message["error_message"]
+    assert_equal I18n.t("session.errors.no_signatures"), message["error_message"]
     assert_not bundle.reload.completed?
   end
 

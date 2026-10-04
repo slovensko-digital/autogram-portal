@@ -34,6 +34,15 @@ sk:
       unknown_response_error: "Nepodarilo sa spracovať odpoveď zo služby."
       document_mismatch_error: "Podpisovaný dokument sa nezhoduje s pôvodným dokumentom."
 
+  session:
+    errors:
+      no_file: "Nevybrali ste žiadny súbor."
+      empty_payload: "Nahraný súbor je prázdny."
+      invalid_base64: "Nahraný súbor sa nepodarilo načítať."
+      validation_failed: "Podpisy v nahranom dokumente sa nepodarilo overiť. Skúste to znova."
+      no_signatures: "Nahraný dokument neobsahuje žiadny podpis. Podpíšte ho a nahrajte znova."
+      invalid_signatures: "Podpis v nahranom dokumente nie je platný. Podpíšte dokument znova a nahrajte ho."
+
   verification:
     sms:
       message: "Overovací kód pre Autogram Portal: %{code}"
@@ -197,7 +206,7 @@ sk:
       new:
         sign_in: "Prihlásiť sa"
         sign_in_subtitle: "Prihláste sa do svojho účtu."
-        email: "Email"
+        email: "E-mail"
         remember_me: "Zapamätať si ma"
         or_continue_with: "Alebo pokračovať s"
         sign_in_with_google: "Pokračovať cez Google"
@@ -215,7 +224,7 @@ sk:
         account_section: "Účet používateľa"
         account_section_description: "Vaše osobné údaje a prihlasovanie."
         name: "Meno"
-        email: "Email"
+        email: "E-mail"
         currently_waiting_confirmation_for_email: "Momentálne čakáme na potvrdenie pre: %{email}"
         update: "Aktualizovať"
         danger_zone: "Nebezpečná zóna"
@@ -286,7 +295,7 @@ sk:
         didn_t_receive_unlock_instructions: "Nedostali ste e-mail na odomknutie?"
     passwordless:
       user:
-        signed_up_but_unconfirmed: "Úspešne ste sa zaregistrovali. Váš účet ešte nie je aktivovaný, skontrolujte si prosím email a kliknite na odkaz na potvrdenie vášho účtu."
+        signed_up_but_unconfirmed: "Úspešne ste sa zaregistrovali. Váš účet ešte nie je aktivovaný, skontrolujte si prosím e-mail a kliknite na odkaz na potvrdenie vášho účtu."
 
   signature_parameters:
     format:
@@ -459,7 +468,7 @@ sk:
       public_link_label: "Verejný odkaz na podpisovanie"
       public_link_description: "Ktokoľvek s odkazom môže podpísať dokumenty v tomto balíku bez pozvánky."
       author_notifications_label: "Notifikácie pre autora"
-      author_notifications_description: "Dostávajte emaily o dôležitých udalostiach týkajúcich sa tohto balíka."
+      author_notifications_description: "Dostávajte e-maily o dôležitých udalostiach týkajúcich sa tohto balíka."
       cancel: "Zrušiť"
     update:
       success: "Balík bol uložený"
@@ -557,14 +566,14 @@ sk:
     index:
       title: "Poslať na podpis"
       subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
-      send_invitation: "Odoslať email"
+      send_invitation: "Odoslať e-mail"
       send_to_portal: "Odoslať do portálu"
       portal_label: "Portál adresáta"
       portal_blank_option: "Tento portál"
       portal_help: "Vyberte dôveryhodný partnerský portál, ak má adresát otvoriť požiadavku cez inú inštanciu Autogram Portálu."
-      email_label: "Email adresáta"
+      email_label: "E-mail adresáta"
       email_placeholder: "jan.novak@example.com"
-      email_help: "Adresát dostane email s odkazom na podpísanie dokumentu"
+      email_help: "Adresát dostane e-mail s odkazom na podpísanie dokumentu. E-mail sa po pridaní neodošle automaticky – odošlete ho až kliknutím na „Odoslať e-mail“ pri adresátovi."
       mobile_phone_label: "Mobilné číslo adresáta"
       mobile_phone_placeholder: "+421901234567"
       mobile_phone_help: "Ak je vyplnené, overovací kód pri AdES podpise príde cez SMS. Inak sa pošle e-mailom."
@@ -592,7 +601,7 @@ sk:
       index:
         title: "Organizácie"
         subtitle: "Prehľad všetkých organizácií, ich plánov a funkcií."
-        search_placeholder: "Názov alebo email člena"
+        search_placeholder: "Názov alebo e-mail člena"
         search: "Hľadať"
         id: "ID"
         name: "Názov"
@@ -605,18 +614,18 @@ sk:
         edit: "Upraviť"
       new:
         title: "Nová organizácia"
-        subtitle: "Založenie organizácie pre zákazníka. Vlastník dostane pozvánku emailom."
+        subtitle: "Založenie organizácie pre zákazníka. Vlastník dostane pozvánku e-mailom."
       edit:
         title: "Organizácia %{name}"
         subtitle: "Zmena plánu, funkcií a členov organizácie."
         members: "Členovia"
         add_member: "Pridať člena"
-        add_member_placeholder: "Email existujúceho používateľa"
+        add_member_placeholder: "E-mail existujúceho používateľa"
       form:
         error_title: "Organizáciu sa nepodarilo uložiť"
         name: "Názov"
-        owner_email: "Email vlastníka"
-        owner_email_help: "Ak účet s týmto emailom neexistuje, vytvorí sa bez osobnej organizácie. Prázdna osobná Basic organizácia existujúceho účtu sa zmaže."
+        owner_email: "E-mail vlastníka"
+        owner_email_help: "Ak účet s týmto e-mailom neexistuje, vytvorí sa bez osobnej organizácie. Prázdna osobná Basic organizácia existujúceho účtu sa zmaže."
         plan: "Plán"
         features: "Funkcie"
         create: "Založiť organizáciu"
@@ -624,12 +633,12 @@ sk:
         cancel: "Zrušiť"
       create:
         success: "Organizácia bola založená a pozvánka odoslaná na %{email}"
-        owner_email_missing: "Zadajte email vlastníka"
+        owner_email_missing: "Zadajte e-mail vlastníka"
       update:
         success: "Organizácia bola upravená"
       add_member:
         success: "Používateľ %{email} bol pridaný do organizácie"
-        user_not_found: "Používateľ s týmto emailom neexistuje"
+        user_not_found: "Používateľ s týmto e-mailom neexistuje"
     portal_instances:
       index:
         title: "Dôveryhodné portály"
@@ -638,7 +647,7 @@ sk:
         name: "Názov"
         base_url: "Základná URL"
         status: "Stav"
-        domains: "Emailové domény"
+        domains: "E-mailové domény"
         actions: "Akcie"
         edit: "Upraviť"
         verify: "Overiť"
@@ -656,8 +665,8 @@ sk:
         issuer: "Issuer"
         public_key_pem: "Verejný kľúč (PEM)"
         status: "Stav"
-        allowed_email_domains: "Povolené emailové domény"
-        allowed_email_domains_help: "Zadajte zoznam emailových domén oddelených čiarkou, pri ktorých sa má tento portál navrhovať odosielateľom."
+        allowed_email_domains: "Povolené e-mailové domény"
+        allowed_email_domains_help: "Zadajte zoznam e-mailových domén oddelených čiarkou, pri ktorých sa má tento portál navrhovať odosielateľom."
         cancel: "Zrušiť"
       create:
         success: "Dôveryhodný portál bol vytvorený"
@@ -833,6 +842,7 @@ sk:
         unsupported_qscd: "Vaša karta nemá NFC čip – vyžaduje preukaz vydaný po 1.12.2022."
         unsupported_signature_level: "Podporuje iba podpisy BASELINE_B."
         desktop_only: "Dostupné iba na počítači."
+        method_not_allowed: "Podpisovanie v samostatných aplikáciách nie je pre tento dokument povolené."
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
@@ -1189,6 +1199,7 @@ sk:
       signature_field_submit: "Pokračovať na elektronické podpisovanie"
     allowed_methods:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
+      standalone_qes: Stiahnutie dokumentu, kvalifikovaný podpis vo vlastnej aplikácii na počítači (napr. Podpisuj) a nahratie podpísaného dokumentu späť
       ades: Elektronický podpis s evidenčným záznamom a overením cez druhý faktor (SMS alebo e-mail)
       scan: Vytlačiť, ručne podpísať a naskenovať
       visual: Pridať do PDF vizuálnu pečiatku
@@ -1196,6 +1207,7 @@ sk:
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
       short:
         qes: Kvalifikovaný elektronický podpis
+        standalone_qes: Podpisuj alebo iné samostatné aplikácie
         ades: Jednoduchý elektronický podpis
         scan: Sken podpísaného dokumentu
         visual: Vizuálna pečiatka
@@ -1391,7 +1403,7 @@ sk:
         items:
           account:
             question: "Potrebujem účet na podpisovanie dokumentu?"
-            answer: "Nie. Príjemcovia môžu dokumenty podpisovať bez registrácie priamo cez odkaz, ktorý dostanú emailom. Účet je potrebný len pre odosielateľov, ktorí chcú sledovať históriu dokumentov, posielať žiadosti o podpis a využívať pokročilé funkcie. Rovnako nie je účet potrebný, ak chcete iba vy sami podpisovať a overovať dokumenty."
+            answer: "Nie. Príjemcovia môžu dokumenty podpisovať bez registrácie priamo cez odkaz, ktorý dostanú e-mailom. Účet je potrebný len pre odosielateľov, ktorí chcú sledovať históriu dokumentov, posielať žiadosti o podpis a využívať pokročilé funkcie. Rovnako nie je účet potrebný, ak chcete iba vy sami podpisovať a overovať dokumenty."
           formats:
             question: "Aké formáty súborov sú podporované?"
             answer: "Primárne pracujeme s PDF dokumentmi. Okrem toho sú podporované XML dokumenty slovenských elektronických formulárov, ASiC-E kontajnery a ďalšie bežné formáty. Presný zoznam: .pdf, .xml, .xdcf, .asice, .txt, .png, .jpg, .jpeg"
@@ -1538,7 +1550,7 @@ sk:
             description: "Podpíšte dokument vlastným kvalifikovaným podpisom cez aplikáciu Autogram alebo eIdentitu."
           request:
             label: "Požiadať o podpis"
-            description: "Odošlite dokument iným osobám na podpis emailom — systém vytvorí balík a rozošle pozvánky."
+            description: "Odošlite dokument iným osobám na podpis e-mailom — systém vytvorí balík a rozošle pozvánky."
           timestamp:
             label: "Pridať časovú pečiatku"
             description: "Na dokument s existujúcim podpisom bez pečiatky môžete doplniť kvalifikovanú časovú pečiatku."
@@ -1561,10 +1573,10 @@ sk:
             description: "Zvoľte úroveň podpisu (bez/s časovou pečiatkou) a formát (PAdES, XAdES, CAdES, ASiC-E)."
           recipients:
             title: "Pridajte príjemcov"
-            description: "Zadajte emailové adresy osôb, ktoré majú dokument podpísať. Nastavte pravidlo podpisovania."
+            description: "Zadajte e-mailové adresy osôb, ktoré majú dokument podpísať. Nastavte pravidlo podpisovania."
           send:
             title: "Odošlite"
-            description: "Príjemcovia dostanú emailovú notifikáciu s odkazom na podpísanie. Môžete tiež skopírovať odkaz ručne."
+            description: "Príjemcovia dostanú e-mailovú notifikáciu s odkazom na podpísanie. Môžete tiež skopírovať odkaz ručne."
           done:
             title: "Stiahnite podpísané dokumenty"
             description: "Po dokončení balíka si stiahnete podpísaný súbor priamo z detailu balíka."
@@ -1605,7 +1617,7 @@ sk:
         public_link_description: "Pre každý balík môžete vygenerovať verejný odkaz, ktorý umožní podpísanie komukoľvek — bez nutnosti byť pridaný ako príjemca."
       received:
         title: "Prijaté balíky"
-        intro: "V sekcii \"Prijaté balíky\" nájdete všetky balíky, na ktorých podpisovanie ste boli pozvaní — či už emailom alebo cez verejný odkaz."
+        intro: "V sekcii \"Prijaté balíky\" nájdete všetky balíky, na ktorých podpisovanie ste boli pozvaní — či už e-mailom alebo cez verejný odkaz."
         states_title: "Vaše stavy v prijatom balíku"
         states:
           awaiting:
@@ -1629,7 +1641,7 @@ sk:
             badge_class: "bg-gray-100 text-gray-600"
             dot_class: "bg-gray-400"
         decline_title: "Odmietnutie podpisu"
-        decline_description: "Pri podpisovaní môžete podpis odmietnuť. Odosielateľ balíka dostane emailovú notifikáciu o odmietnutí."
+        decline_description: "Pri podpisovaní môžete podpis odmietnuť. Odosielateľ balíka dostane e-mailovú notifikáciu o odmietnutí."
       signing:
         screenshot_alt: "Krok Vyberte podpisovú aplikáciu: hore zvolený typ občianskeho preukazu s možnosťou Zmeniť výber, pod ním voľby Autogram na počítači (vybraná), Autogram v mobile a eIdentita a tlačidlá Späť a Pokračovať na podpisovanie"
         title: "Podpisovanie dokumentov"
@@ -1740,13 +1752,13 @@ sk:
         items:
           name:
             label: "Meno"
-            description: "Vaše zobrazované meno, ktoré vidia odosielatelia a príjemcovia v notifikačných emailoch."
+            description: "Vaše zobrazované meno, ktoré vidia odosielatelia a príjemcovia v notifikačných e-mailoch."
           email:
-            label: "Email"
-            description: "Prihlasovací email je v nastaveniach iba zobrazený (read-only) a nie je možné ho meniť."
+            label: "E-mail"
+            description: "Prihlasovací e-mail je v nastaveniach iba zobrazený (read-only) a nie je možné ho meniť."
           login:
             label: "Spôsoby prihlásenia"
-            description: "Prihlásenie je možné cez Google OAuth alebo jednorazový odkaz (magic link) zaslaný na email."
+            description: "Prihlásenie je možné cez Google OAuth alebo jednorazový odkaz (magic link) zaslaný na e-mail."
           delete_account:
             label: "Zmazať účet"
             description: "V sekcii Danger Zone môžete účet natrvalo zmazať po potvrdení bezpečnostnej frázy."
@@ -1798,10 +1810,10 @@ sk:
         requests:
           origin_link:
             label: "Pôvodná URL požiadavky"
-            description: "Bežná podpisová URL balíka, typicky `/bundles/:bundle_uuid/sign?recipient=:recipient_uuid`. Túto URL odosielateľ kopíruje alebo ju adresát dostane v notifikačnom emaile."
+            description: "Bežná podpisová URL balíka, typicky `/bundles/:bundle_uuid/sign?recipient=:recipient_uuid`. Túto URL odosielateľ kopíruje alebo ju adresát dostane v notifikačnom e-maile."
           well_known:
             label: "Federované metadáta"
-            description: "Dokument `/.well-known/autogram-portal.json` zverejňuje issuer, názov portálu, verejný kľúč, základ federovaného API, podporované schopnosti a voliteľné emailové domény portálu."
+            description: "Dokument `/.well-known/autogram-portal.json` zverejňuje issuer, názov portálu, verejný kľúč, základ federovaného API, podporované schopnosti a voliteľné e-mailové domény portálu."
           preview_api:
             label: "API požiadavka na náhľad"
             description: "`GET /api/federation/v1/requests/:recipient_uuid` používa domáci portál na získanie čitateľného náhľadu požiadavky ešte pred jej prevzatím."
@@ -1816,7 +1828,7 @@ sk:
           explicit_trust: "Smerovanie od odosielateľa používa explicitne nakonfigurovaný zoznam dôveryhodných portálov. Takto pôvodný portál rozhoduje, ktorý domáci portál smie prevziať federovaného adresáta."
           dynamic_opening: "Otvorenie vloženého cudzieho odkazu na domácom portáli je voľnejšie: domáci portál si môže pôvodný portál objaviť dynamicky cez jeho metadátový dokument aj bez lokálneho záznamu dôvery."
           portal_auth: "Portálové API volania sú autentifikované samostatným JWT tvrdením s issuerom, audience, exspiráciou, unikátnym ID a federovaným scope."
-          recipient_binding: "Pôvodný portál overuje, že preberajúci portál sa zhoduje s portálom priradeným adresátovi a že email preberajúceho používateľa sa stále zhoduje s emailom adresáta."
+          recipient_binding: "Pôvodný portál overuje, že preberajúci portál sa zhoduje s portálom priradeným adresátovi a že e-mail preberajúceho používateľa sa stále zhoduje s e-mailom adresáta."
           source_of_truth: "Dokončenie balíka, stiahnutie adresáta, superseding aj uloženie podpísaných dokumentov zostávajú vždy na pôvodnom portáli."
           revocation: "Krátkodobé prístupové granty sa rušia automaticky, keď požiadavka už pre daného adresáta nie je platná."
         current_scope_title: "Rozsah aktuálnej implementácie"
@@ -2090,7 +2102,7 @@ sk:
     memberships:
       create:
         success: "Pozvánka pre %{email} bola odoslaná"
-        email_missing: "Zadajte email používateľa"
+        email_missing: "Zadajte e-mail používateľa"
       destroy:
         success: "Používateľ %{email} bol odstránený z organizácie"
 

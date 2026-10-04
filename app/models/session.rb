@@ -29,6 +29,16 @@ class Session < ApplicationRecord
     end
   end
 
+  # The uploaded signed file is unusable; the signer can fix it and upload again.
+  class InvalidSignedFileError < StandardError
+    attr_reader :reason
+
+    def initialize(reason)
+      @reason = reason
+      super(I18n.t("session.errors.#{reason}"))
+    end
+  end
+
   # Reasons a signing app cannot sign the document as it was requested (its
   # signature level, its files or prepared fields), as opposed to reasons on the
   # signer's side such as the ID card.
@@ -199,11 +209,11 @@ class Session < ApplicationRecord
 
   def decode_signed_file!(signed_file)
     decoded_signed_file = Base64.strict_decode64(signed_file.to_s)
-    raise "Signed document payload is empty" if decoded_signed_file.blank?
+    raise InvalidSignedFileError, :empty_payload if decoded_signed_file.blank?
 
     decoded_signed_file
   rescue ArgumentError
-    raise "Signed document payload is not valid Base64"
+    raise InvalidSignedFileError, :invalid_base64
   end
 
   def validate_signed_file!(decoded_signed_file)
@@ -216,9 +226,9 @@ class Session < ApplicationRecord
     validation_document = Document.new(blob: validation_blob)
     validation_result = AutogramEnvironment.autogram_service.validate_signatures(validation_document)
 
-    raise "Signed document validation failed" unless validation_result.valid_response?
-    raise "Signed document does not contain signatures" unless validation_result.has_signatures?
-    raise "Signed document signatures are invalid" unless validation_result.signatures.any? { |signature| signature.valid }
+    raise InvalidSignedFileError, :validation_failed unless validation_result.valid_response?
+    raise InvalidSignedFileError, :no_signatures unless validation_result.has_signatures?
+    raise InvalidSignedFileError, :invalid_signatures unless validation_result.signatures.any? { |signature| signature.valid }
 
     ensure_signed_content_matches_contract!(validation_document)
 
@@ -269,8 +279,8 @@ class Session < ApplicationRecord
     Turbo::StreamsChannel.broadcast_replace_to(
       self,
       target: "signature_apps_#{contract.uuid}",
-      partial: "contracts/sessions/error",
-      locals: { session: self }
+      partial: "contracts/sessions/session",
+      locals: { session: self, recipient: recipient, iframe: iframe_param, embedded: nil, skip_method_choice: nil }
     )
   end
 end

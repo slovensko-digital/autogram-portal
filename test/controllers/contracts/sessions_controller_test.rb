@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
+  include Turbo::Broadcastable::TestHelper
+
   setup do
     @contract, @session = create_contract_with_session
     @autogram_service = AutogramService.new
@@ -83,6 +85,22 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_instance_of AdesEvidenceSession, session
     assert_equal "true", session.options["iframe"]
     assert_equal "sms", session.verification_channel
+  end
+
+  test "podpisuj session is created only when standalone signing is allowed" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/sessions/podpisuj"
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.method_not_allowed")
+    assert_equal 0, contract.reload.sessions.where(type: "PodpisujSession").count
+
+    contract.update!(allowed_methods: [ "qes", "standalone_qes" ])
+    get "/contracts/#{contract.uuid}/sessions/podpisuj"
+
+    assert_response :success
+    assert_equal 1, contract.reload.sessions.where(type: "PodpisujSession").count
   end
 
   test "ades evidence session create renders full session page on direct visit" do
@@ -410,15 +428,78 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
       documentInfo: { signed_objects_count: 1 }
     )
 
+    broadcasts = nil
+    with_autogram_service(fake_validation_service(validation_result)) do
+      broadcasts = capture_turbo_stream_broadcasts(@session) do
+        post "/contracts/#{@contract.uuid}/sessions/#{@session.id}/upload", params: {
+          session_token: SessionAccessToken.generate(contract: @contract, session: @session),
+          signed_document: Base64.strict_encode64("signed")
+        }
+      end
+
+      assert_response :bad_request
+      assert_equal I18n.t("session.errors.invalid_signatures"), JSON.parse(response.body).fetch("error")
+      assert @session.reload.failed?
+    end
+
+    error_stream = broadcasts.sole
+    assert_equal "replace", error_stream["action"]
+    assert_includes error_stream.to_html, I18n.t("contracts.sessions.error.title")
+    assert error_stream.at_css("a[href='#{signature_apps_contract_path(@contract)}']", text: I18n.t("actions.back"))
+  end
+
+  test "podpisuj upload with invalid signatures shows the error and keeps the session open" do
+    @session.update_column(:type, "PodpisujSession")
+    @session = Session.find(@session.id)
+    validation_result = AutogramService::ValidationResult.new(
+      hasSignatures: true,
+      signatures: [
+        parsed_signature(
+          validation_result: "TOTAL_FAILED",
+          subject_dn: "CN=Unknown Test, OU=Autogram, O=Autogram, L=Bratislava, ST=Bratislava, C=SK"
+        )
+      ],
+      documentInfo: { signed_objects_count: 1 }
+    )
+
     with_autogram_service(fake_validation_service(validation_result)) do
       post "/contracts/#{@contract.uuid}/sessions/#{@session.id}/upload", params: {
         session_token: SessionAccessToken.generate(contract: @contract, session: @session),
-        signed_document: Base64.strict_encode64("signed")
+        file: Rack::Test::UploadedFile.new(StringIO.new("signed"), "application/pdf", original_filename: "signed.pdf")
       }
 
-      assert_response :bad_request
-      assert_equal "Signed document signatures are invalid", JSON.parse(response.body).fetch("error")
-      assert @session.reload.failed?
+      assert_response :unprocessable_entity
+      assert_equal I18n.t("session.errors.invalid_signatures"), JSON.parse(response.body).fetch("error")
+      assert @session.reload.pending?
+      assert_nil @session.error_message
+    end
+  end
+
+  test "podpisuj upload of a different document shows the error and keeps the session open" do
+    @session.update_column(:type, "PodpisujSession")
+    @session = Session.find(@session.id)
+    validation_result = AutogramService::ValidationResult.new(
+      hasSignatures: true,
+      signatures: [
+        parsed_signature(
+          validation_result: "TOTAL_PASSED",
+          subject_dn: "CN=Signer, C=SK"
+        )
+      ],
+      documentInfo: { signed_objects_count: 1 }
+    )
+    service = fake_validation_service(validation_result)
+    service.define_singleton_method(:ensure_documents_equal) { |**| raise AutogramService::DocumentMismatchError }
+
+    with_autogram_service(service) do
+      post "/contracts/#{@contract.uuid}/sessions/#{@session.id}/upload", params: {
+        session_token: SessionAccessToken.generate(contract: @contract, session: @session),
+        file: Rack::Test::UploadedFile.new(StringIO.new("signed"), "application/pdf", original_filename: "signed.pdf")
+      }
+
+      assert_response :unprocessable_entity
+      assert_equal I18n.t("autogram_service.errors.document_mismatch_error"), JSON.parse(response.body).fetch("error")
+      assert @session.reload.pending?
     end
   end
 

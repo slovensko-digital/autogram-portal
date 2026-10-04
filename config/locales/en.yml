@@ -63,6 +63,15 @@ en:
       unknown_response_error: "Failed to process the response from the service."
       document_mismatch_error: "The signed document does not match the original document."
 
+  session:
+    errors:
+      no_file: "No file was selected."
+      empty_payload: "The uploaded file is empty."
+      invalid_base64: "The uploaded file could not be read."
+      validation_failed: "The signatures in the uploaded document could not be verified. Please try again."
+      no_signatures: "The uploaded document contains no signature. Sign it and upload it again."
+      invalid_signatures: "The signature in the uploaded document is not valid. Sign the document again and upload it."
+
   verification:
     sms:
       message: "Verification code for Autogram Portal: %{code}"
@@ -635,7 +644,7 @@ en:
       portal_help: "Choose a trusted partner portal when the recipient should open the request through another Autogram Portal instance."
       email_label: "Recipient Email"
       email_placeholder: "jan.novak@example.com"
-      email_help: "Recipient will receive an email with a link to sign the documents"
+      email_help: "The recipient will receive an email with a link to sign the documents. The email is not sent automatically when you add the recipient – send it by clicking “Send email” next to the recipient."
       mobile_phone_label: "Recipient mobile phone"
       mobile_phone_placeholder: "+421901234567"
       mobile_phone_help: "If provided, the AdES verification code is sent by SMS. Otherwise it is sent by email."
@@ -909,6 +918,7 @@ en:
         unsupported_qscd: "Your card has no NFC chip – requires an ID card issued after 1.12.2022."
         unsupported_signature_level: "Supports only BASELINE_B signatures."
         desktop_only: "Available only on a desktop computer."
+        method_not_allowed: "Signing in standalone applications is not allowed for this document."
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
@@ -1263,6 +1273,7 @@ en:
       signature_field_submit: "Continue to electronic signing"
     allowed_methods:
       qes: Qualified electronic signature
+      standalone_qes: Download the document, sign it with a qualified signature in your own desktop application (e.g. Podpisuj) and upload the signed document back
       ades: Simple electronic signature
       scan: Print, sign by hand, and scan
       visual: Add a visual stamp to the PDF
@@ -1270,6 +1281,7 @@ en:
       notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
       short:
         qes: Qualified electronic signature
+        standalone_qes: Podpisuj or other standalone applications
         ades: Simple electronic signature with second factor verification via SMS or email
         scan: Print, sign by hand, and scan
         visual: Visual stamp

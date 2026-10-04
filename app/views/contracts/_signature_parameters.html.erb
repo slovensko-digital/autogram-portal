@@ -1,6 +1,8 @@
 <%= turbo_frame_tag "contract_actions_#{@contract.uuid}" do %>
   <% configurable_allowed_methods = @contract.available_signature_methods_for(next_step: @next_step, signature_format: @contract.signature_parameters.format) %>
-  <% has_selected_configurable_method = configurable_allowed_methods.any? { |value| @contract.allowed_methods.include?(value) } %>
+  <%# Recipients get only the integrated signing apps unless the author also allows standalone ones. %>
+  <% preselected_methods = @next_step == "request_signature" ? @contract.allowed_methods - [ "standalone_qes" ] : @contract.allowed_methods %>
+  <% has_selected_configurable_method = configurable_allowed_methods.any? { |value| preselected_methods.include?(value) } %>
   <div class="w-full">
     <div class="mb-6 text-center lg:text-left">
       <h2 class="text-lg font-semibold text-gray-900 mb-2"><%= t('.sign_title') %></h2>
@@ -74,7 +76,7 @@
                         value: value,
                         label: t("contracts.allowed_methods.short.#{value.downcase}"),
                         description: t("contracts.allowed_methods.#{value.downcase}"),
-                        checked: @contract.allowed_methods.include?(value) || (!has_selected_configurable_method && configurable_allowed_methods.one? && value == configurable_allowed_methods.first) %>
+                        checked: preselected_methods.include?(value) || (!has_selected_configurable_method && configurable_allowed_methods.one? && value == configurable_allowed_methods.first) %>
                 <% end %>
               </div>
             </fieldset>

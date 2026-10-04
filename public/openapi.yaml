@@ -667,8 +667,13 @@ components:
 
     SignatureMethod:
       type: string
+      description: |
+        `qes` signs with a qualified signature through the integrated signing apps (Autogram, Autogram v mobile, eIdentita).
+        `standalone_qes` additionally lets the signer download the document, sign it with a qualified signature in a standalone
+        desktop application (e.g. Podpisuj) and upload it back. Neither implies the other.
       enum:
         - qes
+        - standalone_qes
         - ades
         - visual
         - scan

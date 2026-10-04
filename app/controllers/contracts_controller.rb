@@ -47,6 +47,7 @@ class ContractsController < ApplicationController
     @contract = Contract.new(
       tenant: current_tenant,
       author_notifications_enabled: true,
+      allowed_methods: Contract::OWN_SIGNING_DEFAULT_METHODS.dup,
       documents: [ Document.new(params.require(:document).permit(:blob)) ]
     )
 
