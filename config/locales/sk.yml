@@ -842,6 +842,7 @@ sk:
         unsupported_qscd: "Vaša karta nemá NFC čip – vyžaduje preukaz vydaný po 1.12.2022."
         unsupported_signature_level: "Podporuje iba podpisy BASELINE_B."
         desktop_only: "Dostupné iba na počítači."
+        method_not_allowed: "Podpisovanie v samostatných aplikáciách nie je pre tento dokument povolené."
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
@@ -1198,6 +1199,7 @@ sk:
       signature_field_submit: "Pokračovať na elektronické podpisovanie"
     allowed_methods:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
+      standalone_qes: Stiahnutie dokumentu, kvalifikovaný podpis vo vlastnej aplikácii na počítači (napr. Podpisuj) a nahratie podpísaného dokumentu späť
       ades: Elektronický podpis s evidenčným záznamom a overením cez druhý faktor (SMS alebo e-mail)
       scan: Vytlačiť, ručne podpísať a naskenovať
       visual: Pridať do PDF vizuálnu pečiatku
@@ -1205,6 +1207,7 @@ sk:
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
       short:
         qes: Kvalifikovaný elektronický podpis
+        standalone_qes: Podpisuj alebo iné samostatné aplikácie
         ades: Jednoduchý elektronický podpis
         scan: Sken podpísaného dokumentu
         visual: Vizuálna pečiatka

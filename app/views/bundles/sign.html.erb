@@ -115,7 +115,7 @@
                                   (public_signing_available && contract.awaiting_signature?)) && !@recipient&.declined? %>
           <% contract_signed_for_viewer = !contract.awaiting_signature? || @recipient&.signed_contract?(contract) %>
           <% first_document = contract.documents.first %>
-          <% only_electronic_signing = contract.allowed_methods.one? && contract.allowed_methods.include?('qes') %>
+          <% only_electronic_signing = contract.qualified_signing_allowed? && (contract.allowed_methods - Contract::QUALIFIED_METHODS).empty? %>
           <% signature_field_appearance_required = contract.prepared_signature_field_appearance_required_for?(recipient: @recipient) %>
           <% signature_apps_qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
           <% can_render_signature_apps_in_frame = !signature_field_appearance_required && (params[:iframe] == 'no_onboarding' || (signature_apps_qscd.present? && !User.legacy_eid_card?(signature_apps_qscd))) %>

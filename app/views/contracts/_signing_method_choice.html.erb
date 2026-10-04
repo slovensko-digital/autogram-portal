@@ -16,7 +16,7 @@ end %>
     <fieldset>
       <legend class="mb-4"><%= content_tag "h#{heading_level}", t('.title'), class: "text-lg font-semibold text-gray-900" %></legend>
       <div class="space-y-3">
-        <% if contract.allowed_methods.include?('qes') %>
+        <% if contract.qualified_signing_allowed? %>
           <%= render 'shared/radio_button_card',
                 name: "signing_method_#{contract.uuid}",
                 value: 'electronic',
@@ -36,7 +36,7 @@ end %>
                 value: 'ades',
                 label: t('.ades_label'),
                 description: t('.ades_description'),
-                checked: !contract.allowed_methods.include?('qes') && !contract.allowed_methods.include?('scan') && !contract.allowed_methods.include?('visual'),
+                checked: !contract.qualified_signing_allowed? && !contract.allowed_methods.include?('scan') && !contract.allowed_methods.include?('visual'),
                 icon: 'mobile',
                 data_attributes: {
                   signing_method_target: 'methodRadio',
@@ -64,7 +64,7 @@ end %>
                 value: 'visual',
                 label: t('.visual_label'),
                 description: t('.visual_description'),
-                checked: !contract.allowed_methods.include?('qes') && !contract.allowed_methods.include?('scan'),
+                checked: !contract.qualified_signing_allowed? && !contract.allowed_methods.include?('scan'),
                 icon: 'pencil',
                 data_attributes: {
                   signing_method_target: 'methodRadio',
@@ -75,7 +75,7 @@ end %>
     </fieldset>
 
     <div class="hidden">
-      <% if contract.allowed_methods.include?('qes') %>
+      <% if contract.qualified_signing_allowed? %>
         <%= link_to "",
             electronic_signature_apps_path,
             data: {

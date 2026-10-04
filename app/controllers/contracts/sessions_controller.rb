@@ -336,6 +336,8 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def create_podpisuj_session
+    raise SessionCreationError, t("contracts.signature_apps.unavailable_reasons.method_not_allowed") unless @contract.standalone_qes_allowed?
+
     existing = @signer_contract&.sessions&.pending&.where(type: "PodpisujSession")&.first
     return persist_session_view_options(existing) if existing
 

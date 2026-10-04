@@ -234,6 +234,19 @@ class ContractTest < ActiveSupport::TestCase
     assert Contract.new(allowed_methods: [ "qes", "ades" ]).ades_allowed?
   end
 
+  test "qualified signing is allowed with integrated or standalone apps" do
+    assert Contract.new(allowed_methods: [ "qes" ]).qualified_signing_allowed?
+    assert Contract.new(allowed_methods: [ "standalone_qes" ]).qualified_signing_allowed?
+    assert_not Contract.new(allowed_methods: [ "ades" ]).qualified_signing_allowed?
+    assert_not Contract.new(allowed_methods: [ "qes" ]).standalone_qes_allowed?
+    assert Contract.new(allowed_methods: [ "qes", "standalone_qes" ]).standalone_qes_allowed?
+  end
+
+  test "standalone signing is available wherever qes is" do
+    assert_includes Contract::ALLOWED_METHODS, "standalone_qes" if Contract::ALLOWED_METHODS.include?("qes")
+    assert_includes Contract::OWN_SIGNING_DEFAULT_METHODS, "standalone_qes" if Contract::ALLOWED_METHODS.include?("qes")
+  end
+
   test "pades field preparation is allowed for unsigned bundled pades contracts" do
     contract = Contract.create!(
       documents_attributes: [ { blob: pdf_blob("bundle-contract.pdf", "%PDF-1.4 original") } ],

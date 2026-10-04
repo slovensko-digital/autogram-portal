@@ -4,6 +4,7 @@
   signing_apps = [
     {
       session_class: AutogramSession,
+      allowed_method: "qes",
       value: "autogram",
       label: t("contracts.signature_apps.autogram_desktop_label"),
       description: t("contracts.signature_apps.autogram_desktop_description"),
@@ -12,6 +13,7 @@
     },
     {
       session_class: AvmSession,
+      allowed_method: "qes",
       value: "avm",
       label: t("contracts.signature_apps.autogram_mobile_label"),
       description: t("contracts.signature_apps.autogram_mobile_description"),
@@ -20,6 +22,7 @@
     },
     {
       session_class: EidentitaSession,
+      allowed_method: "qes",
       value: "eidentita",
       label: t("contracts.signature_apps.eidentita_label"),
       description: t("contracts.signature_apps.eidentita_description"),
@@ -28,6 +31,7 @@
     },
     {
       session_class: PodpisujSession,
+      allowed_method: "standalone_qes",
       value: "podpisuj",
       label: t("contracts.signature_apps.podpisuj_label"),
       description: t("contracts.signature_apps.podpisuj_description"),
@@ -35,6 +39,8 @@
       desktop_only: true
     }
   ]
+
+  signing_apps.select! { |app| @contract.allowed_methods.include?(app[:allowed_method]) }
 
   # Only the author of a standalone contract can change its signature format, so
   # apps that cannot sign the requested format are shown (disabled) only to them.
@@ -50,7 +56,8 @@
     last_available_index = signing_apps.rindex { |app| app[:session_class].available?(@qscd, @contract) }
     signing_apps.insert(last_available_index ? last_available_index + 1 : 0, podpisuj_app)
   end
-  first_available_app = signing_apps.find { |app| app[:session_class].available?(@qscd, @contract) }
+  available_app_values = signing_apps.select { |app| app[:session_class].available?(@qscd, @contract) }.map { |app| app[:value] }
+  first_available_app = signing_apps.find { |app| available_app_values.include?(app[:value]) }
 %>
 
 <fieldset class="space-y-3">
@@ -79,7 +86,7 @@
   <% end %>
 </fieldset>
 
-<% if (AvmSession.available?(@qscd, @contract) || EidentitaSession.available?(@qscd, @contract)) && !params[:iframe] %>
+<% if available_app_values.intersect?(%w[avm eidentita]) && !params[:iframe] %>
   <%= render "shared/info",
         title: t("contracts.signature_apps.third_party_notice_title"),
         content: t("contracts.signature_apps.third_party_notice") %>
@@ -87,7 +94,7 @@
 
 <div class="hidden">
   <% signing_apps.each do |app| %>
-    <% next unless app[:session_class].available?(@qscd, @contract) %>
+    <% next unless available_app_values.include?(app[:value]) %>
     <%= link_to "",
           public_send("#{app[:value]}_contract_sessions_path", @contract,
             recipient: @recipient,

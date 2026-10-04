@@ -918,6 +918,7 @@ en:
         unsupported_qscd: "Your card has no NFC chip – requires an ID card issued after 1.12.2022."
         unsupported_signature_level: "Supports only BASELINE_B signatures."
         desktop_only: "Available only on a desktop computer."
+        method_not_allowed: "Signing in standalone applications is not allowed for this document."
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
@@ -1272,6 +1273,7 @@ en:
       signature_field_submit: "Continue to electronic signing"
     allowed_methods:
       qes: Qualified electronic signature
+      standalone_qes: Download the document, sign it with a qualified signature in your own desktop application (e.g. Podpisuj) and upload the signed document back
       ades: Simple electronic signature
       scan: Print, sign by hand, and scan
       visual: Add a visual stamp to the PDF
@@ -1279,6 +1281,7 @@ en:
       notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
       short:
         qes: Qualified electronic signature
+        standalone_qes: Podpisuj or other standalone applications
         ades: Simple electronic signature with second factor verification via SMS or email
         scan: Print, sign by hand, and scan
         visual: Visual stamp

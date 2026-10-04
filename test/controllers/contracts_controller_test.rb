@@ -220,7 +220,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signature apps show incompatible qscd choices disabled without launch links" do
-    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
 
     get signature_apps_contract_path(contract, qscd: "eid_2021")
 
@@ -241,7 +241,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "embedded signature apps enable all compatible choices" do
-    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
 
     get signature_apps_contract_path(contract, qscd: "eid_2024", embedded: true)
 
@@ -254,7 +254,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signature apps of a standalone contract show apps that cannot sign its level disabled" do
-    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
     contract.signature_parameters.update!(level: "BASELINE_T")
 
     get signature_apps_contract_path(contract, qscd: "eid_2024")
@@ -266,7 +266,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signature apps leave out apps that cannot sign the requested format in an iframe" do
-    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
     contract.signature_parameters.update!(level: "BASELINE_T")
 
     get signature_apps_contract_path(contract, qscd: "eid_2024", iframe: "true")
@@ -278,7 +278,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signature apps of a bundled contract leave out apps that cannot sign its format but keep card restrictions" do
-    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
     contract.signature_parameters.update!(level: "BASELINE_T")
     bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "signer@example.com")
@@ -292,6 +292,72 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[value='avm'][disabled]", count: 1
     assert_select "input[value='eidentita'][disabled]", count: 1
     assert_not_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
+  end
+
+  test "signature apps leave out standalone apps unless standalone signing is allowed" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024")
+
+    assert_response :success
+    assert_equal %w[autogram avm eidentita], signature_app_values
+    assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 0
+  end
+
+  test "signature apps offer only standalone apps when qes is not allowed" do
+    contract = create_pdf_contract(allowed_methods: [ "standalone_qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024")
+
+    assert_response :success
+    assert_equal %w[podpisuj], signature_app_values
+    assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
+  end
+
+  test "uploaded own contract allows standalone apps by default and the author can turn them off" do
+    post contracts_path, params: {
+      document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 own"), "application/pdf", original_filename: "own.pdf") },
+      contract: { agree_to_policies: "1" }
+    }
+    contract = Contract.order(:id).last
+    assert_equal [ "qes", "standalone_qes" ], contract.allowed_methods
+
+    get signature_parameters_contract_path(contract, target_step: "sign")
+    assert_select "input[name='contract[allowed_methods][]'][value='standalone_qes'][checked]", count: 1
+
+    put "/contracts/#{contract.uuid}", params: {
+      next_step: "sign",
+      contract: {
+        allowed_methods: [ "qes" ],
+        signature_parameters_attributes: { id: contract.signature_parameters.id, level: "BASELINE_B", format: "PAdES" }
+      }
+    }
+
+    assert_redirected_to sign_contract_path(contract)
+    assert_equal [ "qes" ], contract.reload.allowed_methods
+  end
+
+  test "requesting signatures leaves standalone apps unchecked by default" do
+    user = users(:one)
+    user.update_columns(confirmed_at: Time.current)
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
+    contract.update!(tenant: tenants(:one))
+    sign_in user
+
+    get signature_parameters_contract_path(contract, target_step: "request_signature")
+
+    assert_response :success
+    assert_select "input[name='contract[allowed_methods][]'][value='qes'][checked]", count: 1
+    assert_select "input[name='contract[allowed_methods][]'][value='standalone_qes']", count: 1
+    assert_select "input[name='contract[allowed_methods][]'][value='standalone_qes'][checked]", count: 0
+
+    put "/contracts/#{contract.uuid}", params: {
+      next_step: "request_signature",
+      contract: { allowed_methods: [ "qes" ] }
+    }
+
+    assert_redirected_to contract.reload.bundle
+    assert_equal [ "qes" ], contract.allowed_methods
   end
 
   test "visual signing creates stamped content and marks signer signed" do

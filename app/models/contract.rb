@@ -56,11 +56,19 @@ class Contract < ApplicationRecord
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
   accepts_nested_attributes_for :signature_parameters
 
-  ALLOWED_METHODS = ENV.fetch("ALLOWED_METHODS", "qes,ades").split(",").map(&:strip)
+  # "qes" signs through the integrated apps (Autogram, AVM, eIdentita); "standalone_qes"
+  # lets the signer download the document, sign it in a standalone app (e.g. Podpisuj)
+  # and upload it back. Standalone signing is available wherever QES is.
+  QUALIFIED_METHODS = %w[qes standalone_qes].freeze
+  ALLOWED_METHODS = ENV.fetch("ALLOWED_METHODS", "qes,ades").split(",").map(&:strip).then do |methods|
+    methods.include?("qes") ? methods | [ "standalone_qes" ] : methods
+  end
+  # Contracts uploaded to sign oneself also offer standalone apps; requests for signatures do not by default.
+  OWN_SIGNING_DEFAULT_METHODS = ((QUALIFIED_METHODS & ALLOWED_METHODS).presence || [ "qes" ]).freeze
   attribute :allowed_methods, default: [ "qes" ]
 
   validate :validate_allowed_methods
-  validates :signature_parameters, presence: true, if: -> { allowed_methods.present? && allowed_methods.include?("qes") }
+  validates :signature_parameters, presence: true, if: :qualified_signing_allowed?
   validate :validate_documents
   validate :validate_signature_parameters, if: -> { signature_parameters.present? }
   validates :uuid, presence: true, uniqueness: true
@@ -261,6 +269,14 @@ class Contract < ApplicationRecord
 
   def ades_allowed?
     allowed_methods.include?("ades")
+  end
+
+  def qualified_signing_allowed?
+    Array(allowed_methods).intersect?(QUALIFIED_METHODS)
+  end
+
+  def standalone_qes_allowed?
+    allowed_methods.include?("standalone_qes")
   end
 
   def latest_visual_signature_stamps

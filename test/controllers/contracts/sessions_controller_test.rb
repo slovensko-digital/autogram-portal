@@ -87,6 +87,22 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "sms", session.verification_channel
   end
 
+  test "podpisuj session is created only when standalone signing is allowed" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/sessions/podpisuj"
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.method_not_allowed")
+    assert_equal 0, contract.reload.sessions.where(type: "PodpisujSession").count
+
+    contract.update!(allowed_methods: [ "qes", "standalone_qes" ])
+    get "/contracts/#{contract.uuid}/sessions/podpisuj"
+
+    assert_response :success
+    assert_equal 1, contract.reload.sessions.where(type: "PodpisujSession").count
+  end
+
   test "ades evidence session create renders full session page on direct visit" do
     contract, recipient = create_bundle_contract_with_mobile_recipient
 
