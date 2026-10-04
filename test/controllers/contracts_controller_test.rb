@@ -225,6 +225,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get signature_apps_contract_path(contract, qscd: "eid_2021")
 
     assert_response :success
+    assert_equal %w[autogram podpisuj avm eidentita], signature_app_values
     assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
     assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 2
     assert_select "input[value='avm'][disabled]", count: 1
@@ -245,6 +246,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get signature_apps_contract_path(contract, qscd: "eid_2024", embedded: true)
 
     assert_response :success
+    assert_equal %w[autogram avm eidentita podpisuj], signature_app_values
     assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
     assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 0
     assert_select "input[data-desktop-only='true']", count: 2
@@ -259,6 +261,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "input[value='podpisuj'][disabled]", count: 1
+    assert_equal %w[autogram avm eidentita podpisuj], signature_app_values
     assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
   end
 
@@ -721,6 +724,10 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def signature_app_values
+    css_select("input[data-signing-app-selector-target='appRadio']").map { |radio| radio["value"] }
+  end
 
   def create_pdf_contract(allowed_methods:)
     blob = ActiveStorage::Blob.create_and_upload!(

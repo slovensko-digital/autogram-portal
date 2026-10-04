@@ -411,7 +411,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     message = assert_portal_message("sign-error")
     assert_equal bundle.contracts.sole.uuid, message["contract_id"]
     assert_equal bundle.uuid, message["bundle_id"]
-    assert_equal "Signed document does not contain signatures", message["error_message"]
+    assert_equal I18n.t("session.errors.no_signatures"), message["error_message"]
     assert_not bundle.reload.completed?
   end
 

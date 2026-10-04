@@ -67,6 +67,7 @@ export default class extends Controller {
     this.statusTarget.classList.add("hidden")
     this.errorTarget.classList.remove("hidden")
     this.errorTarget.textContent = message
+    this.inputTarget.value = ""
   }
 
   hideError() {

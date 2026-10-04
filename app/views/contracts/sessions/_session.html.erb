@@ -1,28 +1,31 @@
-<%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
+<%# locals: (session:, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]) %>
+<% @session ||= session %>
+<% contract = @session.contract %>
+<%= turbo_frame_tag "signature_apps_#{contract.uuid}" do %>
   <%=  turbo_stream_from @session %>
   <div class="mx-auto flex max-w-4xl flex-col items-center space-y-6 lg:flex">
     <div class="relative isolate overflow-hidden">
       <% if @session.signed? %>
-        <%= render "signed" %>
-      <% elsif @session.failed? %>
-        <%= render "error" %>
+        <%= render "contracts/sessions/signed" %>
+      <% elsif @session.failed? || @session.expired? %>
+        <%= render "contracts/sessions/error" %>
       <% elsif @session.eidentita? %>
-        <%= render "eidentita" %>
+        <%= render "contracts/sessions/eidentita" %>
       <% elsif @session.avm? %>
-        <%= render "avm" %>
+        <%= render "contracts/sessions/avm" %>
       <% elsif @session.autogram? %>
-        <%= render "autogram" %>
+        <%= render "contracts/sessions/autogram" %>
       <% elsif @session.ades_evidence? %>
-        <%= render "ades_evidence" %>
+        <%= render "contracts/sessions/ades_evidence" %>
       <% elsif @session.podpisuj? %>
-        <%= render "podpisuj" %>
+        <%= render "contracts/sessions/podpisuj" %>
       <% end %>
       <!-- Footer with back button -->
       <div class="border-t border-gray-200 px-6 py-4">
         <% back_path = if @session.ades_evidence?
-          @contract.bundle ? sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]) : sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice])
+          contract.bundle ? sign_bundle_path(contract.bundle, recipient: recipient&.uuid, iframe: iframe, embedded: embedded, skip_method_choice: skip_method_choice) : sign_contract_path(contract, recipient: recipient&.uuid, iframe: iframe, embedded: embedded, skip_method_choice: skip_method_choice)
         else
-          signature_apps_contract_path(@contract, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice])
+          signature_apps_contract_path(contract, recipient: recipient, iframe: iframe, embedded: embedded, skip_method_choice: skip_method_choice)
         end %>
 
         <%= link_to back_path,

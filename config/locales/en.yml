@@ -63,6 +63,15 @@ en:
       unknown_response_error: "Failed to process the response from the service."
       document_mismatch_error: "The signed document does not match the original document."
 
+  session:
+    errors:
+      no_file: "No file was selected."
+      empty_payload: "The uploaded file is empty."
+      invalid_base64: "The uploaded file could not be read."
+      validation_failed: "The signatures in the uploaded document could not be verified. Please try again."
+      no_signatures: "The uploaded document contains no signature. Sign it and upload it again."
+      invalid_signatures: "The signature in the uploaded document is not valid. Sign the document again and upload it."
+
   verification:
     sms:
       message: "Verification code for Autogram Portal: %{code}"
@@ -635,7 +644,7 @@ en:
       portal_help: "Choose a trusted partner portal when the recipient should open the request through another Autogram Portal instance."
       email_label: "Recipient Email"
       email_placeholder: "jan.novak@example.com"
-      email_help: "Recipient will receive an email with a link to sign the documents"
+      email_help: "The recipient will receive an email with a link to sign the documents. The email is not sent automatically when you add the recipient – send it by clicking “Send email” next to the recipient."
       mobile_phone_label: "Recipient mobile phone"
       mobile_phone_placeholder: "+421901234567"
       mobile_phone_help: "If provided, the AdES verification code is sent by SMS. Otherwise it is sent by email."

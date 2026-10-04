@@ -21,6 +21,24 @@
 	--font-logo: "Source Sans Pro", sans-serif;
 }
 
+/* Tailwind v4 no longer gives buttons a pointer cursor; restore it for all clickable controls.
+   Kept in the base layer so cursor-* utilities still override it. */
+@layer base {
+	button:not(:disabled),
+	[role="button"]:not([aria-disabled="true"]),
+	input:is([type="checkbox"], [type="radio"], [type="file"], [type="submit"], [type="button"], [type="reset"]):not(:disabled),
+	input:is([type="checkbox"], [type="radio"]):not(:disabled) + label,
+	label:has(> input:is([type="checkbox"], [type="radio"], [type="file"]):not(:disabled)),
+	select:not(:disabled),
+	summary {
+		cursor: pointer;
+	}
+
+	input:not(:disabled)::file-selector-button {
+		cursor: pointer;
+	}
+}
+
 /* ALTCHA dims its footer with opacity: 0.7, which lowers the text contrast below 4.5:1 */
 altcha-widget .altcha-footer {
 	opacity: 1;

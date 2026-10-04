@@ -11,14 +11,6 @@
       desktop_only: true
     },
     {
-      session_class: PodpisujSession,
-      value: "podpisuj",
-      label: t("contracts.signature_apps.podpisuj_label"),
-      description: t("contracts.signature_apps.podpisuj_description"),
-      icon: "pencil",
-      desktop_only: true
-    },
-    {
       session_class: AvmSession,
       value: "avm",
       label: t("contracts.signature_apps.autogram_mobile_label"),
@@ -33,6 +25,14 @@
       description: t("contracts.signature_apps.eidentita_description"),
       icon: "mobile",
       desktop_only: false
+    },
+    {
+      session_class: PodpisujSession,
+      value: "podpisuj",
+      label: t("contracts.signature_apps.podpisuj_label"),
+      description: t("contracts.signature_apps.podpisuj_description"),
+      icon: "pencil",
+      desktop_only: true
     }
   ]
 
@@ -42,6 +42,13 @@
     signing_apps.reject! do |app|
       app[:session_class].unavailability_reasons(@qscd, @contract).intersect?(Session::SIGNATURE_FORMAT_UNAVAILABILITY_REASONS)
     end
+  end
+  # Podpisuj (and other standalone apps) goes after the last available app, but still before the unavailable ones.
+  podpisuj_app = signing_apps.find { |app| app[:value] == "podpisuj" }
+  if podpisuj_app&.dig(:session_class)&.available?(@qscd, @contract)
+    signing_apps.delete(podpisuj_app)
+    last_available_index = signing_apps.rindex { |app| app[:session_class].available?(@qscd, @contract) }
+    signing_apps.insert(last_available_index ? last_available_index + 1 : 0, podpisuj_app)
   end
   first_available_app = signing_apps.find { |app| app[:session_class].available?(@qscd, @contract) }
 %>

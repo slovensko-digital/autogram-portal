@@ -135,9 +135,15 @@ class Contracts::SessionsController < ApplicationController
       @session.accept_signed_file(params[:signed_document])
       render json: { success: true }
     else
-      render json: { error: "No file provided" }, status: :bad_request
+      render json: { error: t("session.errors.no_file") }, status: :bad_request
     end
   rescue => e
+    if @session.podpisuj? && retryable_upload_error?(e)
+      # The signer uploads the file by hand, so keep the session open and let them pick another file.
+      Rails.logger.info "Rejected uploaded signed document: #{e.message}"
+      return render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     Rails.logger.error "Error uploading signed document: #{e.message}"
     @session.update(error_message: e.message) if @session.respond_to?(:update)
     @session.mark_failed!(e.message) if @session.respond_to?(:mark_failed!)
@@ -157,6 +163,10 @@ class Contracts::SessionsController < ApplicationController
   end
 
   private
+
+  def retryable_upload_error?(error)
+    error.is_a?(Session::InvalidSignedFileError) || error.is_a?(AutogramService::AutogramServiceError)
+  end
 
   def set_contract
     @contract = Contract.find_by!(uuid: params[:contract_id])
