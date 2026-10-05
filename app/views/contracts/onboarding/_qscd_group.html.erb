@@ -1,0 +1,46 @@
+<%# locals: (group:, selected: nil, required: false) %>
+<%#
+  Disclosure section with a part of the QSCD radio group (WAI-ARIA disclosure pattern):
+  the toggle button sits in a heading, its state is aria-expanded (the visible
+  "show/hide" hint is aria-hidden so the name doesn't change), and the revealed radios
+  form a named sub-group.
+%>
+<% values = User::QSCD_GROUPS.fetch(group) %>
+<% expanded = selected.to_s.in?(values) %>
+<% base_id = "qscd_group_#{group}" %>
+
+<div data-controller="toggle" data-toggle-collapsed-value="<%= !expanded %>" class="w-full">
+  <h2 class="m-0">
+    <button type="button"
+            id="<%= base_id %>_button"
+            data-action="click->toggle#toggle" data-toggle-target="button"
+            aria-expanded="<%= expanded %>"
+            aria-controls="<%= base_id %>_content"
+            aria-describedby="<%= base_id %>_subtitle"
+            class="flex w-full min-h-11 items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 cursor-pointer">
+      <span class="flex flex-col items-start gap-0.5 min-w-0 text-left">
+        <span id="<%= base_id %>_title" class="text-gray-900"><%= t(".#{group}.title") %></span>
+        <span id="<%= base_id %>_subtitle" class="text-xs font-normal text-gray-600"><%= t(".#{group}.subtitle") %></span>
+      </span>
+      <span class="flex items-center gap-2 shrink-0" aria-hidden="true">
+        <span class="hidden md:inline text-xs text-gray-600">
+          <span data-toggle-target="textCollapsed" class="<%= 'hidden' if expanded %>"><%= t(".#{group}.show") %></span>
+          <span data-toggle-target="textExpanded" class="<%= 'hidden' unless expanded %>"><%= t(".#{group}.hide") %></span>
+        </span>
+        <svg data-toggle-target="icon"
+             class="w-4 h-4 text-gray-500 transition-transform duration-200 motion-reduce:transition-none <%= 'rotate-180' if expanded %>"
+             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </span>
+    </button>
+  </h2>
+
+  <div id="<%= base_id %>_content" data-toggle-target="content"
+       role="group" aria-labelledby="<%= base_id %>_title"
+       class="<%= 'hidden ' unless expanded %>mt-2 space-y-2">
+    <% values.each do |value| %>
+      <%= render "contracts/onboarding/qscd_option", value: value, selected: selected, required: required %>
+    <% end %>
+  </div>
+</div>

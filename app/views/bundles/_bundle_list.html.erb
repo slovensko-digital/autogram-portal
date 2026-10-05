@@ -13,7 +13,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-sm font-semibold text-gray-900"><%= bundle.display_name %></span>
+              <%= link_to bundle.display_name, bundle_path(bundle), class: "text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors" %>
             </div>
             <div class="md:hidden flex-1 items-center w-36 shrink-0">
               <% if bundle_state == :completed %>
@@ -57,9 +57,10 @@
           </div>
           <div class="flex items-center gap-6 shrink-0 justify-end">
             <% if show_destroy %>
-              <%= link_to bundle_path(bundle),
-                          data: { turbo_method: :delete, turbo_confirm: t('bundles.destroy.confirm', name: bundle.display_name) },
-                          class: "hidden underline sm:inline text-sm text-red-700 hover:text-red-900 transition-colors" do %>
+              <%= button_to bundle_path(bundle), method: :delete,
+                            form: { data: { turbo_confirm: t('bundles.destroy.confirm', name: bundle.display_name) } },
+                            form_class: "hidden sm:inline",
+                            class: "underline cursor-pointer text-sm text-red-700 hover:text-red-900 transition-colors" do %>
                 <%= t('actions.delete') %><span class="sr-only">: <%= bundle.display_name %></span>
               <% end %>
             <% end %>

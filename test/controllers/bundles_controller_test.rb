@@ -298,6 +298,8 @@ class BundlesControllerTest < ActionController::TestCase
     assert_includes response.body, I18n.t("bundles.received.external_invitation_title")
     assert_includes response.body, portal_instance.name
     assert_includes response.body, federation_requests_open_path(url: invitation.payload["openUrl"])
+    assert_select "a[href=?]", federation_requests_open_path(url: invitation.payload["openUrl"]),
+                  text: I18n.t("bundles.received.external_invitation_title")
   end
 
   test "received signed filter lists signed invitations from trusted portals" do

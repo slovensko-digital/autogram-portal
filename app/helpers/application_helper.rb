@@ -32,6 +32,10 @@ module ApplicationHelper
     ENV["PRIVACY_POLICY_URL"].presence || root_path
   end
 
+  def pricing_url
+    ENV["PRICING_URL"].presence
+  end
+
   def decode_base64_content(content, mime_type)
     return content unless mime_type&.include?(";base64")
 

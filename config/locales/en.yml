@@ -955,7 +955,7 @@ en:
       unavailable_reasons:
         multiple_files: "Does not support documents with multiple files."
         prepared_signature_fields: "Does not support prepared signature fields."
-        unsupported_qscd: "Your card has no NFC chip – requires an ID card issued after 1.12.2022."
+        unsupported_qscd: "Requires a document with an NFC chip (e.g. a Slovak ID card issued after 1.12.2022)."
         unsupported_signature_level: "Supports only BASELINE_B signatures."
         desktop_only: "Available only on a desktop computer."
         method_not_allowed: "Signing in standalone applications is not allowed for this document."
@@ -1213,16 +1213,30 @@ en:
       physical_title: "Physical Signing Setup"
       subtitle: "Complete these steps to prepare for signing"
       qscd_check:
-        title: "Select your ID card type"
-        description: "Based on your selection, we will show available qualified signing options."
+        title: "What will you sign with?"
+        description: "Select your identity document or qualified device (smart card, USB token). Based on your selection, we will show available qualified signing options."
+        sk_eid_title: "Slovak ID card"
         compatible_mobile: "Compatible with mobile signing apps (AVM, eIdentita)"
         requires_desktop: "Requires a computer with card reader (Autogram Desktop only)"
         issued_after: "Issued after %{date}"
-        dpb_cards: "Residence permit cards"
-        show_dpb: "Show residence permit cards"
-        hide_dpb: "Hide residence permit cards"
         continue: "Continue"
-        invalid_selection: "Please select your ID card type."
+        invalid_selection: "Please select the document or device you will sign with."
+      qscd_group:
+        sk_dpb:
+          title: "Residence permit cards"
+          subtitle: "Slovak cards for foreigners residing in Slovakia"
+          show: "Show residence permit cards"
+          hide: "Hide residence permit cards"
+        cz_eid:
+          title: "Czech ID card (eObčanka)"
+          subtitle: "With a qualified certificate from a Czech certification authority"
+          show: "Show Czech ID cards"
+          hide: "Hide Czech ID cards"
+        tokens:
+          title: "Qualified smart cards and USB tokens"
+          subtitle: "Devices from certification authorities, e.g. I.CA, MONET+, Thales (Gemalto)"
+          show: "Show cards and tokens"
+          hide: "Hide cards and tokens"
       pin_check:
         title: "Do you know your BOK?"
         description_a: "To use the electronic ID card, you need to know the security personal code (BOK). This code is set when issuing a new ID card at the office."
@@ -1230,7 +1244,24 @@ en:
         no_pin_title: "Don't have your BOK?"
         no_pin_description: "You have to visit regional police office to reset it."
         no_pin_learn_more: "Learn what to do if you forgot your BOK"
+        no_pin_learn_more_url: "https://www.slovensko.sk/sk/faq/_obciansky-preukaz-s-cipom-do#zabudne"
         continue: "I have my BOK, continue"
+        cz:
+          title: "Do you know the PIN for your signing certificate?"
+          description_a: "To sign with a Czech ID card, you need the PIN for the signing key that you set when the qualified certificate was loaded onto the chip."
+          description_b: "You will enter the PIN in the Autogram app for every signature. Never share it with anyone and keep it safe."
+          no_pin_title: "Don't know your PIN?"
+          no_pin_description: "Contact the certification authority that loaded the certificate onto your ID card."
+          no_pin_learn_more: "Signing with a Czech ID card"
+          no_pin_learn_more_url: "https://info.identita.gov.cz/eop/Podepisovani.aspx"
+          continue: "I know my PIN, continue"
+        token:
+          title: "Do you know the PIN for your card or token?"
+          description_a: "The signing key on a qualified smart card or USB token is protected by a PIN. You received it from the certification authority or set it when you took over the device."
+          description_b: "After several wrong attempts the PIN gets blocked and can only be unblocked with the PUK code."
+          no_pin_title: "Don't know your PIN?"
+          no_pin_description: "Contact the certification authority that issued your card or token (e.g. I.CA, MONET+)."
+          continue: "I know my PIN, continue"
       certificate_check:
         title: "Do you have certificates on your eID card?"
         description_a: "To sign documents electronically, you need to have valid certificates on your eID card. These certificates are used to create qualified electronic signatures and are essential for the signing process."
@@ -1238,13 +1269,34 @@ en:
         no_certificates_title: "Don't have certificates yet?"
         no_certificates_description: "You'll need to use a computer and a physical card reader to issue them first. This is a one-time requirement."
         no_certificates_learn_more: "Learn more about eID card certificates"
+        no_certificates_learn_more_url: "https://navody.digital/zivotne-situacie/aktivacia-eid/krok/certifikaty"
         continue: "I have certificates, continue"
+        cz:
+          title: "Is there a qualified certificate on your ID card?"
+          description_a: "A Czech ID card issued since 1.7.2018 can hold a qualified signing certificate, but it is not issued automatically. A qualified certification authority (e.g. PostSignum, I.CA) has to load it onto the chip."
+          description_b: "To sign, you need a card reader connected to a computer, the eObčanka software and the Autogram app."
+          no_certificates_title: "Don't have a certificate yet?"
+          no_certificates_description: "Request a qualified certificate from one of the Czech qualified certification authorities. Issuing methods and fees differ between them."
+          no_certificates_learn_more: "Signing with an ID card (identita.gov.cz)"
+          no_certificates_learn_more_url: "https://info.identita.gov.cz/eop/Podepisovani.aspx"
+          continue: "I have a certificate, continue"
+        token:
+          title: "Is your device ready?"
+          description_a: "A qualified smart card or USB token holds a certificate from a certification authority. Check that the certificate is still valid."
+          description_b: "To sign, you need a computer with the Autogram app and the device driver installed (e.g. I.CA SecureStore, MONET+ ProID+, SafeNet Authentication Client). For other devices, set the path to the PKCS#11 driver in Autogram."
+          no_certificates_title: "Has your certificate expired?"
+          no_certificates_description: "Renew the certificate with the certification authority that issued your device."
+          continue: "My device is ready, continue"
       legacy_eid_card:
         title: "Electronic Signing Not Available"
         description: "Unfortunately, your selected card generation no longer supports qualified electronic signatures. To sign documents electronically, you need to obtain a newer card."
         warning_title: "This card is no longer valid for qualified electronic signing"
         warning_description: "Older card generations can no longer be used for qualified electronic signatures. You need to request a newer one at the issuing authority."
         warning_learn_more: "How to get a new eID card"
+        cz:
+          description: "Your Czech ID card does not support qualified electronic signatures. You need an ID card issued since 1.7.2018 with a qualified certificate loaded, or another qualified smart card or USB token."
+          warning_title: "This ID card cannot be used for qualified signing"
+          warning_description: "A qualified certificate cannot be loaded onto ID cards issued before 1.7.2018. Request a new ID card or use another qualified smart card or USB token."
       physical_instructions:
         title: "Physical Signing Instructions"
         description: "To sign this document physically, please follow these steps:"
@@ -1417,8 +1469,19 @@ en:
         description_html: "A platform for managing <span class=\"inline-flex items-center font-semibold text-gray-900\">qualified</span> electronic signatures. <span class=\"font-semibold text-gray-900\">Send contracts</span> to third parties for signing, <span class=\"font-semibold text-gray-900\">archive</span> signed documents, and easily <span class=\"font-semibold text-gray-900\">integrate</span> with your own system."
         view_on_github: "View on GitHub"
         log_in: "Log in"
+        start_signing: "Sign a document"
+        create_account: "Create a free account"
       start_using:
+        subtitle: "Pricing"
         title: "Start using Autogram Portal today"
+        vat_note: "All prices are exclusive of VAT"
+        full_pricing: "Full pricing"
+        opens_in_new_tab: "(opens in a new tab)"
+        integration:
+          title: "Integration into your own systems"
+          description: "Account setup, configuration, access to the API integration and consultations (3 hours)"
+          price: "€249"
+          price_note: "one-time"
         anonymous:
           title: "Anonymous"
           price: "Free"
@@ -1456,14 +1519,21 @@ en:
               other: "At most %{count} users"
         pro:
           title: "PRO account"
-          price: "EUR 19/month"
+          badge: "For businesses"
+          price_amount: "€19"
+          price_period: "/ month"
           audience: "A comprehensive signing tool"
+          usage_prices: "Plus €0.29 per document sent for signing and €0.09 per timestamp."
           contact: "Contact us at"
           included:
             - "Unlimited users under one company account"
             - "Unlimited documents"
             - "Long-term document archiving"
           excluded: []
+      document_vs_bundle:
+        subtitle: "Documents and bundles"
+        title: "You always send a bundle for signing"
+        description: "The app works with two concepts. A document is a single file that gets signed. A bundle is the package in which you send documents to others for signing – usually it contains just one document."
       features:
         subtitle: "eIDAS-Compatible Platform"
         title: "Bridging Security with Modern Application Simplicity"
@@ -1485,18 +1555,39 @@ en:
         title: "Your complete signing toolkit"
         description: "Autogram Portal is part of a suite of tools for desktop, mobile, and web browsers. Everything is designed to help you create legally valid signatures quickly and securely."
         learn_more: "Learn more"
+        current: "You are here"
         desktop:
           title: "Autogram Desktop"
-          description: "Desktop application for Windows, macOS, and Linux that creates qualified signatures using eID cards and other qualified signature creation devices. Connects directly to the portal for seamless signing workflows."
+          platform: "Windows, macOS, Linux"
+          description: "Creates qualified signatures using eID cards and other qualified signature creation devices. Connects directly to the portal."
         mobile:
           title: "Autogram Mobile"
-          description: "Mobile applications for iOS and Android that enable qualified signatures using mobile eID solutions and qualified signature creation devices. Sign documents on the go with full portal integration."
+          platform: "iOS, Android"
+          description: "Qualified signatures using mobile eID solutions. Sign documents on the go with full portal integration."
         extension:
           title: "Autogram Extension"
-          description: "Browser extension that integrates Autogram Desktop and Mobile directly into Slovak eGovernment portals. Sign documents seamlessly without leaving government websites."
+          platform: "Browser extension"
+          description: "Brings Autogram Desktop and Mobile directly into Slovak eGovernment portals. Sign without leaving government websites."
         portal:
           title: "Autogram Portal"
-          description: "Web-based platform for managing the complete document signing lifecycle in commercial applications. Provides validation, workflow management, and API integration for business processes."
+          platform: "Web platform"
+          description: "Manages the complete document signing lifecycle. Validation, workflow management and API integration for business processes."
+      provider:
+        subtitle: "Who is behind the portal"
+        title: "Autogram Portal is brought to you by Slovensko.Digital"
+        logo_alt: "Slovensko.Digital"
+        description_html: "Slovensko.Digital is a civic association focused on improving the quality of digital public services in Slovakia. The portal is operated by its company <strong class=\"font-semibold text-gray-900\">Služby Slovensko.Digital, s.r.o.</strong>, which builds value-added services focused mainly on communication with the state."
+        about_link: "More about Slovensko.Digital"
+        services_link: "More services for businesses"
+        egov:
+          title: "Better digital public services"
+          description: "We monitor and assess the largest state IT projects to improve their quality and transparency."
+        open:
+          title: "Open development"
+          description: "We develop the entire Autogram signing ecosystem openly on GitHub under the EUPL licence, so anyone can review the code."
+        ngi:
+          title: "Supported by the Next Generation Internet programme"
+          description: "Development of Autogram Portal is funded by the NGI Zero Core fund of NLnet with financial support from the European Commission."
       standards:
         title: "Built on Open Standards for Maximum Security"
         description: "Autogram Portal is built on open technologies and proven standards. The highest level of security is guaranteed through transparency and collaboration with the community."
@@ -1530,28 +1621,36 @@ en:
       faq:
         subtitle: "FAQ"
         title: "Frequently asked questions"
+        help_html: "Didn't find an answer? Write to us at %{email} or read the %{docs}."
+        docs_link: "user guide"
         storage_basic_retention:
           one: "In the free Basic plan, documents and bundles are deleted automatically at most %{count} day after they were created."
           other: "In the free Basic plan, documents and bundles are deleted automatically at most %{count} days after they were created."
         items:
+          where_stored:
+            question: "Where are my documents stored?"
+            answer: "We store documents in secure data storage. Only members of your organisation and the recipients you sent a document to for signing can access them. If you want full control over your documents, you can also run Autogram Portal on your own infrastructure."
+          wrong_recipient:
+            question: "What if I make a mistake and send a document to the wrong email address?"
+            answer: "You can withdraw the signature request in the bundle detail until the recipient signs it. The link they received stops working, they can no longer sign the document, and they receive an email that the request was withdrawn. Then add the correct recipient to the bundle."
+          storage:
+            question: "How long are documents stored?"
+            answer: "Documents and bundles of signed-in users are stored until the user deletes them. Documents and bundles of non-signed-in users are stored for at most 60 minutes after the document is uploaded for signing."
           account:
             question: "Do I need an account to sign a document?"
-            answer: "No. Recipients can sign documents without registering, directly via the link they receive by email. An account is only needed for senders who want to track document history, send signature requests, and use advanced features. An account is also not required if you only want to sign and validate documents yourself."
+            answer: "No. Recipients can sign documents without registering, directly via the link they receive by email. An account is also not required if you only want to sign and validate documents yourself. An account is only needed for users who want to track document history and use advanced features."
           formats:
             question: "What file formats are supported?"
             answer: "We primarily work with PDF documents. XML documents for Slovak electronic forms, ASiC-E containers, and other common formats are also supported. Exact list: .pdf, .xml, .xdcf, .asice, .txt, .png, .jpg, .jpeg"
           signature_types:
             question: "What is the difference between a qualified electronic signature with and without a timestamp?"
-            answer: "A qualified electronic signature without a timestamp is equivalent to a handwritten signature under Slovak civil law. By adding a qualified timestamp, the signature becomes de facto equivalent to a notarised signature."
+            answer: "A qualified electronic signature without a timestamp is equivalent to a handwritten signature under the Slovak Civil Code. Adding a timestamp confirms the exact time of signing, so the document carries the same weight as if you had it officially certified."
           recipients_install:
             question: "Do recipients need to install anything?"
-            answer: "Recipients need an application for creating qualified signatures, such as Autogram Desktop, Autogram Mobile, or eIdentita. Depending on the exact card/ID card, using a computer and a physical card reader may be required."
+            answer: "Recipients need an application for creating qualified electronic signatures, such as Autogram Desktop, Autogram Mobile, eIdentita, Podpisuj, or other standalone applications. Depending on the exact card/ID card, using a computer and a physical card reader may be required."
           multiple_signers:
             question: "Can I send a document to multiple people for signing?"
-            answer: "Yes. You can add any number of recipients. The system will track who has already signed and notify you when everyone has signed the document. You can also define how many recipients must sign for the bundle to be considered completed."
-          storage:
-            question: "How long are documents stored?"
-            answer: "Documents and bundles of signed-in users are stored until the user deletes them. Documents and bundles of non-signed-in users are stored for at most 60 minutes."
+            answer: "Yes. You can add any number of recipients. The system will track who has signed the document and notify you when all recipients have signed it. You can also define how many recipients must sign for the bundle to be considered completed."
           open_source:
             question: "Is Autogram Portal free and open-source?"
             answer: "Yes. Autogram Portal is a fully open-source project (EUPL licence) available on GitHub. You can run it on your own infrastructure. Development is supported by the NLNet organisation."
@@ -1617,6 +1716,7 @@ en:
         subtitle: "Everything you need to know about using Autogram Portal."
       nav:
         label: "User guide contents"
+        documents_and_bundles: "Documents and bundles"
         dashboard: "Dashboard"
         contracts: "My Documents"
         bundles: "My Bundles"
@@ -1625,6 +1725,9 @@ en:
         account: "Account Settings"
         federation: "Federation"
         integration: "API & SDK"
+      documents_and_bundles:
+        title: "You always send a bundle for signing"
+        intro: "The app works with two concepts. A document is a single file that gets signed. A bundle is the package in which you send documents to others for signing – usually it contains just one document."
       dashboard:
         screenshot_alt: "Account overview: counts of bundles, contracts, documents awaiting my signature, sent and declined bundles; quick actions Upload new document and Verify signature; list of recent bundles with status, signature count, date and a View link"
         title: "Dashboard"
@@ -1834,7 +1937,7 @@ en:
         qualified_signing_title: "Qualified signing — what to expect"
         qualified_signing_intro: "Before signing, onboarding walks you through a few checks required for creating a qualified electronic signature."
         qualified_signing_checks:
-          qscd: "Select your exact QSCD device (most commonly eID, but also residence permit cards)."
+          qscd: "Select your exact QSCD device (most commonly the Slovak eID, but also residence permit cards, Czech ID cards, qualified smart cards or USB tokens)."
           pin: "Confirm that you know your security codes (BOK/PIN/KEP PIN depending on card type)."
           cert: "Confirm that your signing certificates are issued on the card."
         qscd_cards_title: "Supported QSCD cards and compatibility"
@@ -1874,6 +1977,21 @@ en:
             mode: "Legacy — unsupported"
             badge_class: "bg-red-100 text-red-800"
             description: "This card type is no longer compatible with qualified signing."
+          cz_eid_2018:
+            label: "Czech ID card issued since 1.7.2018"
+            mode: "Desktop only"
+            badge_class: "bg-yellow-100 text-yellow-800"
+            description: "Requires a qualified certificate from a Czech certification authority loaded onto the chip, a card reader and Autogram on a computer."
+          tokens:
+            label: "Qualified smart cards and USB tokens (I.CA, MONET+, Thales/Gemalto, other PKCS#11)"
+            mode: "Desktop only"
+            badge_class: "bg-yellow-100 text-yellow-800"
+            description: "Requires Autogram on a computer and the device driver installed."
+          cz_eid_2012:
+            label: "Czech ID card issued before 1.7.2018"
+            mode: "Legacy — unsupported"
+            badge_class: "bg-red-100 text-red-800"
+            description: "A qualified certificate cannot be loaded onto this ID card."
         screenshot_title: "Screenshot"
         screenshot_description: "Recommended: add a screenshot of application selection and the document signing step."
         screenshot_file_hint: "File: /public/docs/screenshots/signing-app-selection.png"
@@ -1995,7 +2113,7 @@ en:
 
   footer:
     heading: "Footer"
-    by: "by Slovensko.Digital"
+    by_html: "by %{link}"
     view_on_github: "View on GitHub"
     service_provider: "Service provider"
     support: "Support"
@@ -2003,6 +2121,29 @@ en:
     terms_of_service: "Terms of Service"
 
   shared:
+    document_vs_bundle:
+      arrow: "creates"
+      note_html: "<strong class=\"font-semibold text-gray-900\">The most common case is a bundle with a single document.</strong> Adding more documents to one bundle is currently possible only via the API."
+      document:
+        title: "Document"
+        subtitle: "A single file to be signed"
+        tile_label: "Document"
+        tile_format: "PDF"
+        points:
+          - "PDF, XML, ASiC-E or another supported format"
+          - "You can sign or validate it yourself – no bundle needed"
+          - "If someone else needs to sign it, you put it into a bundle"
+      bundle:
+        title: "Bundle"
+        subtitle: "A package you send for signing"
+        box_label: "Bundle"
+        box_count: "1 or more documents"
+        optional_document: "Another document (currently API only)"
+        recipients: "Recipients and the rule for how many should sign"
+        points:
+          - "Contains one or more documents"
+          - "Defines the recipients and how many of them should sign"
+          - "Recipients get a link to the whole bundle and sign the documents in it"
     stamp_geometry:
       box_label: "Box in the document preview"
       status: "Position x %{x}, y %{y} points, size %{width} × %{height} points"
@@ -2180,6 +2321,12 @@ en:
       dpb_2014: "Slovak residence permit card issued before 10.7.2020"
       dpb_2020: "Slovak residence permit card issued after 10.7.2020"
       dpb_2023: "Slovak residence permit card issued after 18.10.2023"
+      cz_eid_2012: "Czech ID card issued before 1.7.2018"
+      cz_eid_2018: "Czech ID card issued since 1.7.2018"
+      ica_securestore: "I.CA – smart card or USB token"
+      monet_proid: "MONET+ ProID+Q – smart card or USB token"
+      gemalto_idprime: "Thales (Gemalto) IDPrime 940"
+      pkcs11_other: "Other qualified smart card or USB token"
     description:
       eid_2013: "This ID card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer ID card."
       eid_2021: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer cards."
@@ -2188,6 +2335,18 @@ en:
       dpb_2014: "This residence permit card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer residence permit card."
       dpb_2020: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
       dpb_2023: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
+      cz_eid_2012: "This ID card does not support qualified signing. To sign documents electronically, you need a newer ID card or another qualified card or token."
+      cz_eid_2018: "You can sign if a qualified certificate from a Czech certification authority (e.g. PostSignum, I.CA) is loaded onto the chip. You need a card reader connected to a computer and the Autogram app."
+      ica_securestore: "Device with a qualified certificate from I.CA. Signing works in the Autogram desktop app with the I.CA SecureStore driver installed."
+      monet_proid: "Qualified MONET+ device. Signing works in the Autogram desktop app with the ProID+ driver installed."
+      gemalto_idprime: "Qualified Thales/Gemalto smart card. Signing works in the Autogram desktop app with SafeNet Authentication Client and a card reader."
+      pkcs11_other: "If your device has a PKCS#11 driver, set its path in the Autogram app and sign just like with the other cards."
+    badges:
+      mobile: "Mobile and desktop (NFC)"
+      card_reader: "Computer + card reader"
+      driver: "Computer + device driver"
+      certificate: "Requires a qualified certificate"
+      unsupported: "Not supported"
 
   plan_limits:
     exceeded:

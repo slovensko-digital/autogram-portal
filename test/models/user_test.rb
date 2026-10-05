@@ -87,4 +87,24 @@ class UserTest < ActiveSupport::TestCase
   test "user without any consents returns false" do
     assert_not users(:two).accepted_current_policies?
   end
+
+  test "every qscd except none belongs to exactly one onboarding group" do
+    grouped = User::QSCD_GROUPS.values.flatten
+
+    assert_equal grouped.uniq, grouped
+    assert_equal User.qscds.keys - [ "none" ], grouped.sort_by { |qscd| User.qscds[qscd] }
+  end
+
+  test "qscd group and legacy cards" do
+    assert_equal :sk_eid, User.qscd_group("eid_2024")
+    assert_equal :cz_eid, User.qscd_group("cz_eid_2018")
+    assert_equal :tokens, User.qscd_group(:ica_securestore)
+    assert_nil User.qscd_group(nil)
+    assert_nil User.qscd_group("unknown")
+
+    assert User.legacy_eid_card?("cz_eid_2012")
+    assert User.legacy_eid_card?(:eid_2013)
+    assert_not User.legacy_eid_card?("cz_eid_2018")
+    assert_not User.legacy_eid_card?("pkcs11_other")
+  end
 end

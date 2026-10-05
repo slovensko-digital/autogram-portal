@@ -1,0 +1,10 @@
+<%# locals: (value:, selected: nil, required: false) %>
+<%= render "shared/radio_button_card",
+      name: :qscd,
+      value: value,
+      checked: value == selected.to_s,
+      required: required,
+      label: t("qscd.title.#{value}"),
+      image: qscd_image_path(value),
+      description: t("qscd.description.#{value}"),
+      badges: qscd_badges(value) %>

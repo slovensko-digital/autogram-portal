@@ -39,7 +39,11 @@
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-sm font-semibold text-gray-900"><%= record.filename %></span>
+                  <% if record.source_contract_available? %>
+                    <%= link_to record.filename, contract_path(record.contract), class: "text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors" %>
+                  <% else %>
+                    <span class="text-sm font-semibold text-gray-900"><%= record.filename %></span>
+                  <% end %>
                   <% if record.signature_levels.any? %>
                     <span class="text-xs text-gray-600"><%= record.signature_levels.map { |level| t("signature_parameters.level.#{level.downcase}", default: level) }.join(', ') %></span>
                   <% end %>
@@ -95,15 +99,17 @@
                   <% end %>
                 <% end %>
                 <% if record.refresh_action_available? %>
-                  <%= link_to refresh_contract_validation_record_path(record),
-                              data: { turbo_method: :post, turbo_confirm: t('.refresh_confirm') },
-                              class: "hidden underline sm:inline text-sm text-yellow-700 hover:text-yellow-800 transition-colors" do %>
+                  <%= button_to refresh_contract_validation_record_path(record), method: :post,
+                                form: { data: { turbo_confirm: t('.refresh_confirm') } },
+                                form_class: "hidden sm:inline",
+                                class: "underline cursor-pointer text-sm text-yellow-700 hover:text-yellow-800 transition-colors" do %>
                     <%= t('.refresh_archive') %><span class="sr-only">: <%= record.filename %></span>
                   <% end %>
                 <% end %>
-                <%= link_to contract_validation_record_path(record),
-                            data: { turbo_method: :delete, turbo_confirm: t('contract_validation_records.destroy.confirm', name: record.filename) },
-                            class: "underline text-sm font-medium text-red-700 hover:text-red-900 transition-colors" do %>
+                <%= button_to contract_validation_record_path(record), method: :delete,
+                              form: { data: { turbo_confirm: t('contract_validation_records.destroy.confirm', name: record.filename) } },
+                              form_class: "inline",
+                              class: "underline cursor-pointer text-sm font-medium text-red-700 hover:text-red-900 transition-colors" do %>
                   <%= t('actions.delete') %><span class="sr-only">: <%= record.filename %></span>
                 <% end %>
               </div>

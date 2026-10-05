@@ -19,37 +19,17 @@
 
         <fieldset>
         <legend class="sr-only"><%= t('.title') %></legend>
-        <div class="space-y-3">
-          <% [ "eid_2024", "eid_2022", "eid_2021", "eid_2013" ].each do |value| %>
-            <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
+        <h2 id="qscd_group_sk_eid_title" class="mb-3 text-sm font-semibold text-gray-700"><%= t('.sk_eid_title') %></h2>
+        <div class="space-y-3" role="group" aria-labelledby="qscd_group_sk_eid_title">
+          <% User::QSCD_GROUPS[:sk_eid].each do |value| %>
+            <%= render "contracts/onboarding/qscd_option", value: value, selected: @selected_qscd, required: true %>
           <% end %>
         </div>
 
-        <div data-controller="toggle" data-toggle-collapsed-value="true" class="w-full mt-8">
-          <button type="button"
-                  data-action="click->toggle#toggle" data-toggle-target="button"
-                  class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer">
-            <span class="flex items-center gap-2 min-w-0">
-              <span class="whitespace-nowrap"><%= t('.dpb_cards') %></span>
-            </span>
-            <span class="flex items-center gap-2 shrink-0">
-              <span class="hidden md:inline text-xs text-gray-600">
-                <span data-toggle-target="textCollapsed"><%= t('.show_dpb') %></span>
-                <span data-toggle-target="textExpanded" class="hidden"><%= t('.hide_dpb') %></span>
-              </span>
-              <svg aria-hidden="true" data-toggle-target="icon"
-                   class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                   fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </span>
-          </button>
-
-          <div data-toggle-target="content" class="hidden mt-2 space-y-2">
-            <% [ "dpb_2023", "dpb_2020", "dpb_2014"].each do |value| %>
-              <%= render "shared/radio_button_card", name: :qscd, value: value, label: t("qscd.title.#{value}"), image: "qscd/#{value}.png", description: t("qscd.description.#{value}") %>
-            <% end %>
-          </div>
+        <div class="mt-8 space-y-3">
+          <% %i[sk_dpb cz_eid tokens].each do |group| %>
+            <%= render "contracts/onboarding/qscd_group", group: group, selected: @selected_qscd, required: true %>
+          <% end %>
         </div>
         </fieldset>
 
@@ -64,10 +44,10 @@
             end
           %>
           <%= link_to back_path,
-              class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+              class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500" do %>
             <%= t('actions.back') %>
           <% end %>
-          <%= f.submit t('.continue'), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <%= f.submit t('.continue'), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500" %>
         </div>
       <% end %>
     </div>

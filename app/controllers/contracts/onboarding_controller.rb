@@ -15,6 +15,7 @@ module Contracts
     def show
       @step = step_param || first_step
       @method = params[:method] # 'electronic' or 'physical'
+      @selected_qscd = flow_qscd.presence_in(User.qscds.keys)
 
       render @step
     end

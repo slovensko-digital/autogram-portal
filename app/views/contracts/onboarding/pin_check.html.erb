@@ -1,19 +1,21 @@
-<% content_for :title, t('.title') %>
+<% variant = qscd_onboarding_variant(@selected_qscd) %>
+<% scope = variant == "sk" ? "contracts.onboarding.pin_check" : "contracts.onboarding.pin_check.#{variant}" %>
+<% content_for :title, t("#{scope}.title") %>
 
 <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
 <div class="mx-auto max-w-3xl sm:mb-20">
   <div class="relative isolate overflow-hidden">
     <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div class="space-y-8">
-        <h1 class="text-4xl font-semibold text-gray-900"><%= t('.title') %></h1>
-        <p class="text-md text-gray-600"><%= t('.description_a') %></p>
-        <p class="text-md text-gray-600"><%= t('.description_b') %></p>
+        <h1 class="text-4xl font-semibold text-gray-900"><%= t("#{scope}.title") %></h1>
+        <p class="text-md text-gray-600"><%= t("#{scope}.description_a") %></p>
+        <p class="text-md text-gray-600"><%= t("#{scope}.description_b") %></p>
 
         <%= render 'shared/info',
-          title: t('.no_pin_title'),
-          content: t('.no_pin_description'),
-          button: t('.no_pin_learn_more'),
-          target: "https://www.slovensko.sk/sk/faq/_obciansky-preukaz-s-cipom-do#zabudne"
+          title: t("#{scope}.no_pin_title"),
+          content: t("#{scope}.no_pin_description"),
+          button: t("#{scope}.no_pin_learn_more", default: nil),
+          target: t("#{scope}.no_pin_learn_more_url", default: nil)
         %>
 
       </div>
@@ -32,7 +34,7 @@
               class: "flex-1 inline-flex items-center justify-center px-6 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
             <%= t('actions.back') %>
           <% end %>
-          <%= f.submit t('.continue'), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <%= f.submit t("#{scope}.continue"), class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
         </div>
       <% end %>
     </div>

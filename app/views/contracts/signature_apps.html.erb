@@ -18,7 +18,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-6">
               <div class="flex-shrink-0">
-                <%= image_tag "qscd/#{@qscd}.png", alt: "", class: "h-24 w-auto rounded-md" %>
+                <%= image_tag qscd_image_path(@qscd), alt: "", class: "h-24 w-auto rounded-md" %>
               </div>
               <div>
                 <div class="text-sm font-medium text-gray-900"><%= t("qscd.title.#{@qscd}") %></div>
@@ -85,7 +85,7 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-6">
                   <div class="flex-shrink-0">
-                    <%= image_tag "qscd/#{@qscd}.png", alt: "", class: "h-24 w-auto rounded-md" %>
+                    <%= image_tag qscd_image_path(@qscd), alt: "", class: "h-24 w-auto rounded-md" %>
                   </div>
                   <div>
                     <div class="text-sm font-medium text-gray-900"><%= t("qscd.title.#{@qscd}") %></div>

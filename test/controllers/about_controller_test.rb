@@ -27,4 +27,20 @@ class AboutControllerTest < ActionDispatch::IntegrationTest
       assert_not_includes response.body, I18n.t("about.index.faq.storage_basic_retention", count: 60)
     end
   end
+
+  test "the price list links the full pricing page when PRICING_URL is set" do
+    original = ENV["PRICING_URL"]
+    ENV["PRICING_URL"] = "https://example.com/cennik"
+    get about_index_path
+
+    assert_response :success
+    assert_select "a[href=?]", "https://example.com/cennik", text: /#{I18n.t("about.index.start_using.full_pricing")}/
+
+    ENV["PRICING_URL"] = ""
+    get about_index_path
+
+    assert_select "a[href=?]", "https://example.com/cennik", count: 0
+  ensure
+    ENV["PRICING_URL"] = original
+  end
 end

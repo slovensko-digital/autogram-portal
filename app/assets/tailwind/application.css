@@ -57,6 +57,12 @@ altcha-widget .altcha-footer {
 		outline-offset: 2px;
 	}
 
+	/* Tailwind rings are box-shadows, which forced colors drop: show keyboard focus on choice cards */
+	.choice-card:has(:focus-visible) {
+		outline: 2px dashed CanvasText;
+		outline-offset: 4px;
+	}
+
 	label:has(input[type="file"]:focus-visible) {
 		outline: 2px solid Highlight;
 		outline-offset: 2px;

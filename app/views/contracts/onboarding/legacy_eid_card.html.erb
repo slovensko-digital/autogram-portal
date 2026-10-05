@@ -6,11 +6,12 @@
     <div class="mx-auto flex flex-col max-w-4xl space-y-6 px-6 pb-8 pt-10 lg:flex lg:px-8">
       <div class="space-y-8">
         <h1 class="text-4xl font-semibold text-gray-900"><%= t('.title') %></h1>
-        <p class="text-md text-gray-600"><%= t('.description') %></p>
+        <% scope = qscd_onboarding_variant(@selected_qscd) == "cz" ? "contracts.onboarding.legacy_eid_card.cz" : "contracts.onboarding.legacy_eid_card" %>
+        <p class="text-md text-gray-600"><%= t("#{scope}.description") %></p>
 
         <%= render 'shared/warning',
-          title: t('.warning_title'),
-          content: t('.warning_description')
+          title: t("#{scope}.warning_title"),
+          content: t("#{scope}.warning_description")
         %>
 
       </div>

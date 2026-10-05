@@ -40,6 +40,16 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
     assert_empty EidentitaSession.unavailability_reasons("eid_2024", contract)
   end
 
+  test "czech id cards and qualified tokens are desktop only" do
+    contract = plain_contract
+
+    %w[cz_eid_2018 ica_securestore monet_proid gemalto_idprime pkcs11_other].each do |qscd|
+      assert_equal [ :unsupported_qscd ], AvmSession.unavailability_reasons(qscd, contract), qscd
+      assert_equal [ :unsupported_qscd ], EidentitaSession.unavailability_reasons(qscd, contract), qscd
+      assert AutogramSession.available?(qscd, contract), qscd
+    end
+  end
+
   test "document constraints return all applicable reasons" do
     contract = multiple_file_contract
 
