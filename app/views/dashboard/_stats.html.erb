@@ -1,0 +1,14 @@
+<%# locals: (stats:) %>
+
+<section aria-label="<%= t("dashboard.index.stats.label") %>" class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <% stats.each do |stat| %>
+    <%= link_to stat[:path], class: "flex flex-col gap-1.5 rounded-lg border border-gray-200 bg-white p-5 transition-colors hover:border-blue-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700" do %>
+      <span class="flex items-center gap-2 text-sm font-semibold text-gray-600">
+        <span aria-hidden="true" class="h-2 w-2 shrink-0 rounded-full <%= stat[:dot] %>"></span>
+        <%= stat[:label] %>
+      </span>
+      <span class="text-3xl font-bold <%= stat[:alert] ? "text-red-700" : "text-gray-900" %>"><%= stat[:value] %></span>
+      <span class="text-xs text-gray-500"><%= stat[:hint] %></span>
+    <% end %>
+  <% end %>
+</section>

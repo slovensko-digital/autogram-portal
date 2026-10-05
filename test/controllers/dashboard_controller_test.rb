@@ -60,6 +60,11 @@ class DashboardControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_equal 1, @controller.instance_variable_get(:@awaiting_my_signature_count)
+    assert_select "section[aria-labelledby=awaiting-signature-title]" do
+      assert_select "li", text: /#{I18n.t("bundles.received.external_invitation_title")}/
+      assert_select "li", text: /#{I18n.t("dashboard.index.awaiting.from", sender: "Partner portal")}/
+      assert_select "a[href=?]", federation_requests_open_path(url: "https://origin.example/bundles/123/sign?recipient=abc")
+    end
   end
 
   private

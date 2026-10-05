@@ -430,6 +430,8 @@ sk:
     bundle_list:
       signatures: "Podpisy"
       no_bundles: "Zatiaľ žiadne balíky"
+      kind_personal: "Osobné"
+      kind_organization: "Organizačné"
     received:
       title: "Prijaté na podpis"
       subtitle: "Balíky, ktoré vám odoslali iní na podpis."
@@ -1353,20 +1355,52 @@ sk:
     index:
       title: "Vitajte späť, %{name}"
       subtitle: "Prehľad vašich dokumentov a podpisov"
+      subtitle_pro: "Vaše úlohy a prehľad organizácie %{name}"
       validation_warning:
         title: "Archív podpisov vyžaduje pozornosť"
         content: "%{count} záznamov podpísaných dokumentov vyžaduje zásah pred %{date}."
         action: "Otvoriť archív podpisov"
+      awaiting:
+        title: "Čaká na môj podpis"
+        title_pro: "Čo môžem podpísať"
+        subtitle: "Balíky, v ktorých ste príjemca a ešte ste ich nepodpísali"
+        subtitle_pro: "Balíky, ktoré máte podpísať vy osobne"
+        view_all: "Všetky prijaté balíky"
+        from: "Od %{sender}"
+        received_on: "prijaté %{date}"
+        sign: "Podpísať"
+        more:
+          one: "Zobraziť ďalší %{count} balík"
+          few: "Zobraziť ďalšie %{count} balíky"
+          other: "Zobraziť ďalších %{count} balíkov"
+        empty: "Momentálne na vás nečaká žiadny podpis."
+        empty_hint: "Keď vás niekto pozve podpísať balík, objaví sa tu."
       stats:
+        label: "Štatistiky"
+        organization_bundles: "Balíky organizácie"
+        organization_contracts: "Dokumenty organizácie"
+        bundles_hint: "Spolu vytvorených"
+        contracts_hint: "Samostatné dokumenty"
+        sent_for_signing_hint: "Čakajú na podpis príjemcov"
+        declined_hint: "Niektorý príjemca odmietol podpísať"
         my_bundles: "Moje balíky"
         my_contracts: "Moje dokumenty"
-        awaiting_my_signature: "Čaká na môj podpis"
         sent_for_signing: "Odoslané na podpis"
         declined_bundles: "Odmietnuté balíky"
+      zones:
+        personal: "Osobná zóna"
+        organization: "Organizácia"
+      organization:
+        members:
+          one: "%{count} člen"
+          few: "%{count} členovia"
+          other: "%{count} členov"
+        settings: "Nastavenia organizácie"
       quick_actions:
         title: "Rýchle akcie"
         upload_document: "Nahrať nový dokument"
         upload_document_subtitle: "Začnite nový proces podpisovania"
+        upload_document_subtitle_pro: "Za organizáciu %{name}"
         verify_signature: "Overiť podpis"
         verify_signature_subtitle: "Skontrolujte platnosť podpisu"
         validation_archive: "Archív podpisov"
@@ -1374,6 +1408,9 @@ sk:
       recent_bundles:
         title: "Nedávne balíky"
         subtitle: "Prehľad vašich posledných balíkov"
+        subtitle_pro: "Posledné balíky organizácie. Osobné sú tie, ktoré podpisujete aj vy."
+        empty: "Nahrajte dokument a pošlite ho na podpis. Odoslané balíky uvidíte tu."
+        empty_pro: "Organizácia zatiaľ neposlala nič na podpis. Keď niekto z členov pošle dokument na podpis, uvidíte ho tu."
         document: "Dokument"
         status: "Stav"
         recipients: "Príjemcovia"
@@ -1660,9 +1697,9 @@ sk:
         title: "Na podpis vždy posielate balík"
         intro: "V aplikácii pracujete s dvoma pojmami. Dokument je jeden súbor, ktorý sa podpisuje. Balík je obal, v ktorom dokumenty posielate na podpis iným – väčšinou obsahuje iba jeden dokument."
       dashboard:
-        screenshot_alt: "Prehľad účtu: počty balíkov, dokumentov, dokumentov čakajúcich na môj podpis, odoslaných a odmietnutých balíkov; rýchle akcie Nahrať nový dokument a Overiť podpis; zoznam posledných balíkov so stavom, počtom podpisov, dátumom a odkazom Zobraziť"
+        screenshot_alt: "Prehľad účtu: zoznam balíkov čakajúcich na môj podpis s tlačidlom Podpísať; počty balíkov, dokumentov, odoslaných a odmietnutých balíkov; využitie plánu; rýchle akcie Nahrať nový dokument a Overiť podpis; zoznam posledných balíkov so stavom, počtom podpisov, dátumom a odkazom Zobraziť"
         title: "Prehľad (Dashboard)"
-        intro: "Po prihlásení sa zobrazí prehľadová stránka so štatistikami vašich dokumentov a rýchlymi skratkami na najčastejšie akcie."
+        intro: "Po prihlásení sa zobrazí prehľad. Hore sú balíky, ktoré čakajú na váš podpis, pod nimi štatistiky, využitie plánu, rýchle akcie a posledné balíky. V organizácii s plánom PRO je prehľad rozdelený na osobnú zónu (čo máte podpísať vy) a prehľad organizácie s jej názvom; pri posledných balíkoch vidíte, či sú osobné (podpisujete ich aj vy) alebo organizačné."
         stats:
           bundles:
             label: "Moje balíky"
@@ -1676,7 +1713,7 @@ sk:
             dot_class: "bg-indigo-500"
           awaiting:
             label: "Čaká na môj podpis"
-            description: "Balíky od iných používateľov, v ktorých ste vy príjemca a ste ešte nepodpísali."
+            description: "Zoznam balíkov, v ktorých ste vy príjemca a ešte ste nepodpísali, s tlačidlom Podpísať. V organizácii PRO ho nájdete v osobnej zóne pod názvom „Čo môžem podpísať“."
             card_class: "border-yellow-200 bg-yellow-50"
             dot_class: "bg-yellow-500"
           sent:
