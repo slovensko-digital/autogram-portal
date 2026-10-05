@@ -31,9 +31,13 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal user, request.env["warden"].user(:user)
     assert_select "a[href=?]", contract_path(own_contract), minimum: 1
-    assert_select "a[href=?] .sr-only", contract_path(own_contract), text: ": #{own_contract.display_name}", count: 2
-    assert_select "a[href=?][data-turbo-method='delete'][data-turbo-confirm=?]", contract_path(own_contract),
-                  I18n.t("contracts.destroy.confirm", name: own_contract.display_name)
+    assert_select "a[href=?] .sr-only", contract_path(own_contract), text: ": #{own_contract.display_name}", count: 1
+    assert_select "form[action=?][method='post'][data-turbo-confirm=?]", contract_path(own_contract),
+                  I18n.t("contracts.destroy.confirm", name: own_contract.display_name) do
+      assert_select "input[name='_method'][value='delete']", count: 1
+      assert_select "button[type='submit'] .sr-only", text: ": #{own_contract.display_name}", count: 1
+    end
+    assert_select "a[data-turbo-method]", count: 0
     assert_select "a[href=?]", contract_path(foreign_contract), count: 0
     assert_select "a[href=?]", contract_path(bundled_contract), count: 0
   end

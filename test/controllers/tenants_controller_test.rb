@@ -63,7 +63,7 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{dashboard_path}']", count: 0
     assert_select "a[href='#{edit_user_registration_path}']", count: 0
     assert_select "a[href='#{new_user_session_path}']", count: 0
-    assert_select "a[href='#{destroy_user_session_path}']"
+    assert_select "form[action='#{destroy_user_session_path}'] input[name='_method'][value='delete']"
   end
 
   test "user works only with account pages until a tenant is chosen" do

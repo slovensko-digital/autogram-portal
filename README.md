@@ -69,6 +69,7 @@ Edit `.env` file:
 - `API_SKIP_AUTH=true` - Skip auth in development
 - `AUTOGRAM_SERVICE_URL` - Autogram service URL
 - `AVM_URL` - Autogram AVM service URL
+- `PRICING_URL` - Link to the full price list shown in the homepage pricing section (hidden when blank)
 - `WEBHOOK_REQUIRE_HTTPS=true` - Require HTTPS for webhook destinations (defaults to true in production)
 - `WEBHOOK_ALLOWED_HOSTS=host1,host2` - Optional allowlist override for internal webhook destinations
 - `WEBHOOK_OPEN_TIMEOUT=3` - Outbound webhook TCP connect timeout in seconds
