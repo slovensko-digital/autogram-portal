@@ -84,6 +84,20 @@
   </div>
 </section>
 
+<%# Dokument a balík %>
+<section aria-labelledby="document-vs-bundle-heading" class="border-b border-gray-200 bg-white px-6 py-24 lg:px-8">
+  <div class="mx-auto max-w-6xl">
+    <div class="max-w-3xl">
+      <p class="text-base font-semibold leading-7 text-blue-600"><%= t('.document_vs_bundle.subtitle') %></p>
+      <h2 id="document-vs-bundle-heading" class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= t('.document_vs_bundle.title') %></h2>
+      <p class="mt-5 text-lg leading-8 text-gray-600"><%= t('.document_vs_bundle.description') %></p>
+    </div>
+    <div class="mt-12">
+      <%= render "shared/document_vs_bundle" %>
+    </div>
+  </div>
+</section>
+
 <%# Funkcie %>
 <section class="bg-white px-6 py-24 lg:px-8">
   <div class="mx-auto max-w-6xl">

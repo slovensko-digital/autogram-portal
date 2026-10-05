@@ -1460,6 +1460,10 @@ sk:
             - "Neobmedzené množstvo dokumentov"
             - "Dlhodobá archivácia dokumentov"
           excluded: []
+      document_vs_bundle:
+        subtitle: "Dokument a balík"
+        title: "Na podpis vždy posielate balík"
+        description: "V aplikácii pracujete s dvoma pojmami. Dokument je jeden súbor, ktorý sa podpisuje. Balík je obal, v ktorom dokumenty posielate na podpis iným – väčšinou obsahuje iba jeden dokument."
       features:
         subtitle: "eIDAS-kompatibilná platforma"
         title: "Spájame bezpečnosť s jednoduchosťou modernej aplikácie"
@@ -1643,6 +1647,7 @@ sk:
         subtitle: "Všetko, čo potrebujete vedieť o používaní Autogram Portalu."
       nav:
         label: "Obsah príručky"
+        documents_and_bundles: "Dokument a balík"
         dashboard: "Prehľad"
         contracts: "Moje dokumenty"
         bundles: "Moje balíky"
@@ -1651,6 +1656,9 @@ sk:
         account: "Nastavenia"
         federation: "Federácia"
         integration: "API a SDK"
+      documents_and_bundles:
+        title: "Na podpis vždy posielate balík"
+        intro: "V aplikácii pracujete s dvoma pojmami. Dokument je jeden súbor, ktorý sa podpisuje. Balík je obal, v ktorom dokumenty posielate na podpis iným – väčšinou obsahuje iba jeden dokument."
       dashboard:
         screenshot_alt: "Prehľad účtu: počty balíkov, dokumentov, dokumentov čakajúcich na môj podpis, odoslaných a odmietnutých balíkov; rýchle akcie Nahrať nový dokument a Overiť podpis; zoznam posledných balíkov so stavom, počtom podpisov, dátumom a odkazom Zobraziť"
         title: "Prehľad (Dashboard)"
@@ -2044,6 +2052,29 @@ sk:
     terms_of_service: "Všeobecné obchodné podmienky"
 
   shared:
+    document_vs_bundle:
+      arrow: "vytvorí"
+      note_html: "<strong class=\"font-semibold text-gray-900\">Najčastejší prípad je balík s jedným dokumentom.</strong> Viac dokumentov do jedného balíka sa zatiaľ dá pridať iba cez API."
+      document:
+        title: "Dokument"
+        subtitle: "Jeden podpisovaný súbor"
+        tile_label: "Dokument"
+        tile_format: "PDF"
+        points:
+          - "PDF, XML, ASiC-E alebo iný podporovaný formát"
+          - "Podpísať alebo overiť ho môžete aj sami – bez balíka"
+          - "Ak ho má podpísať niekto iný, vložíte ho do balíka"
+      bundle:
+        title: "Balík"
+        subtitle: "Obal na odoslanie na podpis"
+        box_label: "Balík"
+        box_count: "1 alebo viac dokumentov"
+        optional_document: "Ďalší dokument (zatiaľ iba cez API)"
+        recipients: "Adresáti a pravidlo, koľkí majú podpísať"
+        points:
+          - "Obsahuje jeden alebo viac dokumentov"
+          - "Určuje adresátov a koľkí z nich majú podpísať"
+          - "Adresáti dostanú odkaz na celý balík a podpíšu dokumenty v ňom"
     stamp_geometry:
       box_label: "Rámik v náhľade dokumentu"
       status: "Pozícia x %{x}, y %{y} bodov, veľkosť %{width} × %{height} bodov"

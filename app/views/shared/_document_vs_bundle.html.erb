@@ -1,0 +1,89 @@
+<%# Vysvetlenie rozdielu medzi dokumentom a balíkom. Použité na stránke O portáli a v príručke.
+    horizontal_from: :lg (predvolené) alebo :xl – od akej šírky sú karty vedľa seba. %>
+<% wide = local_assigns.fetch(:horizontal_from, :lg) == :xl %>
+<% doc_icon = "M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" %>
+<% bundle_icon = "M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" %>
+
+<div class="flex flex-col gap-5 <%= wide ? 'xl:flex-row' : 'lg:flex-row' %>">
+  <div class="flex flex-1 flex-col rounded-xl border border-gray-200 bg-gray-50 p-6 sm:p-7">
+    <div class="flex items-center gap-3">
+      <span aria-hidden="true" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="<%= doc_icon %>" /></svg>
+      </span>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-900"><%= t('shared.document_vs_bundle.document.title') %></h3>
+        <p class="text-base text-gray-500"><%= t('shared.document_vs_bundle.document.subtitle') %></p>
+      </div>
+    </div>
+    <div aria-hidden="true" class="mt-6 flex items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-3 py-2.5">
+      <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="<%= doc_icon %>" /></svg>
+      <span class="text-base font-semibold text-gray-900"><%= t('shared.document_vs_bundle.document.tile_label') %></span>
+      <span class="ml-auto rounded-full bg-gray-100 px-2 text-xs font-semibold text-gray-600"><%= t('shared.document_vs_bundle.document.tile_format') %></span>
+    </div>
+    <ul role="list" class="mt-6 space-y-2.5 text-base leading-7 text-gray-700">
+      <% t('shared.document_vs_bundle.document.points').each do |point| %>
+        <li class="flex gap-2.5">
+          <span aria-hidden="true" class="mt-2.5 h-1.5 w-1.5 flex-none rounded-full bg-blue-600"></span>
+          <span><%= point %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div aria-hidden="true" class="flex flex-col items-center justify-center gap-1.5 px-1 text-gray-500">
+    <svg class="h-7 w-7 rotate-90 <%= wide ? 'xl:rotate-0' : 'lg:rotate-0' %>" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+    <span class="text-sm font-semibold"><%= t('shared.document_vs_bundle.arrow') %></span>
+  </div>
+
+  <div class="flex flex-[1.5] flex-col rounded-xl border border-blue-200 bg-blue-50 p-6 sm:p-7">
+    <div class="flex items-center gap-3">
+      <span aria-hidden="true" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="<%= bundle_icon %>" /></svg>
+      </span>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-900"><%= t('shared.document_vs_bundle.bundle.title') %></h3>
+        <p class="text-base text-gray-600"><%= t('shared.document_vs_bundle.bundle.subtitle') %></p>
+      </div>
+    </div>
+    <div aria-hidden="true" class="mt-6 flex flex-col gap-2.5 rounded-xl border-2 border-blue-600 bg-white p-4">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-sm font-bold uppercase tracking-wide text-blue-700"><%= t('shared.document_vs_bundle.bundle.box_label') %></span>
+        <span class="text-sm text-gray-600"><%= t('shared.document_vs_bundle.bundle.box_count') %></span>
+      </div>
+      <div class="flex items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-3 py-2.5">
+        <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="<%= doc_icon %>" /></svg>
+        <span class="text-base font-semibold text-gray-900"><%= t('shared.document_vs_bundle.document.tile_label') %></span>
+        <span class="ml-auto rounded-full bg-gray-100 px-2 text-xs font-semibold text-gray-600"><%= t('shared.document_vs_bundle.document.tile_format') %></span>
+      </div>
+      <div class="flex items-center gap-2.5 rounded-lg border-[1.5px] border-dashed border-gray-400 px-3 py-2.5 text-gray-600">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        <span class="text-base"><%= t('shared.document_vs_bundle.bundle.optional_document') %></span>
+      </div>
+      <div class="mt-1 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-3">
+        <span class="flex -space-x-2 pl-0.5">
+          <% 3.times do %>
+            <span class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-blue-100 text-blue-700">
+              <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+            </span>
+          <% end %>
+        </span>
+        <span class="text-base text-gray-700"><%= t('shared.document_vs_bundle.bundle.recipients') %></span>
+      </div>
+    </div>
+    <ul role="list" class="mt-6 space-y-2.5 text-base leading-7 text-gray-700">
+      <% t('shared.document_vs_bundle.bundle.points').each do |point| %>
+        <li class="flex gap-2.5">
+          <span aria-hidden="true" class="mt-2.5 h-1.5 w-1.5 flex-none rounded-full bg-blue-600"></span>
+          <span><%= point %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<div class="mt-5 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
+  <span aria-hidden="true" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+    <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v8M12 5.5h.01" /></svg>
+  </span>
+  <p class="mt-0.5 text-base leading-7 text-gray-700"><%= t('shared.document_vs_bundle.note_html') %></p>
+</div>

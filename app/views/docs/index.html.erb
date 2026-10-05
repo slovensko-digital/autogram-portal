@@ -10,6 +10,7 @@
   <div class="mx-auto max-w-4xl px-6 lg:px-8">
     <nav aria-label="<%= t('.nav.label') %>">
       <ul role="list" class="flex flex-wrap gap-x-6 gap-y-2 py-3 text-sm font-medium text-gray-600">
+        <li><a href="#documents-and-bundles" class="hover:text-blue-800 transition-colors underline"><%= t('.nav.documents_and_bundles') %></a></li>
         <li><a href="#dashboard" class="hover:text-blue-800 transition-colors underline"><%= t('.nav.dashboard') %></a></li>
         <li><a href="#contracts" class="hover:text-blue-800 transition-colors underline"><%= t('.nav.contracts') %></a></li>
         <li><a href="#bundles" class="hover:text-blue-800 transition-colors underline"><%= t('.nav.bundles') %></a></li>
@@ -24,6 +25,22 @@
 </div>
 
 <div class="mx-auto max-w-4xl px-6 lg:px-8 py-16 space-y-20">
+
+  <%# ─── DOKUMENT A BALÍK ───────────────────────────────────── %>
+  <section id="documents-and-bundles">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
+        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900"><%= t('.documents_and_bundles.title') %></h2>
+    </div>
+    <p class="text-gray-600 leading-7 mb-6"><%= t('.documents_and_bundles.intro') %></p>
+    <%= render "shared/document_vs_bundle", horizontal_from: :xl %>
+  </section>
+
+  <hr class="border-gray-200">
 
   <%# ─── DASHBOARD ──────────────────────────────────────────── %>
   <section id="dashboard">

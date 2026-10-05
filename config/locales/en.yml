@@ -1530,6 +1530,10 @@ en:
             - "Unlimited documents"
             - "Long-term document archiving"
           excluded: []
+      document_vs_bundle:
+        subtitle: "Documents and bundles"
+        title: "You always send a bundle for signing"
+        description: "The app works with two concepts. A document is a single file that gets signed. A bundle is the package in which you send documents to others for signing – usually it contains just one document."
       features:
         subtitle: "eIDAS-Compatible Platform"
         title: "Bridging Security with Modern Application Simplicity"
@@ -1712,6 +1716,7 @@ en:
         subtitle: "Everything you need to know about using Autogram Portal."
       nav:
         label: "User guide contents"
+        documents_and_bundles: "Documents and bundles"
         dashboard: "Dashboard"
         contracts: "My Documents"
         bundles: "My Bundles"
@@ -1720,6 +1725,9 @@ en:
         account: "Account Settings"
         federation: "Federation"
         integration: "API & SDK"
+      documents_and_bundles:
+        title: "You always send a bundle for signing"
+        intro: "The app works with two concepts. A document is a single file that gets signed. A bundle is the package in which you send documents to others for signing – usually it contains just one document."
       dashboard:
         screenshot_alt: "Account overview: counts of bundles, contracts, documents awaiting my signature, sent and declined bundles; quick actions Upload new document and Verify signature; list of recent bundles with status, signature count, date and a View link"
         title: "Dashboard"
@@ -2113,6 +2121,29 @@ en:
     terms_of_service: "Terms of Service"
 
   shared:
+    document_vs_bundle:
+      arrow: "creates"
+      note_html: "<strong class=\"font-semibold text-gray-900\">The most common case is a bundle with a single document.</strong> Adding more documents to one bundle is currently possible only via the API."
+      document:
+        title: "Document"
+        subtitle: "A single file to be signed"
+        tile_label: "Document"
+        tile_format: "PDF"
+        points:
+          - "PDF, XML, ASiC-E or another supported format"
+          - "You can sign or validate it yourself – no bundle needed"
+          - "If someone else needs to sign it, you put it into a bundle"
+      bundle:
+        title: "Bundle"
+        subtitle: "A package you send for signing"
+        box_label: "Bundle"
+        box_count: "1 or more documents"
+        optional_document: "Another document (currently API only)"
+        recipients: "Recipients and the rule for how many should sign"
+        points:
+          - "Contains one or more documents"
+          - "Defines the recipients and how many of them should sign"
+          - "Recipients get a link to the whole bundle and sign the documents in it"
     stamp_geometry:
       box_label: "Box in the document preview"
       status: "Position x %{x}, y %{y} points, size %{width} × %{height} points"
