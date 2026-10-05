@@ -39,7 +39,11 @@
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-sm font-semibold text-gray-900"><%= record.filename %></span>
+                  <% if record.source_contract_available? %>
+                    <%= link_to record.filename, contract_path(record.contract), class: "text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors" %>
+                  <% else %>
+                    <span class="text-sm font-semibold text-gray-900"><%= record.filename %></span>
+                  <% end %>
                   <% if record.signature_levels.any? %>
                     <span class="text-xs text-gray-600"><%= record.signature_levels.map { |level| t("signature_parameters.level.#{level.downcase}", default: level) }.join(', ') %></span>
                   <% end %>

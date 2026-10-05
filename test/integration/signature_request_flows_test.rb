@@ -44,9 +44,9 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     sign_in_with_tenant colleague, @organization
     get bundles_path
-    assert_includes response.body, bundle_path(bundle)
+    assert_select "a[href=?]", bundle_path(bundle), text: bundle.display_name
     get received_bundles_path
-    assert_includes response.body, sign_bundle_path(bundle, recipient: recipient.uuid)
+    assert_select "a[href=?]", sign_bundle_path(bundle, recipient: recipient.uuid), text: bundle.display_name
 
     get sign_bundle_path(bundle)
     assert_response :success
@@ -65,7 +65,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     sign_in outsider
     get received_bundles_path
-    assert_includes response.body, sign_bundle_path(bundle, recipient: recipient.uuid)
+    assert_select "a[href=?]", sign_bundle_path(bundle, recipient: recipient.uuid), text: bundle.display_name
     get bundles_path
     assert_not_includes response.body, bundle_path(bundle)
     get bundle_path(bundle)

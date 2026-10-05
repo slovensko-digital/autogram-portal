@@ -48,6 +48,21 @@ class ContractValidationRecordsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "index links the file name to the source contract while it exists" do
+    linked_record = create_record(user: @user, expires_at: 1.month.from_now)
+    contract = create_contract_with_version(user: @user)
+    linked_record.update!(contract: contract, contract_content_version: contract.latest_content_version, source_contract_uuid: contract.uuid, source_version_number: contract.latest_content_version.version_number)
+    orphan_record = create_record(user: @user, expires_at: 2.months.from_now)
+    orphan_record.update!(filename: "deleted-source.pdf")
+
+    get :index
+
+    assert_response :success
+    assert_select "a[href=?]", contract_path(contract), text: linked_record.filename
+    assert_select "span", text: orphan_record.filename
+    assert_select "a", text: orphan_record.filename, count: 0
+  end
+
   test "destroy deletes current user's record" do
     record = create_record(user: @user, expires_at: 1.month.from_now)
 

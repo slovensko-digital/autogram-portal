@@ -13,7 +13,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-sm font-semibold text-gray-900"><%= bundle.display_name %></span>
+              <%= link_to bundle.display_name, bundle_path(bundle), class: "text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors" %>
             </div>
             <div class="md:hidden flex-1 items-center w-36 shrink-0">
               <% if bundle_state == :completed %>
