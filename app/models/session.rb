@@ -158,9 +158,7 @@ class Session < ApplicationRecord
   end
 
   def self.old_card?(qscd)
-    return false unless qscd.present?
-
-    [ :eid_2013, :dpb_2014 ].include?(qscd.to_sym)
+    User.legacy_eid_card?(qscd)
   end
 
   def self.multiple_files?(contract)

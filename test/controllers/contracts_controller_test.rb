@@ -235,8 +235,8 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[value='avm'][disabled]", count: 1
     assert_select "input[value='eidentita'][disabled]", count: 1
     assert_select "label[tabindex], label[aria-disabled]", count: 0
-    reason_id = css_select("input[value='avm'][disabled]").first["aria-describedby"]
-    assert_select "[id='#{reason_id}']", text: /\S/, count: 1
+    reason_id = css_select("input[value='avm'][disabled]").first["aria-describedby"].split.first
+    assert_select "[id='#{reason_id}']", text: /#{Regexp.escape(I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021")))}/, count: 1
     assert_select "a[data-signing-app-selector-target='autogramSubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='avmSubmitButton']", count: 0

@@ -55,8 +55,23 @@ class User < ApplicationRecord
   has_many :signers, dependent: :destroy
   has_many :policy_consents, class_name: "UserPolicyConsent", dependent: :destroy
 
-  enum :qscd, { none: 0, eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4, dpb_2014: 5, dpb_2020: 6, dpb_2023: 7 }, prefix: true
+  enum :qscd, {
+    none: 0,
+    eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4,
+    dpb_2014: 5, dpb_2020: 6, dpb_2023: 7,
+    cz_eid_2012: 8, cz_eid_2018: 9,
+    ica_securestore: 10, monet_proid: 11, gemalto_idprime: 12, pkcs11_other: 13
+  }, prefix: true
+
+  # QSCD choices grouped as offered in onboarding (qscd_check), newest first.
+  QSCD_GROUPS = {
+    sk_eid: [ "eid_2024", "eid_2022", "eid_2021", "eid_2013" ],
+    sk_dpb: [ "dpb_2023", "dpb_2020", "dpb_2014" ],
+    cz_eid: [ "cz_eid_2018", "cz_eid_2012" ],
+    tokens: [ "ica_securestore", "monet_proid", "gemalto_idprime", "pkcs11_other" ]
+  }.freeze
   MOBILE_QSCDS = [ "eid_2022", "eid_2024", "dpb_2023" ].freeze
+  LEGACY_QSCDS = [ "eid_2013", "dpb_2014", "cz_eid_2012" ].freeze
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
   validates :agree_to_policies, acceptance: true, on: :create
@@ -148,7 +163,14 @@ class User < ApplicationRecord
   end
 
   def self.legacy_eid_card?(qscd)
-    qscd.present? && qscd.in?(%w[eid_2013 dpb_2014])
+    qscd.present? && qscd.to_s.in?(LEGACY_QSCDS)
+  end
+
+  # :sk_eid, :sk_dpb, :cz_eid or :tokens; nil for an unknown value.
+  def self.qscd_group(qscd)
+    return if qscd.blank?
+
+    QSCD_GROUPS.find { |_group, values| values.include?(qscd.to_s) }&.first
   end
 
   def self.mobile_qscd?(qscd)

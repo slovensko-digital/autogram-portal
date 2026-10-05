@@ -879,7 +879,7 @@ sk:
       unavailable_reasons:
         multiple_files: "Nepodporuje dokumenty s viacerými súbormi."
         prepared_signature_fields: "Nepodporuje pripravené podpisové polia."
-        unsupported_qscd: "Vaša karta nemá NFC čip – vyžaduje preukaz vydaný po 1.12.2022."
+        unsupported_qscd: "Vyžaduje doklad s NFC čipom (napr. slovenský občiansky preukaz vydaný po 1.12.2022)."
         unsupported_signature_level: "Podporuje iba podpisy BASELINE_B."
         desktop_only: "Dostupné iba na počítači."
         method_not_allowed: "Podpisovanie v samostatných aplikáciách nie je pre tento dokument povolené."
@@ -1140,16 +1140,30 @@ sk:
       physical_title: "Nastavenie fyzického podpisovania"
       subtitle: "Dokončite tieto kroky na prípravu podpisovania"
       qscd_check:
-        title: "Vyberte typ vášho občianskeho preukazu"
-        description: "Podľa vášho výberu vám zobrazíme dostupné možnosti kvalifikovaného podpisovania."
+        title: "Čím budete podpisovať?"
+        description: "Vyberte svoj doklad alebo kvalifikované zariadenie (čipovú kartu, USB token). Podľa výberu vám zobrazíme dostupné možnosti kvalifikovaného podpisovania."
+        sk_eid_title: "Slovenský občiansky preukaz"
         compatible_mobile: "Kompatibilné s mobilnými podpisovými aplikáciami (AVM, eIdentita)"
         requires_desktop: "Vyžaduje počítač a čítačku kariet (iba Autogram na počítači)"
         issued_after: "Vydaný po %{date}"
         continue: "Pokračovať"
-        dpb_cards: Doklady o povolení na pobyt
-        show_dpb: Zobraziť doklady o pobyte
-        hide_dpb: Skryť doklady o pobyte
-        invalid_selection: "Vyberte typ občianskeho preukazu."
+        invalid_selection: "Vyberte doklad alebo zariadenie, ktorým budete podpisovať."
+      qscd_group:
+        sk_dpb:
+          title: "Doklady o povolení na pobyt"
+          subtitle: "Slovenské doklady pre cudzincov s pobytom na Slovensku"
+          show: "Zobraziť doklady o pobyte"
+          hide: "Skryť doklady o pobyte"
+        cz_eid:
+          title: "Český občiansky preukaz (eObčanka)"
+          subtitle: "S kvalifikovaným certifikátom od českej certifikačnej autority"
+          show: "Zobraziť české preukazy"
+          hide: "Skryť české preukazy"
+        tokens:
+          title: "Kvalifikované čipové karty a USB tokeny"
+          subtitle: "Zariadenia od certifikačných autorít, napr. I.CA, MONET+, Thales (Gemalto)"
+          show: "Zobraziť karty a tokeny"
+          hide: "Skryť karty a tokeny"
       pin_check:
         title: "Poznáte váš BOK?"
         description_a: "Na použitie elektronického občianskeho preukazu je potrebné poznať bezpečnostný osobný kód (BOK). Tento kód sa nastavuje pri vydávaní nového občianskeho preukazu na úrade."
@@ -1157,7 +1171,24 @@ sk:
         no_pin_title: "Nepoznáte BOK?"
         no_pin_description: "Musíte navštíviť oddelenie dokladov na ktoromkoľvek okresnom riaditeľstve policajného zboru."
         no_pin_learn_more: "Čo robiť, ak som zabudol BOK?"
+        no_pin_learn_more_url: "https://www.slovensko.sk/sk/faq/_obciansky-preukaz-s-cipom-do#zabudne"
         continue: "Mám BOK, pokračovať"
+        cz:
+          title: "Poznáte PIN k podpisovému certifikátu?"
+          description_a: "Na podpisovanie českým občianskym preukazom potrebujete PIN k podpisovému kľúču, ktorý ste si nastavili pri nahrávaní kvalifikovaného certifikátu do čipu."
+          description_b: "PIN budete zadávať v aplikácii Autogram pri každom podpise. Nikomu ho neprezrádzajte a bezpečne si ho uchovajte."
+          no_pin_title: "Nepoznáte PIN?"
+          no_pin_description: "Obráťte sa na certifikačnú autoritu, ktorá vám certifikát do občianskeho preukazu nahrala."
+          no_pin_learn_more: "Podpisovanie českým občianskym preukazom"
+          no_pin_learn_more_url: "https://info.identita.gov.cz/eop/Podepisovani.aspx"
+          continue: "Poznám PIN, pokračovať"
+        token:
+          title: "Poznáte PIN k vašej karte alebo tokenu?"
+          description_a: "Podpisový kľúč na kvalifikovanej čipovej karte alebo USB tokene je chránený PIN kódom. Dostali ste ho od certifikačnej autority alebo ste si ho nastavili pri prevzatí zariadenia."
+          description_b: "Po niekoľkých nesprávnych pokusoch sa PIN zablokuje a odblokovať ho bude možné iba pomocou PUK kódu."
+          no_pin_title: "Nepoznáte PIN?"
+          no_pin_description: "Obráťte sa na certifikačnú autoritu, ktorá vám kartu alebo token vydala (napr. I.CA, MONET+)."
+          continue: "Poznám PIN, pokračovať"
       certificate_check:
         title: "Máte vydané certifikáty?"
         description_a: "Elektronické podpisovanie vyžaduje platné kvalifikované certifikáty na vašom občianskom preukaze. Tieto certifikáty vám buď vydali pri preberaní nového OP na polícii alebo ste si ich museli vydať sami doma. K certifikátom potrebujete poznať ešte podpisový PIN (6 čísel), ktorý by sa mal líšiť od vášho BOK."
@@ -1165,12 +1196,33 @@ sk:
         no_certificates_title: "Nemáte ešte certifikáty?"
         no_certificates_description: "Budete potrebovať počítač a fyzickú čítačku kariet na ich vydanie. Toto je jednorazová požiadavka."
         no_certificates_learn_more: "Ako získať certifikáty pre elektronické podpisovanie?"
+        no_certificates_learn_more_url: "https://navody.digital/zivotne-situacie/aktivacia-eid/krok/certifikaty"
         continue: "Mám certifikáty, pokračovať"
+        cz:
+          title: "Máte v občianskom preukaze kvalifikovaný certifikát?"
+          description_a: "Český občiansky preukaz vydaný od 1.7.2018 dokáže uchovávať kvalifikovaný certifikát na podpisovanie, ten sa však nevydáva automaticky. Do čipu vám ho musí nahrať kvalifikovaná certifikačná autorita (napr. PostSignum, I.CA)."
+          description_b: "Na podpisovanie potrebujete čítačku kariet pripojenú k počítaču, nainštalovaný softvér eObčanka a aplikáciu Autogram."
+          no_certificates_title: "Nemáte ešte certifikát?"
+          no_certificates_description: "Požiadajte o kvalifikovaný certifikát niektorú z českých kvalifikovaných certifikačných autorít. Spôsob vydania aj poplatky sa medzi nimi líšia."
+          no_certificates_learn_more: "Podpisovanie občianskym preukazom (identita.gov.cz)"
+          no_certificates_learn_more_url: "https://info.identita.gov.cz/eop/Podepisovani.aspx"
+          continue: "Mám certifikát, pokračovať"
+        token:
+          title: "Je vaše zariadenie pripravené?"
+          description_a: "Kvalifikovaná čipová karta alebo USB token obsahuje certifikát od certifikačnej autority. Skontrolujte, či je certifikát stále platný."
+          description_b: "Na podpisovanie potrebujete počítač s aplikáciou Autogram a nainštalovaným ovládačom zariadenia (napr. I.CA SecureStore, MONET+ ProID+, SafeNet Authentication Client). Pri iných zariadeniach nastavíte v Autograme cestu k PKCS#11 ovládaču."
+          no_certificates_title: "Certifikát vám vypršal?"
+          no_certificates_description: "Obnovu certifikátu riešite s certifikačnou autoritou, ktorá vám zariadenie vydala."
+          continue: "Zariadenie je pripravené, pokračovať"
       legacy_eid_card:
         title: "Elektronické podpisovanie nie je možné"
         description: "Bohužiaľ, vaša generácia občianskeho preukazu už nepodporuje kvalifikované elektronické podpisy. Na elektronické podpisovanie dokumentov budete musieť požiadať o nový občiansky preukaz. Výmena z dôvodu starého čipu v občianskom preukaze by mala byť bez poplatku."
         warning_title: "Tento občiansky preukaz už nie je platný pre kvalifikované podpisovanie"
         warning_description: "Staré občianske preukazy vydané pred rokom 2021 už nie je možné použiť na kvalifikované elektronické podpisovanie. Musíte navštíviť oddelenie dokladov OR PZ a požiadať o nový občiansky preukaz."
+        cz:
+          description: "Váš český občiansky preukaz nepodporuje kvalifikované elektronické podpisovanie. Potrebujete občiansky preukaz vydaný od 1.7.2018 s nahraným kvalifikovaným certifikátom alebo inú kvalifikovanú čipovú kartu či USB token."
+          warning_title: "Tento občiansky preukaz nie je možné použiť na kvalifikované podpisovanie"
+          warning_description: "Do občianskych preukazov vydaných pred 1.7.2018 nie je možné nahrať kvalifikovaný certifikát. Požiadajte o nový občiansky preukaz alebo použite inú kvalifikovanú čipovú kartu či USB token."
       physical_instructions:
         title: "Pokyny pre fyzické podpisovanie"
         description: "Na fyzické podpísanie tohto dokumentu postupujte podľa týchto krokov:"
@@ -1808,7 +1860,7 @@ sk:
         qualified_signing_title: "Kvalifikované podpisovanie — čo vás čaká"
         qualified_signing_intro: "Pred samotným podpisom vás onboarding prevedie niekoľkými kontrolami, aby ste mohli úspešne vytvoriť kvalifikovaný elektronický podpis."
         qualified_signing_checks:
-          qscd: "Výber konkrétneho QSCD zariadenia (najčastejšie eID, ale aj doklad o pobyte)."
+          qscd: "Výber konkrétneho QSCD zariadenia (najčastejšie slovenské eID, ale aj doklad o pobyte, český občiansky preukaz, kvalifikovaná čipová karta alebo USB token)."
           pin: "Potvrdenie, že poznáte bezpečnostné kódy (BOK/PIN/KEP PIN podľa typu dokladu)."
           cert: "Potvrdenie, že máte na doklade vydané podpisové certifikáty."
         qscd_cards_title: "Podporované QSCD karty a kompatibilita"
@@ -1848,6 +1900,21 @@ sk:
             mode: "Legacy — nepodporované"
             badge_class: "bg-red-100 text-red-800"
             description: "Tento typ karty už nie je kompatibilný s kvalifikovaným podpisovaním."
+          cz_eid_2018:
+            label: "Český občiansky preukaz vydaný od 1.7.2018"
+            mode: "Iba desktop"
+            badge_class: "bg-yellow-100 text-yellow-800"
+            description: "Vyžaduje kvalifikovaný certifikát nahraný v čipe od českej certifikačnej autority, čítačku kariet a Autogram na počítači."
+          tokens:
+            label: "Kvalifikované čipové karty a USB tokeny (I.CA, MONET+, Thales/Gemalto, iné PKCS#11)"
+            mode: "Iba desktop"
+            badge_class: "bg-yellow-100 text-yellow-800"
+            description: "Vyžaduje Autogram na počítači a nainštalovaný ovládač zariadenia."
+          cz_eid_2012:
+            label: "Český občiansky preukaz vydaný pred 1.7.2018"
+            mode: "Legacy — nepodporované"
+            badge_class: "bg-red-100 text-red-800"
+            description: "Do tohto preukazu nie je možné nahrať kvalifikovaný certifikát."
         screenshot_title: "Ukážka obrazovky"
         screenshot_description: "Odporúčame sem doplniť screenshot výberu aplikácie a kroku podpisovania dokumentu."
         screenshot_file_hint: "Súbor: /public/docs/screenshots/signing-app-selection.png"
@@ -2153,6 +2220,12 @@ sk:
       dpb_2014: "Doklad o povolení na pobyt vydaný pred 10.7.2020"
       dpb_2020: "Doklad o povolení na pobyt vydaný po 10.7.2020"
       dpb_2023: "Doklad o povolení na pobyt vydaný po 18.10.2023"
+      cz_eid_2012: "Český občiansky preukaz vydaný pred 1.7.2018"
+      cz_eid_2018: "Český občiansky preukaz vydaný od 1.7.2018"
+      ica_securestore: "I.CA – čipová karta alebo USB token"
+      monet_proid: "MONET+ ProID+Q – čipová karta alebo USB token"
+      gemalto_idprime: "Thales (Gemalto) IDPrime 940"
+      pkcs11_other: "Iná kvalifikovaná čipová karta alebo USB token"
     description:
       eid_2013: "Tento občiansky preukaz obsahuje čip, ktorý už nie je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový občiansky preukaz."
       eid_2021: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími preukazmi."
@@ -2161,6 +2234,18 @@ sk:
       dpb_2014: "Tento doklad o povolení na pobyt obsahuje čip, ktorý už nie je kompatibilný s kvalifikovaným podpisovaním. Pre elektronické podpisovanie dokumentov budete musieť požiadať o nový doklad o povolení na pobyt."
       dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
       dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácií Autogram v mobile a eIdentita."
+      cz_eid_2012: "Tento občiansky preukaz nepodporuje kvalifikované podpisovanie. Na elektronické podpisovanie si budete musieť vybaviť nový občiansky preukaz alebo použiť inú kvalifikovanú kartu či token."
+      cz_eid_2018: "Podpisovať môžete, ak máte v čipe nahraný kvalifikovaný certifikát od českej certifikačnej autority (napr. PostSignum, I.CA). Potrebujete čítačku kariet pripojenú k počítaču a aplikáciu Autogram."
+      ica_securestore: "Zariadenie s kvalifikovaným certifikátom od I.CA. Podpisuje sa v aplikácii Autogram na počítači s nainštalovaným ovládačom I.CA SecureStore."
+      monet_proid: "Kvalifikované zariadenie MONET+. Podpisuje sa v aplikácii Autogram na počítači s nainštalovaným ovládačom ProID+."
+      gemalto_idprime: "Kvalifikovaná čipová karta Thales/Gemalto. Podpisuje sa v aplikácii Autogram na počítači s ovládačom SafeNet Authentication Client a čítačkou kariet."
+      pkcs11_other: "Ak má vaše zariadenie ovládač PKCS#11, v aplikácii Autogram nastavíte cestu k nemu a podpisujete rovnako ako s ostatnými kartami."
+    badges:
+      mobile: "Mobil aj počítač (NFC)"
+      card_reader: "Počítač + čítačka kariet"
+      driver: "Počítač + ovládač zariadenia"
+      certificate: "Vyžaduje kvalifikovaný certifikát"
+      unsupported: "Nepodporované"
 
   plan_limits:
     exceeded:
