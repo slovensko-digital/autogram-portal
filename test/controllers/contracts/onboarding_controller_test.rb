@@ -74,7 +74,7 @@ class Contracts::OnboardingControllerTest < ActionDispatch::IntegrationTest
     User::QSCD_GROUPS.values.flatten.each do |qscd|
       assert_select "input[type=radio][name=qscd][value='#{qscd}']"
     end
-    assert_select "input[type=radio][name=qscd]:checked", count: 0
+    assert_select "input[type=radio][name=qscd][checked]", count: 0
   end
 
   test "qscd check preselects the current choice and expands its group" do
