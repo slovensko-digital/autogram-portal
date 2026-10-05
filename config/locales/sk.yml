@@ -50,8 +50,9 @@ sk:
   verification_mailer:
     otp_code:
       subject: "Váš overovací kód pre Autogram Portal"
+      badge: "Overenie"
       title: "Váš overovací kód"
-      body: "Na pokračovanie v podpisovaní v Autogram Portal použite tento jednorazový kód:"
+      body: "Na pokračovanie v podpisovaní v Autogram Portáli použite tento jednorazový kód:"
       footer: "Ak ste tento kód neočakávali, tento e-mail môžete ignorovať."
 
   consents:
@@ -272,21 +273,29 @@ sk:
         resend_unlock_instructions: "Znovu poslať inštrukcie na odomknutie"
         subtitle: "Požiadajte o inštrukcie na odomknutie, aby ste získali prístup k svojmu účtu."
     mailer:
-      greeting: "Dobrý deň 👋 %{recipient}!"
       unlock_instructions:
+        badge: "Zabezpečenie"
+        title: "Váš účet bol uzamknutý"
         message: "Váš účet bol uzamknutý kvôli nadmernému počtu neúspešných pokusov o prihlásenie."
-        instruction: "Kliknutím na odkaz nižšie odomknete svoj účet:"
+        instruction: "Odomknúť ho môžete pomocou tlačidla nižšie."
         action: "Odomknúť môj účet"
       email_changed:
+        badge: "Zabezpečenie"
+        title: "Váš e-mail bol zmenený"
+        title_unconfirmed: "Váš e-mail sa mení"
         message: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail bol zmenený na %{email}."
         message_unconfirmed: "Kontaktujeme vás, aby sme vás informovali, že váš e-mail sa mení na %{email}."
       confirmation_instructions:
-        instruction: "Svoj e-mail môžete potvrdiť kliknutím na odkaz nižšie:"
+        badge: "Registrácia"
+        title: "Potvrďte svoj e-mail"
+        instruction: "Dobrý deň, %{recipient}. Svoj e-mail potvrdíte pomocou tlačidla nižšie."
         action: "Potvrdiť môj účet"
       magic_link:
-        instruction: "Prihlásiť sa môžete pomocou odkazu nižšie:"
+        badge: "Prihlásenie"
+        title: "Prihláste sa do Autogram Portálu"
+        instruction: "Dobrý deň, %{recipient}. Prihlásiť sa môžete pomocou tlačidla nižšie."
         action: "Prihlásiť sa do môjho účtu"
-        expiry_notice: "Odkaz je platný %{expiry} minút."
+        expiry_notice: "Odkaz je platný %{expiry} minút. Ak ste o prihlásenie nežiadali, tento e-mail môžete ignorovať."
     shared:
       captcha:
         captcha_link_label: "ALTCHA – webová stránka služby ochrany (otvorí sa v novom okne)"
@@ -2030,65 +2039,67 @@ sk:
       copy_failure: "Nepodarilo sa skopírovať odkaz"
 
   notification_mailer:
-    greeting: "Dobrý deň 👋"
+    signature_details:
+      document: "Dokument"
+      signed_by: "Podpisujúci"
+      signing_time: "Čas podpisu"
+      timestamp_qualified: "Overené kvalifikovanou časovou pečiatkou"
+      timestamp_non_qualified: "Negarantovaný čas (bez časovej pečiatky)"
     contract_signed:
       subject: "Vaše dokumenty boli podpísané"
-      title: "Dokument bol podpísaný"
-      message: "dokument %{filename} bol podpísaný."
-      details_title: "Detaily podpisu:"
-      signed_by: "Podpísal: %{signer_name}"
-      timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
-      timestamp_non_qualified: "Negarantovaný dátum a čas (bez časovej pečiatky): %{signing_time}"
+      badge: "Podpísané"
+      title: "Váš dokument bol podpísaný"
+      message: "Podpísaný dokument nájdete v Autogram Portáli."
       view_contract: "Zobraziť podpísaný dokument"
     bundle_contract_signed:
       subject: "Dokument v balíku bol podpísaný"
-      title: "Dokument bol podpísaný"
-      message: "dokument %{filename} v balíku bol podpísaný adresátom %{signer_name}."
-      details_title: "Detaily podpisu:"
-      signed_by: "Podpísal: %{signer_name}"
-      timestamp_qualified: "Dátum a čas časovej pečiatky: %{signing_time}"
-      timestamp_non_qualified: "Negarantovaný dátum a čas (bez časovej pečiatky): %{signing_time}"
+      badge: "Podpísané"
+      title: "Dokument z vášho balíka bol podpísaný"
+      message: "Stav ostatných dokumentov uvidíte v detaile balíka."
       view_bundle: "Zobraziť balík"
     bundle_completed:
       subject: "Váš balík dokumentov bol podpísaný"
-      title: "Balík dokumentov bol dokončený"
-      message: "Váš balík s dokumentami bol dokončený."
-      details_title: "Dokončené dokumenty:"
+      badge: "Dokončené"
+      title: "Všetky dokumenty v balíku sú podpísané"
+      message: "Balík %{bundle_name} je dokončený. Podpísané dokumenty nájdete v Autogram Portáli."
+      documents: "Podpísané dokumenty (%{count})"
       view_bundle: "Zobraziť balík"
     signature_requested:
       subject: "Dokumenty na podpis"
-      title: "Nový dokument na podpis"
+      badge: "Žiadosť o podpis"
+      title: "%{author_name} vás žiada o podpis"
+      message: "Dokumenty podpíšete online v Autogram Portáli. Po kliknutí na tlačidlo vás systém prevedie jednotlivými krokmi."
       note_from_sender_title: "Poznámka od odosielateľa"
-      documents: "Dokumenty"
-      message: "%{author_name} vám poslal dokument na podpis v systéme Autogram Portal."
-      how_it_works_title: "Ako to funguje"
-      signing_is_simple: "Ak si nie ste istý, proces podpisu je jednoduchý. Po kliknutí na odkaz vás systém prevedie krokmi."
-      step_1_title: "Kliknite na tlačidlo"
-      step_1_desc: "Otvorí sa bezpečná podpisovacia platforma"
-      step_2_title: "Autorizujte sa"
-      step_2_desc: "Použite občiansky preukaz a postupujte podľa pokynov"
-      step_3_title: "Hotovo"
-      step_3_desc: "Dokument je podpísaný"
-      details_title: "Dokumenty na podpis:"
-      view_bundle: "Zobraziť dokument"
+      documents: "Dokumenty (%{count})"
+      view_bundle: "Zobraziť a podpísať"
+      how_it_works_title: "Ako podpísať"
+      step_1_title: "Kliknite na tlačidlo."
+      step_1_desc: "Otvorí sa bezpečná podpisovacia platforma."
+      step_2_title: "Autorizujte sa."
+      step_2_desc: "Použite občiansky preukaz a postupujte podľa pokynov."
+      step_3_title: "Hotovo."
+      step_3_desc: "Dokument je podpísaný."
     signature_no_longer_required:
       subject: "Váš podpis už nie je potrebný"
-      title: "Podpis už nie je potrebný"
-      message: "Balík dokumentov od %{author_name} bol dokončený bez vášho podpisu."
-      details_title: "Dokumenty v balíku:"
+      badge: "Bez vášho podpisu"
+      title: "Váš podpis už nie je potrebný"
+      message: "%{author_name} už váš podpis nepotrebuje, balík dokumentov bol dokončený bez neho. Nemusíte nič robiť."
+      documents: "Dokumenty v balíku"
       view_bundle: "Zobraziť balík"
     signature_withdrawn:
       subject: "Požiadavka na podpis bola stiahnutá"
-      title: "Požiadavka na podpis bola stiahnutá"
-      message: "%{author_name} stiahol požiadavku na váš podpis pre tento balík."
+      badge: "Stiahnuté"
+      title: "Žiadosť o podpis bola stiahnutá"
+      message: "%{author_name} už nežiada váš podpis. Dokumenty nižšie podpisovať nemusíte."
       apology: "Ospravedlňujeme sa za prípadné komplikácie."
-      details_title: "Dokumenty v balíku:"
+      documents: "Dokumenty v balíku"
 
   layouts:
     skip_to_main_content: "Preskočiť na hlavný obsah"
     mailer:
       regards: "S pozdravom,"
       team: "tím Autogram Portal"
+      operator: "Autogram Portal prevádzkuje"
 
   qscd:
     title:
@@ -2195,6 +2206,7 @@ sk:
   tenant_mailer:
     invitation:
       subject: "Pozvánka do organizácie %{tenant} v Autogram Portáli"
+      badge: "Pozvánka"
       title: "Pozvánka do organizácie %{tenant}"
       message: "Boli ste pridaný do organizácie %{tenant} v Autogram Portáli. Získate prístup k jej dokumentom a balíkom na podpis."
       accept: "Prijať pozvánku"

@@ -1,31 +1,4 @@
-<p class="greeting"><%= t('notification_mailer.greeting') %></p>
-
-<div class="section-card">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-    <tr>
-      <td width="56" valign="top" style="padding: 0 12px 10px 0;">
-        <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
-      </td>
-      <td valign="middle" style="padding: 0 0 10px 0;">
-        <h2 class="section-title" style="margin: 0;"><%= t('.title') %></h2>
-      </td>
-    </tr>
-  </table>
-  <p class="section-body"><%= t('.message', filename: @contract.display_name) %></p>
-</div>
-
-<div class="section-card">
-  <div class="details">
-    <div class="details-title"><%= t('.details_title') %></div>
-    <div class="details-list">
-      <div><%= t('.signed_by', signer_name: @signature.signerName) %></div>
-      <% if @signature.qualified_timestamps? %>
-        <div><%= t('.timestamp_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %></div>
-      <% else %>
-        <div><%= t('.timestamp_non_qualified', signing_time: @signature.signingTime&.strftime('%d. %m. %Y %H:%M')) %></div>
-      <% end %>
-    </div>
-  </div>
-</div>
-
-<%= link_to t('.view_contract'), url_for(@contract), class: "button" %>
+<%= render "mailer/badge", label: t(".badge"), tone: :green %>
+<%= render "mailer/heading", title: t(".title"), message: t(".message") %>
+<%= render "signature_details", contract: @contract, signer_name: @signature&.signerName || @signer&.display_name, signature: @signature %>
+<%= render "mailer/button", label: t(".view_contract"), url: url_for(@contract) %>

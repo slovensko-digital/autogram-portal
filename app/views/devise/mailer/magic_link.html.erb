@@ -1,7 +1,4 @@
-<p class="greeting"><%= t('devise.mailer.greeting', recipient: @resource.email) %></p>
-
-<p><%= t('.instruction') %></p>
-
-<%= link_to t('.action'), magic_link_url(@resource, @scope_name => {email: @resource.email, token: @token, remember_me: @remember_me}), class: 'button' %>
-
-<p><%= t('.expiry_notice', expiry: Devise.passwordless_login_within.inspect.to_i) %></p>
+<%= render "mailer/badge", label: t(".badge"), tone: :blue %>
+<%= render "mailer/heading", title: t(".title"), message: t(".instruction", recipient: @resource.email) %>
+<%= render "mailer/button", label: t(".action"), url: magic_link_url(@resource, @scope_name => { email: @resource.email, token: @token, remember_me: @remember_me }) %>
+<%= render "mailer/hint", text: t(".expiry_notice", expiry: Devise.passwordless_login_within.inspect.to_i) %>

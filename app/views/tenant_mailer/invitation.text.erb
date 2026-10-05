@@ -1,6 +1,5 @@
-<%= t('notification_mailer.greeting') %>
-
 <%= t('.title', tenant: @tenant.name) %>
+
 <%= t('.message', tenant: @tenant.name) %>
 
 <%= @user.confirmed? ? t('.open_portal') : t('.accept') %>: <%= @url %>

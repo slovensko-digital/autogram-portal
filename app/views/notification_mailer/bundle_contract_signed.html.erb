@@ -1,17 +1,4 @@
-<p class="greeting"><%= t('notification_mailer.greeting') %></p>
-
-<div class="section-card">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-    <tr>
-      <td width="56" valign="top" style="padding: 0 12px 10px 0;">
-        <div class="section-icon" style="background-color:#DCFCE7;"><%= render 'icon_check_done' %></div>
-      </td>
-      <td valign="middle" style="padding: 0 0 10px 0;">
-        <h2 class="section-title" style="margin: 0;"><%= t('.title') %></h2>
-      </td>
-    </tr>
-  </table>
-  <p class="section-body"><%= t('.message', filename: @contract.display_name, signer_name: @signer.display_name) %></p>
-</div>
-
-<%= link_to t('.view_bundle'), url_for(@bundle), class: "button" %>
+<%= render "mailer/badge", label: t(".badge"), tone: :green %>
+<%= render "mailer/heading", title: t(".title"), message: t(".message") %>
+<%= render "signature_details", contract: @contract, signer_name: @signer.display_name, signature: nil %>
+<%= render "mailer/button", label: t(".view_bundle"), url: url_for(@bundle) %>

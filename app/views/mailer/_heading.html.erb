@@ -1,0 +1,6 @@
+<%# locals: (title:, message: nil) -%>
+<h1 class="email-title" style="margin: 0 0 12px; font-size: 26px; line-height: 1.25; font-weight: 700; color: #111827;"><%= title %></h1>
+<% Array(message).each do |paragraph| %>
+  <p style="margin: 0 0 12px; font-size: 16px; line-height: 1.6; color: #374151;"><%= paragraph %></p>
+<% end %>
+<div style="height: 16px; line-height: 16px; font-size: 0;">&nbsp;</div>

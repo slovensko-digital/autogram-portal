@@ -1,0 +1,14 @@
+<%# locals: (label:, url:, variant: :primary) -%>
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 28px;">
+  <tr>
+    <% if variant == :secondary %>
+      <td bgcolor="#FFFFFF" style="border-radius: 8px; background-color: #FFFFFF;">
+        <a href="<%= url %>" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 16px; font-weight: 600; line-height: 24px; color: #155DFC; text-decoration: none; border-radius: 8px; border: 1px solid #93C5FD;"><%= label %></a>
+      </td>
+    <% else %>
+      <td bgcolor="#155DFC" style="border-radius: 8px; background-color: #155DFC;">
+        <a href="<%= url %>" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 16px; font-weight: 600; line-height: 24px; color: #FFFFFF; text-decoration: none; border-radius: 8px;"><%= label %></a>
+      </td>
+    <% end %>
+  </tr>
+</table>
