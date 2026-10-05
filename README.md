@@ -74,6 +74,34 @@ Edit `.env` file:
 - `WEBHOOK_OPEN_TIMEOUT=3` - Outbound webhook TCP connect timeout in seconds
 - `WEBHOOK_TIMEOUT=5` - Outbound webhook request timeout in seconds
 
+### Plan Limits
+
+Usage limits of the organization plans are configured per instance (`app/lib/plan_limits.rb`).
+A blank or missing value means unlimited; only `BASIC_MAX_MEMBERS` defaults to 1.
+
+| Variable (`BASIC_` / `PRO_` prefix) | Meaning |
+|---|---|
+| `*_MAX_MEMBERS` | Members of an organization |
+| `*_MAX_STORED_DOCUMENTS` | Documents (contracts, standalone or in bundles) stored at once |
+| `*_STORAGE_GB` | Total size of stored documents and their signed versions |
+| `*_MONTHLY_SIGNATURE_REQUESTS` | Documents sent for signature per calendar month |
+| `*_MONTHLY_TIMESTAMPS` | Timestamps per calendar month (signature extension, archivation, timestamped AVM signatures) |
+| `*_RETENTION_DAYS` | Documents and bundles are deleted this many days after they were created |
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `MAX_DOCUMENT_SIZE_MB` | unlimited | Total size of the files of one document, also for anonymous uploads |
+| `ANONYMOUS_RETENTION_MINUTES` | 55 | Anonymous documents are deleted after this time (the cleanup runs every 5 minutes) |
+| `PLAN_CHANGE_RETENTION_GRACE_DAYS` | 30 | After a plan change (e.g. a cancelled PRO), documents are kept this long before the new plan's retention applies |
+| `SIGNED_HISTORY_DAYS` | unlimited | In a plan with retention, documents signed for others stay in the received list this long |
+
+A document sent for signature counts once: when a recipient is notified, or, for bundles shared by
+a link or created through the API, when someone other than the organization signs the bundle
+(all its documents count then). Monthly usage is kept in `usage_records`, so deleting documents does
+not return the quota; the records are also the billing basis shown to admins on the organization page.
+Organizations see their usage in their settings and on the dashboard; integrators can call
+`GET /api/v1/usage`.
+
 ## Development
 
 ```bash

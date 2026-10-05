@@ -8,6 +8,10 @@
 
   <%= render "form" %>
 
+  <%= render "tenants/usage", tenant: @tenant %>
+
+  <%= render "usage", tenant: @tenant, month: @usage_month, usage_by_kind_and_source: @usage_by_kind_and_source %>
+
   <div class="rounded-lg border border-gray-200 bg-white">
     <div class="border-b border-gray-100 px-5 py-4">
       <h2 class="text-lg font-semibold text-gray-900"><%= t('.members') %></h2>

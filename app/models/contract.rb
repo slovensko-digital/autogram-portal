@@ -74,6 +74,8 @@ class Contract < ApplicationRecord
   validates :uuid, presence: true, uniqueness: true
   validates_associated :signature_parameters
   validate :tenant_matches_bundle, if: :bundle
+  validate :documents_fit_size_limit
+  validate :documents_fit_tenant_limits, if: :tenant
 
   before_validation :ensure_uuid, on: :create
   before_validation :inherit_tenant_from_bundle
@@ -318,8 +320,11 @@ class Contract < ApplicationRecord
     documents.first.available_extension_target_levels
   end
 
-  def extend_signatures!(target_level: "T", source_content_version: latest_content_version)
+  # Each extension adds a timestamp that counts towards the monthly limit of the tenant.
+  def extend_signatures!(target_level: "T", source_content_version: latest_content_version, usage_source: :extension)
     return unless extendable_signatures?(target_level: target_level)
+
+    tenant&.ensure_within_limit!(:timestamps)
 
     source_document = source_content_version&.document || documents.first
     raise "No signed content is available for extension" if source_document.blank?
@@ -331,6 +336,7 @@ class Contract < ApplicationRecord
       content_type: source_document.content_type,
       origin: "extension"
     )
+    tenant&.record_timestamps!(self, source: usage_source, enforce: false)
     persist_validation_record!(contract_content_version: version)
     version
   end
@@ -449,6 +455,48 @@ class Contract < ApplicationRecord
   def validate_documents
     if documents.empty?
       errors.add(:documents, "must have at least one document")
+    end
+  end
+
+  def kept_documents
+    documents.reject(&:marked_for_destruction?)
+  end
+
+  # Files are added only to a new contract or through loaded (nested) documents.
+  def documents_may_change?
+    new_record? || association(:documents).loaded?
+  end
+
+  def documents_byte_size(documents)
+    documents.sum { |document| document.blob.attached? ? document.blob.byte_size.to_i : 0 }
+  end
+
+  def documents_fit_size_limit
+    max = PlanLimits.max_document_bytes
+    return if max.nil? || !documents_may_change?
+    return if documents_byte_size(kept_documents) <= max
+
+    errors.add(:base, :too_large, max: PlanLimits::Exceeded.format(:document_size, max))
+  end
+
+  # A contract that newly belongs to the tenant (created or claimed after sign-in) takes up one
+  # of its stored documents, and every new file takes up its storage.
+  def documents_fit_tenant_limits
+    joins_tenant = new_record? || will_save_change_to_tenant_id?
+    if joins_tenant && !tenant.within_limit?(:stored_documents)
+      errors.add(:base, :stored_documents_limit, max: tenant.limit_of(:stored_documents))
+    end
+
+    added_documents = if joins_tenant
+      kept_documents
+    elsif documents_may_change?
+      kept_documents.select(&:new_record?)
+    else
+      []
+    end
+    added_bytes = documents_byte_size(added_documents)
+    if added_bytes.positive? && !tenant.within_limit?(:storage, added_bytes)
+      errors.add(:base, :storage_limit, max: PlanLimits::Exceeded.format(:storage, tenant.limit_of(:storage)))
     end
   end
 

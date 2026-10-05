@@ -126,11 +126,19 @@ sk:
               last_tenant_owner: "Účet nemožno zmazať, kým ste jediným vlastníkom organizácie s ďalšími členmi. Najprv odovzdajte vlastníctvo alebo odstráňte členov."
         contract:
           attributes:
+            base:
+              too_large: "Dokument je príliš veľký. Všetky jeho súbory môžu mať spolu najviac %{max}."
+              stored_documents_limit: "Organizácia môže mať uložených najviac %{max} dokumentov naraz. Zmažte dokumenty, ktoré už nepotrebujete."
+              storage_limit: "Úložisko organizácie (%{max}) je plné. Zmažte dokumenty, ktoré už nepotrebujete."
             tenant:
               bundle_mismatch: "musí byť organizácia balíka"
             agree_to_policies:
               blank: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
               acceptance: "Musíte súhlasiť so zásadami a podmienkami, aby ste mohli pokračovať"
+        session:
+          attributes:
+            base:
+              signature_request_limit: "Organizácia %{sender} tento mesiac vyčerpala limit dokumentov odoslaných na podpis."
 
   errors:
     archivation_disabled: "Funkcia archivácie dokumentov je pre vašu organizáciu momentálne vypnutá. Kontaktujte administrátora."
@@ -398,6 +406,9 @@ sk:
       signature_extended_successfully: "Podpisy boli úspešne rozšírené na úroveň %{target_level}."
 
   bundles:
+    sign_limit_reached:
+      title: "Dokumenty zatiaľ nie je možné podpísať"
+      message: "Organizácia %{sender} tento mesiac vyčerpala limit dokumentov odoslaných na podpis. Kontaktujte, prosím, odosielateľa."
     display_name: "Balík dokumentov"
     index:
       title: "Balíky dokumentov"
@@ -607,6 +618,25 @@ sk:
 
   admin:
     tenants:
+      usage:
+        title: "Spotreba podľa mesiacov"
+        subtitle: "Podklad na vyúčtovanie: dokumenty odoslané na podpis a použité časové pečiatky v kalendárnom mesiaci."
+        month: "Mesiac"
+        show: "Zobraziť"
+        caption: "Spotreba za %{month}"
+        kind: "Druh"
+        source: "Zdroj"
+        quantity: "Počet"
+        total: "Spolu – %{kind}"
+        kinds:
+          signature_request: "Dokumenty odoslané na podpis"
+          timestamp: "Časové pečiatky"
+        sources:
+          notification: "Odoslanie príjemcovi"
+          recipient_signature: "Podpis cez zdieľaný odkaz"
+          extension: "Rozšírenie podpisov"
+          archivation: "Archivácia"
+          avm_signing: "Podpis v Autograme v mobile"
       index:
         title: "Organizácie"
         subtitle: "Prehľad všetkých organizácií, ich plánov a funkcií."
@@ -710,6 +740,7 @@ sk:
   contracts:
     submit_failed: "Odoslanie zlyhalo: %{errors}"
     alerts:
+      claim_failed: "Dokument sa nepodarilo uložiť do organizácie. %{errors} Dokument zostáva neuložený a čoskoro sa automaticky zmaže."
       unauthorized_edit_attempt: "Nemáte oprávnenie upravovať tento dokument."
       visual_signing_not_available_for_signed_pades: "Po podpísaní dokumentu vo formáte PAdES už nie je možné pridať vizuálny podpis ani pečiatku."
       signature_field_appearance_unavailable: "Pre tento dokument vám nie je priradené žiadne pripravené podpisové pole."
@@ -852,6 +883,7 @@ sk:
         unsupported_signature_level: "Podporuje iba podpisy BASELINE_B."
         desktop_only: "Dostupné iba na počítači."
         method_not_allowed: "Podpisovanie v samostatných aplikáciách nie je pre tento dokument povolené."
+        timestamp_limit_reached: "Organizácia, ktorej dokument patrí, tento mesiac vyčerpala limit časových pečiatok."
     signature_parameters:
       sign_title: "Podpísať dokument"
       sign_subtitle: "Vyberte formát a typ podpisu pre tento dokument."
@@ -1329,10 +1361,29 @@ sk:
           start: "Začať"
           log_in: "Prihlásiť sa"
           included:
-            - "10 dokumentov mesačne na podpis a uloženie"
-            - "10 kvalifikovaných časových pečiatok"
-          excluded:
-            - "Iba jeden používateľ"
+            - "Odosielanie dokumentov na podpis a ich uchovávanie"
+            - "Pridávanie kvalifikovaných časových pečiatok"
+          limits:
+            stored_documents:
+              one: "Uchovávanie najviac %{count} dokumentu súčasne"
+              few: "Uchovávanie najviac %{count} dokumentov súčasne"
+              other: "Uchovávanie najviac %{count} dokumentov súčasne"
+            signature_requests:
+              one: "%{count} dokument odoslaný na podpis mesačne"
+              few: "%{count} dokumenty odoslané na podpis mesačne"
+              other: "%{count} dokumentov odoslaných na podpis mesačne"
+            timestamps:
+              one: "%{count} kvalifikovaná časová pečiatka mesačne"
+              few: "%{count} kvalifikované časové pečiatky mesačne"
+              other: "%{count} kvalifikovaných časových pečiatok mesačne"
+            retention:
+              one: "Dokumenty sa uchovávajú najviac %{count} deň"
+              few: "Dokumenty sa uchovávajú najviac %{count} dni"
+              other: "Dokumenty sa uchovávajú najviac %{count} dní"
+            members:
+              one: "Iba jeden používateľ"
+              few: "Najviac %{count} používatelia"
+              other: "Najviac %{count} používateľov"
         pro:
           title: "PRO účet"
           price: "19 eur/mesačne"
@@ -1409,6 +1460,10 @@ sk:
       faq:
         subtitle: "FAQ"
         title: "Časté otázky"
+        storage_basic_retention:
+          one: "V bezplatnom pláne Basic sa dokumenty a balíky automaticky mažú najneskôr %{count} deň po vytvorení."
+          few: "V bezplatnom pláne Basic sa dokumenty a balíky automaticky mažú najneskôr %{count} dni po vytvorení."
+          other: "V bezplatnom pláne Basic sa dokumenty a balíky automaticky mažú najneskôr %{count} dní po vytvorení."
         items:
           account:
             question: "Potrebujem účet na podpisovanie dokumentu?"
@@ -1427,7 +1482,7 @@ sk:
             answer: "Áno. Môžete pridať ľubovoľný počet príjemcov. Systém bude sledovať, kto už podpísal, a notifikuje vás, keď všetci dokument podpíšu. Rovnako si môžete nastaviť, koľkí príjemcovia musia balík podpísať, aby bol považovaný za dokončený."
           storage:
             question: "Ako dlho sú dokumenty uložené?"
-            answer: "Dokumenty a balíky prihláseného používateľa sa uchovávajú dokým ich používateľ nezmaže. Dokumenty a balíky neprihlásených používateľov sa uchovávajú najviac 60 minút."
+            answer: "Dokumenty a balíky prihláseného používateľa sa uchovávajú, kým ich používateľ nezmaže. Dokumenty a balíky neprihlásených používateľov sa uchovávajú najviac 60 minút."
           open_source:
             question: "Je Autogram Portal zadarmo a open-source?"
             answer: "Áno. Autogram Portal je plne open-source projekt (licencia EUPL) dostupný na GitHube. Môžete si ho spustiť na vlastnej infraštruktúre. Vývoj je podporovaný organizáciou NLNet."
@@ -1960,6 +2015,7 @@ sk:
       file_selected: "Zvolený súbor: %{filename} (%{size})"
     errors:
       file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty sú PDF, XML a iné súbory."
+      file_too_large: "Súbor \"%{filename}\" je príliš veľký. Dokument môže mať najviac %{max}."
       signing_failed: "Nepodarilo sa iniciovať podpisovanie. Skúste to prosím znova."
       network_error: "Vyskytla sa sieťová chyba. Skontrolujte prosím pripojenie a skúste to znova."
       iframe_client_error: "Nepodarilo sa vytvoriť Autogram klienta kompatibilného s iframe"
@@ -2063,7 +2119,37 @@ sk:
       dpb_2020: "Pre podpisovanie je potrebné použiť fyzickú čítačku kariet pripojenú k počítaču a aplikáciu Autogram. Mobilné podpisovanie je možné iba s novšími dokladmi o povolení na pobyt."
       dpb_2023: "Obsahuje čip s NFC rozhraním a tým pádom je podpisovanie pomocou neho možné aj prostredníctvom mobilných aplikácií Autogram v mobile a eIdentita."
 
+  plan_limits:
+    exceeded:
+      stored_documents: "Organizácia má uložených %{used} z %{max} dokumentov, ktoré jej plán umožňuje. Zmažte dokumenty, ktoré už nepotrebujete."
+      storage: "Úložisko organizácie je plné (využité %{used} z %{max})."
+      signature_requests: "Organizácia tento mesiac odoslala na podpis %{used} z %{max} dokumentov, ktoré jej plán umožňuje. Limit sa obnoví na začiatku ďalšieho mesiaca."
+      timestamps: "Organizácia tento mesiac použila %{used} z %{max} časových pečiatok, ktoré jej plán umožňuje. Limit sa obnoví na začiatku ďalšieho mesiaca."
+      document_size: "Dokument je príliš veľký. Všetky jeho súbory môžu mať spolu najviac %{max}."
+    signing_blocked: "Organizácia %{sender} tento mesiac vyčerpala limit dokumentov odoslaných na podpis. Dokument zatiaľ nie je možné podpísať, kontaktujte odosielateľa."
+    action_unavailable:
+      signature_requests: "Organizácia tento mesiac vyčerpala limit dokumentov odoslaných na podpis."
+      timestamps: "Organizácia tento mesiac vyčerpala limit časových pečiatok."
+
   tenants:
+    usage:
+      title: "Využitie plánu"
+      subtitle: "Mesačné limity platia pre aktuálny kalendárny mesiac."
+      details: "Podrobnosti"
+      limited_value: "%{used} / %{max}"
+      unlimited_value: "%{used} (bez obmedzenia)"
+      reached: "Limit je vyčerpaný."
+      reached_monthly: "Limit je vyčerpaný, obnoví sa %{date}."
+      retention:
+        one: "Dokumenty a balíky sa automaticky mažú %{count} deň po vytvorení."
+        few: "Dokumenty a balíky sa automaticky mažú %{count} dni po vytvorení."
+        other: "Dokumenty a balíky sa automaticky mažú %{count} dní po vytvorení."
+      max_document_size: "Jeden dokument môže mať spolu najviac %{size}."
+      limits:
+        stored_documents: "Uložené dokumenty"
+        storage: "Úložisko"
+        signature_requests: "Dokumenty odoslané na podpis tento mesiac"
+        timestamps: "Časové pečiatky tento mesiac"
     plans:
       basic: "Basic"
       pro: "PRO"

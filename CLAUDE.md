@@ -28,6 +28,7 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - **Recipient** = invited signer of a bundle (linked to a `User` by email when one exists). Signing goes through `Signer` (STI: `RecipientSigner`, `UserSigner`, `AnonymousSigner`) → `SignerContract` (signed/declined/superseded) → `Session` (STI per signing app). Bundle `signing_rule`: `all`, `any`, `threshold`. Superseded or withdrawn recipients must not be able to sign.
 - When the tenant itself signs its bundle, an **author proxy** recipient is created (`Recipient.find_or_create_author_proxy_for!`); it is not a visible recipient.
 - Author notifications go to the tenant owners except the user who caused them (`Tenant#notification_recipients`).
+- Plan limits come from ENV through `PlanLimits` (blank = unlimited); `Tenant::Usage` checks them and records monthly usage (documents sent for signature, timestamps) in `UsageRecord`, which also is the PRO billing basis. Raise/rescue `PlanLimits::Exceeded`; retention runs in `TenantRetentionJob` and `AnonymousContractsCleanupJob`.
 
 ## Current tenant (web)
 

@@ -182,6 +182,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Api::V1::Documents#show` | TenantApi, API document scope | Parent contract tenant | Existing `Document not found`; orphan documents excluded |
 | `Api::V1::Bundles#create/show/status/destroy` | TenantApi, tenant bundle scope | Bundle tenant, not public visibility | Existing `Bundle not found`, duplicate UUID conflict, bodies and polling headers |
 | `Api::V1::Hello#show/show_auth` | Public / TenantApi | Explicit public skip / API hello policy | Existing public message and authenticated tenant message |
+| `Api::V1::Usage#show` | TenantApi | `Api::V1::UsagePolicy#show?` | Limits and usage of the token's tenant only |
 | `Api::Federation::V1::Requests#show/claim` | Verified Portal and recipient UUID | Federated recipient assigned to caller | Portal mismatch 403, state 409, claimant mismatch 422, bundle mismatch 404; grants unchanged |
 | `Api::Federation::V1::RequestInvitations#create/withdraw` | Portal, caller-bound lookup/scope | Caller portal ownership | Foreign invitation 404; payload/status behavior unchanged |
 | `Federation::Requests#show/claim` | Web public / authenticated user | Preview skips authorization / `FederationRequestPolicy#claim?` | Existing broker URL checks, remote errors and signing continuation |

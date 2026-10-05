@@ -1,0 +1,43 @@
+<%# locals: (tenant:, month:, usage_by_kind_and_source:) %>
+<div class="rounded-lg border border-gray-200 bg-white">
+  <div class="flex flex-col gap-3 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900"><%= t('admin.tenants.usage.title') %></h2>
+      <p class="mt-1 text-sm text-gray-600"><%= t('admin.tenants.usage.subtitle') %></p>
+    </div>
+    <%= form_with url: edit_admin_tenant_path(tenant), method: :get, class: "flex items-end gap-2" do |form| %>
+      <div>
+        <%= form.label :month, t('admin.tenants.usage.month'), class: "block text-xs font-medium text-gray-700" %>
+        <%= form.month_field :month, value: month.strftime("%Y-%m"), class: "mt-1 rounded-md border border-gray-500 px-3 py-1.5 text-sm" %>
+      </div>
+      <%= form.submit t('admin.tenants.usage.show'), name: nil, class: "inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <caption class="sr-only"><%= t('admin.tenants.usage.caption', month: month.strftime("%m/%Y")) %></caption>
+    <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-5 py-2 text-left font-medium text-gray-700"><%= t('admin.tenants.usage.kind') %></th>
+        <th scope="col" class="px-5 py-2 text-left font-medium text-gray-700"><%= t('admin.tenants.usage.source') %></th>
+        <th scope="col" class="px-5 py-2 text-right font-medium text-gray-700"><%= t('admin.tenants.usage.quantity') %></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% UsageRecord.kinds.each_key do |kind| %>
+        <% rows = usage_by_kind_and_source.select { |(row_kind, _), _| row_kind == kind } %>
+        <% rows.sort.each do |(_, source), quantity| %>
+          <tr>
+            <td class="px-5 py-2 text-gray-900"><%= t("admin.tenants.usage.kinds.#{kind}") %></td>
+            <td class="px-5 py-2 text-gray-600"><%= t("admin.tenants.usage.sources.#{source}") %></td>
+            <td class="px-5 py-2 text-right text-gray-900"><%= quantity %></td>
+          </tr>
+        <% end %>
+        <tr class="bg-gray-50">
+          <th scope="row" colspan="2" class="px-5 py-2 text-left font-semibold text-gray-900"><%= t('admin.tenants.usage.total', kind: t("admin.tenants.usage.kinds.#{kind}")) %></th>
+          <td class="px-5 py-2 text-right font-semibold text-gray-900"><%= rows.sum { |_, quantity| quantity } %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

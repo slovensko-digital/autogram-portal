@@ -6,7 +6,8 @@ export default class extends Controller {
   static classes = ["dragging", "uploading"]
   static values = {
     mode: String,
-    inputName: String
+    inputName: String,
+    maxBytes: Number
   }
 
   connect() {
@@ -57,7 +58,9 @@ export default class extends Controller {
   }
 
   setFile(file) {
-    if (this.isValidFileType(file)) {
+    if (this.maxBytesValue && file.size > this.maxBytesValue) {
+      this.showError(i18n.t('errors.file_too_large', { filename: file.name, max: this.formatFileSize(this.maxBytesValue) }))
+    } else if (this.isValidFileType(file)) {
       // Clear any existing file first
       this.clearFile()
 

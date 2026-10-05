@@ -155,8 +155,16 @@ en:
               last_tenant_owner: "The account cannot be deleted while you are the only owner of an organization with other members. Transfer ownership or remove the members first."
         contract:
           attributes:
+            base:
+              too_large: "The document is too large. All its files together may have at most %{max}."
+              stored_documents_limit: "The organization may store at most %{max} documents at once. Delete documents you no longer need."
+              storage_limit: "The organization's storage (%{max}) is full. Delete documents you no longer need."
             tenant:
               bundle_mismatch: "must be the organization of the bundle"
+        session:
+          attributes:
+            base:
+              signature_request_limit: "%{sender} has used up its monthly limit of documents sent for signature."
 
   errors:
     archivation_disabled: "Document archivation feature is currently disabled for your organization. Please contact the administrator."
@@ -452,6 +460,9 @@ en:
       signature_extended_successfully: "Signatures extended successfully to %{target_level}."
 
   bundles:
+    sign_limit_reached:
+      title: "The documents cannot be signed yet"
+      message: "%{sender} has used up its monthly limit of documents sent for signature. Please contact the sender."
     display_name: "Bundle"
     index:
       title: "Contract Bundles"
@@ -678,6 +689,25 @@ en:
 
   admin:
     tenants:
+      usage:
+        title: "Monthly usage"
+        subtitle: "Billing basis: documents sent for signature and timestamps used in a calendar month."
+        month: "Month"
+        show: "Show"
+        caption: "Usage for %{month}"
+        kind: "Kind"
+        source: "Source"
+        quantity: "Quantity"
+        total: "Total – %{kind}"
+        kinds:
+          signature_request: "Documents sent for signature"
+          timestamp: "Timestamps"
+        sources:
+          notification: "Sent to a recipient"
+          recipient_signature: "Signed through a shared link"
+          extension: "Signature extension"
+          archivation: "Archivation"
+          avm_signing: "Signed in Autogram v mobile"
       index:
         title: "Organizations"
         subtitle: "All organizations with their plans and features."
@@ -782,6 +812,7 @@ en:
   contracts:
     submit_failed: "Submission failed: %{errors}"
     alerts:
+      claim_failed: "The document could not be saved to the organization. %{errors} The document stays unsaved and will be deleted automatically soon."
       unauthorized_edit_attempt: "You are not authorized to edit this contract."
       visual_signing_not_available_for_signed_pades: "Adding a visual signature or stamp is not allowed after the document has already been signed in PAdES."
       signature_field_appearance_unavailable: "No prepared signature field is assigned to you for this contract."
@@ -928,6 +959,7 @@ en:
         unsupported_signature_level: "Supports only BASELINE_B signatures."
         desktop_only: "Available only on a desktop computer."
         method_not_allowed: "Signing in standalone applications is not allowed for this document."
+        timestamp_limit_reached: "The organization the document belongs to has used up its monthly limit of timestamps."
     signature_parameters:
       sign_title: "Sign document"
       sign_subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
@@ -1404,10 +1436,24 @@ en:
           start: "Get started"
           log_in: "Log in"
           included:
-            - "10 documents per month for signing and storage"
-            - "10 qualified timestamps"
-          excluded:
-            - "One user only"
+            - "Sending documents for signature and storing them"
+            - "Adding qualified timestamps"
+          limits:
+            stored_documents:
+              one: "Up to %{count} document stored at once"
+              other: "Up to %{count} documents stored at once"
+            signature_requests:
+              one: "%{count} document sent for signature per month"
+              other: "%{count} documents sent for signature per month"
+            timestamps:
+              one: "%{count} qualified timestamp per month"
+              other: "%{count} qualified timestamps per month"
+            retention:
+              one: "Documents are kept for at most %{count} day"
+              other: "Documents are kept for at most %{count} days"
+            members:
+              one: "One user only"
+              other: "At most %{count} users"
         pro:
           title: "PRO account"
           price: "EUR 19/month"
@@ -1484,6 +1530,9 @@ en:
       faq:
         subtitle: "FAQ"
         title: "Frequently asked questions"
+        storage_basic_retention:
+          one: "In the free Basic plan, documents and bundles are deleted automatically at most %{count} day after they were created."
+          other: "In the free Basic plan, documents and bundles are deleted automatically at most %{count} days after they were created."
         items:
           account:
             question: "Do I need an account to sign a document?"
@@ -2036,6 +2085,7 @@ en:
       file_selected: "Selected file: %{filename} (%{size})"
     errors:
       file_not_supported: "File \"%{filename}\" is not supported. Allowed formats are PDF, XML, and other files."
+      file_too_large: "File \"%{filename}\" is too large. A document may have at most %{max}."
       signing_failed: "Failed to initiate signing. Please try again."
       network_error: "Network error occurred. Please check your connection and try again."
       iframe_client_error: "Could not create iframe-compatible Autogram client"
@@ -2139,7 +2189,36 @@ en:
       dpb_2020: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
       dpb_2023: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
 
+  plan_limits:
+    exceeded:
+      stored_documents: "The organization stores %{used} of the %{max} documents its plan allows. Delete documents you no longer need."
+      storage: "The organization's storage is full (%{used} of %{max} used)."
+      signature_requests: "This month the organization has sent %{used} of the %{max} documents for signature its plan allows. The limit resets at the start of next month."
+      timestamps: "This month the organization has used %{used} of the %{max} timestamps its plan allows. The limit resets at the start of next month."
+      document_size: "The document is too large. All its files together may have at most %{max}."
+    signing_blocked: "%{sender} has used up its monthly limit of documents sent for signature. The document cannot be signed yet, please contact the sender."
+    action_unavailable:
+      signature_requests: "The organization has used up its monthly limit of documents sent for signature."
+      timestamps: "The organization has used up its monthly limit of timestamps."
+
   tenants:
+    usage:
+      title: "Plan usage"
+      subtitle: "Monthly limits apply to the current calendar month."
+      details: "Details"
+      limited_value: "%{used} / %{max}"
+      unlimited_value: "%{used} (unlimited)"
+      reached: "The limit has been reached."
+      reached_monthly: "The limit has been reached, it resets on %{date}."
+      retention:
+        one: "Documents and bundles are deleted automatically %{count} day after they were created."
+        other: "Documents and bundles are deleted automatically %{count} days after they were created."
+      max_document_size: "A single document may have at most %{size} in total."
+      limits:
+        stored_documents: "Stored documents"
+        storage: "Storage"
+        signature_requests: "Documents sent for signature this month"
+        timestamps: "Timestamps this month"
     plans:
       basic: "Basic"
       pro: "PRO"

@@ -67,6 +67,35 @@ paths:
         "401":
           description: Unauthorized access.
 
+  /usage:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Plan limits and usage
+      description: |
+        Returns the limits of the organization's plan and its usage in the current calendar month.
+        A `null` limit means unlimited.
+
+        - `storedDocuments` – documents (contracts) the organization keeps at once
+        - `storage` – bytes of all stored documents and their signed versions
+        - `signatureRequests` – documents sent for signature this month. A document counts once,
+          when a recipient is notified or, for bundles shared by a link or created through the API,
+          when someone other than the organization signs the bundle (all its documents count then).
+          Once the limit is reached, recipients cannot start signing bundles that were not counted yet.
+        - `timestamps` – timestamps added this month by extending signatures, by archivation and by
+          signing in Autogram v mobile with a timestamped signature level
+      responses:
+        "200":
+          description: Limits and usage of the organization.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usage"
+        "401":
+          description: Unauthorized access.
+
   /contracts:
     post:
       tags:
@@ -130,7 +159,15 @@ paths:
         "409":
           description: Conflict - A contract with the same ID already exists.
         "422":
-          description: Unprocessable Entity - The request body is invalid.
+          description: |
+            Unprocessable Entity - The request body is invalid, or it does not fit the limits of the
+            organization's plan (`code: limit_exceeded`). Nothing is stored in that case.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ValidationErrors"
+                  - $ref: "#/components/schemas/LimitExceeded"
 
   /contracts/{id}:
     get:
@@ -302,7 +339,15 @@ paths:
         "409":
           description: Conflict - A bundle with the same ID already exists.
         "422":
-          description: Unprocessable Entity - The request body is invalid.
+          description: |
+            Unprocessable Entity - The request body is invalid, or it does not fit the limits of the
+            organization's plan (`code: limit_exceeded`). Nothing is stored in that case.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ValidationErrors"
+                  - $ref: "#/components/schemas/LimitExceeded"
 
   /bundles/{id}:
     get:
@@ -592,6 +637,70 @@ webhooks:
 
 components:
   schemas:
+    UsageEntry:
+      type: object
+      properties:
+        used:
+          type: integer
+          example: 3
+        limit:
+          type: ["integer", "null"]
+          description: Null means unlimited.
+          example: 10
+    Usage:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum: [basic, pro]
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        usage:
+          type: object
+          properties:
+            storedDocuments:
+              $ref: "#/components/schemas/UsageEntry"
+            storage:
+              $ref: "#/components/schemas/UsageEntry"
+            signatureRequests:
+              $ref: "#/components/schemas/UsageEntry"
+            timestamps:
+              $ref: "#/components/schemas/UsageEntry"
+        maxDocumentBytes:
+          type: ["integer", "null"]
+          description: Maximum total size of the files of one document. Null means unlimited.
+          example: 26214400
+        retentionDays:
+          type: ["integer", "null"]
+          description: Documents and bundles are deleted this many days after they were created. Null means they are kept until deleted.
+          example: 60
+    ValidationErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+    LimitExceeded:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+        code:
+          type: string
+          enum: [limit_exceeded]
+        limit:
+          type: string
+          enum: [document_size, stored_documents, storage]
     Bundle:
       type: object
       properties:

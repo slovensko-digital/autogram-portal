@@ -10,6 +10,7 @@ require "test_helper"
 #  name                 :string           not null
 #  personal             :boolean          default(FALSE), not null
 #  plan                 :string           default("basic"), not null
+#  plan_changed_at      :datetime
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
 #

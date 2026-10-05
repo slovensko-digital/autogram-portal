@@ -101,24 +101,22 @@
           </div>
           <p class="mt-4 text-base leading-7 text-gray-600"><%= t('.start_using.basic.audience') %></p>
           <ul class="mt-6 flex-1 space-y-3 text-base leading-7">
-            <li class="flex gap-x-3">
-              <svg class="mt-1 h-5 w-5 flex-none text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-              </svg>
-              <span><%= t('.start_using.basic.included').first %></span>
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="mt-1 h-5 w-5 flex-none text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-              </svg>
-              <span><%= t('.start_using.basic.included').second %></span>
-            </li>
-            <li class="flex gap-x-3 text-gray-500">
-              <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-              <span><%= t('.start_using.basic.excluded').first %></span>
-            </li>
+            <% (t('.start_using.basic.included') + basic_plan_limit_items).each do |item| %>
+              <li class="flex gap-x-3">
+                <svg class="mt-1 h-5 w-5 flex-none text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                <span><%= item %></span>
+              </li>
+            <% end %>
+            <% if (members_item = basic_plan_members_item) %>
+              <li class="flex gap-x-3 text-gray-500">
+                <svg class="mt-1 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+                <span><%= members_item %></span>
+              </li>
+            <% end %>
           </ul>
           <div class="mt-8 flex items-center gap-4 border-t border-gray-200 pt-5">
             <% unless @current_user %>
@@ -424,7 +422,7 @@
       </p>
     </div>
     <div class="mt-16 space-y-4">
-      <% t('.faq.items').each do |_key, item| %>
+      <% t('.faq.items').each do |key, item| %>
         <details class="group rounded-xl border border-gray-200">
           <summary class="flex cursor-pointer items-center justify-between gap-x-4 px-6 py-5 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-xl [list-style:none] [&::-webkit-details-marker]:hidden">
             <%= item[:question] %>
@@ -433,7 +431,7 @@
             </svg>
           </summary>
           <div class="px-6 pb-5 pt-2 text-base text-gray-600 leading-7">
-            <%= item[:answer] %>
+            <%= faq_answer(key, item) %>
           </div>
         </details>
       <% end %>

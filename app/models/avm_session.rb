@@ -39,7 +39,17 @@ class AvmSession < Session
     reasons = []
     reasons << :multiple_files if contract.documents.count > 1
     reasons << :unsupported_qscd if qscd.present? && !User.mobile_qscd?(qscd)
+    reasons << :timestamp_limit_reached if timestamped_level?(contract) && contract.tenant&.within_limit?(:timestamps) == false
     reasons
+  end
+
+  # AVM adds the timestamp of T and higher levels itself.
+  def self.timestamped_level?(contract)
+    contract.signature_parameters.present? && contract.signature_parameters.level != "BASELINE_B"
+  end
+
+  def adds_portal_timestamp?
+    self.class.timestamped_level?(contract)
   end
 
   def avm_url

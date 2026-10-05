@@ -2,12 +2,14 @@ require "test_helper"
 require "jwt"
 require "openssl"
 require_relative "../support/signing_flow_helper"
+require_relative "../support/plan_limits_helper"
 
 # End-to-end signature requests created through the API by an organization and
 # signed by recipients through the web.
 class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   include SigningFlowHelper
+  include PlanLimitsHelper
 
   setup do
     @api_key = OpenSSL::PKey::RSA.generate(2048)
@@ -111,6 +113,60 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     get api_v1_bundle_path(bundle), headers: api_headers(tenant: other, key: other_key)
 
     assert_response :not_found
+  end
+
+  test "a document over the size limit is rejected before anything is stored" do
+    with_plan_limits("MAX_DOCUMENT_SIZE_MB" => "1") do
+      large = Base64.strict_encode64("%PDF-1.4 " + "a" * 1.megabyte)
+      payload = pdf_contract_payload("velky.pdf").merge(documents: [ { filename: "velky.pdf", content: large, contentType: "application/pdf;base64" } ])
+
+      assert_no_difference [ "ActiveStorage::Blob.count", "Bundle.count", "Contract.count" ] do
+        post api_v1_bundles_path, params: { id: SecureRandom.uuid, contracts: [ payload ], recipients: [ { email: "signer@example.com" } ] }, headers: api_headers, as: :json
+      end
+
+      assert_response :unprocessable_entity
+      assert_equal "limit_exceeded", response.parsed_body["code"]
+      assert_equal "document_size", response.parsed_body["limit"]
+    end
+  end
+
+  test "all documents of a request must fit the stored documents limit" do
+    with_plan_limits("PRO_MAX_STORED_DOCUMENTS" => "2") do
+      contracts = [ pdf_contract_payload("a.pdf"), pdf_contract_payload("b.pdf"), pdf_contract_payload("c.pdf") ]
+
+      assert_no_difference [ "ActiveStorage::Blob.count", "Contract.count" ] do
+        post api_v1_bundles_path, params: { id: SecureRandom.uuid, contracts: contracts, recipients: [ { email: "signer@example.com" } ] }, headers: api_headers, as: :json
+      end
+      assert_response :unprocessable_entity
+      assert_equal "stored_documents", response.parsed_body["limit"]
+
+      post api_v1_contracts_path, params: pdf_contract_payload("samostatny.pdf"), headers: api_headers, as: :json
+      assert_response :created
+    end
+  end
+
+  test "a bundle created through the API counts when its recipient signs and the usage is reported" do
+    with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "5", "PRO_MONTHLY_TIMESTAMPS" => nil, "PRO_MAX_STORED_DOCUMENTS" => nil, "PRO_STORAGE_GB" => nil) do
+      bundle = create_bundle_via_api(contracts: [ pdf_contract_payload("a.pdf"), pdf_contract_payload("b.pdf") ], recipients: [ { email: "signer@example.com" } ])
+      assert_equal 0, @organization.usage_of(:signature_requests), "creating a bundle does not send it"
+
+      sign_with_autogram(bundle.contracts.order(:id).first, recipient: bundle.recipients.sole)
+
+      get api_v1_usage_path, headers: api_headers
+      assert_response :success
+      usage = response.parsed_body
+      assert_equal "pro", usage["plan"]
+      assert_equal({ "used" => 2, "limit" => 5 }, usage.dig("usage", "signatureRequests"), "the whole bundle counts at the first signature")
+      assert_equal({ "used" => 0, "limit" => nil }, usage.dig("usage", "timestamps"))
+      assert_equal 2, usage.dig("usage", "storedDocuments", "used")
+      assert usage.dig("usage", "storage", "used").positive?
+    end
+  end
+
+  test "usage is reported only to a tenant with an API token" do
+    get api_v1_usage_path
+
+    assert_response :unauthorized
   end
 
   private

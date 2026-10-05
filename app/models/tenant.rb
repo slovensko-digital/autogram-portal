@@ -8,6 +8,7 @@
 #  name                 :string           not null
 #  personal             :boolean          default(FALSE), not null
 #  plan                 :string           default("basic"), not null
+#  plan_changed_at      :datetime
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
 #
@@ -16,9 +17,9 @@
 #  index_tenants_on_plan  (plan)
 #
 class Tenant < ApplicationRecord
+  include Tenant::Usage
+
   AVAILABLE_FEATURES = %w[archivation api].freeze
-  # nil means unlimited
-  MAX_MEMBERS = { "basic" => 1, "pro" => nil }.freeze
 
   enum :plan, { basic: "basic", pro: "pro" }, validate: true
 
@@ -35,6 +36,7 @@ class Tenant < ApplicationRecord
   validate :api_token_public_key_is_valid, if: -> { api_token_public_key.present? && api_token_public_key_changed? }
 
   before_validation :normalize_features
+  before_save :track_plan_change, if: :plan_changed?
 
   scope :with_feature, ->(feature) { where("? = ANY(features)", feature.to_s) }
 
@@ -58,17 +60,9 @@ class Tenant < ApplicationRecord
     feature_enabled?(:api)
   end
 
-  def signature_request_allowed?
-    # TODO: verify tenant first before allowing them to send signature requests
-    true
-  end
-
-  def signature_extension_allowed?
-    true
-  end
-
+  # nil means unlimited
   def max_members
-    MAX_MEMBERS.fetch(plan)
+    limits.max_members
   end
 
   def can_add_member?
@@ -86,6 +80,10 @@ class Tenant < ApplicationRecord
   end
 
   private
+
+  def track_plan_change
+    self.plan_changed_at = Time.current if persisted?
+  end
 
   def normalize_features
     self.features = Array(features).map(&:to_s).reject(&:blank?).uniq & AVAILABLE_FEATURES
