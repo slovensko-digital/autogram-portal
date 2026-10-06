@@ -1,64 +1,55 @@
 <% @session ||= session %>
 
-<% inline_bundle_success = @session.inline_bundle_success? %>
 <% iframe_completion = @session.close_iframe_after_completion? %>
+<% message = if iframe_completion
+  t('.iframe_message')
+elsif @session.more_bundle_documents_to_sign?
+  t('.bundle_progress_message')
+else
+  t('.message')
+end %>
 
-<% if inline_bundle_success %>
-  <div class="w-full rounded-lg border border-green-200 bg-green-50 p-4">
-    <div class="flex items-start gap-3">
-      <div class="mt-0.5 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
-        <svg aria-hidden="true" class="h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+<div class="p-8 sm:py-40">
+  <div class="border border-gray-200 rounded-lg p-8">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+        <svg aria-hidden="true" class="h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
         </svg>
       </div>
-      <div>
-        <h3 class="text-base font-semibold text-green-900"><%= t('.title') %></h3>
-        <p class="mt-1 text-sm text-green-800"><%= t('.bundle_progress_message') %></p>
-      </div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2"><%= t('.title') %></h1>
+      <p class="text-sm text-gray-600"><%= message %></p>
     </div>
-  </div>
-<% else %>
-  <div class="p-8 sm:py-40">
-    <div class="border border-gray-200 rounded-lg p-8">
-      <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-          <svg aria-hidden="true" class="h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-          </svg>
+
+    <% if @session.ades_evidence? && @session.signature_evidence_record.present? %>
+      <div class="mb-6 rounded-lg border border-blue-100 bg-blue-50 p-4 text-left">
+        <p class="text-xs font-semibold uppercase tracking-wide text-blue-700"><%= t('.evidence_reference_label') %></p>
+        <p class="mt-2 font-mono text-sm text-blue-900 break-all"><%= @session.signature_evidence_record.public_reference %></p>
+        <div class="mt-3">
+          <%= link_to t('.verify_reference_link'),
+                signature_evidence_verification_path(reference: @session.signature_evidence_record.public_reference),
+                data: { turbo_frame: "_top" },
+                class: "inline-flex text-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 hover:bg-blue-100" %>
         </div>
-        <%= content_tag(params[:embedded] ? :h3 : :h1, t('.title'), class: "text-2xl font-bold text-gray-900 mb-2") %>
-        <p class="text-sm text-gray-600"><%= iframe_completion ? t('.iframe_message') : t('.message') %></p>
       </div>
+    <% end %>
 
-      <% if @session.ades_evidence? && @session.signature_evidence_record.present? %>
-        <div class="mb-6 rounded-lg border border-blue-100 bg-blue-50 p-4 text-left">
-          <p class="text-xs font-semibold uppercase tracking-wide text-blue-700"><%= t('.evidence_reference_label') %></p>
-          <p class="mt-2 font-mono text-sm text-blue-900 break-all"><%= @session.signature_evidence_record.public_reference %></p>
-          <div class="mt-3">
-            <%= link_to t('.verify_reference_link'),
-                  signature_evidence_verification_path(reference: @session.signature_evidence_record.public_reference),
-                  data: { turbo_frame: "_top" },
-                  class: "inline-flex text-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 hover:bg-blue-100" %>
-          </div>
-        </div>
-      <% end %>
-
-      <% unless iframe_completion %>
-        <div class="mt-2 flex justify-center">
-          <% if @session.contract.bundle.present? %>
-            <%= link_to t('.view_bundle'), sign_bundle_path(@session.contract.bundle, recipient: @session.recipient&.uuid, iframe: @session.iframe_param),
-                  data: { turbo_frame: "_top" },
-                  class: "inline-flex text-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700" %>
-          <% else %>
-            <%= link_to t('.view_contract'), contract_path(@session.contract),
-                  data: { turbo_frame: "_top" },
-                  class: "inline-flex text-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700" %>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
+    <% unless iframe_completion %>
+      <div class="mt-2 flex justify-center">
+        <% if @session.contract.bundle.present? %>
+          <%= link_to @session.contract.signed_through_bundle?(recipient: @session.recipient) ? t('.view_bundle') : t('.back_to_contract'),
+                signing_page_path(@session.contract, recipient: @session.recipient, iframe: @session.iframe_param),
+                data: { turbo_frame: "_top" },
+                class: "inline-flex text-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700" %>
+        <% else %>
+          <%= link_to t('.view_contract'), contract_path(@session.contract),
+                data: { turbo_frame: "_top" },
+                class: "inline-flex text-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700" %>
+        <% end %>
+      </div>
+    <% end %>
   </div>
-<% end %>
+</div>
 
 <% if @session.iframe_param.present? %>
   <%= tag.div hidden: true, data: { controller: "parent-message", parent_message_payload_value: @session.completion_event_payload, parent_message_key_value: "session-#{@session.id}-signed" } %>

@@ -87,6 +87,15 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "sms", session.verification_channel
   end
 
+  test "back from a signing app returns to the signing apps with the chosen document" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/sessions/autogram", params: { iframe: "true", qscd: "eid_2024" }
+
+    assert_response :success
+    assert_select "a[href='#{signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")}'][data-turbo='false']", text: I18n.t("actions.back")
+  end
+
   test "podpisuj session is created only when standalone signing is allowed" do
     contract = create_contract_without_session
 
@@ -127,7 +136,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     contract, recipient = create_bundle_contract_with_prepared_signature_field
 
     get "/contracts/#{contract.uuid}/sessions/ades",
-        params: { recipient: recipient.uuid, embedded: true },
+        params: { recipient: recipient.uuid },
         headers: { "Turbo-Frame" => "signature_apps_#{contract.uuid}" }
 
     assert_response :success
@@ -139,7 +148,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
   test "ades evidence session falls back to email when recipient phone is missing" do
     contract, recipient = create_bundle_contract_with_mobile_recipient(mobile_phone: nil)
 
-    get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid, embedded: true }
+    get "/contracts/#{contract.uuid}/sessions/ades", params: { recipient: recipient.uuid }
 
     assert_response :success
     assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}"
@@ -364,7 +373,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
         { error: message }
       end
     end.new("AVM temporarily unavailable")) do
-      get "/contracts/#{contract.uuid}/sessions/avm", params: { iframe: "true", embedded: true }
+      get "/contracts/#{contract.uuid}/sessions/avm", params: { iframe: "true" }
 
       assert_response :unprocessable_entity
       assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}"
@@ -446,6 +455,21 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "replace", error_stream["action"]
     assert_includes error_stream.to_html, I18n.t("contracts.sessions.error.title")
     assert error_stream.at_css("a[href='#{signature_apps_contract_path(@contract)}']", text: I18n.t("actions.back"))
+  end
+
+  test "signing error goes back to the signing apps with the chosen document" do
+    contract = create_contract_without_session
+    get "/contracts/#{contract.uuid}/sessions/autogram", params: { iframe: "true", qscd: "eid_2024" }
+    session = contract.sessions.sole
+    assert_equal({ "iframe" => "true", "qscd" => "eid_2024" }, session.options)
+
+    broadcasts = capture_turbo_stream_broadcasts(session) do
+      session.update!(status: :failed, error_message: "Podpis zlyhal")
+    end
+
+    error_stream = broadcasts.sole
+    assert_includes error_stream.to_html, I18n.t("contracts.sessions.error.title")
+    assert error_stream.at_css("a[href='#{signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")}']", text: I18n.t("actions.back"))
   end
 
   test "podpisuj upload with invalid signatures shows the error and keeps the session open" do

@@ -1,20 +1,13 @@
-<% content_for :title, t('.title') unless params[:embedded] %>
+<% content_for :title, t('.title') %>
 <div data-controller="signers--eidentita">
-<% if params[:embedded] %>
-  <div class="w-full space-y-1">
-    <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
-    <p class="text-sm text-gray-600"><%= t('.subtitle') %></p>
-  </div>
-<% else %>
-  <div class="sr-only md:not-sr-only md:px-6 md:py-5">
-    <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
-    <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
-  </div>
-<% end %>
+<div class="sr-only md:not-sr-only md:px-6 md:py-5">
+  <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+  <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
+</div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 <%= 'px-6' unless params[:embedded] %>">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 px-6">
   <div class="space-y-6 border border-gray-200 rounded-lg p-6 hidden md:block">
-    <%= content_tag(params[:embedded] ? :h4 : :h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
+    <%= content_tag(:h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
     <ol role="list" class="space-y-4">
       <% (1..7).each do |i| %>
         <li class="flex items-start gap-3">
@@ -22,7 +15,7 @@
             <%= i %>
           </div>
           <div class="flex-1">
-            <%= content_tag(params[:embedded] ? :h5 : :h3, t(".step#{i}_title"), class: "font-semibold text-gray-900") %>
+            <%= content_tag(:h3, t(".step#{i}_title"), class: "font-semibold text-gray-900") %>
             <p class="text-sm text-gray-600"><%= t(".step#{i}_desc_html", domain: Rails.application.config.action_controller.default_url_options[:host]) %></p>
           </div>
         </li>

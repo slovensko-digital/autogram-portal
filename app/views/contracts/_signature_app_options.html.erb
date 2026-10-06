@@ -99,8 +99,7 @@
           public_send("#{app[:value]}_contract_sessions_path", @contract,
             recipient: @recipient,
             iframe: params[:iframe],
-            embedded: params[:embedded],
-            skip_method_choice: params[:skip_method_choice]),
+            qscd: @qscd),
           data: {
             turbo_frame: "signature_apps_#{@contract.uuid}",
             signing_app_selector_target: "#{app[:value]}SubmitButton"

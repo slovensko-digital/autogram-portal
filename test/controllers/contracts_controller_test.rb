@@ -244,10 +244,10 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021"))
   end
 
-  test "embedded signature apps enable all compatible choices" do
+  test "signature apps enable all choices compatible with the document" do
     contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
 
-    get signature_apps_contract_path(contract, qscd: "eid_2024", embedded: true)
+    get signature_apps_contract_path(contract, qscd: "eid_2024")
 
     assert_response :success
     assert_equal %w[autogram avm eidentita podpisuj], signature_app_values
@@ -316,6 +316,79 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal %w[podpisuj], signature_app_values
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
+  end
+
+  test "sign offers electronic signing as the only method and continues to the signing apps page" do
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
+
+    get sign_contract_path(contract, qscd: "eid_2024", iframe: "true")
+
+    assert_response :success
+    assert_select "input[name='signing_method_#{contract.uuid}']", count: 1
+    assert_select "input[name='signing_method_#{contract.uuid}'][value='electronic'][checked]", count: 1
+    assert_select "button[data-signing-method-target='continueButton']", count: 1
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}", count: 0
+    assert_select "a[data-signing-method-target='electronicButton'][href='#{signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")}'][data-turbo-frame='_top']"
+  end
+
+  test "sign still lets the signer choose when there are several signing methods" do
+    contract = create_pdf_contract(allowed_methods: %w[qes ades])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    get sign_bundle_path(bundle, recipient: recipient.uuid, qscd: "eid_2024")
+
+    assert_response :success
+    assert_select "button[data-signing-method-target='continueButton']", count: 1
+    assert_select "input[name='signing_method_#{contract.uuid}']", count: 2
+    assert_select "a[data-signing-method-target='electronicButton'][href='#{signature_apps_contract_path(contract, recipient: recipient.uuid, qscd: "eid_2024")}'][data-turbo-frame='_top']"
+  end
+
+  test "signature apps send the signer to pick a usable document first" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, iframe: "true")
+    assert_redirected_to contract_onboarding_path(contract, "qscd_check", method: "electronic", iframe: "true")
+
+    get signature_apps_contract_path(contract, qscd: "eid_2013")
+    assert_redirected_to contract_onboarding_path(contract, "qscd_check", method: "electronic")
+  end
+
+  test "signature apps keep the chosen document on the way to signing, back and to changing it" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024", iframe: "true")
+
+    assert_response :success
+    assert_select "a[data-signing-app-selector-target='autogramSubmitButton'][href*='qscd=eid_2024']"
+    assert_select "a[href='#{sign_contract_path(contract, iframe: "true", qscd: "eid_2024")}']", text: I18n.t("actions.back")
+    assert_select "a[href='#{contract_onboarding_path(contract, "qscd_check", method: "electronic", review: "true", iframe: "true", qscd: "eid_2024")}']", text: /#{Regexp.escape(I18n.t("actions.change_selection"))}/
+  end
+
+  test "signature apps of a bundled contract go back to the bundle only for signers who may open it" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    get signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")
+    assert_select "a[href='#{sign_contract_path(contract, iframe: "true", qscd: "eid_2024")}']", text: I18n.t("actions.back")
+
+    get signature_apps_contract_path(contract, recipient: recipient.uuid, iframe: "true", qscd: "eid_2024")
+    assert_select "a[href='#{sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "true", qscd: "eid_2024")}']", text: I18n.t("actions.back")
+  end
+
+  test "bundled contract signed on its own page stays there as signed" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    Bundle.create!(tenant: tenants(:one), contracts: [ contract ]).recipients.create!(email: "signer@example.com")
+    AnonymousSigner.create!.signer_contracts.create!(contract: contract, signed_at: Time.current)
+
+    get sign_contract_path(contract, iframe: "true")
+    assert_response :success
+    assert_includes response.body, I18n.t("contracts.sign.already_signed.title")
+    assert_select "a[href^='#{signature_apps_contract_path(contract)}']", count: 0
+
+    get signature_apps_contract_path(contract, iframe: "true")
+    assert_redirected_to sign_contract_path(contract, iframe: "true")
   end
 
   test "uploaded own contract allows standalone apps by default and the author can turn them off" do
@@ -574,7 +647,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
     with_autogram_service(fake_unsigned_pades_validation_service) do
       get "/contracts/#{contract.uuid}/signature_apps",
-          params: { recipient: recipient.uuid, embedded: true },
+          params: { recipient: recipient.uuid },
           headers: { "Turbo-Frame" => "signature_apps_#{contract.uuid}" }
     end
 

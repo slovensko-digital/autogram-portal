@@ -1,21 +1,14 @@
-<% content_for :title, t('.title') unless params[:embedded] %>
+<% content_for :title, t('.title') %>
 <% verification_channel = @session.signature_verification&.channel.presence || @session.effective_verification_channel || @session.verification_channel || "sms" %>
 <% email_channel = verification_channel == "email" %>
-<% if params[:embedded] %>
-  <div class="w-full space-y-1">
-    <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
-    <p class="text-sm text-gray-600"><%= email_channel ? t('.subtitle_email') : t('.subtitle') %></p>
-  </div>
-<% else %>
-  <div class="sr-only md:not-sr-only md:px-6 md:py-5">
-    <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
-    <p class="text-sm text-gray-600 mt-1"><%= email_channel ? t('.subtitle_email') : t('.subtitle') %></p>
-  </div>
-<% end %>
+<div class="sr-only md:not-sr-only md:px-6 md:py-5">
+  <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+  <p class="text-sm text-gray-600 mt-1"><%= email_channel ? t('.subtitle_email') : t('.subtitle') %></p>
+</div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 <%= 'px-6' unless params[:embedded] %>">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6 px-6">
   <div class="space-y-6 bg-white border border-gray-200 rounded-lg p-6">
-    <%= content_tag(params[:embedded] ? :h4 : :h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
+    <%= content_tag(:h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
     <ol role="list" class="space-y-4">
       <% (1..4).each do |i| %>
         <li class="flex items-start gap-3">
@@ -25,7 +18,7 @@
           <div class="flex-1">
             <% title_key = i == 2 && email_channel ? ".step2_title_email" : ".step#{i}_title" %>
             <% description_key = i == 2 && email_channel ? ".step2_desc_email" : ".step#{i}_desc" %>
-            <%= content_tag(params[:embedded] ? :h5 : :h3, t(title_key), class: "font-semibold text-gray-900") %>
+            <%= content_tag(:h3, t(title_key), class: "font-semibold text-gray-900") %>
             <p class="text-sm text-gray-600"><%= t(description_key) %></p>
           </div>
         </li>
@@ -66,7 +59,7 @@
             <p class="mt-2 text-sm text-gray-700"><%= t('.complete_signing_body') %></p>
           </div>
 
-          <%= button_to t('.complete_signing_button'), complete_signing_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]), method: :post, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+          <%= button_to t('.complete_signing_button'), complete_signing_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
         </div>
       <% end %>
     <% elsif @session.verification_requested? %>
@@ -76,7 +69,7 @@
           <p class="mt-2 text-sm text-gray-700"><%= email_channel ? t('.email_sent_body') : t('.sms_sent_body') %></p>
         </div>
 
-        <%= form_with url: verify_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]), method: :post, class: "space-y-3" do |form| %>
+        <%= form_with url: verify_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, class: "space-y-3" do |form| %>
           <div>
             <%= form.label :verification_code, t('.verification_code_label'), class: "block text-sm font-medium text-gray-700 mb-2" %>
             <%= form.text_field :verification_code,
@@ -89,7 +82,7 @@
 
           <div class="flex flex-col gap-3 sm:flex-row">
             <%= form.submit t('.verify_code_button'), class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
-            <%= button_to t('.resend_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]), method: :post, form_class: "contents", class: "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+            <%= button_to t('.resend_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, form_class: "contents", class: "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
           </div>
         <% end %>
       </div>
@@ -100,7 +93,7 @@
           <p class="mt-2 text-sm text-gray-700"><%= email_channel ? t('.request_code_body_email') : t('.request_code_body') %></p>
         </div>
 
-        <%= button_to(email_channel ? t('.request_code_button_email') : t('.request_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]), method: :post, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2") %>
+        <%= button_to(email_channel ? t('.request_code_button_email') : t('.request_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2") %>
       </div>
     <% end %>
 

@@ -36,7 +36,7 @@ class SessionTest < ActiveSupport::TestCase
     assert_equal 2, session.bundle_contracts_total
     assert_equal 1, session.remaining_bundle_contracts_count
     assert_not session.bundle_signing_complete?
-    assert session.inline_bundle_success?
+    assert session.more_bundle_documents_to_sign?
     assert_not session.close_iframe_after_completion?
     assert_equal false, session.completion_event_payload[:close_iframe]
   end
@@ -51,7 +51,7 @@ class SessionTest < ActiveSupport::TestCase
     assert_equal 1, session.bundle_contracts_total
     assert_equal 0, session.remaining_bundle_contracts_count
     assert session.bundle_signing_complete?
-    assert_not session.inline_bundle_success?
+    assert_not session.more_bundle_documents_to_sign?
     assert session.close_iframe_after_completion?
     assert_equal bundle.uuid, session.completion_event_payload[:bundle_id]
     assert_equal true, session.completion_event_payload[:bundle_completed]

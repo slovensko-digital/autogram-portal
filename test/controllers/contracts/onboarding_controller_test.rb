@@ -41,6 +41,28 @@ class Contracts::OnboardingControllerTest < ActionDispatch::IntegrationTest
     )
   end
 
+  test "back from the document choice returns to the signing apps with the current document" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", review: "true", qscd: "eid_2024", iframe: "true" }
+
+    assert_response :success
+    assert_select "turbo-frame", count: 0
+    assert_select "a[href='#{signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")}']", text: I18n.t("actions.back")
+  end
+
+  test "back from the first document choice returns to the signing page the signer can open" do
+    contract = create_contract_without_session
+    bundle = Bundle.create!(tenant: Tenant.create!(name: "Firma ABC", plan: :pro), contracts: [ contract ])
+
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", iframe: "true" }
+    assert_select "a[href='#{sign_contract_path(contract, iframe: "true")}']", text: I18n.t("actions.back")
+
+    bundle.update!(publicly_visible: true)
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", iframe: "true" }
+    assert_select "a[href='#{sign_bundle_path(bundle, iframe: "true")}']", text: I18n.t("actions.back")
+  end
+
   test "pin and certificate steps keep qscd in iframe forms" do
     contract = create_contract_without_session
 

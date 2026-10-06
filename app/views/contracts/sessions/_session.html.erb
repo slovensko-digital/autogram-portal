@@ -1,4 +1,4 @@
-<%# locals: (session:, recipient: @recipient, iframe: params[:iframe], embedded: params[:embedded], skip_method_choice: params[:skip_method_choice]) %>
+<%# locals: (session:, recipient: @recipient, iframe: params[:iframe], qscd: params[:qscd]) %>
 <% @session ||= session %>
 <% contract = @session.contract %>
 <%= turbo_frame_tag "signature_apps_#{contract.uuid}" do %>
@@ -23,9 +23,9 @@
       <!-- Footer with back button -->
       <div class="border-t border-gray-200 px-6 py-4">
         <% back_path = if @session.ades_evidence?
-          contract.bundle ? sign_bundle_path(contract.bundle, recipient: recipient&.uuid, iframe: iframe, embedded: embedded, skip_method_choice: skip_method_choice) : sign_contract_path(contract, recipient: recipient&.uuid, iframe: iframe, embedded: embedded, skip_method_choice: skip_method_choice)
+          signing_page_path(contract, recipient: recipient, iframe: iframe, qscd: qscd)
         else
-          signature_apps_contract_path(contract, recipient: recipient, iframe: iframe, embedded: embedded, skip_method_choice: skip_method_choice)
+          signature_apps_contract_path(contract, recipient: recipient, iframe: iframe, qscd: qscd)
         end %>
 
         <%= link_to back_path,

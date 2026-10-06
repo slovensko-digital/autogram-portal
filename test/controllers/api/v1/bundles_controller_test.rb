@@ -11,7 +11,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     @owner_tenant.update_columns(api_token_public_key: @owner_key.public_to_pem, features: [ "api" ])
   end
 
-  test "public bundle sign route falls back to full-page electronic setup when onboarding is still needed" do
+  test "public bundle sign route offers electronic signing that opens the signing apps page" do
     post "/api/v1/bundles",
          params: {
            id: SecureRandom.uuid,
@@ -46,12 +46,13 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     get "/bundles/#{bundle.uuid}/sign"
 
     assert_response :success
-    assert_select "button[data-signing-method-target='continueButton']", count: 0
+    assert_select "button[data-signing-method-target='continueButton']", count: 1
 
     contract = bundle.contracts.first
-    assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}[src]", count: 0
-    assert_select "a[href='/contracts/#{contract.uuid}/sessions/autogram']", count: 0
-    assert_select "a[href*='/contracts/#{contract.uuid}/signature_apps']", text: "Pokračovať"
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}", count: 0
+    assert_select "input[name='signing_method_#{contract.uuid}'][value='electronic'][checked]", count: 1
+    assert_select "input[name='signing_app_#{contract.uuid}']", count: 0
+    assert_select "a[data-signing-method-target='electronicButton'][href='/contracts/#{contract.uuid}/signature_apps'][data-turbo-frame='_top']"
   end
 
   test "api bundle creation allows recipients without email" do
@@ -238,7 +239,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("contracts.signing_method_choice.ades_label")
   end
 
-  test "public bundle sign route loads embedded signature apps directly in no_onboarding mode" do
+  test "public bundle sign route opens the signing apps page in no_onboarding mode" do
     post "/api/v1/bundles",
          params: {
            id: SecureRandom.uuid,
@@ -272,8 +273,9 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     get "/bundles/#{bundle.uuid}/sign", params: { iframe: "no_onboarding" }
 
     assert_response :success
-    assert_select "button[data-signing-method-target='continueButton']", count: 0
-    assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}[src*='/contracts/#{contract.uuid}/signature_apps'][src*='embedded=true'][src*='iframe=no_onboarding']"
+    assert_select "button[data-signing-method-target='continueButton']", count: 1
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}", count: 0
+    assert_select "a[data-signing-method-target='electronicButton'][href^='/contracts/#{contract.uuid}/signature_apps'][href*='iframe=no_onboarding'][data-turbo-frame='_top']"
   end
 
   test "public bundle sign route stays available when bundle only has an author proxy recipient" do
@@ -310,8 +312,9 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     get "/bundles/#{bundle.uuid}/sign", params: { iframe: "no_onboarding" }
 
     assert_response :success
-    assert_select "button[data-signing-method-target='continueButton']", count: 0
-    assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}[src*='/contracts/#{contract.uuid}/signature_apps'][src*='embedded=true'][src*='iframe=no_onboarding']"
+    assert_select "button[data-signing-method-target='continueButton']", count: 1
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}", count: 0
+    assert_select "a[data-signing-method-target='electronicButton'][href^='/contracts/#{contract.uuid}/signature_apps'][href*='iframe=no_onboarding'][data-turbo-frame='_top']"
   end
 
   test "public bundle sign route offers autogram desktop batch signing for multiple contracts" do
@@ -347,7 +350,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a[href='/bundles/#{bundle.uuid}/autogram_batch?iframe=no_onboarding']"
-    assert_select "button[data-signing-method-target='continueButton']", count: 0
+    assert_select "button[data-signing-method-target='continueButton']", count: 2
     assert_select "section.border-t", count: 2
     assert_select "span.inline-flex.shrink-0.whitespace-nowrap.rounded-full", count: 2
     assert_not_includes response.body, "first:border-t-0"
@@ -360,7 +363,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "contract-0.txt"
     assert_includes response.body, "contract-1.txt"
     bundle.contracts.each do |contract|
-      assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}[src*='/contracts/#{contract.uuid}/signature_apps'][src*='embedded=true'][src*='iframe=no_onboarding']"
+      assert_select "a[data-signing-method-target='electronicButton'][href^='/contracts/#{contract.uuid}/signature_apps'][href*='iframe=no_onboarding'][data-turbo-frame='_top']"
     end
 
     get "/bundles/#{bundle.uuid}/autogram_batch", params: { iframe: "no_onboarding" }
@@ -426,7 +429,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/bundles/#{bundle.uuid}/sign?iframe=no_onboarding"
   end
 
-  test "bundle signing method choice falls back to top-level onboarding when electronic setup is missing" do
+  test "bundle signing method choice opens the signing apps page" do
     with_allowed_methods(%w[qes scan]) do
       post "/api/v1/bundles",
            params: {
@@ -465,7 +468,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "bundle signing method choice keeps embedded signing app selector in no_onboarding mode" do
+  test "bundle signing method choice opens the signing apps page in no_onboarding mode" do
     with_allowed_methods(%w[qes scan]) do
       post "/api/v1/bundles",
            params: {
@@ -500,7 +503,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_select "button[data-signing-method-target='continueButton']", count: 1
-      assert_select "a[data-signing-method-target='electronicButton'][href*='embedded=true'][href*='iframe=no_onboarding'][data-turbo-frame='signature_apps_#{contract.uuid}']"
+      assert_select "a[data-signing-method-target='electronicButton'][href^='/contracts/#{contract.uuid}/signature_apps'][href*='iframe=no_onboarding'][data-turbo-frame='_top']"
     end
   end
 

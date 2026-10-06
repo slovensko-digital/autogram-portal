@@ -63,7 +63,15 @@
         <% end %>
       <% end %>
 
-      <% if @contract.awaiting_signature? || policy(@contract).show? %>
+      <% if @signer_contract&.signed? %>
+        <div class="w-full">
+          <% if params[:iframe].present? %>
+            <%= render 'shared/success', title: t('.already_signed.title'), content: t('.already_signed.message') %>
+          <% else %>
+            <%= render 'shared/success', title: t('.already_signed.title'), content: t('.already_signed.message'), button: t('actions.download_contract'), target: signed_document_contract_path(@contract) %>
+          <% end %>
+        </div>
+      <% elsif @contract.awaiting_signature? || policy(@contract).show? %>
         <div class="w-full">
           <%= render 'signing_method_choice', contract: @contract, recipient: @recipient, heading_level: 2 %>
         </div>

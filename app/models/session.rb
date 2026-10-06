@@ -80,6 +80,10 @@ class Session < ApplicationRecord
     options&.dig("iframe").presence
   end
 
+  def qscd_param
+    options&.dig("qscd").presence
+  end
+
   def bundle_contracts_total
     contract.bundle&.contracts&.count.to_i
   end
@@ -99,8 +103,9 @@ class Session < ApplicationRecord
     contract.bundle.present? && remaining_bundle_contracts_count.zero?
   end
 
-  def inline_bundle_success?
-    contract.bundle.present? && bundle_contracts_total > 1 && !bundle_signing_complete?
+  # Signed one of several bundle documents, with others still waiting for the signer in the bundle.
+  def more_bundle_documents_to_sign?
+    contract.signed_through_bundle?(recipient: recipient) && bundle_contracts_total > 1 && !bundle_signing_complete?
   end
 
   def close_iframe_after_completion?
@@ -295,7 +300,7 @@ class Session < ApplicationRecord
       self,
       target: "signature_apps_#{contract.uuid}",
       partial: "contracts/sessions/session",
-      locals: { session: self, recipient: recipient, iframe: iframe_param, embedded: nil, skip_method_choice: nil }
+      locals: { session: self, recipient: recipient, iframe: iframe_param, qscd: qscd_param }
     )
   end
 end

@@ -117,6 +117,23 @@ class Contract < ApplicationRecord
     available_signature_methods.dup
   end
 
+  # Signing methods the signer can choose from, in the order they are offered.
+  # AdES needs a recipient to verify, so it is not offered to anyone else.
+  def signing_methods_for(recipient: nil)
+    methods = []
+    methods << "electronic" if qualified_signing_allowed?
+    methods << "ades" if AdesEvidenceSession.available?(self, recipient: recipient)
+    methods << "physical" if allowed_methods.include?("scan")
+    methods << "visual" if allowed_methods.include?("visual") && visual_signing_allowed?
+    methods
+  end
+
+  # Signers who may open the bundle sign its contracts there. Anyone else with a link to a bundled
+  # contract (e.g. an integrator embedding just the contract) signs it on the contract page.
+  def signed_through_bundle?(recipient: nil)
+    bundle.present? && (recipient.present? || bundle.publicly_visible?)
+  end
+
   def notify_signed!(signer: nil)
     Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_author?
 
