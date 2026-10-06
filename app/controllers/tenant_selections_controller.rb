@@ -3,6 +3,8 @@
 class TenantSelectionsController < ApplicationController
   before_action :authenticate_user!
   skip_before_action :ensure_tenant_selected
+  # Consent depends on the chosen tenant, so it is asked after the choice.
+  skip_before_action :enforce_current_policy_consent
   before_action :redirect_when_tenant_selected
 
   rescue_from Pundit::NotAuthorizedError, with: :render_not_found

@@ -25,10 +25,11 @@ class Users::OmniauthController < Devise::OmniauthCallbacksController
     sign_in @user
     set_flash_message(:notice, :success, kind: "Google") if is_navigational_format?
 
-    if @user.accepted_current_policies?
-      redirect_to after_sign_in_path_for(@user)
-    else
+    # Users with several tenants are asked for consent after choosing one.
+    if current_tenant&.basic? && !@user.accepted_current_policies?
       redirect_to new_consent_url
+    else
+      redirect_to after_sign_in_path_for(@user)
     end
   end
 

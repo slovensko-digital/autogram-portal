@@ -5,8 +5,8 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :set_locale
-  before_action :enforce_current_policy_consent, if: :user_signed_in?
   before_action :ensure_tenant_selected, if: :user_signed_in?
+  before_action :enforce_current_policy_consent, if: :user_signed_in?
   before_action :skip_authorization, only: [ :devtools_config ]
   after_action :verify_authorized
   after_action :verify_policy_scoped, if: -> { action_name == "index" }
@@ -123,8 +123,11 @@ class ApplicationController < ActionController::Base
     cookies[:locale] = { value: I18n.locale, expires: 1.year.from_now, secure: Rails.env.production?, httponly: true }
   end
 
+  # PRO tenants are set up under a signed contract that already covers the terms
+  # and privacy policy, so their members are not asked again. Work outside them
+  # (Basic tenants, embedded signing before a tenant is chosen) needs consent.
   def enforce_current_policy_consent
-    return if devise_controller?
+    return if devise_controller? || current_tenant&.pro?
     return if current_user.accepted_current_policies?
 
     redirect_to new_consent_url
