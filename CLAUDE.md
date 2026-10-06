@@ -35,6 +35,7 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - `current_tenant` comes from `session[:current_tenant_id]` (`ApplicationController#resolve_current_tenant`). A user with exactly one tenant gets it automatically.
 - A user with several tenants picks one after signing in: `ensure_tenant_selected` redirects signed-in users without a tenant to `TenantSelectionsController` (except Devise pages and embedded `iframe` signing actions, which skip it explicitly). The tenant cannot be switched without signing out.
 - Authorization uses Pundit: collections via `policy_scope`, operations via `authorize`. Model ownership predicates are used by policies. Preserve other-own-tenant redirects through `render_tenant_record_denial` / `redirect_for_other_tenant`; `tenant_manages?` was removed.
+- Consent with the current terms and privacy policy (`enforce_current_policy_consent`) is checked after tenant selection and skipped in PRO tenants, whose signed contract already covers it; Basic tenants and embedded signing before a tenant is chosen still require it.
 - Organization settings live on the user settings page (`edit_user_registration_path(anchor: "organization")`, partial `tenants/_settings`).
 
 ## Authorization (Pundit)

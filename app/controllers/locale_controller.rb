@@ -1,5 +1,6 @@
 class LocaleController < ApplicationController
   skip_before_action :ensure_tenant_selected
+  skip_before_action :enforce_current_policy_consent
   before_action :skip_authorization, only: [ :switch ]
 
   def switch
