@@ -177,6 +177,7 @@ sk:
   header:
     current_tenant:
       label: "Organizácia"
+      personal: "Osobná organizácia"
     navigation:
       main: "Hlavná navigácia"
       toggle_menu: "Menu"
@@ -431,7 +432,6 @@ sk:
       signatures: "Podpisy"
       no_bundles: "Zatiaľ žiadne balíky"
       kind_personal: "Osobné"
-      kind_organization: "Organizačné"
     received:
       title: "Prijaté na podpis"
       subtitle: "Balíky, ktoré vám odoslali iní na podpis."
@@ -1369,7 +1369,6 @@ sk:
       stats:
         my_bundles: "Balíky"
         my_contracts: "Dokumenty"
-        awaiting_my_signature: "Čaká na môj podpis"
         sent_for_signing: "Odoslané na podpis"
         declined_bundles: "Odmietnuté balíky"
       organization:
@@ -1676,7 +1675,7 @@ sk:
       dashboard:
         screenshot_alt: "Prehľad účtu: počty balíkov, dokumentov, balíkov čakajúcich na môj podpis, odoslaných a odmietnutých balíkov; využitie plánu; rýchle akcie Nahrať nový dokument a Overiť podpis; zoznam balíkov čakajúcich na môj podpis a zoznam posledných balíkov so stavom, počtom podpisov, dátumom a odkazom Zobraziť"
         title: "Prehľad (Dashboard)"
-        intro: "Po prihlásení sa zobrazí prehľad so štatistikami, využitím plánu, rýchlymi akciami, zoznamom balíkov čakajúcich na váš podpis a poslednými balíkmi. V organizácii s plánom PRO je hore zoznam balíkov čakajúcich na váš podpis a pod ním prehľad organizácie; pri posledných balíkoch vidíte, či sú osobné (podpisujete ich aj vy) alebo organizačné."
+        intro: "Po prihlásení sa zobrazí prehľad so štatistikami, využitím plánu, rýchlymi akciami, zoznamom balíkov čakajúcich na váš podpis a poslednými balíkmi. V organizácii s plánom PRO je hore zoznam balíkov čakajúcich na váš podpis a pod ním prehľad organizácie; pri posledných balíkoch sú označené osobné (podpisujete ich aj vy)."
         stats:
           bundles:
             label: "Balíky"
@@ -2310,6 +2309,7 @@ sk:
       subtitle: "Mesačné limity platia pre aktuálny kalendárny mesiac."
       details: "Podrobnosti"
       limited_value: "%{used} / %{max}"
+      limited_value_spoken: "%{used} z %{max}"
       unlimited_value: "%{used} (bez obmedzenia)"
       reached: "Limit je vyčerpaný."
       reached_monthly: "Limit je vyčerpaný, obnoví sa %{date}."

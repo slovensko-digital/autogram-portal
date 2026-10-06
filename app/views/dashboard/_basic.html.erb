@@ -1,9 +1,9 @@
 <%= render "dashboard/stats" %>
 
-<%= render "dashboard/usage_strip", tenant: current_tenant %>
-
 <%= render "dashboard/quick_actions" %>
 
 <%= render "dashboard/awaiting_signature", items: @awaiting_my_signature, count: @awaiting_my_signature_count %>
 
 <%= render "dashboard/recent_bundles", bundles: @recent_bundles, empty_text: t("dashboard.index.recent_bundles.empty") %>
+
+<%= render "dashboard/usage_strip", tenant: current_tenant %>

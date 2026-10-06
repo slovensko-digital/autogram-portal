@@ -8,7 +8,6 @@ require "test_helper"
 #  api_token_public_key :string
 #  features             :string           default([]), not null, is an Array
 #  name                 :string           not null
-#  personal             :boolean          default(FALSE), not null
 #  plan                 :string           default("basic"), not null
 #  plan_changed_at      :datetime
 #  created_at           :datetime         not null

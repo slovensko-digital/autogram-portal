@@ -3,27 +3,37 @@
 <% entries = tenant.usage_summary.select { |entry| !entry.unlimited? || Tenant::Usage::MONTHLY_LIMIT_KINDS.key?(entry.limit) } %>
 
 <% if entries.any? %>
-  <section aria-labelledby="dashboard-usage-title" class="mb-8 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-600">
-    <%= content_tag heading_tag, id: "dashboard-usage-title", class: "flex items-center gap-2 font-semibold text-gray-900" do %>
-      <%= t("tenants.usage.title") %>
-      <%= tenant_plan_badge(tenant) %>
-    <% end %>
-    <ul role="list" class="contents">
+  <section aria-labelledby="dashboard-usage-title" class="mt-10 mb-8">
+    <%= render "dashboard/section_header",
+          id: "dashboard-usage-title",
+          title: t("tenants.usage.title"),
+          subtitle: t("tenants.usage.subtitle"),
+          path: edit_user_registration_path(anchor: "organization"),
+          link_text: t("tenants.usage.details"),
+          secondary: true,
+          heading_tag: heading_tag %>
+    <ul role="list" class="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white text-sm text-gray-600">
       <% entries.each do |entry| %>
-        <li class="inline-flex flex-wrap items-center gap-x-2">
-          <%= t("tenants.usage.limits.#{entry.limit}") %>
+        <li class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3">
+          <span class="flex-1"><%= t("tenants.usage.limits.#{entry.limit}") %></span>
           <% if entry.percentage %>
-            <span aria-hidden="true" class="inline-block h-1.5 w-16 rounded-full bg-gray-200">
+            <span aria-hidden="true" class="inline-block h-1.5 w-32 rounded-full bg-gray-200">
               <span class="block h-1.5 rounded-full <%= entry.reached? ? "bg-red-600" : "bg-blue-600" %>" style="width: <%= entry.percentage %>%"></span>
             </span>
           <% end %>
-          <span class="font-medium <%= entry.reached? ? "text-red-700" : "text-gray-900" %>"><%= entry.unlimited? ? plan_usage_value(entry.limit, entry.used) : plan_usage_text(entry) %></span>
+          <span class="min-w-16 text-right font-medium <%= entry.reached? ? "text-red-700" : "text-gray-900" %>">
+            <% if entry.unlimited? %>
+              <%= plan_usage_value(entry.limit, entry.used) %>
+            <% else %>
+              <span aria-hidden="true"><%= plan_usage_text(entry) %></span>
+              <span class="sr-only"><%= plan_usage_text(entry, spoken: true) %></span>
+            <% end %>
+          </span>
           <% if entry.reached? %>
-            <span class="text-red-700"><%= t("tenants.usage.reached") %></span>
+            <span class="basis-full text-right text-xs text-red-700"><%= t("tenants.usage.reached") %></span>
           <% end %>
         </li>
       <% end %>
     </ul>
-    <%= link_to t("tenants.usage.details"), edit_user_registration_path(anchor: "organization"), class: "font-medium text-blue-700 underline hover:text-blue-900 sm:ml-auto" %>
   </section>
 <% end %>

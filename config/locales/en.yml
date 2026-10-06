@@ -203,6 +203,7 @@ en:
   header:
     current_tenant:
       label: "Organization"
+      personal: "Personal organization"
     navigation:
       main: "Main navigation"
       toggle_menu: "Menu"
@@ -495,7 +496,6 @@ en:
       signatures: "Signatures"
       no_bundles: "No bundles yet"
       kind_personal: "Personal"
-      kind_organization: "Organization"
     received:
       title: "Received for Signing"
       subtitle: "Bundles sent to you by others for signing."
@@ -1443,7 +1443,6 @@ en:
       stats:
         my_bundles: "Bundles"
         my_contracts: "Contracts"
-        awaiting_my_signature: "Awaiting my signature"
         sent_for_signing: "Sent for signing"
         declined_bundles: "Declined bundles"
       organization:
@@ -1745,7 +1744,7 @@ en:
       dashboard:
         screenshot_alt: "Account overview: counts of bundles, contracts, bundles awaiting my signature, sent and declined bundles; plan usage; quick actions Upload new document and Verify signature; list of bundles awaiting my signature and list of recent bundles with status, signature count, date and a View link"
         title: "Dashboard"
-        intro: "After logging in, you are shown a dashboard with statistics, plan usage, quick actions, the bundles awaiting your signature and your recent bundles. In a PRO organization the bundles awaiting your signature come first, followed by an overview of the organization; recent bundles show whether they are personal (you sign them too) or organizational."
+        intro: "After logging in, you are shown a dashboard with statistics, plan usage, quick actions, the bundles awaiting your signature and your recent bundles. In a PRO organization the bundles awaiting your signature come first, followed by an overview of the organization; personal recent bundles (you sign them too) are marked."
         stats:
           bundles:
             label: "Bundles"
@@ -2380,6 +2379,7 @@ en:
       subtitle: "Monthly limits apply to the current calendar month."
       details: "Details"
       limited_value: "%{used} / %{max}"
+      limited_value_spoken: "%{used} of %{max}"
       unlimited_value: "%{used} (unlimited)"
       reached: "The limit has been reached."
       reached_monthly: "The limit has been reached, it resets on %{date}."

@@ -8,9 +8,7 @@
     <p class="text-sm text-gray-500"><%= t("dashboard.index.organization.name_html", name: current_tenant.name) %></p>
   </div>
 
-  <%= render "dashboard/stats", awaiting: false %>
-
-  <%= render "dashboard/usage_strip", tenant: current_tenant, heading_tag: :h3 %>
+  <%= render "dashboard/stats" %>
 
   <%= render "dashboard/quick_actions", heading_tag: :h3, grid_class: "lg:grid-cols-3" %>
 
@@ -19,4 +17,6 @@
         empty_text: t("dashboard.index.recent_bundles.empty_pro"),
         heading_tag: :h3,
         personal_bundle_ids: @personal_bundle_ids %>
+
+  <%= render "dashboard/usage_strip", tenant: current_tenant, heading_tag: :h3 %>
 </section>

@@ -6,7 +6,6 @@
 #  api_token_public_key :string
 #  features             :string           default([]), not null, is an Array
 #  name                 :string           not null
-#  personal             :boolean          default(FALSE), not null
 #  plan                 :string           default("basic"), not null
 #  plan_changed_at      :datetime
 #  created_at           :datetime         not null
@@ -42,7 +41,7 @@ class Tenant < ApplicationRecord
 
   def self.create_personal_for!(user)
     transaction do
-      create!(name: user.name.presence || user.email, personal: true).tap do |tenant|
+      create!(name: user.name.presence || user.email).tap do |tenant|
         tenant.memberships.create!(user: user, role: :owner)
       end
     end
