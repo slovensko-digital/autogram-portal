@@ -61,6 +61,20 @@ class Bundle < ApplicationRecord
       .merge(Recipient.active.visible)
       .where(recipients: { user: user })
   }
+  # Bundles where +user+, as an active visible recipient, still has a document to sign.
+  scope :pending_signature_of, ->(user) {
+    where(id: unscoped.signer_contracts_of(user).merge(SignerContract.awaiting).select(:id))
+  }
+  scope :declined_by, ->(user) {
+    where(id: unscoped.signer_contracts_of(user).merge(SignerContract.declined).select(:id))
+  }
+  # What "awaiting my signature" means for the user: something left to sign and nothing declined.
+  scope :awaiting_signature_of, ->(user) { pending_signature_of(user).where.not(id: unscoped.declined_by(user).select(:id)) }
+  scope :signer_contracts_of, ->(user) {
+    joins(recipients: { recipient_signer: :signer_contracts })
+      .merge(Recipient.active.visible)
+      .where(recipients: { user_id: user.id })
+  }
 
   def to_param
     uuid

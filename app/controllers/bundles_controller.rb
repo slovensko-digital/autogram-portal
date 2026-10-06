@@ -83,17 +83,8 @@ class BundlesController < ApplicationController
     end
     recipient_bundles = policy_scope([ :received, Bundle ]).distinct
 
-    awaiting_for_user_scope = recipient_bundles
-                                    .joins(recipients: { recipient_signer: :signer_contracts })
-                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
-                                    .where(signer_contracts: { signed_at: nil, declined_at: nil, superseded_at: nil })
-                                    .distinct
-
-    declined_for_user_scope = recipient_bundles
-                                    .joins(recipients: { recipient_signer: :signer_contracts })
-                                    .where(recipients: { user_id: current_user.id, withdrawn_at: nil, author_proxy: false })
-                                    .where.not(signer_contracts: { declined_at: nil })
-                                    .distinct
+    awaiting_for_user_scope = recipient_bundles.pending_signature_of(current_user)
+    declined_for_user_scope = recipient_bundles.declined_by(current_user)
 
     superseded_for_user_scope = recipient_bundles
                                       .joins(recipients: { recipient_signer: :signer_contracts })

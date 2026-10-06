@@ -9,7 +9,7 @@ class TenantSelectionsController < ApplicationController
 
   def show
     authorize [ :tenant_selection, :tenant ]
-    @tenants = current_user.tenants.order(personal: :desc, name: :asc)
+    @tenants = current_user.tenants.order(plan: :asc, name: :asc)
   end
 
   def update

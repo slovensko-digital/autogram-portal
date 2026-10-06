@@ -285,6 +285,19 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the sidebar links the current tenant to its settings and names a Basic tenant generically" do
+    organization_link = "a[href='#{edit_user_registration_path(anchor: "organization")}']"
+
+    sign_in_with_tenant(@owner, @organization)
+    get dashboard_path
+    assert_select organization_link, text: /Firma ABC\s*#{I18n.t("tenants.plans.pro")}/
+
+    sign_out @owner
+    sign_in_with_tenant(@owner, @owner.tenants.basic.sole)
+    get dashboard_path
+    assert_select organization_link, text: I18n.t("header.current_tenant.personal")
+  end
+
   test "the organization sees its plan usage on the dashboard and in its settings" do
     with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "10", "PRO_MAX_STORED_DOCUMENTS" => nil, "PRO_STORAGE_GB" => nil, "PRO_MONTHLY_TIMESTAMPS" => nil) do
       bundle = request_signature_from_web(as: @owner, filename: "pocitana.pdf")
@@ -294,9 +307,10 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
       get dashboard_path
       assert_response :success
-      assert_select "section", text: /#{I18n.t("tenants.usage.title")}/ do
-        assert_select "li", count: 1
-        assert_select "li", text: /1 \/ 10/
+      assert_select "section[aria-labelledby=dashboard-usage-title]", text: /#{I18n.t("tenants.usage.title")}/ do
+        assert_select "li", count: 2
+        assert_select "li", text: /#{I18n.t("tenants.usage.limits.signature_requests")}\s*1 \/ 10/
+        assert_select "li", text: /#{I18n.t("tenants.usage.limits.timestamps")}\s*0\z/
       end
 
       get edit_user_registration_path
@@ -305,6 +319,65 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
       assert_includes response.body, I18n.t("tenants.usage.unlimited_value", used: 1)
       assert_select "[role=progressbar][aria-valuenow='1'][aria-valuemax='10']"
     end
+  end
+
+  test "the dashboard lists bundles awaiting my signature until I sign them" do
+    outsider = confirmed_user("partner@inafirma.sk")
+    awaiting_bundle = request_signature_from_web(as: @owner, filename: "na-podpis.pdf")
+    recipient = add_recipient(awaiting_bundle, outsider.email)
+    foreign_bundle = request_signature_from_web(as: @owner, filename: "pre-ineho.pdf")
+    add_recipient(foreign_bundle, "iny@example.com")
+    sign_out @owner
+
+    sign_in outsider
+    get dashboard_path
+    assert_response :success
+    assert outsider.tenants.sole.basic?
+    assert_select "#organization-overview-title", count: 0
+    assert_select "section[aria-labelledby=awaiting-signature-title]" do
+      assert_select "#awaiting-signature-title", text: I18n.t("dashboard.index.awaiting.title_with_count", count: 1)
+      assert_select "li", count: 1
+      assert_select "a[href=?]", sign_bundle_path(awaiting_bundle, recipient: recipient.uuid),
+                    text: "#{I18n.t("actions.view")}: #{awaiting_bundle.display_name}"
+      assert_select "a[href*=?]", foreign_bundle.uuid, count: 0
+    end
+
+    sign_with_autogram(awaiting_bundle.contracts.sole, recipient: recipient)
+    assert recipient.reload.signed?
+
+    get dashboard_path
+    assert_select "section[aria-labelledby=awaiting-signature-title]" do
+      assert_select "#awaiting-signature-title", text: I18n.t("dashboard.index.awaiting.title")
+      assert_select "li", count: 0
+      assert_select "span", text: I18n.t("dashboard.index.awaiting.empty")
+    end
+  end
+
+  test "a PRO dashboard shows my signatures above the organization overview" do
+    colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
+    organization_bundle = request_signature_from_web(as: @owner, filename: "organizacna.pdf")
+    add_recipient(organization_bundle, "partner@example.com")
+    personal_bundle = request_signature_from_web(as: @owner, filename: "osobna.pdf")
+    recipient = add_recipient(personal_bundle, colleague.email)
+    sign_out @owner
+
+    sign_in_with_tenant colleague, @organization
+    get dashboard_path
+    assert_response :success
+
+    assert_select "#organization-overview-title", text: I18n.t("dashboard.index.organization.title")
+    assert_select "section[aria-labelledby=organization-overview-title] p strong", text: "Firma ABC"
+
+    assert_select "section[aria-labelledby=awaiting-signature-title]" do
+      assert_select "#awaiting-signature-title", text: I18n.t("dashboard.index.awaiting.title_with_count", count: 1)
+      assert_select "a[href=?]", sign_bundle_path(personal_bundle, recipient: recipient.uuid)
+      assert_select "a[href*=?]", organization_bundle.uuid, count: 0
+    end
+
+    personal_row = recent_bundle_row(personal_bundle)
+    organization_row = recent_bundle_row(organization_bundle)
+    assert_includes personal_row.text, I18n.t("bundles.bundle_list.kind_personal")
+    assert_not_includes organization_row.text, I18n.t("bundles.bundle_list.kind_personal")
   end
 
   test "a Basic organization sees documents it signed for others only within the signed history" do
@@ -357,6 +430,12 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_redirected_to bundle_path(bundle)
     assert_equal contract.tenant, bundle.tenant
     bundle
+  end
+
+  def recent_bundle_row(bundle)
+    link = css_select("section[aria-labelledby=recent-bundles-title] a[href='#{bundle_path(bundle)}']").first
+    assert link, "#{bundle.display_name} is not among the recent bundles"
+    link.ancestors("div.px-4").first
   end
 
   def add_recipient(bundle, email)

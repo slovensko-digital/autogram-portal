@@ -10,11 +10,11 @@ module TenantsHelper
     limit == :storage ? PlanLimits::Exceeded.format(limit, value) : number_with_delimiter(value)
   end
 
-  # "3 / 10", or "3 (unlimited)" for a limit the plan does not have.
-  def plan_usage_text(entry)
+  # "3 / 10", or "3 (unlimited)" for a limit the plan does not have; spoken: "3 of 10" for screen readers.
+  def plan_usage_text(entry, spoken: false)
     used = plan_usage_value(entry.limit, entry.used)
     return t("tenants.usage.unlimited_value", used: used) if entry.unlimited?
 
-    t("tenants.usage.limited_value", used: used, max: plan_usage_value(entry.limit, entry.max))
+    t(spoken ? "tenants.usage.limited_value_spoken" : "tenants.usage.limited_value", used: used, max: plan_usage_value(entry.limit, entry.max))
   end
 end

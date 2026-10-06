@@ -1,10 +1,22 @@
-<%# locals: (bundles:, show_destroy: true) %>
+<%# locals: (bundles:, show_destroy: true, personal_bundle_ids: nil) %>
 
 <% if bundles.any? %>
   <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
     <div class="divide-y divide-gray-100">
       <% bundles.each do |bundle| %>
         <% bundle_state = bundle.bundle_state %>
+        <% if personal_bundle_ids %>
+          <% bundle_kind = capture do %>
+            <% if personal_bundle_ids.include?(bundle.id) %>
+              <span class="inline-flex items-center gap-1 md:gap-1.5 text-xs md:text-sm text-gray-600">
+                <svg aria-hidden="true" class="h-3 w-3 md:h-5 md:w-5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                <%= t('.kind_personal') %>
+              </span>
+            <% end %>
+          <% end %>
+        <% end %>
         <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
           <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
             <svg aria-hidden="true" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -27,6 +39,9 @@
               <% end %>
             </div>
             <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-600 flex-wrap">
+              <% if bundle_kind.present? %>
+                <span class="md:hidden"><%= bundle_kind %></span>
+              <% end %>
               <span class="flex items-center gap-1">
                 <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -52,6 +67,9 @@
               <%= render 'shared/badge', color: 'yellow', label: t('bundles.status.awaiting_signature') %>
             <% end %>
           </div>
+          <% if personal_bundle_ids %>
+            <div class="hidden md:block w-36 shrink-0"><%= bundle_kind %></div>
+          <% end %>
           <div class="hidden md:block w-28 shrink-0 text-sm text-gray-500">
             <%= bundle.contracts.size %> <%= t('document', count: bundle.contracts.size) %>
           </div>

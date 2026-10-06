@@ -1,0 +1,24 @@
+<%# locals: (bundles:, empty_text:, heading_tag: :h2, personal_bundle_ids: nil) %>
+
+<section aria-labelledby="recent-bundles-title">
+  <%= render "dashboard/section_header",
+        id: "recent-bundles-title",
+        title: t("dashboard.index.recent_bundles.title"),
+        subtitle: t("dashboard.index.recent_bundles.subtitle"),
+        path: (bundles_path if bundles.any?),
+        heading_tag: heading_tag %>
+  <% if bundles.any? %>
+    <%= render "bundles/bundle_list", bundles: bundles, show_destroy: false, personal_bundle_ids: personal_bundle_ids %>
+  <% else %>
+    <div class="flex flex-col items-center gap-2 rounded-lg border border-dashed border-gray-300 bg-white px-5 py-10 text-center">
+      <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-gray-100">
+        <svg aria-hidden="true" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+        </svg>
+      </span>
+      <p class="mt-1 text-sm font-semibold text-gray-900"><%= t("bundles.bundle_list.no_bundles") %></p>
+      <p class="max-w-md text-sm text-gray-500"><%= empty_text %></p>
+      <%= link_to t("dashboard.index.quick_actions.upload_document"), new_contract_path, class: "mt-2 inline-flex min-h-11 items-center rounded-lg border border-blue-500 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700" %>
+    </div>
+  <% end %>
+</section>

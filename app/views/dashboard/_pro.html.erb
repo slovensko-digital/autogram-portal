@@ -1,0 +1,22 @@
+<%= render "dashboard/awaiting_signature", items: @awaiting_my_signature, count: @awaiting_my_signature_count %>
+
+<hr class="mb-10 border-gray-200">
+
+<section aria-labelledby="organization-overview-title">
+  <div class="mb-4">
+    <h2 id="organization-overview-title" class="text-lg font-semibold text-gray-900"><%= t("dashboard.index.organization.title") %></h2>
+    <p class="text-sm text-gray-500"><%= t("dashboard.index.organization.name_html", name: current_tenant.name) %></p>
+  </div>
+
+  <%= render "dashboard/stats" %>
+
+  <%= render "dashboard/quick_actions", heading_tag: :h3, grid_class: "lg:grid-cols-3" %>
+
+  <%= render "dashboard/recent_bundles",
+        bundles: @recent_bundles,
+        empty_text: t("dashboard.index.recent_bundles.empty_pro"),
+        heading_tag: :h3,
+        personal_bundle_ids: @personal_bundle_ids %>
+
+  <%= render "dashboard/usage_strip", tenant: current_tenant, heading_tag: :h3 %>
+</section>
