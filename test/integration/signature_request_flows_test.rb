@@ -320,13 +320,12 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_response :success
     assert outsider.tenants.sole.basic?
-    assert_select "#dashboard-personal-zone", count: 0
+    assert_select "#organization-overview-title", count: 0
     assert_select "section[aria-labelledby=awaiting-signature-title]" do
-      assert_select "#awaiting-signature-title", text: /#{I18n.t("dashboard.index.awaiting.title")}\s*\(1\)/
+      assert_select "#awaiting-signature-title", text: I18n.t("dashboard.index.awaiting.title_with_count", count: 1)
       assert_select "li", count: 1
-      assert_select "li", text: /#{I18n.t("dashboard.index.awaiting.from", sender: "Firma ABC")}/
       assert_select "a[href=?]", sign_bundle_path(awaiting_bundle, recipient: recipient.uuid),
-                    text: "#{I18n.t("dashboard.index.awaiting.sign")}: #{awaiting_bundle.display_name}"
+                    text: "#{I18n.t("actions.view")}: #{awaiting_bundle.display_name}"
       assert_select "a[href*=?]", foreign_bundle.uuid, count: 0
     end
 
@@ -341,7 +340,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a PRO dashboard separates my signatures from the organization overview" do
+  test "a PRO dashboard shows my signatures above the organization overview" do
     colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
     organization_bundle = request_signature_from_web(as: @owner, filename: "organizacna.pdf")
     add_recipient(organization_bundle, "partner@example.com")
@@ -353,13 +352,11 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_response :success
 
-    assert_select "#dashboard-personal-zone", text: I18n.t("dashboard.index.zones.personal")
-    assert_select "#dashboard-organization-zone", text: I18n.t("dashboard.index.zones.organization")
-    assert_select "section[aria-labelledby=dashboard-organization-zone] h3", text: /Firma ABC/
-    assert_select "p", text: I18n.t("dashboard.index.organization.members", count: 2)
+    assert_select "#organization-overview-title", text: I18n.t("dashboard.index.organization.title")
+    assert_select "section[aria-labelledby=organization-overview-title] p strong", text: "Firma ABC"
 
     assert_select "section[aria-labelledby=awaiting-signature-title]" do
-      assert_select "#awaiting-signature-title", text: /#{I18n.t("dashboard.index.awaiting.title_pro")}\s*\(1\)/
+      assert_select "#awaiting-signature-title", text: I18n.t("dashboard.index.awaiting.title_with_count", count: 1)
       assert_select "a[href=?]", sign_bundle_path(personal_bundle, recipient: recipient.uuid)
       assert_select "a[href*=?]", organization_bundle.uuid, count: 0
     end

@@ -1429,44 +1429,30 @@ en:
     index:
       title: "Welcome back, %{name}"
       subtitle: "Overview of your documents and signatures"
-      subtitle_pro: "Your tasks and an overview of %{name}"
+      subtitle_pro: "Overview of documents and signatures"
       validation_warning:
         title: "Validation archive needs attention"
         content: "%{count} signed contract records need attention before %{date}."
         action: "Open validation archive"
       awaiting:
         title: "Awaiting my signature"
-        title_pro: "What I can sign"
-        subtitle: "Bundles you were invited to sign and have not signed yet"
-        subtitle_pro: "Bundles you are asked to sign personally"
-        view_all: "All received bundles"
-        from: "From %{sender}"
-        received_on: "received %{date}"
-        sign: "Sign"
-        more:
-          one: "Show %{count} more bundle"
-          other: "Show %{count} more bundles"
+        title_with_count: "Awaiting my signature (%{count})"
+        subtitle: "Overview of documents waiting for you"
         empty: "Nothing is waiting for your signature right now."
         empty_hint: "When someone invites you to sign a bundle, it shows up here."
       stats:
-        my_bundles: "My bundles"
-        my_contracts: "My contracts"
+        my_bundles: "Bundles"
+        my_contracts: "Contracts"
         awaiting_my_signature: "Awaiting my signature"
         sent_for_signing: "Sent for signing"
         declined_bundles: "Declined bundles"
-      zones:
-        personal: "Personal"
-        organization: "Organization"
       organization:
-        members:
-          one: "%{count} member"
-          other: "%{count} members"
-        settings: "Organization settings"
+        title: "Organization overview"
+        name_html: "Organization: <strong class=\"font-semibold text-gray-900\">%{name}</strong>"
       quick_actions:
         title: "Quick actions"
         upload_document: "Upload new document"
         upload_document_subtitle: "Start a new signing process"
-        upload_document_subtitle_pro: "On behalf of %{name}"
         verify_signature: "Verify signature"
         verify_signature_subtitle: "Check the validity of a signature"
         validation_archive: "Validation archive"
@@ -1474,7 +1460,6 @@ en:
       recent_bundles:
         title: "Recent bundles"
         subtitle: "Overview of your latest bundles"
-        subtitle_pro: "The organization's latest bundles. Personal ones are those you sign too."
         empty: "Upload a document and send it for signing. Sent bundles show up here."
         empty_pro: "The organization has not sent anything for signing yet. When a member sends a document for signing, it shows up here."
         document: "Document"
@@ -1758,17 +1743,17 @@ en:
         title: "You always send a bundle for signing"
         intro: "The app works with two concepts. A document is a single file that gets signed. A bundle is the package in which you send documents to others for signing – usually it contains just one document."
       dashboard:
-        screenshot_alt: "Account overview: list of bundles awaiting my signature with a Sign button; counts of bundles, contracts, bundles awaiting my signature, sent and declined bundles; plan usage; quick actions Upload new document and Verify signature; list of recent bundles with status, signature count, date and a View link"
+        screenshot_alt: "Account overview: counts of bundles, contracts, bundles awaiting my signature, sent and declined bundles; plan usage; quick actions Upload new document and Verify signature; list of bundles awaiting my signature and list of recent bundles with status, signature count, date and a View link"
         title: "Dashboard"
-        intro: "After logging in, you are shown a dashboard. At the top are the bundles awaiting your signature, followed by statistics, plan usage, quick actions and recent bundles. In a PRO organization the dashboard is split into a personal zone (what you have to sign) and an overview of the organization with its name; recent bundles show whether they are personal (you sign them too) or organizational."
+        intro: "After logging in, you are shown a dashboard with statistics, plan usage, quick actions, the bundles awaiting your signature and your recent bundles. In a PRO organization the bundles awaiting your signature come first, followed by an overview of the organization; recent bundles show whether they are personal (you sign them too) or organizational."
         stats:
           bundles:
-            label: "My Bundles"
+            label: "Bundles"
             description: "Total number of bundles you have created and sent for signing."
             card_class: "border-blue-200 bg-blue-50"
             dot_class: "bg-blue-500"
           contracts:
-            label: "My Documents"
+            label: "Contracts"
             description: "Total number of documents uploaded to your account."
             card_class: "border-indigo-200 bg-indigo-50"
             dot_class: "bg-indigo-500"

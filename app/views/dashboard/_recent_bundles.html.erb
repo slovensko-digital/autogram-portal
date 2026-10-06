@@ -1,15 +1,12 @@
-<%# locals: (bundles:, subtitle:, empty_text:, heading_tag: :h2, personal_bundle_ids: nil) %>
+<%# locals: (bundles:, empty_text:, heading_tag: :h2, personal_bundle_ids: nil) %>
 
 <section aria-labelledby="recent-bundles-title">
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <%= content_tag heading_tag, t("dashboard.index.recent_bundles.title"), id: "recent-bundles-title", class: "text-lg font-semibold text-gray-900" %>
-      <p class="text-sm text-gray-500"><%= subtitle %></p>
-    </div>
-    <% if bundles.any? %>
-      <%= link_to t("dashboard.index.recent_bundles.view_all"), bundles_path, class: "text-sm font-medium text-blue-700 underline hover:text-blue-900" %>
-    <% end %>
-  </div>
+  <%= render "dashboard/section_header",
+        id: "recent-bundles-title",
+        title: t("dashboard.index.recent_bundles.title"),
+        subtitle: t("dashboard.index.recent_bundles.subtitle"),
+        path: (bundles_path if bundles.any?),
+        heading_tag: heading_tag %>
   <% if bundles.any? %>
     <%= render "bundles/bundle_list", bundles: bundles, show_destroy: false, personal_bundle_ids: personal_bundle_ids %>
   <% else %>

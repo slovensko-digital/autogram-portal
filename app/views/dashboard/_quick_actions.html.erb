@@ -1,42 +1,41 @@
-<%# locals: (heading_tag: :h2, upload_subtitle: t("dashboard.index.quick_actions.upload_document_subtitle")) %>
-<% action_class = "bg-white rounded-lg border border-gray-200 p-4 flex items-center gap-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700" %>
+<%# locals: (heading_tag: :h2, grid_class: nil) %>
 
 <section aria-labelledby="quick-actions-title" class="mb-8">
   <%= content_tag heading_tag, t("dashboard.index.quick_actions.title"), id: "quick-actions-title", class: "text-lg font-semibold text-gray-900 mb-4" %>
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    <%= link_to new_contract_path, class: "#{action_class} hover:border-blue-300" do %>
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-        <svg aria-hidden="true" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 <%= grid_class %>">
+    <%= link_to new_contract_path, class: "bg-white rounded-lg border border-gray-200 p-5 flex items-center gap-4 hover:border-blue-300 transition-all group has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" do %>
+      <div class="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-700 transition-colors">
+        <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
         </svg>
-      </span>
-      <span>
-        <span class="block text-sm font-semibold text-gray-900"><%= t("dashboard.index.quick_actions.upload_document") %></span>
-        <span class="mt-0.5 block text-xs text-gray-500"><%= upload_subtitle %></span>
-      </span>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-900"><%= t('dashboard.index.quick_actions.upload_document') %></p>
+        <p class="text-xs text-gray-500 mt-0.5"><%= t('dashboard.index.quick_actions.upload_document_subtitle') %></p>
+      </div>
     <% end %>
-    <%= link_to new_contract_path, class: "#{action_class} hover:border-green-300" do %>
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-50">
-        <svg aria-hidden="true" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <%= link_to new_contract_path, class: "bg-white rounded-lg border border-gray-200 p-5 flex items-center gap-4 hover:border-green-300 transition-all group has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" do %>
+      <div class="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center shrink-0 group-hover:bg-green-700 transition-colors">
+        <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-      </span>
-      <span>
-        <span class="block text-sm font-semibold text-gray-900"><%= t("dashboard.index.quick_actions.verify_signature") %></span>
-        <span class="mt-0.5 block text-xs text-gray-500"><%= t("dashboard.index.quick_actions.verify_signature_subtitle") %></span>
-      </span>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-900"><%= t('dashboard.index.quick_actions.verify_signature') %></p>
+        <p class="text-xs text-gray-500 mt-0.5"><%= t('dashboard.index.quick_actions.verify_signature_subtitle') %></p>
+      </div>
     <% end %>
     <% if current_tenant.archivation_enabled? %>
-      <%= link_to contract_validation_records_path, class: "#{action_class} hover:border-yellow-300" do %>
-        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-yellow-50">
-          <svg aria-hidden="true" class="h-6 w-6 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <%= link_to contract_validation_records_path, class: "bg-white rounded-lg border border-gray-200 p-5 flex items-center gap-4 hover:border-yellow-300 transition-all group has-[:focus]:ring-2 has-[:focus]:ring-blue-500 has-[:focus]:ring-offset-2" do %>
+        <div class="h-12 w-12 rounded-lg bg-yellow-500 flex items-center justify-center shrink-0 group-hover:bg-yellow-600 transition-colors">
+          <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5A2.25 2.25 0 0119.5 12.75v6A2.25 2.25 0 0117.25 21h-10.5A2.25 2.25 0 014.5 18.75v-6A2.25 2.25 0 016.75 10.5z" />
           </svg>
-        </span>
-        <span>
-          <span class="block text-sm font-semibold text-gray-900"><%= t("dashboard.index.quick_actions.validation_archive") %></span>
-          <span class="mt-0.5 block text-xs text-gray-500"><%= t("dashboard.index.quick_actions.validation_archive_subtitle") %></span>
-        </span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-900"><%= t('dashboard.index.quick_actions.validation_archive') %></p>
+          <p class="text-xs text-gray-500 mt-0.5"><%= t('dashboard.index.quick_actions.validation_archive_subtitle') %></p>
+        </div>
       <% end %>
     <% end %>
   </div>

@@ -1,53 +1,21 @@
-<section aria-labelledby="dashboard-personal-zone" class="mb-10">
-  <div class="mb-4 flex items-center gap-2.5">
-    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50">
-      <svg aria-hidden="true" class="h-4 w-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-      </svg>
-    </span>
-    <h2 id="dashboard-personal-zone" class="text-sm font-bold uppercase tracking-wide text-gray-700"><%= t("dashboard.index.zones.personal") %></h2>
-    <span aria-hidden="true" class="h-px flex-1 bg-gray-200"></span>
+<%= render "dashboard/awaiting_signature", items: @awaiting_my_signature, count: @awaiting_my_signature_count %>
+
+<hr class="mb-10 border-gray-200">
+
+<section aria-labelledby="organization-overview-title">
+  <div class="mb-4">
+    <h2 id="organization-overview-title" class="text-lg font-semibold text-gray-900"><%= t("dashboard.index.organization.title") %></h2>
+    <p class="text-sm text-gray-500"><%= t("dashboard.index.organization.name_html", name: current_tenant.name) %></p>
   </div>
 
-  <%= render "dashboard/awaiting_signature",
-        items: @awaiting_my_signature,
-        count: @awaiting_my_signature_count,
-        title: t("dashboard.index.awaiting.title_pro"),
-        subtitle: t("dashboard.index.awaiting.subtitle_pro"),
-        heading_tag: :h3 %>
-</section>
-
-<section aria-labelledby="dashboard-organization-zone">
-  <div class="mb-4 flex items-center gap-2.5">
-    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-      <svg aria-hidden="true" class="h-4 w-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21" />
-      </svg>
-    </span>
-    <h2 id="dashboard-organization-zone" class="text-sm font-bold uppercase tracking-wide text-gray-700"><%= t("dashboard.index.zones.organization") %></h2>
-    <span aria-hidden="true" class="h-px flex-1 bg-gray-200"></span>
-  </div>
-
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h3 class="flex flex-wrap items-center gap-2 text-xl font-bold text-gray-900">
-        <%= current_tenant.name %>
-        <%= tenant_plan_badge(current_tenant) %>
-      </h3>
-      <p class="mt-0.5 text-sm text-gray-500"><%= t("dashboard.index.organization.members", count: @members_count) %></p>
-    </div>
-    <%= link_to t("dashboard.index.organization.settings"), edit_user_registration_path(anchor: "organization"), class: "text-sm font-medium text-blue-700 underline hover:text-blue-900" %>
-  </div>
-
-  <%= render "dashboard/stats" %>
+  <%= render "dashboard/stats", awaiting: false %>
 
   <%= render "dashboard/usage_strip", tenant: current_tenant, heading_tag: :h3 %>
 
-  <%= render "dashboard/quick_actions", heading_tag: :h3, upload_subtitle: t("dashboard.index.quick_actions.upload_document_subtitle_pro", name: current_tenant.name) %>
+  <%= render "dashboard/quick_actions", heading_tag: :h3, grid_class: "lg:grid-cols-3" %>
 
   <%= render "dashboard/recent_bundles",
         bundles: @recent_bundles,
-        subtitle: t("dashboard.index.recent_bundles.subtitle_pro"),
         empty_text: t("dashboard.index.recent_bundles.empty_pro"),
         heading_tag: :h3,
         personal_bundle_ids: @personal_bundle_ids %>

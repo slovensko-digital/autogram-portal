@@ -1,4 +1,6 @@
-<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-8">
+<%# locals: (awaiting: true) %>
+
+<div class="grid grid-cols-2 gap-4 mb-8 <%= awaiting ? "sm:grid-cols-3 lg:grid-cols-5" : "lg:grid-cols-4" %>">
   <%= link_to bundles_path, class: "bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 transition-colors" do %>
     <div class="mb-3">
       <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
@@ -21,16 +23,18 @@
     <p class="text-2xl font-bold text-gray-900"><%= @contracts_count %></p>
     <p class="text-xs text-gray-500 mt-0.5"><%= t('dashboard.index.stats.my_contracts') %></p>
   <% end %>
-  <%= link_to received_bundles_path(state: 'awaiting'), class: "bg-white rounded-lg border border-gray-200 p-5 hover:border-yellow-300 transition-colors" do %>
-    <div class="mb-3">
-      <div class="h-9 w-9 rounded-lg bg-yellow-50 flex items-center justify-center">
-        <svg aria-hidden="true" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+  <% if awaiting %>
+    <%= link_to received_bundles_path(state: 'awaiting'), class: "bg-white rounded-lg border border-gray-200 p-5 hover:border-yellow-300 transition-colors" do %>
+      <div class="mb-3">
+        <div class="h-9 w-9 rounded-lg bg-yellow-50 flex items-center justify-center">
+          <svg aria-hidden="true" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
       </div>
-    </div>
-    <p class="text-2xl font-bold text-gray-900"><%= @awaiting_my_signature_count %></p>
-    <p class="text-xs text-gray-500 mt-0.5"><%= t('dashboard.index.stats.awaiting_my_signature') %></p>
+      <p class="text-2xl font-bold text-gray-900"><%= @awaiting_my_signature_count %></p>
+      <p class="text-xs text-gray-500 mt-0.5"><%= t('dashboard.index.stats.awaiting_my_signature') %></p>
+    <% end %>
   <% end %>
   <%= link_to bundles_path(state: 'awaiting'), class: "bg-white rounded-lg border border-gray-200 p-5 hover:border-green-300 transition-colors" do %>
     <div class="mb-3">

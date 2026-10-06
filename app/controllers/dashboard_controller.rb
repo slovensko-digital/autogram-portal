@@ -2,7 +2,7 @@ class DashboardController < ApplicationController
   AWAITING_LIMIT = 5
   RECENT_LIMIT = 5
 
-  AwaitingItem = Data.define(:name, :sender, :received_at, :documents_count, :path)
+  AwaitingItem = Data.define(:name, :received_at, :signatures, :portal, :path)
 
   before_action :authenticate_user!
 
@@ -41,7 +41,6 @@ class DashboardController < ApplicationController
                                   .to_a
     return unless current_tenant.pro?
 
-    @members_count = current_tenant.memberships.count
     @personal_bundle_ids = bundles.where(id: @recent_bundles.map(&:id)).recipient_user(current_user).distinct.pluck(:id).to_set
   end
 
@@ -54,14 +53,14 @@ class DashboardController < ApplicationController
 
     @awaiting_my_signature_count = awaiting_bundles.count + pending_invitations.count
 
-    latest_bundles = awaiting_bundles.includes(:tenant, :contracts).order(created_at: :desc).limit(AWAITING_LIMIT).to_a
+    latest_bundles = awaiting_bundles.order(created_at: :desc).limit(AWAITING_LIMIT).to_a
     recipients = Recipient.active.visible.where(user: current_user, bundle_id: latest_bundles.map(&:id)).index_by(&:bundle_id)
     bundle_items = latest_bundles.map do |bundle|
       AwaitingItem.new(
         name: bundle.display_name,
-        sender: bundle.sender_display_name,
         received_at: bundle.created_at,
-        documents_count: bundle.contracts.size,
+        signatures: "#{bundle.completed_recipients.size} / #{bundle.visible_recipients.size}",
+        portal: nil,
         path: sign_bundle_path(bundle, recipient: recipients[bundle.id]&.uuid)
       )
     end
@@ -70,9 +69,9 @@ class DashboardController < ApplicationController
       payload = invitation.payload
       AwaitingItem.new(
         name: t("bundles.received.external_invitation_title"),
-        sender: payload["authorName"].presence || invitation.portal_instance.name,
         received_at: invitation.created_at,
-        documents_count: Array(payload["contracts"]).size.nonzero?,
+        signatures: nil,
+        portal: invitation.portal_instance.name,
         path: federation_requests_open_path(url: payload["openUrl"])
       )
     end
