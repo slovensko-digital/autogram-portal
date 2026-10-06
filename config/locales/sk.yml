@@ -387,6 +387,7 @@ sk:
           subtitle: "Rozšíri podpisy na úroveň T pridaním kvalifikovanej časovej pečiatky."
         archive:
           title: "Archivovať dokument"
+          title_without_archivation: "Pridať archívnu pečiatku"
           subtitle: "Rozšíri podpisy na úroveň LTA pridaním archívnej časovej pečiatky pre dlhodobé overenie."
     actions_error:
       title: "Chyba pri načítavaní akcií dokumentu"
@@ -954,8 +955,10 @@ sk:
           button: "Pridať časovú pečiatku k podpisom"
         lta:
           title: "Archivovať dokument"
+          title_without_archivation: "Pridať archívnu pečiatku"
           subtitle: "Rozšíri podpisy na úroveň LTA pridaním archívnej časovej pečiatky pre dlhodobé overenie."
           button: "Archivovať podpísaný dokument"
+          button_without_archivation: "Pridať archívnu pečiatku k podpisom"
     download_actions:
       message: "Tento dokument bol podpísaný a je pripravený na stiahnutie."
       download_button: "Stiahnuť podpísaný dokument"

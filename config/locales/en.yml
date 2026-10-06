@@ -432,6 +432,7 @@ en:
           subtitle: "Extend signatures to T level by adding a qualified timestamp."
         archive:
           title: "Archive document"
+          title_without_archivation: "Add archive timestamp"
           subtitle: "Extend signatures to LTA level with an archive timestamp for long-term validation."
     show:
       title: "Document"
@@ -1031,8 +1032,10 @@ en:
           button: "Add timestamp to signatures"
         lta:
           title: "Archive document"
+          title_without_archivation: "Add archive timestamp"
           subtitle: "Extend signatures to LTA level by adding an archive timestamp for long-term validation."
           button: "Archive signed document"
+          button_without_archivation: "Add archive timestamp to signatures"
     download_actions:
       message: "This document has been signed and is ready for download."
       download_button: "Download Signed Document"

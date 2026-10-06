@@ -59,7 +59,7 @@
       <% if @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
         <%= form_with url: extend_signatures_contract_path(@contract), method: :post, local: true, class: "w-full sm:w-auto" do |form| %>
           <%= form.hidden_field :target_level, value: 'LTA' %>
-          <%= form.submit t('documents.new.actions.archive.title'),
+          <%= form.submit archive_action_t(@contract.tenant, 'documents.new.actions.archive.title'),
                           class: "items-center w-full sm:w-auto px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
                           data: { "form-submit-target": "submitButton" } %>
         <% end %>
