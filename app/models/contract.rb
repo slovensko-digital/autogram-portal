@@ -128,8 +128,10 @@ class Contract < ApplicationRecord
     methods
   end
 
-  def electronic_signing_only_for?(recipient: nil)
-    signing_methods_for(recipient: recipient) == [ "electronic" ]
+  # Signers who may open the bundle sign its contracts there. Anyone else with a link to a bundled
+  # contract (e.g. an integrator embedding just the contract) signs it on the contract page.
+  def signed_through_bundle?(recipient: nil)
+    bundle.present? && (recipient.present? || bundle.publicly_visible?)
   end
 
   def notify_signed!(signer: nil)

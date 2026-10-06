@@ -229,13 +229,7 @@ class Contracts::SessionsController < ApplicationController
     return if params[:show_completed].present?
     return unless @session.not_pending?
 
-    redirect_path = if @contract.bundle
-      sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: @session.iframe_param)
-    else
-      sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: @session.iframe_param)
-    end
-
-    redirect_to redirect_path
+    redirect_to helpers.signing_page_path(@contract, recipient: @recipient, iframe: @session.iframe_param)
   end
 
   def ensure_prepared_signature_field_appearance_completed
@@ -377,9 +371,11 @@ class Contracts::SessionsController < ApplicationController
     SessionAccessToken.valid?(token: token, contract: @contract, session: @session)
   end
 
+  # Where the signer opened the session, for pages rendered without the request (e.g. a signing error broadcast).
   def session_view_options
     {}.tap do |options|
       options["iframe"] = params[:iframe] if params[:iframe].present?
+      options["qscd"] = params[:qscd] if params[:qscd].presence_in(User.qscds.keys)
     end
   end
 

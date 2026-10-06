@@ -75,6 +75,21 @@ class ContractTest < ActiveSupport::TestCase
     assert_not contract.reload.anonymous?
   end
 
+  test "only signers who may open the bundle sign its contracts through it" do
+    contract = Contract.new(documents_attributes: [ { blob: pdf_blob("own.pdf", "%PDF-1.4 original") } ])
+    assert_not contract.signed_through_bundle?
+
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ Contract.create!(documents_attributes: [ { blob: pdf_blob("bundled.pdf", "%PDF-1.4 original") } ]) ])
+    bundled = bundle.contracts.sole
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    assert bundled.signed_through_bundle?(recipient: recipient)
+    assert_not bundled.signed_through_bundle?
+
+    bundle.update!(publicly_visible: true)
+    assert bundled.signed_through_bundle?
+  end
+
   test "bundled contracts cannot belong to another tenant" do
     contract = Contract.new(tenant: tenants(:two), bundle: bundles(:one), documents_attributes: [ { blob: pdf_blob("foreign.pdf", "%PDF-1.4 original") } ])
     contract.validate

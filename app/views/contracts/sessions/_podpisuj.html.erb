@@ -1,32 +1,25 @@
-<% content_for :title, t('.title') unless params[:embedded] %>
+<% content_for :title, t('.title') %>
 <% session_token = SessionAccessToken.generate(contract: @contract, session: @session) %>
 
 <div
   data-controller="signers--podpisuj"
   data-signers--podpisuj-signed-document-path-value="<%= upload_contract_session_path(@contract, @session, session_token: session_token) %>"
 >
-  <% if params[:embedded] %>
-    <div class="w-full space-y-1">
-      <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
-      <p class="text-sm text-gray-600"><%= t('.subtitle') %></p>
-    </div>
-  <% else %>
-    <div class="px-6 py-5">
-      <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
-      <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
-    </div>
-  <% end %>
+  <div class="px-6 py-5">
+    <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+    <p class="text-sm text-gray-600 mt-1"><%= t('.subtitle') %></p>
+  </div>
 
-  <div class="space-y-6 py-6 <%= 'px-6' unless params[:embedded] %>">
+  <div class="space-y-6 py-6 px-6">
     <%= render 'shared/info', title: t('.instructions_title'), content: t('.instructions') %>
 
-    <%= content_tag(params[:embedded] ? :h4 : :h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
+    <%= content_tag(:h2, t("contracts.sessions.steps_heading"), class: "sr-only") %>
     <ol role="list" class="space-y-6">
       <li class="bg-white border border-gray-200 rounded-lg p-6 space-y-3">
         <div class="flex items-start gap-3">
           <div aria-hidden="true" class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">1</div>
           <div class="flex-1">
-            <%= content_tag(params[:embedded] ? :h5 : :h3, t('.download_title'), class: "font-semibold text-gray-900") %>
+            <%= content_tag(:h3, t('.download_title'), class: "font-semibold text-gray-900") %>
             <p class="text-sm text-gray-600 mb-3"><%= t('.download_desc') %></p>
             <a href="<%= download_contract_session_path(@contract, @session, session_token: session_token) %>" target="_blank" rel="noopener"
                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -43,7 +36,7 @@
         <div class="flex items-start gap-3">
           <div aria-hidden="true" class="flex-shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">2</div>
           <div class="flex-1">
-            <%= content_tag(params[:embedded] ? :h5 : :h3, t('.upload_title'), class: "font-semibold text-gray-900") %>
+            <%= content_tag(:h3, t('.upload_title'), class: "font-semibold text-gray-900") %>
             <p class="text-sm text-gray-600 mb-3"><%= t('.upload_desc') %></p>
 
             <label data-action="dragover->signers--podpisuj#dragover dragleave->signers--podpisuj#dragleave drop->signers--podpisuj#drop"

@@ -7,8 +7,6 @@
             @contract,
             recipient: @recipient&.uuid,
             iframe: params[:iframe],
-            embedded: params[:embedded],
-            skip_method_choice: params[:skip_method_choice],
             qscd: params[:qscd]
           ),
           data: { turbo_frame: "signature_apps_#{@contract.uuid}" },

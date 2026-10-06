@@ -205,17 +205,15 @@
               <% end %>
 
               <% if contract_signed_for_viewer %>
-                <%= turbo_frame_tag "signature_apps_#{contract.uuid}" do %>
-                  <div class="mt-6">
-                    <% unless params[:iframe].present? %>
-                      <%= render 'shared/success', title: t('contracts.sign.already_signed.title'), content: t('contracts.sign.already_signed.message'), button: t('actions.download_contract'), target: signed_document_contract_path(contract) %>
-                    <% else %>
-                      <%= render 'shared/success', title: t('contracts.sign.already_signed.title'), content: t('contracts.sign.already_signed.message') %>
-                    <% end %>
-                  </div>
-                <% end %>
+                <div class="mt-6">
+                  <% unless params[:iframe].present? %>
+                    <%= render 'shared/success', title: t('contracts.sign.already_signed.title'), content: t('contracts.sign.already_signed.message'), button: t('actions.download_contract'), target: signed_document_contract_path(contract) %>
+                  <% else %>
+                    <%= render 'shared/success', title: t('contracts.sign.already_signed.title'), content: t('contracts.sign.already_signed.message') %>
+                  <% end %>
+                </div>
               <% elsif contract_signable %>
-                <%= render 'contracts/signing_options', contract: contract, recipient: @recipient, bundle_id: @bundle.uuid %>
+                <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient %>
               <% end %>
             </div>
           </section>

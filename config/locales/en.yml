@@ -573,7 +573,7 @@ en:
       title: "Documents bundle"
       title_requested_singular: "You received a document to sign"
       title_requested_plural: "You received a bundle of %{count} documents to sign"
-      subtitle_requested: "Check the sender and documents in the bundle, then select the signing method."
+      subtitle_requested: "Check the sender and the documents in the bundle and sign them."
       batch_sign_recommended: "Recommended"
       batch_sign_title: "Sign all documents with Autogram Desktop"
       batch_sign_description: "Sign all remaining documents in this bundle at once with Autogram Desktop. Documents: %{count}."
@@ -901,9 +901,9 @@ en:
     sign:
       all_contracts: "All documents"
       title: "Document"
-      subtitle: "Check the document, then select the signing method."
+      subtitle: "Check the document and sign it."
       title_requested: "You received a document to sign"
-      subtitle_requested: "Check the sender and document, then select the signing method."
+      subtitle_requested: "Check the sender and the document and sign it."
       sender: "Sender"
       view_document: "View document"
       signatures_status: "Document already signed by (2 of 3)"
@@ -923,10 +923,6 @@ en:
       already_signed:
         title: "Document has been signed"
         message: "This document has been signed and is complete. No further signature is required."
-    signature_apps_preview:
-      title: "First choose what you will sign with"
-      description: "Based on your ID card, smart card or token, we will enable the signing apps that support it."
-      action: "Choose your ID"
     signature_apps:
       select_signing_app: "Select signing application"
       add_another_signature: "Add another signature"
@@ -1209,6 +1205,7 @@ en:
         bundle_progress_message: "This document is done. Continue with the next document in the bundle."
         view_contract: "View signed document"
         view_bundle: "Return to bundle"
+        back_to_contract: "Return to document"
         evidence_reference_label: "Evidence reference"
         verify_reference_link: "Verify this reference"
     onboarding:

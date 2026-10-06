@@ -1,5 +1,4 @@
-<%# locals: (contract: @contract, recipient: @recipient, qscd: @qscd, preview: false) %>
-<%# preview: shows the apps disabled until the signer picks a document in onboarding. %>
+<%# locals: () %>
 
 <%
   signing_apps = [
@@ -41,23 +40,23 @@
     }
   ]
 
-  signing_apps.select! { |app| contract.allowed_methods.include?(app[:allowed_method]) }
+  signing_apps.select! { |app| @contract.allowed_methods.include?(app[:allowed_method]) }
 
   # Only the author of a standalone contract can change its signature format, so
   # apps that cannot sign the requested format are shown (disabled) only to them.
-  unless contract.bundle.nil? && params[:iframe].blank?
+  unless @contract.bundle.nil? && params[:iframe].blank?
     signing_apps.reject! do |app|
-      app[:session_class].unavailability_reasons(qscd, contract).intersect?(Session::SIGNATURE_FORMAT_UNAVAILABILITY_REASONS)
+      app[:session_class].unavailability_reasons(@qscd, @contract).intersect?(Session::SIGNATURE_FORMAT_UNAVAILABILITY_REASONS)
     end
   end
   # Podpisuj (and other standalone apps) goes after the last available app, but still before the unavailable ones.
   podpisuj_app = signing_apps.find { |app| app[:value] == "podpisuj" }
-  if podpisuj_app&.dig(:session_class)&.available?(qscd, contract)
+  if podpisuj_app&.dig(:session_class)&.available?(@qscd, @contract)
     signing_apps.delete(podpisuj_app)
-    last_available_index = signing_apps.rindex { |app| app[:session_class].available?(qscd, contract) }
+    last_available_index = signing_apps.rindex { |app| app[:session_class].available?(@qscd, @contract) }
     signing_apps.insert(last_available_index ? last_available_index + 1 : 0, podpisuj_app)
   end
-  available_app_values = preview ? [] : signing_apps.select { |app| app[:session_class].available?(qscd, contract) }.map { |app| app[:value] }
+  available_app_values = signing_apps.select { |app| app[:session_class].available?(@qscd, @contract) }.map { |app| app[:value] }
   first_available_app = signing_apps.find { |app| available_app_values.include?(app[:value]) }
 %>
 
@@ -65,18 +64,18 @@
   <legend class="sr-only"><%= t("contracts.signature_apps.title") %></legend>
   <% signing_apps.each do |app| %>
     <%
-      reason_keys = app[:session_class].unavailability_reasons(qscd, contract)
+      reason_keys = app[:session_class].unavailability_reasons(@qscd, @contract)
       reasons = reason_keys.map do |reason|
-        t("contracts.signature_apps.unavailable_reasons.#{reason}", qscd: (qscd.present? ? t("qscd.title.#{qscd}") : nil))
+        t("contracts.signature_apps.unavailable_reasons.#{reason}", qscd: (@qscd.present? ? t("qscd.title.#{@qscd}") : nil))
       end
     %>
     <%= render "shared/radio_button_card",
-          name: "signing_app_#{contract.uuid}",
+          name: "signing_app_#{@contract.uuid}",
           value: app[:value],
           label: app[:label],
           description: app[:description],
           checked: app == first_available_app,
-          disabled: preview || reasons.any?,
+          disabled: reasons.any?,
           disabled_reasons: reasons,
           icon: app[:icon],
           data_attributes: {
@@ -97,14 +96,12 @@
   <% signing_apps.each do |app| %>
     <% next unless available_app_values.include?(app[:value]) %>
     <%= link_to "",
-          public_send("#{app[:value]}_contract_sessions_path", contract,
-            recipient: recipient,
+          public_send("#{app[:value]}_contract_sessions_path", @contract,
+            recipient: @recipient,
             iframe: params[:iframe],
-            embedded: params[:embedded],
-            skip_method_choice: params[:skip_method_choice],
-            qscd: qscd.presence),
+            qscd: @qscd),
           data: {
-            turbo_frame: "signature_apps_#{contract.uuid}",
+            turbo_frame: "signature_apps_#{@contract.uuid}",
             signing_app_selector_target: "#{app[:value]}SubmitButton"
           } %>
   <% end %>

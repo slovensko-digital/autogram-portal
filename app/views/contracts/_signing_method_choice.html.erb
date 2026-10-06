@@ -1,4 +1,12 @@
-<%# locals: (contract:, signing_methods:, electronic_path:, electronic_frame:, recipient: nil, heading_level: 3) %>
+<%# locals: (contract:, recipient: nil, heading_level: 3) %>
+
+<% signing_methods = contract.signing_methods_for(recipient: recipient) %>
+<% qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
+<% electronic_path = if contract.prepared_signature_field_appearance_required_for?(recipient: recipient)
+  visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], purpose: "signature_field_appearance")
+else
+  signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], qscd: qscd.presence)
+end %>
 
 <div data-controller="signing-method" class="w-full space-y-4">
   <fieldset>
@@ -66,7 +74,7 @@
     <% if signing_methods.include?("electronic") %>
       <%= link_to "",
           electronic_path,
-          data: { signing_method_target: 'electronicButton', turbo_frame: electronic_frame } %>
+          data: { signing_method_target: 'electronicButton', turbo_frame: "_top" } %>
     <% end %>
 
     <% if signing_methods.include?("ades") %>

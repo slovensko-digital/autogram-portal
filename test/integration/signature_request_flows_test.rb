@@ -24,7 +24,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     get link_in(mail, %r{/bundles/#{bundle.uuid}/sign})
     assert_response :success
     assert_includes response.body, "Firma ABC"
-    assert_select "a[href*='#{contract_onboarding_path(bundle.contracts.sole, "qscd_check")}']", text: I18n.t("contracts.signature_apps_preview.action")
+    assert_select "a[href*='#{signature_apps_contract_path(bundle.contracts.sole)}']"
 
     parameters = sign_with_autogram(bundle.contracts.sole, recipient: recipient)
 
@@ -121,7 +121,6 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     contract = bundle.contracts.sole
     assert_select "a[href*='#{autogram_contract_sessions_path(contract)}']", count: 0
     assert_select "a[href*='#{signature_apps_contract_path(contract)}']", count: 0
-    assert_select "a[href*='#{contract_onboarding_path(contract, "qscd_check")}']", count: 0
   end
 
   test "released recipient can no longer sign, not even with a signing already in progress" do

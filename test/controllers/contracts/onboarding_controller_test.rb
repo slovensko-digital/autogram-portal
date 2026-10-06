@@ -36,56 +36,31 @@ class Contracts::OnboardingControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirect_preserves_qscd(
       response.location,
-      "/contracts/#{contract.uuid}/sign",
+      "/contracts/#{contract.uuid}/signature_apps",
       { "qscd" => "eid_2024", "iframe" => "true" }
     )
   end
 
-  test "electronic onboarding returns to the bundle when electronic signing is its only method" do
-    bundle = create_bundle(allowed_methods: [ "qes" ])
-    contract = bundle.contracts.sole
-    recipient = bundle.recipients.sole
-
-    patch "/contracts/#{contract.uuid}/onboarding/certificate_check", params: {
-      method: "electronic",
-      qscd: "eid_2024",
-      recipient: recipient.uuid,
-      iframe: "true"
-    }
-
-    assert_redirect_preserves_qscd(
-      response.location,
-      "/bundles/#{bundle.uuid}/sign",
-      { "qscd" => "eid_2024", "recipient" => recipient.uuid, "iframe" => "true" }
-    )
-  end
-
-  test "electronic onboarding continues to the signing apps when the signer chose electronic signing among other methods" do
-    bundle = create_bundle(allowed_methods: %w[qes ades])
-    contract = bundle.contracts.sole
-    recipient = bundle.recipients.sole
-
-    patch "/contracts/#{contract.uuid}/onboarding/certificate_check", params: {
-      method: "electronic",
-      qscd: "eid_2024",
-      recipient: recipient.uuid
-    }
-
-    assert_redirect_preserves_qscd(
-      response.location,
-      "/contracts/#{contract.uuid}/signature_apps",
-      { "qscd" => "eid_2024", "recipient" => recipient.uuid }
-    )
-  end
-
-  test "onboarding pages navigate the whole page, not the signing apps frame they are wrapped in" do
+  test "back from the document choice returns to the signing apps with the current document" do
     contract = create_contract_without_session
 
-    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", iframe: "true" }
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", review: "true", qscd: "eid_2024", iframe: "true" }
 
     assert_response :success
-    assert_select "turbo-frame#signature_apps_#{contract.uuid}[target='_top']"
-    assert_select "turbo-frame#signature_apps_#{contract.uuid} a[href='/contracts/#{contract.uuid}/sign?iframe=true']", text: I18n.t("actions.back")
+    assert_select "turbo-frame", count: 0
+    assert_select "a[href='#{signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")}']", text: I18n.t("actions.back")
+  end
+
+  test "back from the first document choice returns to the signing page the signer can open" do
+    contract = create_contract_without_session
+    bundle = Bundle.create!(tenant: Tenant.create!(name: "Firma ABC", plan: :pro), contracts: [ contract ])
+
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", iframe: "true" }
+    assert_select "a[href='#{sign_contract_path(contract, iframe: "true")}']", text: I18n.t("actions.back")
+
+    bundle.update!(publicly_visible: true)
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", iframe: "true" }
+    assert_select "a[href='#{sign_bundle_path(bundle, iframe: "true")}']", text: I18n.t("actions.back")
   end
 
   test "pin and certificate steps keep qscd in iframe forms" do
@@ -193,20 +168,6 @@ class Contracts::OnboardingControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal expected_path, uri.path
     assert_equal expected_query, Rack::Utils.parse_nested_query(uri.query)
-  end
-
-  def create_bundle(allowed_methods:)
-    Bundle.create!(
-      tenant: Tenant.create!(name: "Firma ABC", plan: :pro),
-      contracts_attributes: [
-        {
-          allowed_methods: allowed_methods,
-          signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" },
-          documents_attributes: [ { blob: ActiveStorage::Blob.create_and_upload!(io: StringIO.new("%PDF-1.4 test content"), filename: "onboarding-test.pdf", content_type: "application/pdf") } ]
-        }
-      ],
-      recipients_attributes: [ { email: "signer@example.com" } ]
-    )
   end
 
   def create_contract_without_session

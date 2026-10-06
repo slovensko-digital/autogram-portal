@@ -197,8 +197,7 @@ end %>
           </div>
 
           <div class="flex justify-between items-center pt-4">
-            <% back_path = @contract.bundle ? sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe]) : sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe]) %>
-            <%= link_to t('.back'), back_path,
+            <%= link_to t('.back'), signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe]),
                 class: "px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" %>
             <%= f.submit signature_field_appearance ? t('actions.continue') : t('.submit'),
                 class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>

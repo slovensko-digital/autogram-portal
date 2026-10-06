@@ -392,6 +392,9 @@ class ContractsController < ApplicationController
       unless @signer_contract
         @signer_contract = AnonymousSigner.create!.signer_contracts.create!(contract: @contract)
       end
+    elsif @contract.bundle
+      # The anonymous signer the signing sessions of a bundled contract use (Contracts::SessionsController).
+      @signer_contract = @contract.signer_contracts.joins(:signer).find_by(signers: { type: "AnonymousSigner" })
     end
 
     if @signer_contract&.superseded? && @contract.bundle
@@ -402,8 +405,11 @@ class ContractsController < ApplicationController
 
     return unless @signer_contract&.signed?
 
-    if @contract.bundle
-      redirect_to sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid)
+    if @contract.signed_through_bundle?(recipient: @recipient)
+      redirect_to sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
+    elsif @contract.bundle
+      # Signed on the contract page of a bundle the signer cannot open: the contract page shows it signed.
+      redirect_to sign_contract_path(@contract, iframe: params[:iframe]) unless action_name == "sign"
     else
       @signer_contract.update_column(:signed_at, nil)
     end
@@ -657,11 +663,7 @@ class ContractsController < ApplicationController
   end
 
   def visual_signing_unavailable_redirect_path
-    if @contract.bundle
-      sign_bundle_path(@contract.bundle, recipient: @recipient&.uuid, iframe: params[:iframe])
-    else
-      sign_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
-    end
+    helpers.signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe])
   end
 
   def signature_field_appearance_completion_path

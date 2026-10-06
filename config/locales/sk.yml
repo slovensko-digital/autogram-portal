@@ -502,7 +502,7 @@ sk:
       title: "Balík dokumentov"
       title_requested_singular: "Dostali ste dokument na podpis"
       title_requested_plural: "Dostali ste balík %{count} dokumentov na podpis"
-      subtitle_requested: "Skontrolujte odosielateľa a dokumenty v balíku, potom vyberte spôsob podpisu."
+      subtitle_requested: "Skontrolujte odosielateľa aj dokumenty v balíku a podpíšte ich."
       batch_sign_recommended: "Odporúčané"
       batch_sign_title: "Podpísať hromadne cez Autogram"
       batch_sign_description: "Podpíšte všetky zostávajúce dokumenty v tomto balíku naraz cez Autogram. Počet dokumentov: %{count}."
@@ -825,9 +825,9 @@ sk:
     sign:
       all_contracts: "Všetky dokumenty"
       title: "Dokument"
-      subtitle: "Skontrolujte dokument, potom vyberte spôsob podpisu."
+      subtitle: "Skontrolujte dokument a podpíšte ho."
       title_requested: "Dostali ste dokument na podpis"
-      subtitle_requested: "Skontrolujte odosielateľa a dokument, potom vyberte spôsob podpisu."
+      subtitle_requested: "Skontrolujte odosielateľa aj dokument a podpíšte ho."
       sender: "Odosielateľ"
       view_document: "Zobraziť dokument"
       signatures_status: "Dokument už podpísali (2 z 3)"
@@ -847,10 +847,6 @@ sk:
       already_signed:
         title: "Dokument je podpísaný"
         message: "Tento dokument je už podpísaný. Nie je od vás potrebný ďalší podpis."
-    signature_apps_preview:
-      title: "Najprv vyberte, čím budete podpisovať"
-      description: "Podľa občianskeho preukazu, karty alebo tokenu vám sprístupníme podpisové aplikácie, ktoré ho podporujú."
-      action: "Vybrať doklad"
     signature_apps:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       add_another_signature: "Pridajte ďalší podpis"
@@ -1136,6 +1132,7 @@ sk:
         bundle_progress_message: "Tento dokument je hotový. Pokračujte ďalším dokumentom v balíku."
         view_contract: "Zobraziť podpísaný dokument"
         view_bundle: "Späť na balík"
+        back_to_contract: "Späť na dokument"
         evidence_reference_label: "Referencia evidencie"
         verify_reference_link: "Overiť túto referenciu"
     onboarding:
@@ -1238,7 +1235,7 @@ sk:
     signing_method_choice:
       title: "Ako by ste chceli podpísať tento dokument?"
       electronic_label: "Elektronické podpisovanie"
-      electronic_description: "Podpíšte digitálne pomocou vášho občianskeho preukazu a podpisovej aplikácie"
+      electronic_description: "Podpíšte elektronicky pomocou vášho občianskeho preukazu a podpisovej aplikácie"
       ades_label: "Overené AdES podpisovanie"
       ades_description: "Overte mobilné číslo SMS kódom a nechajte portál vytvoriť elektronický podpis s podporným evidenčným záznamom"
       physical_label: "Fyzické podpisovanie"
@@ -1481,7 +1478,7 @@ sk:
       features:
         subtitle: "eIDAS-kompatibilná platforma"
         title: "Spájame bezpečnosť s jednoduchosťou modernej aplikácie"
-        description: "Zabudnite na tlačiareň. Zmluvy riešite iba digitálne - od prvého do posledného podpisu. Váš elektronický podpis spĺňa najvyššiu európsku úroveň (eIDAS) a má rovnakú váhu ako ten overený u notára. Zmluvy podpíšete pomocou občianskeho preukazu (eID), odošlete ich na podpis iným, alebo si celý systém napojíte na vlastné aplikácie."
+        description: "Zabudnite na tlačiareň. Zmluvy riešite iba elektronicky - od prvého do posledného podpisu. Váš elektronický podpis spĺňa najvyššiu európsku úroveň (eIDAS) a má rovnakú váhu ako ten overený u notára. Zmluvy podpíšete pomocou občianskeho preukazu (eID), odošlete ich na podpis iným, alebo si celý systém napojíte na vlastné aplikácie."
         send_documents:
           title: "Posielajte dokumenty na podpis"
           description: "Požiadajte druhú stranu o podpis cez e-mail. Naživo viete sledovať, kto už dokument podpísal."
