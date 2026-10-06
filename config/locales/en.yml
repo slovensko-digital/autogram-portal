@@ -1449,15 +1449,9 @@ en:
         empty: "Nothing is waiting for your signature right now."
         empty_hint: "When someone invites you to sign a bundle, it shows up here."
       stats:
-        label: "Statistics"
-        organization_bundles: "Organization bundles"
-        organization_contracts: "Organization contracts"
-        bundles_hint: "Created in total"
-        contracts_hint: "Standalone contracts"
-        sent_for_signing_hint: "Waiting for recipients to sign"
-        declined_hint: "A recipient declined to sign"
         my_bundles: "My bundles"
         my_contracts: "My contracts"
+        awaiting_my_signature: "Awaiting my signature"
         sent_for_signing: "Sent for signing"
         declined_bundles: "Declined bundles"
       zones:
@@ -1764,7 +1758,7 @@ en:
         title: "You always send a bundle for signing"
         intro: "The app works with two concepts. A document is a single file that gets signed. A bundle is the package in which you send documents to others for signing – usually it contains just one document."
       dashboard:
-        screenshot_alt: "Account overview: list of bundles awaiting my signature with a Sign button; counts of bundles, contracts, sent and declined bundles; plan usage; quick actions Upload new document and Verify signature; list of recent bundles with status, signature count, date and a View link"
+        screenshot_alt: "Account overview: list of bundles awaiting my signature with a Sign button; counts of bundles, contracts, bundles awaiting my signature, sent and declined bundles; plan usage; quick actions Upload new document and Verify signature; list of recent bundles with status, signature count, date and a View link"
         title: "Dashboard"
         intro: "After logging in, you are shown a dashboard. At the top are the bundles awaiting your signature, followed by statistics, plan usage, quick actions and recent bundles. In a PRO organization the dashboard is split into a personal zone (what you have to sign) and an overview of the organization with its name; recent bundles show whether they are personal (you sign them too) or organizational."
         stats:
@@ -1780,7 +1774,7 @@ en:
             dot_class: "bg-indigo-500"
           awaiting:
             label: "Awaiting My Signature"
-            description: "A list of bundles where you are a recipient and have not signed yet, each with a Sign button. In a PRO organization it is in the personal zone, titled \"What I can sign\"."
+            description: "Bundles from other users where you are a recipient and have not yet signed."
             card_class: "border-yellow-200 bg-yellow-50"
             dot_class: "bg-yellow-500"
           sent:

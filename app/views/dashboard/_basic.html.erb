@@ -4,12 +4,7 @@
       title: t("dashboard.index.awaiting.title"),
       subtitle: t("dashboard.index.awaiting.subtitle") %>
 
-<%= render "dashboard/stats", stats: [
-      { label: t("dashboard.index.stats.my_bundles"), hint: t("dashboard.index.stats.bundles_hint"), value: @bundles_count, path: bundles_path, dot: "bg-blue-600" },
-      { label: t("dashboard.index.stats.my_contracts"), hint: t("dashboard.index.stats.contracts_hint"), value: @contracts_count, path: contracts_path, dot: "bg-indigo-600" },
-      { label: t("dashboard.index.stats.sent_for_signing"), hint: t("dashboard.index.stats.sent_for_signing_hint"), value: @sent_for_signing_count, path: bundles_path(state: "awaiting"), dot: "bg-yellow-500" },
-      { label: t("dashboard.index.stats.declined_bundles"), hint: t("dashboard.index.stats.declined_hint"), value: @declined_bundles_count, path: bundles_path(state: "declined"), dot: "bg-red-600", alert: @declined_bundles_count.positive? }
-    ] %>
+<%= render "dashboard/stats" %>
 
 <%= render "dashboard/usage_strip", tenant: current_tenant %>
 
