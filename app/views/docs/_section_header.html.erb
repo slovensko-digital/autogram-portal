@@ -1,0 +1,11 @@
+<%# locals: (title:, icon:, color:, id: nil) %>
+<div class="flex items-center gap-3 mb-6">
+  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg <%= color %>">
+    <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <% Array(icon).each do |path| %>
+        <path stroke-linecap="round" stroke-linejoin="round" d="<%= path %>" />
+      <% end %>
+    </svg>
+  </div>
+  <%= tag.h2 title, id: id, class: "text-2xl font-bold text-gray-900" %>
+</div>

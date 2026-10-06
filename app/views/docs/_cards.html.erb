@@ -1,0 +1,9 @@
+<%# locals: (items:) %>
+<dl class="space-y-3">
+  <% items.each_value do |item| %>
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+      <dt class="text-sm font-semibold text-gray-900"><%= item[:label] %></dt>
+      <dd class="mt-1 text-sm text-gray-600"><%= render_inline_code(item[:description]) %></dd>
+    </div>
+  <% end %>
+</dl>

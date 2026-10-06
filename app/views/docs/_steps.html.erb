@@ -1,0 +1,12 @@
+<%# locals: (steps:, color: "bg-blue-600") %>
+<ol role="list" class="space-y-3">
+  <% steps.each_value.with_index(1) do |step, number| %>
+    <li class="flex items-start gap-3">
+      <span aria-hidden="true" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full <%= color %> text-white text-xs font-bold mt-0.5"><%= number %></span>
+      <div>
+        <p class="text-sm font-semibold text-gray-900"><%= step[:title] %></p>
+        <p class="text-sm text-gray-600"><%= render_inline_code(step[:description]) %></p>
+      </div>
+    </li>
+  <% end %>
+</ol>

@@ -52,7 +52,7 @@ sk:
       subject: "Váš overovací kód pre Autogram Portal"
       badge: "Overenie"
       title: "Váš overovací kód"
-      body: "Na pokračovanie v podpisovaní v Autogram Portáli použite tento jednorazový kód:"
+      body: "Na pokračovanie v podpisovaní v Autogram Portali použite tento jednorazový kód:"
       footer: "Ak ste tento kód neočakávali, tento e-mail môžete ignorovať."
 
   consents:
@@ -248,7 +248,7 @@ sk:
         delete_confirmation_mismatch: "Potvrdzovacia fráza sa nezhoduje."
         admin: "Administrácia"
         manage_portal_instances: "Dôveryhodné portály"
-        manage_portal_instances_description: "Spravujte externé inštancie Autogram Portálu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
+        manage_portal_instances_description: "Spravujte externé inštancie Autogram Portalu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
         manage_portal_instances_link: "Spravovať dôveryhodné portály"
         manage_tenants: "Organizácie"
         manage_tenants_description: "Spravujte plány (Basic/PRO), funkcie a členov organizácií."
@@ -264,7 +264,7 @@ sk:
           federation: "Federácia"
         feature_descriptions:
           admin: "Umožňuje prístup do administrátorských častí, napríklad správy dôveryhodných portálov a administrácie úloh."
-          federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portálu."
+          federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portalu."
     confirmations:
       new:
         resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"
@@ -293,7 +293,7 @@ sk:
         action: "Potvrdiť môj účet"
       magic_link:
         badge: "Prihlásenie"
-        title: "Prihláste sa do Autogram Portálu"
+        title: "Prihláste sa do Autogram Portalu"
         instruction: "Dobrý deň, %{recipient}. Prihlásiť sa môžete pomocou tlačidla nižšie."
         action: "Prihlásiť sa do môjho účtu"
         expiry_notice: "Odkaz je platný %{expiry} minút. Ak ste o prihlásenie nežiadali, tento e-mail môžete ignorovať."
@@ -591,7 +591,7 @@ sk:
       send_to_portal: "Odoslať do portálu"
       portal_label: "Portál adresáta"
       portal_blank_option: "Tento portál"
-      portal_help: "Vyberte dôveryhodný partnerský portál, ak má adresát otvoriť požiadavku cez inú inštanciu Autogram Portálu."
+      portal_help: "Vyberte dôveryhodný partnerský portál, ak má adresát otvoriť požiadavku cez inú inštanciu Autogram Portalu."
       email_label: "E-mail adresáta"
       email_placeholder: "jan.novak@example.com"
       email_help: "Adresát dostane e-mail s odkazom na podpísanie dokumentu. E-mail sa po pridaní neodošle automaticky – odošlete ho až kliknutím na „Odoslať e-mail“ pri adresátovi."
@@ -682,7 +682,7 @@ sk:
     portal_instances:
       index:
         title: "Dôveryhodné portály"
-        subtitle: "Spravujte externé inštancie Autogram Portálu, ktoré možno použiť pre federovaných adresátov."
+        subtitle: "Spravujte externé inštancie Autogram Portalu, ktoré možno použiť pre federovaných adresátov."
         new: "Pridať portál"
         name: "Názov"
         base_url: "Základná URL"
@@ -694,7 +694,7 @@ sk:
         revoke: "Zrušiť dôveru"
       new:
         title: "Pridať dôveryhodný portál"
-        subtitle: "Zaregistrujte vzdialenú inštanciu Autogram Portálu pre federované smerovanie adresátov."
+        subtitle: "Zaregistrujte vzdialenú inštanciu Autogram Portalu pre federované smerovanie adresátov."
       edit:
         title: "Upraviť dôveryhodný portál"
         subtitle: "Aktualizujte konfiguráciu vzdialeného portálu a stav dôvery."
@@ -721,7 +721,7 @@ sk:
     requests:
       show:
         title: "Otvoriť federovanú požiadavku"
-        subtitle: "Vložte odkaz na požiadavku na podpis z inej inštancie Autogram Portálu a zobrazte si jej náhľad alebo si ju prevezmite tu."
+        subtitle: "Vložte odkaz na požiadavku na podpis z inej inštancie Autogram Portalu a zobrazte si jej náhľad alebo si ju prevezmite tu."
         url_label: "URL požiadavky"
         url_placeholder: "https://portal.example/bundles/.../sign?recipient=..."
         preview: "Zobraziť náhľad"
@@ -1656,6 +1656,9 @@ sk:
 
   docs:
     index:
+      opens_in_new_tab: "(otvorí sa v novom okne)"
+      back_to_contents: "Späť na obsah príručky"
+      screenshot_full_size: "(zobrazí sa v plnej veľkosti v novom okne)"
       header:
         eyebrow: "Používateľská príručka"
         title: "Dokumentácia pre používateľov"
@@ -1663,209 +1666,226 @@ sk:
       nav:
         label: "Obsah príručky"
         documents_and_bundles: "Dokument a balík"
-        dashboard: "Prehľad"
-        contracts: "Moje dokumenty"
-        bundles: "Moje balíky"
-        received: "Prijaté balíky"
+        organizations: "Prihlásenie a organizácie"
+        dashboard: "Domov"
+        contracts: "Dokumenty"
         signing: "Podpisovanie"
+        bundles: "Balíky"
+        received: "Prijaté na podpis"
+        archive: "Archív podpisov"
         account: "Nastavenia"
         federation: "Federácia"
         integration: "API a SDK"
       documents_and_bundles:
         title: "Na podpis vždy posielate balík"
         intro: "V aplikácii pracujete s dvoma pojmami. Dokument je jeden súbor, ktorý sa podpisuje. Balík je obal, v ktorom dokumenty posielate na podpis iným – väčšinou obsahuje iba jeden dokument."
+      organizations:
+        title: "Prihlásenie a organizácie"
+        intro: "Dokument môžete podpísať aj bez prihlásenia. Účet potrebujete, ak chcete dokumenty uchovávať, posielať ich na podpis iným, pridávať k nim časové pečiatky alebo pracovať spolu s kolegami v organizácii."
+        sign_in_title: "Registrácia a prihlásenie"
+        sign_in:
+          register:
+            label: "Registrácia"
+            description: "Kliknite na Prihlásiť sa a potom na Registrovať sa. Zadajte e-mail, potvrďte súhlas s podmienkami používania a so zásadami ochrany osobných údajov a účet aktivujte odkazom z potvrdzovacieho e-mailu."
+          magic_link:
+            label: "Prihlásenie odkazom z e-mailu"
+            description: "Portál nepoužíva heslá. Zadajte svoj e-mail a prihláste sa jednorazovým odkazom, ktorý vám príde e-mailom. Ak zaškrtnete Zapamätať si ma, zostanete na tomto zariadení prihlásení."
+          google:
+            label: "Prihlásenie cez Google"
+            description: "Tlačidlom Pokračovať cez Google sa prihlásite účtom Google. Ak účet s týmto e-mailom v portáli ešte nemáte, vytvorí sa po potvrdení súhlasu s podmienkami."
+          anonymous:
+            label: "Bez prihlásenia"
+            description: "Bez účtu môžete nahrať dokument, zobraziť jeho podpisy a podpísať ho. Takýto dokument sa po krátkom čase automaticky zmaže, preto si podpísaný dokument hneď stiahnite. Ak sa prihlásite priamo z detailu dokumentu tlačidlom Prihlásiť sa alebo registrovať, dokument sa presunie do vášho účtu."
+        organizations_title: "Organizácie"
+        organizations_intro: "Dokumenty a balíky vždy patria organizácii, v ktorej práve pracujete. Táto organizácia je aj odosielateľom vašich balíkov."
+        organizations:
+          personal:
+            label: "Osobná organizácia"
+            description: "Každý používateľ má vlastnú organizáciu s plánom Basic. Vytvorí sa spolu s účtom a zostáva vám, aj keď sa stanete členom inej organizácie. V ľavom menu sa zobrazuje ako Osobná organizácia."
+          pro:
+            label: "Organizácia s plánom PRO"
+            description: "Organizácia pre firmy a úrady s viacerými členmi. Všetci členovia vidia a spravujú všetky dokumenty a balíky organizácie. Organizáciu PRO zriaďuje administrátor portálu, ktorý nastavuje aj jej názov, plán a funkcie (Archív podpisov, API prístup)."
+          roles:
+            label: "Vlastník a člen"
+            description: "Vlastníci pozývajú a odstraňujú členov, spravujú API kľúč a dostávajú e-mailové notifikácie o balíkoch organizácie. Členovia pracujú s dokumentmi a balíkmi rovnako ako vlastníci."
+          selection:
+            label: "Výber organizácie"
+            description: "Ak ste členom viacerých organizácií, po prihlásení si vyberiete, v ktorej chcete pracovať. Aktuálnu organizáciu vidíte v ľavom menu dole. Do inej organizácie sa prepnete tak, že sa odhlásite a znova prihlásite."
+        screenshot_caption: "Výber organizácie po prihlásení"
+        screenshot_alt: "Stránka Vyberte organizáciu so zoznamom organizácií používateľa: Osobná s plánom Basic a označením Naposledy použitá a organizácia Novák & partneri, s.r.o. s plánom PRO"
+        plans_title: "Plány a limity"
+        plans_intro: "Čo môžete v organizácii robiť, závisí od jej plánu. Konkrétne limity určuje prevádzkovateľ portálu."
+        pricing_link: "Pozrite si cenník."
+        plans:
+          basic:
+            label: "Basic"
+            description: "Plán pre jedného používateľa. Môže obmedzovať počet uložených dokumentov, počet dokumentov odoslaných na podpis za mesiac a počet časových pečiatok za mesiac. Dokumenty a balíky sa môžu po uplynutí doby uchovávania automaticky mazať."
+          pro:
+            label: "PRO"
+            description: "Plán pre organizácie s neobmedzeným počtom členov. Dokumenty odoslané na podpis a časové pečiatky sa evidujú po mesiacoch ako podklad pre vyúčtovanie."
+          usage:
+            label: "Využitie plánu"
+            description: "Čerpanie limitov, dobu uchovávania dokumentov a maximálnu veľkosť dokumentu vidíte na stránke Domov a v Nastaveniach v časti Organizácia. Mesačné limity sa obnovujú na začiatku kalendárneho mesiaca. Keď limit vyčerpáte, príslušná akcia nie je dostupná a portál vám to oznámi."
+          signature_requests:
+            label: "Čo sa počíta ako dokument odoslaný na podpis"
+            description: "Každý dokument balíka, ktorý podpíše niekto iný ako vaša organizácia – bez ohľadu na to, či ste adresáta pozvali e-mailom, alebo mu poslali odkaz. Ak organizácia limit vyčerpá, adresáti nemôžu podpisovať, kým sa limit neobnoví."
       dashboard:
-        screenshot_alt: "Prehľad účtu: počty balíkov, dokumentov, balíkov čakajúcich na môj podpis, odoslaných a odmietnutých balíkov; využitie plánu; rýchle akcie Nahrať nový dokument a Overiť podpis; zoznam balíkov čakajúcich na môj podpis a zoznam posledných balíkov so stavom, počtom podpisov, dátumom a odkazom Zobraziť"
-        title: "Prehľad (Dashboard)"
-        intro: "Po prihlásení sa zobrazí prehľad so štatistikami, využitím plánu, rýchlymi akciami, zoznamom balíkov čakajúcich na váš podpis a poslednými balíkmi. V organizácii s plánom PRO je hore zoznam balíkov čakajúcich na váš podpis a pod ním prehľad organizácie; pri posledných balíkoch sú označené osobné (podpisujete ich aj vy)."
+        title: "Domov"
+        intro: "Po prihlásení sa zobrazí stránka Domov. Nájdete na nej súhrnné počty, rýchle akcie, balíky čakajúce na váš podpis, posledné balíky a využitie plánu."
         stats:
           bundles:
             label: "Balíky"
-            description: "Celkový počet balíkov, ktoré ste vytvorili a odoslali na podpis."
-            card_class: "border-blue-200 bg-blue-50"
-            dot_class: "bg-blue-500"
+            description: "Počet všetkých balíkov organizácie."
           contracts:
             label: "Dokumenty"
-            description: "Celkový počet dokumentov nahratých na váš účet."
-            card_class: "border-indigo-200 bg-indigo-50"
-            dot_class: "bg-indigo-500"
-          awaiting:
-            label: "Čaká na môj podpis"
-            description: "Balíky od iných používateľov, v ktorých ste vy príjemca a ste ešte nepodpísali."
-            card_class: "border-yellow-200 bg-yellow-50"
-            dot_class: "bg-yellow-500"
+            description: "Počet samostatných dokumentov, ktoré nie sú súčasťou žiadneho balíka."
           sent:
             label: "Odoslané na podpis"
-            description: "Vaše balíky, ktoré čakajú na podpis od príjemcov."
-            card_class: "border-green-200 bg-green-50"
-            dot_class: "bg-green-500"
+            description: "Balíky, v ktorých niektorý adresát ešte nepodpísal ani neodmietol."
           declined:
             label: "Odmietnuté balíky"
-            description: "Balíky, v ktorých niektorý príjemca odmietol podpis."
-            card_class: "border-red-200 bg-red-50"
-            dot_class: "bg-red-500"
-        quick_actions_title: "Rýchle akcie"
-        quick_actions_description: "Z prehľadu môžete jedným klikom nahrať nový dokument, vytvoriť nový balík alebo prejsť na zoznam dokumentov čakajúcich na váš podpis."
-        screenshot_title: "Ukážka obrazovky"
-        screenshot_description: "Odporúčame sem doplniť screenshot hlavného dashboardu so štatistikami a rýchlymi akciami."
-        screenshot_file_hint: "Súbor: /public/docs/screenshots/dashboard-overview.png"
-        screenshot_placeholder: "Miesto pre screenshot dashboardu"
+            description: "Balíky, v ktorých niektorý adresát odmietol podpis."
+        stats_hint: "Kliknutím na počet otvoríte príslušný zoznam."
+        sections_title: "Čo ešte nájdete na stránke Domov"
+        sections:
+          quick_actions:
+            label: "Rýchle akcie"
+            description: "Nahrať nový dokument, Overiť podpis a v organizáciách s archívom podpisov aj Archív podpisov."
+          awaiting:
+            label: "Čaká na môj podpis"
+            description: "Balíky, v ktorých ste adresátom vy, a to aj od iných organizácií. Tie sú označené ako Externý odosielateľ."
+          recent:
+            label: "Nedávne balíky"
+            description: "Päť najnovších balíkov organizácie so stavom, počtom podpisov a dátumom vytvorenia."
+          usage:
+            label: "Využitie plánu"
+            description: "Čerpanie limitov plánu v aktuálnom mesiaci."
+        pro_title: "Organizácia s plánom PRO"
+        pro_description: "V organizácii PRO je na začiatku zoznam Čaká na môj podpis a pod ním Prehľad organizácie. Pri nedávnych balíkoch je označené Čaká na mňa, ak sa v nich čaká na váš podpis. Ak má organizácia zapnutý archív podpisov, stránka Domov upozorní aj na podpisy, ktorým čoskoro skončí platnosť."
+        screenshot_caption: "Stránka Domov v osobnej organizácii"
+        screenshot_alt: "Stránka Domov: ľavé menu s položkami Domov, Dokumenty, Balíky, Prijaté na podpis, Nastavenia, Nový dokument, O portáli a Používateľská príručka a dole prepínač jazyka, odhlásenie, Osobná organizácia a meno používateľa; vpravo počty balíkov, dokumentov, odoslaných a odmietnutých balíkov, rýchle akcie, zoznam Čaká na môj podpis, zoznam Nedávne balíky so stavmi a Využitie plánu"
       contracts:
-        title: "Moje dokumenty"
-        intro: "Sekcia \"Moje dokumenty\" zobrazuje všetky jednotlivé dokumenty (PDF, XML, ASiC-E...) nahrané na váš účet. Dokumenty môžete filtrovať podľa stavu a triediť podľa dátumu."
+        title: "Dokumenty"
+        intro: "V sekcii Dokumenty sú samostatné dokumenty, ktoré ste nahrali na podpis alebo na overenie. Keď dokument pošlete na podpis, presunie sa do balíka a nájdete ho v sekcii Balíky. Zoznam môžete filtrovať podľa stavu a zoradiť podľa dátumu."
+        screenshot_caption: "Zoznam dokumentov"
+        screenshot_alt: "Zoznam Dokumenty s filtrom Stav a Zoradiť a štyrmi dokumentmi v stavoch Čaká na podpis a Podpísané, pri každom s odkazmi Zmazať a Zobraziť"
         states_title: "Stavy dokumentov"
         states:
           awaiting:
             label: "Čaká na podpis"
-            description: "Dokument bol nahratý, ale ešte neobsahuje žiadny podpis."
-            badge_class: "bg-yellow-100 text-yellow-800"
-            dot_class: "bg-yellow-500"
+            description: "Dokument zatiaľ nie je podpísaný."
           completed:
-            label: "Podpísaný"
-            description: "Dokument bol úspešne podpísaný."
-            badge_class: "bg-green-100 text-green-800"
-            dot_class: "bg-green-500"
-        actions_title: "Dostupné akcie pri dokumente"
+            label: "Podpísané"
+            description: "Dokument je podpísaný – v portáli alebo už pri nahratí obsahoval podpis."
+        upload_title: "Nahratie dokumentu"
+        upload_description: "Kliknite na Nový dokument v ľavom menu, pretiahnite súbor do vyznačenej plochy alebo ho vyberte z počítača a kliknite na Nahrať a pokračovať. Podporované sú PDF, XML, kontajnery ASiC-E aj ďalšie typy súborov."
+        upload_screenshot_caption: "Nahratie nového dokumentu"
+        upload_screenshot_alt: "Stránka Nový dokument s plochou na pretiahnutie súboru a tlačidlom Nahrať a pokračovať"
+        detail_title: "Detail dokumentu"
+        detail_description: "Po nahratí sa otvorí detail dokumentu. Môžete si zobraziť jeho obsah (Zobraziť dokument), skontrolovať, kto ho už podpísal a akým podpisom (Zobraziť detaily ukáže certifikát a čas podpisu), stiahnuť podpísanú verziu alebo dokument zmazať. Pod tým vyberiete, čo chcete s dokumentom urobiť, a kliknete na Pokračovať."
+        detail_screenshot_caption: "Detail podpísaného dokumentu s ponukou akcií"
+        detail_screenshot_alt: "Detail dokumentu Čestné vyhlásenie.pdf s tlačidlami Stiahnuť a Zmazať, zoznamom Dokument už podpísali s menom podpisujúcej a typom podpisu a ponukou Vyberte akciu: Podpísať dokument, Poslať na podpis, Pridať časovú pečiatku a Pridať archívnu pečiatku"
+        actions_title: "Akcie pri dokumente"
         actions:
           sign:
-            label: "Podpísať"
-            description: "Podpíšte dokument vlastným kvalifikovaným podpisom cez aplikáciu Autogram alebo eIdentitu."
+            label: "Podpísať dokument"
+            description: "Podpíšete dokument sami. Postup je opísaný v časti Podpisovanie."
           request:
-            label: "Požiadať o podpis"
-            description: "Odošlite dokument iným osobám na podpis e-mailom — systém vytvorí balík a rozošle pozvánky."
+            label: "Poslať na podpis"
+            description: "Vytvorí z dokumentu balík, do ktorého pridáte adresátov. Postup je opísaný v časti Balíky."
           timestamp:
             label: "Pridať časovú pečiatku"
-            description: "Na dokument s existujúcim podpisom bez pečiatky môžete doplniť kvalifikovanú časovú pečiatku."
+            description: "Rozšíri podpisy na úroveň T pridaním kvalifikovanej časovej pečiatky. Ponúka sa pri podpísanom dokumente, ktorého podpisy ešte nemajú časovú pečiatku."
+          archive:
+            label: "Pridať archívnu pečiatku"
+            description: "Rozšíri podpisy na úroveň LTA pridaním archívnej časovej pečiatky, vďaka ktorej sa podpis dá overiť aj po skončení platnosti certifikátu. V organizáciách s archívom podpisov sa akcia volá Archivovať dokument."
           download:
             label: "Stiahnuť"
-            description: "Stiahnite podpísaný dokument do svojho zariadenia."
+            description: "Stiahne podpísaný dokument. V organizáciách s archívom podpisov nájdete v Histórii verzií aj predchádzajúce podpísané verzie."
           delete:
             label: "Zmazať"
-            description: "Natrvalo odstráňte dokument. Dokument, ktorý je súčasťou balíka, nie je možné zmazať samostatne."
-      bundles:
-        title: "Moje balíky"
-        intro: "Balík je kolekcia jedného alebo viacerých dokumentov odoslaných na podpis príjemcom. Tu nájdete všetky balíky, ktoré ste vy vytvorili."
-        lifecycle_title: "Postup pri vytváraní balíka"
-        lifecycle:
-          upload:
-            title: "Nahrajte dokument"
-            description: "Nahrajte PDF alebo iný súbor cez sekciu \"Nový dokument\". Po nahraní vyberte akciu \"Požiadať o podpis\"."
-          configure:
-            title: "Nastavte typ a formát podpisu"
-            description: "Zvoľte úroveň podpisu (bez/s časovou pečiatkou) a formát (PAdES, XAdES, CAdES, ASiC-E)."
-          recipients:
-            title: "Pridajte príjemcov"
-            description: "Zadajte e-mailové adresy osôb, ktoré majú dokument podpísať. Nastavte pravidlo podpisovania."
-          send:
-            title: "Odošlite"
-            description: "Príjemcovia dostanú e-mailovú notifikáciu s odkazom na podpísanie. Môžete tiež skopírovať odkaz ručne."
-          done:
-            title: "Stiahnite podpísané dokumenty"
-            description: "Po dokončení balíka si stiahnete podpísaný súbor priamo z detailu balíka."
-        states_title: "Stavy balíka"
-        states:
-          awaiting:
-            label: "Čaká na podpis"
-            description: "Balík bol odoslaný príjemcom, ale ešte nie všetci podpísali."
-            badge_class: "bg-yellow-100 text-yellow-800"
-            dot_class: "bg-yellow-500"
-          completed:
-            label: "Dokončený"
-            description: "Všetci požadovaní príjemcovia podpísali dokumenty v balíku."
-            badge_class: "bg-green-100 text-green-800"
-            dot_class: "bg-green-500"
-          declined:
-            label: "Odmietnutý"
-            description: "Aspoň jeden príjemca odmietol podpis."
-            badge_class: "bg-red-100 text-red-800"
-            dot_class: "bg-red-500"
-          no_recipients:
-            label: "Bez príjemcov"
-            description: "Balík bol vytvorený, ale zatiaľ neobsahuje žiadnych príjemcov."
-            badge_class: "bg-gray-100 text-gray-600"
-            dot_class: "bg-gray-400"
-        signing_rules_title: "Pravidlá podpisovania"
-        signing_rules:
-          all:
-            label: "Všetci musia podpísať"
-            description: "Balík je dokončený až keď podpíšu všetci pridaní príjemcovia."
-          any:
-            label: "Stačí jeden podpis"
-            description: "Balík je dokončený hneď ako podpíše ktorýkoľvek jeden príjemca."
-          threshold:
-            label: "Minimálny počet podpisov"
-            description: "Môžete nastaviť presný počet príjemcov, ktorí musia podpísať, aby bol balík považovaný za dokončený."
-        public_link_title: "Verejný odkaz na podpis"
-        public_link_description: "Pre každý balík môžete vygenerovať verejný odkaz, ktorý umožní podpísanie komukoľvek — bez nutnosti byť pridaný ako príjemca."
-      received:
-        title: "Prijaté balíky"
-        intro: "V sekcii \"Prijaté balíky\" nájdete všetky balíky, na ktorých podpisovanie ste boli pozvaní — či už e-mailom alebo cez verejný odkaz."
-        states_title: "Vaše stavy v prijatom balíku"
-        states:
-          awaiting:
-            label: "Čaká na podpis"
-            description: "Ste pozvaní a ešte ste nepodpísali."
-            badge_class: "bg-yellow-100 text-yellow-800"
-            dot_class: "bg-yellow-500"
-          signed:
-            label: "Podpísané"
-            description: "Úspešne ste podpísali dokumenty v tomto balíku."
-            badge_class: "bg-green-100 text-green-800"
-            dot_class: "bg-green-500"
-          declined:
-            label: "Odmietnuté"
-            description: "Odmietli ste podpísať dokumenty v tomto balíku."
-            badge_class: "bg-red-100 text-red-800"
-            dot_class: "bg-red-500"
-          superseded:
-            label: "Nahradené"
-            description: "Balík bol dokončený bez vášho podpisu — napr. na základe pravidla \"stačí jeden\"."
-            badge_class: "bg-gray-100 text-gray-600"
-            dot_class: "bg-gray-400"
-        decline_title: "Odmietnutie podpisu"
-        decline_description: "Pri podpisovaní môžete podpis odmietnuť. Odosielateľ balíka dostane e-mailovú notifikáciu o odmietnutí."
+            description: "Natrvalo odstráni dokument. Dokument, ktorý je súčasťou balíka, nie je možné zmazať samostatne – zmazať môžete celý balík."
+        actions_note: "Bez prihlásenia je dostupná iba akcia Podpísať dokument. Časové a archívne pečiatky sa započítavajú do mesačného limitu časových pečiatok."
+        verify_title: "Overenie podpisu"
+        verify_description: "Ak chcete iba zistiť, kto dokument podpísal a či je podpis platný, nahrajte ho cez Nový dokument alebo rýchlu akciu Overiť podpis. Výsledok overenia sa zobrazí na detaile dokumentu. Dokument potom môžete zmazať."
       signing:
-        screenshot_alt: "Krok Vyberte podpisovú aplikáciu: hore zvolený typ občianskeho preukazu s možnosťou Zmeniť výber, pod ním voľby Autogram na počítači (vybraná), Autogram v mobile a eIdentita a tlačidlá Späť a Pokračovať na podpisovanie"
         title: "Podpisovanie dokumentov"
-        intro: "Pri podpisovaní dokumentu vyberiete úroveň podpisu a formát. Následne si zvolíte podporovanú podpisovú aplikáciu."
-        signature_levels_title: "Úrovne podpisu"
+        intro: "Kvalifikovaný elektronický podpis (KEP) vytvoríte občianskym preukazom s čipom alebo iným kvalifikovaným zariadením a podpisovou aplikáciou. Portál vás celým postupom prevedie."
+        steps_title: "Postup podpisovania"
+        steps:
+          action:
+            title: "Vyberte akciu Podpísať dokument"
+            description: "Na detaile dokumentu nechajte vybranú akciu Podpísať dokument a kliknite na Pokračovať. Dokument, ktorý vám niekto poslal, otvoríte odkazom z e-mailu alebo v sekcii Prijaté na podpis."
+          level:
+            title: "Zvoľte typ podpisu"
+            description: "Vyberte Vlastnoručný podpis alebo Osvedčený podpis (s časovou pečiatkou). V Rozšírených nastaveniach môžete zmeniť formát podpisu. Ak podpisujete dokument na žiadosť odosielateľa, typ a formát už nastavil on."
+          device:
+            title: "Vyberte, čím budete podpisovať"
+            description: "Pri prvom podpise vyberiete svoj doklad alebo zariadenie a potvrdíte, že poznáte BOK alebo PIN a máte vydané podpisové certifikáty. Portál si výber zapamätá a nabudúce ho len zobrazí s možnosťou Zmeniť výber."
+          app:
+            title: "Vyberte podpisovú aplikáciu"
+            description: "Ponuka aplikácií sa prispôsobí vášmu dokladu. Staršie občianske preukazy a čipové karty vyžadujú počítač s čítačkou kariet a Autogram na počítači."
+          finish:
+            title: "Podpíšte a stiahnite dokument"
+            description: "Podpis dokončíte v aplikácii zadaním podpisového PIN-u. Portál podpísaný dokument automaticky uloží a stiahnete ho tlačidlom Stiahnuť."
+        parameters_screenshot_caption: "Výber typu podpisu s otvorenými Rozšírenými nastaveniami"
+        parameters_screenshot_alt: "Krok Podpísať dokument: typ podpisu Vlastnoručný podpis alebo Osvedčený podpis, otvorené Rozšírené nastavenia s formátom podpisu PAdES a povolenými metódami podpisu a tlačidlá Späť a Pokračovať na podpisovanie"
+        qscd_screenshot_caption: "Výber dokladu alebo zariadenia"
+        qscd_screenshot_alt: "Stránka Čím budete podpisovať? so štyrmi typmi slovenského občianskeho preukazu podľa dátumu vydania s označením kompatibility a so skupinami Doklady o povolení na pobyt, Český občiansky preukaz a Kvalifikované čipové karty a USB tokeny"
+        apps_screenshot_caption: "Výber podpisovej aplikácie"
+        apps_screenshot_alt: "Stránka Vyberte podpisovú aplikáciu so zvoleným občianskym preukazom a možnosťami Autogram na počítači, Autogram v mobile, eIdentita a Podpisuj alebo iné samostatné aplikácie"
+        signature_levels_title: "Typy podpisu"
         signature_levels:
           baseline_b:
-            label: "Bez časovej pečiatky (BASELINE_B)"
-            description: "Kvalifikovaný elektronický podpis bez časovej pečiatky. Podľa Občianskeho zákonníka je ekvivalentom vlastnoručného podpisu."
+            label: "Vlastnoručný podpis (BASELINE_B)"
+            description: "Kvalifikovaný elektronický podpis bez časovej pečiatky. Podľa Občianskeho zákonníka je rovnocenný vlastnoručnému podpisu."
           baseline_t:
-            label: "S časovou pečiatkou (BASELINE_T)"
-            description: "Kvalifikovaný elektronický podpis s časovou pečiatkou. De facto ekvivalent overeného podpisu. Odporúčané pre dokumenty s dlhšou platnosťou."
-        formats_title: "Formáty podpisov"
+            label: "Osvedčený podpis (BASELINE_T)"
+            description: "Kvalifikovaný elektronický podpis s kvalifikovanou časovou pečiatkou. De facto ide o ekvivalent úradne osvedčeného podpisu. Odporúčame ho pre dokumenty s dlhšou platnosťou."
+        formats_title: "Formáty podpisu"
+        formats_intro: "Formát zmeníte v Rozšírených nastaveniach. Ak dokument už obsahuje podpisy, ponúkne sa iba formát, ktorý je s nimi kompatibilný. Dokument s viacerými súbormi sa vždy podpisuje ako jeden kontajner ASiC-E."
         formats:
           pades:
             label: "PAdES"
-            description: "Podpis vložený priamo do PDF súboru. Ideálne pre bežné PDF dokumenty — podpísaný výstup zostane .pdf."
+            description: "Podpis vložený priamo do PDF súboru – podpísaný dokument zostane PDF. Predvolený formát pre PDF dokumenty."
           xades:
-            label: "XAdES + ASiC-E"
-            description: "Podpis pre XML dokumenty (napr. slovenské eFormuláre). Pri potrebe kontajnera môžete použiť ASiC-E výstup."
+            label: "XAdES v ASiC-E kontajneri"
+            description: "Výsledkom je kontajner ASiC-E (.asice), ktorý obsahuje dokument aj podpis. Vhodný najmä pre XML dokumenty, napríklad slovenské elektronické formuláre."
           cades:
-            label: "CAdES + ASiC-E"
-            description: "Podpis vytvorí obalový .p7s súbor. Pri potrebe kontajnera môžete použiť ASiC-E výstup pre ľubovoľný formát súboru."
-        methods_title: "Metódy podpisovania"
+            label: "CAdES v ASiC-E kontajneri"
+            description: "Výsledkom je tiež kontajner ASiC-E, podpis je vo formáte CMS. Hodí sa pre ľubovoľný typ súboru."
+        allowed_methods_title: "Povolené metódy podpisu"
+        allowed_methods_intro: "Keď posielate dokument na podpis, v Rozšírených nastaveniach určíte, akými metódami môžu adresáti podpisovať."
+        allowed_methods:
+          qes:
+            label: "Kvalifikovaný elektronický podpis"
+            description: "Podpis občianskym preukazom alebo iným kvalifikovaným zariadením cez podpisové aplikácie."
+          ades:
+            label: "Jednoduchý elektronický podpis"
+            description: "Adresát sa overí jednorazovým kódom zaslaným SMS alebo e-mailom a portál vytvorí podpis s evidenčným záznamom (Overené AdES podpisovanie)."
+          standalone_qes:
+            label: "Podpisuj alebo iné samostatné aplikácie"
+            description: "Adresát si stiahne dokument, podpíše ho kvalifikovaným podpisom vo vlastnej aplikácii na počítači a nahrá ho späť. Pre adresátov je táto metóda predvolene vypnutá."
+        allowed_methods_note: "Prevádzkovateľ portálu môže povoliť aj ďalšie metódy, napríklad vizuálnu pečiatku v PDF alebo sken ručne podpísaného dokumentu."
+        methods_title: "Podpisové aplikácie"
         methods:
           autogram_desktop:
             label: "Autogram na počítači"
-            description: "Desktopová aplikácia pre Windows, macOS a Linux, ktorá komunikuje s čipovou kartou alebo eID zariadením zapojeným do počítača."
+            description: "Bezplatná aplikácia pre Windows, macOS a Linux. Podpisuje občianskym preukazom alebo kvalifikovanou čipovou kartou v čítačke kariet a vie podpísať aj viac dokumentov naraz."
             links:
               download:
                 label: "Stiahnuť Autogram"
                 url: "https://autogram.slovensko.digital"
           autogram_mobile:
-            label: "Autogram v mobile (AVM)"
-            description: "Mobilná aplikácia pre iOS a Android. Podpisovanie cez smartfón pomocou mobilného eID."
+            label: "Autogram v mobile"
+            description: "Bezplatná open-source aplikácia pre Android a iOS. Podpisuje občianskym preukazom s NFC čipom, ktorý priložíte k telefónu. Na počítači naskenujete QR kód, v telefóne otvoríte odkaz."
             links:
               info:
                 label: "Viac info a stiahnutie"
                 url: "https://autogram.slovensko.digital"
           eidentita:
             label: "eIdentita"
-            description: "Slovenská štátna aplikácia pre mobilné podpisovanie. Dostupná na App Store a Google Play."
+            description: "Štátna mobilná aplikácia pre Android a iOS. Podpisuje občianskym preukazom s NFC čipom. Na počítači naskenujete QR kód, v telefóne otvoríte odkaz."
             links:
               ios:
                 label: "Stiahnuť z App Store"
@@ -1875,94 +1895,260 @@ sk:
                 url: "https://play.google.com/store/apps/details?id=sk.minv.eidentita"
           podpisuj:
             label: "Podpisuj alebo iné samostatné aplikácie"
-            description: "Dostupné len pri podpisovaní jednotlivých dokumentov bez časovej pečiatky a iba na počítači. Stiahnite si dokument, podpíšte ho vo vašej preferovanej aplikácii (napr. Podpisuj) priamo na počítači a podpísaný dokument nahrajte späť."
+            description: "Dostupné iba na počítači, pre dokumenty s jedným súborom a pre podpis bez časovej pečiatky. Stiahnete dokument, podpíšete ho vo svojej aplikácii (napr. Podpisuj) a podpísaný súbor nahráte späť."
             links:
               download:
                 label: "Stiahnuť Podpisuj"
                 url: "https://www.podpisuj.sk/download"
-        qualified_signing_title: "Kvalifikované podpisovanie — čo vás čaká"
-        qualified_signing_intro: "Pred samotným podpisom vás onboarding prevedie niekoľkými kontrolami, aby ste mohli úspešne vytvoriť kvalifikovaný elektronický podpis."
+        third_party_note: "Autogram v mobile a eIdentita sú externé aplikácie s vlastnými podmienkami používania a zásadami ochrany osobných údajov."
+        more_title: "Ďalšie možnosti podpisovania"
+        more:
+          batch:
+            label: "Hromadné podpisovanie"
+            description: "Ak balík obsahuje viac dokumentov, na počítači ich podpíšete naraz tlačidlom Podpísať všetko cez Autogram na počítači – podpis potvrdíte iba raz. Na mobile sa dokumenty podpisujú jednotlivo."
+          ades:
+            label: "Overené AdES podpisovanie"
+            description: "Ak odosielateľ povolí jednoduchý elektronický podpis, adresát môže podpísať aj bez občianskeho preukazu. Overí sa jednorazovým kódom, ktorý mu príde SMS na mobilné číslo zadané odosielateľom (inak e-mailom), a portál vytvorí podpis na serveri. K dokumentu pripojí referenciu na evidenčný záznam s časom a spôsobom overenia. Nejde o kvalifikovaný elektronický podpis a metóda je dostupná iba adresátom balíka."
+          timestamps:
+            label: "Časová a archívna pečiatka"
+            description: "K podpísanému dokumentu môžete pridať kvalifikovanú časovú pečiatku (úroveň T) alebo archívnu časovú pečiatku (úroveň LTA), ktorá umožní overiť podpis aj po skončení platnosti certifikátov. Pečiatky sa započítavajú do mesačného limitu časových pečiatok – rovnako ako osvedčený podpis vytvorený cez Autogram v mobile."
+          fields:
+            label: "Viditeľné podpisové polia v PDF"
+            description: "Ak balík obsahuje jeden ešte nepodpísaný PDF dokument s formátom PAdES, môžete každému adresátovi pripraviť viditeľné podpisové pole. V detaile balíka kliknite pri dokumente na Pripraviť viditeľné podpisové polia, pre každého adresáta umiestnite pole v náhľade a kliknite na Dokončiť a vygenerovať podpisový PDF. Adresát pred podpisom doplní do svojho poľa meno, obrázok alebo nakreslený podpis."
+        evidence_verification_html: "Údaje k referencii podpisu vytvoreného overeným AdES podpisovaním si môže ktokoľvek overiť na stránke %{link}."
+        evidence_verification_link: "Overiť referenciu podpisu"
+        qualified_signing_title: "Doklady a zariadenia na kvalifikované podpisovanie"
+        qualified_signing_intro: "Pred prvým kvalifikovaným podpisom vás portál prevedie krátkou kontrolou:"
         qualified_signing_checks:
-          qscd: "Výber konkrétneho QSCD zariadenia (najčastejšie slovenské eID, ale aj doklad o pobyte, český občiansky preukaz, kvalifikovaná čipová karta alebo USB token)."
-          pin: "Potvrdenie, že poznáte bezpečnostné kódy (BOK/PIN/KEP PIN podľa typu dokladu)."
+          qscd: "Výber dokladu alebo zariadenia, ktorým budete podpisovať (najčastejšie slovenský občiansky preukaz, ale aj doklad o pobyte, český občiansky preukaz, kvalifikovaná čipová karta alebo USB token)."
+          pin: "Potvrdenie, že poznáte bezpečnostné kódy (BOK alebo PIN podľa typu dokladu)."
           cert: "Potvrdenie, že máte na doklade vydané podpisové certifikáty."
-        qscd_cards_title: "Podporované QSCD karty a kompatibilita"
+        qscd_cards_title: "Podporované doklady a zariadenia"
+        qscd_support:
+          mobile: "Mobil aj počítač (NFC)"
+          desktop: "Iba počítač"
+          unsupported: "Nepodporované"
         qscd_cards:
           eid_2024:
             label: "Občiansky preukaz vydaný po 18.12.2024"
-            mode: "Mobil + desktop (NFC)"
-            badge_class: "bg-green-100 text-green-800"
-            description: "Podporuje mobilné podpisovanie cez NFC (Autogram v mobile/eIdentita) aj podpisovanie na počítači."
+            support: "mobile"
+            description: "Podporuje mobilné podpisovanie cez NFC (Autogram v mobile, eIdentita) aj podpisovanie na počítači."
           eid_2022:
             label: "Občiansky preukaz vydaný po 1.12.2022"
-            mode: "Mobil + desktop (NFC)"
-            badge_class: "bg-green-100 text-green-800"
+            support: "mobile"
             description: "Podporuje mobilné podpisovanie cez NFC aj podpisovanie na počítači."
           dpb_2023:
             label: "Doklad o povolení na pobyt vydaný po 18.10.2023"
-            mode: "Mobil + desktop (NFC)"
-            badge_class: "bg-green-100 text-green-800"
+            support: "mobile"
             description: "Podporuje mobilné podpisovanie cez NFC aj podpisovanie na počítači."
           eid_2021:
             label: "Občiansky preukaz vydaný po 21.6.2021"
-            mode: "Iba desktop"
-            badge_class: "bg-yellow-100 text-yellow-800"
-            description: "Vyžaduje počítač, fyzickú čítačku kariet a desktop aplikáciu. Mobilné podpisovanie nie je dostupné."
+            support: "desktop"
+            description: "Vyžaduje počítač, čítačku kariet a Autogram na počítači. Mobilné podpisovanie nie je dostupné."
           dpb_2020:
             label: "Doklad o povolení na pobyt vydaný po 10.7.2020"
-            mode: "Iba desktop"
-            badge_class: "bg-yellow-100 text-yellow-800"
-            description: "Vyžaduje počítač, fyzickú čítačku kariet a desktop aplikáciu. Mobilné podpisovanie nie je dostupné."
-          eid_2013:
-            label: "Občiansky preukaz vydaný pred 21.6.2021"
-            mode: "Legacy — nepodporované"
-            badge_class: "bg-red-100 text-red-800"
-            description: "Tento typ karty už nie je kompatibilný s kvalifikovaným podpisovaním."
-          dpb_2014:
-            label: "Doklad o povolení na pobyt vydaný pred 10.7.2020"
-            mode: "Legacy — nepodporované"
-            badge_class: "bg-red-100 text-red-800"
-            description: "Tento typ karty už nie je kompatibilný s kvalifikovaným podpisovaním."
+            support: "desktop"
+            description: "Vyžaduje počítač, čítačku kariet a Autogram na počítači. Mobilné podpisovanie nie je dostupné."
           cz_eid_2018:
             label: "Český občiansky preukaz vydaný od 1.7.2018"
-            mode: "Iba desktop"
-            badge_class: "bg-yellow-100 text-yellow-800"
+            support: "desktop"
             description: "Vyžaduje kvalifikovaný certifikát nahraný v čipe od českej certifikačnej autority, čítačku kariet a Autogram na počítači."
           tokens:
             label: "Kvalifikované čipové karty a USB tokeny (I.CA, MONET+, Thales/Gemalto, iné PKCS#11)"
-            mode: "Iba desktop"
-            badge_class: "bg-yellow-100 text-yellow-800"
+            support: "desktop"
             description: "Vyžaduje Autogram na počítači a nainštalovaný ovládač zariadenia."
+          eid_2013:
+            label: "Občiansky preukaz vydaný pred 21.6.2021"
+            support: "unsupported"
+            description: "Tento typ preukazu už nie je kompatibilný s kvalifikovaným podpisovaním. Na elektronické podpisovanie potrebujete nový občiansky preukaz."
+          dpb_2014:
+            label: "Doklad o povolení na pobyt vydaný pred 10.7.2020"
+            support: "unsupported"
+            description: "Tento typ dokladu už nie je kompatibilný s kvalifikovaným podpisovaním."
           cz_eid_2012:
             label: "Český občiansky preukaz vydaný pred 1.7.2018"
-            mode: "Legacy — nepodporované"
-            badge_class: "bg-red-100 text-red-800"
+            support: "unsupported"
             description: "Do tohto preukazu nie je možné nahrať kvalifikovaný certifikát."
-        screenshot_title: "Ukážka obrazovky"
-        screenshot_description: "Odporúčame sem doplniť screenshot výberu aplikácie a kroku podpisovania dokumentu."
-        screenshot_file_hint: "Súbor: /public/docs/screenshots/signing-app-selection.png"
-        screenshot_placeholder: "Miesto pre screenshot podpisovania"
+      bundles:
+        title: "Balíky"
+        intro: "Balík slúži na posielanie dokumentov na podpis. Obsahuje jeden alebo viac dokumentov, zoznam adresátov a pravidlo, koľko z nich musí podpísať. Odosielateľom je vždy vaša organizácia. V sekcii Balíky nájdete všetky balíky organizácie."
+        screenshot_caption: "Zoznam balíkov"
+        screenshot_alt: "Zoznam Balíky dokumentov s filtrom Stav a Zoradiť a štyrmi balíkmi v stavoch Nepodpísané, Čaká na podpis, Dokončené a Odmietnuté s počtom podpisov, dátumom a počtom dokumentov"
+        lifecycle_title: "Ako poslať dokument na podpis"
+        lifecycle:
+          upload:
+            title: "Nahrajte dokument a zvoľte Poslať na podpis"
+            description: "Na detaile dokumentu vyberte akciu Poslať na podpis a kliknite na Pokračovať."
+          configure:
+            title: "Nastavte typ podpisu"
+            description: "Vyberte Vlastnoručný alebo Osvedčený podpis. V Rozšírených nastaveniach zvolíte formát a povolené metódy podpisu. Po potvrdení sa vytvorí balík a otvorí sa jeho detail."
+          recipients:
+            title: "Pridajte adresátov"
+            description: "Zadajte e-mail adresáta a kliknite na Pridať. Mobilné číslo vyplňte, ak sa má adresát pri jednoduchom elektronickom podpise overiť SMS kódom."
+          send:
+            title: "Odošlite pozvánky"
+            description: "Pri adresátovi kliknite na Odoslať e-mail – pozvánka sa po pridaní neodošle automaticky. Odkaz na podpisovanie môžete adresátovi poslať aj sami (Kopírovať odkaz na podpisovanie)."
+          done:
+            title: "Sledujte stav a stiahnite podpísané dokumenty"
+            description: "O podpisoch, odmietnutiach a dokončení balíka vás upozorníme e-mailom. Podpísané dokumenty stiahnete z detailu balíka."
+        detail_screenshot_caption: "Detail balíka s dokumentmi a adresátmi"
+        detail_screenshot_alt: "Detail balíka Zmluva o dielo s tlačidlami Upraviť, Podpísať a Zmazať, poznámkou pre adresátov, dvoma dokumentmi s podpisom, tlačidlami Stiahnuť podpísaný dokument, Pridať časovú pečiatku a Pridať archívnu pečiatku a časťou Poslať na podpis s pravidlom podpisovania, dvoma adresátmi a formulárom na pridanie adresáta"
+        manage_title: "Správa balíka"
+        manage:
+          edit:
+            label: "Upraviť"
+            description: "Zmeníte názov balíka, správu pre adresátov (zobrazí sa v pozvánke aj pri podpisovaní), pravidlo podpisovania, verejný odkaz a notifikácie pre autora."
+          sign:
+            label: "Podpísať"
+            description: "Dokumenty balíka podpíšete aj vy ako odosielateľ."
+          remove:
+            label: "Odstrániť adresáta"
+            description: "Adresátovi, ktorý ešte nepodpísal, stiahnete požiadavku na podpis a jeho odkaz prestane fungovať."
+          delete:
+            label: "Zmazať"
+            description: "Natrvalo zmaže balík aj s jeho dokumentmi."
+        settings_screenshot_caption: "Úprava balíka"
+        settings_screenshot_alt: "Formulár Upraviť balík s poliami Názov a Správa pre adresátov, výberom pravidla podpisovania a voľbami Verejný odkaz na podpisovanie a Notifikácie pre autora"
+        states_title: "Stavy balíka"
+        states:
+          awaiting:
+            label: "Čaká na podpis"
+            description: "Niektorý adresát ešte nepodpísal."
+          completed:
+            label: "Dokončené"
+            description: "Podpísali všetci adresáti, ktorých vyžaduje pravidlo podpisovania."
+          declined:
+            label: "Odmietnuté"
+            description: "Aspoň jeden adresát odmietol podpis."
+          no_recipients:
+            label: "Nepodpísané"
+            description: "Balík zatiaľ nemá adresátov."
+        recipient_states_title: "Stavy adresátov"
+        recipient_states:
+          pending:
+            label: "Čaká na podpis"
+            description: "Adresát ešte nepodpísal."
+          signed:
+            label: "Podpísané"
+            description: "Adresát podpísal dokumenty balíka."
+          declined:
+            label: "Odmietnuté"
+            description: "Adresát podpis odmietol."
+          superseded:
+            label: "Podpis nie je potrebný"
+            description: "Balík bol podľa pravidla podpisovania dokončený bez podpisu tohto adresáta."
+          withdrawn:
+            label: "Stiahnuté"
+            description: "Odosielateľ požiadavku na podpis stiahol."
+        signing_rules_title: "Pravidlá podpisovania"
+        signing_rules:
+          all:
+            label: "Všetci adresáti musia podpísať"
+            description: "Balík je dokončený, keď podpíšu všetci adresáti."
+          any:
+            label: "Stačí podpis jedného adresáta"
+            description: "Balík je dokončený hneď po prvom podpise. Ostatným adresátom sa zobrazí, že ich podpis už nie je potrebný."
+          threshold:
+            label: "Určitý počet adresátov musí podpísať"
+            description: "Nastavíte, koľko adresátov musí podpísať, aby bol balík dokončený."
+        public_link_title: "Verejný odkaz na podpisovanie"
+        public_link_description: "V úprave balíka môžete zapnúť verejný odkaz. Ktokoľvek, kto ho má, potom môže dokumenty v balíku podpísať bez pozvánky. Odkaz skopírujete z detailu balíka."
+        notifications_title: "Notifikácie"
+        notifications_description: "Ak sú zapnuté Notifikácie pre autora, vlastníci organizácie dostávajú e-maily o podpisoch, odmietnutiach a dokončení balíka – okrem toho, kto udalosť sám spôsobil."
+      received:
+        title: "Prijaté na podpis"
+        intro: "Keď vás niekto požiada o podpis, dostanete e-mail s odkazom. Odkaz funguje aj bez prihlásenia. Ak máte v portáli účet s rovnakým e-mailom, balík nájdete aj v sekcii Prijaté na podpis a na stránke Domov."
+        screenshot_caption: "Prijaté balíky"
+        screenshot_alt: "Zoznam Prijaté na podpis s filtrom Stav a Zoradiť a balíkmi od rôznych odosielateľov, niektoré s označením Externý odosielateľ, v stavoch Čaká na môj podpis, Podpísané mnou, Podpis nie je potrebný a Odmietnuté"
+        states_title: "Stavy prijatých balíkov"
+        states:
+          awaiting:
+            label: "Čaká na môj podpis"
+            description: "Ešte ste nepodpísali."
+          signed:
+            label: "Podpísané mnou"
+            description: "Dokumenty balíka ste podpísali."
+          declined:
+            label: "Odmietnuté"
+            description: "Podpis ste odmietli."
+          superseded:
+            label: "Podpis nie je potrebný"
+            description: "Balík bol dokončený bez vášho podpisu, napríklad podľa pravidla Stačí podpis jedného adresáta."
+        external_description: "Balíky od organizácií, ktorých nie ste členom, sú označené ako Externý odosielateľ. Pred podpisom skontrolujte, kto vám dokument posiela."
+        sign_title: "Podpísanie prijatého balíka"
+        sign_description: "Po otvorení balíka vidíte odosielateľa, jeho poznámku, dokumenty a adresátov, od ktorých sa podpis čaká. Vyberte spôsob podpisu – Elektronické podpisovanie alebo Overené AdES podpisovanie, ak ho odosielateľ povolil – a kliknite na Pokračovať. Ak balík obsahuje viac dokumentov, na počítači ich môžete podpísať naraz."
+        sign_screenshot_caption: "Podpisovanie prijatého balíka"
+        sign_screenshot_alt: "Stránka Dostali ste dokument na podpis s odosielateľom, poznámkou od odosielateľa, dokumentom, zoznamom Čaká na podpis od a výberom spôsobu podpisu Elektronické podpisovanie alebo Overené AdES podpisovanie, s tlačidlami Odmietnuť a Pokračovať"
+        decline_title: "Odmietnutie podpisu"
+        decline_description: "Tlačidlom Odmietnuť podpis odmietnete a odosielateľ dostane e-mail. Kým balík nie je dokončený, rozhodnutie môžete zmeniť tlačidlom Prijať znova. Ak odosielateľ požiadavku stiahne, odkaz na podpisovanie prestane fungovať."
+      archive:
+        title: "Archív podpisov"
+        intro: "Archív podpisov je dostupný v organizáciách so zapnutou funkciou Archív podpisov. Pri každom podpise si portál uloží validačné metadáta podpísaného dokumentu: kto ho podpísal, úroveň podpisu, odtlačok SHA-256 a dátum, do ktorého je podpis overiteľný. Ak sa tento dátum blíži, stránka Domov vás upozorní."
+        screenshot_caption: "Archív podpisov"
+        screenshot_alt: "Archív podpisov s filtrom Stav a Zoradiť a dvoma záznamami s typom podpisu, verziou, odtlačkom SHA-256 a podpisujúcim, v stavoch Vyžaduje pozornosť a V poriadku, s dátumom exspirácie a odkazmi Zobraziť dokument, Obnoviť do LTA a Zmazať"
+        states_title: "Stavy záznamov"
+        states:
+          healthy:
+            label: "V poriadku"
+            description: "Podpis zostane overiteľný ešte viac ako dva mesiace."
+          expiring:
+            label: "Vyžaduje pozornosť"
+            description: "Overiteľnosť podpisu skončí do dvoch mesiacov."
+          expired:
+            label: "Exspirované"
+            description: "Overiteľnosť podpisu už skončila."
+          unknown:
+            label: "Neznáme"
+            description: "Dátum exspirácie sa nepodarilo zistiť."
+        actions_title: "Akcie pri zázname"
+        actions:
+          refresh:
+            label: "Obnoviť do LTA"
+            description: "Vytvorí novú verziu dokumentu s archívnou časovou pečiatkou a predĺži tak overiteľnosť podpisov."
+          view:
+            label: "Zobraziť dokument"
+            description: "Otvorí detail dokumentu. V Histórii verzií nájdete všetky jeho podpísané verzie."
+          delete:
+            label: "Zmazať"
+            description: "Odstráni iba uložené metadáta – dokument zostane zachovaný."
       account:
-        screenshot_alt: "Sekcia Nebezpečná zóna v nastaveniach: Zrušiť môj účet, pole na napísanie potvrdzujúcej frázy a červené tlačidlo Zmazať účet"
-        title: "Nastavenia účtu"
-        intro: "V nastaveniach účtu (ikona ozubeného kolieska v ľavom menu) spravujete základné údaje profilu a bezpečnostné možnosti."
+        title: "Nastavenia"
+        intro: "Nastavenia otvoríte v ľavom menu. Obsahujú váš používateľský účet a nastavenia organizácie, v ktorej práve pracujete."
+        account_title: "Účet používateľa"
         items:
           name:
             label: "Meno"
-            description: "Vaše zobrazované meno, ktoré vidia odosielatelia a príjemcovia v notifikačných e-mailoch."
+            description: "Zobrazuje sa adresátom a v e-mailových notifikáciách."
           email:
             label: "E-mail"
-            description: "Prihlasovací e-mail je v nastaveniach iba zobrazený (read-only) a nie je možné ho meniť."
-          login:
-            label: "Spôsoby prihlásenia"
-            description: "Prihlásenie je možné cez Google OAuth alebo jednorazový odkaz (magic link) zaslaný na e-mail."
+            description: "Slúži na prihlásenie a v nastaveniach ho nemožno zmeniť."
+          language:
+            label: "Jazyk"
+            description: "Slovenčinu alebo angličtinu prepnete v ľavom menu dole."
           delete_account:
             label: "Zmazať účet"
-            description: "V sekcii Danger Zone môžete účet natrvalo zmazať po potvrdení bezpečnostnej frázy."
-        screenshot_title: "Ukážka obrazovky"
-        screenshot_description: "Odporúčame sem doplniť screenshot stránky nastavení s vyznačenou sekciou Danger Zone."
-        screenshot_file_hint: "Súbor: /public/docs/screenshots/account-danger-zone.png"
-        screenshot_placeholder: "Miesto pre screenshot nastavení účtu"
+            description: "V Nebezpečnej zóne napíšte potvrdzovaciu frázu a kliknite na Zmazať účet. Účet nemožno zmazať, kým ste jediným vlastníkom organizácie, ktorá má ďalších členov."
+        account_screenshot_caption: "Nastavenia účtu"
+        account_screenshot_alt: "Sekcia Účet používateľa s poliami Meno a E-mail a tlačidlom Aktualizovať a Nebezpečná zóna s poľom na potvrdzovaciu frázu a tlačidlom Zmazať účet"
+        organization_title: "Organizácia"
+        organization_items:
+          plan:
+            label: "Názov a plán"
+            description: "Názov organizácie a jej plán mení iba administrátor portálu. Názov osobnej organizácie sa odvodzuje od vášho mena alebo e-mailu."
+          api:
+            label: "Verejný kľúč API tokenu"
+            description: "Vlastník tu nastaví verejný kľúč na overovanie API tokenov. Pole je dostupné, ak má organizácia zapnutý API prístup."
+          usage:
+            label: "Využitie plánu"
+            description: "Čerpanie limitov, doba uchovávania dokumentov a maximálna veľkosť dokumentu."
+          members:
+            label: "Členovia"
+            description: "Vlastník pozve člena zadaním e-mailu a roly (Člen alebo Vlastník) a môže členov odstrániť. Pozvaný dostane e-mail, a ak ešte nemá účet, vytvorí sa mu. Plán Basic umožňuje iba jedného používateľa."
+          leave:
+            label: "Opustiť organizáciu"
+            description: "Ak ste členom viacerých organizácií, organizáciu môžete opustiť. Posledný vlastník ju opustiť nemôže."
+        organization_screenshot_caption: "Nastavenia organizácie s plánom PRO"
+        organization_screenshot_alt: "Sekcia Organizácia s označením Plán PRO, poľami Názov organizácie a Verejný kľúč API tokenu, Využitím plánu, zoznamom členov s rolami Vlastník a Člen a formulárom Pozvať člena"
       federation:
         title: "Federácia medzi portálmi"
         intro: "Autogram Portal dokáže odovzdávať požiadavky na podpis medzi inštanciami portálu. Pôvodný portál zostáva vlastníkom balíka, zatiaľ čo domáci portál adresáta pomáha s lokálnym prihlásením a prevzatím požiadavky."
@@ -1976,7 +2162,7 @@ sk:
             description: "Portál, na ktorom sa adresát preferuje prihlasovať. Vie zobraziť náhľad požiadavky z iného portálu a prevziať ju v mene lokálne prihláseného používateľa."
           trust:
             label: "Zoznam dôveryhodných portálov"
-            description: "Administrátorom spravovaný zoznam externých inštancií Autogram Portálu používaný vtedy, keď odosielateľ cielene priraďuje adresáta na iný portál."
+            description: "Administrátorom spravovaný zoznam externých inštancií Autogram Portalu používaný vtedy, keď odosielateľ cielene priraďuje adresáta na iný portál."
         flow_title: "Ako celý proces funguje"
         flow:
           setup:
@@ -2032,7 +2218,7 @@ sk:
         current_scope_description: "Federácia dnes umožňuje adresátovi vložiť a prevziať cudziu požiadavku na vlastnom portáli aj vtedy, keď pôvodný portál nebol lokálne vopred nastavený, ale samotné podpisovanie sa stále dokončuje na pôvodnom portáli."
       integration:
         title: "API a SDK"
-        intro: "Ak chcete Autogram Portal integrovať do vlastnej aplikácie, použite SDK ukážku a API dokumentáciu."
+        intro: "Organizácie so zapnutým API prístupom môžu Autogram Portal prepojiť s vlastnou aplikáciou. API prijíma JWT tokeny podpísané vaším kľúčom: verejný kľúč vloží vlastník v Nastaveniach organizácie a v tokene uvediete `sub` = ID organizácie."
         links:
           sdk_example:
             label: "SDK príklad"
@@ -2205,7 +2391,7 @@ sk:
       subject: "Vaše dokumenty boli podpísané"
       badge: "Podpísané"
       title: "Váš dokument bol podpísaný"
-      message: "Podpísaný dokument nájdete v Autogram Portáli."
+      message: "Podpísaný dokument nájdete v Autogram Portali."
       view_contract: "Zobraziť podpísaný dokument"
     bundle_contract_signed:
       subject: "Dokument v balíku bol podpísaný"
@@ -2217,14 +2403,14 @@ sk:
       subject: "Váš balík dokumentov bol podpísaný"
       badge: "Dokončené"
       title: "Všetky dokumenty v balíku sú podpísané"
-      message: "Balík %{bundle_name} je dokončený. Podpísané dokumenty nájdete v Autogram Portáli."
+      message: "Balík %{bundle_name} je dokončený. Podpísané dokumenty nájdete v Autogram Portali."
       documents: "Podpísané dokumenty (%{count})"
       view_bundle: "Zobraziť balík"
     signature_requested:
       subject: "Dokumenty na podpis"
       badge: "Žiadosť o podpis"
       title: "%{author_name} vás žiada o podpis"
-      message: "Dokumenty podpíšete online v Autogram Portáli. Po kliknutí na tlačidlo vás systém prevedie jednotlivými krokmi."
+      message: "Dokumenty podpíšete online v Autogram Portali. Po kliknutí na tlačidlo vás systém prevedie jednotlivými krokmi."
       note_from_sender_title: "Poznámka od odosielateľa"
       documents: "Dokumenty (%{count})"
       view_bundle: "Zobraziť a podpísať"
@@ -2380,12 +2566,12 @@ sk:
 
   tenant_mailer:
     invitation:
-      subject: "Pozvánka do organizácie %{tenant} v Autogram Portáli"
+      subject: "Pozvánka do organizácie %{tenant} v Autogram Portali"
       badge: "Pozvánka"
       title: "Pozvánka do organizácie %{tenant}"
-      message: "Boli ste pridaný do organizácie %{tenant} v Autogram Portáli. Získate prístup k jej dokumentom a balíkom na podpis."
+      message: "Boli ste pridaný do organizácie %{tenant} v Autogram Portali. Získate prístup k jej dokumentom a balíkom na podpis."
       accept: "Prijať pozvánku"
-      open_portal: "Otvoriť Autogram Portál"
+      open_portal: "Otvoriť Autogram Portal"
 
   tenant_selections:
     show:

@@ -11,6 +11,7 @@ bin/rails test test/integration/signature_request_flows_test.rb:42
 bin/rubocop                      # must stay clean (rails-omakase style: `[ "a", "b" ]` with inner spaces)
 bin/brakeman
 bin/rails zeitwerk:check          # verify autoloading after adding/renaming classes
+bin/rails test test/user_guide/screenshots.rb   # retake user guide screenshots (public/docs/screenshots/<locale>)
 bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fixtures/tests after schema changes
 ```
 
@@ -24,8 +25,10 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - **Membership** joins users and tenants with role `owner` / `member`. All members see all tenant data; owners manage members and the API key. A tenant must keep an owner.
 - **User** is only a person: login, recipients, signers, consents, identities. User features are only `admin` and `federation`. Users have no password (magic link via devise-passwordless or Google); `remember_token` backs "remember me".
   - Every user has a personal Basic tenant (`Tenant.create_personal_for!`, named after the email, not editable by the user), created with the user (also for users invited via `User.find_or_invite!`) and kept when they join organizations. Organization members therefore always pick a tenant after signing in; the UI recognizes it by the Basic plan: the selection page labels Basic tenants "Personal" and the sidebar shows "Personal organization" instead of the name.
-- **Bundle** has one or more **Contracts**; a contract has one or more **Documents** (several documents = one ASiC-E container, XAdES/CAdES). Bundles and contracts have no user; the sender is always the tenant (`sender_display_name`). A bundled contract always has its bundle's tenant (validated); a contract without a tenant is anonymous.
+- **Bundle** has one or more **Contracts**; a contract has one or more **Documents** (several documents = one ASiC-E container, XAdES/CAdES). Bundles and contracts have no user; the sender is always the tenant (`sender_display_name`). A bundled contract always has its bundle's tenant (validated); a contract without a tenant is anonymous. The web UI creates a bundle from one uploaded document ("Poslať na podpis"); bundles with several contracts come only from the API.
 - **Recipient** = invited signer of a bundle (linked to a `User` by email when one exists). Signing goes through `Signer` (STI: `RecipientSigner`, `UserSigner`, `AnonymousSigner`) → `SignerContract` (signed/declined/superseded) → `Session` (STI per signing app). Bundle `signing_rule`: `all`, `any`, `threshold`. Superseded or withdrawn recipients must not be able to sign.
+- Recipients are emailed only by the explicit notify action (web "Odoslať e-mail"); adding a recipient, including via the API, sends nothing.
+- Signing methods come from ENV `ALLOWED_METHODS` (default `qes,ades`), read once into `Contract::ALLOWED_METHODS` when the class loads, so tests cannot change them through ENV. `qes` implies `standalone_qes` (Podpisuj and other standalone apps), which recipients get only when the author allows it.
 - When the tenant itself signs its bundle, an **author proxy** recipient is created (`Recipient.find_or_create_author_proxy_for!`); it is not a visible recipient.
 - Author notifications go to the tenant owners except the user who caused them (`Tenant#notification_recipients`).
 - Plan limits come from ENV through `PlanLimits` (blank = unlimited); `Tenant::Usage` checks them and records monthly usage (documents sent for signature, timestamps) in `UsageRecord`, which also is the PRO billing basis. Raise/rescue `PlanLimits::Exceeded`; retention runs in `TenantRetentionJob` and `AnonymousContractsCleanupJob`.
@@ -57,8 +60,10 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 
 ## Conventions
 
-- UI is Slovak by default; every user-facing string goes to both `config/locales/sk.yml` and `en.yml`. `:base` model errors live under `activerecord.errors.models.<model>.attributes.base.<key>`.
-- Views: ERB + Tailwind + Stimulus/Alpine, importmap (no Node build).
+- UI is Slovak by default; every user-facing string goes to both `config/locales/sk.yml` and `en.yml`, with identical keys (only Slovak `few` plural forms differ). After larger edits compare the flattened key sets: a mis-indented key shows "translation missing" in one language only. `:base` model errors live under `activerecord.errors.models.<model>.attributes.base.<key>`.
+- The product name is "Autogram Portal" with a short "a", also when declined in Slovak ("Autogram Portalu", "v Autogram Portali"); the common noun "portál" keeps the long "á".
+- Views: ERB + Tailwind + Stimulus/Alpine, importmap (no Node build). Tailwind v4 compiles only class names that appear literally in source files (views, helpers, locales); do not build them by interpolation such as `bg-#{color}-100` unless the full names exist elsewhere.
+- The user guide (`/docs`, `app/views/docs`) takes its texts from `docs.index` in both locales; when a documented screen changes, update the texts and retake the screenshots (command above).
 - External services are behind `AutogramEnvironment` (`autogram_service`, `avm_service`, `eidentita_service`, `ades_signing_service`); stub them there in tests.
 - Keep model annotations (annotaterb) up to date in models, fixtures and model tests.
 
@@ -70,4 +75,5 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - Integration tests sign in with `Devise::Test::IntegrationHelpers#sign_in`; for a user with several tenants, follow with `post tenant_selection_path(tenant_id: ...)`.
 - Authorization request tests need confirmed users; assert the actual Warden actor when a denial could otherwise pass anonymously. Fixture emails are placeholders: replace them locally when email validations are exercised.
 - List tests must include a matching nonempty record set and foreign-record exclusions. Empty results can hide invalid eager loads, such as the removed `Contract.user` association; `Membership.user` remains valid.
-- Use `bin/rails test` for the full suite; editor discovery may cover only a subset. For ActiveJob enqueue assertions, use the test queue adapter locally instead of the default inline GoodJob adapter.
+- Unsaved documents read their content from the upload's tempfile (`Document#content`), so build them from `Rack::Test::UploadedFile` / `ActionDispatch::Http::UploadedFile`; `{ io:, filename: }` attachments raise `ActiveStorage::FileNotFoundError` during validation.
+- Use `bin/rails test` for the full suite; editor discovery may cover only a subset. System tests are separate (`bin/rails test:system`; CI runs both), and files under `test/` not ending in `_test.rb` (e.g. the user guide screenshots) run only when named explicitly. For ActiveJob enqueue assertions, use the test queue adapter locally instead of the default inline GoodJob adapter.

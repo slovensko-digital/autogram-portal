@@ -161,6 +161,9 @@ en:
               storage_limit: "The organization's storage (%{max}) is full. Delete documents you no longer need."
             tenant:
               bundle_mismatch: "must be the organization of the bundle"
+            agree_to_policies:
+              blank: "You must agree to the policies and terms to continue"
+              acceptance: "You must agree to the policies and terms to continue"
         session:
           attributes:
             base:
@@ -414,9 +417,9 @@ en:
         sign:
           title: "Sign the document"
           subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
-          prepare_signature_fields:
-            title: "Prepare visible signature fields"
-            subtitle: "Assign one visible PAdES field to each bundle recipient before the first signature is added."
+        prepare_signature_fields:
+          title: "Prepare visible signature fields"
+          subtitle: "Assign one visible PAdES field to each bundle recipient before the first signature is added."
         request_signature:
           evidence_reference_label: "Evidence reference"
           verify_reference_link: "Verify this reference"
@@ -1725,6 +1728,9 @@ en:
 
   docs:
     index:
+      opens_in_new_tab: "(opens in a new tab)"
+      back_to_contents: "Back to the guide contents"
+      screenshot_full_size: "(opens full size in a new tab)"
       header:
         eyebrow: "User Guide"
         title: "User Documentation"
@@ -1732,209 +1738,226 @@ en:
       nav:
         label: "User guide contents"
         documents_and_bundles: "Documents and bundles"
-        dashboard: "Dashboard"
-        contracts: "My Documents"
-        bundles: "My Bundles"
-        received: "Received Bundles"
+        organizations: "Sign-in and organizations"
+        dashboard: "Home"
+        contracts: "Contracts"
         signing: "Signing"
-        account: "Account Settings"
+        bundles: "Bundles"
+        received: "Received for Signing"
+        archive: "Validation archive"
+        account: "Settings"
         federation: "Federation"
         integration: "API & SDK"
       documents_and_bundles:
         title: "You always send a bundle for signing"
         intro: "The app works with two concepts. A document is a single file that gets signed. A bundle is the package in which you send documents to others for signing – usually it contains just one document."
+      organizations:
+        title: "Sign-in and organizations"
+        intro: "You can sign a document without signing in. You need an account to keep your documents, send them to others for signing, add timestamps or work together with colleagues in an organization."
+        sign_in_title: "Signing up and signing in"
+        sign_in:
+          register:
+            label: "Signing up"
+            description: "Click Sign in and then Sign up. Enter your email, agree to the terms of service and the privacy policy and activate the account with the link from the confirmation email."
+          magic_link:
+            label: "Signing in with an email link"
+            description: "The portal does not use passwords. Enter your email and sign in with the one-time link we send you. If you tick Remember me, you stay signed in on this device."
+          google:
+            label: "Signing in with Google"
+            description: "Click Continue with Google to sign in with your Google account. If the portal has no account with that email yet, it is created once you agree to the terms."
+          anonymous:
+            label: "Without signing in"
+            description: "Without an account you can upload a document, see its signatures and sign it. Such a document is deleted automatically after a short time, so download the signed document right away. If you sign in directly from the document page with Sign in or register, the document moves to your account."
+        organizations_title: "Organizations"
+        organizations_intro: "Contracts and bundles always belong to the organization you are working in. That organization is also the sender of your bundles."
+        organizations:
+          personal:
+            label: "Personal organization"
+            description: "Every user has their own organization on the Basic plan. It is created together with the account and stays with you even when you join another organization. The left menu shows it as Personal organization."
+          pro:
+            label: "PRO organization"
+            description: "An organization for companies and offices with several members. All members see and manage all contracts and bundles of the organization. PRO organizations are set up by the portal administrator, who also manages their name, plan and features (Validation archive, API access)."
+          roles:
+            label: "Owner and member"
+            description: "Owners invite and remove members, manage the API key and receive email notifications about the organization's bundles. Members work with contracts and bundles the same way as owners."
+          selection:
+            label: "Choosing an organization"
+            description: "If you are a member of several organizations, you choose the one to work in after signing in. The current organization is shown at the bottom of the left menu. To switch to another organization, sign out and sign in again."
+        screenshot_caption: "Choosing an organization after signing in"
+        screenshot_alt: "The Choose an organization page listing the user's organizations: Personal on the Basic plan marked Last used, and Novak & Partners Ltd. on the PRO plan"
+        plans_title: "Plans and limits"
+        plans_intro: "What you can do in an organization depends on its plan. The exact limits are set by the portal operator."
+        pricing_link: "See the price list."
+        plans:
+          basic:
+            label: "Basic"
+            description: "A plan for a single user. It may limit the number of stored documents, the number of documents sent for signature per month and the number of timestamps per month. Contracts and bundles may be deleted automatically after the retention period."
+          pro:
+            label: "PRO"
+            description: "A plan for organizations with an unlimited number of members. Documents sent for signature and timestamps are recorded monthly as the basis for billing."
+          usage:
+            label: "Plan usage"
+            description: "You can see how much of the limits you have used, the retention period and the maximum document size on the Home page and in Settings under Organization. Monthly limits reset at the start of each calendar month. When a limit is used up, the corresponding action is not available and the portal tells you why."
+          signature_requests:
+            label: "What counts as a document sent for signature"
+            description: "Every document of a bundle signed by someone other than your organization – no matter whether you invited the recipient by email or sent them a link. When the organization uses up the limit, recipients cannot sign until the limit resets."
       dashboard:
-        screenshot_alt: "Account overview: counts of bundles, contracts, bundles awaiting my signature, sent and declined bundles; plan usage; quick actions Upload new document and Verify signature; list of bundles awaiting my signature and list of recent bundles with status, signature count, date and a View link"
-        title: "Dashboard"
-        intro: "After logging in, you are shown a dashboard with statistics, plan usage, quick actions, the bundles awaiting your signature and your recent bundles. In a PRO organization the bundles awaiting your signature come first, followed by an overview of the organization; personal recent bundles (you sign them too) are marked."
+        title: "Home"
+        intro: "After signing in you see the Home page. It shows summary counts, quick actions, the bundles awaiting your signature, recent bundles and plan usage."
         stats:
           bundles:
             label: "Bundles"
-            description: "Total number of bundles you have created and sent for signing."
-            card_class: "border-blue-200 bg-blue-50"
-            dot_class: "bg-blue-500"
+            description: "The number of all bundles of the organization."
           contracts:
             label: "Contracts"
-            description: "Total number of documents uploaded to your account."
-            card_class: "border-indigo-200 bg-indigo-50"
-            dot_class: "bg-indigo-500"
-          awaiting:
-            label: "Awaiting My Signature"
-            description: "Bundles from other users where you are a recipient and have not yet signed."
-            card_class: "border-yellow-200 bg-yellow-50"
-            dot_class: "bg-yellow-500"
+            description: "The number of standalone documents that are not part of any bundle."
           sent:
-            label: "Sent for Signing"
-            description: "Your bundles that are waiting for signatures from recipients."
-            card_class: "border-green-200 bg-green-50"
-            dot_class: "bg-green-500"
+            label: "Sent for signing"
+            description: "Bundles in which a recipient has neither signed nor declined yet."
           declined:
-            label: "Declined Bundles"
-            description: "Bundles in which at least one recipient declined to sign."
-            card_class: "border-red-200 bg-red-50"
-            dot_class: "bg-red-500"
-        quick_actions_title: "Quick Actions"
-        quick_actions_description: "From the dashboard you can upload a new document, create a new bundle, or go directly to the list of documents awaiting your signature — all in one click."
-        screenshot_title: "Screenshot"
-        screenshot_description: "Recommended: add a screenshot of the main dashboard with statistics and quick actions."
-        screenshot_file_hint: "File: /public/docs/screenshots/dashboard-overview.png"
-        screenshot_placeholder: "Placeholder for dashboard screenshot"
+            label: "Declined bundles"
+            description: "Bundles in which a recipient declined to sign."
+        stats_hint: "Click a count to open the corresponding list."
+        sections_title: "What else is on the Home page"
+        sections:
+          quick_actions:
+            label: "Quick actions"
+            description: "Upload new document, Verify signature and, in organizations with the validation archive, Validation archive."
+          awaiting:
+            label: "Awaiting my signature"
+            description: "Bundles in which you are a recipient, including bundles from other organizations. Those are marked External sender."
+          recent:
+            label: "Recent bundles"
+            description: "The five newest bundles of the organization with their status, number of signatures and creation date."
+          usage:
+            label: "Plan usage"
+            description: "How much of the plan limits you have used this month."
+        pro_title: "PRO organization"
+        pro_description: "In a PRO organization the Awaiting my signature list comes first, followed by the Organization overview. Recent bundles waiting for your signature are marked Awaiting me. If the organization has the validation archive enabled, the Home page also warns you about signatures that will soon stop being verifiable."
+        screenshot_caption: "The Home page of a personal organization"
+        screenshot_alt: "The Home page: the left menu with Home, Contracts, Bundles, Received for Signing, Settings, New contract, About and User Guide, and at the bottom the language switch, Sign out, Personal organization and the user's name; on the right the counts of bundles, contracts, sent and declined bundles, quick actions, the Awaiting my signature list, the Recent bundles list with statuses and Plan usage"
       contracts:
-        title: "My Documents"
-        intro: "The \"My Documents\" section shows all individual documents (PDF, XML, ASiC-E\u2026) uploaded to your account. You can filter documents by status and sort them by date."
-        states_title: "Document States"
+        title: "Contracts"
+        intro: "The Contracts section lists the standalone documents you uploaded for signing or for verification. When you send a document for signing, it moves into a bundle and you find it in the Bundles section. You can filter the list by status and sort it by date."
+        screenshot_caption: "The list of contracts"
+        screenshot_alt: "The Contracts list with Status and Sort filters and four documents with the statuses Awaiting signature and Signed, each with Delete and View links"
+        states_title: "Document statuses"
         states:
           awaiting:
-            label: "Awaiting Signature"
-            description: "The document has been uploaded but does not yet contain any signature."
-            badge_class: "bg-yellow-100 text-yellow-800"
-            dot_class: "bg-yellow-500"
+            label: "Awaiting signature"
+            description: "The document is not signed yet."
           completed:
             label: "Signed"
-            description: "The document has been successfully signed."
-            badge_class: "bg-green-100 text-green-800"
-            dot_class: "bg-green-500"
-        actions_title: "Available Document Actions"
+            description: "The document is signed – in the portal, or it already contained a signature when you uploaded it."
+        upload_title: "Uploading a document"
+        upload_description: "Click New contract in the left menu, drag the file into the marked area or choose it from your computer and click Upload & Continue. PDF, XML, ASiC-E containers and other file types are supported."
+        upload_screenshot_caption: "Uploading a new document"
+        upload_screenshot_alt: "The New document page with an area to drop a file and the Upload & Continue button"
+        detail_title: "Document page"
+        detail_description: "After the upload the document page opens. You can show its content (Show document), check who has signed it and with which signature (Show details shows the certificate and signing time), download the signed version or delete the document. Below, choose what you want to do with the document and click Continue."
+        detail_screenshot_caption: "A signed document with the available actions"
+        detail_screenshot_alt: "The page of the document Affidavit.pdf with the Download and Delete buttons, the Document already signed by list with the signer's name and signature type, and the Choose action options: Sign the document, Request a signature, Add timestamp and Add archive timestamp"
+        actions_title: "Document actions"
         actions:
           sign:
-            label: "Sign"
-            description: "Sign the document with your own qualified signature using the Autogram app or eIdentita."
+            label: "Sign the document"
+            description: "You sign the document yourself. The steps are described in Signing."
           request:
-            label: "Request Signature"
-            description: "Send the document to other people for signing via email — the system creates a bundle and sends invitations."
+            label: "Request a signature"
+            description: "Creates a bundle from the document to which you add recipients. The steps are described in Bundles."
           timestamp:
-            label: "Add Timestamp"
-            description: "Add a qualified timestamp to a document that already has a signature without one."
+            label: "Add timestamp"
+            description: "Extends the signatures to level T with a qualified timestamp. Offered for a signed document whose signatures have no timestamp yet."
+          archive:
+            label: "Add archive timestamp"
+            description: "Extends the signatures to level LTA with an archive timestamp, so the signature can be verified even after the certificate expires. In organizations with the validation archive the action is called Archive document."
           download:
             label: "Download"
-            description: "Download the signed document to your device."
+            description: "Downloads the signed document. In organizations with the validation archive, Version history also lists the previous signed versions."
           delete:
             label: "Delete"
-            description: "Permanently remove the document. A document that is part of a bundle cannot be deleted individually."
-      bundles:
-        title: "My Bundles"
-        intro: "A bundle is a collection of one or more documents sent to recipients for signing. Here you will find all bundles you have created."
-        lifecycle_title: "Creating a Bundle — Step by Step"
-        lifecycle:
-          upload:
-            title: "Upload a Document"
-            description: "Upload a PDF or other file via the \"New Document\" section. After uploading, select the \"Request Signature\" action."
-          configure:
-            title: "Set Signature Type and Format"
-            description: "Choose the signature level (with or without timestamp) and the format (PAdES, XAdES, CAdES, ASiC-E)."
-          recipients:
-            title: "Add Recipients"
-            description: "Enter the email addresses of people who should sign the document. Set the signing rule."
-          send:
-            title: "Send"
-            description: "Recipients receive an email notification with a signing link. You can also copy the link manually."
-          done:
-            title: "Download Signed Documents"
-            description: "Once the bundle is completed, you can download the signed file directly from the bundle detail page."
-        states_title: "Bundle States"
-        states:
-          awaiting:
-            label: "Awaiting Signature"
-            description: "The bundle has been sent to recipients, but not everyone has signed yet."
-            badge_class: "bg-yellow-100 text-yellow-800"
-            dot_class: "bg-yellow-500"
-          completed:
-            label: "Completed"
-            description: "All required recipients have signed the documents in the bundle."
-            badge_class: "bg-green-100 text-green-800"
-            dot_class: "bg-green-500"
-          declined:
-            label: "Declined"
-            description: "At least one recipient declined to sign."
-            badge_class: "bg-red-100 text-red-800"
-            dot_class: "bg-red-500"
-          no_recipients:
-            label: "No Recipients"
-            description: "The bundle was created but has no recipients added yet."
-            badge_class: "bg-gray-100 text-gray-600"
-            dot_class: "bg-gray-400"
-        signing_rules_title: "Signing Rules"
-        signing_rules:
-          all:
-            label: "All Must Sign"
-            description: "The bundle is completed only when all added recipients have signed."
-          any:
-            label: "Any One Signature Is Enough"
-            description: "The bundle is completed as soon as any single recipient signs."
-          threshold:
-            label: "Minimum Number of Signatures"
-            description: "You can set an exact number of recipients who must sign for the bundle to be considered completed."
-        public_link_title: "Public Signing Link"
-        public_link_description: "For each bundle you can generate a public signing link that allows anyone to sign — without being added as a recipient."
-      received:
-        title: "Received Bundles"
-        intro: "The \"Received Bundles\" section shows all bundles you have been invited to sign — whether by email or via a public link."
-        states_title: "Your States in a Received Bundle"
-        states:
-          awaiting:
-            label: "Awaiting Signature"
-            description: "You have been invited and have not yet signed."
-            badge_class: "bg-yellow-100 text-yellow-800"
-            dot_class: "bg-yellow-500"
-          signed:
-            label: "Signed"
-            description: "You have successfully signed the documents in this bundle."
-            badge_class: "bg-green-100 text-green-800"
-            dot_class: "bg-green-500"
-          declined:
-            label: "Declined"
-            description: "You declined to sign the documents in this bundle."
-            badge_class: "bg-red-100 text-red-800"
-            dot_class: "bg-red-500"
-          superseded:
-            label: "Superseded"
-            description: "The bundle was completed without your signature — e.g. based on an \"any one\" signing rule."
-            badge_class: "bg-gray-100 text-gray-600"
-            dot_class: "bg-gray-400"
-        decline_title: "Declining a Signature Request"
-        decline_description: "During signing you may decline the signature request. The bundle sender will receive an email notification about the decline."
+            description: "Permanently deletes the document. A document that is part of a bundle cannot be deleted on its own – you can delete the whole bundle."
+        actions_note: "Without signing in, only Sign the document is available. Timestamps and archive timestamps count towards the monthly timestamp limit."
+        verify_title: "Verifying a signature"
+        verify_description: "If you only want to find out who signed a document and whether the signature is valid, upload it via New contract or the Verify signature quick action. The validation result is shown on the document page. You can delete the document afterwards."
       signing:
-        screenshot_alt: "Select signing application step: the selected ID card type with a Change selection option at the top, followed by the options Autogram Desktop (selected), Autogram Mobile and eIdentita, and the Back and Continue to signing buttons"
-        title: "Signing Documents"
-        intro: "When signing a document, you choose the signature level and format. Then you select a supported signing application."
-        signature_levels_title: "Signature Levels"
+        title: "Signing documents"
+        intro: "You create a qualified electronic signature (QES) with an ID card with a chip or another qualified device and a signing application. The portal guides you through all the steps."
+        steps_title: "How to sign"
+        steps:
+          action:
+            title: "Choose Sign the document"
+            description: "On the document page keep Sign the document selected and click Continue. A document someone sent you opens from the link in the email or from Received for Signing."
+          level:
+            title: "Choose the signature level"
+            description: "Choose Handwritten Signature or Certified Signature (with a timestamp). Advanced settings let you change the signature format. When you sign at a sender's request, the sender has already chosen the level and format."
+          device:
+            title: "Choose what you will sign with"
+            description: "The first time you sign, you choose your ID card or device and confirm that you know your BOK or PIN and have signing certificates issued. The portal remembers your choice and next time only shows it with a Change selection option."
+          app:
+            title: "Choose a signing application"
+            description: "The applications offered depend on your ID card. Older ID cards and smart cards require a computer with a card reader and Autogram Desktop."
+          finish:
+            title: "Sign and download the document"
+            description: "Finish the signature in the application by entering your signing PIN. The portal saves the signed document automatically and you download it with the Download button."
+        parameters_screenshot_caption: "Choosing the signature level with Advanced settings open"
+        parameters_screenshot_alt: "The Sign document step: the signature level Handwritten Signature or Certified Signature, Advanced settings open with the PAdES signature format and the allowed signature methods, and the Back and Continue to signing buttons"
+        qscd_screenshot_caption: "Choosing an ID card or device"
+        qscd_screenshot_alt: "The What will you sign with? page with four kinds of Slovak ID cards by issue date with their compatibility, and the groups for residence permits, Czech ID cards and qualified smart cards and USB tokens"
+        apps_screenshot_caption: "Choosing a signing application"
+        apps_screenshot_alt: "The Select Signing Application page with the selected ID card and the options Autogram Desktop, Autogram Mobile, eIdentita and Podpisuj or other standalone applications"
+        signature_levels_title: "Signature levels"
         signature_levels:
           baseline_b:
-            label: "Without Timestamp (BASELINE_B)"
-            description: "Qualified electronic signature without a timestamp. Under civil law this is equivalent to a handwritten signature."
+            label: "Handwritten Signature (BASELINE_B)"
+            description: "A qualified electronic signature without a timestamp. Under the Slovak Civil Code it is equivalent to a handwritten signature."
           baseline_t:
-            label: "With Timestamp (BASELINE_T)"
-            description: "Qualified electronic signature with a qualified timestamp. De facto equivalent to a notarised signature. Recommended for documents requiring long-term validity."
-        formats_title: "Signature Formats"
+            label: "Certified Signature (BASELINE_T)"
+            description: "A qualified electronic signature with a qualified timestamp. De facto equivalent to an officially certified signature. Recommended for documents that must stay valid for a long time."
+        formats_title: "Signature formats"
+        formats_intro: "You can change the format in Advanced settings. If the document already contains signatures, only a compatible format is offered. A document with several files is always signed as one ASiC-E container."
         formats:
           pades:
             label: "PAdES"
-            description: "Signature embedded directly inside the PDF file. Ideal for standard PDF documents — the signed output remains a .pdf file."
+            description: "The signature is embedded directly in the PDF file – the signed document stays a PDF. The default format for PDF documents."
           xades:
-            label: "XAdES + ASiC-E"
-            description: "Signature for XML documents (e.g. Slovak eForms). If needed, you can use ASiC-E as the container output."
+            label: "XAdES in ASiC-E container"
+            description: "The result is an ASiC-E container (.asice) holding both the document and the signature. Suited especially to XML documents, such as Slovak electronic forms."
           cades:
-            label: "CAdES + ASiC-E"
-            description: "The signature creates a wrapping .p7s file. If needed, you can use ASiC-E as the container output for any file format."
-        methods_title: "Signing Methods"
+            label: "CAdES in ASiC-E container"
+            description: "The result is also an ASiC-E container, with the signature in CMS format. Suitable for any file type."
+        allowed_methods_title: "Allowed signature methods"
+        allowed_methods_intro: "When you send a document for signing, Advanced settings let you choose how recipients may sign."
+        allowed_methods:
+          qes:
+            label: "Qualified electronic signature"
+            description: "Signing with an ID card or another qualified device through the signing applications."
+          ades:
+            label: "Simple electronic signature"
+            description: "The recipient is verified with a one-time code sent by SMS or email and the portal creates a signature backed by an evidence record (Verified AdES signing)."
+          standalone_qes:
+            label: "Podpisuj or other standalone applications"
+            description: "The recipient downloads the document, signs it with a qualified signature in their own desktop application and uploads it back. This method is off for recipients by default."
+        allowed_methods_note: "The portal operator may also enable other methods, such as a visual stamp in the PDF or a scan of a document signed by hand."
+        methods_title: "Signing applications"
         methods:
           autogram_desktop:
             label: "Autogram Desktop"
-            description: "Desktop application for Windows, macOS, and Linux that communicates with a smart card or eID device connected to the computer."
+            description: "A free application for Windows, macOS and Linux. It signs with an ID card or a qualified smart card in a card reader and can sign several documents at once."
             links:
               download:
                 label: "Download Autogram"
                 url: "https://autogram.slovensko.digital"
           autogram_mobile:
-            label: "Autogram Mobile (AVM)"
-            description: "Mobile application for iOS and Android. Sign documents on a smartphone using mobile eID."
+            label: "Autogram Mobile"
+            description: "A free open-source application for Android and iOS. It signs with an ID card with an NFC chip that you hold to the phone. On a computer you scan a QR code, on the phone you open a link."
             links:
               info:
                 label: "More info and download"
                 url: "https://autogram.slovensko.digital"
           eidentita:
             label: "eIdentita"
-            description: "Slovak government signing app for mobile devices. Available on the App Store and Google Play."
+            description: "The Slovak government mobile application for Android and iOS. It signs with an ID card with an NFC chip. On a computer you scan a QR code, on the phone you open a link."
             links:
               ios:
                 label: "Download from App Store"
@@ -1944,94 +1967,260 @@ en:
                 url: "https://play.google.com/store/apps/details?id=sk.minv.eidentita"
           podpisuj:
             label: "Podpisuj or other standalone applications"
-            description: "Available only when signing individual documents without a timestamp and on desktop only. Download the document, sign it in a standalone application (e.g. Podpisuj), and upload the signed document back."
+            description: "Available only on a computer, for documents with a single file and for signatures without a timestamp. You download the document, sign it in your own application (e.g. Podpisuj) and upload the signed file back."
             links:
               download:
                 label: "Download Podpisuj"
                 url: "https://www.podpisuj.sk/download"
-        qualified_signing_title: "Qualified signing — what to expect"
-        qualified_signing_intro: "Before signing, onboarding walks you through a few checks required for creating a qualified electronic signature."
+        third_party_note: "Autogram Mobile and eIdentita are external applications with their own terms of use and privacy policies."
+        more_title: "More signing options"
+        more:
+          batch:
+            label: "Batch signing"
+            description: "If a bundle contains several documents, on a computer you sign them all at once with Sign all in Autogram Desktop – you confirm the signature only once. On mobile, documents are signed one by one."
+          ades:
+            label: "Verified AdES signing"
+            description: "If the sender allows the simple electronic signature, the recipient can sign without an ID card. They verify themselves with a one-time code sent by SMS to the mobile number entered by the sender (otherwise by email) and the portal creates the signature on the server. It attaches a reference to an evidence record with the time and method of verification. This is not a qualified electronic signature and the method is available only to bundle recipients."
+          timestamps:
+            label: "Timestamp and archive timestamp"
+            description: "You can add a qualified timestamp (level T) or an archive timestamp (level LTA) to a signed document, so the signature can be verified even after the certificates expire. Timestamps count towards the monthly timestamp limit – and so does a Certified Signature created with Autogram Mobile."
+          fields:
+            label: "Visible signature fields in a PDF"
+            description: "If a bundle contains a single PDF document in PAdES format that is not signed yet, you can prepare a visible signature field for each recipient. On the bundle page click Prepare visible signature fields next to the document, place a field for each recipient in the preview and click Finish and generate signing PDF. Before signing, the recipient fills their field with a typed name, an image or a drawn signature."
+        evidence_verification_html: "Anyone can check the data behind the reference of a signature created with Verified AdES signing on the %{link} page."
+        evidence_verification_link: "Verify a signature reference"
+        qualified_signing_title: "ID cards and devices for qualified signing"
+        qualified_signing_intro: "Before your first qualified signature, the portal walks you through a short check:"
         qualified_signing_checks:
-          qscd: "Select your exact QSCD device (most commonly the Slovak eID, but also residence permit cards, Czech ID cards, qualified smart cards or USB tokens)."
-          pin: "Confirm that you know your security codes (BOK/PIN/KEP PIN depending on card type)."
+          qscd: "Choose the ID card or device you will sign with (most often the Slovak ID card, but also a residence permit card, a Czech ID card, a qualified smart card or a USB token)."
+          pin: "Confirm that you know your security codes (BOK or PIN depending on the card)."
           cert: "Confirm that your signing certificates are issued on the card."
-        qscd_cards_title: "Supported QSCD cards and compatibility"
+        qscd_cards_title: "Supported ID cards and devices"
+        qscd_support:
+          mobile: "Mobile and desktop (NFC)"
+          desktop: "Desktop only"
+          unsupported: "Unsupported"
         qscd_cards:
           eid_2024:
             label: "Slovak ID card issued after 18.12.2024"
-            mode: "Mobile + desktop (NFC)"
-            badge_class: "bg-green-100 text-green-800"
-            description: "Supports mobile signing via NFC (Autogram Mobile/eIdentita) and desktop signing."
+            support: "mobile"
+            description: "Supports mobile signing via NFC (Autogram Mobile, eIdentita) and signing on a computer."
           eid_2022:
             label: "Slovak ID card issued after 1.12.2022"
-            mode: "Mobile + desktop (NFC)"
-            badge_class: "bg-green-100 text-green-800"
-            description: "Supports mobile signing via NFC and desktop signing."
+            support: "mobile"
+            description: "Supports mobile signing via NFC and signing on a computer."
           dpb_2023:
             label: "Slovak residence permit card issued after 18.10.2023"
-            mode: "Mobile + desktop (NFC)"
-            badge_class: "bg-green-100 text-green-800"
-            description: "Supports mobile signing via NFC and desktop signing."
+            support: "mobile"
+            description: "Supports mobile signing via NFC and signing on a computer."
           eid_2021:
             label: "Slovak ID card issued after 21.6.2021"
-            mode: "Desktop only"
-            badge_class: "bg-yellow-100 text-yellow-800"
-            description: "Requires a computer, physical card reader, and desktop app. Mobile signing is not available."
+            support: "desktop"
+            description: "Requires a computer, a card reader and Autogram Desktop. Mobile signing is not available."
           dpb_2020:
             label: "Slovak residence permit card issued after 10.7.2020"
-            mode: "Desktop only"
-            badge_class: "bg-yellow-100 text-yellow-800"
-            description: "Requires a computer, physical card reader, and desktop app. Mobile signing is not available."
-          eid_2013:
-            label: "Slovak ID card issued before 21.6.2021"
-            mode: "Legacy — unsupported"
-            badge_class: "bg-red-100 text-red-800"
-            description: "This card type is no longer compatible with qualified signing."
-          dpb_2014:
-            label: "Slovak residence permit card issued before 10.7.2020"
-            mode: "Legacy — unsupported"
-            badge_class: "bg-red-100 text-red-800"
-            description: "This card type is no longer compatible with qualified signing."
+            support: "desktop"
+            description: "Requires a computer, a card reader and Autogram Desktop. Mobile signing is not available."
           cz_eid_2018:
             label: "Czech ID card issued since 1.7.2018"
-            mode: "Desktop only"
-            badge_class: "bg-yellow-100 text-yellow-800"
-            description: "Requires a qualified certificate from a Czech certification authority loaded onto the chip, a card reader and Autogram on a computer."
+            support: "desktop"
+            description: "Requires a qualified certificate from a Czech certification authority loaded onto the chip, a card reader and Autogram Desktop."
           tokens:
             label: "Qualified smart cards and USB tokens (I.CA, MONET+, Thales/Gemalto, other PKCS#11)"
-            mode: "Desktop only"
-            badge_class: "bg-yellow-100 text-yellow-800"
-            description: "Requires Autogram on a computer and the device driver installed."
+            support: "desktop"
+            description: "Requires Autogram Desktop and the device driver installed."
+          eid_2013:
+            label: "Slovak ID card issued before 21.6.2021"
+            support: "unsupported"
+            description: "This card type is no longer compatible with qualified signing. You need a new ID card to sign electronically."
+          dpb_2014:
+            label: "Slovak residence permit card issued before 10.7.2020"
+            support: "unsupported"
+            description: "This card type is no longer compatible with qualified signing."
           cz_eid_2012:
             label: "Czech ID card issued before 1.7.2018"
-            mode: "Legacy — unsupported"
-            badge_class: "bg-red-100 text-red-800"
+            support: "unsupported"
             description: "A qualified certificate cannot be loaded onto this ID card."
-        screenshot_title: "Screenshot"
-        screenshot_description: "Recommended: add a screenshot of application selection and the document signing step."
-        screenshot_file_hint: "File: /public/docs/screenshots/signing-app-selection.png"
-        screenshot_placeholder: "Placeholder for signing screenshot"
+      bundles:
+        title: "Bundles"
+        intro: "A bundle is how you send documents for signing. It holds one or more documents, a list of recipients and a rule for how many of them must sign. The sender is always your organization. The Bundles section lists all bundles of the organization."
+        screenshot_caption: "The list of bundles"
+        screenshot_alt: "The Contract Bundles list with Status and Sort filters and four bundles with the statuses Not sent, Awaiting signature, Completed and Declined, their number of signatures, date and number of documents"
+        lifecycle_title: "How to send a document for signing"
+        lifecycle:
+          upload:
+            title: "Upload a document and choose Request a signature"
+            description: "On the document page choose Request a signature and click Continue."
+          configure:
+            title: "Set the signature level"
+            description: "Choose Handwritten Signature or Certified Signature. Advanced settings let you choose the format and the allowed signature methods. After you confirm, the bundle is created and its page opens."
+          recipients:
+            title: "Add recipients"
+            description: "Enter the recipient's email and click Add. Fill in the mobile phone if the recipient should verify a simple electronic signature with an SMS code."
+          send:
+            title: "Send the invitations"
+            description: "Click Send email next to the recipient – the invitation is not sent automatically when you add them. You can also send the signing link yourself (Copy signing link)."
+          done:
+            title: "Follow the progress and download the signed documents"
+            description: "We email you about signatures, declines and the completion of the bundle. You download the signed documents from the bundle page."
+        detail_screenshot_caption: "A bundle with its documents and recipients"
+        detail_screenshot_alt: "The page of the bundle Contract for work with the Edit, Sign and Delete buttons, a note for recipients, two signed documents with the Download Signed Document, Add timestamp and Add archive timestamp buttons, and the Send for Signature part with the signing rule, two recipients and the form for adding a recipient"
+        manage_title: "Managing a bundle"
+        manage:
+          edit:
+            label: "Edit"
+            description: "Change the bundle name, the message for recipients (shown in the invitation and when signing), the signing rule, the public signing link and author notifications."
+          sign:
+            label: "Sign"
+            description: "You can also sign the bundle's documents yourself as the sender."
+          remove:
+            label: "Remove a recipient"
+            description: "Withdraws the signature request from a recipient who has not signed yet; their link stops working."
+          delete:
+            label: "Delete"
+            description: "Permanently deletes the bundle including its documents."
+        settings_screenshot_caption: "Editing a bundle"
+        settings_screenshot_alt: "The Edit bundle form with the Name and Message for recipients fields, the signing rule choice and the Public signing link and Author notifications options"
+        states_title: "Bundle statuses"
+        states:
+          awaiting:
+            label: "Awaiting signature"
+            description: "A recipient has not signed yet."
+          completed:
+            label: "Completed"
+            description: "All recipients required by the signing rule have signed."
+          declined:
+            label: "Declined"
+            description: "At least one recipient declined to sign."
+          no_recipients:
+            label: "Not sent"
+            description: "The bundle has no recipients yet."
+        recipient_states_title: "Recipient statuses"
+        recipient_states:
+          pending:
+            label: "Awaiting signature"
+            description: "The recipient has not signed yet."
+          signed:
+            label: "Signed"
+            description: "The recipient signed the bundle's documents."
+          declined:
+            label: "Declined"
+            description: "The recipient declined to sign."
+          superseded:
+            label: "Signature no longer required"
+            description: "The bundle was completed according to the signing rule without this recipient's signature."
+          withdrawn:
+            label: "Withdrawn"
+            description: "The sender withdrew the signature request."
+        signing_rules_title: "Signing rules"
+        signing_rules:
+          all:
+            label: "All recipients must sign"
+            description: "The bundle is completed when all recipients have signed."
+          any:
+            label: "Any one recipient is enough"
+            description: "The bundle is completed with the first signature. The other recipients see that their signature is no longer required."
+          threshold:
+            label: "A specific number of recipients must sign"
+            description: "You set how many recipients must sign for the bundle to be completed."
+        public_link_title: "Public signing link"
+        public_link_description: "When editing a bundle you can turn on the public signing link. Anyone who has it can then sign the documents in the bundle without an invitation. You copy the link from the bundle page."
+        notifications_title: "Notifications"
+        notifications_description: "With Author notifications on, the organization's owners receive emails about signatures, declines and the completion of the bundle – except whoever caused the event."
+      received:
+        title: "Received for Signing"
+        intro: "When someone asks you to sign, you receive an email with a link. The link works without signing in. If you have a portal account with the same email, you also find the bundle in Received for Signing and on the Home page."
+        screenshot_caption: "Received bundles"
+        screenshot_alt: "The Received for Signing list with Status and Sort filters and bundles from different senders, some marked External sender, with the statuses Awaiting my signature, Signed by me, Signature no longer required and Declined"
+        states_title: "Statuses of received bundles"
+        states:
+          awaiting:
+            label: "Awaiting my signature"
+            description: "You have not signed yet."
+          signed:
+            label: "Signed by me"
+            description: "You signed the bundle's documents."
+          declined:
+            label: "Declined"
+            description: "You declined to sign."
+          superseded:
+            label: "Signature no longer required"
+            description: "The bundle was completed without your signature, for example under the Any one recipient is enough rule."
+        external_description: "Bundles from organizations you are not a member of are marked External sender. Check who is sending you the document before you sign."
+        sign_title: "Signing a received bundle"
+        sign_description: "When you open the bundle, you see the sender, their note, the documents and the recipients whose signature is still awaited. Choose how to sign – Electronic Signing, or Verified AdES signing if the sender allows it – and click Continue. If the bundle contains several documents, you can sign them all at once on a computer."
+        sign_screenshot_caption: "Signing a received bundle"
+        sign_screenshot_alt: "The You received a document to sign page with the sender, the note from the sender, the document, the Awaiting signature from list and the choice between Electronic Signing and Verified AdES signing, with the Decline and Continue buttons"
+        decline_title: "Declining to sign"
+        decline_description: "Click Decline to decline the signature; the sender receives an email. Until the bundle is completed, you can change your mind with Accept again. If the sender withdraws the request, the signing link stops working."
+      archive:
+        title: "Validation archive"
+        intro: "The validation archive is available in organizations with the Validation archive feature. With every signature, the portal stores the validation metadata of the signed document: who signed it, the signature level, the SHA-256 fingerprint and the date until which the signature can be verified. When that date approaches, the Home page warns you."
+        screenshot_caption: "The validation archive"
+        screenshot_alt: "The Validation archive with Status and Sort filters and two records with the signature type, version, SHA-256 fingerprint and signer, with the statuses Needs attention and Healthy, their expiry date and the View contract, Refresh to LTA and Delete links"
+        states_title: "Record statuses"
+        states:
+          healthy:
+            label: "Healthy"
+            description: "The signature stays verifiable for more than two months."
+          expiring:
+            label: "Needs attention"
+            description: "The signature stops being verifiable within two months."
+          expired:
+            label: "Expired"
+            description: "The signature can no longer be verified."
+          unknown:
+            label: "Unknown"
+            description: "The expiry date could not be determined."
+        actions_title: "Record actions"
+        actions:
+          refresh:
+            label: "Refresh to LTA"
+            description: "Creates a new version of the document with an archive timestamp, which extends how long the signatures can be verified."
+          view:
+            label: "View contract"
+            description: "Opens the document page. Version history lists all its signed versions."
+          delete:
+            label: "Delete"
+            description: "Deletes only the stored metadata – the document is kept."
       account:
-        screenshot_alt: "Danger zone section in settings: Cancel my account, a field for typing the confirmation phrase and a red Delete account button"
-        title: "Account Settings"
-        intro: "In account settings (gear icon in the left menu), you manage basic profile details and security options."
+        title: "Settings"
+        intro: "Open Settings from the left menu. They contain your user account and the settings of the organization you are working in."
+        account_title: "User account"
         items:
           name:
             label: "Name"
-            description: "Your display name, visible to senders and recipients in notification emails."
+            description: "Shown to recipients and in email notifications."
           email:
             label: "Email"
-            description: "Your login email is displayed as read-only in settings and cannot be changed there."
-          login:
-            label: "Sign-in Methods"
-            description: "Sign in is available via Google OAuth or a one-time email link (magic link)."
+            description: "Used for signing in; it cannot be changed in the settings."
+          language:
+            label: "Language"
+            description: "Switch between Slovak and English at the bottom of the left menu."
           delete_account:
-            label: "Delete Account"
-            description: "In the Danger Zone section, you can permanently delete your account after confirming the safety phrase."
-        screenshot_title: "Screenshot"
-        screenshot_description: "Recommended: add a screenshot of account settings with the Danger Zone section highlighted."
-        screenshot_file_hint: "File: /public/docs/screenshots/account-danger-zone.png"
-        screenshot_placeholder: "Placeholder for account settings screenshot"
+            label: "Delete account"
+            description: "In the Danger Zone, type the confirmation phrase and click Delete account. The account cannot be deleted while you are the only owner of an organization that has other members."
+        account_screenshot_caption: "Account settings"
+        account_screenshot_alt: "The User account section with the Name and Email fields and the Update button, and the Danger Zone with a field for the confirmation phrase and the Delete account button"
+        organization_title: "Organization"
+        organization_items:
+          plan:
+            label: "Name and plan"
+            description: "Only the portal administrator can change the organization's name and plan. A personal organization is named after your name or email."
+          api:
+            label: "API token public key"
+            description: "The owner sets the public key used to verify API tokens. The field is available when the organization has API access enabled."
+          usage:
+            label: "Plan usage"
+            description: "Used limits, the document retention period and the maximum document size."
+          members:
+            label: "Members"
+            description: "An owner invites a member by entering their email and role (Member or Owner) and can remove members. The invited person receives an email, and an account is created for them if they do not have one yet. The Basic plan allows only one user."
+          leave:
+            label: "Leave organization"
+            description: "If you are a member of several organizations, you can leave one. The last owner cannot leave."
+        organization_screenshot_caption: "Settings of a PRO organization"
+        organization_screenshot_alt: "The Organization section with the PRO plan badge, the Organization name and API token public key fields, Plan usage, the list of members with the Owner and Member roles and the Invite a member form"
       federation:
         title: "Federation Between Portals"
         intro: "Autogram Portal can hand signing requests between portal instances. The origin portal keeps ownership of the bundle, while the recipient's home portal helps with local sign-in and claiming the request."
@@ -2101,7 +2290,7 @@ en:
         current_scope_description: "Today, federation lets a recipient paste and claim a foreign request on their own portal even if the origin portal was not preconfigured locally, but the actual signing still completes on the origin portal."
       integration:
         title: "API & SDK"
-        intro: "If you want to integrate Autogram Portal into your own application, use the SDK example and API documentation."
+        intro: "Organizations with API access can connect Autogram Portal to their own application. The API accepts JWT tokens signed with your key: an owner enters the public key in the organization settings and the token uses `sub` = the organization ID."
         links:
           sdk_example:
             label: "SDK Example"

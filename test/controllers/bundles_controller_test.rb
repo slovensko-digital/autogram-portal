@@ -175,7 +175,8 @@ class BundlesControllerTest < ActionController::TestCase
     assert_select "form[action='#{extend_signatures_contract_path(contract)}']"
     assert_select "input[name='target_level'][value='LTA']", count: 1
     assert_select "input[name='target_level'][value='T']", count: 0
-    assert_includes response.body, I18n.t("contracts.signature_extension.levels.lta.title")
+    # Without the validation archive the action adds an archive timestamp instead of archiving.
+    assert_select "input[type='submit'][value=?]", I18n.t("documents.new.actions.archive.title_without_archivation")
   end
 
   test "bundle show offers signature field preparation link for eligible unsigned contract" do
