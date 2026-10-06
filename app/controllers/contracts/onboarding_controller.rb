@@ -125,7 +125,12 @@ module Contracts
     def redirect_to_next_page
       case @method
       when "electronic"
-        redirect_to signature_apps_contract_path(@contract, **redirect_to_signature_apps_params)
+        # Without a signing method to choose, the signing page itself offers the signing apps.
+        if @contract.electronic_signing_only_for?(recipient: @recipient)
+          redirect_to signing_page_path
+        else
+          redirect_to signature_apps_contract_path(@contract, **redirect_to_signature_apps_params)
+        end
       when "physical"
         redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
       end
@@ -164,6 +169,14 @@ module Contracts
         iframe: params[:iframe],
         qscd: flow_qscd
       }.compact
+    end
+
+    def signing_page_path
+      if @contract.bundle
+        sign_bundle_path(@contract.bundle, **redirect_to_signature_apps_params)
+      else
+        sign_contract_path(@contract, **redirect_to_signature_apps_params)
+      end
     end
   end
 end

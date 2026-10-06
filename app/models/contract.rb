@@ -117,6 +117,21 @@ class Contract < ApplicationRecord
     available_signature_methods.dup
   end
 
+  # Signing methods the signer can choose from, in the order they are offered.
+  # AdES needs a recipient to verify, so it is not offered to anyone else.
+  def signing_methods_for(recipient: nil)
+    methods = []
+    methods << "electronic" if qualified_signing_allowed?
+    methods << "ades" if AdesEvidenceSession.available?(self, recipient: recipient)
+    methods << "physical" if allowed_methods.include?("scan")
+    methods << "visual" if allowed_methods.include?("visual") && visual_signing_allowed?
+    methods
+  end
+
+  def electronic_signing_only_for?(recipient: nil)
+    signing_methods_for(recipient: recipient) == [ "electronic" ]
+  end
+
   def notify_signed!(signer: nil)
     Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_author?
 

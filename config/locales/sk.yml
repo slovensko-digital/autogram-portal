@@ -515,9 +515,6 @@ sk:
       individual_signing_section_description: "Ak nechcete použiť hromadné podpisovanie cez Autogram vyššie, nižšie môžete pokračovať podpisovaním po jednotlivých dokumentoch cez dostupné aplikácie."
       mobile_individual_signing_title: "Na mobile podpisujte dokumenty jednotlivo"
       mobile_individual_signing_description: "Autogram na počítači tu nie je dostupný, preto pre každý dokument vyberte jednu z aplikácií nižšie."
-      electronic_setup_title: "Pokračovať k elektronickému podpisu"
-      electronic_setup_description: "Pred výberom podpisovej aplikácie dokončite krátke nastavenie typu dokladu a podpisovania."
-      electronic_setup_action: "Pokračovať"
       contract_number: "Dokument %{current} z %{total}"
       note_title: "Poznámka od odosielateľa"
       awaiting_recipients: "Čaká na podpis od"
@@ -850,6 +847,10 @@ sk:
       already_signed:
         title: "Dokument je podpísaný"
         message: "Tento dokument je už podpísaný. Nie je od vás potrebný ďalší podpis."
+    signature_apps_preview:
+      title: "Najprv vyberte, čím budete podpisovať"
+      description: "Podľa občianskeho preukazu, karty alebo tokenu vám sprístupníme podpisové aplikácie, ktoré ho podporujú."
+      action: "Vybrať doklad"
     signature_apps:
       select_signing_app: "Vyberte aplikáciu na podpisovanie"
       add_another_signature: "Pridajte ďalší podpis"

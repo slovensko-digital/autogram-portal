@@ -43,8 +43,8 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_selector "a[target='_blank']", text: I18n.t("actions.view")
       assert_text I18n.t("bundles.sign.awaiting_recipients")
       assert_text "signer@example.com"
-      assert_text I18n.t("bundles.sign.electronic_setup_title")
-      assert_link I18n.t("bundles.sign.electronic_setup_action")
+      assert_text I18n.t("contracts.signature_apps_preview.title")
+      assert_link I18n.t("contracts.signature_apps_preview.action")
 
       assert_no_text "Autogram Portal"
       assert_no_text I18n.t("footer.support")
@@ -74,7 +74,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     within_portal_frame do
       assert_text "zmluva.pdf"
-      assert_text I18n.t("bundles.sign.electronic_setup_title")
+      assert_text I18n.t("contracts.signature_apps_preview.title")
 
       assert_no_text I18n.t("bundles.sender.sender")
       assert_no_text "Prosíme o podpis do piatku."
@@ -96,7 +96,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_text I18n.t("contracts.signature_apps.eidentita_label")
       assert_button I18n.t("contracts.signature_apps.continue_to_sign")
 
-      assert_no_text I18n.t("bundles.sign.electronic_setup_title")
+      assert_no_text I18n.t("contracts.signature_apps_preview.title")
       assert_no_text I18n.t("bundles.sender.sender")
     end
   end
@@ -114,14 +114,16 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     end
   end
 
-  test "default embedding walks the signer through onboarding inside the iframe" do
-    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ])
+  test "default embedding walks the signer through onboarding inside the iframe and back to the bundle" do
+    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ], note: "Prosíme o podpis do piatku.")
 
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid
 
     within_portal_frame do
       wait_for_signature_validation
-      click_on I18n.t("bundles.sign.electronic_setup_action")
+      assert_no_text I18n.t("contracts.signing_method_choice.title")
+      assert_no_button I18n.t("contracts.signature_apps.continue_to_sign")
+      click_on I18n.t("contracts.signature_apps_preview.action")
 
       assert_text I18n.t("contracts.onboarding.qscd_check.title")
       choose I18n.t("qscd.title.eid_2024"), allow_label_click: true
@@ -133,11 +135,118 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_text I18n.t("contracts.onboarding.certificate_check.title")
       click_on I18n.t("contracts.onboarding.certificate_check.continue")
 
+      assert_text "Prosíme o podpis do piatku."
       assert_text I18n.t("contracts.signature_apps.title")
       assert_text I18n.t("qscd.title.eid_2024")
       assert_button I18n.t("contracts.signature_apps.continue_to_sign")
+      assert_no_link I18n.t("actions.back")
+      assert_no_text I18n.t("contracts.signature_apps_preview.title")
       assert_no_text "Autogram Portal"
     end
+  end
+
+  test "back from onboarding returns to the whole bundle in the iframe" do
+    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ], note: "Prosíme o podpis do piatku.")
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid
+
+    within_portal_frame do
+      wait_for_signature_validation
+      click_on I18n.t("contracts.signature_apps_preview.action")
+      assert_text I18n.t("contracts.onboarding.qscd_check.title")
+
+      click_on I18n.t("actions.back")
+
+      assert_text "Prosíme o podpis do piatku."
+      assert_text I18n.t("contracts.signature_apps_preview.title")
+      assert_no_text I18n.t("contracts.onboarding.qscd_check.title")
+    end
+  end
+
+  test "back from onboarding returns to the standalone contract in the iframe" do
+    contract = Contract.create!(qes_contract("samostatna.pdf"))
+
+    embed_with_sdk :initContractIframe, contract.uuid
+
+    within_portal_frame do
+      wait_for_signature_validation
+      click_on I18n.t("contracts.signature_apps_preview.action")
+      assert_text I18n.t("contracts.onboarding.qscd_check.title")
+
+      click_on I18n.t("actions.back")
+
+      assert_text "samostatna.pdf"
+      assert_text I18n.t("contracts.signature_apps_preview.title")
+      assert_no_text "Content missing"
+      assert_no_text I18n.t("contracts.onboarding.qscd_check.title")
+    end
+  end
+
+  test "back from a signing app returns to the bundle with the apps for the document picked in the cross-site iframe" do
+    contract = qes_contract("zmluva.pdf").merge(allowed_methods: %w[qes standalone_qes])
+    bundle = create_bundle(contracts: [ contract ], recipients: [ { email: "signer@example.com" } ], note: "Prosíme o podpis do piatku.")
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid
+
+    within_portal_frame do
+      wait_for_signature_validation
+      pick_document_in_onboarding "eid_2024"
+
+      choose I18n.t("contracts.signature_apps.podpisuj_label"), allow_label_click: true
+      click_on I18n.t("contracts.signature_apps.continue_to_sign")
+      assert_text I18n.t("contracts.sessions.podpisuj.title")
+
+      click_on I18n.t("actions.back")
+
+      assert_text "Prosíme o podpis do piatku."
+      assert_text I18n.t("qscd.title.eid_2024")
+      assert_button I18n.t("contracts.signature_apps.continue_to_sign")
+      assert_no_text I18n.t("contracts.sessions.podpisuj.title")
+      assert_no_text I18n.t("contracts.signature_apps_preview.title")
+    end
+  end
+
+  test "signer changes the picked document and returns to the bundle with apps for the new one" do
+    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ], note: "Prosíme o podpis do piatku.")
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid
+
+    within_portal_frame do
+      wait_for_signature_validation
+      pick_document_in_onboarding "eid_2024"
+
+      click_on I18n.t("actions.change_selection")
+      assert_text I18n.t("contracts.onboarding.qscd_check.title")
+      choose I18n.t("qscd.title.eid_2021"), allow_label_click: true
+      click_on I18n.t("contracts.onboarding.qscd_check.continue")
+      click_on I18n.t("contracts.onboarding.pin_check.continue")
+      click_on I18n.t("contracts.onboarding.certificate_check.continue")
+
+      assert_text "Prosíme o podpis do piatku."
+      assert_text I18n.t("qscd.title.eid_2021")
+      assert_text I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021"))
+      assert_button I18n.t("contracts.signature_apps.continue_to_sign")
+    end
+  end
+
+  test "signer of a standalone contract picks a document and signs it on the contract page" do
+    contract = Contract.create!(qes_contract("samostatna.pdf"))
+    install_fake_autogram_app
+
+    embed_with_sdk :initContractIframe, contract.uuid
+
+    within_portal_frame do
+      wait_for_signature_validation
+      pick_document_in_onboarding "eid_2024"
+
+      assert_text "samostatna.pdf"
+      assert_text I18n.t("qscd.title.eid_2024")
+      click_on I18n.t("contracts.signature_apps.continue_to_sign")
+
+      assert_text I18n.t("shared.signature_validation.signatures_found_title")
+    end
+
+    assert contract.reload.signed_document.attached?
   end
 
   test "bundle with several documents offers signing them all at once" do
@@ -164,8 +273,8 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     within_portal_frame do
       assert_text I18n.t("bundles.sign.awaiting_recipients", locale: :en)
-      assert_text I18n.t("bundles.sign.electronic_setup_title", locale: :en)
-      assert_no_text I18n.t("bundles.sign.electronic_setup_title", locale: :sk)
+      assert_text I18n.t("contracts.signature_apps_preview.title", locale: :en)
+      assert_no_text I18n.t("contracts.signature_apps_preview.title", locale: :sk)
     end
   end
 
@@ -180,7 +289,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_text I18n.t("bundles.status.completed")
       assert_text I18n.t("contracts.sign.already_signed.title")
       assert_no_link I18n.t("actions.download_contract")
-      assert_no_text I18n.t("bundles.sign.electronic_setup_title")
+      assert_no_text I18n.t("contracts.signature_apps_preview.title")
     end
   end
 
@@ -194,7 +303,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     within_portal_frame do
       assert_text I18n.t("bundles.sign.declined_info_title")
       assert_button I18n.t("actions.sign")
-      assert_no_text I18n.t("bundles.sign.electronic_setup_title")
+      assert_no_text I18n.t("contracts.signature_apps_preview.title")
     end
   end
 
@@ -235,12 +344,12 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     within_portal_frame do
       assert_text "verejna.pdf"
-      assert_text I18n.t("bundles.sign.electronic_setup_title")
+      assert_text I18n.t("contracts.signature_apps_preview.title")
       assert_no_text I18n.t("bundles.sign.awaiting_recipients")
     end
   end
 
-  test "standalone contract embedded with the contract API shows the preview and signing choice" do
+  test "standalone contract embedded with the contract API shows the preview and the signing apps" do
     contract = Contract.create!(qes_contract("samostatna.pdf"))
 
     embed_with_sdk :initContractIframe, contract.uuid, parentElement: "#agp-container"
@@ -248,12 +357,13 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     within_portal_frame do
       assert_text "samostatna.pdf"
       assert_text I18n.t("contracts.visualization_with_toggle.show_document")
-      assert_text I18n.t("contracts.signing_method_choice.electronic_label")
+      assert_text I18n.t("contracts.signature_apps.title")
+      assert_no_text I18n.t("contracts.signing_method_choice.title")
       assert_no_text "Autogram Portal"
 
       wait_for_signature_validation
       assert_no_text I18n.t("shared.signature_validation.no_signatures_title")
-      click_on I18n.t("contracts.signing_method_choice.continue")
+      click_on I18n.t("contracts.signature_apps_preview.action")
 
       assert_text I18n.t("contracts.onboarding.qscd_check.title")
       assert_no_text "Autogram Portal"
@@ -278,7 +388,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     assert_includes iframe[:src], "/contracts/#{contract.uuid}/sign?iframe=no_preview"
     within_portal_frame do
-      assert_text I18n.t("contracts.signing_method_choice.title")
+      assert_text I18n.t("contracts.signature_apps.title")
       assert_no_text I18n.t("contracts.visualization_with_toggle.show_document")
     end
   end
@@ -489,6 +599,15 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" },
       documents_attributes: [ { blob: pdf_blob(filename) } ]
     }
+  end
+
+  # Picks the signer's document in onboarding, which ends on the signing page again.
+  def pick_document_in_onboarding(qscd)
+    click_on I18n.t("contracts.signature_apps_preview.action")
+    choose I18n.t("qscd.title.#{qscd}"), allow_label_click: true
+    click_on I18n.t("contracts.onboarding.qscd_check.continue")
+    click_on I18n.t("contracts.onboarding.pin_check.continue")
+    click_on I18n.t("contracts.onboarding.certificate_check.continue")
   end
 
   # The lazily loaded validation result moves the buttons below it.

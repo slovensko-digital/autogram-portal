@@ -318,6 +318,70 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
   end
 
+  test "sign skips the method choice and asks for the document first when electronic signing is the only method" do
+    contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
+
+    get sign_contract_path(contract)
+
+    assert_response :success
+    assert_select "button[data-signing-method-target='continueButton']", count: 0
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}[src]", count: 0
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}" do
+      assert_select "h2", text: I18n.t("contracts.signature_apps.title")
+      assert_select "a[href='#{contract_onboarding_path(contract, "qscd_check", method: "electronic")}'][data-turbo-frame='_top']", count: 2
+      assert_select "a", text: I18n.t("contracts.signature_apps_preview.action")
+    end
+    assert_equal %w[autogram avm eidentita podpisuj], signature_app_values
+    assert_select "input[name='signing_app_#{contract.uuid}']:not([disabled])", count: 0
+    assert_select "a[data-signing-app-selector-target$='SubmitButton']", count: 0
+  end
+
+  test "sign offers the signing apps right away once the signer picked a document" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get sign_contract_path(contract, qscd: "eid_2024", iframe: "true")
+
+    assert_response :success
+    assert_select "button[data-signing-method-target='continueButton']", count: 0
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}[loading='eager'][src='#{signature_apps_contract_path(contract, iframe: "true", embedded: true, skip_method_choice: true, qscd: "eid_2024", heading_level: 2)}']"
+  end
+
+  test "sign asks for another document when the chosen one cannot sign" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get sign_contract_path(contract, qscd: "eid_2013")
+
+    assert_response :success
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}[src]", count: 0
+    assert_select "a[href='#{contract_onboarding_path(contract, "qscd_check", method: "electronic")}']", text: I18n.t("contracts.signature_apps_preview.action")
+  end
+
+  test "sign still lets the signer choose when there are several signing methods" do
+    contract = create_pdf_contract(allowed_methods: %w[qes ades])
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    get sign_bundle_path(bundle, recipient: recipient.uuid, qscd: "eid_2024")
+
+    assert_response :success
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}:not([src])" do
+      assert_select "button[data-signing-method-target='continueButton']", count: 1
+      assert_select "input[name='signing_method_#{contract.uuid}']", count: 2
+      assert_select "a[data-signing-method-target='electronicButton'][href*='embedded=true'][data-turbo-frame='signature_apps_#{contract.uuid}']"
+    end
+  end
+
+  test "signature apps shown in the signing page use its heading level and offer no way back to a method choice" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "eid_2024", embedded: true, skip_method_choice: true, heading_level: 2)
+
+    assert_response :success
+    assert_select "h2", text: I18n.t("contracts.signature_apps.title")
+    assert_select "a", text: I18n.t("actions.back"), count: 0
+    assert_select "a[data-signing-app-selector-target='autogramSubmitButton'][href*='skip_method_choice=true'][href*='qscd=eid_2024']"
+  end
+
   test "uploaded own contract allows standalone apps by default and the author can turn them off" do
     post contracts_path, params: {
       document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 own"), "application/pdf", original_filename: "own.pdf") },

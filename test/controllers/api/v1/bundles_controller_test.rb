@@ -11,7 +11,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     @owner_tenant.update_columns(api_token_public_key: @owner_key.public_to_pem, features: [ "api" ])
   end
 
-  test "public bundle sign route falls back to full-page electronic setup when onboarding is still needed" do
+  test "public bundle sign route shows the signing apps disabled until the signer picks a document" do
     post "/api/v1/bundles",
          params: {
            id: SecureRandom.uuid,
@@ -50,8 +50,12 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
 
     contract = bundle.contracts.first
     assert_select "turbo-frame##{"signature_apps_#{contract.uuid}"}[src]", count: 0
-    assert_select "a[href='/contracts/#{contract.uuid}/sessions/autogram']", count: 0
-    assert_select "a[href*='/contracts/#{contract.uuid}/signature_apps']", text: "Pokračovať"
+    assert_select "a[href*='/contracts/#{contract.uuid}/sessions/']", count: 0
+    assert_select "turbo-frame#signature_apps_#{contract.uuid}" do
+      assert_select "input[name='signing_app_#{contract.uuid}'][disabled]", minimum: 1
+      assert_select "input[name='signing_app_#{contract.uuid}']:not([disabled])", count: 0
+      assert_select "a[href^='/contracts/#{contract.uuid}/onboarding/qscd_check?method=electronic'][data-turbo-frame='_top']", text: I18n.t("contracts.signature_apps_preview.action")
+    end
   end
 
   test "api bundle creation allows recipients without email" do

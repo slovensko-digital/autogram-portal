@@ -586,9 +586,6 @@ en:
       individual_signing_section_description: "If you do not want to use batch signing with Autogram Desktop above, you can continue below by signing each document individually with the available apps."
       mobile_individual_signing_title: "Sign documents individually on mobile"
       mobile_individual_signing_description: "Autogram Desktop is not available here, so choose one of the applications below for each document."
-      electronic_setup_title: "Continue to electronic signing"
-      electronic_setup_description: "Before choosing a signing application, complete the short setup for your document type and signing method."
-      electronic_setup_action: "Continue"
       contract_number: "Contract %{current} of %{total}"
       note_title: "Note from sender"
       awaiting_recipients: "Awaiting signature from"
@@ -926,6 +923,10 @@ en:
       already_signed:
         title: "Document has been signed"
         message: "This document has been signed and is complete. No further signature is required."
+    signature_apps_preview:
+      title: "First choose what you will sign with"
+      description: "Based on your ID card, smart card or token, we will enable the signing apps that support it."
+      action: "Choose your ID"
     signature_apps:
       select_signing_app: "Select signing application"
       add_another_signature: "Add another signature"

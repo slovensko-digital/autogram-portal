@@ -87,6 +87,24 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "sms", session.verification_channel
   end
 
+  test "back from a signing app shown in the signing page returns to that page with the chosen document" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/sessions/autogram", params: { iframe: "true", embedded: true, skip_method_choice: true, qscd: "eid_2024" }
+
+    assert_response :success
+    assert_select "a[href='#{sign_contract_path(contract, iframe: "true", qscd: "eid_2024")}'][data-turbo='false']", text: I18n.t("actions.back")
+  end
+
+  test "back from a signing app on the signing apps page returns to that page" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/sessions/autogram", params: { qscd: "eid_2024" }
+
+    assert_response :success
+    assert_select "a[href='#{signature_apps_contract_path(contract, qscd: "eid_2024")}'][data-turbo='false']", text: I18n.t("actions.back")
+  end
+
   test "podpisuj session is created only when standalone signing is allowed" do
     contract = create_contract_without_session
 

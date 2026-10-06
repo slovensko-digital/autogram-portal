@@ -8,7 +8,7 @@
   <% if embedded %>
     <div class="space-y-5" data-controller="signing-app-selector">
       <div class="w-full space-y-1">
-        <h3 class="text-lg font-semibold text-gray-900"><%= t('.title') %></h3>
+        <%= content_tag(params[:heading_level].to_i == 2 ? :h2 : :h3, t('.title'), class: "text-lg font-semibold text-gray-900") %>
         <p class="text-sm text-gray-600"><%= t('.subtitle') %></p>
       </div>
 

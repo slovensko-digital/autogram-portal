@@ -1,0 +1,59 @@
+<%# locals: (contract:, recipient: nil, bundle_id: nil, heading_level: 3) %>
+
+<%#
+  How a signer starts signing a contract on the contract and bundle signing pages.
+
+  Everything is rendered in the signature_apps frame, which the signing apps, their
+  sessions and the signed state replace. When electronic signing is the only method,
+  there is nothing to choose: the signing apps are shown right away, or (before the
+  signer picked a document in onboarding) shown disabled below a prompt to pick it.
+%>
+
+<% frame_id = "signature_apps_#{contract.uuid}" %>
+<% signing_methods = contract.signing_methods_for(recipient: recipient) %>
+<% qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd] %>
+<% signature_apps_ready = params[:iframe] == "no_onboarding" || (qscd.present? && !User.legacy_eid_card?(qscd)) %>
+<% signature_field_appearance_required = contract.prepared_signature_field_appearance_required_for?(recipient: recipient) %>
+
+<% if signing_methods == [ "electronic" ] %>
+  <% if signature_field_appearance_required %>
+    <%= render "contracts/signature_field_appearance_required", frame_id: frame_id, contract: contract, recipient: recipient %>
+  <% elsif signature_apps_ready %>
+    <%= turbo_frame_tag frame_id,
+          src: signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], embedded: true, skip_method_choice: true, qscd: qscd.presence, heading_level: heading_level),
+          loading: "eager" do %>
+      <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
+        <div class="animate-pulse space-y-3">
+          <div class="h-5 w-48 rounded bg-gray-200"></div>
+          <div class="h-16 rounded bg-gray-200"></div>
+          <div class="h-16 rounded bg-gray-200"></div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <%= turbo_frame_tag frame_id do %>
+      <%= render "contracts/signature_apps_preview", contract: contract, recipient: recipient, heading_level: heading_level %>
+    <% end %>
+  <% end %>
+<% else %>
+  <%
+    # Bundles show the signing apps in place of the choice once the signer picked a document.
+    electronic_in_frame = !signature_field_appearance_required && bundle_id.present? && signature_apps_ready
+    electronic_path = if signature_field_appearance_required
+      visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], purpose: "signature_field_appearance")
+    elsif electronic_in_frame
+      signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], embedded: true, qscd: qscd.presence, heading_level: heading_level)
+    else
+      signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], qscd: qscd.presence)
+    end
+  %>
+  <%= turbo_frame_tag frame_id do %>
+    <%= render "contracts/signing_method_choice",
+          contract: contract,
+          recipient: recipient,
+          signing_methods: signing_methods,
+          electronic_path: electronic_path,
+          electronic_frame: (electronic_in_frame ? frame_id : "_top"),
+          heading_level: heading_level %>
+  <% end %>
+<% end %>

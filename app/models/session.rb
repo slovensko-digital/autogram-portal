@@ -295,7 +295,7 @@ class Session < ApplicationRecord
       self,
       target: "signature_apps_#{contract.uuid}",
       partial: "contracts/sessions/session",
-      locals: { session: self, recipient: recipient, iframe: iframe_param, embedded: nil, skip_method_choice: nil }
+      locals: { session: self, recipient: recipient, iframe: iframe_param, embedded: nil }
     )
   end
 end
