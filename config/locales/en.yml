@@ -496,7 +496,7 @@ en:
     bundle_list:
       signatures: "Signatures"
       no_bundles: "No bundles yet"
-      kind_personal: "Personal"
+      kind_awaiting_me: "Awaiting me"
     received:
       title: "Received for Signing"
       subtitle: "Bundles sent to you by others for signing."
@@ -652,6 +652,7 @@ en:
       no_recipients: "Not sent"
     sender:
       sender: "Sender"
+      external: "External sender"
 
   recipients:
     index:
@@ -1513,21 +1514,21 @@ en:
           start: "Get started"
           log_in: "Log in"
           included:
-            - "Sending documents for signature and storing them"
-            - "Adding qualified timestamps"
+            - "Sending documents for signature"
+            - "Qualified timestamps"
           limits:
             stored_documents:
-              one: "Up to %{count} document stored at once"
-              other: "Up to %{count} documents stored at once"
+              one: "Up to %{count} stored document"
+              other: "Up to %{count} stored documents"
             signature_requests:
-              one: "%{count} document sent for signature per month"
-              other: "%{count} documents sent for signature per month"
+              one: "%{count} document for signature per month"
+              other: "%{count} documents for signature per month"
             timestamps:
-              one: "%{count} qualified timestamp per month"
-              other: "%{count} qualified timestamps per month"
+              one: "%{count} timestamp per month"
+              other: "%{count} timestamps per month"
             retention:
-              one: "Documents are kept for at most %{count} day"
-              other: "Documents are kept for at most %{count} days"
+              one: "Documents kept for %{count} day"
+              other: "Documents kept for %{count} days"
             members:
               one: "One user only"
               other: "At most %{count} users"
@@ -1540,7 +1541,7 @@ en:
           usage_prices: "Plus €0.29 per document sent for signing and €0.09 per timestamp."
           contact: "Contact us at"
           included:
-            - "Unlimited users under one company account"
+            - "Unlimited users"
             - "Unlimited documents"
             - "Long-term document archiving"
           excluded: []

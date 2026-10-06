@@ -357,8 +357,8 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
     organization_bundle = request_signature_from_web(as: @owner, filename: "organizacna.pdf")
     add_recipient(organization_bundle, "partner@example.com")
-    personal_bundle = request_signature_from_web(as: @owner, filename: "osobna.pdf")
-    recipient = add_recipient(personal_bundle, colleague.email)
+    awaiting_me_bundle = request_signature_from_web(as: @owner, filename: "osobna.pdf")
+    recipient = add_recipient(awaiting_me_bundle, colleague.email)
     sign_out @owner
 
     sign_in_with_tenant colleague, @organization
@@ -370,14 +370,14 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     assert_select "section[aria-labelledby=awaiting-signature-title]" do
       assert_select "#awaiting-signature-title", text: I18n.t("dashboard.index.awaiting.title_with_count", count: 1)
-      assert_select "a[href=?]", sign_bundle_path(personal_bundle, recipient: recipient.uuid)
+      assert_select "a[href=?]", sign_bundle_path(awaiting_me_bundle, recipient: recipient.uuid)
       assert_select "a[href*=?]", organization_bundle.uuid, count: 0
     end
 
-    personal_row = recent_bundle_row(personal_bundle)
+    awaiting_me_row = recent_bundle_row(awaiting_me_bundle)
     organization_row = recent_bundle_row(organization_bundle)
-    assert_includes personal_row.text, I18n.t("bundles.bundle_list.kind_personal")
-    assert_not_includes organization_row.text, I18n.t("bundles.bundle_list.kind_personal")
+    assert_includes awaiting_me_row.text, I18n.t("bundles.bundle_list.kind_awaiting_me")
+    assert_not_includes organization_row.text, I18n.t("bundles.bundle_list.kind_awaiting_me")
   end
 
   test "a Basic organization sees documents it signed for others only within the signed history" do

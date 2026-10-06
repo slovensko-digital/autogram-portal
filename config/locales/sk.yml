@@ -432,7 +432,7 @@ sk:
     bundle_list:
       signatures: "Podpisy"
       no_bundles: "Zatiaľ žiadne balíky"
-      kind_personal: "Osobné"
+      kind_awaiting_me: "Čaká na mňa"
     received:
       title: "Prijaté na podpis"
       subtitle: "Balíky, ktoré vám odoslali iní na podpis."
@@ -581,6 +581,7 @@ sk:
       no_recipients: "Nepodpísané"
     sender:
       sender: "Odosielateľ"
+      external: "Externý odosielateľ"
 
   recipients:
     index:
@@ -1438,25 +1439,25 @@ sk:
           start: "Začať"
           log_in: "Prihlásiť sa"
           included:
-            - "Odosielanie dokumentov na podpis a ich uchovávanie"
-            - "Pridávanie kvalifikovaných časových pečiatok"
+            - "Odosielanie dokumentov na podpis"
+            - "Kvalifikované časové pečiatky"
           limits:
             stored_documents:
-              one: "Uchovávanie najviac %{count} dokumentu súčasne"
-              few: "Uchovávanie najviac %{count} dokumentov súčasne"
-              other: "Uchovávanie najviac %{count} dokumentov súčasne"
+              one: "Najviac %{count} uložený dokument"
+              few: "Najviac %{count} uložené dokumenty"
+              other: "Najviac %{count} uložených dokumentov"
             signature_requests:
-              one: "%{count} dokument odoslaný na podpis mesačne"
-              few: "%{count} dokumenty odoslané na podpis mesačne"
-              other: "%{count} dokumentov odoslaných na podpis mesačne"
+              one: "%{count} dokument na podpis mesačne"
+              few: "%{count} dokumenty na podpis mesačne"
+              other: "%{count} dokumentov na podpis mesačne"
             timestamps:
-              one: "%{count} kvalifikovaná časová pečiatka mesačne"
-              few: "%{count} kvalifikované časové pečiatky mesačne"
-              other: "%{count} kvalifikovaných časových pečiatok mesačne"
+              one: "%{count} časová pečiatka mesačne"
+              few: "%{count} časové pečiatky mesačne"
+              other: "%{count} časových pečiatok mesačne"
             retention:
-              one: "Dokumenty sa uchovávajú najviac %{count} deň"
-              few: "Dokumenty sa uchovávajú najviac %{count} dni"
-              other: "Dokumenty sa uchovávajú najviac %{count} dní"
+              one: "Uchovanie dokumentov %{count} deň"
+              few: "Uchovanie dokumentov %{count} dni"
+              other: "Uchovanie dokumentov %{count} dní"
             members:
               one: "Iba jeden používateľ"
               few: "Najviac %{count} používatelia"
@@ -1470,7 +1471,7 @@ sk:
           usage_prices: "Plus 0,29 € za odoslaný dokument a 0,09 € za časovú pečiatku."
           contact: "Kontaktujte nás na adrese"
           included:
-            - "Neobmedzený počet používateľov pod jedným firemným účtom"
+            - "Neobmedzený počet používateľov"
             - "Neobmedzené množstvo dokumentov"
             - "Dlhodobá archivácia dokumentov"
           excluded: []

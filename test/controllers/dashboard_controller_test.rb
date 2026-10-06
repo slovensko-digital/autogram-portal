@@ -67,7 +67,43 @@ class DashboardControllerTest < ActionController::TestCase
     end
   end
 
+  test "index shows the sender of bundles awaiting signature and marks senders outside own organizations" do
+    external_tenant = users(:two).tenants.sole
+    external_tenant.update!(name: "External Sender")
+    external_bundle = create_bundle_awaiting_signature(tenant: external_tenant, name: "External bundle")
+    own_bundle = create_bundle_awaiting_signature(tenant: @user.tenants.sole, name: "Own bundle")
+
+    get :index
+
+    assert_response :success
+    assert_select "section[aria-labelledby=awaiting-signature-title]" do
+      assert_select "li", text: /#{external_bundle.name}/ do
+        assert_select "div", text: /#{Regexp.escape(external_bundle.sender_display_name)}/
+        assert_select "span", text: I18n.t("bundles.sender.external", locale: :en)
+      end
+      assert_select "li", text: /#{own_bundle.name}/ do
+        assert_select "div", text: /#{Regexp.escape(own_bundle.sender_display_name)}/
+        assert_select "span", text: I18n.t("bundles.sender.external", locale: :en), count: 0
+      end
+    end
+  end
+
   private
+
+  def create_bundle_awaiting_signature(tenant:, name:)
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new("%PDF-1.4 #{name}"),
+      filename: "#{name.parameterize}.pdf",
+      content_type: "application/pdf"
+    )
+    contract = Contract.create!(
+      documents_attributes: [ { blob: blob } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" }
+    )
+    Bundle.create!(tenant: tenant, name: name, contracts: [ contract ]).tap do |bundle|
+      bundle.recipients.create!(email: @user.email, user: @user, locale: "en")
+    end
+  end
 
   def create_record(user:, expires_at: nil)
     ContractValidationRecord.create!(

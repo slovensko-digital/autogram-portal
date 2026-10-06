@@ -1,4 +1,4 @@
-<%# locals: (bundles:, empty_text:, heading_tag: :h2, personal_bundle_ids: nil) %>
+<%# locals: (bundles:, empty_text:, heading_tag: :h2, awaiting_me_bundle_ids: nil) %>
 
 <section aria-labelledby="recent-bundles-title">
   <%= render "dashboard/section_header",
@@ -8,7 +8,7 @@
         path: (bundles_path if bundles.any?),
         heading_tag: heading_tag %>
   <% if bundles.any? %>
-    <%= render "bundles/bundle_list", bundles: bundles, show_destroy: false, personal_bundle_ids: personal_bundle_ids %>
+    <%= render "bundles/bundle_list", bundles: bundles, show_destroy: false, awaiting_me_bundle_ids: awaiting_me_bundle_ids %>
   <% else %>
     <div class="flex flex-col items-center gap-2 rounded-lg border border-dashed border-gray-300 bg-white px-5 py-10 text-center">
       <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-gray-100">

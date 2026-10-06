@@ -113,8 +113,9 @@ class BundlesController < ApplicationController
       recipient_bundles
     end
 
-    @bundles = @bundles.includes(:contracts, :tenant).order(created_at: order_dir)
+    @bundles = @bundles.includes(:contracts, tenant: :owners).order(created_at: order_dir)
 
+    @own_tenant_ids = current_user.tenant_ids
     @recipients_by_bundle = Recipient.active.visible.where(user: current_user, bundle_id: @bundles.map(&:id))
                                      .index_by(&:bundle_id)
   end

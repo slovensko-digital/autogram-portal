@@ -211,7 +211,7 @@ The current implementation lets a recipient paste and claim a foreign request on
 
 ### Federation Configuration
 
-- `FEDERATION_BASE_URL` - Public base URL this portal advertises to peer portals
+- `FEDERATION_BASE_URL` - Public base URL this portal advertises to peer portals; when blank, the federation section is hidden from the docs page
 - `FEDERATION_ISSUER` - Stable issuer identifier used in federation metadata and JWT assertions
 - `FEDERATION_PORTAL_NAME` - Display name exposed in federation metadata
 - `FEDERATION_PUBLIC_KEY_PEM` - Public key advertised to peer portals

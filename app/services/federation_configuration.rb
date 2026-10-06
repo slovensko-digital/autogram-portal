@@ -1,5 +1,9 @@
 class FederationConfiguration
   class << self
+    def enabled?
+      ENV["FEDERATION_BASE_URL"].present?
+    end
+
     def static_base_url
       ENV["FEDERATION_BASE_URL"].presence || ENV["FEDERATION_ISSUER"].presence || "http://www.example.com"
     end

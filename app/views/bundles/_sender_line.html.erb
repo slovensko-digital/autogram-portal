@@ -1,0 +1,8 @@
+<%# locals: (name:, external: false, classes: "") %>
+
+<div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-700 <%= classes %>">
+  <span class="min-w-0 break-words"><span class="sr-only"><%= t("bundles.sender.sender") %>: </span><%= name %></span>
+  <% if external %>
+    <%= render "shared/badge", color: "yellow", label: t("bundles.sender.external") %>
+  <% end %>
+</div>

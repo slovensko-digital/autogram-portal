@@ -50,7 +50,9 @@
                   <% end %>
                   <%= render 'shared/badge', color: 'indigo', label: t('.external_portal_badge') %>
                 </div>
-                <div class="text-sm text-gray-700"><%= payload["authorName"] %></div>
+                <% if payload["authorName"].present? %>
+                  <%= render "bundles/sender_line", name: payload["authorName"], classes: "md:hidden" %>
+                <% end %>
                 <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-600 flex-wrap">
                   <span class="flex items-center gap-1">
                     <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -70,6 +72,11 @@
                 </div>
                 <% if payload["note"].present? %>
                   <div class="text-sm text-gray-500"><%= payload["note"] %></div>
+                <% end %>
+              </div>
+              <div class="hidden md:block w-72 shrink-0">
+                <% if payload["authorName"].present? %>
+                  <%= render "bundles/sender_line", name: payload["authorName"] %>
                 <% end %>
               </div>
               <div class="hidden md:flex flex-1">
@@ -117,13 +124,8 @@
                     <%= render 'shared/badge', color: 'yellow', label: t('.state_awaiting') %>
                   <% end %>
                 </div>
+                <%= render "bundles/sender_line", name: bundle.sender_display_name, external: @own_tenant_ids.exclude?(bundle.tenant_id), classes: "md:hidden" %>
                 <div class="mt-0.5 flex items-center space-y-1 space-x-3 text-xs text-gray-600 flex-wrap">
-                  <span class="flex items-center gap-1">
-                    <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                    <%= bundle.sender_display_name %>
-                  </span>
                   <span class="flex items-center gap-1">
                     <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
@@ -131,6 +133,9 @@
                     <%= bundle.created_at.strftime("%d.%m.%Y") %>
                   </span>
                 </div>
+              </div>
+              <div class="hidden md:block w-72 shrink-0">
+                <%= render "bundles/sender_line", name: bundle.sender_display_name, external: @own_tenant_ids.exclude?(bundle.tenant_id) %>
               </div>
               <div class="hidden md:flex flex-1">
                 <% if recipient&.declined? %>
