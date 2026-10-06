@@ -19,6 +19,9 @@
             </div>
             <div class="flex-1 min-w-0">
               <%= link_to item.name, item.path, class: "text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors break-words" %>
+              <% if item.sender.present? %>
+                <%= render "bundles/sender_line", name: item.sender, external: item.external_sender, classes: "mt-0.5 md:hidden" %>
+              <% end %>
               <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-600 flex-wrap">
                 <% if item.signatures %>
                   <span class="flex items-center gap-1">
@@ -38,6 +41,11 @@
                   <%= item.received_at.strftime("%d.%m.%Y") %>
                 </span>
               </div>
+            </div>
+            <div class="hidden md:block w-72 shrink-0">
+              <% if item.sender.present? %>
+                <%= render "bundles/sender_line", name: item.sender, external: item.external_sender %>
+              <% end %>
             </div>
             <%= link_to item.path, class: "underline text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors shrink-0" do %>
               <%= t("actions.view") %><span class="sr-only">: <%= item.name %></span>

@@ -2,7 +2,7 @@ class DashboardController < ApplicationController
   AWAITING_LIMIT = 5
   RECENT_LIMIT = 5
 
-  AwaitingItem = Data.define(:name, :received_at, :signatures, :portal, :path)
+  AwaitingItem = Data.define(:name, :sender, :external_sender, :received_at, :signatures, :portal, :path)
 
   before_action :authenticate_user!
 
@@ -41,7 +41,7 @@ class DashboardController < ApplicationController
                                   .to_a
     return unless current_tenant.pro?
 
-    @personal_bundle_ids = bundles.where(id: @recent_bundles.map(&:id)).recipient_user(current_user).distinct.pluck(:id).to_set
+    @awaiting_me_bundle_ids = bundles.where(id: @recent_bundles.map(&:id)).awaiting_signature_of(current_user).pluck(:id).to_set
   end
 
   private
@@ -53,11 +53,14 @@ class DashboardController < ApplicationController
 
     @awaiting_my_signature_count = awaiting_bundles.count + pending_invitations.count
 
-    latest_bundles = awaiting_bundles.order(created_at: :desc).limit(AWAITING_LIMIT).to_a
+    latest_bundles = awaiting_bundles.includes(tenant: :owners).order(created_at: :desc).limit(AWAITING_LIMIT).to_a
+    own_tenant_ids = current_user.tenant_ids
     recipients = Recipient.active.visible.where(user: current_user, bundle_id: latest_bundles.map(&:id)).index_by(&:bundle_id)
     bundle_items = latest_bundles.map do |bundle|
       AwaitingItem.new(
         name: bundle.display_name,
+        sender: bundle.sender_display_name,
+        external_sender: own_tenant_ids.exclude?(bundle.tenant_id),
         received_at: bundle.created_at,
         signatures: "#{bundle.completed_recipients.size} / #{bundle.visible_recipients.size}",
         portal: nil,
@@ -69,6 +72,8 @@ class DashboardController < ApplicationController
       payload = invitation.payload
       AwaitingItem.new(
         name: t("bundles.received.external_invitation_title"),
+        sender: payload["authorName"],
+        external_sender: false,
         received_at: invitation.created_at,
         signatures: nil,
         portal: invitation.portal_instance.name,

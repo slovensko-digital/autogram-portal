@@ -72,6 +72,15 @@ class Tenant < ApplicationRecord
     user.present? && memberships.owner.exists?(user: user)
   end
 
+  # A Basic tenant is a personal account: it is presented by its owner's
+  # self-chosen name together with their email, which identifies the sender.
+  def sender_display_name
+    owner = owners.first if basic?
+    return name unless owner
+
+    [ owner.name.presence, owner.email ].compact.uniq.join(" - ")
+  end
+
   # Owners get the author notifications of the tenant's bundles and contracts,
   # except for whoever caused them.
   def notification_recipients(except: nil)

@@ -18,20 +18,23 @@ This project is funded through [NGI Zero Core](https://nlnet.nl/core), a fund es
 
 ## What It Does
 
-Autogram Portal provides comprehensive electronic signature management for individuals, organizations, and integrators:
+Autogram Portal provides comprehensive electronic signature management for individuals, organizations, and integrators. The user guide (Slovak and English) is part of the app at [/docs](https://agp.dev.slovensko.digital/docs).
 
-### For Unregistered Users
-- **Sign Documents** - Upload and sign documents using Autogram Desktop or Mobile
+### Without an Account
+- **Sign Documents** - Upload a document and sign it with a qualified electronic signature using Autogram Desktop, Autogram Mobile, eIdentita or a standalone application such as Podpisuj
 - **Verify Signatures** - Validate existing electronic signatures
 - **View Document Contents** - Visualize ASiC-E containers and Slovak XML Datacontainers (special XML format for eGovernment)
-- **Share for Signing** - Generate shareable URLs for others to sign your documents
+- **Sign Requests** - Sign or decline documents sent to you through an email invitation link
 
 ### For Registered Users
 Sign in via **Google OAuth2** or **email magic link** to access:
-- **Manage Contracts** - Store and organize contracts in your profile
-- **Track Signature Status** - Monitor pending and completed signatures
-- **Extend Signatures** - Add timestamps to existing signatures for long-term validity
-- **Email Notifications** *(coming soon)* - Send contracts for signature via email
+- **Organizations** - Every user has a personal Basic organization; PRO organizations have several members sharing all documents and bundles
+- **Request Signatures** - Send documents in bundles to recipients by email or a shared link, with signing rules (all, any, a number of recipients) and email notifications
+- **Verified AdES Signing** - Let recipients sign with a simple electronic signature backed by an evidence record after SMS or email verification
+- **Visible Signature Fields** - Prepare a visible PAdES signature field for each recipient of a PDF
+- **Extend Signatures** - Add qualified timestamps (T) or archive timestamps (LTA) to existing signatures
+- **Validation Archive** - Keep validation metadata of signed documents and refresh them to LTA before they expire (organization feature)
+- **Plan Usage** - See the usage of the organization's plan limits
 
 ### For Integrators (API)
 - **Create Bundles** - Programmatically create bundles of contracts via API
@@ -211,7 +214,7 @@ The current implementation lets a recipient paste and claim a foreign request on
 
 ### Federation Configuration
 
-- `FEDERATION_BASE_URL` - Public base URL this portal advertises to peer portals
+- `FEDERATION_BASE_URL` - Public base URL this portal advertises to peer portals; when blank, the federation section is hidden from the docs page
 - `FEDERATION_ISSUER` - Stable issuer identifier used in federation metadata and JWT assertions
 - `FEDERATION_PORTAL_NAME` - Display name exposed in federation metadata
 - `FEDERATION_PUBLIC_KEY_PEM` - Public key advertised to peer portals

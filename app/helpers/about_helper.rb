@@ -5,9 +5,13 @@ module AboutHelper
     {
       stored_documents: limits.max_stored_documents,
       signature_requests: limits.monthly_signature_requests,
-      timestamps: limits.monthly_timestamps,
-      retention: limits.retention&.in_days&.to_i
+      timestamps: limits.monthly_timestamps
     }.filter_map { |key, count| t("about.index.start_using.basic.limits.#{key}", count: count) if count }
+  end
+
+  def basic_plan_retention_item
+    retention = PlanLimits.for(:basic).retention
+    t("about.index.start_using.basic.limits.retention", count: retention.in_days.to_i) if retention
   end
 
   def basic_plan_members_item

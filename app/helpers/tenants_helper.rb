@@ -5,6 +5,12 @@ module TenantsHelper
     tag.span(label, class: "shrink-0 rounded-full font-semibold #{size} #{colors}")
   end
 
+  # Without the archivation feature the LTA extension only adds an archive timestamp, so its labels
+  # have a `<key>_without_archivation` variant. Keys without one (e.g. the T level) are shared.
+  def archive_action_t(tenant, key)
+    tenant&.archivation_enabled? ? t(key) : t("#{key}_without_archivation", default: key.to_sym)
+  end
+
   # A usage value (Tenant::Usage::UsageEntry#used or #max) in the unit of its limit.
   def plan_usage_value(limit, value)
     limit == :storage ? PlanLimits::Exceeded.format(limit, value) : number_with_delimiter(value)

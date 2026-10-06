@@ -1,0 +1,6 @@
+<%# locals: (items:) %>
+<ul role="list" class="list-disc pl-5 space-y-2 text-sm text-gray-600">
+  <% items.each_value do |item| %>
+    <li><strong class="font-semibold text-gray-900"><%= item[:label] %></strong> – <%= item[:description] %></li>
+  <% end %>
+</ul>

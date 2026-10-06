@@ -51,7 +51,7 @@
         <%= render 'shared/radio_button_card',
           name: 'document_action',
           value: 'archive_signature',
-          label: t('documents.new.actions.archive.title'),
+          label: archive_action_t(@contract.tenant, 'documents.new.actions.archive.title'),
           description: t('documents.new.actions.archive.subtitle'),
           disabled: true,
           disabled_reasons: [t('documents.new.actions.account_required')] %>
@@ -89,7 +89,7 @@
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'archive_signature',
-              label: t('documents.new.actions.archive.title'),
+              label: archive_action_t(@contract.tenant, 'documents.new.actions.archive.title'),
               description: t('documents.new.actions.archive.subtitle'),
               checked: false,
               disabled: timestamp_limit_reasons.any?,

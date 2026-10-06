@@ -90,6 +90,16 @@ class BundleTest < ActiveSupport::TestCase
     assert_equal [ co_owner ], bundle.tenant.notification_recipients(except: @author)
   end
 
+  test "basic tenant sender shows the owner name and email" do
+    bundle = Bundle.new(tenant: @author.tenants.sole)
+
+    @author.update_column(:name, "Marek Celuch")
+    assert_equal "Marek Celuch - #{@author.email}", bundle.sender_display_name
+
+    @author.update_column(:name, nil)
+    assert_equal @author.email, bundle.sender_display_name
+  end
+
   test "does not notify author for webhook-managed bundles even when enabled" do
     bundle = Bundle.new(tenant: @author.tenants.sole, author_notifications_enabled: true)
     bundle.build_webhook(url: "https://example.com/webhook", method: :standard)

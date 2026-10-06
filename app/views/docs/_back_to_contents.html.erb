@@ -1,0 +1,9 @@
+<%# Vráti fokus na obsah príručky (nav#docs-contents má tabindex="-1"). Bez Turba, aby prehliadač presunul fokus. %>
+<p class="mt-10 flex justify-end">
+  <a href="#docs-contents" data-turbo="false" class="inline-flex items-center gap-1.5 rounded-sm text-sm font-medium text-blue-700 underline underline-offset-4 hover:text-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+    </svg>
+    <%= t('docs.index.back_to_contents') %>
+  </a>
+</p>

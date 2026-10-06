@@ -86,7 +86,7 @@ class Bundle < ApplicationRecord
   end
 
   def sender_display_name
-    tenant.name
+    tenant.sender_display_name
   end
 
   def display_name

@@ -16,7 +16,7 @@
         bundles: @recent_bundles,
         empty_text: t("dashboard.index.recent_bundles.empty_pro"),
         heading_tag: :h3,
-        personal_bundle_ids: @personal_bundle_ids %>
+        awaiting_me_bundle_ids: @awaiting_me_bundle_ids %>
 
   <%= render "dashboard/usage_strip", tenant: current_tenant, heading_tag: :h3 %>
 </section>
