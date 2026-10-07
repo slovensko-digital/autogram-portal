@@ -401,6 +401,73 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{contract_path(@contract)}'][data-turbo-frame='_top']"
   end
 
+  test "pending session page asks for the session state with its own token" do
+    get "/contracts/#{@contract.uuid}/sessions/#{@session.id}"
+
+    assert_response :success
+    state_url = css_select("turbo-cable-stream-source[data-controller='session-state']").sole["data-session-state-url-value"]
+    assert_match %r{\A/contracts/#{@contract.uuid}/sessions/#{@session.id}/state\?session_token=}, state_url
+
+    get state_url
+
+    assert_response :no_content
+  end
+
+  test "state is forbidden without token or authorized user" do
+    @session.update_columns(status: Session.statuses[:signed], completed_at: Time.current)
+
+    get "/contracts/#{@contract.uuid}/sessions/#{@session.id}/state"
+
+    assert_response :forbidden
+  end
+
+  test "state replaces the signing apps with the signed session of a signed bundle signer" do
+    contract, session = create_bundle_contract_with_session
+    token = SessionAccessToken.generate(contract: contract, session: session)
+    session.signer_contract.update_column(:signed_at, Time.current)
+    session.update_columns(status: Session.statuses[:signed], completed_at: Time.current)
+
+    get "/contracts/#{contract.uuid}/sessions/#{session.id}/state", params: { session_token: token }
+
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_select "turbo-stream[action='replace'][target='signature_apps_#{contract.uuid}']"
+    assert_includes response.body, I18n.t("contracts.sessions.signed.title")
+  end
+
+  test "state replaces the signing apps with the error of a failed session" do
+    token = SessionAccessToken.generate(contract: @contract, session: @session)
+    @session.update_columns(status: Session.statuses[:failed], error_message: "Card was removed", completed_at: Time.current)
+
+    get "/contracts/#{@contract.uuid}/sessions/#{@session.id}/state", params: { session_token: token }
+
+    assert_response :success
+    assert_select "turbo-stream[action='replace'][target='signature_apps_#{@contract.uuid}']"
+    assert_includes response.body, "Card was removed"
+    assert_not_includes response.body, "session-state"
+  end
+
+  test "avm session page has phone actions next to the qr code" do
+    contract = create_contract_without_session
+
+    with_avm_service(Struct.new(:started_at) do
+      def initiate_signing(_contract, signer_contract: nil)
+        { document_identifier: "guid-123", encryption_key: "secret-key-456", signing_started_at: started_at }
+      end
+    end.new(Time.current)) do
+      without_avm_poll_job do
+        get "/contracts/#{contract.uuid}/sessions/avm"
+      end
+    end
+
+    assert_response :success
+    assert_select "[data-signers--avm-target='phoneActions'].hidden" do
+      assert_select "a[href^='avm://'][data-action='signers--avm#openApp:prevent']"
+      assert_select "button[data-action='signers--avm#showQrCode']", text: I18n.t("contracts.sessions.avm.show_qr_code")
+    end
+    assert_select "[data-signers--avm-target='qrCode']:not(.hidden) a[data-signers--avm-target='appUrl'] svg"
+  end
+
   test "upload succeeds for indeterminate autogram test certificate in test environment" do
     validation_result = AutogramService::ValidationResult.new(
       hasSignatures: true,

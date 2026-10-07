@@ -1,0 +1,10 @@
+<%# The same update as Session#broadcast_status_change sends when the session completes. %>
+<% if @session.signed? %>
+  <%= turbo_stream.replace "signature_apps_#{@contract.uuid}", partial: "contracts/sessions/signed", locals: { session: @session } %>
+<% elsif @session.canceled? %>
+  <%= turbo_stream.refresh %>
+<% else %>
+  <%= turbo_stream.replace "signature_apps_#{@contract.uuid}",
+        partial: "contracts/sessions/session",
+        locals: { session: @session, recipient: @session.recipient, iframe: @session.iframe_param, qscd: @session.qscd_param } %>
+<% end %>

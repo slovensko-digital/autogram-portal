@@ -892,7 +892,12 @@ sk:
       signature_format: "Formát podpisu"
       signature_level: "Typ podpisu"
       allowed_methods: "Povolené metódy podpisu"
+    visual_stamp_alt_text:
+      with_name: "Vizuálny podpis: %{name}, %{date}"
+      without_name: "Vizuálny podpis, %{date}"
+      date_format: "%-d. %-m. %Y"
     signature_field_preparations:
+      pdf_field_label: "Podpis – %{name}"
       index:
         title: "Pripraviť viditeľné podpisové polia"
         subtitle: "Dva kroky: pre každého príjemcu umiestnite jedno podpisové pole a potom vygenerujte podpisový PDF súbor, aby sa polia k nim dostali."
@@ -1074,6 +1079,9 @@ sk:
         subtitle: "Použite mobilnú aplikáciu vo vašom telefóne"
         note: "Na mobile: Naskenujte QR kód alebo naň klepnite"
         expiry: "Platnosť podpisovania vyprší o 10 minút"
+        phone_instructions: "Podpíšte dokument v aplikácii Autogram v mobile. Potom sa vráťte sem, stránka sa aktualizuje sama."
+        open_app: "Otvoriť Autogram v mobile"
+        show_qr_code: "Zobraziť QR kód na podpis v inom zariadení"
         step1_title: "Nainštalujte si Autogram v mobile"
         step1_desc_html: "Stiahnite a nainštalujte si <a href='https://sluzby.slovensko.digital/autogram-v-mobile/index.html#download' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>Autogram v mobile</b></a>"
         step2_title: "Naskenujte QR kód"
@@ -1098,6 +1106,9 @@ sk:
         subtitle: "Použite mobilnú aplikáciu eIdentita vo vašom telefóne"
         note: "Na mobile: Naskenujte QR kód aplikáciou eIdentita alebo naň klepnite"
         expiry: "Platnosť podpisovania vyprší o 10 minút"
+        phone_instructions: "Podpíšte dokument v aplikácii eIdentita. Potom sa vráťte sem, stránka sa aktualizuje sama."
+        open_app: "Otvoriť aplikáciu eIdentita"
+        show_qr_code: "Zobraziť QR kód na podpis v inom zariadení"
         step1_title: "Naskenujte QR kód"
         step1_desc_html: "Použite aplikáciu <a href='https://meid.minv.sk/' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>eIdentita</b></a> na naskenovanie QR kódu zobrazeného na obrazovke"
         step2_title: "Skontrolujte zdroj súboru"
@@ -1878,14 +1889,14 @@ sk:
                 url: "https://autogram.slovensko.digital"
           autogram_mobile:
             label: "Autogram v mobile"
-            description: "Bezplatná open-source aplikácia pre Android a iOS. Podpisuje občianskym preukazom s NFC čipom, ktorý priložíte k telefónu. Na počítači naskenujete QR kód, v telefóne otvoríte odkaz."
+            description: "Bezplatná open-source aplikácia pre Android a iOS. Podpisuje občianskym preukazom s NFC čipom, ktorý priložíte k telefónu. Na počítači alebo tablete naskenujete QR kód telefónom, v telefóne sa aplikácia otvorí priamo."
             links:
               info:
                 label: "Viac info a stiahnutie"
                 url: "https://autogram.slovensko.digital"
           eidentita:
             label: "eIdentita"
-            description: "Štátna mobilná aplikácia pre Android a iOS. Podpisuje občianskym preukazom s NFC čipom. Na počítači naskenujete QR kód, v telefóne otvoríte odkaz."
+            description: "Štátna mobilná aplikácia pre Android a iOS. Podpisuje občianskym preukazom s NFC čipom. Na počítači alebo tablete naskenujete QR kód telefónom, v telefóne sa aplikácia otvorí priamo."
             links:
               ios:
                 label: "Stiahnuť z App Store"

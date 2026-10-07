@@ -116,6 +116,7 @@ Rails.application.routes.draw do
       member do
         get :parameters
         get :download
+        get :state
         post :upload
         post :request_verification
         post :verify_verification

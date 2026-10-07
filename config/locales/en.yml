@@ -972,7 +972,12 @@ en:
       signature_method: "Electronic signature level"
       signature_level: "Electronic signature level"
       allowed_methods: "Allowed signature methods"
+    visual_stamp_alt_text:
+      with_name: "Visual signature: %{name}, %{date}"
+      without_name: "Visual signature, %{date}"
+      date_format: "%B %-d, %Y"
     signature_field_preparations:
+      pdf_field_label: "Signature – %{name}"
       index:
         title: "Prepare visible signature fields"
         subtitle: "Two steps: place one signature field for each recipient, then generate the signing PDF so the fields reach them."
@@ -1150,6 +1155,9 @@ en:
         subtitle: "Use the mobile application on your phone"
         note: "On mobile: Scan the QR code or tap it"
         expiry: "Signing will expire in 10 minutes"
+        phone_instructions: "Sign the document in the Autogram Mobile app. Then come back here, the page updates by itself."
+        open_app: "Open Autogram Mobile"
+        show_qr_code: "Show QR code to sign on another device"
         step1_title: "Install Autogram on mobile"
         step1_desc_html: "Download and install <a href='https://sluzby.slovensko.digital/autogram-v-mobile/index.html#download' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>Autogram on mobile</b></a>"
         step2_title: "Scan the QR code"
@@ -1174,6 +1182,9 @@ en:
         subtitle: "Use the eIdentita mobile application on your phone"
         note: "On mobile: Scan the QR code with eIdentita app or tap it"
         expiry: "Signing will expire in 10 minutes"
+        phone_instructions: "Sign the document in the eIdentita app. Then come back here, the page updates by itself."
+        open_app: "Open the eIdentita app"
+        show_qr_code: "Show QR code to sign on another device"
         step1_title: "Scan the QR code"
         step1_desc_html: "Use the <a href='https://meid.minv.sk/' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>eIdentita</b></a> application to scan the QR code displayed on the screen"
         step2_title: "Check the file source"
@@ -1950,14 +1961,14 @@ en:
                 url: "https://autogram.slovensko.digital"
           autogram_mobile:
             label: "Autogram Mobile"
-            description: "A free open-source application for Android and iOS. It signs with an ID card with an NFC chip that you hold to the phone. On a computer you scan a QR code, on the phone you open a link."
+            description: "A free open-source application for Android and iOS. It signs with an ID card with an NFC chip that you hold to the phone. On a computer or tablet you scan a QR code with your phone, on the phone the app opens directly."
             links:
               info:
                 label: "More info and download"
                 url: "https://autogram.slovensko.digital"
           eidentita:
             label: "eIdentita"
-            description: "The Slovak government mobile application for Android and iOS. It signs with an ID card with an NFC chip. On a computer you scan a QR code, on the phone you open a link."
+            description: "The Slovak government mobile application for Android and iOS. It signs with an ID card with an NFC chip. On a computer or tablet you scan a QR code with your phone, on the phone the app opens directly."
             links:
               ios:
                 label: "Download from App Store"

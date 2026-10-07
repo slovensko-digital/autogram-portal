@@ -105,6 +105,14 @@ class Contracts::SessionsController < ApplicationController
     head :not_found
   end
 
+  # The result of a session for a page that missed its broadcast, e.g. a phone browser that dropped
+  # the WebSocket while the signer was in the signing app.
+  def state
+    return head :no_content if @session.pending?
+
+    render formats: :turbo_stream
+  end
+
   def download
     document = @contract.documents_to_sign_for(signer_contract: @session.signer_contract).first
     unless document&.blob&.attached?

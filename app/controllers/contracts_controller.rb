@@ -540,7 +540,8 @@ class ContractsController < ApplicationController
       y: visual_stamp.y.to_f,
       width: visual_stamp.width.to_f,
       height: visual_stamp.height.to_f,
-      text: visual_stamp.text
+      text: visual_stamp.text,
+      altText: visual_stamp_alt_text(visual_stamp)
     }
 
     if visual_stamp.image.attached?
@@ -550,6 +551,17 @@ class ContractsController < ApplicationController
     end
 
     stamp
+  end
+
+  # Alternative text of the stamp in tagged PDFs, so assistive technologies announce the visual signature.
+  def visual_stamp_alt_text(visual_stamp)
+    date = Date.current.strftime(t("contracts.visual_stamp_alt_text.date_format"))
+    name = @signer_contract.signer.recipient&.name.presence || @signer_contract.signer.user&.name.presence
+    alt_text = name ? t("contracts.visual_stamp_alt_text.with_name", name: name, date: date) : t("contracts.visual_stamp_alt_text.without_name", date: date)
+    text = visual_stamp.text.to_s.squish
+
+    alt_text = "#{alt_text}. #{text}" if text.present? && text != name
+    alt_text.truncate(500)
   end
 
   def visual_stamp_image_payload(existing_stamp)
