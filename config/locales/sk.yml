@@ -1718,7 +1718,7 @@ sk:
             description: "Organizácia pre firmy a úrady s viacerými členmi. Všetci členovia vidia a spravujú všetky dokumenty a balíky organizácie. Organizáciu PRO zriaďuje administrátor portálu, ktorý nastavuje aj jej názov, plán a funkcie (Archív podpisov, API prístup)."
           roles:
             label: "Vlastník a člen"
-            description: "Vlastníci pozývajú a odstraňujú členov, spravujú API kľúč a dostávajú e-mailové notifikácie o balíkoch organizácie. Členovia pracujú s dokumentmi a balíkmi rovnako ako vlastníci."
+            description: "Vlastníci pozývajú a odstraňujú členov, spravujú API kľúč a dostávajú e-mailové notifikácie o balíkoch poslaných cez API. Členovia pracujú s dokumentmi a balíkmi rovnako ako vlastníci."
           selection:
             label: "Výber organizácie"
             description: "Ak ste členom viacerých organizácií, po prihlásení si vyberiete, v ktorej chcete pracovať. Aktuálnu organizáciu vidíte v ľavom menu dole. Do inej organizácie sa prepnete tak, že sa odhlásite a znova prihlásite."
@@ -2065,7 +2065,7 @@ sk:
         public_link_title: "Verejný odkaz na podpisovanie"
         public_link_description: "V úprave balíka môžete zapnúť verejný odkaz. Ktokoľvek, kto ho má, potom môže dokumenty v balíku podpísať bez pozvánky. Odkaz skopírujete z detailu balíka."
         notifications_title: "Notifikácie"
-        notifications_description: "Ak sú zapnuté Notifikácie pre autora, vlastníci organizácie dostávajú e-maily o podpisoch, odmietnutiach a dokončení balíka – okrem toho, kto udalosť sám spôsobil."
+        notifications_description: "Ak sú zapnuté Notifikácie pre autora, e-maily o podpisoch, odmietnutiach a dokončení balíka dostáva ten, kto balík poslal na podpis – nie však o tom, čo urobil sám. O balíkoch poslaných cez API dostávajú e-maily vlastníci organizácie."
       received:
         title: "Prijaté na podpis"
         intro: "Keď vás niekto požiada o podpis, dostanete e-mail s odkazom. Odkaz funguje aj bez prihlásenia. Ak máte v portáli účet s rovnakým e-mailom, balík nájdete aj v sekcii Prijaté na podpis a na stránke Domov."

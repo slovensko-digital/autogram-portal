@@ -47,6 +47,7 @@ class ContractsController < ApplicationController
     authorize Contract
     @contract = Contract.new(
       tenant: current_tenant,
+      author: current_user,
       author_notifications_enabled: true,
       allowed_methods: Contract::OWN_SIGNING_DEFAULT_METHODS.dup,
       documents: [ Document.new(params.require(:document).permit(:blob)) ]
@@ -274,7 +275,7 @@ class ContractsController < ApplicationController
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
-        bundle = Bundle.create!(contracts: [ @contract ], tenant: @contract.tenant, author_notifications_enabled: true)
+        bundle = Bundle.create!(contracts: [ @contract ], tenant: @contract.tenant, author: current_user, author_notifications_enabled: true)
         redirect_to bundle
       elsif params[:next_step] == "sign"
         redirect_to sign_contract_path(@contract)
@@ -322,6 +323,7 @@ class ContractsController < ApplicationController
       next unless @contract.anonymous?
 
       @contract.tenant = current_tenant
+      @contract.author = current_user
       next if @contract.save
 
       # The tenant has no room for it (plan limits): the contract stays anonymous.

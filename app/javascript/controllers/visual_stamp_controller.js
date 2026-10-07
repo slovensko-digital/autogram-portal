@@ -4,6 +4,10 @@ import * as pdfjsLib from "pdfjs-dist"
 const PDFJS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs"
 const MIN_WIDTH = 120
 const MIN_HEIGHT = 36
+// Stamp layout in PDF points, as drawn by PdfStamper in avm-service.
+const STAMP_PADDING = 8
+const STAMP_FONT_SIZE = 10
+const STAMP_LINE_HEIGHT = 12
 const ARROW_DELTAS = {
   ArrowLeft: [ -1, 0 ],
   ArrowRight: [ 1, 0 ],
@@ -154,6 +158,16 @@ export default class extends Controller {
       width: width * scaleX,
       height: height * scaleY
     })
+    this.applyContentScale(scaleX)
+  }
+
+  // Scales the stamp padding and text with the preview, so the content sits where it ends up in the PDF.
+  applyContentScale(scale) {
+    if (!this.hasStampTextTarget) return
+
+    this.stampTarget.style.padding = `${STAMP_PADDING * scale}px`
+    this.stampTextTarget.style.fontSize = `${STAMP_FONT_SIZE * scale}px`
+    this.stampTextTarget.style.lineHeight = `${STAMP_LINE_HEIGHT * scale}px`
   }
 
   applyPreviewRect(rect) {

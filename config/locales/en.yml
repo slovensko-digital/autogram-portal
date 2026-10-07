@@ -1790,7 +1790,7 @@ en:
             description: "An organization for companies and offices with several members. All members see and manage all contracts and bundles of the organization. PRO organizations are set up by the portal administrator, who also manages their name, plan and features (Validation archive, API access)."
           roles:
             label: "Owner and member"
-            description: "Owners invite and remove members, manage the API key and receive email notifications about the organization's bundles. Members work with contracts and bundles the same way as owners."
+            description: "Owners invite and remove members, manage the API key and receive email notifications about bundles sent through the API. Members work with contracts and bundles the same way as owners."
           selection:
             label: "Choosing an organization"
             description: "If you are a member of several organizations, you choose the one to work in after signing in. The current organization is shown at the bottom of the left menu. To switch to another organization, sign out and sign in again."
@@ -2137,7 +2137,7 @@ en:
         public_link_title: "Public signing link"
         public_link_description: "When editing a bundle you can turn on the public signing link. Anyone who has it can then sign the documents in the bundle without an invitation. You copy the link from the bundle page."
         notifications_title: "Notifications"
-        notifications_description: "With Author notifications on, the organization's owners receive emails about signatures, declines and the completion of the bundle – except whoever caused the event."
+        notifications_description: "With Author notifications on, whoever sent the bundle for signature receives emails about signatures, declines and the completion of the bundle – but not about their own actions. For bundles sent through the API, the organization's owners receive the emails."
       received:
         title: "Received for Signing"
         intro: "When someone asks you to sign, you receive an email with a link. The link works without signing in. If you have a portal account with the same email, you also find the bundle in Received for Signing and on the Home page."

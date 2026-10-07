@@ -77,9 +77,10 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_not outsider.member_of?(@organization)
   end
 
-  test "with several recipients the bundle waits for all of them and owners are told about each signature" do
+  test "with several recipients the bundle waits for all of them and its author is told about each signature" do
     co_owner = confirmed_user("co-owner@firma-abc.sk", tenant: @organization, role: :owner)
     bundle = request_signature_from_web(as: @owner, filename: "spolocna.pdf")
+    assert_equal @owner, bundle.author
     first = add_recipient(bundle, "first@example.com")
     second = add_recipient(bundle, "second@example.com")
     sign_out @owner
@@ -90,16 +91,27 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert first.reload.signed?
     assert second.reload.pending?
     assert_not bundle.reload.completed?
-    [ @owner, co_owner ].each do |owner|
-      assert_equal 1, mails_to(owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_contract_signed.subject") }
-    end
+    assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_contract_signed.subject") }
 
     sign_with_autogram(contract, recipient: second)
 
     assert bundle.reload.completed?
-    [ @owner, co_owner ].each do |owner|
-      assert_equal 1, mails_to(owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
-    end
+    assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+    assert_empty mails_to(co_owner.email), "other owners are not told about bundles they did not send"
+  end
+
+  test "a member's bundle notifies the member, not the owners" do
+    member = confirmed_user("member@firma-abc.sk", tenant: @organization)
+    bundle = request_signature_from_web(as: member, filename: "clenska.pdf")
+    recipient = add_recipient(bundle, "partner@example.com")
+    sign_out member
+
+    sign_with_autogram(bundle.contracts.sole, recipient: recipient)
+
+    assert bundle.reload.completed?
+    assert_equal member, bundle.author
+    assert_equal 1, mails_to(member.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+    assert_empty mails_to(@owner.email)
   end
 
   test "with the any rule the first signature completes the bundle and releases the other recipients" do
@@ -154,7 +166,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal 1, second.sessions.count
   end
 
-  test "owner signs their own request too and is not notified about their own signature" do
+  test "owner signs their own request too and nobody is notified about it" do
     co_owner = confirmed_user("co-owner@firma-abc.sk", tenant: @organization, role: :owner)
     bundle = request_signature_from_web(as: @owner, filename: "obojstranna.pdf")
     recipient = add_recipient(bundle, "partner@example.com")
@@ -167,7 +179,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal @owner, author_proxy.user
     assert_not bundle.reload.completed?, "the author's signature does not replace the recipient's"
     assert_empty mails_to(@owner.email).select { |m| m.subject == I18n.t("notification_mailer.bundle_contract_signed.subject") }
-    assert_equal 1, mails_to(co_owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_contract_signed.subject") }
+    assert_empty mails_to(co_owner.email), "the author's own signature is not news for the other owners"
     sign_out @owner
 
     sign_with_autogram(bundle.contracts.sole, recipient: recipient)
@@ -175,7 +187,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert bundle.reload.completed?
   end
 
-  test "member signs a standalone document of the organization and the owner is notified" do
+  test "member uploads and signs a standalone document and nobody is notified" do
     member = confirmed_user("member@firma-abc.sk", tenant: @organization)
     sign_in_with_tenant member, @organization
     post contracts_path, params: { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 vlastny"), "application/pdf", original_filename: "vlastny.pdf") } }
@@ -191,7 +203,8 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     assert contract.reload.signed_document_attached?
     assert_nil contract.bundle
-    assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.contract_signed.subject") }
+    assert_equal member, contract.author
+    assert_empty mails_to(@owner.email)
     assert_empty mails_to(member.email)
   end
 

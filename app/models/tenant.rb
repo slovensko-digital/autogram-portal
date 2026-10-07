@@ -81,10 +81,12 @@ class Tenant < ApplicationRecord
     [ owner.name.presence, owner.email ].compact.uniq.join(" - ")
   end
 
-  # Owners get the author notifications of the tenant's bundles and contracts,
-  # except for whoever caused them.
-  def notification_recipients(except: nil)
-    owners.where.not(id: except&.id).to_a
+  # Author notifications of a bundle or contract go to its author while they are a member. Without
+  # one (sent through the API, created before authors were recorded, or the author left), they go
+  # to the owners. Whoever caused the notification never gets it.
+  def notification_recipients(author: nil, except: nil)
+    recipients = author && users.exists?(author.id) ? [ author ] : owners.to_a
+    recipients - [ except ]
   end
 
   private
