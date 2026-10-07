@@ -43,7 +43,12 @@ accessories:
       app_port: 7200
       healthcheck:
         path: /info
-
+  redis:
+    image: redis:8.10
+    roles:
+      - web
+    directories:
+      - data:/data
 
 registry:
   server: registry.dev.slovensko.digital
