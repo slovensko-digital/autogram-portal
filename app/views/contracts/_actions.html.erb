@@ -4,20 +4,35 @@
   <% anonymous_account_teaser = current_user.nil? && @contract.anonymous? %>
   <% contract_policy = policy(@contract) %>
   <% managed_contract = contract_policy.manage? %>
+  <% signing_supported = @contract.signing_supported? %>
+  <% timestamp_limit_reasons = managed_contract && !@contract.tenant.signature_extension_allowed? ? [ t('plan_limits.action_unavailable.timestamps') ] : [] %>
+  <% timestamp_extendable = managed_contract && @contract.extendable_signatures?(target_level: 'T') %>
+  <% archive_extendable = managed_contract && @contract.extendable_signatures?(target_level: 'LTA') %>
+  <% default_action, default_action_url = if signing_supported
+       [ 'sign', signature_parameters_contract_path(@contract, target_step: 'sign') ]
+     elsif timestamp_limit_reasons.empty? && timestamp_extendable
+       [ 'add_timestamp', signature_extension_contract_path(@contract, target_level: 'T') ]
+     elsif timestamp_limit_reasons.empty? && archive_extendable
+       [ 'archive_signature', signature_extension_contract_path(@contract, target_level: 'LTA') ]
+     end %>
   <div class="w-full" data-controller="radio-link" data-action="change->radio-link#updateLink">
     <fieldset class="space-y-3">
       <legend class="mb-6 w-full text-center lg:text-left">
         <h2 class="text-lg font-semibold text-gray-900 mb-2"><%= t('documents.new.actions.header') %></h2>
       </legend>
-      <%= render 'shared/radio_button_card',
-            name: 'document_action',
-            value: 'sign',
-            label: t('documents.new.actions.sign.title'),
-            description: t('documents.new.actions.sign.subtitle'),
-            checked: true,
-            data_attributes: {
-              url: signature_parameters_contract_path(@contract, target_step: 'sign')
-            } %>
+      <% if signing_supported %>
+        <%= render 'shared/radio_button_card',
+              name: 'document_action',
+              value: 'sign',
+              label: t('documents.new.actions.sign.title'),
+              description: t('documents.new.actions.sign.subtitle'),
+              checked: true,
+              data_attributes: {
+                url: signature_parameters_contract_path(@contract, target_step: 'sign')
+              } %>
+      <% else %>
+        <%= render 'shared/info', title: t('documents.new.actions.signing_unsupported.title'), content: t('documents.new.actions.signing_unsupported.content') %>
+      <% end %>
 
       <% if contract_policy.prepare_signature_fields? && @contract.pades_field_preparation_allowed? %>
         <%= render 'shared/radio_button_card',
@@ -32,13 +47,15 @@
       <% end %>
 
       <% if anonymous_account_teaser %>
-        <%= render 'shared/radio_button_card',
-          name: 'document_action',
-          value: 'request_signature',
-          label: t('documents.new.actions.request_signature.title'),
-          description: t('documents.new.actions.request_signature.subtitle'),
-          disabled: true,
-          disabled_reasons: [t('documents.new.actions.account_required')] %>
+        <% if signing_supported %>
+          <%= render 'shared/radio_button_card',
+            name: 'document_action',
+            value: 'request_signature',
+            label: t('documents.new.actions.request_signature.title'),
+            description: t('documents.new.actions.request_signature.subtitle'),
+            disabled: true,
+            disabled_reasons: [t('documents.new.actions.account_required')] %>
+        <% end %>
 
         <%= render 'shared/radio_button_card',
           name: 'document_action',
@@ -55,7 +72,7 @@
           description: t('documents.new.actions.archive.subtitle'),
           disabled: true,
           disabled_reasons: [t('documents.new.actions.account_required')] %>
-      <% elsif managed_contract && @contract.bundle.nil? %>
+      <% elsif managed_contract && @contract.bundle.nil? && signing_supported %>
         <% request_limit_reasons = @contract.tenant.signature_request_allowed? ? [] : [ t('plan_limits.action_unavailable.signature_requests') ] %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
@@ -70,14 +87,13 @@
               } %>
       <% end %>
 
-      <% timestamp_limit_reasons = managed_contract && !@contract.tenant.signature_extension_allowed? ? [ t('plan_limits.action_unavailable.timestamps') ] : [] %>
-      <% if managed_contract && @contract.extendable_signatures?(target_level: 'T') %>
+      <% if timestamp_extendable %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'add_timestamp',
               label: t('documents.new.actions.add_timestamp.title'),
               description: t('documents.new.actions.add_timestamp.subtitle'),
-              checked: false,
+              checked: default_action == 'add_timestamp',
               disabled: timestamp_limit_reasons.any?,
               disabled_reasons: timestamp_limit_reasons,
               data_attributes: {
@@ -85,13 +101,13 @@
               } %>
       <% end %>
 
-      <% if managed_contract && @contract.extendable_signatures?(target_level: 'LTA') %>
+      <% if archive_extendable %>
         <%= render 'shared/radio_button_card',
               name: 'document_action',
               value: 'archive_signature',
               label: archive_action_t(@contract.tenant, 'documents.new.actions.archive.title'),
               description: t('documents.new.actions.archive.subtitle'),
-              checked: false,
+              checked: default_action == 'archive_signature',
               disabled: timestamp_limit_reasons.any?,
               disabled_reasons: timestamp_limit_reasons,
               data_attributes: {
@@ -113,13 +129,15 @@
         <%= link_to contract_back_path, class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: {turbo_frame: "_top"} do %>
           <%= t('documents.new.actions.back') %>
         <% end %>
-        <%= link_to signature_parameters_contract_path(@contract, target_step: 'sign'),
-              class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-              data: {
-                turbo_frame: "_self",
-                "radio-link-target": "link"
-              } do %>
-          <%= t('documents.new.actions.continue') %>
+        <% if default_action_url %>
+          <%= link_to default_action_url,
+                class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                data: {
+                  turbo_frame: "_self",
+                  "radio-link-target": "link"
+                } do %>
+            <%= t('documents.new.actions.continue') %>
+          <% end %>
         <% end %>
       </div>
     </div>

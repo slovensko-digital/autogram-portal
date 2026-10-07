@@ -67,6 +67,7 @@ class Api::V1::ContractsController < ApiController
 
     {
       uuid: contract[:id],
+      signing_required: true,
       allowed_methods: contract[:allowedMethods] || [],
       signature_parameters_attributes: contract[:signatureParameters]&.transform_keys(&:underscore) || {},
       documents_attributes: documents.map { |document| document_attributes(document) }

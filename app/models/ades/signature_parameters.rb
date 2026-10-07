@@ -27,7 +27,7 @@ module Ades
     after_initialize :set_defaults, if: :new_record?
     before_validation :set_container
 
-    validates :format, inclusion: { in: ->(record) { record.available_formats } }
+    validate :format_available
     validates :level, presence: true, inclusion: { in: %w[BASELINE_B BASELINE_T BASELINE_LT BASELINE_LTA] }
     validates :container, inclusion: { in: [ "ASiC_E" ] }, if: -> { format.in?([ "XAdES", "CAdES" ]) }
     validates :container, absence: true, if: -> { format == "PAdES" }
@@ -56,7 +56,23 @@ module Ades
       end
     end
 
+    # No signature can be added to a document signed in another form (e.g. an enveloping CMS).
+    def signing_supported?
+      available_formats.any?
+    end
+
     private
+
+    # A document no signature can be added to gets no format at all.
+    def format_available
+      formats = available_formats
+
+      if formats.empty?
+        errors.add(:format, :present) if format.present?
+      elsif !formats.include?(format)
+        errors.add(:format, :inclusion, value: format)
+      end
+    end
 
     def set_defaults
       self.level ||= "BASELINE_B"

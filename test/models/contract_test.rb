@@ -28,8 +28,11 @@
 require "test_helper"
 require "tempfile"
 require "zip"
+require_relative "../support/cms_signed_document_helper"
 
 class ContractTest < ActiveSupport::TestCase
+  include CmsSignedDocumentHelper
+
   setup do
     @user = users(:one)
   end
@@ -386,6 +389,41 @@ class ContractTest < ActiveSupport::TestCase
     )
     assert_not unsigned_contract.source_document_is_pdf?
     assert_not unsigned_contract.source_document_is_asice?
+  end
+
+  test "unwraps a document signed in an enveloping CMS and keeps the CMS for validation only" do
+    upload = cms_signed_upload("pdf_cades.pdf")
+    contract = Contract.new(tenant: @user.tenants.sole, documents: [ Document.new(blob: upload) ])
+
+    with_cms_validation_service do
+      assert contract.save, contract.errors.full_messages.to_sentence
+
+      assert_equal [ "pdf_cades.pdf" ], contract.documents.map(&:filename)
+      assert_equal "application/pdf", contract.documents.first.content_type
+      assert_equal SIGNED_PDF_CONTENT, contract.documents.first.content
+      assert_equal "pdf_cades.pdf", contract.signed_document.filename.to_s
+      assert_equal CmsSignedDocumentExtractor::CONTENT_TYPE, contract.signed_document.content_type
+      assert_equal "uploaded_signed", contract.latest_source_content_version.origin
+      assert_equal "CAdES", contract.validation_result.documentInfo[:signatureForm]
+      assert_nil contract.signature_parameters.format
+      assert_not contract.signing_supported?
+    end
+  end
+
+  test "bundles and API uploads reject documents that cannot be signed" do
+    with_cms_validation_service do
+      bundled = Contract.new(bundle: bundles(:one), documents: [ Document.new(blob: cms_signed_upload) ])
+      assert_not bundled.valid?
+      assert bundled.errors.added?(:base, :signing_unsupported)
+
+      api_upload = Contract.new(tenant: @user.tenants.sole, signing_required: true, documents: [ Document.new(blob: cms_signed_upload) ])
+      assert_not api_upload.valid?
+      assert api_upload.errors.added?(:base, :signing_unsupported)
+
+      unsigned = Contract.new(tenant: @user.tenants.sole, signing_required: true, documents_attributes: [ { blob: pdf_blob("unsigned.pdf", "%PDF-1.4 unsigned") } ])
+      assert unsigned.valid?, unsigned.errors.full_messages.to_sentence
+      assert unsigned.signing_supported?
+    end
   end
 
   private

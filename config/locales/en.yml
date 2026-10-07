@@ -159,6 +159,7 @@ en:
               too_large: "The document is too large. All its files together may have at most %{max}."
               stored_documents_limit: "The organization may store at most %{max} documents at once. Delete documents you no longer need."
               storage_limit: "The organization's storage (%{max}) is full. Delete documents you no longer need."
+              signing_unsupported: "The document is signed in a format Autogram Portal cannot add another signature to, so it cannot be sent for signature."
             tenant:
               bundle_mismatch: "must be the organization of the bundle"
             agree_to_policies:
@@ -361,6 +362,8 @@ en:
       pades: "PDF Advanced Electronic Signature (PAdES)"
       xades: "XML Advanced electronic signature in ASiC-E container"
       cades: "CMS Advanced electronic signature in ASiC-E container"
+      cades_without_container: "CMS Advanced electronic signature (CAdES)"
+      xades_without_container: "XML Advanced electronic signature (XAdES)"
       unknown: "Unknown signature format"
       short:
         pades: "PAdES"
@@ -414,6 +417,9 @@ en:
         account_required: "Available after signing in"
         account_cta_text: "Create a free account to access advanced portal features"
         account_cta: "Sign in or register"
+        signing_unsupported:
+          title: "Another signature cannot be added"
+          content: "The document is signed in a format Autogram Portal cannot add another signature to. You can verify the signatures, view the document and download it in its original form."
         sign:
           title: "Sign the document"
           subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
@@ -821,6 +827,7 @@ en:
       visual_signing_not_available_for_signed_pades: "Adding a visual signature or stamp is not allowed after the document has already been signed in PAdES."
       signature_field_appearance_unavailable: "No prepared signature field is assigned to you for this contract."
       missing_policy_agreement: "You must agree to the policies and terms to continue"
+      signing_unsupported: "The document is signed in a format Autogram Portal cannot add another signature to."
     signature_field_appearance_required:
       title: "Visible signature appearance required"
       description: "A visible signature field has already been prepared for you. Add the text or image that should appear in that field before continuing to electronic signing."

@@ -160,8 +160,10 @@ paths:
           description: Conflict - A contract with the same ID already exists.
         "422":
           description: |
-            Unprocessable Entity - The request body is invalid, or it does not fit the limits of the
-            organization's plan (`code: limit_exceeded`). Nothing is stored in that case.
+            Unprocessable Entity - The request body is invalid, a document is already signed in a form
+            no signature can be added to (e.g. a PDF in an enveloping CMS/CAdES signature, `.p7m`), or the
+            request does not fit the limits of the organization's plan (`code: limit_exceeded`). Nothing is
+            stored in that case.
           content:
             application/json:
               schema:
@@ -340,8 +342,10 @@ paths:
           description: Conflict - A bundle with the same ID already exists.
         "422":
           description: |
-            Unprocessable Entity - The request body is invalid, or it does not fit the limits of the
-            organization's plan (`code: limit_exceeded`). Nothing is stored in that case.
+            Unprocessable Entity - The request body is invalid, a document is already signed in a form
+            no signature can be added to (e.g. a PDF in an enveloping CMS/CAdES signature, `.p7m`), or the
+            request does not fit the limits of the organization's plan (`code: limit_exceeded`). Nothing is
+            stored in that case.
           content:
             application/json:
               schema:

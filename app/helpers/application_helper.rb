@@ -72,7 +72,12 @@ module ApplicationHelper
   def signature_format(level, container)
     return t("signature_parameters.format.pades") if level == "PAdES"
 
-    return t("signature_parameters.format.unknown") unless container.include? "ASiC"
+    if container.blank?
+      return t("signature_parameters.format.cades_without_container") if level == "CAdES"
+      return t("signature_parameters.format.xades_without_container") if level == "XAdES"
+    end
+
+    return t("signature_parameters.format.unknown") unless container.to_s.include? "ASiC"
 
     if level == "XAdES"
       t("signature_parameters.format.xades")

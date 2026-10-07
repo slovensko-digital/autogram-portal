@@ -71,6 +71,8 @@ class Contract < ApplicationRecord
   # Contracts uploaded to sign oneself also offer standalone apps; requests for signatures do not by default.
   OWN_SIGNING_DEFAULT_METHODS = ((QUALIFIED_METHODS & ALLOWED_METHODS).presence || [ "qes" ]).freeze
   attribute :allowed_methods, default: [ "qes" ]
+  # Set for uploads that are sent for signature anyway (API); bundled contracts always require it.
+  attribute :signing_required, :boolean, default: false
 
   validate :validate_allowed_methods
   validates :signature_parameters, presence: true, if: :qualified_signing_allowed?
@@ -79,12 +81,14 @@ class Contract < ApplicationRecord
   validates :uuid, presence: true, uniqueness: true
   validates_associated :signature_parameters
   validate :tenant_matches_bundle, if: :bundle
+  validate :signing_supported_when_required
   validate :documents_fit_size_limit
   validate :documents_fit_tenant_limits, if: :tenant
 
   before_validation :ensure_uuid, on: :create
   before_validation :inherit_tenant_from_bundle
   before_validation :expand_asice_container_documents, on: :create
+  before_validation :unwrap_cms_signed_document, on: :create
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
   after_commit :schedule_existing_signed_content_capture, on: :create
@@ -202,7 +206,8 @@ class Contract < ApplicationRecord
     latest_prepared_signature_fields_content_version&.file&.attached? || false
   end
 
-  def add_signed_content_version!(content:, filename:, content_type:, origin:, created_at: Time.current)
+  # Pass identify: false when content_type is exact; Marcel takes e.g. an enveloping CMS with a PDF inside for a PDF.
+  def add_signed_content_version!(content:, filename:, content_type:, origin:, created_at: Time.current, identify: true)
     raise "Contract must be persisted before adding signed content versions" unless persisted?
 
     version = content_versions.build(
@@ -214,7 +219,8 @@ class Contract < ApplicationRecord
     version.file.attach(
       io: StringIO.new(content),
       filename: filename,
-      content_type: content_type
+      content_type: content_type,
+      identify: identify
     )
     version.save!
     version
@@ -291,6 +297,13 @@ class Contract < ApplicationRecord
     !pades_signed?
   end
 
+  # Signature parameters get no format when the document is signed in a form no signature can be added to
+  # (e.g. an enveloping CMS); such contracts are only validated, shown and downloaded. Reading the stored
+  # format spares the signing pages a validation.
+  def signing_supported?
+    signature_parameters.nil? || signature_parameters.format.present?
+  end
+
   def ades_allowed?
     allowed_methods.include?("ades")
   end
@@ -352,11 +365,13 @@ class Contract < ApplicationRecord
     raise "No signed content is available for extension" if source_document.blank?
 
     extended_content = AutogramEnvironment.autogram_service.extend_signatures(source_document, target_level: target_level)
+    # Extension keeps the format of the signed document.
     version = add_signed_content_version!(
       content: extended_content,
       filename: source_document.filename,
       content_type: source_document.content_type,
-      origin: "extension"
+      origin: "extension",
+      identify: false
     )
     tenant&.record_timestamps!(self, source: usage_source, enforce: false)
     persist_validation_record!(contract_content_version: version)
@@ -542,6 +557,11 @@ class Contract < ApplicationRecord
     errors.add(:tenant, :bundle_mismatch) unless tenant == bundle.tenant
   end
 
+  def signing_supported_when_required
+    required = signing_required || (bundle.present? && (new_record? || will_save_change_to_bundle_id?))
+    errors.add(:base, :signing_unsupported) if required && signature_parameters && !signature_parameters.signing_supported?
+  end
+
   def latest_prepared_signature_fields_content_version
     if association(:content_versions).loaded?
       content_versions
@@ -577,6 +597,35 @@ class Contract < ApplicationRecord
     )
   end
 
+  # The document signed inside an enveloping CMS becomes the contract document (shown and previewed),
+  # while the uploaded CMS is kept as the signed content its signatures are validated on.
+  def unwrap_cms_signed_document
+    return if signed_document_attached?
+    return unless documents.one?
+
+    signed_document = documents.first
+    return unless signed_document&.blob&.attached?
+
+    cms_content = signed_document.content
+    extractor = CmsSignedDocumentExtractor.new(cms_content, filename: signed_document.filename)
+    return unless extractor.cms_signed?
+
+    self.documents = [
+      Document.new(blob: ActiveStorage::Blob.create_and_upload!(
+        io: StringIO.new(extractor.signed_content),
+        filename: extractor.signed_filename,
+        content_type: extractor.signed_content_type
+      ))
+    ]
+    build_signed_content_version(
+      content: cms_content,
+      filename: signed_document.filename,
+      content_type: CmsSignedDocumentExtractor::CONTENT_TYPE,
+      origin: "uploaded_signed",
+      identify: false
+    )
+  end
+
   def next_content_version_number
     versions = if association(:content_versions).loaded?
       content_versions.map(&:version_number)
@@ -587,11 +636,12 @@ class Contract < ApplicationRecord
     versions.compact.max.to_i + 1
   end
 
-  def build_signed_content_version(content:, filename:, content_type:, origin:, created_at: Time.current)
+  def build_signed_content_version(content:, filename:, content_type:, origin:, created_at: Time.current, identify: true)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new(content),
       filename: filename,
-      content_type: content_type
+      content_type: content_type,
+      identify: identify
     )
 
     content_versions.build(

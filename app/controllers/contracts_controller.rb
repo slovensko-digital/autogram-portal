@@ -4,6 +4,7 @@ class ContractsController < ApplicationController
   before_action :skip_authorization, only: [ :show_bundle, :actions, :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session, :signed_document, :validate ]
   before_action :claim_pending_anonymous_contract, only: [ :show, :actions ]
   before_action :authorize_contract!, only: [ :show, :update, :destroy ]
+  before_action :ensure_signing_supported, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :render_sign_limit_reached_if_needed, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
   before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
@@ -109,6 +110,9 @@ class ContractsController < ApplicationController
     else
       skip_authorization
     end
+
+    ensure_signing_supported
+    return if performed?
 
     @next_step = params[:target_step]
     render partial: "signature_parameters"
@@ -271,6 +275,10 @@ class ContractsController < ApplicationController
 
   def update
     authorize @contract, :request_signatures? if params[:next_step] == "request_signature"
+    if params[:next_step].in?(%w[sign request_signature])
+      ensure_signing_supported
+      return if performed?
+    end
 
     if @contract.update(contract_params)
       @contract.save!
@@ -334,6 +342,12 @@ class ContractsController < ApplicationController
 
   def authorize_contract!
     authorize @contract
+  end
+
+  def ensure_signing_supported
+    return if @contract.signing_supported?
+
+    redirect_to contract_path(@contract), alert: t("contracts.alerts.signing_unsupported")
   end
 
   def render_contract_denial(error)
