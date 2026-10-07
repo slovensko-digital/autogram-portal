@@ -80,7 +80,7 @@ end
 
 gem "good_job", "~> 4.12"
 
-gem "redis", "~> 5.4"
+gem "redis", "~> 6.0"
 
 gem "jwt", "~> 3.1"
 
