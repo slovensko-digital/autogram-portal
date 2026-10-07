@@ -130,6 +130,7 @@ sk:
               too_large: "Dokument je príliš veľký. Všetky jeho súbory môžu mať spolu najviac %{max}."
               stored_documents_limit: "Organizácia môže mať uložených najviac %{max} dokumentov naraz. Zmažte dokumenty, ktoré už nepotrebujete."
               storage_limit: "Úložisko organizácie (%{max}) je plné. Zmažte dokumenty, ktoré už nepotrebujete."
+              signing_unsupported: "Dokument je podpísaný vo formáte, do ktorého Autogram Portal nevie pridať ďalší podpis, preto ho nemožno poslať na podpis."
             tenant:
               bundle_mismatch: "musí byť organizácia balíka"
             agree_to_policies:
@@ -320,6 +321,8 @@ sk:
       pades: "PDF Pokročilý elektronický podpis (PAdES)"
       xades: "XML Pokročilý elektronický podpis v ASiC-E kontajneri"
       cades: "CMS Pokročilý elektronický podpis v ASiC-E kontajneri"
+      cades_without_container: "CMS Pokročilý elektronický podpis (CAdES)"
+      xades_without_container: "XML Pokročilý elektronický podpis (XAdES)"
       unknown: "Neznámy formát podpisu"
       short:
         pades: "PAdES"
@@ -371,6 +374,9 @@ sk:
         account_required: "Dostupné po prihlásení"
         account_cta_text: "Vytvorte si bezplatný účet a využívajte pokročilé funkcie portálu"
         account_cta: "Prihlásiť sa alebo registrovať"
+        signing_unsupported:
+          title: "Ďalší podpis nemožno pridať"
+          content: "Dokument je podpísaný vo formáte, do ktorého Autogram Portal nevie pridať ďalší podpis. Podpisy môžete overiť, dokument si prezrieť a stiahnuť v pôvodnej podobe."
         sign:
           title: "Podpísať dokument"
           subtitle: "Vyberte formát podpisu a typ podpisu a podpíšte tento dokument."
@@ -746,6 +752,7 @@ sk:
       visual_signing_not_available_for_signed_pades: "Po podpísaní dokumentu vo formáte PAdES už nie je možné pridať vizuálny podpis ani pečiatku."
       signature_field_appearance_unavailable: "Pre tento dokument vám nie je priradené žiadne pripravené podpisové pole."
       missing_policy_agreement: "Musíte súhlasiť s pravidlami a podmienkami, aby ste mohli pokračovať."
+      signing_unsupported: "Dokument je podpísaný vo formáte, do ktorého Autogram Portal nevie pridať ďalší podpis."
     signature_field_appearance_required:
       title: "Vyžaduje sa viditeľná podoba podpisu"
       description: "Pre vás už bolo pripravené viditeľné podpisové pole. Pred pokračovaním na elektronické podpisovanie doplňte text alebo obrázok, ktorý sa má v tomto poli zobraziť."

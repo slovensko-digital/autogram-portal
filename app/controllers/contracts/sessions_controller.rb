@@ -17,6 +17,7 @@ class Contracts::SessionsController < ApplicationController
 
   def create
     session_type = params[:type] || params[:application]
+    raise SessionCreationError, t("contracts.alerts.signing_unsupported") unless @contract.signing_supported?
     ensure_signature_request_limit!
 
     @session = case session_type
