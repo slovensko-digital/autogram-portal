@@ -8,17 +8,20 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
+#  author_id                    :bigint
 #  bundle_id                    :bigint
 #  tenant_id                    :bigint
 #
 # Indexes
 #
+#  index_contracts_on_author_id  (author_id)
 #  index_contracts_on_bundle_id  (bundle_id)
 #  index_contracts_on_tenant_id  (tenant_id)
 #  index_contracts_on_uuid       (uuid)
 #
 # Foreign Keys
 #
+#  fk_rails_...  (author_id => users.id) ON DELETE => nullify
 #  fk_rails_...  (bundle_id => bundles.id)
 #  fk_rails_...  (tenant_id => tenants.id)
 #
@@ -42,6 +45,8 @@ class Contract < ApplicationRecord
 
   belongs_to :tenant, optional: true
   belongs_to :bundle, optional: true
+  # Who uploaded the contract on the web; it gets the author notifications (see Tenant#notification_recipients).
+  belongs_to :author, class_name: "User", optional: true
 
   has_many :signer_contracts, dependent: :destroy
   has_many :signers, through: :signer_contracts

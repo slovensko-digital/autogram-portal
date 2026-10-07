@@ -21,6 +21,7 @@ class SessionPolicyTest < ActiveSupport::TestCase
     assert policy.parameters?
     assert policy.download?
     assert policy.upload?
+    assert policy.state?
     assert_not policy.destroy?
   end
 
@@ -46,6 +47,7 @@ class SessionPolicyTest < ActiveSupport::TestCase
     policy = Signing::SigningSessionAccessPolicy.new(context, @access)
 
     assert_not policy.parameters?
+    assert_not policy.state?
     assert_not policy.destroy?
   end
 

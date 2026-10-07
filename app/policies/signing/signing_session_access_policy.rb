@@ -19,6 +19,10 @@ class Signing::SigningSessionAccessPolicy < ApplicationPolicy
     parameters?
   end
 
+  def state?
+    parameters?
+  end
+
   def destroy?
     show? && allowed_user?
   end

@@ -972,7 +972,12 @@ en:
       signature_method: "Electronic signature level"
       signature_level: "Electronic signature level"
       allowed_methods: "Allowed signature methods"
+    visual_stamp_alt_text:
+      with_name: "Visual signature: %{name}, %{date}"
+      without_name: "Visual signature, %{date}"
+      date_format: "%B %-d, %Y"
     signature_field_preparations:
+      pdf_field_label: "Signature – %{name}"
       index:
         title: "Prepare visible signature fields"
         subtitle: "Two steps: place one signature field for each recipient, then generate the signing PDF so the fields reach them."
@@ -1150,6 +1155,9 @@ en:
         subtitle: "Use the mobile application on your phone"
         note: "On mobile: Scan the QR code or tap it"
         expiry: "Signing will expire in 10 minutes"
+        phone_instructions: "Sign the document in the Autogram Mobile app. Then come back here, the page updates by itself."
+        open_app: "Open Autogram Mobile"
+        show_qr_code: "Show QR code to sign on another device"
         step1_title: "Install Autogram on mobile"
         step1_desc_html: "Download and install <a href='https://sluzby.slovensko.digital/autogram-v-mobile/index.html#download' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>Autogram on mobile</b></a>"
         step2_title: "Scan the QR code"
@@ -1174,6 +1182,9 @@ en:
         subtitle: "Use the eIdentita mobile application on your phone"
         note: "On mobile: Scan the QR code with eIdentita app or tap it"
         expiry: "Signing will expire in 10 minutes"
+        phone_instructions: "Sign the document in the eIdentita app. Then come back here, the page updates by itself."
+        open_app: "Open the eIdentita app"
+        show_qr_code: "Show QR code to sign on another device"
         step1_title: "Scan the QR code"
         step1_desc_html: "Use the <a href='https://meid.minv.sk/' target='_blank' class='text-blue-600 underline hover:text-blue-800'><b>eIdentita</b></a> application to scan the QR code displayed on the screen"
         step2_title: "Check the file source"
@@ -1779,7 +1790,7 @@ en:
             description: "An organization for companies and offices with several members. All members see and manage all contracts and bundles of the organization. PRO organizations are set up by the portal administrator, who also manages their name, plan and features (Validation archive, API access)."
           roles:
             label: "Owner and member"
-            description: "Owners invite and remove members, manage the API key and receive email notifications about the organization's bundles. Members work with contracts and bundles the same way as owners."
+            description: "Owners invite and remove members, manage the API key and receive email notifications about bundles sent through the API. Members work with contracts and bundles the same way as owners."
           selection:
             label: "Choosing an organization"
             description: "If you are a member of several organizations, you choose the one to work in after signing in. The current organization is shown at the bottom of the left menu. To switch to another organization, sign out and sign in again."
@@ -1950,14 +1961,14 @@ en:
                 url: "https://autogram.slovensko.digital"
           autogram_mobile:
             label: "Autogram Mobile"
-            description: "A free open-source application for Android and iOS. It signs with an ID card with an NFC chip that you hold to the phone. On a computer you scan a QR code, on the phone you open a link."
+            description: "A free open-source application for Android and iOS. It signs with an ID card with an NFC chip that you hold to the phone. On a computer or tablet you scan a QR code with your phone, on the phone the app opens directly."
             links:
               info:
                 label: "More info and download"
                 url: "https://autogram.slovensko.digital"
           eidentita:
             label: "eIdentita"
-            description: "The Slovak government mobile application for Android and iOS. It signs with an ID card with an NFC chip. On a computer you scan a QR code, on the phone you open a link."
+            description: "The Slovak government mobile application for Android and iOS. It signs with an ID card with an NFC chip. On a computer or tablet you scan a QR code with your phone, on the phone the app opens directly."
             links:
               ios:
                 label: "Download from App Store"
@@ -2126,7 +2137,7 @@ en:
         public_link_title: "Public signing link"
         public_link_description: "When editing a bundle you can turn on the public signing link. Anyone who has it can then sign the documents in the bundle without an invitation. You copy the link from the bundle page."
         notifications_title: "Notifications"
-        notifications_description: "With Author notifications on, the organization's owners receive emails about signatures, declines and the completion of the bundle – except whoever caused the event."
+        notifications_description: "With Author notifications on, whoever sent the bundle for signature receives emails about signatures, declines and the completion of the bundle – but not about their own actions. For bundles sent through the API, the organization's owners receive the emails."
       received:
         title: "Received for Signing"
         intro: "When someone asks you to sign, you receive an email with a link. The link works without signing in. If you have a portal account with the same email, you also find the bundle in Received for Signing and on the Home page."

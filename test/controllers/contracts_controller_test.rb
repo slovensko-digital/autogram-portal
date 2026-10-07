@@ -442,18 +442,20 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       contract = create_pdf_contract(allowed_methods: [ "visual" ])
       stamp_service = fake_stamp_service("stamped visual pdf")
 
-      with_autogram_service(stamp_service) do
-        post "/contracts/#{contract.uuid}/visual_signing", params: {
-          stamp: {
-            page: 1,
-            x: 120.5,
-            y: 88.25,
-            width: 200,
-            height: 60,
-            custom_text: "Placed stamp",
-            content_mode: "text"
+      travel_to Time.zone.local(2026, 10, 2, 12) do
+        with_autogram_service(stamp_service) do
+          post "/contracts/#{contract.uuid}/visual_signing", params: {
+            stamp: {
+              page: 1,
+              x: 120.5,
+              y: 88.25,
+              width: 200,
+              height: 60,
+              custom_text: "Placed stamp",
+              content_mode: "text"
+            }
           }
-        }
+        end
       end
 
       session = contract.reload.signer_contracts.last.sessions.order(:id).last
@@ -473,7 +475,8 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       assert_equal 200.0, visual_stamp.width.to_f
       assert_equal 60.0, visual_stamp.height.to_f
       assert_equal "Placed stamp", visual_stamp.text
-      assert_equal({ page: 1, x: 120.5, y: 88.25, width: 200.0, height: 60.0, text: "Placed stamp" }, stamp_service.last_stamp)
+      assert_equal({ page: 1, x: 120.5, y: 88.25, width: 200.0, height: 60.0, text: "Placed stamp" }, stamp_service.last_stamp.except(:altText))
+      assert_equal "Vizuálny podpis, 2. 10. 2026. Placed stamp", stamp_service.last_stamp[:altText]
       assert_equal "%PDF-1.4 test content", stamp_service.last_document_content
     end
   end
@@ -713,6 +716,29 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       assert_nil visual_stamp.text
       assert_equal "image/png", stamp_service.last_stamp[:imageMimeType]
       assert Base64.strict_decode64(stamp_service.last_stamp[:imageContent]).present?
+    end
+  end
+
+  test "visual signing by a named recipient describes the stamp with the signer name" do
+    with_allowed_methods(%w[visual]) do
+      contract = create_pdf_contract(allowed_methods: [ "visual" ])
+      bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+      recipient = bundle.recipients.create!(email: "jan.novak@example.com", name: "Ján Novák")
+      stamp_service = fake_stamp_service("image stamped visual pdf")
+
+      travel_to Time.zone.local(2026, 10, 2, 12) do
+        with_autogram_service(stamp_service) do
+          post "/contracts/#{contract.uuid}/visual_signing", params: {
+            recipient: recipient.uuid,
+            stamp: {
+              content_mode: "image",
+              image: png_upload
+            }
+          }
+        end
+      end
+
+      assert_equal "Vizuálny podpis: Ján Novák, 2. 10. 2026", stamp_service.last_stamp[:altText]
     end
   end
 

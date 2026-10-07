@@ -1,14 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
-import { isMobileDevice } from "utils/device_detection"
+import { isPhoneDevice } from "utils/device_detection"
 
 export default class extends Controller {
-  static targets = ["appUrl", "stateNotInstalled"]
+  static targets = ["appUrl", "stateNotInstalled", "phoneActions", "qrCode", "showQrCodeButton"]
 
   connect() {
     console.log("Eidentita signer controller connected")
-    if (isMobileDevice() && this.hasAppUrlTarget) {
+    // Tablets keep the QR code for a phone and do not open the app themselves.
+    if (isPhoneDevice() && this.hasAppUrlTarget) {
+      this.qrCodeTarget.classList.add('hidden')
+      this.phoneActionsTarget.classList.remove('hidden')
       this.openApp()
     }
+  }
+
+  showQrCode() {
+    this.qrCodeTarget.classList.remove('hidden')
+    this.showQrCodeButtonTarget.classList.add('hidden')
+    this.appUrlTarget.focus()
   }
 
   openApp() {

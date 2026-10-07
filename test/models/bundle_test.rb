@@ -12,15 +12,18 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
+#  author_id                    :bigint
 #  tenant_id                    :bigint           not null
 #
 # Indexes
 #
+#  index_bundles_on_author_id  (author_id)
 #  index_bundles_on_tenant_id  (tenant_id)
 #  index_bundles_on_uuid       (uuid)
 #
 # Foreign Keys
 #
+#  fk_rails_...  (author_id => users.id) ON DELETE => nullify
 #  fk_rails_...  (tenant_id => tenants.id)
 #
 require "test_helper"
@@ -78,7 +81,7 @@ class BundleTest < ActiveSupport::TestCase
     assert bundle.should_notify_author?
   end
 
-  test "tenant is the sender and its owners get author notifications except the signer" do
+  test "tenant is the sender and its owners get author notifications of bundles without an author" do
     tenant = @author.tenants.sole
     tenant.update!(plan: :pro)
     co_owner = users(:two)
@@ -86,8 +89,22 @@ class BundleTest < ActiveSupport::TestCase
     bundle = Bundle.new(tenant: tenant)
 
     assert_equal tenant.name, bundle.sender_display_name
-    assert_equal [ @author, co_owner ].sort_by(&:id), bundle.tenant.notification_recipients.sort_by(&:id)
-    assert_equal [ co_owner ], bundle.tenant.notification_recipients(except: @author)
+    assert_equal [ @author, co_owner ].sort_by(&:id), bundle.tenant.notification_recipients(author: bundle.author).sort_by(&:id)
+    assert_equal [ co_owner ], bundle.tenant.notification_recipients(author: bundle.author, except: @author)
+  end
+
+  test "only the author of a bundle gets its author notifications while a member" do
+    tenant = @author.tenants.sole
+    tenant.update!(plan: :pro)
+    member = users(:two)
+    membership = tenant.memberships.create!(user: member, role: :member)
+    bundle = Bundle.new(tenant: tenant, author: member)
+
+    assert_equal [ member ], tenant.notification_recipients(author: bundle.author)
+    assert_empty tenant.notification_recipients(author: bundle.author, except: member)
+
+    membership.destroy!
+    assert_equal [ @author ], tenant.notification_recipients(author: bundle.author), "owners take over when the author left"
   end
 
   test "basic tenant sender shows the owner name and email" do

@@ -8,17 +8,20 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
+#  author_id                    :bigint
 #  bundle_id                    :bigint
 #  tenant_id                    :bigint
 #
 # Indexes
 #
+#  index_contracts_on_author_id  (author_id)
 #  index_contracts_on_bundle_id  (bundle_id)
 #  index_contracts_on_tenant_id  (tenant_id)
 #  index_contracts_on_uuid       (uuid)
 #
 # Foreign Keys
 #
+#  fk_rails_...  (author_id => users.id) ON DELETE => nullify
 #  fk_rails_...  (bundle_id => bundles.id)
 #  fk_rails_...  (tenant_id => tenants.id)
 #
@@ -44,6 +47,17 @@ class ContractTest < ActiveSupport::TestCase
 
     assert contract.should_notify_author?
     assert_equal [ @user ], contract.tenant.notification_recipients
+  end
+
+  test "notifies only the member who uploaded a standalone contract, unless they signed it" do
+    tenant = @user.tenants.sole
+    tenant.update!(plan: :pro)
+    member = users(:two)
+    tenant.memberships.create!(user: member, role: :member)
+    contract = Contract.new(tenant: tenant, author: member, author_notifications_enabled: true)
+
+    assert_equal [ member ], contract.tenant.notification_recipients(author: contract.author)
+    assert_empty contract.tenant.notification_recipients(author: contract.author, except: member)
   end
 
   test "does not notify the owner who signed the contract" do

@@ -24,23 +24,40 @@
   </div>
 
   <div class="space-y-6 md:border md:border-gray-200 md:rounded-lg md:p-6">
-    <div class="flex justify-center">
-      <a href="<%= @session.eidentita_url %>"
-        class="block hover:opacity-75 transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-lg max-w-full"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="<%= t('.qr_link_label') %>"
-        data-signers--eidentita-target="appUrl">
-        <div class="bg-white p-4 rounded-lg border border-4 border-dashed border-black transition-colors duration-200 w-96 max-w-full flex items-center justify-center">
-          <%= qr_code_svg(@session.eidentita_url) %>
-        </div>
+    <% eidentita_url = @session.eidentita_url %>
+    <!-- Shown on phones, which open the app themselves -->
+    <div class="hidden space-y-4 text-center" data-signers--eidentita-target="phoneActions">
+      <p class="text-sm text-gray-600"><%= t('.phone_instructions') %></p>
+      <a href="<%= eidentita_url %>"
+        data-action="signers--eidentita#openApp:prevent"
+        class="flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-3 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+        <%= t('.open_app') %>
       </a>
+      <button type="button"
+        data-signers--eidentita-target="showQrCodeButton"
+        data-action="signers--eidentita#showQrCode"
+        class="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+        <%= t('.show_qr_code') %>
+      </button>
     </div>
 
-    <div class="text-center text-sm text-gray-600 space-y-4 px-8 mt-4">
-      <p><%= t('.expiry') %></p>
-      <p><%= t('.note') %></p>
+    <div class="space-y-4" data-signers--eidentita-target="qrCode">
+      <div class="flex justify-center">
+        <a href="<%= eidentita_url %>"
+          class="block hover:opacity-75 transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-lg max-w-full"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="<%= t('.qr_link_label') %>"
+          data-signers--eidentita-target="appUrl">
+          <div class="bg-white p-4 rounded-lg border border-4 border-dashed border-black transition-colors duration-200 w-96 max-w-full flex items-center justify-center">
+            <%= qr_code_svg(eidentita_url) %>
+          </div>
+        </a>
+      </div>
+      <p class="text-center text-sm text-gray-600 px-8"><%= t('.note') %></p>
     </div>
+
+    <p class="text-center text-sm text-gray-600 px-8"><%= t('.expiry') %></p>
 
     <!-- App not installed warning -->
     <div class="hidden" data-signers--eidentita-target="stateNotInstalled">

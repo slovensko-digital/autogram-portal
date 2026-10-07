@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
   end
 
   create_table "bundles", force: :cascade do |t|
+    t.bigint "author_id"
     t.boolean "author_notifications_enabled", default: false, null: false
     t.datetime "created_at", null: false
     t.string "name"
@@ -65,6 +66,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
     t.string "uuid", null: false
+    t.index ["author_id"], name: "index_bundles_on_author_id"
     t.index ["tenant_id"], name: "index_bundles_on_tenant_id"
     t.index ["uuid"], name: "index_bundles_on_uuid"
   end
@@ -105,12 +107,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
 
   create_table "contracts", force: :cascade do |t|
     t.string "allowed_methods", default: [], array: true
+    t.bigint "author_id"
     t.boolean "author_notifications_enabled", default: false, null: false
     t.bigint "bundle_id"
     t.datetime "created_at", null: false
     t.bigint "tenant_id"
     t.datetime "updated_at", null: false
     t.string "uuid", null: false
+    t.index ["author_id"], name: "index_contracts_on_author_id"
     t.index ["bundle_id"], name: "index_contracts_on_bundle_id"
     t.index ["tenant_id"], name: "index_contracts_on_tenant_id"
     t.index ["uuid"], name: "index_contracts_on_uuid"
@@ -570,12 +574,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ades_signature_parameters", "contracts"
   add_foreign_key "bundles", "tenants"
+  add_foreign_key "bundles", "users", column: "author_id", on_delete: :nullify
   add_foreign_key "contract_content_versions", "contracts"
   add_foreign_key "contract_validation_records", "contract_content_versions", on_delete: :nullify
   add_foreign_key "contract_validation_records", "contracts", on_delete: :nullify
   add_foreign_key "contract_validation_records", "tenants"
   add_foreign_key "contracts", "bundles"
   add_foreign_key "contracts", "tenants"
+  add_foreign_key "contracts", "users", column: "author_id", on_delete: :nullify
   add_foreign_key "documents", "contracts"
   add_foreign_key "federation_request_invitations", "portal_instances"
   add_foreign_key "federation_request_invitations", "users", column: "recipient_user_id"

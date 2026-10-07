@@ -12,21 +12,26 @@
 #  uuid                         :string           not null
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
+#  author_id                    :bigint
 #  tenant_id                    :bigint           not null
 #
 # Indexes
 #
+#  index_bundles_on_author_id  (author_id)
 #  index_bundles_on_tenant_id  (tenant_id)
 #  index_bundles_on_uuid       (uuid)
 #
 # Foreign Keys
 #
+#  fk_rails_...  (author_id => users.id) ON DELETE => nullify
 #  fk_rails_...  (tenant_id => tenants.id)
 #
 class Bundle < ApplicationRecord
   attr_accessor :allow_blank_recipient_emails
 
   belongs_to :tenant
+  # Who sent the bundle from the web; it gets the author notifications (see Tenant#notification_recipients).
+  belongs_to :author, class_name: "User", optional: true
 
   has_many :contracts, dependent: :destroy
   has_many :signature_field_preparations, through: :contracts
@@ -135,7 +140,7 @@ class Bundle < ApplicationRecord
 
     return unless completed?
 
-    Notification::BundleCompletedJob.perform_later(self)
+    Notification::BundleCompletedJob.perform_later(self, signer: signer)
 
     Turbo::StreamsChannel.broadcast_replace_to(
       self,

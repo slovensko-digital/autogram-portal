@@ -234,6 +234,29 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
     assert_equal "%PDF-1.4 visually stamped content", service.last_document_content
   end
 
+  test "finalize sends accessible labels of signature fields" do
+    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+    named_recipient = contract.bundle.recipients.create!(email: "jan.novak@example.com", name: "Ján Novák", locale: "sk")
+    [ recipient, named_recipient ].each_with_index do |field_recipient, index|
+      contract.signature_field_preparations.create!(
+        recipient: field_recipient,
+        document: contract.documents.first,
+        page: 1,
+        x: 42,
+        y: 64 + (index * 100),
+        width: 180,
+        height: 64
+      )
+    end
+    service = fake_autogram_service(has_signatures: false, prepared_content: "prepared pdf content")
+
+    with_autogram_service(service) do
+      post :finalize, params: { contract_id: contract.uuid }
+    end
+
+    assert_equal [ "Signature – #{recipient.email}", "Podpis – Ján Novák (jan.novak@example.com)" ], service.last_fields.map { |field| field[:label] }
+  end
+
   test "create invalidates prepared signing pdf" do
     contract, recipient = create_bundle_contract_with_recipient(author: @user)
     second_recipient = contract.bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
@@ -436,13 +459,14 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
   end
 
   def fake_autogram_service(has_signatures:, prepared_content: nil)
-    Struct.new(:validation_result, :prepared_content, :last_document_content) do
+    Struct.new(:validation_result, :prepared_content, :last_document_content, :last_fields) do
       def validate_signatures(_document)
         validation_result
       end
 
       def prepare_signature_fields(document, fields:)
         self.last_document_content = document.content
+        self.last_fields = fields
         prepared_content || "%PDF-1.4 prepared fields"
       end
     end.new(

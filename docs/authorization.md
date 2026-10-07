@@ -171,7 +171,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Bundles#sign/autogram_batch` | Web, bound signing subject | Recipient capability OR public bundle OR selected-tenant manager | Lookup precedence unchanged; invalid grant/mismatch 404, withdrawn signing 410, batch eligibility stays separate |
 | `Bundles#accept/decline` | Web, recipient found through bundle | Bound recipient capability | Existing UUID/user lookup retained; withdrawal/completion/superseding responses unchanged |
 | `Contracts::Sessions#create/show` | Web, bound signing subject | Existing signer resolution / nested session | Creation/preparation/completion redirects unchanged; UUID/session display is not hardened |
-| `Contracts::Sessions#parameters/download/upload` | Web, contract UUID and nested session ID | Valid bound token OR allowed user | 403; expiry/withdrawal checked by token service; format/attachment/upload errors unchanged |
+| `Contracts::Sessions#parameters/download/upload/state` | Web, contract UUID and nested session ID | Valid bound token OR allowed user | 403; expiry/withdrawal checked by token service; format/attachment/upload errors unchanged; `state` returns the completed session's broadcast as a Turbo Stream (204 while pending) for pages that missed it |
 | `Contracts::Sessions#destroy` | Same | Allowed user only, never token alone | 403; managers and existing signer ownership/email semantics retained |
 | `Contracts::Sessions#request_verification/verify_verification/complete_signing` | Same, resolved signer contract | Session matches resolved signer | 403 on mismatch; AdES type and service errors remain separate |
 | `Contracts::Sessions#get_webhook/standard_webhook` | Web anonymous context, nested session | Explicit bound-session queries | No new user authentication; AVM type/protocol checks and CSRF exceptions preserved |
@@ -223,7 +223,7 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 | Contracts CRUD/actions | Contract tenant ownership, anonymous permissions, anonymous-claim ordering, per-action denial responses |
 | Contract validation history/records and evidence-private download | Selected tenant and archivation feature; refreshability and attachment errors remain distinct |
 | Contract signing, onboarding and visual/physical signing | Existing user/recipient/anonymous resolution, withdrawal/superseding responses and preparation guards |
-| Session parameters/download/upload | Bound, valid session token OR existing allowed-user checks; expiry and withdrawal remain validated by SessionAccessToken |
+| Session parameters/download/upload/state | Bound, valid session token OR existing allowed-user checks; expiry and withdrawal remain validated by SessionAccessToken |
 | Session destroy | Allowed-user branch only; session token alone never grants deletion |
 | Session create/show/verification/completion | Parent/session/signer matching and existing method/state/preparation checks, not one generic signing permission |
 | Session AVM webhooks | Existing protocol/service checks and CSRF exception, not newly invented user authentication |

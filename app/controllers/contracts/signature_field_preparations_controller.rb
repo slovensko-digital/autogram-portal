@@ -125,9 +125,18 @@ module Contracts
           x: preparation.x.to_f,
           y: preparation.y.to_f,
           width: preparation.width.to_f,
-          height: preparation.height.to_f
+          height: preparation.height.to_f,
+          label: signature_field_label(preparation.recipient)
         }
       end
+    end
+
+    # Accessible name (/TU) of the PDF field in the recipient's language, so assistive technologies announce whom the field is for.
+    def signature_field_label(recipient)
+      name = recipient.name.presence || recipient.user&.name.presence
+      person = name ? "#{name} (#{recipient.email})" : recipient.email
+
+      I18n.t("contracts.signature_field_preparations.pdf_field_label", name: person, locale: recipient.locale || I18n.default_locale)
     end
 
     def prepared_signature_fields_filename(document)
