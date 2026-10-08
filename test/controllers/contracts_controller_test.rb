@@ -81,16 +81,28 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", contract_path(bundled_contract), text: back, count: 0
   end
 
-  test "anonymous contract can be viewed but deletion requires route authentication" do
+  test "anonymous contract can be viewed and deleted without signing in" do
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
 
     get contract_path(contract)
     assert_response :success
 
+    assert_difference -> { Contract.count }, -1 do
+      delete contract_path(contract)
+    end
+    assert_redirected_to new_contract_path
+    assert_equal I18n.t("contracts.destroy.success"), flash[:notice]
+  end
+
+  test "anonymous visitor cannot delete a tenant contract" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+    contract.update!(tenant: tenants(:one))
+
     assert_no_difference -> { Contract.count } do
       delete contract_path(contract)
     end
-    assert_redirected_to new_user_session_path
+    assert_redirected_to new_contract_path
+    assert_equal I18n.t("contracts.alerts.unauthorized_edit_attempt"), flash[:alert]
   end
 
   test "anonymous contract cannot request signatures" do
