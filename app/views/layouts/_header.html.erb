@@ -38,7 +38,7 @@
           <%= render "shared/left_menu_item", path: new_contract_path, label: t('header.links.new_contract'), icon: :new_paper %>
         </li>
         <li>
-          <%= render "shared/left_menu_item", path: "#", label: t('header.links.electronic_onboarding'), icon: :fingerprint %>
+          <%= render "shared/left_menu_item", path: how_to_sign_index_path, label: t('header.links.how_to_sign'), icon: :fingerprint %>
         </li>
         <li>
           <%= render "shared/left_menu_item", path: about_index_path, label: t('header.links.about'), icon: :info %>
@@ -170,7 +170,7 @@
           <li><%= render "shared/mobile_menu_item", path: edit_user_registration_path, label: t('header.links.settings') %></li>
         <% end %>
         <li><%= render "shared/mobile_menu_item", path: new_contract_path, label: t('header.links.new_contract') %></li>
-        <li><%= render "shared/mobile_menu_item", path: "#", label: t('header.links.electronic_onboarding') %></li>
+        <li><%= render "shared/mobile_menu_item", path: how_to_sign_index_path, label: t('header.links.how_to_sign') %></li>
         <li><%= render "shared/mobile_menu_item", path: about_index_path, label: t('header.links.about') %></li>
         <li><%= render "shared/mobile_menu_item", path: docs_path, label: t('header.links.docs') %></li>
       </ul>
