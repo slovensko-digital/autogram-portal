@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 import { isMobileDevice } from "utils/device_detection"
+import { versionedSignatureParameters } from "utils/autogram_parameters"
 
 export default class extends Controller {
   static targets = ["progressBar", "progressPercent", "progressText", "currentDocumentName", "documentItem", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateAppNotRunning", "stateSuccess", "stateCancelled", "stateError", "errorMessage"]
@@ -72,7 +73,7 @@ export default class extends Controller {
         const signedDocument = signRequest.useVersionedSigning
           ? await client.signV1(
             signRequest.documents,
-            autogramParameters.signature_parameters,
+            versionedSignatureParameters(autogramParameters.signature_parameters),
             {
               abortController: this.abortController,
               batchId: batchId,

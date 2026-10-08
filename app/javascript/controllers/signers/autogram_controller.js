@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
+import { versionedSignatureParameters } from "utils/autogram_parameters"
 
 export default class extends Controller {
   static targets = ["form", "progressBar", "progressPercent", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateMaybeNotInstalled", "stateNotInstalled", "stateAppVersionTooLow", "stateCancelled", "stateError", "errorMessage"]
@@ -133,7 +134,7 @@ export default class extends Controller {
       const autogramParametersResponse = await fetch(this.autogramParametersPathValue, {
         headers: {
           'Accept': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          ...this.csrfHeaders()
         }
       })
 
@@ -230,7 +231,7 @@ export default class extends Controller {
       } else {
         signResult = await client.signV1(
           autogramParameters.documents.map(doc => this.buildVersionedDocument(doc)),
-          autogramParameters.signature_parameters,
+          versionedSignatureParameters(autogramParameters.signature_parameters),
           states
         )
       }
@@ -247,7 +248,7 @@ export default class extends Controller {
           method: 'POST',
           body: formData,
           headers: {
-            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            ...this.csrfHeaders(),
             'Accept': 'application/json'
           }
         })
@@ -293,6 +294,12 @@ export default class extends Controller {
       console.error('Unexpected signing error:', error)
       this.showErrorState(error?.message || 'Unknown error')
     }
+  }
+
+  // The page has no CSRF token where forgery protection is off (tests); the session token authorizes the request.
+  csrfHeaders() {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    return token ? { 'X-CSRF-Token': token } : {}
   }
 
   getOldSignatureParameters(newParams, xdcParams) {
