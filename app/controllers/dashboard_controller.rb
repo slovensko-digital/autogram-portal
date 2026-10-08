@@ -1,4 +1,6 @@
 class DashboardController < ApplicationController
+  include MobileDeviceDetection
+
   AWAITING_LIMIT = 5
   RECENT_LIMIT = 5
 
@@ -52,6 +54,7 @@ class DashboardController < ApplicationController
     pending_invitations = policy_scope([ :received, FederationRequestInvitation ]).pending
 
     @awaiting_my_signature_count = awaiting_bundles.count + pending_invitations.count
+    @batch_signing = AwaitingBatchSigning.new(awaiting_bundles, user: current_user)
 
     latest_bundles = awaiting_bundles.includes(tenant: :owners).order(created_at: :desc).limit(AWAITING_LIMIT).to_a
     own_tenant_ids = current_user.tenant_ids

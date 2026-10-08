@@ -1,0 +1,22 @@
+<%# locals: (batch:) %>
+<%# Offers signing everything awaiting the user in one Autogram batch (desktop only). %>
+<% if batch.available? %>
+  <% if mobile_device_request? %>
+    <p class="mb-5 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600"><%= t("received.autogram_batches.offer.mobile_hint") %></p>
+  <% else %>
+    <section aria-labelledby="batch-sign-title" class="mb-5 rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-200">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="min-w-0">
+          <h2 id="batch-sign-title" class="text-lg font-semibold text-gray-900"><%= t("received.autogram_batches.offer.title") %></h2>
+          <p class="mt-1 text-sm text-gray-600"><%= t("received.autogram_batches.offer.description", count: batch.items.size) %></p>
+          <% if batch.other_items.any? %>
+            <p class="mt-1 text-sm text-gray-600"><%= t("received.autogram_batches.offer.other_documents", count: batch.other_items.size) %></p>
+          <% end %>
+        </div>
+        <%= link_to t("received.autogram_batches.offer.action", count: batch.items.size), received_autogram_batch_path,
+              data: { turbo: false },
+              class: "inline-flex w-full shrink-0 items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 md:w-auto" %>
+      </div>
+    </section>
+  <% end %>
+<% end %>

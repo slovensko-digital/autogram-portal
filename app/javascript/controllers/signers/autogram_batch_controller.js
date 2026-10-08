@@ -220,7 +220,7 @@ export default class extends Controller {
     const response = await fetch(path, {
       headers: {
         Accept: "application/json",
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        ...this.csrfHeaders()
       }
     })
 
@@ -338,6 +338,12 @@ export default class extends Controller {
     }
   }
 
+  // The page has no CSRF token where forgery protection is off (tests); the session token authorizes the request.
+  csrfHeaders() {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content")
+    return token ? { "X-CSRF-Token": token } : {}
+  }
+
   async uploadSignedDocument(path, content) {
     const formData = new FormData()
     formData.append("signed_document", content)
@@ -346,7 +352,7 @@ export default class extends Controller {
       method: "POST",
       body: formData,
       headers: {
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+        ...this.csrfHeaders(),
         Accept: "application/json"
       }
     })
