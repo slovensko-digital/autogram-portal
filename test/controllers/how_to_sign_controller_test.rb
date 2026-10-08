@@ -19,4 +19,16 @@ class HowToSignControllerTest < ActionDispatch::IntegrationTest
     end
     assert_select "figcaption a[href='#guide']"
   end
+
+  test "the video has Slovak captions and English subtitles turned on in English" do
+    get how_to_sign_index_path
+
+    assert_select "video track[kind=captions][srclang=sk]:not([default])"
+    assert_select "video track[kind=subtitles][srclang=en]:not([default])"
+
+    get how_to_sign_index_path(locale: :en)
+    assert_select "video track[kind=subtitles][srclang=en][default]"
+
+    assert_select "video[crossorigin=anonymous] track[src=?]", "https://static-ssd.s3.eu-central-1.amazonaws.com/agp.sk.vtt"
+  end
 end

@@ -1,6 +1,7 @@
 <%# Návod Ako podpisovať. Texty sú v config/locales (how_to_sign.index). %>
 <% content_for :title, t('header.links.how_to_sign') %>
-<% video_url = "https://static-ssd.s3.eu-central-1.amazonaws.com/agp.mp4" %>
+<% video_host = "https://static-ssd.s3.eu-central-1.amazonaws.com" %>
+<% video_url = "#{video_host}/agp.mp4" %>
 <% link_class = "font-semibold text-blue-700 underline underline-offset-4 hover:text-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" %>
 
 <%# Úvod a video %>
@@ -16,9 +17,13 @@
     <p class="mt-4 max-w-2xl text-lg leading-8 text-gray-600"><%= t('.header.subtitle') %></p>
 
     <figure class="mt-10 max-w-4xl">
-      <video controls playsinline preload="metadata" aria-label="<%= t('.video.title') %>" aria-describedby="how-to-sign-video-caption"
+      <%# crossorigin: titulky sú na S3, prehliadač ich načíta len cez CORS (bucket musí posielať Access-Control-Allow-Origin). %>
+      <video controls playsinline preload="metadata" crossorigin="anonymous" aria-label="<%= t('.video.title') %>" aria-describedby="how-to-sign-video-caption"
              class="aspect-video w-full rounded-xl border border-gray-200 bg-gray-900">
         <source src="<%= video_url %>" type="video/mp4">
+        <%# Video je po slovensky: slovenské titulky sú prepis, anglické preklad a v anglickej verzii sa zapnú samy. %>
+        <track kind="captions" src="<%= video_host %>/agp.sk.vtt" srclang="sk" label="<%= t('language_switcher.languages.sk') %>">
+        <track kind="subtitles" src="<%= video_host %>/agp.en.vtt" srclang="en" label="<%= t('language_switcher.languages.en') %>" <%= "default" if I18n.locale == :en %>>
         <p class="p-5 text-white"><%= t('.video.fallback_html', link: link_to(t('.video.download_link'), video_url, class: "underline")) %></p>
       </video>
       <figcaption id="how-to-sign-video-caption" class="mt-3 text-sm text-gray-600">
