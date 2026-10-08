@@ -208,6 +208,7 @@ en:
     agree_to_policies_html: "I agree with %{terms_link} and %{privacy_link}"
     terms_of_service: "Terms of Service"
     privacy_policy: "Privacy Policy"
+    opens_in_new_tab: "(opens in a new tab)"
     submit: "Upload & Continue"
 
   header:
@@ -2525,6 +2526,7 @@ en:
       file_selected: "Selected file: %{filename} (%{size})"
     errors:
       file_not_supported: "File \"%{filename}\" is not supported. Allowed formats are PDF, XML, and other files."
+      file_not_readable: "File \"%{filename}\" could not be read. Please select it again."
       file_too_large: "File \"%{filename}\" is too large. A document may have at most %{max}."
       signing_failed: "Failed to initiate signing. Please try again."
       network_error: "Network error occurred. Please check your connection and try again."

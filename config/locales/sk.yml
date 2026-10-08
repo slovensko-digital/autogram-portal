@@ -179,6 +179,7 @@ sk:
     agree_to_policies_html: "Súhlasím s %{terms_link} a %{privacy_link}"
     terms_of_service: "Obchodnými podmienkami"
     privacy_policy: "Zásadami ochrany osobných údajov"
+    opens_in_new_tab: "(otvorí sa v novom okne)"
     submit: "Nahrať a pokračovať"
 
   header:
@@ -2453,6 +2454,7 @@ sk:
       file_selected: "Zvolený súbor: %{filename} (%{size})"
     errors:
       file_not_supported: "Súbor \"%{filename}\" nie je podporovaný. Povolené formáty sú PDF, XML a iné súbory."
+      file_not_readable: "Súbor \"%{filename}\" sa nepodarilo načítať. Vyberte ho prosím znova."
       file_too_large: "Súbor \"%{filename}\" je príliš veľký. Dokument môže mať najviac %{max}."
       signing_failed: "Nepodarilo sa iniciovať podpisovanie. Skúste to prosím znova."
       network_error: "Vyskytla sa sieťová chyba. Skontrolujte prosím pripojenie a skúste to znova."
