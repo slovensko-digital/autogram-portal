@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="<%= t('layouts.meta.description') %>">
+    <meta property="og:title" content="Autogram Portal">
+    <meta property="og:description" content="<%= t('layouts.meta.og_description') %>">
+    <meta property="og:image" content="<%= "#{request.base_url}/og-image.png" %>">
+    <meta property="og:url" content="<%= "#{request.base_url}#{request.path}" %>">
+    <meta property="og:type" content="website">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 

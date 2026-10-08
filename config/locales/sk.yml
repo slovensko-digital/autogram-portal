@@ -2533,6 +2533,9 @@ sk:
       documents: "Dokumenty v balíku"
 
   layouts:
+    meta:
+      description: "Nahrajte dokument, podpíšte ho alebo pošlite na podpis. Kvalifikované elektronické podpisy jednoducho a bezpečne s Autogram Portalom."
+      og_description: "Platforma pre kvalifikované elektronické podpisy jednoducho a bezpečne. Nahrajte dokument, podpíšte ho alebo pošlite na podpis."
     skip_to_main_content: "Preskočiť na hlavný obsah"
     mailer:
       regards: "S pozdravom,"
