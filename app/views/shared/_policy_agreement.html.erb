@@ -1,0 +1,20 @@
+<%# locals: (form: nil) %>
+<%# Only the box toggles the agreement; the sentence next to it is not a label, so a tap on it cannot hit the links by mistake. %>
+<% input_id = form ? form.field_id(:agree_to_policies) : "agree_to_policies" %>
+<% checkbox_options = { required: true, class: "sr-only", aria: { labelledby: "#{input_id}_text" } } %>
+<div class="flex items-start gap-3">
+  <label class="group -m-2 shrink-0 cursor-pointer p-2">
+    <%= form ? form.check_box(:agree_to_policies, checkbox_options) : check_box_tag(:agree_to_policies, "1", false, checkbox_options) %>
+    <span class="flex h-6 w-6 items-center justify-center rounded border border-gray-500 bg-white transition-colors group-has-[:checked]:border-blue-500 group-has-[:checked]:bg-blue-500 group-has-[:focus-visible]:ring-2 group-has-[:focus-visible]:ring-blue-500 group-has-[:focus-visible]:ring-offset-2">
+      <svg aria-hidden="true" class="hidden h-4 w-4 text-white group-has-[:checked]:block" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+      </svg>
+    </span>
+  </label>
+  <p id="<%= input_id %>_text" class="text-sm leading-6 text-gray-700">
+    <%= t('upload_form.agree_to_policies_html',
+          terms_link: policy_document_link(t('upload_form.terms_of_service'), terms_of_service_link),
+          privacy_link: policy_document_link(t('upload_form.privacy_policy'), privacy_policy_link)) %>
+    <span class="text-red-700">(<%= t('shared.required') %>)</span>
+  </p>
+</div>
