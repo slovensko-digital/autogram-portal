@@ -32,6 +32,12 @@ module ApplicationHelper
     ENV["PRIVACY_POLICY_URL"].presence || root_path
   end
 
+  def policy_document_link(text, url)
+    link_to url, target: "_blank", rel: "noopener", class: "text-blue-600 underline hover:text-blue-800" do
+      safe_join([ text, tag.span(" #{t('upload_form.opens_in_new_tab')}", class: "sr-only") ])
+    end
+  end
+
   def pricing_url
     ENV["PRICING_URL"].presence
   end

@@ -57,10 +57,23 @@ export default class extends Controller {
     }
   }
 
-  setFile(file) {
-    if (this.maxBytesValue && file.size > this.maxBytesValue) {
-      this.showError(i18n.t('errors.file_too_large', { filename: file.name, max: this.formatFileSize(this.maxBytesValue) }))
-    } else if (this.isValidFileType(file)) {
+  async setFile(pickedFile) {
+    if (this.maxBytesValue && pickedFile.size > this.maxBytesValue) {
+      this.showError(i18n.t('errors.file_too_large', { filename: pickedFile.name, max: this.formatFileSize(this.maxBytesValue) }))
+    } else if (this.isValidFileType(pickedFile)) {
+      this.pendingFile = pickedFile
+      let file
+      try {
+        file = await this.copyToMemory(pickedFile)
+      } catch {
+        if (this.pendingFile === pickedFile) {
+          this.showError(i18n.t('errors.file_not_readable', { filename: pickedFile.name }))
+        }
+        return
+      }
+      // A newer file was picked while this one was being read
+      if (this.pendingFile !== pickedFile) return
+
       // Clear any existing file first
       this.clearFile()
 
@@ -78,8 +91,16 @@ export default class extends Controller {
       this.showError('')
       this.announce(i18n.t('dropzone.file_selected', { filename: file.name, size: this.formatFileSize(file.size) }))
     } else {
-      this.showError(i18n.t('errors.file_not_supported', { filename: file.name }))
+      this.showError(i18n.t('errors.file_not_supported', { filename: pickedFile.name }))
     }
+  }
+
+  // Firefox on Android loses access to a picked file once the tab goes to the
+  // background (e.g. after opening the terms in a new tab) and then submits the
+  // form without its content. An in-memory copy stays readable.
+  async copyToMemory(file) {
+    const content = await file.arrayBuffer()
+    return new File([content], file.name, { type: file.type, lastModified: file.lastModified })
   }
 
   showError(message) {
@@ -161,6 +182,7 @@ export default class extends Controller {
 
   removeFile(event) {
     event.stopPropagation()
+    this.pendingFile = null
     this.clearFile()
     this.updateUI()
     this.updateSubmitButton()
