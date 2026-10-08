@@ -141,7 +141,7 @@
         <%= t('.cta.description_html', docs: link_to(t('.cta.docs_link'), docs_path, class: link_class)) %>
       </p>
     </div>
-    <%= link_to new_contract_path, class: "inline-flex min-h-12 items-center gap-2 rounded-md bg-blue-600 px-5 text-base font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" do %>
+    <%= link_to new_contract_path, class: "btn btn-primary" do %>
       <%= t('.cta.upload') %>
       <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />

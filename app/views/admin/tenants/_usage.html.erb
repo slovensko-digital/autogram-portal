@@ -10,7 +10,7 @@
         <%= form.label :month, t('admin.tenants.usage.month'), class: "block text-xs font-medium text-gray-700" %>
         <%= form.month_field :month, value: month.strftime("%Y-%m"), class: "mt-1 rounded-md border border-gray-500 px-3 py-1.5 text-sm" %>
       </div>
-      <%= form.submit t('admin.tenants.usage.show'), name: nil, class: "inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer" %>
+      <%= form.submit t('admin.tenants.usage.show'), name: nil, class: "btn btn-secondary" %>
     <% end %>
   </div>
 

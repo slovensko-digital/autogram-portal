@@ -9,7 +9,7 @@
     <p class="text-sm text-gray-500"><%= subtitle %></p>
   </div>
   <% if path %>
-    <%= link_to path, class: "inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors #{secondary ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50" : "bg-blue-600 text-white hover:bg-blue-700"}" do %>
+    <%= link_to path, class: "btn gap-1.5 #{secondary ? "btn-secondary" : "btn-primary"}" do %>
       <%= link_text %><span class="sr-only">: <%= title %></span>
       <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />

@@ -22,25 +22,25 @@
           <%= link_to t('documents.new.actions.prepare_signature_fields.title'),
                 contract_signature_field_preparations_path(@contract),
                 data: { turbo_frame: "_top" },
-                class: "inline-flex w-full justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto" %>
+                class: "btn btn-secondary w-full sm:w-auto" %>
         <% end %>
       <% end %>
 
       <% if @contract.signed_document.attached? %>
         <div class="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
           <%= link_to signed_document_contract_path(@contract), data: { turbo: false },
-                class: "inline-flex w-full justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto" do %>
+                class: "btn btn-primary w-full sm:w-auto" do %>
             <%= t('contracts.download_actions.download_button') %>
           <% end %>
           <% @contract.private_signature_evidence_records.each do |evidence_record| %>
             <%= link_to download_private_signature_evidence_verification_path(reference: evidence_record.public_reference), data: { turbo: false },
-                  class: "inline-flex w-full justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto" do %>
+                  class: "btn btn-secondary w-full sm:w-auto" do %>
               <%= t('contracts.show_bundle.private_evidence_download_button') %>
             <% end %>
           <% end %>
           <% if @contract.tenant.archivation_enabled? %>
             <%= link_to content_versions_contract_path(@contract), data: { turbo_frame: "_top" },
-                  class: "inline-flex w-full justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto" do %>
+                  class: "btn btn-secondary w-full sm:w-auto" do %>
               <%= t('contracts.show.version_history') %>
             <% end %>
           <% end %>
@@ -51,7 +51,7 @@
         <%= form_with url: extend_signatures_contract_path(@contract), method: :post, local: true, class: "w-full sm:w-auto" do |form| %>
           <%= form.hidden_field :target_level, value: 'T' %>
           <%= form.submit t('documents.new.actions.add_timestamp.title'),
-                          class: "items-center w-full sm:w-auto px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                          class: "btn btn-secondary w-full sm:w-auto",
                           data: { "form-submit-target": "submitButton" } %>
         <% end %>
       <% end %>
@@ -60,7 +60,7 @@
         <%= form_with url: extend_signatures_contract_path(@contract), method: :post, local: true, class: "w-full sm:w-auto" do |form| %>
           <%= form.hidden_field :target_level, value: 'LTA' %>
           <%= form.submit archive_action_t(@contract.tenant, 'documents.new.actions.archive.title'),
-                          class: "items-center w-full sm:w-auto px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                          class: "btn btn-secondary w-full sm:w-auto",
                           data: { "form-submit-target": "submitButton" } %>
         <% end %>
       <% end %>

@@ -18,12 +18,12 @@
         <%= hidden_field_tag :target_level, target_level %>
         <div class="flex flex-col sm:flex-row gap-8">
           <% if back_path.present? %>
-            <%= link_to back_path, class: "flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <%= link_to back_path, class: "btn btn-secondary flex-1" do %>
               <%= t('documents.new.actions.back') %>
             <% end %>
           <% end %>
           <%= submit_tag archive_action_t(contract.tenant, "contracts.signature_extension.levels.#{target_level.downcase}.button"),
-                      class: "#{back_path.present? ? 'flex-1' : 'w-full'} inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                      class: "btn btn-primary #{back_path.present? ? 'flex-1' : 'w-full'}",
                       data: { "form-submit-target": "submitButton", turbo_frame: "_top" } %>
         </div>
       <% end %>
