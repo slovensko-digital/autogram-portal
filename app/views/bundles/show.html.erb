@@ -50,6 +50,8 @@
       </div>
     </div>
 
+    <%= render "shared/retention_notice", record: @bundle %>
+
     <% if @bundle.note.present? %>
       <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
         <h2 class="text-sm font-medium text-gray-700"><%= t('.note_title') %></h2>

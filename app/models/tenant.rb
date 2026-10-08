@@ -17,6 +17,7 @@
 #
 class Tenant < ApplicationRecord
   include Tenant::Usage
+  include Tenant::Retention
 
   AVAILABLE_FEATURES = %w[archivation api].freeze
 

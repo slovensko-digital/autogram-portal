@@ -1449,6 +1449,10 @@ en:
       not_refreshable: "This validation record cannot be refreshed anymore."
 
   dashboard:
+    expiring_documents:
+      title:
+        one: "%{count} document will soon be deleted automatically"
+        other: "%{count} documents will soon be deleted automatically"
     index:
       title: "Welcome back, %{name}"
       subtitle: "Overview of your documents and signatures"
@@ -1815,7 +1819,7 @@ en:
             description: "A plan for organizations with an unlimited number of members. Documents sent for signature and timestamps are recorded monthly as the basis for billing."
           usage:
             label: "Plan usage"
-            description: "You can see how much of the limits you have used, the retention period and the maximum document size on the Home page and in Settings under Organization. Monthly limits reset at the start of each calendar month. When a limit is used up, the corresponding action is not available and the portal tells you why."
+            description: "You can see how much of the limits you have used, the retention period and the maximum document size on the Home page and in Settings under Organization. Monthly limits reset at the start of each calendar month. When a limit is used up, the corresponding action is not available and the portal tells you why. If the plan deletes documents after a while, the deletion date is shown on the document and bundle details, and documents deleted within 7 days are marked in the lists. The Home page then shows how many there are."
           signature_requests:
             label: "What counts as a document sent for signature"
             description: "Every document of a bundle signed by someone other than your organization – no matter whether you invited the recipient by email or sent them a link. When the organization uses up the limit, recipients cannot sign until the limit resets."
@@ -2569,6 +2573,25 @@ en:
       driver: "Computer + device driver"
       certificate: "Requires a qualified certificate"
       unsupported: "Not supported"
+
+  retention:
+    note:
+      one: "In the %{plan} plan, documents and bundles are deleted automatically %{count} day after they are created."
+      other: "In the %{plan} plan, documents and bundles are deleted automatically %{count} days after they are created."
+    badge: "Deleted %{countdown}"
+    countdown:
+      today: "today"
+      tomorrow: "tomorrow"
+      days:
+        one: "in %{count} day"
+        other: "in %{count} days"
+    notice:
+      title:
+        document: "This document will be deleted automatically on %{date} (%{countdown})"
+        bundle: "This bundle and its documents will be deleted automatically on %{date} (%{countdown})"
+      description:
+        one: "In the %{plan} plan, documents and bundles are deleted %{count} day after they are created. If you want to keep them, download them before they are deleted."
+        other: "In the %{plan} plan, documents and bundles are deleted %{count} days after they are created. If you want to keep them, download them before they are deleted."
 
   plan_limits:
     exceeded:

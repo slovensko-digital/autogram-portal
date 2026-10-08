@@ -6,6 +6,7 @@
     <%# Page header %>
     <div class="mb-6">
       <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+      <%= render "shared/retention_note", tenant: current_tenant, css_class: "mt-2" %>
     </div>
 
     <%# Filter bar %>

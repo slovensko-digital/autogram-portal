@@ -417,6 +417,12 @@ class Contract < ApplicationRecord
     documents.first.blob.filename
   end
 
+  # When the retention of the tenant's plan deletes the contract (a bundled one together with its bundle);
+  # nil when it is kept.
+  def scheduled_deletion_at
+    bundle ? bundle.scheduled_deletion_at : tenant&.retention_deletion_at(created_at)
+  end
+
   def validation_result
     validation_results.first&.validation_result
   end
