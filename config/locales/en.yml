@@ -66,11 +66,17 @@ en:
   session:
     errors:
       no_file: "No file was selected."
-      empty_payload: "The uploaded file is empty."
-      invalid_base64: "The uploaded file could not be read."
-      validation_failed: "The signatures in the uploaded document could not be verified. Please try again."
-      no_signatures: "The uploaded document contains no signature. Sign it and upload it again."
-      invalid_signatures: "The signature in the uploaded document is not valid. Sign the document again and upload it."
+      empty_payload: "The signing app returned an empty document."
+      invalid_base64: "The document from the signing app could not be read."
+      validation_failed: "The signatures in the document could not be verified."
+      no_signatures: "The document contains no signature."
+      invalid_signatures: "The signature in the document is not valid."
+      manual_upload:
+        empty_payload: "The uploaded file is empty."
+        invalid_base64: "The uploaded file could not be read."
+        validation_failed: "The signatures in the uploaded document could not be verified. Please try again."
+        no_signatures: "The uploaded document contains no signature. Sign it and upload it again."
+        invalid_signatures: "The signature in the uploaded document is not valid. Sign the document again and upload it."
 
   verification:
     sms:
@@ -1222,7 +1228,14 @@ en:
         upload_desc: "After signing, upload the signed document back."
         upload_dropzone: "Drop a file here or click to select"
       error:
-        title: "Error signing the document"
+        title: "The document could not be signed"
+        description: "Signing did not finish and the document remains unsigned."
+        expired_title: "Signing timed out"
+        expired_description: "Signing was not completed in time, so it was ended. The document remains unsigned."
+        reason: "Reason"
+        retry_hint: "Try signing the document again. If the error persists, choose another signing method."
+        retry: "Sign again"
+        choose_another_method: "Choose another signing method"
       signed:
         title: "Document was signed successfully"
         message: "Signing was completed successfully. You can close this window or return to the document."

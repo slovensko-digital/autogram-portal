@@ -521,10 +521,12 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     error_stream = broadcasts.sole
     assert_equal "replace", error_stream["action"]
     assert_includes error_stream.to_html, I18n.t("contracts.sessions.error.title")
-    assert error_stream.at_css("a[href='#{signature_apps_contract_path(@contract)}']", text: I18n.t("actions.back"))
+    assert_includes error_stream.to_html, I18n.t("session.errors.invalid_signatures")
+    assert_equal I18n.t("contracts.sessions.error.retry"), error_stream.at_css("a[href='#{autogram_contract_sessions_path(@contract)}'][data-turbo-frame='signature_apps_#{@contract.uuid}']")&.text&.strip
+    assert_equal I18n.t("contracts.sessions.error.choose_another_method"), error_stream.at_css("a[href='#{signature_apps_contract_path(@contract)}']")&.text&.strip
   end
 
-  test "signing error goes back to the signing apps with the chosen document" do
+  test "signing error offers to sign again or go back to the signing apps with the chosen document" do
     contract = create_contract_without_session
     get "/contracts/#{contract.uuid}/sessions/autogram", params: { iframe: "true", qscd: "eid_2024" }
     session = contract.sessions.sole
@@ -536,7 +538,83 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
 
     error_stream = broadcasts.sole
     assert_includes error_stream.to_html, I18n.t("contracts.sessions.error.title")
-    assert error_stream.at_css("a[href='#{signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")}']", text: I18n.t("actions.back"))
+    assert error_stream.at_css("h1[tabindex='-1'][data-controller='focus-on-connect']")
+    retry_link = error_stream.at_css("a[href='#{autogram_contract_sessions_path(contract, iframe: "true", qscd: "eid_2024")}']")
+    assert_equal I18n.t("contracts.sessions.error.retry"), retry_link&.text&.strip
+    back_link = error_stream.at_css("a[href='#{signature_apps_contract_path(contract, iframe: "true", qscd: "eid_2024")}'][data-turbo='false']")
+    assert_equal I18n.t("contracts.sessions.error.choose_another_method"), back_link&.text&.strip
+    assert_not error_stream.css("a").any? { |link| link.text.strip == I18n.t("actions.back") }
+  end
+
+  test "signing error of a signature no longer required only goes back" do
+    @session.signer_contract.update_column(:superseded_at, Time.current)
+
+    broadcasts = capture_turbo_stream_broadcasts(@session) do
+      @session.mark_failed!(Session::SignatureNoLongerRequiredError.new.message)
+    end
+
+    error_stream = broadcasts.sole
+    assert_includes error_stream.to_html, I18n.t("bundles.sign.signature_no_longer_required")
+    assert_not error_stream.css("a").any? { |link| link.text.strip == I18n.t("contracts.sessions.error.retry") }
+    assert_equal I18n.t("actions.back"), error_stream.at_css("a[href='#{signature_apps_contract_path(@contract)}']")&.text&.strip
+  end
+
+  test "failed session broadcasts its error message" do
+    broadcasts = capture_turbo_stream_broadcasts(@session) do
+      @session.mark_failed!("Karta bola vybratá")
+    end
+
+    assert_includes broadcasts.sole.to_html, "Karta bola vybratá"
+    assert_equal "Karta bola vybratá", @session.reload.error_message
+  end
+
+  test "failed session without a known reason shows no reason" do
+    broadcasts = capture_turbo_stream_broadcasts(@session) do
+      @session.mark_failed!
+    end
+
+    error_stream = broadcasts.sole
+    assert_includes error_stream.to_html, I18n.t("contracts.sessions.error.description")
+    assert_not_includes error_stream.to_html, I18n.t("contracts.sessions.error.reason")
+    assert_nil @session.reload.error_message
+  end
+
+  test "expired session tells the signer that the time ran out and offers to sign again" do
+    broadcasts = capture_turbo_stream_broadcasts(@session) do
+      @session.expired!
+    end
+
+    error_stream = broadcasts.sole
+    assert_includes error_stream.to_html, I18n.t("contracts.sessions.error.expired_title")
+    assert_not_includes error_stream.to_html, I18n.t("contracts.sessions.error.title")
+    assert_equal I18n.t("contracts.sessions.error.retry"), error_stream.at_css("a[href='#{autogram_contract_sessions_path(@contract)}']")&.text&.strip
+  end
+
+  test "signing again after an avm session timed out starts a new session" do
+    contract = create_contract_without_session
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+    signer_contract = (recipient.recipient_signer || recipient.create_recipient_signer!).signer_contracts.find_or_create_by!(contract: contract)
+    timed_out = signer_contract.sessions.create!(
+      type: "AvmSession",
+      signing_started_at: 11.minutes.ago,
+      options: { "document_identifier" => "old-guid", "encryption_key" => "old-key" }
+    )
+
+    with_avm_service(Struct.new(:started_at) do
+      def initiate_signing(_contract, signer_contract: nil)
+        { document_identifier: "guid-123", encryption_key: "secret-key-456", signing_started_at: started_at }
+      end
+    end.new(Time.current)) do
+      without_avm_poll_job do
+        get "/contracts/#{contract.uuid}/sessions/avm", params: { recipient: recipient.uuid }
+      end
+    end
+
+    assert_response :success
+    new_session = signer_contract.sessions.order(:id).last
+    assert_not_equal timed_out, new_session
+    assert_equal "guid-123", new_session.document_identifier
   end
 
   test "podpisuj upload with invalid signatures shows the error and keeps the session open" do
@@ -560,7 +638,7 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
       }
 
       assert_response :unprocessable_entity
-      assert_equal I18n.t("session.errors.invalid_signatures"), JSON.parse(response.body).fetch("error")
+      assert_equal I18n.t("session.errors.manual_upload.invalid_signatures"), JSON.parse(response.body).fetch("error")
       assert @session.reload.pending?
       assert_nil @session.error_message
     end
