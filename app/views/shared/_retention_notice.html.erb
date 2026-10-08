@@ -1,0 +1,20 @@
+<%# locals: (record:) %>
+<%# When the retention of the plan deletes a document or bundle. %>
+<% if (deletion_at = record.scheduled_deletion_at) %>
+  <% tenant = record.tenant %>
+  <div class="w-full rounded-lg border border-gray-200 bg-white p-4">
+    <div class="flex items-start gap-3">
+      <svg aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div class="min-w-0 flex-1 text-sm">
+        <p class="font-semibold text-gray-900">
+          <%= t("retention.notice.title.#{record.is_a?(Bundle) ? "bundle" : "document"}", date: deletion_date(deletion_at), countdown: deletion_countdown(deletion_at)) %>
+        </p>
+        <p class="mt-1 text-gray-600">
+          <%= t("retention.notice.description", plan: t("tenants.plans.#{tenant.plan}"), count: tenant.limits.retention.in_days.to_i) %>
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,10 @@
+<%# locals: (deletion_at:) %>
+<%# Marks a list item the retention of the plan deletes soon. %>
+<% if deletion_soon?(deletion_at) %>
+  <span class="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-300" title="<%= deletion_date(deletion_at) %>">
+    <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <%= t("retention.badge", countdown: deletion_countdown(deletion_at)) %>
+  </span>
+<% end %>

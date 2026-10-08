@@ -48,6 +48,8 @@
         </div>
       </div>
 
+      <%= render "shared/retention_notice", record: @contract %>
+
       <% if @contract.bundle %>
         <%= render "shared/warning", title: t('.part_of_bundle'), content: t('.part_of_bundle_description') %>
       <% end %>

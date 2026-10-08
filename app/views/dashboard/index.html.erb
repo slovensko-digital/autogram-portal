@@ -5,6 +5,7 @@
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900"><%= t('.title', name: (current_user.name.presence || current_user.email).split(/[\s@]/).first) %></h1>
       <p class="mt-1 text-sm text-gray-500"><%= current_tenant.pro? ? t('.subtitle_pro') : t('.subtitle') %></p>
+      <%= render "dashboard/expiring_documents", standalone_count: @expiring_contracts_count, bundled_count: @expiring_bundled_contracts_count %>
     </div>
     <% if current_tenant.archivation_enabled? && @expiring_contract_validation_records_count.positive? %>
       <%= render 'shared/warning',

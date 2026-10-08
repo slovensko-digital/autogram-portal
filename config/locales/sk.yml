@@ -1385,6 +1385,11 @@ sk:
       not_refreshable: "Tento validačný záznam už nie je možné obnoviť."
 
   dashboard:
+    expiring_documents:
+      title:
+        one: "%{count} dokument sa čoskoro automaticky zmaže"
+        few: "%{count} dokumenty sa čoskoro automaticky zmažú"
+        other: "%{count} dokumentov sa čoskoro automaticky zmaže"
     index:
       title: "Vitajte späť, %{name}"
       subtitle: "Prehľad vašich dokumentov a podpisov"
@@ -1756,7 +1761,7 @@ sk:
             description: "Plán pre organizácie s neobmedzeným počtom členov. Dokumenty odoslané na podpis a časové pečiatky sa evidujú po mesiacoch ako podklad pre vyúčtovanie."
           usage:
             label: "Využitie plánu"
-            description: "Čerpanie limitov, dobu uchovávania dokumentov a maximálnu veľkosť dokumentu vidíte na stránke Domov a v Nastaveniach v časti Organizácia. Mesačné limity sa obnovujú na začiatku kalendárneho mesiaca. Keď limit vyčerpáte, príslušná akcia nie je dostupná a portál vám to oznámi."
+            description: "Čerpanie limitov, dobu uchovávania dokumentov a maximálnu veľkosť dokumentu vidíte na stránke Domov a v Nastaveniach v časti Organizácia. Mesačné limity sa obnovujú na začiatku kalendárneho mesiaca. Keď limit vyčerpáte, príslušná akcia nie je dostupná a portál vám to oznámi. Ak plán dokumenty po čase maže, dátum zmazania vidíte na detaile dokumentu aj balíka a dokumenty, ktoré sa zmažú do 7 dní, sú označené v zoznamoch. Na stránke Domov vtedy uvidíte, koľko ich je."
           signature_requests:
             label: "Čo sa počíta ako dokument odoslaný na podpis"
             description: "Každý dokument balíka, ktorý podpíše niekto iný ako vaša organizácia – bez ohľadu na to, či ste adresáta pozvali e-mailom, alebo mu poslali odkaz. Ak organizácia limit vyčerpá, adresáti nemôžu podpisovať, kým sa limit neobnoví."
@@ -2509,6 +2514,28 @@ sk:
       driver: "Počítač + ovládač zariadenia"
       certificate: "Vyžaduje kvalifikovaný certifikát"
       unsupported: "Nepodporované"
+
+  retention:
+    note:
+      one: "V pláne %{plan} sa dokumenty a balíky automaticky mažú %{count} deň po vytvorení."
+      few: "V pláne %{plan} sa dokumenty a balíky automaticky mažú %{count} dni po vytvorení."
+      other: "V pláne %{plan} sa dokumenty a balíky automaticky mažú %{count} dní po vytvorení."
+    badge: "Zmaže sa %{countdown}"
+    countdown:
+      today: "dnes"
+      tomorrow: "zajtra"
+      days:
+        one: "o %{count} deň"
+        few: "o %{count} dni"
+        other: "o %{count} dní"
+    notice:
+      title:
+        document: "Dokument sa automaticky zmaže %{date} (%{countdown})"
+        bundle: "Balík sa aj s dokumentmi automaticky zmaže %{date} (%{countdown})"
+      description:
+        one: "V pláne %{plan} sa dokumenty a balíky mažú %{count} deň po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
+        few: "V pláne %{plan} sa dokumenty a balíky mažú %{count} dni po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
+        other: "V pláne %{plan} sa dokumenty a balíky mažú %{count} dní po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
 
   plan_limits:
     exceeded:

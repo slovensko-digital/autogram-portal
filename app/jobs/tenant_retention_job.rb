@@ -1,16 +1,13 @@
-# Deletes bundles and documents older than the retention period of the tenant's plan
-# (e.g. BASIC_RETENTION_DAYS). Tenants whose plan changed recently keep their documents until
-# the grace period (PLAN_CHANGE_RETENTION_GRACE_DAYS) passes, e.g. after a cancelled PRO plan.
+# Deletes bundles and documents older than the retention of the tenant's plan (e.g. BASIC_RETENTION_DAYS).
+# Tenants whose plan changed recently keep their documents until the grace period
+# (PLAN_CHANGE_RETENTION_GRACE_DAYS) passes, e.g. after a cancelled PRO plan (see Tenant::Retention).
 class TenantRetentionJob < ApplicationJob
   queue_as :default
 
   def perform
-    PlanLimits.plans_with_retention.each do |plan|
-      cutoff = PlanLimits.for(plan).retention.ago
-
-      Tenant.where(plan: plan)
-            .where("plan_changed_at IS NULL OR plan_changed_at < ?", PlanLimits.plan_change_grace.ago)
-            .find_each { |tenant| delete_expired(tenant, cutoff) }
+    Tenant.where(plan: PlanLimits.plans_with_retention).find_each do |tenant|
+      cutoff = tenant.retention_cutoff
+      delete_expired(tenant, cutoff) if cutoff
     end
   end
 

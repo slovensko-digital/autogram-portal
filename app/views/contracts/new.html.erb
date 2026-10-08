@@ -42,6 +42,9 @@
 
         <div class="space-y-6">
           <%= render 'shared/dropzone', input_name: 'document[blob]' %>
+          <% if @current_user %>
+            <%= render "shared/retention_note", tenant: current_tenant, css_class: "" %>
+          <% end %>
           <% unless @current_user %>
             <div class="flex items-start space-x-3">
               <%= form.check_box :agree_to_policies, { required: true, class: "mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" } %>

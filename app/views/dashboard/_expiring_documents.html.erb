@@ -1,0 +1,21 @@
+<%# locals: (standalone_count:, bundled_count:) %>
+<%# Documents the retention of the plan deletes within Tenant::Retention::EXPIRING_SOON; their lists sorted
+    from the oldest show them first, marked with the deletion date. %>
+<% count = standalone_count + bundled_count %>
+<% if count.positive? %>
+  <% link_class = "font-medium text-blue-700 underline hover:text-blue-900" %>
+  <p class="mt-3 flex items-start gap-1.5 text-sm text-gray-700">
+    <svg aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>
+      <% if standalone_count.positive? && bundled_count.positive? %>
+        <%= t(".title", count: count) %>:
+        <%= link_to t("header.links.contracts"), contracts_path(sort: "oldest"), class: link_class %>,
+        <%= link_to t("header.links.bundles"), bundles_path(sort: "oldest"), class: link_class %>
+      <% else %>
+        <%= link_to t(".title", count: count), standalone_count.positive? ? contracts_path(sort: "oldest") : bundles_path(sort: "oldest"), class: link_class %>
+      <% end %>
+    </span>
+  </p>
+<% end %>

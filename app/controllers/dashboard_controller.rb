@@ -20,6 +20,7 @@ class DashboardController < ApplicationController
                                                               .expiring
                                                               .count
     load_awaiting_my_signature
+    load_expiring_documents(bundles, contracts)
     @bundles_count = bundles.count
     @contracts_count = contracts.standalone.count
     @sent_for_signing_count = bundles
@@ -45,6 +46,17 @@ class DashboardController < ApplicationController
   end
 
   private
+
+  # Documents the retention of the plan deletes within Tenant::Retention::EXPIRING_SOON: standalone ones
+  # and those in bundles, which are deleted together with their bundle.
+  def load_expiring_documents(bundles, contracts)
+    @expiring_contracts_count = @expiring_bundled_contracts_count = 0
+    cutoff = current_tenant.retention_cutoff(at: Tenant::Retention::EXPIRING_SOON.from_now)
+    return unless cutoff
+
+    @expiring_contracts_count = contracts.standalone.where(created_at: ...cutoff).count
+    @expiring_bundled_contracts_count = contracts.where(bundle_id: bundles.where(created_at: ...cutoff).select(:id)).count
+  end
 
   # Bundles and trusted-portal invitations the signed-in user still has to sign, newest first.
   def load_awaiting_my_signature

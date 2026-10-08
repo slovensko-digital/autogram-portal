@@ -3,7 +3,10 @@
 <div>
   <div class="mx-auto max-w-6xl px-6 pb-24 pt-10 lg:px-8">
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
+        <%= render "shared/retention_note", tenant: current_tenant, css_class: "mt-2" %>
+      </div>
       <%= link_to new_contract_path, class: "inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors self-start" do %>
         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -40,8 +43,9 @@
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                   <%= link_to contract.display_name, contract_path(contract), class: "text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors" %>
+                  <%= render "shared/retention_badge", deletion_at: current_tenant&.retention_deletion_at(contract.created_at) %>
                 </div>
                 <div class="md:hidden">
                   <% if contract.awaiting_signature? %>
