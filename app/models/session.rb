@@ -33,9 +33,11 @@ class Session < ApplicationRecord
   class InvalidSignedFileError < StandardError
     attr_reader :reason
 
-    def initialize(reason)
+    # Signers who upload the file by hand are told to upload a fixed one; signing apps send the file
+    # themselves, so their signers only learn what is wrong and sign again from the error page.
+    def initialize(reason, manual_upload: false)
       @reason = reason
-      super(I18n.t("session.errors.#{reason}"))
+      super(I18n.t(reason, scope: manual_upload ? "session.errors.manual_upload" : "session.errors"))
     end
   end
 
@@ -174,9 +176,9 @@ class Session < ApplicationRecord
     raise NotImplementedError, "Subclasses must implement the .available?(qscd, contract) method"
   end
 
+  # One update, so the error page broadcast on the status change already shows the message.
   def mark_failed!(message = nil)
-    failed!
-    update!(error_message: message || "Signing failed")
+    update!(status: :failed, error_message: message)
   end
 
   def accept_signed_file(signed_file)
@@ -218,13 +220,18 @@ class Session < ApplicationRecord
     "contract-#{id}-signed.#{contract.signature_parameters.container.present? ? 'asice' : 'pdf'}"
   end
 
+  # Podpisuj signers upload the signed file by hand.
+  def invalid_signed_file(reason)
+    InvalidSignedFileError.new(reason, manual_upload: podpisuj?)
+  end
+
   def decode_signed_file!(signed_file)
     decoded_signed_file = Base64.strict_decode64(signed_file.to_s)
-    raise InvalidSignedFileError, :empty_payload if decoded_signed_file.blank?
+    raise invalid_signed_file(:empty_payload) if decoded_signed_file.blank?
 
     decoded_signed_file
   rescue ArgumentError
-    raise InvalidSignedFileError, :invalid_base64
+    raise invalid_signed_file(:invalid_base64)
   end
 
   def validate_signed_file!(decoded_signed_file)
@@ -237,9 +244,9 @@ class Session < ApplicationRecord
     validation_document = Document.new(blob: validation_blob)
     validation_result = AutogramEnvironment.autogram_service.validate_signatures(validation_document)
 
-    raise InvalidSignedFileError, :validation_failed unless validation_result.valid_response?
-    raise InvalidSignedFileError, :no_signatures unless validation_result.has_signatures?
-    raise InvalidSignedFileError, :invalid_signatures unless validation_result.signatures.any? { |signature| signature.valid }
+    raise invalid_signed_file(:validation_failed) unless validation_result.valid_response?
+    raise invalid_signed_file(:no_signatures) unless validation_result.has_signatures?
+    raise invalid_signed_file(:invalid_signatures) unless validation_result.signatures.any? { |signature| signature.valid }
 
     ensure_signed_content_matches_contract!(validation_document)
 

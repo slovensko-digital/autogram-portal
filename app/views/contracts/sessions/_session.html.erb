@@ -10,12 +10,20 @@
   <% else %>
     <%= turbo_stream_from @session %>
   <% end %>
+  <% back_path = if @session.ades_evidence?
+    signing_page_path(contract, recipient: recipient, iframe: iframe, qscd: qscd)
+  else
+    signature_apps_contract_path(contract, recipient: recipient, iframe: iframe, qscd: qscd)
+  end %>
+  <% unsuccessful = !@session.signed? && (@session.failed? || @session.expired?) %>
   <div class="mx-auto flex max-w-4xl flex-col items-center space-y-6 lg:flex">
     <div class="relative isolate overflow-hidden">
       <% if @session.signed? %>
         <%= render "contracts/sessions/signed" %>
-      <% elsif @session.failed? || @session.expired? %>
-        <%= render "contracts/sessions/error" %>
+      <% elsif unsuccessful %>
+        <%= render "contracts/sessions/error",
+              back_path: back_path,
+              retry_path: (restart_session_path(@session, recipient: recipient, iframe: iframe, qscd: qscd) if @session.signer_contract.awaiting?) %>
       <% elsif @session.eidentita? %>
         <%= render "contracts/sessions/eidentita" %>
       <% elsif @session.avm? %>
@@ -27,20 +35,16 @@
       <% elsif @session.podpisuj? %>
         <%= render "contracts/sessions/podpisuj" %>
       <% end %>
-      <!-- Footer with back button -->
-      <div class="border-t border-gray-200 px-6 py-4">
-        <% back_path = if @session.ades_evidence?
-          signing_page_path(contract, recipient: recipient, iframe: iframe, qscd: qscd)
-        else
-          signature_apps_contract_path(contract, recipient: recipient, iframe: iframe, qscd: qscd)
-        end %>
-
-        <%= link_to back_path,
-                    class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-                    data: { turbo: false } do %>
-          <%= t('actions.back') %>
-        <% end %>
-      </div>
+      <% unless unsuccessful %>
+        <!-- Footer with back button -->
+        <div class="border-t border-gray-200 px-6 py-4">
+          <%= link_to back_path,
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+                      data: { turbo: false } do %>
+            <%= t('actions.back') %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   </div>
 <% end %>

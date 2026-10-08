@@ -312,7 +312,8 @@ class Contracts::SessionsController < ApplicationController
 
   def create_avm_session
     existing = @signer_contract&.sessions&.pending&.where(type: "AvmSession")&.first
-    return persist_session_view_options(existing) if existing
+    # A timed-out session can still be pending until the poll job notices; signing again needs a new one.
+    return persist_session_view_options(existing) if existing && !existing.expired?
 
     if AvmSession.unavailability_reasons(nil, @contract).include?(:timestamp_limit_reached)
       raise SessionCreationError, t("contracts.signature_apps.unavailable_reasons.timestamp_limit_reached")

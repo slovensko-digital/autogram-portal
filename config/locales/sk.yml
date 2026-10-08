@@ -37,11 +37,17 @@ sk:
   session:
     errors:
       no_file: "Nevybrali ste žiadny súbor."
-      empty_payload: "Nahraný súbor je prázdny."
-      invalid_base64: "Nahraný súbor sa nepodarilo načítať."
-      validation_failed: "Podpisy v nahranom dokumente sa nepodarilo overiť. Skúste to znova."
-      no_signatures: "Nahraný dokument neobsahuje žiadny podpis. Podpíšte ho a nahrajte znova."
-      invalid_signatures: "Podpis v nahranom dokumente nie je platný. Podpíšte dokument znova a nahrajte ho."
+      empty_payload: "Podpisová aplikácia vrátila prázdny dokument."
+      invalid_base64: "Dokument z podpisovej aplikácie sa nepodarilo načítať."
+      validation_failed: "Podpisy v dokumente sa nepodarilo overiť."
+      no_signatures: "Dokument neobsahuje žiadny podpis."
+      invalid_signatures: "Podpis v dokumente nie je platný."
+      manual_upload:
+        empty_payload: "Nahraný súbor je prázdny."
+        invalid_base64: "Nahraný súbor sa nepodarilo načítať."
+        validation_failed: "Podpisy v nahranom dokumente sa nepodarilo overiť. Skúste to znova."
+        no_signatures: "Nahraný dokument neobsahuje žiadny podpis. Podpíšte ho a nahrajte znova."
+        invalid_signatures: "Podpis v nahranom dokumente nie je platný. Podpíšte dokument znova a nahrajte ho."
 
   verification:
     sms:
@@ -1146,7 +1152,14 @@ sk:
         upload_desc: "Po podpísaní nahrajte podpísaný dokument späť."
         upload_dropzone: "Presuňte súbor sem alebo kliknite pre výber"
       error:
-        title: "Chyba pri podpisovaní dokumentu"
+        title: "Dokument sa nepodarilo podpísať"
+        description: "Podpisovanie sa nedokončilo a dokument zostal nepodpísaný."
+        expired_title: "Čas na podpísanie vypršal"
+        expired_description: "Podpisovanie sa nedokončilo v stanovenom čase, preto bolo ukončené. Dokument zostal nepodpísaný."
+        reason: "Dôvod"
+        retry_hint: "Skúste dokument podpísať znova. Ak sa chyba opakuje, vyberte si iný spôsob podpisu."
+        retry: "Podpísať znova"
+        choose_another_method: "Vybrať iný spôsob podpisu"
       signed:
         title: "Dokument bol úspešne podpísaný"
         message: "Podpisovanie prebehlo v poriadku. Môžete zatvoriť toto okno alebo sa vrátiť späť na dokument."
