@@ -35,6 +35,39 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
   end
 
+  test "recipient signs documents from two organizations in one Autogram batch" do
+    signer = confirmed_user("signer@example.com")
+    other_organization = Tenant.create!(name: "Firma XYZ", plan: :pro)
+    other_owner = confirmed_user("owner@firma-xyz.sk", tenant: other_organization, role: :owner)
+    first = request_signature_from_web(as: @owner, filename: "zmluva-abc.pdf")
+    add_recipient(first, signer.email)
+    second = request_signature_from_web(as: other_owner, filename: "zmluva-xyz.pdf", tenant: other_organization)
+    add_recipient(second, signer.email)
+    sign_out other_owner
+
+    sign_in signer
+    get received_bundles_path
+    assert_select "a[href=?]", received_autogram_batch_path, text: I18n.t("received.autogram_batches.offer.action", count: 2)
+
+    get received_autogram_batch_path
+    assert_response :success
+    items = JSON.parse(css_select("[data-controller='signers--autogram-batch']").sole["data-signers--autogram-batch-items-value"])
+    assert_equal [ "zmluva-abc.pdf", "zmluva-xyz.pdf" ], items.map { |item| item["contract_name"] }
+
+    # What the batch controller does for each item after Autogram signs it.
+    [ first, second ].zip(items).each do |bundle, item|
+      get item["parameters_path"]
+      assert_response :success
+      upload_signed_file(bundle.contracts.sole, item["upload_path"])
+      assert_response :success, -> { "upload failed: #{response.body}" }
+    end
+
+    assert first.reload.completed?
+    assert second.reload.completed?
+    get received_bundles_path
+    assert_select "a[href=?]", received_autogram_batch_path, count: 0
+  end
+
   test "colleague from the same organization signs while signed in and sees the request on both sides" do
     colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
     bundle = request_signature_from_web(as: @owner, filename: "interna.pdf")
@@ -428,12 +461,12 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
   end
 
   # Uploads a PDF, asks for signatures and returns the bundle the web creates.
-  def request_signature_from_web(as:, filename:)
-    sign_in_with_tenant as, @organization
+  def request_signature_from_web(as:, filename:, tenant: @organization)
+    sign_in_with_tenant as, tenant
     post contracts_path, params: { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 #{filename}"), "application/pdf", original_filename: filename) } }
     contract = Contract.order(:id).last
     assert_redirected_to contract_path(contract)
-    assert_equal @organization, contract.tenant
+    assert_equal tenant, contract.tenant
 
     patch contract_path(contract), params: {
       next_step: "request_signature",

@@ -656,6 +656,7 @@ en:
       error_message: "An error occurred while signing the document batch."
       desktop_only: "Batch signing with Autogram Desktop is only available on desktop devices."
       back_to_bundle: "Back to bundle"
+      item_origin: "%{bundle} · %{sender}"
     sign_withdrawn:
       title: "Signature request withdrawn"
     status:
@@ -1461,6 +1462,26 @@ en:
       scheduled: "Archive refresh was scheduled."
       not_refreshable: "This validation record cannot be refreshed anymore."
 
+  received:
+    autogram_batches:
+      show:
+        title: "Sign everything at once"
+        subtitle:
+          one: "Autogram signs %{count} document in one batch."
+          other: "Autogram signs %{count} documents in one batch."
+        other_documents: "Other documents (%{count}) have to be signed one by one because they need another signing method or contain several files. You can find them under Received for Signing."
+        step5_desc: "When finished, the signed documents are saved back to the bundles they came from."
+        back: "Back to Received for Signing"
+        unavailable: "Batch signing is not available right now. At least two documents that can be signed with Autogram have to await your signature."
+      offer:
+        title: "Sign everything at once"
+        description:
+          one: "%{count} document from the bundles you received awaits your signature. Sign it in Autogram on your computer in one batch and confirm the signature only once."
+          other: "%{count} documents from the bundles you received await your signature. Sign them in Autogram on your computer in one batch and confirm the signature only once."
+        other_documents: "Other documents (%{count}) have to be signed one by one."
+        action: "Sign everything (%{count})"
+        mobile_hint: "On a computer you can sign all documents awaiting your signature at once with Autogram."
+
   dashboard:
     expiring_documents:
       title:
@@ -1480,6 +1501,7 @@ en:
         subtitle: "Overview of documents waiting for you"
         empty: "Nothing is waiting for your signature right now."
         empty_hint: "When someone invites you to sign a bundle, it shows up here."
+        batch_hint: "You can sign documents from different bundles at once with Autogram."
       stats:
         my_bundles: "Bundles"
         my_contracts: "Contracts"
@@ -1870,7 +1892,7 @@ en:
         pro_title: "PRO organization"
         pro_description: "In a PRO organization the Awaiting my signature list comes first, followed by the Organization overview. Recent bundles waiting for your signature are marked Awaiting me. If the organization has the validation archive enabled, the Home page also warns you about signatures that will soon stop being verifiable."
         screenshot_caption: "The Home page of a personal organization"
-        screenshot_alt: "The Home page: the left menu with Home, Contracts, Bundles, Received for Signing, Settings, New contract, About and User Guide, and at the bottom the language switch, Sign out, Personal organization and the user's name; on the right the counts of bundles, contracts, sent and declined bundles, quick actions, the Awaiting my signature list, the Recent bundles list with statuses and Plan usage"
+        screenshot_alt: "The Home page: the left menu with Home, Contracts, Bundles, Received for Signing, Settings, New contract, About and User Guide, and at the bottom the language switch, Sign out, Personal organization and the user's name; on the right the counts of bundles, contracts, sent and declined bundles, quick actions, the Awaiting my signature list with the Sign everything (2) button, the Recent bundles list with statuses and Plan usage"
       contracts:
         title: "Contracts"
         intro: "The Contracts section lists the standalone documents you uploaded for signing or for verification. When you send a document for signing, it moves into a bundle and you find it in the Bundles section. You can filter the list by status and sort it by date."
@@ -2012,7 +2034,7 @@ en:
         more:
           batch:
             label: "Batch signing"
-            description: "If a bundle contains several documents, on a computer you sign them all at once with Sign all in Autogram Desktop – you confirm the signature only once. On mobile, documents are signed one by one."
+            description: "If a bundle contains several documents, on a computer you sign them all at once with Sign all in Autogram Desktop – you confirm the signature only once. You can also sign everything awaiting you in several bundles at once, even from different senders: the Sign everything button is under Received for Signing and on the Home page. Documents that need another signing method or contain several files are signed one by one. On mobile, documents are signed one by one."
           ades:
             label: "Verified AdES signing"
             description: "If the sender allows the simple electronic signature, the recipient can sign without an ID card. They verify themselves with a one-time code sent by SMS to the mobile number entered by the sender (otherwise by email) and the portal creates the signature on the server. It attaches a reference to an evidence record with the time and method of verification. This is not a qualified electronic signature and the method is available only to bundle recipients."
@@ -2166,7 +2188,7 @@ en:
         title: "Received for Signing"
         intro: "When someone asks you to sign, you receive an email with a link. The link works without signing in. If you have a portal account with the same email, you also find the bundle in Received for Signing and on the Home page."
         screenshot_caption: "Received bundles"
-        screenshot_alt: "The Received for Signing list with Status and Sort filters and bundles from different senders, some marked External sender, with the statuses Awaiting my signature, Signed by me, Signature no longer required and Declined"
+        screenshot_alt: "The Received for Signing list with the Sign everything at once offer and its Sign everything (2) button, below it the Status and Sort filters and bundles from different senders, some marked External sender, with the statuses Awaiting my signature, Signed by me, Signature no longer required and Declined"
         states_title: "Statuses of received bundles"
         states:
           awaiting:

@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 import { isMobileDevice } from "utils/device_detection"
+import { versionedSignatureParameters } from "utils/autogram_parameters"
 
 export default class extends Controller {
   static targets = ["progressBar", "progressPercent", "progressText", "currentDocumentName", "documentItem", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateAppNotRunning", "stateSuccess", "stateCancelled", "stateError", "errorMessage"]
@@ -72,7 +73,7 @@ export default class extends Controller {
         const signedDocument = signRequest.useVersionedSigning
           ? await client.signV1(
             signRequest.documents,
-            autogramParameters.signature_parameters,
+            versionedSignatureParameters(autogramParameters.signature_parameters),
             {
               abortController: this.abortController,
               batchId: batchId,
@@ -219,7 +220,7 @@ export default class extends Controller {
     const response = await fetch(path, {
       headers: {
         Accept: "application/json",
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        ...this.csrfHeaders()
       }
     })
 
@@ -337,6 +338,12 @@ export default class extends Controller {
     }
   }
 
+  // The page has no CSRF token where forgery protection is off (tests); the session token authorizes the request.
+  csrfHeaders() {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content")
+    return token ? { "X-CSRF-Token": token } : {}
+  }
+
   async uploadSignedDocument(path, content) {
     const formData = new FormData()
     formData.append("signed_document", content)
@@ -345,7 +352,7 @@ export default class extends Controller {
       method: "POST",
       body: formData,
       headers: {
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+        ...this.csrfHeaders(),
         Accept: "application/json"
       }
     })

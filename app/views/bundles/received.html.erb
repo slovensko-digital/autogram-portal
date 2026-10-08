@@ -9,6 +9,8 @@
       <p class="mt-1 text-sm text-gray-500"><%= t('.subtitle') %></p>
     </div>
 
+    <%= render "received/autogram_batches/offer", batch: @batch_signing %>
+
     <%# Filter bar %>
     <%= form_with url: received_bundles_path, method: :get, local: true, class: "mb-5 flex flex-col sm:flex-row sm:items-center gap-3" do |f| %>
       <div class="flex items-center gap-2">

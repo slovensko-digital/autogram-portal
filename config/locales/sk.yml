@@ -582,6 +582,7 @@ sk:
       error_message: "Pri podpisovaní dávky dokumentov nastala chyba."
       desktop_only: "Hromadné podpisovanie cez Autogram je dostupné iba na počítači."
       back_to_bundle: "Späť na balík"
+      item_origin: "%{bundle} · %{sender}"
     sign_withdrawn:
       title: "Požiadavka na podpis bola stiahnutá"
     status:
@@ -1384,6 +1385,28 @@ sk:
       scheduled: "Obnovenie archívnej verzie bolo naplánované."
       not_refreshable: "Tento validačný záznam už nie je možné obnoviť."
 
+  received:
+    autogram_batches:
+      show:
+        title: "Podpísať všetko naraz"
+        subtitle:
+          one: "Autogram podpíše %{count} dokument v jednej dávke."
+          few: "Autogram podpíše %{count} dokumenty v jednej dávke."
+          other: "Autogram podpíše %{count} dokumentov v jednej dávke."
+        other_documents: "Ďalšie dokumenty (%{count}) treba podpísať jednotlivo, lebo vyžadujú iný spôsob podpisu alebo obsahujú viac súborov. Nájdete ich v zozname Prijaté na podpis."
+        step5_desc: "Po dokončení sa podpísané dokumenty automaticky uložia späť do balíkov, z ktorých prišli."
+        back: "Späť na Prijaté na podpis"
+        unavailable: "Hromadné podpisovanie teraz nie je dostupné. Na váš podpis musia čakať aspoň dva dokumenty, ktoré sa dajú podpísať cez Autogram."
+      offer:
+        title: "Podpísať všetko naraz"
+        description:
+          one: "Na váš podpis čaká %{count} dokument z prijatých balíkov. V Autograme na počítači ho podpíšete v jednej dávke a podpis potvrdíte iba raz."
+          few: "Na váš podpis čakajú %{count} dokumenty z prijatých balíkov. V Autograme na počítači ich podpíšete v jednej dávke a podpis potvrdíte iba raz."
+          other: "Na váš podpis čaká %{count} dokumentov z prijatých balíkov. V Autograme na počítači ich podpíšete v jednej dávke a podpis potvrdíte iba raz."
+        other_documents: "Ďalšie dokumenty (%{count}) treba podpísať jednotlivo."
+        action: "Podpísať všetko (%{count})"
+        mobile_hint: "Na počítači môžete všetky dokumenty, ktoré čakajú na váš podpis, podpísať naraz cez Autogram."
+
   dashboard:
     expiring_documents:
       title:
@@ -1404,6 +1427,7 @@ sk:
         subtitle: "Prehľad čakajúcich dokumentov"
         empty: "Momentálne na vás nečaká žiadny podpis."
         empty_hint: "Keď vás niekto pozve podpísať balík, objaví sa tu."
+        batch_hint: "Dokumenty z rôznych balíkov môžete podpísať naraz cez Autogram."
       stats:
         my_bundles: "Balíky"
         my_contracts: "Dokumenty"
@@ -1799,7 +1823,7 @@ sk:
         pro_title: "Organizácia s plánom PRO"
         pro_description: "V organizácii PRO je na začiatku zoznam Čaká na môj podpis a pod ním Prehľad organizácie. Pri nedávnych balíkoch je označené Čaká na mňa, ak sa v nich čaká na váš podpis. Ak má organizácia zapnutý archív podpisov, stránka Domov upozorní aj na podpisy, ktorým čoskoro skončí platnosť."
         screenshot_caption: "Stránka Domov v osobnej organizácii"
-        screenshot_alt: "Stránka Domov: ľavé menu s položkami Domov, Dokumenty, Balíky, Prijaté na podpis, Nastavenia, Nový dokument, O portáli a Používateľská príručka a dole prepínač jazyka, odhlásenie, Osobná organizácia a meno používateľa; vpravo počty balíkov, dokumentov, odoslaných a odmietnutých balíkov, rýchle akcie, zoznam Čaká na môj podpis, zoznam Nedávne balíky so stavmi a Využitie plánu"
+        screenshot_alt: "Stránka Domov: ľavé menu s položkami Domov, Dokumenty, Balíky, Prijaté na podpis, Nastavenia, Nový dokument, O portáli a Používateľská príručka a dole prepínač jazyka, odhlásenie, Osobná organizácia a meno používateľa; vpravo počty balíkov, dokumentov, odoslaných a odmietnutých balíkov, rýchle akcie, zoznam Čaká na môj podpis s tlačidlom Podpísať všetko (2), zoznam Nedávne balíky so stavmi a Využitie plánu"
       contracts:
         title: "Dokumenty"
         intro: "V sekcii Dokumenty sú samostatné dokumenty, ktoré ste nahrali na podpis alebo na overenie. Keď dokument pošlete na podpis, presunie sa do balíka a nájdete ho v sekcii Balíky. Zoznam môžete filtrovať podľa stavu a zoradiť podľa dátumu."
@@ -1941,7 +1965,7 @@ sk:
         more:
           batch:
             label: "Hromadné podpisovanie"
-            description: "Ak balík obsahuje viac dokumentov, na počítači ich podpíšete naraz tlačidlom Podpísať všetko cez Autogram na počítači – podpis potvrdíte iba raz. Na mobile sa dokumenty podpisujú jednotlivo."
+            description: "Ak balík obsahuje viac dokumentov, na počítači ich podpíšete naraz tlačidlom Podpísať všetko cez Autogram na počítači – podpis potvrdíte iba raz. Rovnako naraz podpíšete aj všetky dokumenty, ktoré na vás čakajú vo viacerých balíkoch, aj od rôznych odosielateľov: tlačidlo Podpísať všetko nájdete v sekcii Prijaté na podpis a na stránke Domov. Dokumenty, ktoré vyžadujú iný spôsob podpisu alebo obsahujú viac súborov, podpíšete jednotlivo. Na mobile sa dokumenty podpisujú jednotlivo."
           ades:
             label: "Overené AdES podpisovanie"
             description: "Ak odosielateľ povolí jednoduchý elektronický podpis, adresát môže podpísať aj bez občianskeho preukazu. Overí sa jednorazovým kódom, ktorý mu príde SMS na mobilné číslo zadané odosielateľom (inak e-mailom), a portál vytvorí podpis na serveri. K dokumentu pripojí referenciu na evidenčný záznam s časom a spôsobom overenia. Nejde o kvalifikovaný elektronický podpis a metóda je dostupná iba adresátom balíka."
@@ -2095,7 +2119,7 @@ sk:
         title: "Prijaté na podpis"
         intro: "Keď vás niekto požiada o podpis, dostanete e-mail s odkazom. Odkaz funguje aj bez prihlásenia. Ak máte v portáli účet s rovnakým e-mailom, balík nájdete aj v sekcii Prijaté na podpis a na stránke Domov."
         screenshot_caption: "Prijaté balíky"
-        screenshot_alt: "Zoznam Prijaté na podpis s filtrom Stav a Zoradiť a balíkmi od rôznych odosielateľov, niektoré s označením Externý odosielateľ, v stavoch Čaká na môj podpis, Podpísané mnou, Podpis nie je potrebný a Odmietnuté"
+        screenshot_alt: "Zoznam Prijaté na podpis s ponukou Podpísať všetko naraz a tlačidlom Podpísať všetko (2), pod ňou filter Stav a Zoradiť a balíky od rôznych odosielateľov, niektoré s označením Externý odosielateľ, v stavoch Čaká na môj podpis, Podpísané mnou, Podpis nie je potrebný a Odmietnuté"
         states_title: "Stavy prijatých balíkov"
         states:
           awaiting:
