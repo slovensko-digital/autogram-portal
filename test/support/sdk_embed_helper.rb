@@ -12,7 +12,8 @@ require_relative "signing_flow_helper"
 module SdkEmbedHelper
   INTEGRATOR_PAGE_PATH = "/__integrator_page".freeze
 
-  # Stands in for the Autogram desktop app. With a signed result the portal's
+  # Stands in for the Autogram desktop app; window.agpSignV1Parameters keeps the parameters of the last
+  # POST /api/v1/sign request. With a signed result the portal's
   # Autogram signers get a file SigningFlowHelper::FakeAutogramService accepts
   # as validly signed, otherwise one without signatures.
   def self.fake_autogram_app(signed:)
@@ -25,7 +26,8 @@ module SdkEmbedHelper
             options?.onStateChange?.({ type: "waitingForSignature" });
             return { content: btoa("#{prefix}" + (document?.filename || "document")) };
           }
-          async signV1(documents, _parameters, options) {
+          async signV1(documents, parameters, options) {
+            window.agpSignV1Parameters = parameters;
             options?.onStateChange?.({ type: "waitingForSignature" });
             return { content: btoa("#{prefix}" + documents.length + " documents") };
           }
