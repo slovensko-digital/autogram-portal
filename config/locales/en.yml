@@ -2605,6 +2605,9 @@ en:
       documents: "Documents in bundle"
   
   layouts:
+    meta:
+      description: "Upload a document, sign it or send it for signature. Qualified electronic signatures made simple and secure with Autogram Portal."
+      og_description: "A platform for qualified electronic signatures made simple and secure. Upload a document, sign it or send it for signature."
     skip_to_main_content: "Skip to main content"
     mailer:
       regards: "Best regards,"
