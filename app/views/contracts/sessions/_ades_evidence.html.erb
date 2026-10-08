@@ -59,7 +59,7 @@
             <p class="mt-2 text-sm text-gray-700"><%= t('.complete_signing_body') %></p>
           </div>
 
-          <%= button_to t('.complete_signing_button'), complete_signing_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+          <%= button_to t('.complete_signing_button'), complete_signing_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, class: "btn btn-primary" %>
         </div>
       <% end %>
     <% elsif @session.verification_requested? %>
@@ -81,8 +81,8 @@
           </div>
 
           <div class="flex flex-col gap-3 sm:flex-row">
-            <%= form.submit t('.verify_code_button'), class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
-            <%= button_to t('.resend_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, form_class: "contents", class: "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+            <%= form.submit t('.verify_code_button'), class: "btn btn-primary" %>
+            <%= button_to t('.resend_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, form_class: "contents", class: "btn btn-secondary" %>
           </div>
         <% end %>
       </div>
@@ -93,7 +93,7 @@
           <p class="mt-2 text-sm text-gray-700"><%= email_channel ? t('.request_code_body_email') : t('.request_code_body') %></p>
         </div>
 
-        <%= button_to(email_channel ? t('.request_code_button_email') : t('.request_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2") %>
+        <%= button_to(email_channel ? t('.request_code_button_email') : t('.request_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, class: "btn btn-primary") %>
       </div>
     <% end %>
 

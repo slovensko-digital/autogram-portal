@@ -60,13 +60,13 @@
           <%= link_to t('actions.back'),
             signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe], qscd: @qscd),
             data: { turbo: false },
-            class: "flex-1 inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class: "btn btn-secondary flex-1"
           %>
 
           <button type="button"
                   data-signing-app-selector-target="signButton"
                   data-action="click->signing-app-selector#triggerSign"
-                  class="flex-1 inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  class="btn btn-primary flex-1">
             <%= t('.continue_to_sign') %>
           </button>
         </div>

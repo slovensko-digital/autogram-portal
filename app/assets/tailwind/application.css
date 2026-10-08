@@ -39,6 +39,30 @@
 	}
 }
 
+/* Shared buttons, 40px tall like GOV.UK buttons (well above the 24px target size of WCAG 2.5.8).
+   Utilities in views (w-full, flex-1, mt-*) override these because components come first. */
+@layer components {
+	.btn {
+		@apply inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-3 py-2 text-center text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50;
+	}
+
+	.btn-primary {
+		@apply bg-blue-600 text-white hover:bg-blue-700 disabled:hover:bg-blue-600;
+	}
+
+	.btn-secondary {
+		@apply bg-white text-gray-900 ring-1 ring-gray-500 ring-inset hover:bg-gray-50 disabled:hover:bg-white;
+	}
+
+	.btn-danger-secondary {
+		@apply bg-white text-red-700 ring-1 ring-red-600 ring-inset hover:bg-red-50 focus-visible:outline-red-600 disabled:hover:bg-white;
+	}
+
+	.btn-danger {
+		@apply bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600 disabled:hover:bg-red-600;
+	}
+}
+
 /* ALTCHA dims its footer with opacity: 0.7, which lowers the text contrast below 4.5:1 */
 altcha-widget .altcha-footer {
 	opacity: 1;

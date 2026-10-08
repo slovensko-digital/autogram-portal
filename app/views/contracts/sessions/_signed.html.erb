@@ -29,7 +29,7 @@ end %>
           <%= link_to t('.verify_reference_link'),
                 signature_evidence_verification_path(reference: @session.signature_evidence_record.public_reference),
                 data: { turbo_frame: "_top" },
-                class: "inline-flex text-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 hover:bg-blue-100" %>
+                class: "btn btn-secondary" %>
         </div>
       </div>
     <% end %>
@@ -40,11 +40,11 @@ end %>
           <%= link_to @session.contract.signed_through_bundle?(recipient: @session.recipient) ? t('.view_bundle') : t('.back_to_contract'),
                 signing_page_path(@session.contract, recipient: @session.recipient, iframe: @session.iframe_param),
                 data: { turbo_frame: "_top" },
-                class: "inline-flex text-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700" %>
+                class: "btn btn-primary" %>
         <% else %>
           <%= link_to t('.view_contract'), contract_path(@session.contract),
                 data: { turbo_frame: "_top" },
-                class: "inline-flex text-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700" %>
+                class: "btn btn-primary" %>
         <% end %>
       </div>
     <% end %>

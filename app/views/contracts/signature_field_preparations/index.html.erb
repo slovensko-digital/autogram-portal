@@ -53,7 +53,7 @@
           <%= button_to t('.finalize.submit'),
                         finalize_contract_signature_field_preparations_path(@contract),
                         method: :post,
-                        class: "inline-flex shrink-0 justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                        class: "btn btn-primary shrink-0" %>
         </div>
       </div>
     <% when :ready %>
@@ -128,7 +128,7 @@
                   <div data-visual-stamp-target="previewFallback" class="absolute inset-0 hidden flex items-center justify-center bg-white/90 p-6 text-center text-sm text-gray-600">
                     <div class="space-y-3">
                       <p><%= t('.preview.render_error') %></p>
-                      <a data-visual-stamp-target="previewLink" href="<%= preview_path %>" target="_blank" rel="noopener" class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"><%= t('.preview.open_pdf') %></a>
+                      <a data-visual-stamp-target="previewLink" href="<%= preview_path %>" target="_blank" rel="noopener" class="btn btn-primary"><%= t('.preview.open_pdf') %></a>
                     </div>
                   </div>
                 <% else %>
@@ -179,9 +179,9 @@
             <p class="text-sm text-gray-600"><%= t('.form.hint') %></p>
 
             <%= form.submit t('.form.update_submit'),
-                  class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                  class: "btn btn-primary w-full" %>
             <%= link_to t('.form.cancel'), contract_signature_field_preparations_path(@contract),
-                  class: "w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                  class: "btn btn-secondary w-full" %>
           <% elsif @recipients.present? && document.present? %>
             <div>
               <%= form.label :recipient_uuid, t('.form.recipient'), class: "block text-sm font-medium text-gray-700 mb-2" %>
@@ -195,7 +195,7 @@
             <p class="text-sm text-gray-600"><%= t('.form.hint') %></p>
 
             <%= form.submit t('.form.submit'),
-                  class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                  class: "btn btn-primary w-full" %>
           <% elsif @awaiting_recipients.present? && document.present? %>
             <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-900">
               <p class="font-semibold"><%= t('.form.all_assigned_title') %></p>

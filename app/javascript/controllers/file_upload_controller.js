@@ -203,13 +203,6 @@ export default class extends Controller {
   updateSubmitButton() {
     if (this.hasSubmitButtonTarget) {
       this.submitButtonTarget.disabled = !this.selectedFile
-      if (!this.selectedFile) {
-        this.submitButtonTarget.classList.add('opacity-50', 'cursor-not-allowed')
-        this.submitButtonTarget.classList.remove('hover:bg-indigo-700')
-      } else {
-        this.submitButtonTarget.classList.remove('opacity-50', 'cursor-not-allowed')
-        this.submitButtonTarget.classList.add('hover:bg-indigo-700')
-      }
     }
   }
 

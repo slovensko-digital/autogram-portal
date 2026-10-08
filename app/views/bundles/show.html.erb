@@ -39,13 +39,13 @@
 
         <div class="flex flex-col gap-2 sm:flex-row sm:shrink-0">
           <%= link_to t('actions.edit'), edit_bundle_path(@bundle),
-                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                class: "btn btn-secondary" %>
           <%= link_to t('actions.sign'), sign_bundle_path(@bundle),
-                class: "inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                class: "btn btn-primary" %>
           <%= button_to t('actions.delete'), bundle_path(@bundle),
                 method: :delete,
                 form: { data: { turbo_confirm: t('bundles.destroy.confirm', name: @bundle.display_name) } },
-                class: "w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white cursor-pointer hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+                class: "btn btn-danger-secondary w-full sm:w-auto" %>
         </div>
       </div>
     </div>
@@ -87,7 +87,7 @@
                  class="w-full flex-1 rounded-md border border-gray-500 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           <%= button_tag type: "button",
                 data: { action: "clipboard#copyToClipboard" },
-                class: "inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                class: "btn btn-secondary" do %>
             <span data-clipboard-target="label"><%= t('.copy_link') %></span>
           <% end %>
           <span role="status" class="sr-only" data-clipboard-target="status"></span>

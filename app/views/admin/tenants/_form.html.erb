@@ -49,6 +49,6 @@
   <div class="flex items-center justify-end gap-3">
     <%= link_to t('admin.tenants.form.cancel'), admin_tenants_path, class: "text-sm text-gray-600 hover:text-gray-900" %>
     <%= form.submit(@tenant.new_record? ? t('admin.tenants.form.create') : t('admin.tenants.form.save'),
-          class: "inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer") %>
+          class: "btn btn-primary") %>
   </div>
 <% end %>

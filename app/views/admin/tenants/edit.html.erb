@@ -28,7 +28,7 @@
       <%= form.email_field :email, required: true, placeholder: t('.add_member_placeholder'), class: "w-full md:max-w-sm rounded-md border border-gray-500 px-3 py-2 text-sm" %>
       <%= form.select :role, Membership.roles.keys.map { |role| [ t("tenants.roles.#{role}"), role ] }, { selected: "member" },
             class: "rounded-md border border-gray-500 px-3 py-2 text-sm" %>
-      <%= form.submit t('.add_member'), class: "inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer" %>
+      <%= form.submit t('.add_member'), class: "btn btn-primary" %>
     <% end %>
   </div>
 </div>
