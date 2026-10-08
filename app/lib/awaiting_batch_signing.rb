@@ -13,7 +13,7 @@ class AwaitingBatchSigning
     @user = user
   end
 
-  # Documents signed in the batch, the oldest bundle first.
+  # Documents signed in the batch, the oldest bundle first and within a bundle in upload order.
   def items
     pending_items.select { |item| item.contract.batch_signable? }
   end
@@ -37,7 +37,7 @@ class AwaitingBatchSigning
 
       # The active recipient's own awaiting signature also means the contract awaits a signature.
       signer_contracts = recipient.signer_contracts.awaiting.index_by(&:contract_id)
-      bundle.contracts.filter_map do |contract|
+      bundle.contracts.sort_by { |contract| [ contract.created_at, contract.id ] }.filter_map do |contract|
         signer_contract = signer_contracts[contract.id]
         next unless signer_contract
 
