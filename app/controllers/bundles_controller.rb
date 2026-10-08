@@ -1,6 +1,5 @@
 class BundlesController < ApplicationController
-  MOBILE_DEVICE_USER_AGENT = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
-  helper_method :mobile_device_request?
+  include MobileDeviceDetection
 
   before_action :set_bundle, only: [ :show, :edit, :update, :destroy ]
   after_action :verify_policy_scoped, only: [ :index, :received ]
@@ -118,6 +117,7 @@ class BundlesController < ApplicationController
     @own_tenant_ids = current_user.tenant_ids
     @recipients_by_bundle = Recipient.active.visible.where(user: current_user, bundle_id: @bundles.map(&:id))
                                      .index_by(&:bundle_id)
+    @batch_signing = AwaitingBatchSigning.new(policy_scope([ :received, Bundle ]).distinct.awaiting_signature_of(current_user), user: current_user)
   end
 
   def show
@@ -338,7 +338,7 @@ class BundlesController < ApplicationController
       end
     end
 
-    @batch_autogram_contracts = @pending_batch_contracts.select { |contract| contract.allowed_methods.include?("qes") }
+    @batch_autogram_contracts = @pending_batch_contracts.select(&:batch_signable?)
     @batch_autogram_available = !mobile_device_request? && @pending_batch_contracts.many? && @batch_autogram_contracts.size == @pending_batch_contracts.size
   end
 
@@ -352,25 +352,7 @@ class BundlesController < ApplicationController
   end
 
   def find_or_create_batch_autogram_session(contract)
-    signer_contract = signer_contract_for_batch(contract)
-    existing = signer_contract.sessions.pending.where(type: "AutogramSession").first
-    return persist_batch_session_view_options(existing) if existing
-
-    persist_batch_session_view_options(
-      signer_contract.sessions.create!(
-        type: "AutogramSession",
-        signing_started_at: Time.current,
-        options: batch_session_view_options
-      )
-    )
-  end
-
-  def persist_batch_session_view_options(session)
-    return session if batch_session_view_options.empty?
-
-    merged_options = (session.options || {}).merge(batch_session_view_options)
-    session.update!(options: merged_options) if session.options != merged_options
-    session
+    signer_contract_for_batch(contract).pending_autogram_session!(options: batch_session_view_options)
   end
 
   def batch_session_view_options
@@ -400,9 +382,5 @@ class BundlesController < ApplicationController
 
   def public_signing_available?
     @bundle.publicly_visible? && @bundle.visible_recipients.none?
-  end
-
-  def mobile_device_request?
-    request.user_agent.to_s.match?(MOBILE_DEVICE_USER_AGENT)
   end
 end

@@ -1,0 +1,21 @@
+<% content_for :title, t('.title') %>
+
+<div>
+  <div class="relative isolate overflow-hidden">
+    <div class="mx-auto flex max-w-4xl flex-col items-center px-6 pb-8 pt-10 lg:px-8">
+      <% intro = capture do %>
+        <% if @other_items_count.positive? %>
+          <p class="mt-3 text-sm text-gray-600"><%= t('.other_documents', count: @other_items_count) %></p>
+        <% end %>
+      <% end %>
+      <%= render "bundles/autogram_batch_signing",
+            items: @batch_items,
+            return_path: received_bundles_path,
+            back_label: t('.back'),
+            title: t('.title'),
+            subtitle: t('.subtitle', count: @batch_items.size),
+            intro: intro,
+            step5_desc: t('.step5_desc') %>
+    </div>
+  </div>
+</div>

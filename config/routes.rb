@@ -66,6 +66,9 @@ Rails.application.routes.draw do
       post :refresh, on: :member
     end
 
+    # Before the public bundle member routes, which would take "received" for a bundle id.
+    get "/bundles/received/autogram_batch", to: "received/autogram_batches#show", as: :received_autogram_batch
+
     resources :bundles, only: [ :index, :show, :edit, :update, :destroy ] do
       collection do
         get :received

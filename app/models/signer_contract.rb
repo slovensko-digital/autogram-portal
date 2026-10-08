@@ -54,6 +54,17 @@ class SignerContract < ApplicationRecord
     signed_at.nil? && declined_at.nil? && superseded_at.nil?
   end
 
+  # The pending Autogram session of the signer, e.g. for batch signing; started now when there is none.
+  def pending_autogram_session!(options: {})
+    session = sessions.pending.find_by(type: "AutogramSession") ||
+              sessions.create!(type: "AutogramSession", signing_started_at: Time.current, options: options)
+    return session if options.empty?
+
+    merged_options = (session.options || {}).merge(options)
+    session.update!(options: merged_options) if session.options != merged_options
+    session
+  end
+
   def recipient
     signer.recipient if signer.is_a?(RecipientSigner)
   end

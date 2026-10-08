@@ -316,6 +316,12 @@ class Contract < ApplicationRecord
     allowed_methods.include?("standalone_qes")
   end
 
+  # Autogram signs a batch one document per request, so only single-file contracts signed through the
+  # integrated apps can be part of a batch.
+  def batch_signable?
+    allowed_methods.include?("qes") && documents.size == 1
+  end
+
   def latest_visual_signature_stamps
     VisualStamp.joins(:signer_contract)
                .where(signer_contracts: { contract_id: id }, purpose: VisualStamp.purposes[:visual_method])

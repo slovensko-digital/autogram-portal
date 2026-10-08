@@ -1,4 +1,4 @@
-<%# locals: (items:, count:) %>
+<%# locals: (items:, count:, batch: nil) %>
 
 <section aria-labelledby="awaiting-signature-title" class="mb-8">
   <%= render "dashboard/section_header",
@@ -53,6 +53,14 @@
           </li>
         <% end %>
       </ul>
+      <% if batch&.available? && !mobile_device_request? %>
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 bg-gray-50 px-4 py-3 text-sm">
+          <span class="text-gray-600"><%= t("dashboard.index.awaiting.batch_hint") %></span>
+          <%= link_to t("received.autogram_batches.offer.action", count: batch.items.size), received_autogram_batch_path,
+                data: { turbo: false },
+                class: "inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" %>
+        </div>
+      <% end %>
     <% else %>
       <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 px-4 py-3.5 text-sm">
         <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
