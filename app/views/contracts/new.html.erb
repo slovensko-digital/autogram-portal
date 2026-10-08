@@ -4,7 +4,7 @@
       <div class="mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4"><%= t('.title') %></h1>
         <p class="text-base text-gray-600 mb-2"><%= t('.subtitle') %></p>
-        <p class="text-base text-gray-600"><%= t('.help_text_html', link: link_to(t('.signing_guide_link'), docs_path(anchor: 'signing'), class: 'text-blue-600 underline')).html_safe %></p>
+        <p class="text-base text-gray-600"><%= t('.help_text_html', link: link_to(t('.signing_guide_link'), how_to_sign_index_path, class: 'text-blue-600 underline')).html_safe %></p>
       </div>
 
       <%= form_with model: @contract, local: true, multipart: true,

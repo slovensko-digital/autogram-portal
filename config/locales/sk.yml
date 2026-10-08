@@ -198,7 +198,7 @@ sk:
       settings: "Nastavenia"
       open_foreign_request: "Otvoriť cudzí odkaz"
       new_contract: "Nový dokument"
-      electronic_onboarding: "Elektronické podpisovanie"
+      how_to_sign: "Ako podpisovať"
       docs: "Používateľská príručka"
       sign_in: "Prihlásiť sa"
       sign_out: "Odhlásiť sa"
@@ -1690,6 +1690,66 @@ sk:
       help_body: "Táto stránka potvrdzuje, že referencia existuje v AGP a zobrazuje uložené alebo znovu overené podpisové údaje priradené k podpísanému súboru."
       unknown_value: "Neznáme"
 
+  how_to_sign:
+    index:
+      header:
+        eyebrow: "Ako podpisovať"
+        title: "Sprievodca používaním Autogram Portalu"
+        subtitle: "Pozrite si videonávod, v ktorom sa dozviete, ako môžete na portáli pracovať v prihlásenej verzii aj bez registrácie."
+      video:
+        title: "Videonávod: Sprievodca používaním Autogram Portalu"
+        caption_html: "Hlavné kroky z videa nájdete aj v %{link} nižšie."
+        text_guide_link: "textovom návode"
+        fallback_html: "Váš prehliadač nevie prehrať video. Môžete si ho %{link}."
+        download_link: "stiahnuť"
+      anonymous_html: "Autogram Portal môžete použiť aj <strong class=\"font-semibold\">bez prihlásenia</strong>. Podpísanie, overenie či prijatie dokumentu na podpis funguje v anonymnej verzii rovnako ako po prihlásení."
+      guide:
+        subtitle: "Krok za krokom"
+        title: "Ako odosielať, podpisovať a overovať dokumenty"
+        intro: "Všetko, čo s dokumentmi v Autogram Portali urobíte, začína rovnako: nahráte ich na domovskej stránke. Tento návod platí pre prihlásenú verziu portálu."
+        send:
+          title: "Poslať dokument na podpis"
+          steps_html:
+            - "Na domovskej stránke nahrajte dokument a kliknite na <strong class=\"font-semibold text-gray-900\">Nahrať a pokračovať</strong>."
+            - "Vyberte akciu <strong class=\"font-semibold text-gray-900\">Poslať na podpis</strong>."
+            - "Zvoľte požadovaný typ podpisu."
+            - "Zadajte e-mailovú adresu adresáta a uložte."
+          note: "Adresát dostane e-mail s odkazom, cez ktorý dokument podpíše."
+        sign:
+          title: "Podpísať dokument sami"
+          steps_html:
+            - "Nahrajte dokument a vyberte akciu <strong class=\"font-semibold text-gray-900\">Podpísať</strong>."
+            - "Zvoľte <strong class=\"font-semibold text-gray-900\">Elektronické podpisovanie</strong> a typ vášho občianskeho preukazu."
+            - "Vyberte podpisovú aplikáciu, ktorú používate (napríklad Autogram, eIdentita alebo Podpisuj)."
+            - "Proces dokončite podľa pokynov vybranej aplikácie."
+        received:
+          title: "Podpísať dokument, ktorý vám niekto poslal"
+          intro: "Dostali ste výzvu na podpis? Dokument nájdete dvoma spôsobmi:"
+          items_html:
+            - "po prihlásení v sekcii <strong class=\"font-semibold text-gray-900\">Čaká na môj podpis</strong>,"
+            - "kliknutím na odkaz v e-maile."
+          note: "Dokument si skontrolujte. Potom ho môžete ihneď podpísať alebo odmietnuť."
+        validate:
+          title: "Skontrolovať platnosť podpisov"
+          intro: "Dokument nahrajte rovnako, ako keby ste ho chceli poslať na podpis. Portál vám okamžite zobrazí prehľad všetkých podpisov. Odtiaľ môžete dokument stiahnuť, prípadne ho aj podpísať."
+      apps:
+        title: "Vy si vyberáte, čím podpisujete"
+        description: "Autogram Portal vás nenúti používať jeden nástroj. Podpisovať môžete cez Autogram, Autogram v mobile, eIdentitu, Podpisuj alebo iné samostatné aplikácie."
+        items:
+          - "Autogram"
+          - "Autogram v mobile"
+          - "eIdentita"
+          - "Podpisuj"
+      download:
+        title: "Stiahnutie hotového dokumentu"
+        description: "Po dokončení akéhokoľvek úkonu si dokument s platnými podpismi môžete kedykoľvek stiahnuť do svojho zariadenia."
+        tip_html: "<strong class=\"font-semibold\">Tip:</strong> Bez prihlásenia je dokument dostupný na stiahnutie 60 minút od nahratia."
+      cta:
+        title: "Môžete začať"
+        description_html: "Nahrajte dokument a vyberte, čo s ním chcete urobiť. Podrobný opis všetkých funkcií nájdete v %{docs}."
+        docs_link: "používateľskej príručke"
+        upload: "Nahrať dokument"
+
   docs:
     index:
       opens_in_new_tab: "(otvorí sa v novom okne)"
@@ -1799,7 +1859,7 @@ sk:
         pro_title: "Organizácia s plánom PRO"
         pro_description: "V organizácii PRO je na začiatku zoznam Čaká na môj podpis a pod ním Prehľad organizácie. Pri nedávnych balíkoch je označené Čaká na mňa, ak sa v nich čaká na váš podpis. Ak má organizácia zapnutý archív podpisov, stránka Domov upozorní aj na podpisy, ktorým čoskoro skončí platnosť."
         screenshot_caption: "Stránka Domov v osobnej organizácii"
-        screenshot_alt: "Stránka Domov: ľavé menu s položkami Domov, Dokumenty, Balíky, Prijaté na podpis, Nastavenia, Nový dokument, O portáli a Používateľská príručka a dole prepínač jazyka, odhlásenie, Osobná organizácia a meno používateľa; vpravo počty balíkov, dokumentov, odoslaných a odmietnutých balíkov, rýchle akcie, zoznam Čaká na môj podpis, zoznam Nedávne balíky so stavmi a Využitie plánu"
+        screenshot_alt: "Stránka Domov: ľavé menu s položkami Domov, Dokumenty, Balíky, Prijaté na podpis, Nastavenia, Nový dokument, Ako podpisovať, O portáli a Používateľská príručka a dole prepínač jazyka, odhlásenie, Osobná organizácia a meno používateľa; vpravo počty balíkov, dokumentov, odoslaných a odmietnutých balíkov, rýchle akcie, zoznam Čaká na môj podpis, zoznam Nedávne balíky so stavmi a Využitie plánu"
       contracts:
         title: "Dokumenty"
         intro: "V sekcii Dokumenty sú samostatné dokumenty, ktoré ste nahrali na podpis alebo na overenie. Keď dokument pošlete na podpis, presunie sa do balíka a nájdete ho v sekcii Balíky. Zoznam môžete filtrovať podľa stavu a zoradiť podľa dátumu."

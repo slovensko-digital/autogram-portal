@@ -35,7 +35,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <% no_padding_top = @no_header || flash_messages.any? || current_page?(about_index_path) || current_page?(docs_path) %>
+  <% no_padding_top = @no_header || flash_messages.any? || current_page?(about_index_path) || current_page?(docs_path) || current_page?(how_to_sign_index_path) %>
   <body class="<%= 'lg:pt-24' unless no_padding_top %> <%= 'bg-gradient-to-tr from-slate-50 to-gray-50 text-gray-900 antialiased' unless params[:iframe] %>">
     <a href="#main-content" data-turbo="false" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[1000] focus:bg-yellow-300 focus:px-4 focus:py-2 focus:text-gray-950 focus:outline-3 focus:outline-yellow-300"><%= t('layouts.skip_to_main_content') %></a>
     <%= render "layouts/header" unless @no_header %>

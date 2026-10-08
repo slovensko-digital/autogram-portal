@@ -42,6 +42,7 @@ Rails.application.routes.draw do
 
   resources :about, only: [ :index ]
   resources :docs, only: [ :index ]
+  resources :how_to_sign, only: [ :index ], path: "how-to-sign"
 
   get  "consent" => "consents#new",    as: :new_consent
   post "consent" => "consents#create", as: :consent

@@ -227,7 +227,7 @@ en:
       settings: "Settings"
       open_foreign_request: "Open foreign request"
       new_contract: "New contract"
-      electronic_onboarding: "Electronic signatures"
+      how_to_sign: "How to sign"
       docs: "User Guide"
       sign_in: "Sign in"
       sign_out: "Sign out"
@@ -1761,6 +1761,66 @@ en:
       help_body: "This page confirms that the reference exists in AGP and shows the recorded signature details that AGP stored or revalidated for the associated signed file."
       unknown_value: "Unknown"
 
+  how_to_sign:
+    index:
+      header:
+        eyebrow: "How to sign"
+        title: "A guide to using Autogram Portal"
+        subtitle: "Watch the video guide to learn how to use the portal both signed in and without registration."
+      video:
+        title: "Video guide: Using Autogram Portal"
+        caption_html: "You can also find the main steps from the video in the %{link} below."
+        text_guide_link: "text guide"
+        fallback_html: "Your browser cannot play the video. You can %{link} instead."
+        download_link: "download it"
+      anonymous_html: "You can use Autogram Portal <strong class=\"font-semibold\">without signing in</strong> too. Signing, validating or receiving a document for signature works the same way anonymously as when signed in."
+      guide:
+        subtitle: "Step by step"
+        title: "How to send, sign and validate documents"
+        intro: "Everything you do with documents in Autogram Portal starts the same way: you upload them on the home page. This guide applies to the signed-in version of the portal."
+        send:
+          title: "Send a document for signature"
+          steps_html:
+            - "Upload a document on the home page and click <strong class=\"font-semibold text-gray-900\">Upload &amp; Continue</strong>."
+            - "Choose the <strong class=\"font-semibold text-gray-900\">Send for Signature</strong> action."
+            - "Select the required signature type."
+            - "Enter the recipient's email address and save."
+          note: "The recipient gets an email with a link through which they sign the document."
+        sign:
+          title: "Sign a document yourself"
+          steps_html:
+            - "Upload a document and choose the <strong class=\"font-semibold text-gray-900\">Sign</strong> action."
+            - "Choose <strong class=\"font-semibold text-gray-900\">Electronic Signing</strong> and the type of your ID card."
+            - "Select the signing application you use (for example Autogram, eIdentita or Podpisuj)."
+            - "Finish the process following the instructions of the selected application."
+        received:
+          title: "Sign a document someone sent you"
+          intro: "Have you received a signature request? You can find the document in two ways:"
+          items_html:
+            - "after signing in, in the <strong class=\"font-semibold text-gray-900\">Awaiting my signature</strong> section,"
+            - "by clicking the link in the email."
+          note: "Review the document. Then you can sign it right away or decline it."
+        validate:
+          title: "Check the validity of signatures"
+          intro: "Upload the document the same way as if you wanted to send it for signature. The portal immediately shows an overview of all signatures. From there you can download the document or sign it as well."
+      apps:
+        title: "You choose what you sign with"
+        description: "Autogram Portal does not force you to use a single tool. You can sign with Autogram, Autogram in mobile, eIdentita, Podpisuj or other standalone applications."
+        items:
+          - "Autogram"
+          - "Autogram in mobile"
+          - "eIdentita"
+          - "Podpisuj"
+      download:
+        title: "Downloading the finished document"
+        description: "After completing any action, you can download the document with valid signatures to your device at any time."
+        tip_html: "<strong class=\"font-semibold\">Tip:</strong> Without signing in, the document is available for download for 60 minutes after uploading."
+      cta:
+        title: "You can get started"
+        description_html: "Upload a document and choose what you want to do with it. You will find a detailed description of all features in the %{docs}."
+        docs_link: "user guide"
+        upload: "Upload document"
+
   docs:
     index:
       opens_in_new_tab: "(opens in a new tab)"
@@ -1870,7 +1930,7 @@ en:
         pro_title: "PRO organization"
         pro_description: "In a PRO organization the Awaiting my signature list comes first, followed by the Organization overview. Recent bundles waiting for your signature are marked Awaiting me. If the organization has the validation archive enabled, the Home page also warns you about signatures that will soon stop being verifiable."
         screenshot_caption: "The Home page of a personal organization"
-        screenshot_alt: "The Home page: the left menu with Home, Contracts, Bundles, Received for Signing, Settings, New contract, About and User Guide, and at the bottom the language switch, Sign out, Personal organization and the user's name; on the right the counts of bundles, contracts, sent and declined bundles, quick actions, the Awaiting my signature list, the Recent bundles list with statuses and Plan usage"
+        screenshot_alt: "The Home page: the left menu with Home, Contracts, Bundles, Received for Signing, Settings, New contract, How to sign, About and User Guide, and at the bottom the language switch, Sign out, Personal organization and the user's name; on the right the counts of bundles, contracts, sent and declined bundles, quick actions, the Awaiting my signature list, the Recent bundles list with statuses and Plan usage"
       contracts:
         title: "Contracts"
         intro: "The Contracts section lists the standalone documents you uploaded for signing or for verification. When you send a document for signing, it moves into a bundle and you find it in the Bundles section. You can filter the list by status and sort it by date."
