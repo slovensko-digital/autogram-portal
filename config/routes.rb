@@ -62,7 +62,7 @@ Rails.application.routes.draw do
       resources :memberships, only: [ :create, :destroy ], controller: "tenants/memberships"
     end
 
-    resources :contracts, only: [ :index, :destroy ]
+    resources :contracts, only: [ :index ]
     resources :contract_validation_records, only: [ :index, :destroy ] do
       post :refresh, on: :member
     end

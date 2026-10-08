@@ -188,9 +188,9 @@ in integration tests. They are not a replacement for controller authorization.
 | `Federation::Requests#show/claim` | Web public / authenticated user | Preview skips authorization / `FederationRequestPolicy#claim?` | Existing broker URL checks, remote errors and signing continuation |
 | `Users::Registrations#edit/update/destroy` | Authenticated Devise self resource | `UserPolicy#manage_account?`; `edit_features?` for admin | Non-admin features ignored, admin flag retained; confirmation phrase and model deletion errors unchanged |
 
-Contract deletion remains behind the existing authenticated route even though the
-controller policy permits anonymous-contract management. Display-only rules also
-remain distinct: preparation/extension format and plan checks, decline/accept
+Contract deletion is routed publicly like show/update: anonymous visitors may
+delete anonymous contracts, while tenant contracts require management. Display-only
+rules remain distinct: preparation/extension format and plan checks, decline/accept
 button state, federation navigation feature and archive controls do not silently
 strengthen endpoint permissions.
 
