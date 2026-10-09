@@ -18,7 +18,7 @@ class Federation::SendRequestInvitationJobTest < ActiveJob::TestCase
     recipient.reload
 
     assert recipient.notified?
-    assert_not_nil recipient.remote_notified_at
+    assert_not_nil recipient.notified_at
     assert_equal recipient.portal_instance, fake_client.portal_instance
     assert_equal recipient.uuid, fake_client.invitation.fetch(:recipientId)
     assert_equal recipient.bundle.uuid, fake_client.invitation.fetch(:bundleId)
@@ -27,7 +27,7 @@ class Federation::SendRequestInvitationJobTest < ActiveJob::TestCase
 
   test "perform withdraw sends withdrawal to recipient portal" do
     recipient = create_federated_recipient
-    recipient.update!(remote_notified_at: Time.current)
+    recipient.update!(notified_at: Time.current)
     fake_client = WithdrawClientStub.new
 
     with_federation_portal_client(fake_client) do

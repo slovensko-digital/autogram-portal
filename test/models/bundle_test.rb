@@ -181,7 +181,7 @@ class BundleTest < ActiveSupport::TestCase
       locale: "en",
       portal_instance_uuid: portal_instance.uuid
     )
-    recipient.update!(remote_notified_at: Time.current)
+    recipient.update!(notified_at: Time.current)
     signer_contract = recipient.signer_contracts.find_by!(contract: bundle.contracts.first)
     signer_contract.update!(signed_at: Time.current)
 
@@ -200,7 +200,7 @@ class BundleTest < ActiveSupport::TestCase
       locale: "en",
       portal_instance_uuid: create_portal_instance.uuid
     )
-    second_recipient.update!(remote_notified_at: Time.current)
+    second_recipient.update!(notified_at: Time.current)
 
     first_recipient.signer_contracts.find_by!(contract: bundle.contracts.first).update!(signed_at: Time.current)
 

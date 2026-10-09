@@ -68,7 +68,7 @@
       <% end %>
     </section>
 
-    <section class="rounded-lg border border-gray-200 bg-white p-6">
+    <section class="sm:rounded-lg sm:border sm:border-gray-200 sm:bg-white sm:p-6">
       <%= turbo_frame_tag "bundle_recipients_#{@bundle.uuid}", src: bundle_recipients_path(@bundle), loading: "lazy", class: "block w-full" do %>
         <%= render "bundles/loading", message: t('.loading_recipients') %>
       <% end %>

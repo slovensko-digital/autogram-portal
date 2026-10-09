@@ -673,7 +673,7 @@ en:
   recipients:
     index:
       title: "Send for Signature"
-      subtitle: "Send this bundle to others for signing via email."
+      subtitle: "Add recipients, then send them an email with a link to sign."
       send_invitation: "Send email"
       send_to_portal: "Send to portal"
       portal_label: "Recipient portal"
@@ -681,7 +681,7 @@ en:
       portal_help: "Choose a trusted partner portal when the recipient should open the request through another Autogram Portal instance."
       email_label: "Recipient Email"
       email_placeholder: "jan.novak@example.com"
-      email_help: "The recipient will receive an email with a link to sign the documents. The email is not sent automatically when you add the recipient – send it by clicking “Send email” next to the recipient."
+      email_help: "The recipient is only added to the list first, so you can add several at once. They get the email with the signing link once you click “Send email”."
       mobile_phone_label: "Recipient mobile phone"
       mobile_phone_placeholder: "+421901234567"
       mobile_phone_help: "If provided, the AdES verification code is sent by SMS. Otherwise it is sent by email."
@@ -698,11 +698,29 @@ en:
       required_signatures_label: "Required number of signatures"
       required_signatures_of: "of %{count} recipients"
       request_withdrawn: "Signature request withdrawn"
-      added: "%{recipient} added as a recipient"
+      added: "%{recipient} added as a recipient. No email has been sent yet."
       invitation_sending: "Invitation is being sent to %{recipient}"
       invitation_failed: "Invitation could not be sent to %{recipient}"
       withdrawn: "Signature request for %{recipient} withdrawn"
       withdraw_failed: "Signature request for %{recipient} could not be withdrawn"
+      invitations_sending:
+        one: "Invitation is being sent to 1 recipient"
+        other: "Invitations are being sent to %{count} recipients"
+      invitations_none: "All recipients have already been invited"
+      pending_invitations:
+        title:
+          one: "1 recipient has not been invited yet"
+          other: "%{count} recipients have not been invited yet"
+        description: "Adding a recipient sends nothing. Review the list and send the invitations; recipients get a link to sign the documents."
+        send:
+          one: "Send invitation"
+          other: "Send to all (%{count})"
+      delivery:
+        not_sent: "Not sent"
+        not_sent_description: "No email has been sent yet"
+        sending: "Invitation is being sent"
+        sent: "Invitation sent"
+        sent_at_html: "Invitation sent %{time}"
 
   admin:
     tenants:
@@ -1766,62 +1784,139 @@ en:
     index:
       header:
         eyebrow: "How to sign"
-        title: "A guide to using Autogram Portal"
-        subtitle: "Watch the video guide to learn how to use the portal both signed in and without registration."
+        title: "A guide to using"
+        title_highlight: "Autogram Portal"
+        subtitle: "Watch the video guide or go through the text guide step by step. We show you how to send a document for signature, sign it and validate it."
       video:
         title: "Video guide: Using Autogram Portal"
-        caption_html: "You can also find the main steps from the video in the %{link} below."
+        caption_html: "The video has Slovak and English subtitles. You can also find the main steps from the video in the %{link} below."
         text_guide_link: "text guide"
         fallback_html: "Your browser cannot play the video. You can %{link} instead."
         download_link: "download it"
-      anonymous_html: "You can use Autogram Portal <strong class=\"font-semibold\">without signing in</strong> too. Signing, validating or receiving a document for signature works the same way anonymously as when signed in."
+      anonymous_html: "You can use the portal <strong class=\"font-semibold text-gray-900\">without signing in</strong> too. Signing, validating and receiving a document for signature work the same way."
+      contents:
+        title: "Guide contents"
+        video: "Video guide"
+        send: "Send a document for signature"
+        sign: "Sign a document yourself"
+        eid: "Certificates on the ID card"
+        received: "A document sent to you"
+        validate: "Validate signatures"
+        apps: "Signing applications"
+      opens_in_new_tab: "(opens in a new tab)"
+      other_tasks_label: "Received documents and signature validation"
       guide:
         subtitle: "Step by step"
-        title: "How to send, sign and validate documents"
-        intro: "Everything you do with documents in Autogram Portal starts the same way: you upload them on the home page. This guide applies to the signed-in version of the portal."
+        title: "What do you want to do with the document?"
+        intro: "Everything starts the same way: you upload the document on the home page and choose what to do with it. The steps apply to the signed-in version of the portal."
         send:
           title: "Send a document for signature"
-          steps_html:
-            - "Upload a document on the home page and click <strong class=\"font-semibold text-gray-900\">Upload &amp; Continue</strong>."
-            - "Choose the <strong class=\"font-semibold text-gray-900\">Send for Signature</strong> action."
-            - "Select the required signature type."
-            - "Enter the recipient's email address and save."
-          note: "The recipient gets an email with a link through which they sign the document."
+          steps:
+            upload:
+              title: "Upload the document"
+              text_html: "On the home page, click <strong class=\"font-semibold text-gray-900\">Upload &amp; Continue</strong>."
+            action:
+              title: "Choose an action"
+              text_html: "Choose <strong class=\"font-semibold text-gray-900\">Send for Signature</strong>."
+            signature_type:
+              title: "Choose the signature type"
+              text_html: "Decide which signature the recipient should sign the document with."
+            recipients:
+              title: "Add recipients"
+              text_html: "Enter the recipient's email and click <strong class=\"font-semibold text-gray-900\">Add</strong>. Nothing is sent yet."
+            email:
+              title: "Send the invitations"
+              text_html: "Click <strong class=\"font-semibold text-gray-900\">Send email</strong>. Only then does the recipient get the signing link."
         sign:
           title: "Sign a document yourself"
-          steps_html:
-            - "Upload a document and choose the <strong class=\"font-semibold text-gray-900\">Sign</strong> action."
-            - "Choose <strong class=\"font-semibold text-gray-900\">Electronic Signing</strong> and the type of your ID card."
-            - "Select the signing application you use (for example Autogram, eIdentita or Podpisuj)."
-            - "Finish the process following the instructions of the selected application."
+          steps:
+            upload:
+              title: "Upload the document"
+              text_html: "Then choose the <strong class=\"font-semibold text-gray-900\">Sign</strong> action."
+            method:
+              title: "Choose how to sign"
+              text_html: "<strong class=\"font-semibold text-gray-900\">Electronic Signing</strong> and the type of your ID card."
+            app:
+              title: "Choose an application"
+              text_html: "For example Autogram, eIdentita or Podpisuj."
+            finish:
+              title: "Finish signing"
+              text_html: "Follow the instructions of the selected application."
+          eid_hint_html: "Signing with your ID card for the first time? First %{link}."
+          eid_hint_link: "issue the signing certificates"
         received:
-          title: "Sign a document someone sent you"
-          intro: "Have you received a signature request? You can find the document in two ways:"
-          items_html:
-            - "after signing in, in the <strong class=\"font-semibold text-gray-900\">Awaiting my signature</strong> section,"
-            - "by clicking the link in the email."
+          title: "Did you receive a document to sign?"
+          intro: "You can find the document in two ways:"
+          items:
+            signed_in_html: "after signing in, in the <strong class=\"font-semibold text-gray-900\">Awaiting my signature</strong> section,"
+            email_html: "by clicking the link in the email."
           note: "Review the document. Then you can sign it right away or decline it."
         validate:
-          title: "Check the validity of signatures"
+          title: "Do you want to validate signatures?"
           intro: "Upload the document the same way as if you wanted to send it for signature. The portal immediately shows an overview of all signatures. From there you can download the document or sign it as well."
+          link: "Upload a document to validate"
+      eid:
+        subtitle: "Before you first sign with your ID card"
+        title: "Issue your signing certificates"
+        intro: "To sign with an ID card with a chip (eID), the card needs valid signing certificates. You issue them yourself in the eID klient application. You only need to do it once."
+        needs_title: "You will need"
+        needs:
+          computer:
+            title: "A computer"
+            description_html: "Certificates cannot be issued on a phone."
+          reader:
+            title: "A physical smart card reader"
+            description_html: "Connect it to the computer and insert your ID card."
+          id_card:
+            title: "An ID card with a chip"
+            description_html: "Issued <strong class=\"font-semibold text-gray-900\">on or after 1 December 2022</strong>. Certificates cannot be issued on older ID cards."
+          bok:
+            title: "Security personal code (BOK)"
+            description_html: "The code for your ID card that only you know."
+          eid_client:
+            title: "The eID klient application"
+            description_html: "Installed on the computer."
+        have_certificates_html: "Already have the certificates? Continue with %{link}."
+        have_certificates_link: "Sign a document yourself"
+        steps_title: "How to do it"
+        steps:
+          start:
+            title: "Start eID klient"
+            text_html: "Your ID card has to be in a reader connected to the computer."
+          issue:
+            title: "Click Issue certificates"
+            text_html: "Go through the wizard. You enter your BOK along the way."
+          pin:
+            title: "Choose your signing PIN"
+            text_html: "A 6-digit number you will sign documents with. Never tell it to anyone."
+          confirm:
+            title: "Sign the receipt confirmation"
+            text_html: "At the end, the <strong class=\"font-semibold text-gray-900\">Disig Web Signer</strong> application opens. Sign the <strong class=\"font-semibold text-gray-900\">confirmation of receiving the certificates</strong> there. Issuing is not complete without this step."
+          done:
+            title: "You can sign"
+            text_html: "You can use the ID card signature for private and commercial purposes too."
+        more_link: "Detailed guide with a video on Návody.Digital (in Slovak)"
       apps:
+        subtitle: "Signing and the result"
         title: "You choose what you sign with"
-        description: "Autogram Portal does not force you to use a single tool. You can sign with Autogram, Autogram in mobile, eIdentita, Podpisuj or other standalone applications."
+        description: "Autogram Portal does not force you to use a single tool. Sign with an application you already know."
         items:
-          - "Autogram"
-          - "Autogram in mobile"
-          - "eIdentita"
-          - "Podpisuj"
+          autogram: "Autogram"
+          autogram_mobile: "Autogram in mobile"
+          eidentita: "eIdentita"
+          podpisuj: "Podpisuj"
+        more: "and other standalone applications"
       download:
         title: "Downloading the finished document"
         description: "After completing any action, you can download the document with valid signatures to your device at any time."
-        tip_html: "<strong class=\"font-semibold\">Tip:</strong> Without signing in, the document is available for download for 60 minutes after uploading."
+        anonymous_label: "Without signing in"
+        anonymous_value: "60 minutes"
+        anonymous_description: "That is how long the document is available for download after uploading. Download it as soon as you are done."
       cta:
         title: "You can get started"
         description_html: "Upload a document and choose what you want to do with it. You will find a detailed description of all features in the %{docs}."
         docs_link: "user guide"
         upload: "Upload document"
-
   docs:
     index:
       opens_in_new_tab: "(opens in a new tab)"
@@ -2155,12 +2250,14 @@ en:
             description: "Enter the recipient's email and click Add. Fill in the mobile phone if the recipient should verify a simple electronic signature with an SMS code."
           send:
             title: "Send the invitations"
-            description: "Click Send email next to the recipient – the invitation is not sent automatically when you add them. You can also send the signing link yourself (Copy signing link)."
+            description: "The invitation is not sent automatically when you add a recipient. Recipients without an invitation are marked Not sent; click Send to all or Send email next to the recipient. Sent invitations show when they were sent. You can also send the signing link yourself (Copy signing link)."
           done:
             title: "Follow the progress and download the signed documents"
             description: "We email you about signatures, declines and the completion of the bundle. You download the signed documents from the bundle page."
         detail_screenshot_caption: "A bundle with its documents and recipients"
-        detail_screenshot_alt: "The page of the bundle Contract for work with the Edit, Sign and Delete buttons, a note for recipients, two signed documents with the Download Signed Document, Add timestamp and Add archive timestamp buttons, and the Send for Signature part with the signing rule, two recipients and the form for adding a recipient"
+        recipients_screenshot_caption: "Bundle recipients: who has been invited and who still needs an invitation"
+        recipients_screenshot_alt: "The Send for Signature part with the notice 2 recipients have not been invited yet and the Send to all (2) button, the signing rule and four recipients: one has signed, one is awaiting a signature with the time the invitation was sent, and two have the Not sent status with a Send email button. Below them is the form for adding a recipient."
+        detail_screenshot_alt: "The page of the bundle Contract for work with the Edit, Sign and Delete buttons, a note for recipients, two signed documents with the Download Signed Document, Add timestamp and Add archive timestamp buttons, and the Send for Signature part with the signing rule, four recipients and the form for adding a recipient"
         manage_title: "Managing a bundle"
         manage:
           edit:

@@ -14,8 +14,7 @@ module Federation
         invitation: invitation_payload(recipient)
       )
 
-      recipient.update!(remote_notified_at: Time.current)
-      recipient.notified!
+      recipient.update!(notification_status: :notified, notified_at: Time.current)
     end
 
     private

@@ -4,13 +4,43 @@
   <% elsif @error_message.present? %>
     <%= render "bundles/save_notification", message: @error_message, type: :error %>
   <% end %>
+  <% pending_invitations = @bundle.active_recipients.select(&:notifiable?) %>
   <div class="space-y-6">
-    <div class="md:flex items-center justify-between gap-4">
-      <div class="flex-1 text-left">
-        <h3 class="text-xl font-semibold text-gray-900 mb-2"><%= t('.title') %></h3>
-        <p class="text-gray-600"><%= t('.subtitle') %></p>
-      </div>
+    <div>
+      <h2 class="text-xl font-semibold text-gray-900"><%= t('.title') %></h2>
+      <p class="mt-2 text-gray-600"><%= t('.subtitle') %></p>
     </div>
+
+    <% if pending_invitations.any? %>
+      <div class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-blue-200 bg-blue-50 px-5 py-4">
+        <div class="flex min-w-0 flex-1 basis-80 items-start gap-3">
+          <span aria-hidden="true" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+            </svg>
+          </span>
+          <div>
+            <h3 class="font-semibold text-blue-900"><%= t('.pending_invitations.title', count: pending_invitations.size) %></h3>
+            <p class="mt-1 text-sm leading-6 text-blue-900"><%= t('.pending_invitations.description') %></p>
+          </div>
+        </div>
+        <%= button_to notify_all_bundle_recipients_path(@bundle),
+              method: :post,
+              class: "btn btn-primary",
+              data: { "form-submit-target": "submitButton" },
+              form: { data: {
+                turbo_frame: "bundle_recipients_#{@bundle.uuid}",
+                controller: "form-submit",
+                action: "submit->form-submit#handleSubmit",
+                form_submit_pending_text_value: t("actions.sending")
+              } } do %>
+          <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+          </svg>
+          <%= t('.pending_invitations.send', count: pending_invitations.size) %>
+        <% end %>
+      </div>
+    <% end %>
 
     <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
       <div class="flex items-center gap-2 text-gray-700">
@@ -32,32 +62,48 @@
             class: "font-medium text-blue-600 underline hover:text-blue-800" %>
     </div>
 
-    <div class="space-y-3">
-      <% @bundle.visible_recipients.order(:created_at).select(&:persisted?).each do |recipient| %>
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div class="px-4 py-3.5">
+    <% recipients = @bundle.visible_recipients.order(:created_at).select(&:persisted?) %>
+    <% if recipients.any? %>
+      <ul role="list" class="space-y-3">
+        <% recipients.each do |recipient| %>
+          <% unsent = recipient.pending? && recipient.notifiable? %>
+          <li class="rounded-lg border border-gray-200 bg-white px-4 py-3.5">
             <div class="flex items-start gap-3">
-              <div class="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 8.25v7.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25v-7.5m19.5 0-8.69 5.216a2.25 2.25 0 01-2.122 0L2.25 8.25m19.5 0A2.25 2.25 0 0019.5 6H4.5a2.25 2.25 0 00-2.25 2.25" />
+              <div aria-hidden="true" class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                 </svg>
               </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                  <div class="text-base font-semibold text-gray-900 break-words">
-                    <%= recipient.display_name %>
-                  </div>
-                  <div>
+              <div class="min-w-0">
+                <div class="text-base font-semibold text-gray-900 break-words"><%= recipient.display_name %></div>
+                <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600">
+                  <% if unsent %>
+                    <span class="inline-flex items-center gap-1.5 rounded border border-dashed border-gray-500 bg-white px-2 py-px text-xs font-medium text-gray-700">
+                      <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                      </svg>
+                      <%= t('.delivery.not_sent') %>
+                    </span>
+                    <span><%= t('.delivery.not_sent_description') %></span>
+                  <% else %>
                     <%= recipient_status_badge(recipient) %>
-                  </div>
+                    <% if recipient.active? && recipient.sending? %>
+                      <span><%= t('.delivery.sending') %></span>
+                    <% elsif recipient.active? && recipient.notified? && recipient.notified_at %>
+                      <% notified_at = recipient.notified_at.in_time_zone("Europe/Bratislava") %>
+                      <span><%= t('.delivery.sent_at_html', time: tag.time(notified_at.strftime("%-d. %-m. %Y %H:%M"), datetime: recipient.notified_at.iso8601)) %></span>
+                    <% elsif recipient.active? && recipient.notified? %>
+                      <span><%= t('.delivery.sent') %></span>
+                    <% end %>
+                  <% end %>
                 </div>
 
-                <div class="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                   <% if recipient.active? %>
                     <% if recipient.notifiable? %>
                       <%= button_to notify_bundle_recipient_path(@bundle, recipient),
                             method: :post,
-                            class: "text-blue-600 underline hover:text-blue-800 hover:underline cursor-pointer font-medium",
+                            class: "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 font-semibold text-blue-700 ring-1 ring-blue-600 ring-inset hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50",
                             data: { "form-submit-target": "submitButton" },
                             form: { data: {
                               turbo_frame: "bundle_recipients_#{@bundle.uuid}",
@@ -65,14 +111,29 @@
                               action: "submit->form-submit#handleSubmit",
                               form_submit_pending_text_value: t("actions.sending")
                             } } do %>
-                        <%= recipient.federated_recipient? ? t('.send_to_portal') : t('.send_invitation') %><span class="sr-only">: <%= recipient.display_name %></span>
+                        <svg aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                        </svg>
+                        <%# Skrytý text je vnútri spanu: ako samostatná flex položka by cez gap posunul text. %>
+                        <span><%= recipient.federated_recipient? ? t('.send_to_portal') : t('.send_invitation') %><span class="sr-only">: <%= recipient.display_name %></span></span>
                       <% end %>
+                    <% end %>
+
+                    <% if recipient.pending? %>
+                      <div data-controller="clipboard" data-clipboard-text-value="<%= sign_bundle_url(@bundle, recipient: recipient.uuid) %>">
+                        <%= button_tag type: "button",
+                              class: "min-h-10 cursor-pointer text-left font-medium text-gray-700 underline underline-offset-2 hover:text-gray-900",
+                              data: { action: "clipboard#copyToClipboard" } do %>
+                          <span data-clipboard-target="label"><%= t('.copy_to_clipboard') %></span><span class="sr-only">: <%= recipient.display_name %></span>
+                        <% end %>
+                        <span role="status" class="sr-only" data-clipboard-target="status"></span>
+                      </div>
                     <% end %>
 
                     <% if recipient.removable? %>
                       <%= button_to bundle_recipient_path(@bundle, recipient),
                             method: :delete,
-                            class: "text-red-600 underline hover:text-red-800 hover:underline cursor-pointer font-medium",
+                            class: "min-h-10 cursor-pointer font-medium text-red-700 underline underline-offset-2 hover:text-red-900",
                             data: { "form-submit-target": "submitButton" },
                             form: { data: {
                               turbo_frame: "bundle_recipients_#{@bundle.uuid}",
@@ -83,27 +144,16 @@
                         <%= t('actions.remove') %><span class="sr-only">: <%= recipient.display_name %></span>
                       <% end %>
                     <% end %>
-
-                    <% if recipient.pending? %>
-                      <div data-controller="clipboard" data-clipboard-text-value="<%= sign_bundle_url(@bundle, recipient: recipient.uuid) %>">
-                        <%= button_tag type: "button",
-                              class: "text-gray-600 underline hover:text-gray-800 hover:underline cursor-pointer font-medium",
-                              data: { action: "clipboard#copyToClipboard" } do %>
-                          <span data-clipboard-target="label"><%= t('.copy_to_clipboard') %></span><span class="sr-only">: <%= recipient.display_name %></span>
-                        <% end %>
-                        <span role="status" class="sr-only" data-clipboard-target="status"></span>
-                      </div>
-                    <% end %>
                   <% else %>
                     <span class="text-gray-600"><%= t('.request_withdrawn') %></span>
                   <% end %>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      <% end %>
-    </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
 
     <%= form_with model: @bundle.recipients.build,
           url: bundle_recipients_path(@bundle),
@@ -153,7 +203,12 @@
               "aria-describedby": [ ("recipient_error" if email_invalid), "recipient_email_help" ].compact.join(" "),
               class: "w-full px-3 py-2 text-sm bg-white border border-gray-500 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
               required: true %>
-        <p id="recipient_email_help" class="mt-2 text-sm text-gray-600"><%= t('.email_help') %></p>
+        <p id="recipient_email_help" class="mt-2 flex items-start gap-2 text-sm text-gray-600">
+          <svg aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+          </svg>
+          <span><%= t('.email_help') %></span>
+        </p>
         </div>
         <% if @bundle.sms_verification_available? %>
           <div>
@@ -175,7 +230,7 @@
         <% end %>
         <div class="flex justify-end">
         <%= form.submit t('actions.add'),
-            class: "btn btn-primary",
+            class: pending_invitations.any? ? "btn btn-secondary" : "btn btn-primary",
             data: { "form-submit-target": "submitButton" } %>
         </div>
       </div>

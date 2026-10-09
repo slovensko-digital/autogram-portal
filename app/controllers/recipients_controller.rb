@@ -1,7 +1,7 @@
 class RecipientsController < ApplicationController
   before_action :set_bundle
   before_action :set_portal_instances
-  before_action :set_recipient, except: [ :create, :index ]
+  before_action :set_recipient, except: [ :create, :index, :notify_all ]
   before_action :skip_policy_scope, only: [ :index ]
 
   rescue_from Pundit::NotAuthorizedError, with: :render_tenant_record_denial
@@ -41,6 +41,24 @@ class RecipientsController < ApplicationController
       end
     else
       @error_message = t("recipients.index.invitation_failed", recipient: @recipient.display_name)
+    end
+
+    render "index"
+  end
+
+  # Sends the invitation to every recipient who has not received it yet.
+  def notify_all
+    recipients = @bundle.active_recipients.order(:created_at).select(&:notifiable?)
+
+    if recipients.empty?
+      @error_message = t("recipients.index.invitations_none")
+    else
+      begin
+        recipients.each(&:notify!)
+        @success_message = t("recipients.index.invitations_sending", count: recipients.size)
+      rescue PlanLimits::Exceeded => e
+        @error_message = e.message
+      end
     end
 
     render "index"

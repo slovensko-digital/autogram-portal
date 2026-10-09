@@ -8,7 +8,7 @@ module Notification
       return if recipient.withdrawn?
 
       NotificationMailer.with(recipient: recipient).signature_requested(recipient.bundle).deliver_now
-      recipient.notified!
+      recipient.update!(notification_status: :notified, notified_at: Time.current)
     end
   end
 end

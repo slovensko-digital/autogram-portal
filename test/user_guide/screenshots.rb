@@ -181,6 +181,7 @@ class UserGuideScreenshots < ApplicationSystemTestCase
     visit bundle_path(@works_bundle)
     wait_for_frames
     capture "bundle-detail", "main > div"
+    capture "bundle-recipients", "main section:has(> turbo-frame[id^='bundle_recipients_'])"
 
     visit edit_bundle_path(@works_bundle)
     capture "bundle-settings", "main > div"
@@ -247,7 +248,9 @@ class UserGuideScreenshots < ApplicationSystemTestCase
 
     @works_bundle = demo_bundle(@personal, *bundles[:works], created_at: 1.day.ago, note: @demo[:note], publicly_visible: false)
     signed = add_recipient(@works_bundle, "martin.simko@example.com")
+    add_recipient(@works_bundle, "jana.horvathova@example.com")
     add_recipient(@works_bundle, "eva.kralova@example.com", notified: false)
+    add_recipient(@works_bundle, "peter.kollar@example.com", notified: false)
     sign_recipient!(@works_bundle, signed, "Martin Šimko", at: 6.hours.ago)
 
     lease = demo_bundle(@personal, *bundles[:lease], created_at: 4.days.ago)
@@ -344,7 +347,7 @@ class UserGuideScreenshots < ApplicationSystemTestCase
   end
 
   def add_recipient(bundle, email, notified: true)
-    bundle.recipients.create!(email: email, notification_status: notified ? :notified : :not_notified)
+    bundle.recipients.create!(email: email, notification_status: notified ? :notified : :not_notified, notified_at: (1.day.ago if notified))
   end
 
   def sign_recipient!(bundle, recipient, signer_name, at:, signers: [ signer_name ], expires_at: 2.years.from_now, archive: false)

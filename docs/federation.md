@@ -438,7 +438,8 @@ Federation-specific fields:
 - `portal_instance_id`
 - `remote_claimed_at`
 - `remote_claimed_by_email`
-- `remote_notified_at`
+
+`notified_at` (shared with local recipients) records when the invitation reached the recipient portal; withdrawals are sent only for federated recipients that have it.
 
 ### `federation_request_invitations`
 

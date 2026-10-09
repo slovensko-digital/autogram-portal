@@ -154,7 +154,7 @@ in integration tests. They are not a replacement for controller authorization.
 | --- | --- | --- | --- |
 | `Bundles#index` | Web, `BundlePolicy::Scope` | Selected tenant; `index?` | Existing awaiting/completed/declined/no-recipient filters preserved |
 | `Bundles#show/edit/update/destroy` | Web, global UUID lookup | `BundlePolicy` management queries | Unrelated record 404; another own tenant redirects with guidance, without switching |
-| `Recipients#index/create/notify/destroy` | Web, global bundle UUID and parent-scoped recipient UUID | `BundlePolicy#manage_recipients?` | Same management denials; notifiable/removable state and validation errors remain separate |
+| `Recipients#index/create/notify/notify_all/destroy` | Web, global bundle UUID and parent-scoped recipient UUID | `BundlePolicy#manage_recipients?` | Same management denials; notifiable/removable state and validation errors remain separate |
 | `Bundles#received` | Web user, received bundle/invitation scopes | `Received::BundlePolicy#index?` | Person-scoped across selected tenants; state/active/visible filters retained |
 | `Dashboard#index` | Web, multiple policy scopes | `DashboardPolicy#index?` | Sent data uses selected tenant; received counts use person; archivation feature controls archive scope |
 | `Contracts#index` | Web, direct-tenant scope, then `standalone` | `ContractPolicy#index?` | Original direct association and state/order filters |

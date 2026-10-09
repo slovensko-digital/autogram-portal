@@ -138,6 +138,63 @@ class RecipientsControllerTest < ActionController::TestCase
     assert_select "[data-notification-overlay][role='status']", count: 0
   end
 
+  test "notify_all invites every recipient who has not been invited yet" do
+    first = bundles(:one).recipients.create!(email: "first-invitee@example.com")
+    second = bundles(:one).recipients.create!(email: "second-invitee@example.com")
+    invited = bundles(:one).recipients.create!(email: "invited@example.com", notification_status: :notified)
+    withdrawn = bundles(:one).recipients.create!(email: "withdrawn@example.com", withdrawn_at: Time.current)
+
+    post :notify_all, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_enqueued_jobs 2, only: Notification::RecipientSignatureRequestedJob
+    assert first.reload.sending?
+    assert second.reload.sending?
+    assert invited.reload.notified?
+    assert withdrawn.reload.not_notified?
+    assert_select "[role='status']", text: I18n.t("recipients.index.invitations_sending", count: 2)
+
+    perform_enqueued_jobs only: Notification::RecipientSignatureRequestedJob
+    assert first.reload.notified?
+    assert_not_nil first.notified_at
+  end
+
+  test "notify_all reports when nobody is waiting for an invitation" do
+    bundles(:one).recipients.create!(email: "invited@example.com", notification_status: :notified)
+
+    assert_no_enqueued_jobs do
+      post :notify_all, params: { bundle_id: bundles(:one).uuid }
+    end
+
+    assert_response :success
+    assert_select "[role='alert']", text: I18n.t("recipients.index.invitations_none")
+  end
+
+  test "index tells uninvited recipients apart and offers to invite them all" do
+    uninvited = bundles(:one).recipients.create!(email: "uninvited@example.com")
+    invited = bundles(:one).recipients.create!(email: "invited@example.com", notification_status: :notified,
+                                                notified_at: Time.utc(2026, 10, 9, 12, 32))
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_select "h3", text: I18n.t("recipients.index.pending_invitations.title", count: 1)
+    assert_select "form[action=?] button", notify_all_bundle_recipients_path(bundles(:one)),
+                  text: I18n.t("recipients.index.pending_invitations.send", count: 1)
+    assert_select "li", text: /#{Regexp.escape(uninvited.display_name)}.*#{I18n.t("recipients.index.delivery.not_sent")}/m
+    assert_select "li time[datetime=?]", invited.notified_at.iso8601, text: "9. 10. 2026 14:32"
+    assert_select "form[action=?]", notify_bundle_recipient_path(bundles(:one), invited), count: 0
+  end
+
+  test "index hides the bulk invitation once everybody is invited" do
+    bundles(:one).recipients.create!(email: "invited@example.com", notification_status: :notified)
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_select "form[action=?]", notify_all_bundle_recipients_path(bundles(:one)), count: 0
+  end
+
   test "index names the recipient in its action buttons" do
     first = bundles(:one).recipients.create!(email: "first@example.com")
     second = bundles(:one).recipients.create!(email: "second@example.com")
