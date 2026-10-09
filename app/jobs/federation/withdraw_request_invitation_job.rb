@@ -6,7 +6,7 @@ module Federation
 
     def perform(recipient, status: "withdrawn")
       return unless recipient.federated_recipient?
-      return unless recipient.remote_notified_at.present?
+      return unless recipient.notified_at.present?
 
       FederationPortalClient.new.withdraw_request_invitation(
         portal_instance: recipient.portal_instance,

@@ -10,9 +10,9 @@
 #  mobile_phone            :string
 #  name                    :string
 #  notification_status     :integer          default(0), not null
+#  notified_at             :datetime
 #  remote_claimed_at       :datetime
 #  remote_claimed_by_email :string
-#  remote_notified_at      :datetime
 #  uuid                    :uuid             not null
 #  withdrawn_at            :datetime
 #  created_at              :datetime         not null
@@ -119,7 +119,7 @@ class RecipientTest < ActiveSupport::TestCase
       locale: "en",
       portal_instance_uuid: portal_instance.uuid
     )
-    recipient.update!(notification_status: :notified, remote_notified_at: Time.current)
+    recipient.update!(notification_status: :notified, notified_at: Time.current)
 
     assert_enqueued_with(job: Federation::WithdrawRequestInvitationJob, args: [ recipient, { status: "withdrawn" } ]) do
       recipient.withdraw!

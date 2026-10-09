@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -330,10 +330,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
     t.string "mobile_phone"
     t.string "name"
     t.integer "notification_status", default: 0, null: false
+    t.datetime "notified_at"
     t.bigint "portal_instance_id"
     t.datetime "remote_claimed_at"
     t.string "remote_claimed_by_email"
-    t.datetime "remote_notified_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false

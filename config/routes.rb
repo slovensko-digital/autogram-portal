@@ -72,6 +72,9 @@ Rails.application.routes.draw do
         get :received
       end
       resources :recipients, only: [ :create, :index, :destroy ] do
+        collection do
+          post :notify_all
+        end
         member do
           post :notify
         end

@@ -10,9 +10,9 @@
 #  mobile_phone            :string
 #  name                    :string
 #  notification_status     :integer          default(0), not null
+#  notified_at             :datetime
 #  remote_claimed_at       :datetime
 #  remote_claimed_by_email :string
-#  remote_notified_at      :datetime
 #  uuid                    :uuid             not null
 #  withdrawn_at            :datetime
 #  created_at              :datetime         not null
@@ -223,7 +223,7 @@ class Recipient < ApplicationRecord
       sessions.pending.find_each(&:canceled!)
       update!(withdrawn_at: now)
       revoke_active_access_grants!
-      Federation::WithdrawRequestInvitationJob.perform_later(self, status: "withdrawn") if federated_recipient? && remote_notified_at.present?
+      Federation::WithdrawRequestInvitationJob.perform_later(self, status: "withdrawn") if federated_recipient? && notified_at.present?
       Notification::RecipientSignatureWithdrawnJob.perform_later(self) if notified?
     end
 
