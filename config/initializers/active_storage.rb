@@ -1,8 +1,10 @@
-# Signing pages embedded by integrators show the source PDF in a nested iframe. Files
-# from the disk service (development, staging) come from the portal itself, so they
-# have to allow cross-origin framing like the signing pages; cloud services (production)
-# send no framing headers. Disk URLs are signed and expire, and they serve only files.
+# Signing pages embedded by integrators show the PDF in a nested iframe served by
+# Active Storage (the disk service in development and staging, the proxy in
+# production), so these files have to allow cross-origin framing like the signing
+# pages. Their URLs are signed and they serve only files.
 Rails.application.config.to_prepare do
-  ActiveStorage::DiskController.include AllowsCrossOriginFraming
-  ActiveStorage::DiskController.before_action :allow_cross_origin_framing, only: :show
+  [ ActiveStorage::DiskController, ActiveStorage::Blobs::ProxyController ].each do |controller|
+    controller.include AllowsCrossOriginFraming
+    controller.before_action :allow_cross_origin_framing, only: :show
+  end
 end
