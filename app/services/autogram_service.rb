@@ -506,8 +506,10 @@ class AutogramService
     nil
   end
 
+  # Staging accepts the Autogram test certificate when ALLOW_TEST_SIGNATURES is set, so signing flows
+  # can be tried there without an ID card.
   def allow_indeterminate_test_signatures?
-    Rails.env.development? || Rails.env.test?
+    Rails.env.local? || (Rails.env.staging? && ENV["ALLOW_TEST_SIGNATURES"] == "true")
   end
 
   def error_result(message)

@@ -18,15 +18,14 @@ Rails.application.configure do
     # Allow connections to Autogram desktop app running on client machines
     policy.connect_src :self, :https, "http://localhost:37200", "https://loopback.autogram.slovensko.digital"
 
-    # Allow framing from specific origins
+    allowed_origins = [ :self ]
+    # Allow framing from specific origins; embeddable signing pages add any HTTPS origin (ApplicationController#allow_iframe)
     app_host = ENV["APP_HOST"]
-    if Rails.env.production? && app_host.present?
-      policy.frame_ancestors "https://#{app_host}"
-    elsif Rails.env.development?
-      allowed_origins = [ :self, "http://localhost:*" ]
-      allowed_origins << "https://#{app_host}" if app_host.present?
-      policy.frame_ancestors(*allowed_origins)
-    end
+    # Integrators test embedding from localhost on staging; the SDK system tests embed from localhost too
+    allowed_origins << "http://localhost:*" unless Rails.env.production?
+    allowed_origins << "https://#{app_host}" if app_host.present?
+    allowed_origins << "http://#{app_host}" if app_host.present? && Rails.env.development?
+    policy.frame_ancestors(*allowed_origins)
   end
 
   # Generate session nonces for permitted importmap, inline scripts, and inline styles.

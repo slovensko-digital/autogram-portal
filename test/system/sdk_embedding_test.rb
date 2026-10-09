@@ -40,7 +40,8 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     within_portal_frame do
       assert_text "Prosíme o podpis do piatku."
       assert_text "zmluva.pdf"
-      assert_selector "a[target='_blank']", text: I18n.t("actions.view")
+      assert_button I18n.t("contracts.visualization_with_toggle.show_document")
+      assert_no_selector "a[target='_blank']", text: I18n.t("actions.view")
       assert_text I18n.t("bundles.sign.awaiting_recipients")
       assert_text "signer@example.com"
       assert_button I18n.t("contracts.signing_method_choice.continue")
@@ -53,6 +54,20 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       wait_for_signature_validation
       assert_no_text I18n.t("shared.signature_validation.no_signatures_title")
     end
+  end
+
+  test "bundle embedded on a touch device links to the document preview instead of expanding it" do
+    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    page.driver.browser.execute_cdp("Emulation.setTouchEmulationEnabled", enabled: true, maxTouchPoints: 5)
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid
+
+    within_portal_frame do
+      assert_selector "a[target='_blank']", text: I18n.t("actions.view")
+      assert_no_button I18n.t("contracts.visualization_with_toggle.show_document")
+    end
+  ensure
+    page.driver.browser.execute_cdp("Emulation.setTouchEmulationEnabled", enabled: false)
   end
 
   test "document that already has signatures shows them in the iframe" do
