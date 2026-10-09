@@ -122,7 +122,7 @@
                     <% if recipient.pending? %>
                       <div data-controller="clipboard" data-clipboard-text-value="<%= sign_bundle_url(@bundle, recipient: recipient.uuid) %>">
                         <%= button_tag type: "button",
-                              class: "min-h-10 cursor-pointer font-medium text-gray-700 underline underline-offset-2 hover:text-gray-900",
+                              class: "min-h-10 cursor-pointer text-left font-medium text-gray-700 underline underline-offset-2 hover:text-gray-900",
                               data: { action: "clipboard#copyToClipboard" } do %>
                           <span data-clipboard-target="label"><%= t('.copy_to_clipboard') %></span><span class="sr-only">: <%= recipient.display_name %></span>
                         <% end %>
