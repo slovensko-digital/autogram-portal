@@ -731,6 +731,24 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "visual signing of an API contract without a bundle works without an account" do
+    with_allowed_methods(%w[visual]) do
+      contract = create_pdf_contract(allowed_methods: [ "visual" ])
+      contract.update!(tenant: tenants(:one))
+
+      with_autogram_service(fake_stamp_service("stamped api pdf")) do
+        post "/contracts/#{contract.uuid}/visual_signing", params: {
+          iframe: "true",
+          stamp: { content_mode: "text", custom_text: "Signer" }
+        }
+      end
+
+      signer_contract = contract.reload.signer_contracts.sole
+      assert_instance_of AnonymousSigner, signer_contract.signer
+      assert_equal "Signer", signer_contract.visual_stamps.visual_method.sole.text
+    end
+  end
+
   test "visual signing by a named recipient describes the stamp with the signer name" do
     with_allowed_methods(%w[visual]) do
       contract = create_pdf_contract(allowed_methods: [ "visual" ])

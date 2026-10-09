@@ -401,7 +401,8 @@ class ContractsController < ApplicationController
     elsif current_user
       user_signer = UserSigner.find_or_create_by!(user: current_user)
       @signer_contract = user_signer.signer_contracts.find_or_create_by!(contract: @contract)
-    elsif @contract.anonymous?
+    elsif @contract.bundle.nil?
+      # Anonymous contracts and contracts integrators create through the API, signed without an account.
       @signer_contract = @contract.signer_contracts
                                   .joins(:signer)
                                   .find_by(signers: { type: "AnonymousSigner" })
