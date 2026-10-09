@@ -599,7 +599,7 @@ sk:
   recipients:
     index:
       title: "Poslať na podpis"
-      subtitle: "Pošlite tento balík iným na podpisovanie cez e-mail."
+      subtitle: "Pridajte adresátov a potom im odošlite e-mail s odkazom na podpis."
       send_invitation: "Odoslať e-mail"
       send_to_portal: "Odoslať do portálu"
       portal_label: "Portál adresáta"
@@ -607,7 +607,7 @@ sk:
       portal_help: "Vyberte dôveryhodný partnerský portál, ak má adresát otvoriť požiadavku cez inú inštanciu Autogram Portalu."
       email_label: "E-mail adresáta"
       email_placeholder: "jan.novak@example.com"
-      email_help: "Adresát dostane e-mail s odkazom na podpísanie dokumentu. E-mail sa po pridaní neodošle automaticky – odošlete ho až kliknutím na „Odoslať e-mail“ pri adresátovi."
+      email_help: "Adresát sa najprv len pridá do zoznamu, takže môžete pridať viacerých naraz. E-mail s odkazom na podpis mu odíde až po kliknutí na „Odoslať e-mail“."
       mobile_phone_label: "Mobilné číslo adresáta"
       mobile_phone_placeholder: "+421901234567"
       mobile_phone_help: "Ak je vyplnené, overovací kód pri AdES podpise príde cez SMS. Inak sa pošle e-mailom."
@@ -624,11 +624,32 @@ sk:
       required_signatures_label: "Počet vyžadovaných podpisov"
       required_signatures_of: "z %{count} adresátov"
       request_withdrawn: "Požiadavka na podpis bola stiahnutá"
-      added: "%{recipient} bol pridaný ako adresát"
+      added: "%{recipient} bol pridaný ako adresát. E-mail zatiaľ nebol odoslaný."
       invitation_sending: "Pozvánka pre %{recipient} sa odosiela"
       invitation_failed: "Pozvánku pre %{recipient} sa nepodarilo odoslať"
       withdrawn: "Požiadavka na podpis pre %{recipient} bola stiahnutá"
       withdraw_failed: "Požiadavku na podpis pre %{recipient} sa nepodarilo stiahnuť"
+      invitations_sending:
+        one: "Pozvánka pre 1 adresáta sa odosiela"
+        few: "Pozvánky pre %{count} adresátov sa odosielajú"
+        other: "Pozvánky pre %{count} adresátov sa odosielajú"
+      invitations_none: "Všetci adresáti už pozvánku dostali"
+      pending_invitations:
+        title:
+          one: "1 adresát ešte nedostal pozvánku na podpis"
+          few: "%{count} adresáti ešte nedostali pozvánku na podpis"
+          other: "%{count} adresátov ešte nedostalo pozvánku na podpis"
+        description: "Pridaním adresáta sa nič neodosiela. Skontrolujte zoznam a odošlite pozvánky, adresáti dostanú odkaz na podpísanie dokumentov."
+        send:
+          one: "Odoslať pozvánku"
+          few: "Odoslať všetkým (%{count})"
+          other: "Odoslať všetkým (%{count})"
+      delivery:
+        not_sent: "Neodoslané"
+        not_sent_description: "E-mail zatiaľ nebol odoslaný"
+        sending: "Pozvánka sa odosiela"
+        sent: "Pozvánka odoslaná"
+        sent_at_html: "Pozvánka odoslaná %{time}"
 
   admin:
     tenants:
@@ -1695,62 +1716,139 @@ sk:
     index:
       header:
         eyebrow: "Ako podpisovať"
-        title: "Sprievodca používaním Autogram Portalu"
-        subtitle: "Pozrite si videonávod, v ktorom sa dozviete, ako môžete na portáli pracovať v prihlásenej verzii aj bez registrácie."
+        title: "Sprievodca používaním"
+        title_highlight: "Autogram Portalu"
+        subtitle: "Pozrite si videonávod alebo prejdite textový postup krok za krokom. Ukážeme vám, ako dokument poslať na podpis, podpísať ho a overiť."
       video:
         title: "Videonávod: Sprievodca používaním Autogram Portalu"
-        caption_html: "Hlavné kroky z videa nájdete aj v %{link} nižšie."
+        caption_html: "Video má titulky v slovenčine a angličtine. Hlavné kroky z videa nájdete aj v %{link} nižšie."
         text_guide_link: "textovom návode"
         fallback_html: "Váš prehliadač nevie prehrať video. Môžete si ho %{link}."
         download_link: "stiahnuť"
-      anonymous_html: "Autogram Portal môžete použiť aj <strong class=\"font-semibold\">bez prihlásenia</strong>. Podpísanie, overenie či prijatie dokumentu na podpis funguje v anonymnej verzii rovnako ako po prihlásení."
+      anonymous_html: "Portál môžete používať aj <strong class=\"font-semibold text-gray-900\">bez prihlásenia</strong>. Podpísanie, overenie aj prijatie dokumentu na podpis funguje rovnako."
+      contents:
+        title: "Obsah návodu"
+        video: "Videonávod"
+        send: "Poslať dokument na podpis"
+        sign: "Podpísať dokument sám"
+        eid: "Certifikáty na občianskom preukaze"
+        received: "Prijatý dokument na podpis"
+        validate: "Overiť podpisy"
+        apps: "Podpisové aplikácie"
+      opens_in_new_tab: "(otvorí sa v novom okne)"
+      other_tasks_label: "Prijaté dokumenty a overenie podpisov"
       guide:
         subtitle: "Krok za krokom"
-        title: "Ako odosielať, podpisovať a overovať dokumenty"
-        intro: "Všetko, čo s dokumentmi v Autogram Portali urobíte, začína rovnako: nahráte ich na domovskej stránke. Tento návod platí pre prihlásenú verziu portálu."
+        title: "Čo chcete s dokumentom urobiť?"
+        intro: "Všetko začína rovnako: dokument nahráte na domovskej stránke a vyberiete, čo s ním chcete urobiť. Postupy platia pre prihlásenú verziu portálu."
         send:
           title: "Poslať dokument na podpis"
-          steps_html:
-            - "Na domovskej stránke nahrajte dokument a kliknite na <strong class=\"font-semibold text-gray-900\">Nahrať a pokračovať</strong>."
-            - "Vyberte akciu <strong class=\"font-semibold text-gray-900\">Poslať na podpis</strong>."
-            - "Zvoľte požadovaný typ podpisu."
-            - "Zadajte e-mailovú adresu adresáta a uložte."
-          note: "Adresát dostane e-mail s odkazom, cez ktorý dokument podpíše."
+          steps:
+            upload:
+              title: "Nahrajte dokument"
+              text_html: "Na domovskej stránke kliknite na <strong class=\"font-semibold text-gray-900\">Nahrať a pokračovať</strong>."
+            action:
+              title: "Vyberte akciu"
+              text_html: "Zvoľte <strong class=\"font-semibold text-gray-900\">Poslať na podpis</strong>."
+            signature_type:
+              title: "Zvoľte typ podpisu"
+              text_html: "Určte, akým podpisom má adresát dokument podpísať."
+            recipients:
+              title: "Pridajte adresátov"
+              text_html: "Zadajte e-mail adresáta a kliknite na <strong class=\"font-semibold text-gray-900\">Pridať</strong>. Zatiaľ sa nič neodošle."
+            email:
+              title: "Odošlite pozvánky"
+              text_html: "Kliknite na <strong class=\"font-semibold text-gray-900\">Odoslať e-mail</strong>. Až potom adresát dostane odkaz na podpis."
         sign:
-          title: "Podpísať dokument sami"
-          steps_html:
-            - "Nahrajte dokument a vyberte akciu <strong class=\"font-semibold text-gray-900\">Podpísať</strong>."
-            - "Zvoľte <strong class=\"font-semibold text-gray-900\">Elektronické podpisovanie</strong> a typ vášho občianskeho preukazu."
-            - "Vyberte podpisovú aplikáciu, ktorú používate (napríklad Autogram, eIdentita alebo Podpisuj)."
-            - "Proces dokončite podľa pokynov vybranej aplikácie."
+          title: "Podpísať dokument sám"
+          steps:
+            upload:
+              title: "Nahrajte dokument"
+              text_html: "Potom vyberte akciu <strong class=\"font-semibold text-gray-900\">Podpísať</strong>."
+            method:
+              title: "Zvoľte spôsob podpisu"
+              text_html: "<strong class=\"font-semibold text-gray-900\">Elektronické podpisovanie</strong> a typ vášho občianskeho preukazu."
+            app:
+              title: "Vyberte aplikáciu"
+              text_html: "Napríklad Autogram, eIdentitu alebo Podpisuj."
+            finish:
+              title: "Dokončite podpis"
+              text_html: "Postupujte podľa pokynov vybranej aplikácie."
+          eid_hint_html: "Podpisujete občianskym preukazom prvýkrát? Najprv si %{link}."
+          eid_hint_link: "vydajte podpisové certifikáty"
         received:
-          title: "Podpísať dokument, ktorý vám niekto poslal"
-          intro: "Dostali ste výzvu na podpis? Dokument nájdete dvoma spôsobmi:"
-          items_html:
-            - "po prihlásení v sekcii <strong class=\"font-semibold text-gray-900\">Čaká na môj podpis</strong>,"
-            - "kliknutím na odkaz v e-maile."
+          title: "Dostali ste dokument na podpis?"
+          intro: "Dokument nájdete dvoma spôsobmi:"
+          items:
+            signed_in_html: "po prihlásení v sekcii <strong class=\"font-semibold text-gray-900\">Čaká na môj podpis</strong>,"
+            email_html: "kliknutím na odkaz v e-maile."
           note: "Dokument si skontrolujte. Potom ho môžete ihneď podpísať alebo odmietnuť."
         validate:
-          title: "Skontrolovať platnosť podpisov"
-          intro: "Dokument nahrajte rovnako, ako keby ste ho chceli poslať na podpis. Portál vám okamžite zobrazí prehľad všetkých podpisov. Odtiaľ môžete dokument stiahnuť, prípadne ho aj podpísať."
+          title: "Chcete overiť podpisy?"
+          intro: "Dokument nahrajte rovnako, ako keby ste ho chceli poslať na podpis. Portál vám okamžite ukáže prehľad všetkých podpisov. Odtiaľ môžete dokument stiahnuť alebo ho aj podpísať."
+          link: "Nahrať dokument na overenie"
+      eid:
+        subtitle: "Pred prvým podpisom občianskym preukazom"
+        title: "Vydajte si podpisové certifikáty"
+        intro: "Na podpisovanie občianskym preukazom s čipom (eID) potrebujete na preukaze platné podpisové certifikáty. Vydáte si ich sami v aplikácii eID klient. Stačí to urobiť raz."
+        needs_title: "Budete potrebovať"
+        needs:
+          computer:
+            title: "Počítač"
+            description_html: "Certifikáty sa nedajú vydať na mobile."
+          reader:
+            title: "Fyzickú čítačku čipových kariet"
+            description_html: "Pripojte ju k počítaču a vložte do nej občiansky preukaz."
+          id_card:
+            title: "Občiansky preukaz s čipom"
+            description_html: "Vydaný <strong class=\"font-semibold text-gray-900\">od 1. 12. 2022</strong>. Na starších preukazoch sa podpisové certifikáty vydať nedajú."
+          bok:
+            title: "Bezpečnostný osobný kód (BOK)"
+            description_html: "Kód k preukazu, ktorý poznáte len vy."
+          eid_client:
+            title: "Aplikáciu eID klient"
+            description_html: "Nainštalovanú v počítači."
+        have_certificates_html: "Certifikáty už máte? Pokračujte na %{link}."
+        have_certificates_link: "Podpísať dokument sám"
+        steps_title: "Ako na to"
+        steps:
+          start:
+            title: "Spustite eID klient"
+            text_html: "Občiansky preukaz musí byť vložený v čítačke pripojenej k počítaču."
+          issue:
+            title: "Kliknite na Vydať certifikáty"
+            text_html: "Prejdite sprievodcom. Počas neho zadáte svoj BOK."
+          pin:
+            title: "Zvoľte si podpisový PIN"
+            text_html: "Je to 6-miestne číslo, ktorým budete podpisovať dokumenty. Nikomu ho neprezrádzajte."
+          confirm:
+            title: "Podpíšte potvrdenie o prevzatí"
+            text_html: "Na konci sa otvorí aplikácia <strong class=\"font-semibold text-gray-900\">Disig Web Signer</strong>. V nej podpíšte <strong class=\"font-semibold text-gray-900\">potvrdenie o prevzatí certifikátov</strong>. Bez tohto kroku vydanie nie je dokončené."
+          done:
+            title: "Môžete podpisovať"
+            text_html: "Podpis občianskym preukazom môžete používať aj súkromne a komerčne."
+        more_link: "Podrobný návod s videom na Návody.Digital"
       apps:
+        subtitle: "Podpisovanie a výsledok"
         title: "Vy si vyberáte, čím podpisujete"
-        description: "Autogram Portal vás nenúti používať jeden nástroj. Podpisovať môžete cez Autogram, Autogram v mobile, eIdentitu, Podpisuj alebo iné samostatné aplikácie."
+        description: "Autogram Portal vás nenúti používať jeden nástroj. Podpisujte aplikáciou, ktorú už poznáte."
         items:
-          - "Autogram"
-          - "Autogram v mobile"
-          - "eIdentita"
-          - "Podpisuj"
+          autogram: "Autogram"
+          autogram_mobile: "Autogram v mobile"
+          eidentita: "eIdentita"
+          podpisuj: "Podpisuj"
+        more: "a ďalšie samostatné aplikácie"
       download:
         title: "Stiahnutie hotového dokumentu"
         description: "Po dokončení akéhokoľvek úkonu si dokument s platnými podpismi môžete kedykoľvek stiahnuť do svojho zariadenia."
-        tip_html: "<strong class=\"font-semibold\">Tip:</strong> Bez prihlásenia je dokument dostupný na stiahnutie 60 minút od nahratia."
+        anonymous_label: "Bez prihlásenia"
+        anonymous_value: "60 minút"
+        anonymous_description: "Toľko je dokument dostupný na stiahnutie od nahratia. Stiahnite si ho hneď po dokončení."
       cta:
         title: "Môžete začať"
         description_html: "Nahrajte dokument a vyberte, čo s ním chcete urobiť. Podrobný opis všetkých funkcií nájdete v %{docs}."
         docs_link: "používateľskej príručke"
         upload: "Nahrať dokument"
-
   docs:
     index:
       opens_in_new_tab: "(otvorí sa v novom okne)"
@@ -2084,12 +2182,14 @@ sk:
             description: "Zadajte e-mail adresáta a kliknite na Pridať. Mobilné číslo vyplňte, ak sa má adresát pri jednoduchom elektronickom podpise overiť SMS kódom."
           send:
             title: "Odošlite pozvánky"
-            description: "Pri adresátovi kliknite na Odoslať e-mail – pozvánka sa po pridaní neodošle automaticky. Odkaz na podpisovanie môžete adresátovi poslať aj sami (Kopírovať odkaz na podpisovanie)."
+            description: "Pozvánka sa po pridaní neodošle automaticky. Adresátov bez pozvánky portál označí ako Neodoslané; kliknite na Odoslať všetkým alebo na Odoslať e-mail pri adresátovi. Pri odoslanej pozvánke uvidíte čas odoslania. Odkaz na podpisovanie môžete adresátovi poslať aj sami (Kopírovať odkaz na podpisovanie)."
           done:
             title: "Sledujte stav a stiahnite podpísané dokumenty"
             description: "O podpisoch, odmietnutiach a dokončení balíka vás upozorníme e-mailom. Podpísané dokumenty stiahnete z detailu balíka."
         detail_screenshot_caption: "Detail balíka s dokumentmi a adresátmi"
-        detail_screenshot_alt: "Detail balíka Zmluva o dielo s tlačidlami Upraviť, Podpísať a Zmazať, poznámkou pre adresátov, dvoma dokumentmi s podpisom, tlačidlami Stiahnuť podpísaný dokument, Pridať časovú pečiatku a Pridať archívnu pečiatku a časťou Poslať na podpis s pravidlom podpisovania, dvoma adresátmi a formulárom na pridanie adresáta"
+        recipients_screenshot_caption: "Adresáti balíka: kto už pozvánku dostal a komu ju ešte treba odoslať"
+        recipients_screenshot_alt: "Časť Poslať na podpis s výzvou 2 adresáti ešte nedostali pozvánku na podpis a tlačidlom Odoslať všetkým (2), pravidlom podpisovania a štyrmi adresátmi: jeden podpísal, jeden čaká na podpis s časom odoslania pozvánky a dvaja majú stav Neodoslané s tlačidlom Odoslať e-mail. Pod nimi je formulár na pridanie adresáta."
+        detail_screenshot_alt: "Detail balíka Zmluva o dielo s tlačidlami Upraviť, Podpísať a Zmazať, poznámkou pre adresátov, dvoma dokumentmi s podpisom, tlačidlami Stiahnuť podpísaný dokument, Pridať časovú pečiatku a Pridať archívnu pečiatku a časťou Poslať na podpis s pravidlom podpisovania, štyrmi adresátmi a formulárom na pridanie adresáta"
         manage_title: "Správa balíka"
         manage:
           edit:

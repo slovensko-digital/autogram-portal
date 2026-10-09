@@ -5,10 +5,34 @@ class HowToSignControllerTest < ActionDispatch::IntegrationTest
     get how_to_sign_index_path
 
     assert_response :success
-    assert_select "h1", text: I18n.t("how_to_sign.index.header.title")
+    assert_select "h1", text: "#{I18n.t("how_to_sign.index.header.title")} #{I18n.t("how_to_sign.index.header.title_highlight")}"
     assert_select "section#guide h3", text: I18n.t("how_to_sign.index.guide.send.title")
-    assert_select "section#guide ol li", count: 8
+    assert_select "section#guide ol li", count: 9
+    assert_select "nav[aria-labelledby=how-to-sign-contents] a[href=?]", "#send", text: I18n.t("how_to_sign.index.contents.send")
+    assert_select "#send h4", text: I18n.t("how_to_sign.index.guide.send.steps.email.title")
     assert_select "a[href=?][aria-current=page]", how_to_sign_index_path, minimum: 1
+  end
+
+  test "the contents link to every part of the guide and mark the video as current" do
+    get how_to_sign_index_path
+
+    assert_select "nav[aria-labelledby=how-to-sign-contents]" do
+      assert_select "a[aria-current=true][href='#video']", text: I18n.t("how_to_sign.index.contents.video")
+      %w[send sign eid received validate apps].each do |anchor|
+        assert_select "a[href=?]", "##{anchor}", text: I18n.t("how_to_sign.index.contents.#{anchor}")
+      end
+    end
+    %w[video send sign eid received validate apps].each { |anchor| assert_select "##{anchor}" }
+  end
+
+  test "the guide explains how to issue signing certificates on the ID card" do
+    get how_to_sign_index_path
+
+    assert_select "section#eid h2", text: I18n.t("how_to_sign.index.eid.title")
+    assert_select "section#eid ol li", count: 5
+    assert_select "section#eid", text: /Disig Web Signer/
+    assert_select "section#eid a[href=?][target=_blank][rel=noopener] .sr-only", "https://navody.digital/zivotne-situacie/aktivacia-eid/krok/certifikaty", text: I18n.t("how_to_sign.index.opens_in_new_tab")
+    assert_select "#sign a[href='#eid']", text: I18n.t("how_to_sign.index.guide.sign.eid_hint_link")
   end
 
   test "the guide embeds the video with a link to its text version" do
