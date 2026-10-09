@@ -13,11 +13,11 @@ class IframeEmbeddingTest < ActionDispatch::IntegrationTest
     assert_match(/frame-ancestors 'self' http:\/\/localhost:\* https:(;|\z)/, response.headers["Content-Security-Policy"])
   end
 
-  test "embedded signing page expands the preview with a mouse and links to it on touch devices" do
+  test "embedded signing page expands the preview and links to it on touch devices" do
     get sign_bundle_path(@recipient.bundle, recipient: @recipient.uuid, iframe: "true")
 
-    assert_select "div[class~='pointer-fine:block'] [data-controller='toggle']"
-    assert_select "div[class~='pointer-fine:hidden'] a[target='_blank']", text: I18n.t("actions.view")
+    assert_select "div[class~='pointer-coarse:hidden'] [data-controller='toggle']"
+    assert_select "div[class~='pointer-coarse:flex'] a[target='_blank']", text: I18n.t("actions.view")
   end
 
   test "signing page outside iframe can be framed only by the portal" do

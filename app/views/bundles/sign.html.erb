@@ -143,12 +143,12 @@
               <% unless params[:iframe]&.in?(%w[no_preview no_onboarding]) %>
                 <% if params[:iframe].present? %>
                   <%# Phones cannot show PDFs inside an iframe, so they open the preview in a new tab. %>
-                  <div class="hidden pointer-fine:block">
+                  <div class="pointer-coarse:hidden">
                     <%= render 'contracts/visualization_with_toggle', contract: contract %>
                   </div>
                   <% if first_document %>
                     <% preview_path = first_document.is_pdf? ? pdf_preview_document_path(first_document, format: :pdf, t: Time.current.to_i, iframe: params[:iframe]) : visualize_document_path(first_document, t: Time.current.to_i) %>
-                    <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 pointer-fine:hidden">
+                    <div class="hidden items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 pointer-coarse:flex">
                       <span class="min-w-0 truncate text-sm font-medium text-gray-700"><%= first_document.filename %></span>
                       <%= link_to t('actions.view'),
                             preview_path,

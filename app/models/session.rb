@@ -298,7 +298,7 @@ class Session < ApplicationRecord
         locals: { session: self }
       )
     when "canceled"
-      Turbo::StreamsChannel.broadcast_action_to(self, action: :refresh)
+      Turbo::StreamsChannel.broadcast_refresh_to(self)
     end
   end
 

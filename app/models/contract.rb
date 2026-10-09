@@ -54,7 +54,7 @@ class Contract < ApplicationRecord
   has_many :content_versions, -> { order(version_number: :desc, id: :desc) }, class_name: "ContractContentVersion", dependent: :destroy
   has_many :contract_validation_records, dependent: :nullify
   has_one :signature_parameters, class_name: "Ades::SignatureParameters", dependent: :destroy, required: true
-  has_many :documents, dependent: :destroy
+  has_many :documents, -> { order(:id) }, dependent: :destroy
   has_many :signature_field_preparations, dependent: :destroy
   has_many :sessions, through: :signer_contracts
 
@@ -148,7 +148,7 @@ class Contract < ApplicationRecord
 
     bundle.notify_contract_signed(self, signer) if bundle.present?
 
-    Turbo::StreamsChannel.broadcast_action_to(self, action: :refresh)
+    Turbo::StreamsChannel.broadcast_refresh_to(self)
   end
 
   def latest_content_version

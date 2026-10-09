@@ -190,4 +190,36 @@ class AutogramServiceTest < ActiveSupport::TestCase
       assert_equal "adesig_qc_qc_ts", signature.qualification_label
     end
   end
+
+  test "staging accepts the Autogram test certificate only when ALLOW_TEST_SIGNATURES is set" do
+    service = AutogramService.new
+    accepted = -> { service.send(:accepted_signature_result?, "INDETERMINATE", AutogramService::TEST_SIGNER_COMMON_NAME) }
+
+    in_rails_env("staging") do
+      with_allow_test_signatures(nil) { assert_not accepted.call }
+      with_allow_test_signatures("true") { assert accepted.call }
+    end
+
+    in_rails_env("production") do
+      with_allow_test_signatures("true") { assert_not accepted.call }
+    end
+  end
+
+  private
+
+  def in_rails_env(name)
+    previous = Rails.env
+    Rails.env = name
+    yield
+  ensure
+    Rails.env = previous
+  end
+
+  def with_allow_test_signatures(value)
+    previous = ENV["ALLOW_TEST_SIGNATURES"]
+    value.nil? ? ENV.delete("ALLOW_TEST_SIGNATURES") : ENV["ALLOW_TEST_SIGNATURES"] = value
+    yield
+  ensure
+    previous.nil? ? ENV.delete("ALLOW_TEST_SIGNATURES") : ENV["ALLOW_TEST_SIGNATURES"] = previous
+  end
 end

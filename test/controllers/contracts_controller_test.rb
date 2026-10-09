@@ -736,16 +736,23 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       contract = create_pdf_contract(allowed_methods: [ "visual" ])
       contract.update!(tenant: tenants(:one))
 
+      broadcasts = nil
       with_autogram_service(fake_stamp_service("stamped api pdf")) do
-        post "/contracts/#{contract.uuid}/visual_signing", params: {
-          iframe: "true",
-          stamp: { content_mode: "text", custom_text: "Signer" }
-        }
+        broadcasts = capture_turbo_stream_broadcasts(contract) do
+          post "/contracts/#{contract.uuid}/visual_signing", params: {
+            iframe: "true",
+            stamp: { content_mode: "text", custom_text: "Signer" }
+          }, headers: { "X-Turbo-Request-Id" => "visual-signing-request" }
+        end
       end
 
       signer_contract = contract.reload.signer_contracts.sole
       assert_instance_of AnonymousSigner, signer_contract.signer
       assert_equal "Signer", signer_contract.visual_stamps.visual_method.sole.text
+      # The signing page ignores the refresh it caused itself and follows the redirect to the result.
+      refresh = broadcasts.sole
+      assert_equal "refresh", refresh["action"]
+      assert_equal "visual-signing-request", refresh["request-id"]
     end
   end
 
