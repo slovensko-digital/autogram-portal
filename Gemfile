@@ -78,7 +78,7 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem "good_job", "~> 4.12"
+gem "good_job", "~> 4.21"
 
 gem "redis", "~> 6.0"
 
