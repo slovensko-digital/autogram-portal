@@ -1,6 +1,5 @@
 <%# locals: (record:) %>
-<%# When the retention of the plan deletes a document or bundle. %>
-<% if (deletion_at = record.scheduled_deletion_at) %>
+<% if record.created_at < 1.day.ago && (deletion_at = record.scheduled_deletion_at) %>
   <% tenant = record.tenant %>
   <div class="w-full rounded-lg border border-gray-200 bg-white p-4">
     <div class="flex items-start gap-3">

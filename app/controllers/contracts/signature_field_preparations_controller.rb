@@ -8,7 +8,7 @@ module Contracts
 
     rescue_from Pundit::NotAuthorizedError, with: :render_preparation_denial
 
-    helper_method :prepared_pdf_state
+    helper_method :prepared_pdf_state, :introduction_pending?
 
     def index
       @signature_field_preparation = build_signature_field_preparation
@@ -95,6 +95,12 @@ module Contracts
       @preparations_by_recipient_id = @signature_field_preparations.index_by(&:recipient_id)
       @awaiting_recipients = @contract.bundle.active_recipients.awaiting_contract(@contract).order(:created_at)
       @recipients = @awaiting_recipients.reject { |recipient| @preparations_by_recipient_id.key?(recipient.id) }
+    end
+
+    # Before the first field is placed, the page explains the limits of prepared fields and opens the placement
+    # editor only once the author confirms them.
+    def introduction_pending?
+      action_name == "index" && @signature_field_preparations.blank? && @awaiting_recipients.present? && params[:acknowledged].blank?
     end
 
     # Tells the author how far along the two-step flow they are: place fields, then generate the signing PDF.

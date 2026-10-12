@@ -12,6 +12,17 @@ class NotificationMailerTest < ActionMailer::TestCase
     assert_not_includes body, "<b>Phish</b>"
   end
 
+  test "signature requested names the bundle in the heading" do
+    bundle = create_bundle_with_note("Prosím o podpis do piatka.")
+    bundle.update!(name: "Zmluva o dielo – kancelária")
+
+    mail = NotificationMailer.with(user: users(:two)).signature_requested(bundle)
+
+    assert_equal I18n.t("notification_mailer.signature_requested.subject"), mail.subject
+    assert_includes mail.html_part.body.decoded, "Zmluva o dielo – kancelária</h1>"
+    assert_includes mail.text_part.body.decoded, "Zmluva o dielo – kancelária"
+  end
+
   test "signature withdrawn includes apology and no action link" do
     bundle = create_bundle_with_note("test")
     recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(6)}@example.com", locale: "en")

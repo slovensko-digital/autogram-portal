@@ -445,7 +445,9 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
       contract: { allowed_methods: [ "qes" ] }
     }
 
-    assert_redirected_to contract.reload.bundle
+    bundle = contract.reload.bundle
+    assert_redirected_to edit_bundle_path(bundle)
+    assert_equal "visual-test", bundle.name, "the bundle is named after its document"
     assert_equal [ "qes" ], contract.allowed_methods
   end
 

@@ -32,7 +32,7 @@
             </div>
             <% if policy(@bundle).manage? %>
               <%=link_to bundle_path(@bundle),
-                    class: "btn btn-secondary w-full sm:w-auto" do %>
+                    class: "btn btn-second-primary w-full sm:w-auto" do %>
                 <%=  t('actions.view') %>
               <% end %>
             <% end %>
@@ -155,7 +155,7 @@
                             target: "_blank",
                             rel: "noopener noreferrer",
                             data: { turbo: false },
-                            class: "btn btn-secondary whitespace-nowrap" %>
+                            class: "btn btn-second-primary whitespace-nowrap" %>
                     </div>
                   <% end %>
                 <% else %>

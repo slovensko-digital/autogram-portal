@@ -39,6 +39,20 @@ class RetentionNoticesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "details of documents and bundles younger than a day show no retention notice" do
+    with_plan_limits("BASIC_RETENTION_DAYS" => "60") do
+      bundle = create_bundle("Nový balík", created_at: 23.hours.ago)
+      contract = create_contract(created_at: 23.hours.ago)
+
+      [ bundle_path(bundle), contract_path(contract) ].each do |path|
+        get path
+
+        assert_response :success
+        assert_no_match(/automaticky zmaže/, response.body)
+      end
+    end
+  end
+
   test "lists mark the documents deleted soon" do
     with_plan_limits("BASIC_RETENTION_DAYS" => "60") do
       create_bundle("Starý balík", created_at: 59.days.ago)

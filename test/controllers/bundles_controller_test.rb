@@ -65,18 +65,68 @@ class BundlesControllerTest < ActionController::TestCase
 
   test "author can open the edit form" do
     bundle = create_bundle_with_contracts(author: @author, count: 1)
+    bundle.recipients.create!(email: "first@example.com")
+    bundle.recipients.create!(email: "second@example.com")
 
     get :edit, params: { id: bundle.uuid }
 
     assert_response :success
+    assert_select "h1", text: I18n.t("bundles.edit.title")
+    assert_select "a[href=?]", bundle_path(bundle), text: I18n.t("bundles.edit.back")
     assert_select "form[action=?]", bundle_path(bundle) do
       assert_select "input[name='bundle[name]'][placeholder=?]", bundle.display_name
       assert_select "textarea[name='bundle[note]']"
       assert_select "input[type='radio'][name='bundle[signing_rule]']", count: 3
-      assert_select "input[name='bundle[required_signatures]']"
-      assert_select "input[type='checkbox'][name='bundle[publicly_visible]']"
-      assert_select "input[type='checkbox'][name='bundle[author_notifications_enabled]']"
+      assert_select "input[name='bundle[required_signatures]'][max='2']"
+      assert_select "details input[type='checkbox'][name='bundle[publicly_visible]']"
+      assert_select "details input[type='checkbox'][name='bundle[author_notifications_enabled]']"
+      assert_select "input[type='submit'][value=?]", I18n.t("actions.save")
     end
+    assert_select "h2", text: I18n.t("bundles.edit.invited_warning_title", count: 1), count: 0
+  end
+
+  test "edit form of a bundle without recipients prepares it for sending" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    get :edit, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "h1", text: I18n.t("bundles.edit.preparing_title")
+    assert_select "a[href=?]", bundles_path, text: I18n.t("bundles.show.all_bundles")
+    assert_includes response.body, "bundle-contract-0.pdf"
+    assert_select "form[action=?]", bundle_path(bundle) do
+      assert_select "input[name='bundle[name]']"
+      assert_select "textarea[name='bundle[note]']"
+      assert_select "input[name='bundle[signing_rule]']", count: 0
+      assert_select "input[name='bundle[required_signatures]']", count: 0
+      assert_select "input[type='submit'][value=?]", I18n.t("bundles.edit.save_and_add_recipients")
+    end
+  end
+
+  test "edit form offers the signing rule only from two active recipients" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    bundle.recipients.create!(email: "only@example.com")
+    bundle.recipients.create!(email: "withdrawn@example.com", withdrawn_at: Time.current)
+
+    get :edit, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "h1", text: I18n.t("bundles.edit.title")
+    assert_select "input[name='bundle[signing_rule]']", count: 0
+  end
+
+  test "edit form warns that invited recipients get no new email" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    bundle.recipients.create!(email: "invited@example.com").notified!
+    bundle.recipients.create!(email: "waiting@example.com")
+
+    get :edit, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "h2", text: I18n.t("bundles.edit.invited_warning_title", count: 1)
+    assert_select "p", text: I18n.t("bundles.edit.invited_warning_description", count: 1)
+    assert_select "p", text: "invited@example.com"
+    assert_not_includes response.body, "waiting@example.com"
   end
 
   test "author can update bundle settings" do
@@ -172,11 +222,31 @@ class BundlesControllerTest < ActionController::TestCase
     signed_preview_src = rails_blob_path(contract.latest_source_content_version.file, disposition: "inline")
     assert_select "iframe[src='#{signed_preview_src}#toolbar=0&navpanes=0&scrollbar=0&view=FitH']", count: 0
     assert_includes response.body, "data-src=\"#{signed_preview_src}#toolbar=0&navpanes=0&scrollbar=0&view=FitH\""
-    assert_select "form[action='#{extend_signatures_contract_path(contract)}']"
-    assert_select "input[name='target_level'][value='LTA']", count: 1
-    assert_select "input[name='target_level'][value='T']", count: 0
-    # Without the validation archive the action adds an archive timestamp instead of archiving.
-    assert_select "input[type='submit'][value=?]", I18n.t("documents.new.actions.archive.title_without_archivation")
+    # Extending signatures is a less frequent action, so it sits in the document actions menu.
+    assert_select "#document_actions_#{contract.uuid}" do
+      assert_select "form[action='#{extend_signatures_contract_path(contract)}']"
+      assert_select "input[name='target_level'][value='LTA']", count: 1
+      assert_select "input[name='target_level'][value='T']", count: 0
+      # Without the validation archive the action adds an archive timestamp instead of archiving.
+      assert_select "button", text: /#{Regexp.escape(I18n.t("documents.new.actions.archive.title_without_archivation"))}/
+    end
+    assert_select "a[href=?]", signed_document_contract_path(contract), text: I18n.t("contracts.download_actions.download_button")
+    assert_select "#document_actions_#{contract.uuid} a[href=?]", signed_document_contract_path(contract), count: 0
+  end
+
+  test "bundle show leaves out the document actions menu when no action applies" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    contract = bundle.contracts.first
+    # Signature fields can be prepared only in PAdES; an unsigned document has nothing to extend.
+    contract.signature_parameters.update!(format: "XAdES")
+
+    with_contracts_controller_and_autogram_service(fake_unsigned_pades_validation_service) do
+      get :show_bundle, params: { id: contract.uuid }
+    end
+
+    assert_response :success
+    assert_select "[data-document-actions-toggle]", count: 0
+    assert_select "a[href=?]", signed_document_contract_path(contract), count: 0
   end
 
   test "bundle show offers signature field preparation link for eligible unsigned contract" do
@@ -200,7 +270,10 @@ class BundlesControllerTest < ActionController::TestCase
     end
 
     assert_response :success
-    assert_select "a[href='#{contract_signature_field_preparations_path(contract)}']"
+    assert_select "button[data-document-actions-toggle][aria-controls=?][aria-expanded='false']", "document_actions_#{contract.uuid}"
+    assert_select "#document_actions_#{contract.uuid} a[href=?]", contract_signature_field_preparations_path(contract),
+                  text: /#{Regexp.escape(I18n.t("contracts.document_actions_menu.prepare_signature_fields"))}/
+    assert_select "a[href=?]", contract_signature_field_preparations_path(contract), count: 1
   end
 
   test "bundle show replaces the prepare fields call to action once every recipient has a field" do
@@ -235,8 +308,31 @@ class BundlesControllerTest < ActionController::TestCase
     end
 
     assert_response :success
-    assert_select "a[href=?]", contract_signature_field_preparations_path(contract), text: I18n.t("contracts.show_bundle.edit_signature_fields")
-    assert_select "a", text: I18n.t("documents.new.actions.prepare_signature_fields.title"), count: 0
+    assert_select "#document_actions_#{contract.uuid} a[href=?]", contract_signature_field_preparations_path(contract),
+                  text: /#{Regexp.escape(I18n.t("contracts.document_actions_menu.edit_signature_fields"))}/
+    assert_select "a", text: /#{Regexp.escape(I18n.t("contracts.document_actions_menu.prepare_signature_fields"))}/, count: 0
+    # The fields are placed but the signing PDF is not generated yet.
+    assert_select "button[data-toggle-target='button']", text: /#{Regexp.escape(I18n.t("contracts.show_bundle.signature_fields_unfinished_badge"))}/
+  end
+
+  test "bundle show marks a document with a generated signing pdf of prepared fields" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    contract = bundle.contracts.first
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+    contract.signature_field_preparations.create!(
+      recipient: recipient, document: contract.documents.first, page: 1, x: 42, y: 64, width: 180, height: 64
+    )
+    contract.add_prepared_signature_fields_content_version!(
+      content: "%PDF-1.4 prepared fields", filename: "prepared.pdf", content_type: "application/pdf"
+    )
+
+    with_contracts_controller_and_autogram_service(fake_unsigned_pades_validation_service) do
+      get :show_bundle, params: { id: contract.uuid }
+    end
+
+    assert_response :success
+    assert_select "button[data-toggle-target='button']", text: /#{Regexp.escape(I18n.t("contracts.show_bundle.signature_fields_badge", count: 1))}/
+    assert_select "button[data-toggle-target='button']", text: /#{Regexp.escape(I18n.t("contracts.show_bundle.signature_fields_unfinished_badge"))}/, count: 0
   end
 
   test "bundle show offers private evidence download for signed contract with evidence package" do
@@ -267,7 +363,7 @@ class BundlesControllerTest < ActionController::TestCase
     get :show_bundle, params: { id: contract.uuid }
 
     assert_response :success
-    assert_select "a[href='#{download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)}']", count: 1
+    assert_select "#document_actions_#{contract.uuid} a[href='#{download_private_signature_evidence_verification_path(reference: evidence_record.public_reference)}']", count: 1
     assert_includes response.body, I18n.t("contracts.show_bundle.private_evidence_download_button")
   end
 
@@ -334,6 +430,21 @@ class BundlesControllerTest < ActionController::TestCase
   end
 
   private
+
+  def with_contracts_controller_and_autogram_service(service)
+    original_autogram_service = AutogramEnvironment.method(:autogram_service)
+    AutogramEnvironment.singleton_class.define_method(:autogram_service) { service }
+
+    contracts_controller = ContractsController.new
+    author = @author
+    contracts_controller.singleton_class.define_method(:current_user) { author }
+    contracts_controller.singleton_class.define_method(:user_signed_in?) { true }
+    @controller = contracts_controller
+
+    yield
+  ensure
+    AutogramEnvironment.singleton_class.define_method(:autogram_service) { original_autogram_service.call }
+  end
 
   def create_bundle_with_contracts(author:, count:, signed: false)
     contracts = count.times.map do |index|

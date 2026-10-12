@@ -109,7 +109,7 @@
             <div class="mt-4 flex flex-wrap gap-3">
               <%= link_to t('.evidence_seal_download_button'),
                     download_signature_evidence_verification_path(reference: @signature_evidence_record.public_reference),
-                    class: "btn btn-secondary" %>
+                    class: "btn btn-second-primary" %>
 
               <% if @signature_evidence_record.private_evidence_package.attached? && policy(@signature_evidence_record).download_private? %>
                 <%= link_to t('.private_evidence_download_button'),

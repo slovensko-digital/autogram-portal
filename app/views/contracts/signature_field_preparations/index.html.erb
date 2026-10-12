@@ -38,6 +38,9 @@
       <% end %>
     </div>
 
+    <% if introduction_pending? %>
+      <%= render "contracts/signature_field_preparations/introduction" %>
+    <% else %>
     <% case prepared_pdf_state %>
     <% when :none %>
       <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
@@ -255,5 +258,6 @@
         </div>
       <% end %>
     </section>
+    <% end %>
   </div>
 </div>

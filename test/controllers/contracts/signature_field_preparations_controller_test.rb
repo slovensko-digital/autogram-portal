@@ -17,11 +17,30 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
     @controller.singleton_class.define_method(:user_signed_in?) { true }
   end
 
-  test "index renders signature field preparation form for eligible author" do
+  test "index explains the limitations of prepared fields before the first field is placed" do
     contract, recipient = create_bundle_contract_with_recipient(author: @user)
 
     with_autogram_service(fake_validation_service(has_signatures: false)) do
       get :index, params: { contract_id: contract.uuid }
+    end
+
+    assert_response :success
+    assert_select "[data-signature-field-preparations-introduction]" do
+      assert_select "h2", text: I18n.t("contracts.signature_field_preparations.introduction.title")
+      assert_select "h3", text: I18n.t("contracts.signature_field_preparations.introduction.mobile_only.title")
+      assert_select "li", text: recipient.display_name
+      assert_select "form[action=?][method='get']", contract_signature_field_preparations_path(contract) do
+        assert_select "input[type='checkbox'][name='acknowledged'][value='1'][required]"
+      end
+    end
+    assert_select "[data-controller='visual-stamp']", count: 0
+  end
+
+  test "index renders signature field preparation form for eligible author" do
+    contract, recipient = create_bundle_contract_with_recipient(author: @user)
+
+    with_autogram_service(fake_validation_service(has_signatures: false)) do
+      get :index, params: { contract_id: contract.uuid, acknowledged: "1" }
     end
 
     assert_response :success
@@ -48,7 +67,7 @@ class Contracts::SignatureFieldPreparationsControllerTest < ActionController::Te
     )
 
     with_autogram_service(fake_validation_service(has_signatures: false)) do
-      get :index, params: { contract_id: contract.uuid }
+      get :index, params: { contract_id: contract.uuid, acknowledged: "1" }
     end
 
     assert_response :success

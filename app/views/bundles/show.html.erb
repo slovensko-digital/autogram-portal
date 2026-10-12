@@ -39,7 +39,7 @@
 
         <div class="flex flex-col gap-2 sm:flex-row sm:shrink-0">
           <%= link_to t('actions.edit'), edit_bundle_path(@bundle),
-                class: "btn btn-secondary" %>
+                class: "btn btn-second-primary" %>
           <%= link_to t('actions.sign'), sign_bundle_path(@bundle),
                 class: "btn btn-primary" %>
           <%= button_to t('actions.delete'), bundle_path(@bundle),
@@ -53,9 +53,14 @@
     <%= render "shared/retention_notice", record: @bundle %>
 
     <% if @bundle.note.present? %>
-      <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-        <h2 class="text-sm font-medium text-gray-700"><%= t('.note_title') %></h2>
-        <p class="mt-1 text-gray-900 whitespace-pre-line"><%= @bundle.note %></p>
+      <div class="flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+        <div class="min-w-0">
+          <h2 class="text-base font-medium text-gray-900"><%= t('.note_title') %></h2>
+          <p class="mt-1 text-base text-gray-800 whitespace-pre-line break-words"><%= @bundle.note %></p>
+        </div>
+        <%= link_to edit_bundle_path(@bundle), class: "inline-flex min-h-6 shrink-0 items-center rounded-sm text-base font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" do %>
+          <%= t('.edit_note') %><span class="sr-only">: <%= t('.note_title') %></span>
+        <% end %>
       </div>
     <% end %>
 
@@ -87,7 +92,7 @@
                  class="w-full flex-1 rounded-md border border-gray-500 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           <%= button_tag type: "button",
                 data: { action: "clipboard#copyToClipboard" },
-                class: "btn btn-secondary" do %>
+                class: "btn btn-second-primary" do %>
             <span data-clipboard-target="label"><%= t('.copy_link') %></span>
           <% end %>
           <span role="status" class="sr-only" data-clipboard-target="status"></span>

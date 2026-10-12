@@ -9,7 +9,7 @@
     <div class="flex flex-col gap-2 sm:flex-row">
       <%= form_with url: admin_tenants_path, method: :get, class: "flex gap-2" do |form| %>
         <%= form.search_field :q, value: params[:q], placeholder: t('.search_placeholder'), class: "w-full sm:w-64 rounded-md border border-gray-500 px-3 py-2 text-sm" %>
-        <%= form.submit t('.search'), name: nil, class: "btn btn-secondary" %>
+        <%= form.submit t('.search'), name: nil, class: "btn btn-second-primary" %>
       <% end %>
       <%= link_to t('.new'), new_admin_tenant_path, class: "btn btn-primary" %>
     </div>

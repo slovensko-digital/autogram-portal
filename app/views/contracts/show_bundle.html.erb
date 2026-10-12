@@ -1,5 +1,14 @@
 <%= turbo_frame_tag @contract do %>
-  <%= render 'contracts/visualization_with_toggle', contract: @contract %>
+  <% manageable = policy(@contract.bundle).manage? %>
+  <% actions_menu = render("contracts/document_actions_menu", contract: @contract) if manageable %>
+  <% signature_fields_badge = if manageable && @contract.signature_field_preparations.any?
+       if @contract.prepared_signature_fields_source_attached?
+         render "shared/badge", color: "blue", label: t('.signature_fields_badge', count: @contract.signature_field_preparations.size)
+       elsif @contract.pades_field_preparation_allowed?
+         render "shared/badge", color: "yellow", label: t('.signature_fields_unfinished_badge')
+       end
+     end %>
+  <%= render 'contracts/visualization_with_toggle', contract: @contract, actions: actions_menu.presence, badge: signature_fields_badge %>
 
   <%= turbo_frame_tag "signature_validation_#{@contract.uuid}",
             src: validate_contract_path(@contract),
@@ -10,59 +19,11 @@
 
   <%= render("layouts/flash", flash: flash) %>
 
-  <% if policy(@contract.bundle).manage? %>
-    <div class="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end sm:items-start">
-      <% if policy(@contract).prepare_signature_fields? && @contract.pades_field_preparation_allowed? %>
-        <% if @contract.pades_signature_fields_prepared_for_all_recipients? %>
-          <%= link_to t('contracts.show_bundle.edit_signature_fields'),
-                contract_signature_field_preparations_path(@contract),
-                data: { turbo_frame: "_top" },
-                class: "inline-flex w-full justify-center items-center py-2 text-sm font-medium text-gray-500 underline hover:text-gray-700 sm:w-auto" %>
-        <% else %>
-          <%= link_to t('documents.new.actions.prepare_signature_fields.title'),
-                contract_signature_field_preparations_path(@contract),
-                data: { turbo_frame: "_top" },
-                class: "btn btn-secondary w-full sm:w-auto" %>
-        <% end %>
-      <% end %>
-
-      <% if @contract.signed_document.attached? %>
-        <div class="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-          <%= link_to signed_document_contract_path(@contract), data: { turbo: false },
-                class: "btn btn-primary w-full sm:w-auto" do %>
-            <%= t('contracts.download_actions.download_button') %>
-          <% end %>
-          <% @contract.private_signature_evidence_records.each do |evidence_record| %>
-            <%= link_to download_private_signature_evidence_verification_path(reference: evidence_record.public_reference), data: { turbo: false },
-                  class: "btn btn-secondary w-full sm:w-auto" do %>
-              <%= t('contracts.show_bundle.private_evidence_download_button') %>
-            <% end %>
-          <% end %>
-          <% if @contract.tenant.archivation_enabled? %>
-            <%= link_to content_versions_contract_path(@contract), data: { turbo_frame: "_top" },
-                  class: "btn btn-secondary w-full sm:w-auto" do %>
-              <%= t('contracts.show.version_history') %>
-            <% end %>
-          <% end %>
-        </div>
-      <% end %>
-
-      <% if @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'T') %>
-        <%= form_with url: extend_signatures_contract_path(@contract), method: :post, local: true, class: "w-full sm:w-auto" do |form| %>
-          <%= form.hidden_field :target_level, value: 'T' %>
-          <%= form.submit t('documents.new.actions.add_timestamp.title'),
-                          class: "btn btn-secondary w-full sm:w-auto",
-                          data: { "form-submit-target": "submitButton" } %>
-        <% end %>
-      <% end %>
-
-      <% if @contract.tenant.signature_extension_allowed? && @contract.extendable_signatures?(target_level: 'LTA') %>
-        <%= form_with url: extend_signatures_contract_path(@contract), method: :post, local: true, class: "w-full sm:w-auto" do |form| %>
-          <%= form.hidden_field :target_level, value: 'LTA' %>
-          <%= form.submit archive_action_t(@contract.tenant, 'documents.new.actions.archive.title'),
-                          class: "btn btn-secondary w-full sm:w-auto",
-                          data: { "form-submit-target": "submitButton" } %>
-        <% end %>
+  <% if manageable && @contract.signed_document.attached? %>
+    <div class="mt-4 flex justify-end">
+      <%= link_to signed_document_contract_path(@contract), data: { turbo: false },
+            class: "btn btn-primary w-full sm:w-auto" do %>
+        <%= t('contracts.download_actions.download_button') %>
       <% end %>
     </div>
   <% end %>

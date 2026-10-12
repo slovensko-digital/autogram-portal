@@ -82,7 +82,7 @@
 
           <div class="flex flex-col gap-3 sm:flex-row">
             <%= form.submit t('.verify_code_button'), class: "btn btn-primary" %>
-            <%= button_to t('.resend_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, form_class: "contents", class: "btn btn-secondary" %>
+            <%= button_to t('.resend_code_button'), request_verification_contract_session_path(@contract, @session, recipient: @recipient&.uuid, iframe: params[:iframe]), method: :post, form_class: "contents", class: "btn btn-second-primary" %>
           </div>
         <% end %>
       </div>

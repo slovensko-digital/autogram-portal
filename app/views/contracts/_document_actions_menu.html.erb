@@ -1,0 +1,142 @@
+<%# locals: (contract:) %>
+<%# Less frequent actions of a bundle document, hidden behind a "⋯" disclosure. Renders nothing when none applies. %>
+<% prepare_fields = policy(contract).prepare_signature_fields? && contract.pades_field_preparation_allowed? %>
+<% extension_allowed = contract.tenant.signature_extension_allowed? %>
+<% add_timestamp = extension_allowed && contract.extendable_signatures?(target_level: 'T') %>
+<% archive = extension_allowed && contract.extendable_signatures?(target_level: 'LTA') %>
+<% signed = contract.signed_document.attached? %>
+<% version_history = signed && contract.tenant.archivation_enabled? %>
+<% evidence_records = signed ? contract.private_signature_evidence_records.to_a : [] %>
+<% timestamps_limited = contract.tenant.limit_of(:timestamps).present? %>
+<% other_actions = version_history || evidence_records.any? %>
+
+<% if prepare_fields || add_timestamp || archive || other_actions %>
+  <% menu_id = "document_actions_#{contract.uuid}" %>
+  <% item_class = "flex w-full cursor-pointer items-start gap-3 rounded-md p-2.5 text-left hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-600" %>
+  <% icon_class = "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700" %>
+  <% heading_class = "px-2.5 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-gray-600" %>
+  <%# Extending signatures takes a while: the item shows a spinner and the other controls are disabled until the frame reloads. %>
+  <% extension_form_data = ->(pending_text) { { data: { controller: "form-submit", action: "submit->form-submit#handleSubmit", form_submit_pending_text_value: pending_text } } } %>
+  <% simple_item_class = "flex w-full items-center gap-3 rounded-md px-2.5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-600" %>
+
+  <div class="relative flex shrink-0"
+       x-data="{ open: false }"
+       @click.outside="open = false"
+       @keydown.escape.stop="if (open) { open = false; $refs.button.focus() }">
+    <button type="button"
+            x-ref="button"
+            @click="open = !open"
+            :aria-expanded="open.toString()"
+            aria-expanded="false"
+            aria-controls="<%= menu_id %>"
+            aria-label="<%= t('.toggle') %>"
+            :class="open ? 'bg-gray-100' : 'bg-white'"
+            class="inline-flex w-11 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            data-document-actions-toggle>
+      <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1.75"/>
+        <circle cx="12" cy="12" r="1.75"/>
+        <circle cx="19" cy="12" r="1.75"/>
+      </svg>
+    </button>
+
+    <div id="<%= menu_id %>"
+         x-show="open"
+         x-transition:enter="transition ease-out duration-100"
+         x-transition:enter-start="transform opacity-0 scale-95"
+         x-transition:enter-end="transform opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-75"
+         x-transition:leave-start="transform opacity-100 scale-100"
+         x-transition:leave-end="transform opacity-0 scale-95"
+         class="absolute right-0 top-full z-20 mt-1.5 w-80 max-w-[calc(100vw-3rem)] rounded-lg border border-gray-200 bg-white p-1.5 shadow-lg"
+         style="display: none;">
+      <% if prepare_fields %>
+        <p class="<%= heading_class %>"><%= t('.advanced') %></p>
+        <%= link_to contract_signature_field_preparations_path(contract), data: { turbo_frame: "_top" }, class: item_class do %>
+          <span aria-hidden="true" class="<%= icon_class %>">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+            </svg>
+          </span>
+          <span class="flex min-w-0 flex-col gap-0.5">
+            <% if contract.signature_field_preparations.any? %>
+              <span class="text-sm font-semibold text-gray-900"><%= t('.edit_signature_fields') %></span>
+              <span class="text-sm text-gray-600"><%= t('.edit_signature_fields_description') %></span>
+            <% else %>
+              <span class="text-sm font-semibold text-gray-900"><%= t('.prepare_signature_fields') %></span>
+              <span class="text-sm text-gray-600"><%= t('.prepare_signature_fields_description') %></span>
+              <span class="text-xs text-gray-600"><%= t('.prepare_signature_fields_note') %></span>
+            <% end %>
+          </span>
+        <% end %>
+      <% end %>
+
+      <% if add_timestamp || archive %>
+        <% if prepare_fields %><div class="mx-1 my-1.5 h-px bg-gray-200"></div><% end %>
+        <p class="<%= heading_class %>"><%= t('.extend_signatures') %></p>
+        <% if add_timestamp %>
+          <%= button_to extend_signatures_contract_path(contract), params: { target_level: 'T' }, method: :post, class: item_class,
+                form: extension_form_data.call(t('.add_timestamp_pending')), data: { "form-submit-target": "submitButton" } do %>
+            <span aria-hidden="true" class="<%= icon_class %>">
+              <svg data-form-submit-target="icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+              <svg data-form-submit-target="spinner" class="hidden h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span data-form-submit-target="label" class="text-sm font-semibold text-gray-900"><%= t('documents.new.actions.add_timestamp.title') %></span>
+              <span class="text-sm text-gray-600"><%= t('.add_timestamp_description') %></span>
+              <% if timestamps_limited %>
+                <span class="text-xs text-gray-600"><%= t('.timestamps_limit_note') %></span>
+              <% end %>
+            </span>
+          <% end %>
+        <% end %>
+        <% if archive %>
+          <%= button_to extend_signatures_contract_path(contract), params: { target_level: 'LTA' }, method: :post, class: item_class,
+                form: extension_form_data.call(archive_action_t(contract.tenant, 'contracts.document_actions_menu.archive_pending')), data: { "form-submit-target": "submitButton" } do %>
+            <span aria-hidden="true" class="<%= icon_class %>">
+              <svg data-form-submit-target="icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125h4.5M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+              </svg>
+              <svg data-form-submit-target="spinner" class="hidden h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span data-form-submit-target="label" class="text-sm font-semibold text-gray-900"><%= archive_action_t(contract.tenant, 'documents.new.actions.archive.title') %></span>
+              <span class="text-sm text-gray-600"><%= t('.archive_description') %></span>
+              <% if timestamps_limited %>
+                <span class="text-xs text-gray-600"><%= t('.timestamps_limit_note') %></span>
+              <% end %>
+            </span>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% if other_actions %>
+        <% if prepare_fields || add_timestamp || archive %><div class="mx-1 my-1.5 h-px bg-gray-200"></div><% end %>
+        <% if version_history %>
+          <%= link_to content_versions_contract_path(contract), data: { turbo_frame: "_top" }, class: simple_item_class do %>
+            <svg aria-hidden="true" class="mx-1.5 h-5 w-5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
+            </svg>
+            <%= t('contracts.show.version_history') %>
+          <% end %>
+        <% end %>
+        <% evidence_records.each do |evidence_record| %>
+          <%= link_to download_private_signature_evidence_verification_path(reference: evidence_record.public_reference), data: { turbo: false }, class: simple_item_class do %>
+            <svg aria-hidden="true" class="mx-1.5 h-5 w-5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <%= t('contracts.show_bundle.private_evidence_download_button') %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
