@@ -706,6 +706,130 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "chevron7 session is created once per signer and links to its parameters" do
+    contract, recipient = create_bundle_contract_with_recipient
+
+    get chevron7_contract_sessions_path(contract, recipient: recipient.uuid)
+
+    assert_response :success
+    session = contract.reload.sessions.sole
+    assert_instance_of Chevron7Session, session
+    assert session.chevron7?
+    assert session.pending?
+
+    link = session.chevron7_url
+    assert link.start_with?("chevron7://sign?linkUrl=")
+    link_url = URI(CGI.unescape(link.delete_prefix("chevron7://sign?linkUrl=")))
+    assert_equal "example.com", link_url.host
+    assert_equal parameters_contract_session_path(contract, session, format: :json), link_url.path
+    assert SessionAccessToken.valid?(token: Rack::Utils.parse_query(link_url.query).fetch("session_token"), contract: contract, session: session)
+
+    get chevron7_contract_sessions_path(contract, recipient: recipient.uuid)
+
+    assert_response :success
+    assert_equal [ session ], contract.reload.sessions.to_a
+  end
+
+  test "chevron7 parameters describe the document, the upload and the requested signature" do
+    contract, recipient = create_bundle_contract_with_recipient
+    contract.signature_parameters.update!(level: "BASELINE_T")
+    session = create_chevron7_session_for(contract: contract, recipient: recipient)
+
+    get parameters_contract_session_path(contract, session, format: :json, session_token: SessionAccessToken.generate(contract: contract, session: session))
+
+    assert_response :success
+    payload = response.parsed_body
+    assert_equal 1, payload.fetch("version")
+    assert_equal "Autogram Portal", payload.fetch("portal")
+    assert_equal contract.bundle.sender_display_name, payload.fetch("sender")
+    assert_equal({ "filename" => "session-test.pdf", "contentType" => "application/pdf" }, payload.fetch("document").slice("filename", "contentType"))
+    assert_equal({ "format" => "PAdES", "level" => "BASELINE_T", "container" => nil }, payload.fetch("signatureParameters"))
+    assert_equal contract_url(contract), payload.fetch("callbackUrl")
+
+    source_url = URI(payload.fetch("document").fetch("sourceUrl"))
+    destination_url = URI(payload.fetch("destinationUrl"))
+    assert_equal download_contract_session_path(contract, session), source_url.path
+    assert_equal upload_contract_session_path(contract, session), destination_url.path
+    assert_includes source_url.query, "session_token="
+    assert_includes destination_url.query, "session_token="
+
+    get source_url.request_uri
+
+    assert_response :success
+    assert_equal "%PDF-1.4 test content", response.body
+  end
+
+  test "chevron7 parameters of a contract without a bundle name no sender" do
+    contract = create_contract_without_session
+    session = AnonymousSigner.create!.signer_contracts.create!(contract: contract).sessions.create!(type: "Chevron7Session", signing_started_at: Time.current)
+
+    get parameters_contract_session_path(contract, session, format: :json, session_token: SessionAccessToken.generate(contract: contract, session: session))
+
+    assert_response :success
+    assert response.parsed_body.key?("sender")
+    assert_nil response.parsed_body.fetch("sender")
+  end
+
+  test "chevron7 parameters are refused without a token or with a wrong one" do
+    contract, recipient = create_bundle_contract_with_recipient
+    session = create_chevron7_session_for(contract: contract, recipient: recipient)
+    other_session = create_chevron7_session_for(contract: @contract, recipient: nil)
+
+    get parameters_contract_session_path(contract, session, format: :json)
+    assert_response :forbidden
+
+    get parameters_contract_session_path(contract, session, format: :json, session_token: "forged")
+    assert_response :forbidden
+
+    get parameters_contract_session_path(contract, session, format: :json, session_token: SessionAccessToken.generate(contract: @contract, session: other_session))
+    assert_response :forbidden
+
+    get parameters_contract_session_path(contract, session, format: :json, session_token: SessionAccessToken.generate(contract: contract, session: session, expires_at: 1.minute.ago))
+    assert_response :forbidden
+  end
+
+  test "chevron7 upload of a signed document completes the session" do
+    contract, recipient = create_bundle_contract_with_recipient
+    session = create_chevron7_session_for(contract: contract, recipient: recipient)
+    validation_result = AutogramService::ValidationResult.new(
+      hasSignatures: true,
+      signatures: [ parsed_signature(validation_result: "TOTAL_PASSED", subject_dn: "CN=Signer, C=SK") ],
+      documentInfo: { signed_objects_count: 1 }
+    )
+
+    with_autogram_service(fake_validation_service(validation_result)) do
+      post upload_contract_session_path(contract, session, session_token: SessionAccessToken.generate(contract: contract, session: session)), params: {
+        signed_document: Base64.strict_encode64("%PDF-1.4 signed")
+      }
+    end
+
+    assert_response :success
+    assert_equal({ "success" => true }, response.parsed_body)
+    assert session.reload.signed?
+    assert recipient.reload.signed?
+  end
+
+  test "a refused chevron7 upload fails the session and offers to sign again in Chevron7" do
+    contract, recipient = create_bundle_contract_with_recipient
+    session = create_chevron7_session_for(contract: contract, recipient: recipient)
+    validation_result = AutogramService::ValidationResult.new(hasSignatures: false)
+
+    broadcasts = nil
+    with_autogram_service(fake_validation_service(validation_result)) do
+      broadcasts = capture_turbo_stream_broadcasts(session) do
+        post upload_contract_session_path(contract, session, session_token: SessionAccessToken.generate(contract: contract, session: session)), params: {
+          signed_document: Base64.strict_encode64("%PDF-1.4 unsigned")
+        }
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal I18n.t("session.errors.no_signatures"), response.parsed_body.fetch("error")
+    assert session.reload.failed?
+    retry_link = broadcasts.sole.at_css("a[href='#{chevron7_contract_sessions_path(contract, recipient: recipient.uuid)}']")
+    assert_equal I18n.t("contracts.sessions.error.retry"), retry_link&.text&.strip
+  end
+
   test "destroy is forbidden without authorized user" do
     session_id = @session.id
 
@@ -880,6 +1004,22 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     )
 
     [ contract.reload, session ]
+  end
+
+  def create_bundle_contract_with_recipient
+    contract = create_contract_without_session
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "recipient-#{SecureRandom.hex(4)}@example.com", locale: "en")
+
+    [ contract.reload, recipient.reload ]
+  end
+
+  def create_chevron7_session_for(contract:, recipient:)
+    signer = recipient ? (recipient.recipient_signer || recipient.create_recipient_signer!) : AnonymousSigner.create!
+    signer.signer_contracts.find_or_create_by!(contract: contract).sessions.create!(
+      type: "Chevron7Session",
+      signing_started_at: Time.current
+    )
   end
 
   def create_bundle_contract_with_prepared_signature_field

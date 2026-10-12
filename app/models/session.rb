@@ -160,6 +160,10 @@ class Session < ApplicationRecord
     is_a?(PodpisujSession)
   end
 
+  def chevron7?
+    is_a?(Chevron7Session)
+  end
+
   def ades_evidence?
     is_a?(AdesEvidenceSession)
   end

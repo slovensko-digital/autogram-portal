@@ -67,6 +67,29 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
     assert_not PodpisujSession.available?(nil, contract)
   end
 
+  test "chevron7 is available for one document and refuses several documents or prepared fields" do
+    assert Chevron7Session.available?(nil, plain_contract)
+    assert_empty Chevron7Session.unavailability_reasons(nil, plain_contract)
+    assert_equal [ :multiple_files ], Chevron7Session.unavailability_reasons(nil, multiple_file_contract)
+    assert_equal [ :prepared_signature_fields ], Chevron7Session.unavailability_reasons(nil, contract_with_prepared_signature_fields)
+    assert_not Chevron7Session.available?(nil, contract_with_prepared_signature_fields)
+  end
+
+  test "chevron7 reads the card itself, so no qscd makes it unavailable" do
+    contract = plain_contract
+
+    User.qscds.keys.each do |qscd|
+      assert_empty Chevron7Session.unavailability_reasons(qscd, contract), qscd
+    end
+  end
+
+  test "chevron7 signs any signature level" do
+    contract = plain_contract
+    contract.signature_parameters.update!(level: "BASELINE_T")
+
+    assert Chevron7Session.available?(nil, contract)
+  end
+
   test "ades evidence session is available for recipient mobile phone or email" do
     contract = Contract.create!(
       documents_attributes: [ { blob: pdf_blob("ades.pdf", "%PDF-1.4 original") } ],
