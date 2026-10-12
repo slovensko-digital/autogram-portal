@@ -176,10 +176,16 @@
             <dd class="mt-1 text-sm text-gray-600"><%= method[:description] %></dd>
             <% if method[:links].present? %>
               <dd class="mt-3">
-                <ul role="list" class="flex flex-wrap gap-2">
+                <%# Same download buttons as the signing pages use when an app is not installed. %>
+                <ul role="list" class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <% method[:links].each_value do |link| %>
-                    <li>
-                      <a href="<%= link[:url] %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 underline underline-offset-2 hover:bg-blue-100 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"><%= link[:label] %><%= docs_new_tab_hint %></a>
+                    <li class="flex">
+                      <a href="<%= link[:url] %>" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full sm:w-auto">
+                        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        <%= link[:label] %><%= docs_new_tab_hint %>
+                      </a>
                     </li>
                   <% end %>
                 </ul>
@@ -232,6 +238,21 @@
       <h3 class="<%= subheading %>"><%= t('.bundles.manage_title') %></h3>
       <%= render "docs/list", items: t('.bundles.manage') %>
       <%= docs_screenshot "bundle-settings", alt: t('.bundles.settings_screenshot_alt'), caption: t('.bundles.settings_screenshot_caption') %>
+
+      <h3 class="<%= subheading %>"><%= t('.bundles.document_menu_title') %></h3>
+      <p class="text-sm text-gray-600"><%= t('.bundles.document_menu_description') %></p>
+      <p class="mt-3 text-sm text-gray-600"><%= t('.bundles.document_menu_extension') %></p>
+      <%= docs_screenshot "bundle-document-menu", alt: t('.bundles.document_menu_screenshot_alt'), caption: t('.bundles.document_menu_screenshot_caption') %>
+
+      <h3 class="<%= subheading %>"><%= t('.bundles.fields_title') %></h3>
+      <p class="text-sm text-gray-600 mb-4"><%= t('.bundles.fields_intro') %></p>
+      <%= render "docs/steps", steps: t('.bundles.fields_steps') %>
+      <div class="<%= callout %> border-yellow-100 bg-yellow-50">
+        <p class="text-sm font-semibold text-yellow-900 mb-2"><%= t('.bundles.fields_limits_title') %></p>
+        <%= render "docs/list", items: t('.bundles.fields_limits') %>
+      </div>
+      <%= docs_screenshot "signature-fields-introduction", alt: t('.bundles.fields_introduction_screenshot_alt'), caption: t('.bundles.fields_introduction_screenshot_caption') %>
+      <%= docs_screenshot "signature-fields", alt: t('.bundles.fields_screenshot_alt'), caption: t('.bundles.fields_screenshot_caption') %>
 
       <h3 class="<%= subheading %>"><%= t('.bundles.states_title') %></h3>
       <%= render "docs/statuses", items: t('.bundles.states'), colors: { awaiting: :yellow, completed: :green, declined: :red, no_recipients: :gray } %>

@@ -387,9 +387,6 @@ sk:
         sign:
           title: "Podpísať dokument"
           subtitle: "Vyberte formát podpisu a typ podpisu a podpíšte tento dokument."
-        prepare_signature_fields:
-          title: "Pripraviť viditeľné podpisové polia"
-          subtitle: "Priraďte každému príjemcovi v balíku jedno viditeľné PAdES pole ešte pred prvým podpisom."
         request_signature:
           evidence_reference_label: "Referencia evidencie"
           verify_reference_link: "Overiť túto referenciu"
@@ -614,6 +611,10 @@ sk:
 
   recipients:
     index:
+      signature_fields_warning:
+        title: "Podpis iba v Autograme v mobile"
+        content: "V dokumente sú pripravené podpisové polia, preto ho adresáti môžu podpísať iba v aplikácii Autogram v mobile."
+      signature_field: "Podpisové pole · strana %{page}"
       title: "Poslať na podpis"
       subtitle: "Pridajte adresátov a potom im odošlite e-mail s odkazom na podpis."
       send_invitation: "Odoslať e-mail"
@@ -851,8 +852,27 @@ sk:
       destroy_confirm: "Ste si istý, že chcete vymazať tento dokument? Táto akcia je nezvratná a odstráni aj všetky dokumenty priradené k tomuto dokumentu."
       update_contract: "Aktualizovať dokument"
     show_bundle:
-      edit_signature_fields: "Upraviť podpisové polia"
-      private_evidence_download_button: "Súkromná evidencia (.asice)"
+      private_evidence_download_button: "Stiahnuť súkromnú evidenciu (.asice)"
+      signature_fields_badge:
+        one: "%{count} podpisové pole"
+        few: "%{count} podpisové polia"
+        other: "%{count} podpisových polí"
+      signature_fields_unfinished_badge: "Podpisové polia nie sú dokončené"
+    document_actions_menu:
+      toggle: "Ďalšie možnosti dokumentu"
+      advanced: "Pokročilé"
+      prepare_signature_fields: "Pripraviť podpisové polia…"
+      prepare_signature_fields_description: "Vopred vyhradí v PDF miesto pre viditeľný podpis každého adresáta."
+      prepare_signature_fields_note: "Len pred prvým podpisom · PDF (PAdES)"
+      edit_signature_fields: "Upraviť podpisové polia…"
+      edit_signature_fields_description: "Polohu a veľkosť polí môžete meniť len do prvého podpisu."
+      extend_signatures: "Rozšíriť podpisy"
+      add_timestamp_description: "Doplní k podpisom kvalifikovanú časovú pečiatku (úroveň T). Odporúčame pre dokumenty s dlhšou platnosťou."
+      archive_description: "Podpisy sa dajú overiť aj po skončení platnosti certifikátu (úroveň LTA)."
+      timestamps_limit_note: "Započíta sa do mesačného limitu časových pečiatok"
+      add_timestamp_pending: "Pridáva sa časová pečiatka…"
+      archive_pending: "Dokument sa archivuje…"
+      archive_pending_without_archivation: "Pridáva sa archívna pečiatka…"
     content_versions:
       back_to_contract: "Späť na dokument"
       title: "História obsahu dokumentu"
@@ -949,6 +969,23 @@ sk:
       date_format: "%-d. %-m. %Y"
     signature_field_preparations:
       pdf_field_label: "Podpis – %{name}"
+      introduction:
+        title: "Skôr než začnete"
+        description: "V PDF vopred vyhradíte miesto, kde sa zobrazí podpis každého adresáta. Svoje meno, obrázok alebo nakreslený podpis doňho adresát doplní sám, keď bude podpisovať."
+        before_first_signature:
+          title: "Polia sa dajú pripraviť iba pred prvým podpisom"
+          description: "Po prvom podpise, aj vašom vlastnom, sa už žiadne pole nedá pridať, presunúť ani zmeniť. Každý adresát dostane jedno pole, preto najprv pridajte všetkých adresátov."
+        mobile_only:
+          title: "Podpísať sa dá iba v Autograme v mobile"
+          description: "Dokument s pripravenými poliami podpíšete vy aj adresáti z podpisových aplikácií iba v Autograme v mobile. Autogram na počítači, eIdentita ani Podpisuj ho podpísať nevedia."
+        pades_only:
+          title: "Iba pre jeden PDF dokument vo formáte PAdES"
+          description: "Vopred pripravíte len polohu a veľkosť poľa. Jeho obsah pribudne až pri každom podpise."
+        recipients_title: "Pole pripravíte pre adresátov"
+        missing_recipient: "Chýba niekto? Pridajte ho najprv v balíku."
+        acknowledgement: "Rozumiem, že dokument potom bude možné podpísať iba v Autograme v mobile a polia sa po prvom podpise už nebudú dať zmeniť."
+        continue: "Pokračovať na umiestnenie polí"
+        cancel: "Zrušiť"
       index:
         title: "Pripraviť viditeľné podpisové polia"
         subtitle: "Dva kroky: pre každého príjemcu umiestnite jedno podpisové pole a potom vygenerujte podpisový PDF súbor, aby sa polia k nim dostali."
@@ -2125,7 +2162,7 @@ sk:
             description: "K podpísanému dokumentu môžete pridať kvalifikovanú časovú pečiatku (úroveň T) alebo archívnu časovú pečiatku (úroveň LTA), ktorá umožní overiť podpis aj po skončení platnosti certifikátov. Pečiatky sa započítavajú do mesačného limitu časových pečiatok – rovnako ako osvedčený podpis vytvorený cez Autogram v mobile."
           fields:
             label: "Viditeľné podpisové polia v PDF"
-            description: "Ak balík obsahuje jeden ešte nepodpísaný PDF dokument s formátom PAdES, môžete každému adresátovi pripraviť viditeľné podpisové pole. V detaile balíka kliknite pri dokumente na Pripraviť viditeľné podpisové polia, pre každého adresáta umiestnite pole v náhľade a kliknite na Dokončiť a vygenerovať podpisový PDF. Adresát pred podpisom doplní do svojho poľa meno, obrázok alebo nakreslený podpis."
+            description: "Do PDF dokumentu v balíku môžete vopred pripraviť miesto pre viditeľný podpis každého adresáta. Postup a obmedzenia sú opísané v časti Balíky, Viditeľné podpisové polia."
         evidence_verification_html: "Údaje k referencii podpisu vytvoreného overeným AdES podpisovaním si môže ktokoľvek overiť na stránke %{link}."
         evidence_verification_link: "Overiť referenciu podpisu"
         qualified_signing_title: "Doklady a zariadenia na kvalifikované podpisovanie"
@@ -2208,7 +2245,7 @@ sk:
         detail_screenshot_caption: "Detail balíka s dokumentmi a adresátmi"
         recipients_screenshot_caption: "Adresáti balíka: kto už pozvánku dostal a komu ju ešte treba odoslať"
         recipients_screenshot_alt: "Časť Poslať na podpis s výzvou 2 adresáti ešte nedostali pozvánku na podpis a tlačidlom Odoslať všetkým (2), pravidlom podpisovania a štyrmi adresátmi: jeden podpísal, jeden čaká na podpis s časom odoslania pozvánky a dvaja majú stav Neodoslané s tlačidlom Odoslať e-mail. Pod nimi je formulár na pridanie adresáta."
-        detail_screenshot_alt: "Detail balíka Zmluva o dielo s tlačidlami Upraviť, Podpísať a Zmazať, poznámkou pre adresátov, dvoma dokumentmi s podpisom, tlačidlami Stiahnuť podpísaný dokument, Pridať časovú pečiatku a Pridať archívnu pečiatku a časťou Poslať na podpis s pravidlom podpisovania, štyrmi adresátmi a formulárom na pridanie adresáta"
+        detail_screenshot_alt: "Detail balíka Zmluva o dielo s tlačidlami Upraviť, Podpísať a Zmazať, poznámkou pre adresátov, dvoma dokumentmi s podpisom, tlačidlom Stiahnuť podpísaný dokument a ponukou ďalších možností ⋯ pri každom dokumente a časťou Poslať na podpis s pravidlom podpisovania, štyrmi adresátmi a formulárom na pridanie adresáta"
         manage_title: "Správa balíka"
         manage:
           edit:
@@ -2225,6 +2262,44 @@ sk:
             description: "Natrvalo zmaže balík aj s jeho dokumentmi."
         settings_screenshot_caption: "Úprava balíka"
         settings_screenshot_alt: "Formulár Upraviť balík s upozornením, že pozvánku už dostal jeden adresát, poliami Názov a Správa pre adresátov, výberom pravidla podpisovania a zbalenou časťou Ďalšie nastavenia"
+        document_menu_title: "Ďalšie možnosti pri dokumente"
+        document_menu_description: "Menej časté akcie nájdete v ponuke ⋯ vpravo pri dokumente. Ponuka obsahuje iba akcie, ktoré sa na dokument práve vzťahujú: pred prvým podpisom prípravu podpisových polí, po podpise pridanie časovej pečiatky (úroveň T) a archívnej pečiatky (úroveň LTA), v organizáciách s archívom podpisov aj históriu verzií a pri overenom AdES podpisovaní stiahnutie súkromnej evidencie. Stiahnuť podpísaný dokument môžete priamo tlačidlom pod dokumentom."
+        document_menu_extension: "Pridanie pečiatky trvá niekoľko sekúnd. Kým prebieha, položka ukazuje, že sa pracuje, a ostatné tlačidlá dokumentu sú nedostupné. Po dokončení sa zobrazí hlásenie a pri podpise pribudne časová pečiatka. Časové a archívne pečiatky sa započítavajú do mesačného limitu časových pečiatok."
+        document_menu_screenshot_caption: "Ponuka ďalších možností pri podpísanom dokumente"
+        document_menu_screenshot_alt: "Dokumenty v balíku Zmluva o dielo s otvorenou ponukou ⋯ pri prvom dokumente. V časti Rozšíriť podpisy ponúka Pridať časovú pečiatku a Pridať archívnu pečiatku, každú s krátkym vysvetlením a poznámkou o mesačnom limite časových pečiatok."
+        fields_title: "Viditeľné podpisové polia"
+        fields_intro: "Do PDF dokumentu môžete vopred pripraviť miesto, kde sa zobrazí podpis každého adresáta. Ide o pokročilú funkciu formátu PAdES, ktorá má obmedzenia, preto ju nájdete v ponuke ⋯ pri dokumente."
+        fields_steps:
+          recipients:
+            title: "Pridajte všetkých adresátov"
+            description: "Každý adresát dostane jedno pole. Adresátov preto pridajte ešte pred prípravou polí."
+          menu:
+            title: "Otvorte ponuku pri dokumente"
+            description: "V detaile balíka kliknite pri dokumente na ⋯ a vyberte Pripraviť podpisové polia."
+          confirm:
+            title: "Potvrďte obmedzenia"
+            description: "Portál zhrnie, čo príprava polí znamená a pre ktorých adresátov polia pripravíte. Označte Rozumiem… a kliknite na Pokračovať na umiestnenie polí."
+          place:
+            title: "Umiestnite polia"
+            description: "Vyberte adresáta, v náhľade potiahnite rámik na miesto podpisu (veľkosť upravíte rohovým úchytom) a kliknite na Pridať podpisové pole. Zopakujte to pre každého adresáta."
+          generate:
+            title: "Vygenerujte podpisový PDF"
+            description: "Kliknite na Dokončiť a vygenerovať podpisový PDF. Až potom adresáti podpisujú dokument s poliami. Pri dokumente sa zobrazí počet podpisových polí a pri adresátovi strana jeho poľa."
+        fields_limits_title: "Obmedzenia podpisových polí"
+        fields_limits:
+          before_first_signature:
+            label: "Iba pred prvým podpisom"
+            description: "Po prvom podpise, aj vašom vlastnom, sa už žiadne pole nedá pridať, presunúť ani zmeniť. Vopred sa pripravuje iba poloha a veľkosť poľa, meno, obrázok alebo nakreslený podpis doplní adresát pri podpisovaní."
+          mobile_only:
+            label: "Iba Autogram v mobile"
+            description: "Dokument s pripravenými poliami sa z podpisových aplikácií dá podpísať iba v Autograme v mobile. Autogram na počítači, eIdentita ani Podpisuj ho podpísať nevedia. Platí to pre adresátov aj pre vás."
+          pades_only:
+            label: "Iba jeden PDF vo formáte PAdES"
+            description: "Polia sa dajú pripraviť v balíku s jedným ešte nepodpísaným PDF dokumentom, ktorý sa podpisuje vo formáte PAdES."
+        fields_introduction_screenshot_caption: "Pred prípravou polí portál zhrnie ich obmedzenia"
+        fields_introduction_screenshot_alt: "Stránka Pripraviť viditeľné podpisové polia s časťou Skôr než začnete: polia sa dajú pripraviť iba pred prvým podpisom, podpísať sa dá iba v Autograme v mobile a funkcia je iba pre jeden PDF dokument vo formáte PAdES. Pod tým sú adresáti, pre ktorých sa polia pripravia, potvrdenie Rozumiem a tlačidlá Zrušiť a Pokračovať na umiestnenie polí."
+        fields_screenshot_caption: "Umiestnenie podpisových polí v náhľade dokumentu"
+        fields_screenshot_alt: "Hore upozornenie, že podpisový PDF ešte nie je aktuálny, s tlačidlom Dokončiť a vygenerovať podpisový PDF. Pod ním náhľad prvej strany dokumentu Mandátna zmluva s umiestneným podpisovým poľom prvého adresáta a rámikom poľa pre druhého adresáta. Vedľa náhľadu je výber adresáta a tlačidlo Pridať podpisové pole, pod ním zoznam adresátov so stavom ich polí."
         states_title: "Stavy balíka"
         states:
           awaiting:

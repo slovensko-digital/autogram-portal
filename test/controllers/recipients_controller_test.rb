@@ -186,6 +186,31 @@ class RecipientsControllerTest < ActionController::TestCase
     assert_select "form[action=?]", notify_bundle_recipient_path(bundles(:one), invited), count: 0
   end
 
+  test "index warns that prepared signature fields limit signing to Autogram v mobile" do
+    blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("%PDF-1.4 fields"), filename: "fields.pdf", content_type: "application/pdf")
+    contract = Contract.create!(documents_attributes: [ { blob: blob } ], signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" })
+    bundle = Bundle.create!(tenant: @user.tenants.sole, contracts: [ contract ])
+    with_field = bundle.recipients.create!(email: "with-field@example.com")
+    without_field = bundle.recipients.create!(email: "without-field@example.com")
+    contract.signature_field_preparations.create!(recipient: with_field, document: contract.documents.first, page: 2, x: 42, y: 64, width: 180, height: 64)
+
+    get :index, params: { bundle_id: bundle.uuid }
+
+    # Until the signing PDF is generated, recipients still sign the original document in any app.
+    assert_response :success
+    assert_no_match I18n.t("recipients.index.signature_fields_warning.title"), response.body
+
+    contract.add_prepared_signature_fields_content_version!(content: "%PDF-1.4 prepared", filename: "prepared.pdf", content_type: "application/pdf")
+    get :index, params: { bundle_id: bundle.uuid }
+
+    assert_response :success
+    assert_select "p", text: I18n.t("recipients.index.signature_fields_warning.title")
+    assert_select "li", text: /#{Regexp.escape(with_field.display_name)}.*#{Regexp.escape(I18n.t("recipients.index.signature_field", page: 2))}/m
+    assert_select "li", text: /#{Regexp.escape(without_field.display_name)}/ do |items|
+      assert_no_match I18n.t("recipients.index.signature_field", page: 2), items.first.text
+    end
+  end
+
   test "index hides the bulk invitation once everybody is invited" do
     bundles(:one).recipients.create!(email: "invited@example.com", notification_status: :notified)
 

@@ -34,18 +34,6 @@
         <%= render 'shared/info', title: t('documents.new.actions.signing_unsupported.title'), content: t('documents.new.actions.signing_unsupported.content') %>
       <% end %>
 
-      <% if contract_policy.prepare_signature_fields? && @contract.pades_field_preparation_allowed? %>
-        <%= render 'shared/radio_button_card',
-              name: 'document_action',
-              value: 'prepare_signature_fields',
-              label: t('documents.new.actions.prepare_signature_fields.title'),
-              description: t('documents.new.actions.prepare_signature_fields.subtitle'),
-              checked: false,
-              data_attributes: {
-                url: contract_signature_field_preparations_path(@contract)
-              } %>
-      <% end %>
-
       <% if anonymous_account_teaser %>
         <% if signing_supported %>
           <%= render 'shared/radio_button_card',

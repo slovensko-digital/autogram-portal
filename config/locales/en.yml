@@ -430,9 +430,6 @@ en:
         sign:
           title: "Sign the document"
           subtitle: "Choose signature format and method to create a contract and sign the document in the next step."
-        prepare_signature_fields:
-          title: "Prepare visible signature fields"
-          subtitle: "Assign one visible PAdES field to each bundle recipient before the first signature is added."
         request_signature:
           evidence_reference_label: "Evidence reference"
           verify_reference_link: "Verify this reference"
@@ -686,6 +683,10 @@ en:
 
   recipients:
     index:
+      signature_fields_warning:
+        title: "Signing only in Autogram on mobile"
+        content: "The document has prepared signature fields, so recipients can sign it only in the Autogram on mobile app."
+      signature_field: "Signature field · page %{page}"
       title: "Send for Signature"
       subtitle: "Add recipients, then send them an email with a link to sign."
       send_invitation: "Send email"
@@ -925,8 +926,26 @@ en:
       destroy_confirm: "Are you sure you want to delete this contract? This action is irreversible and will also remove all documents associated with this contract."
       update_contract: "Update Contract"
     show_bundle:
-      edit_signature_fields: "Edit signature fields"
-      private_evidence_download_button: "Private evidence (.asice)"
+      private_evidence_download_button: "Download private evidence (.asice)"
+      signature_fields_badge:
+        one: "%{count} signature field"
+        other: "%{count} signature fields"
+      signature_fields_unfinished_badge: "Signature fields not finished"
+    document_actions_menu:
+      toggle: "More document options"
+      advanced: "Advanced"
+      prepare_signature_fields: "Prepare signature fields…"
+      prepare_signature_fields_description: "Reserves a place in the PDF for each recipient's visible signature in advance."
+      prepare_signature_fields_note: "Only before the first signature · PDF (PAdES)"
+      edit_signature_fields: "Edit signature fields…"
+      edit_signature_fields_description: "You can move or resize the fields only until the first signature."
+      extend_signatures: "Extend signatures"
+      add_timestamp_description: "Adds a qualified timestamp to the signatures (level T). Recommended for documents with a longer validity."
+      archive_description: "The signatures can be verified even after the certificate expires (level LTA)."
+      timestamps_limit_note: "Counts towards the monthly timestamp limit"
+      add_timestamp_pending: "Adding the timestamp…"
+      archive_pending: "Archiving the document…"
+      archive_pending_without_archivation: "Adding the archive timestamp…"
     content_versions:
       back_to_contract: "Back to contract"
       title: "Contract content history"
@@ -1024,6 +1043,23 @@ en:
       date_format: "%B %-d, %Y"
     signature_field_preparations:
       pdf_field_label: "Signature – %{name}"
+      introduction:
+        title: "Before you start"
+        description: "You reserve a place in the PDF where each recipient's signature will appear. Recipients fill in their name, an image or a drawn signature themselves when they sign."
+        before_first_signature:
+          title: "Fields can be prepared only before the first signature"
+          description: "After the first signature, including your own, no field can be added, moved or changed. Each recipient gets one field, so add all recipients first."
+        mobile_only:
+          title: "Signing works only in Autogram on mobile"
+          description: "Of the signing apps, you and the recipients can sign a document with prepared fields only in Autogram on mobile. Autogram on a computer, eIdentita and Podpisuj cannot sign it."
+        pades_only:
+          title: "Only for a single PDF document in PAdES format"
+          description: "You prepare only the position and size of the field. Its content is added with each signature."
+        recipients_title: "You will prepare a field for these recipients"
+        missing_recipient: "Someone missing? Add them to the bundle first."
+        acknowledgement: "I understand that the document can then be signed only in Autogram on mobile and that the fields cannot be changed after the first signature."
+        continue: "Continue to placing fields"
+        cancel: "Cancel"
       index:
         title: "Prepare visible signature fields"
         subtitle: "Two steps: place one signature field for each recipient, then generate the signing PDF so the fields reach them."
@@ -2191,7 +2227,7 @@ en:
             description: "You can add a qualified timestamp (level T) or an archive timestamp (level LTA) to a signed document, so the signature can be verified even after the certificates expire. Timestamps count towards the monthly timestamp limit – and so does a Certified Signature created with Autogram Mobile."
           fields:
             label: "Visible signature fields in a PDF"
-            description: "If a bundle contains a single PDF document in PAdES format that is not signed yet, you can prepare a visible signature field for each recipient. On the bundle page click Prepare visible signature fields next to the document, place a field for each recipient in the preview and click Finish and generate signing PDF. Before signing, the recipient fills their field with a typed name, an image or a drawn signature."
+            description: "You can prepare a place for each recipient's visible signature in a PDF document of a bundle in advance. The steps and limitations are described under Bundles, Visible signature fields."
         evidence_verification_html: "Anyone can check the data behind the reference of a signature created with Verified AdES signing on the %{link} page."
         evidence_verification_link: "Verify a signature reference"
         qualified_signing_title: "ID cards and devices for qualified signing"
@@ -2274,7 +2310,7 @@ en:
         detail_screenshot_caption: "A bundle with its documents and recipients"
         recipients_screenshot_caption: "Bundle recipients: who has been invited and who still needs an invitation"
         recipients_screenshot_alt: "The Send for Signature part with the notice 2 recipients have not been invited yet and the Send to all (2) button, the signing rule and four recipients: one has signed, one is awaiting a signature with the time the invitation was sent, and two have the Not sent status with a Send email button. Below them is the form for adding a recipient."
-        detail_screenshot_alt: "The page of the bundle Contract for work with the Edit, Sign and Delete buttons, a note for recipients, two signed documents with the Download Signed Document, Add timestamp and Add archive timestamp buttons, and the Send for Signature part with the signing rule, four recipients and the form for adding a recipient"
+        detail_screenshot_alt: "The page of the bundle Contract for work with the Edit, Sign and Delete buttons, a note for recipients, two signed documents with the Download Signed Document button and the ⋯ menu of more options next to each document, and the Send for Signature part with the signing rule, four recipients and the form for adding a recipient"
         manage_title: "Managing a bundle"
         manage:
           edit:
@@ -2291,6 +2327,44 @@ en:
             description: "Permanently deletes the bundle including its documents."
         settings_screenshot_caption: "Editing a bundle"
         settings_screenshot_alt: "The Edit bundle form with a warning that one recipient has already received the invitation, the Name and Message for recipients fields, the signing rule choice and the collapsed More settings section"
+        document_menu_title: "More options for a document"
+        document_menu_description: "Less frequent actions are in the ⋯ menu to the right of a document. The menu offers only the actions that currently apply to the document: preparing signature fields before the first signature, adding a timestamp (level T) and an archive timestamp (level LTA) after signing, the version history in organizations with the signature archive, and downloading the private evidence for verified AdES signing. You download the signed document directly with the button below the document."
+        document_menu_extension: "Adding a timestamp takes a few seconds. While it runs, the item shows the progress and the other buttons of the document are unavailable. When it finishes, a message appears and the signature shows the new timestamp. Timestamps and archive timestamps count towards the monthly timestamp limit."
+        document_menu_screenshot_caption: "More options for a signed document"
+        document_menu_screenshot_alt: "Documents of the bundle Contract for work with the ⋯ menu of the first document open. Under Extend signatures it offers Add timestamp and Add archive timestamp, each with a short explanation and a note about the monthly timestamp limit."
+        fields_title: "Visible signature fields"
+        fields_intro: "You can prepare a place in a PDF document where each recipient's signature will appear. It is an advanced feature of the PAdES format with limitations, so you find it in the ⋯ menu next to the document."
+        fields_steps:
+          recipients:
+            title: "Add all recipients"
+            description: "Each recipient gets one field, so add the recipients before you prepare the fields."
+          menu:
+            title: "Open the document menu"
+            description: "On the bundle page click ⋯ next to the document and choose Prepare signature fields."
+          confirm:
+            title: "Confirm the limitations"
+            description: "The portal sums up what preparing fields means and for which recipients you prepare them. Tick I understand… and click Continue to placing fields."
+          place:
+            title: "Place the fields"
+            description: "Choose a recipient, drag the frame to the place of the signature in the preview (resize it with the corner handle) and click Add signature field. Repeat it for each recipient."
+          generate:
+            title: "Generate the signing PDF"
+            description: "Click Finish and generate signing PDF. Only then do the recipients sign the document with the fields. The document shows the number of signature fields and each recipient the page of their field."
+        fields_limits_title: "Limitations of signature fields"
+        fields_limits:
+          before_first_signature:
+            label: "Only before the first signature"
+            description: "After the first signature, including your own, no field can be added, moved or changed. You prepare only the position and size of a field; the recipient adds a name, an image or a drawn signature when signing."
+          mobile_only:
+            label: "Only Autogram on mobile"
+            description: "Of the signing apps, a document with prepared fields can be signed only in Autogram on mobile. Autogram on a computer, eIdentita and Podpisuj cannot sign it. This applies to the recipients and to you."
+          pades_only:
+            label: "Only a single PDF in PAdES format"
+            description: "Fields can be prepared in a bundle with a single PDF document that is not signed yet and is signed in PAdES format."
+        fields_introduction_screenshot_caption: "Before you prepare fields, the portal sums up their limitations"
+        fields_introduction_screenshot_alt: "The Prepare visible signature fields page with the Before you start part: fields can be prepared only before the first signature, signing works only in Autogram on mobile, and the feature is only for a single PDF document in PAdES format. Below are the recipients the fields are prepared for, the I understand confirmation and the Cancel and Continue to placing fields buttons."
+        fields_screenshot_caption: "Placing signature fields in the document preview"
+        fields_screenshot_alt: "At the top a notice that the signing PDF is not up to date with the Finish and generate signing PDF button. Below it the preview of the first page of the document Mandate agreement with the placed signature field of the first recipient and the field frame for the second recipient. Next to the preview is the recipient choice and the Add signature field button, below is the list of recipients with the state of their fields."
         states_title: "Bundle statuses"
         states:
           awaiting:

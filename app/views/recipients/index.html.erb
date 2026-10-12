@@ -5,11 +5,20 @@
     <%= render "bundles/save_notification", message: @error_message, type: :error %>
   <% end %>
   <% pending_invitations = @bundle.active_recipients.select(&:notifiable?) %>
+  <% signature_field_contracts = @bundle.contracts.select(&:prepared_signature_fields_source_attached?) %>
+  <% signature_fields_by_recipient_id = signature_field_contracts.any? ? @bundle.signature_field_preparations.where(contract: signature_field_contracts).index_by(&:recipient_id) : {} %>
   <div class="space-y-6">
     <div>
       <h2 class="text-xl font-semibold text-gray-900"><%= t('.title') %></h2>
       <p class="mt-2 text-gray-600"><%= t('.subtitle') %></p>
     </div>
+
+    <%# Prepared signature fields can be filled in only by Autogram v mobile; other signing apps are unavailable. %>
+    <% if signature_field_contracts.any? %>
+      <div class="[&>div]:mb-0">
+        <%= render "shared/warning", title: t('.signature_fields_warning.title'), content: t('.signature_fields_warning.content') %>
+      </div>
+    <% end %>
 
     <% if pending_invitations.any? %>
       <div class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-blue-200 bg-blue-50 px-5 py-4">
@@ -99,6 +108,14 @@
                     <% elsif recipient.active? && recipient.notified? %>
                       <span><%= t('.delivery.sent') %></span>
                     <% end %>
+                  <% end %>
+                  <% if recipient.active? && (signature_field = signature_fields_by_recipient_id[recipient.id]) %>
+                    <span class="inline-flex items-center gap-1.5 rounded bg-blue-50 px-2 py-px text-xs font-medium text-blue-800">
+                      <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <rect x="3" y="7" width="18" height="10" rx="1.5" stroke-dasharray="3 2" />
+                      </svg>
+                      <%= t('.signature_field', page: signature_field.page) %>
+                    </span>
                   <% end %>
                 </div>
 

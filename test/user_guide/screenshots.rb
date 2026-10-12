@@ -183,6 +183,10 @@ class UserGuideScreenshots < ApplicationSystemTestCase
     capture "bundle-detail", "main > div"
     capture "bundle-recipients", "main section:has(> turbo-frame[id^='bundle_recipients_'])"
 
+    find("[data-document-actions-toggle]", match: :first).click
+    assert_selector "[id^='document_actions_']", visible: true
+    capture "bundle-document-menu", "main section:has(> turbo-frame[id^='contract_'])"
+
     visit edit_bundle_path(@works_bundle)
     capture "bundle-settings", "main > div"
 
@@ -211,6 +215,26 @@ class UserGuideScreenshots < ApplicationSystemTestCase
 
     visit edit_user_registration_path
     capture "settings-organization", "section#organization"
+
+    screenshot_signature_fields
+  end
+
+  def screenshot_signature_fields
+    contract = @mandate_bundle.contracts.first
+    visit contract_signature_field_preparations_path(contract)
+    capture "signature-fields-introduction", "main > div"
+
+    check I18n.t("contracts.signature_field_preparations.introduction.acknowledgement", locale: @locale)
+    click_on I18n.t("contracts.signature_field_preparations.introduction.continue", locale: @locale)
+    assert_selector "[data-visual-stamp-target='pageCount']", text: "1"
+
+    # The first recipient already has a field; the frame for the second one waits in its default place.
+    first_recipient = @mandate_bundle.recipients.visible.order(:created_at).first
+    contract.signature_field_preparations.create!(recipient: first_recipient, document: contract.documents.first, page: 1, x: 340, y: 96, width: 200, height: 64)
+    visit contract_signature_field_preparations_path(contract)
+    assert_selector "[data-visual-stamp-target='pageCount']", text: "1"
+    assert_selector "[data-visual-stamp-target='existingFieldsLayer'] *"
+    capture "signature-fields", "main > div"
   end
 
   # ─── Demo data ────────────────────────────────────────────────────────
@@ -292,7 +316,7 @@ class UserGuideScreenshots < ApplicationSystemTestCase
 
   def build_organization_data
     bundles = @demo[:bundles]
-    mandate = demo_bundle(@organization, *bundles[:mandate], created_at: 1.day.ago)
+    @mandate_bundle = mandate = demo_bundle(@organization, *bundles[:mandate], created_at: 1.day.ago)
     add_recipient(mandate, "frantisek.horak@example.com")
     add_recipient(mandate, @jana.email)
 
