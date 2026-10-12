@@ -28,6 +28,14 @@
       I18n.locale => javascript_translations
     }.to_json %>">
 
+    <% if ENV["PLAUSIBLE_SCRIPT_URL"].present? && params[:iframe].blank? %>
+      <%= javascript_include_tag ENV["PLAUSIBLE_SCRIPT_URL"], async: true, nonce: true %>
+      <%= javascript_tag nonce: true do %>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init()
+      <% end %>
+    <% end %>
+
     <%= yield :head %>
 
     <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
