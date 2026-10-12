@@ -447,10 +447,16 @@ paths:
       description: |
         Emails the signing invitation to recipients of the bundle (a federated recipient gets it on its own
         portal), the same as "Odoslať e-mail" in the web interface. Creating a bundle sends nothing.
-        Without a body every active recipient is considered; `recipients` limits it to the listed ones.
-        A recipient who already got the invitation (or is getting it) never gets it again, so the call is
-        safe to repeat. Sending a bundle counts its documents towards the monthly signature request limit
-        of the organization once.
+        Without a body every active recipient is considered; `recipients` limits it to the listed ones:
+
+        - no body (or an object without `recipients`): every active recipient;
+        - `{"recipients": []}`: nobody;
+        - `{"recipients": null}` or a `recipients` value that is not an array of strings: 400;
+        - a body that is not a JSON object (for example a bare array of UUIDs): 400.
+
+        A recipient who already got the invitation (or is getting it) never gets it again, so repeating
+        the call never re-sends. Sending a bundle counts its documents towards the monthly signature
+        request limit of the organization once.
       parameters:
         - name: id
           in: path
@@ -484,23 +490,20 @@ paths:
               example:
                 notified: [ "8a6a3a51-7f0c-4b8e-9d0e-2f3c1b7a5e10" ]
                 skipped:
-                  - id: "0d7c2f4e-5b1a-4c3d-8e9f-6a7b8c9d0e1f"
+                  - uuid: "0d7c2f4e-5b1a-4c3d-8e9f-6a7b8c9d0e1f"
                     reason: already_notified
         "400":
-          description: "`recipients` is not an array of strings."
+          description: The request body is not a JSON object, or `recipients` is not an array of strings (including `null`).
         "404":
           description: Bundle not found.
         "422":
           description: |
             The documents of the bundle do not fit the monthly signature request limit of the organization's
-            plan (`code: limit_exceeded`). `notified` and `skipped` list the recipients handled before the
-            limit was hit; the remaining ones were not invited.
+            plan (`code: limit_exceeded`, `limit: signature_requests`). Nobody was invited.
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/LimitExceeded"
-                  - $ref: "#/components/schemas/BundleNotifyResult"
+                $ref: "#/components/schemas/LimitExceeded"
 
   /federation/v1/requests/{id}:
     get:
@@ -785,18 +788,18 @@ components:
           items:
             type: object
             properties:
-              id:
+              uuid:
                 type: string
                 description: The recipient UUID as given in the request.
               reason:
                 type: string
                 enum: [already_notified, no_email, withdrawn, superseded, signed, not_found]
                 description: |
-                  - `already_notified`: the invitation was already sent or is being sent; it is never sent twice.
+                  - `already_notified`: the invitation was already sent or is being sent; repeating the call never re-sends it.
                   - `no_email`: the recipient has no email address.
                   - `withdrawn`: the recipient was withdrawn from the bundle.
                   - `superseded`: the signing rule was met without the recipient.
-                  - `signed`: the recipient already signed.
+                  - `signed`: the recipient already signed at least one document of the bundle.
                   - `not_found`: the bundle has no recipient with this UUID (only for a listed UUID).
     Bundle:
       type: object

@@ -35,7 +35,7 @@ class Api::V1::BundleNotificationsTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal [ recipients["first"].uuid, recipients["second"].uuid ].sort, response.parsed_body["notified"].sort
-    assert_equal [ { "id" => recipients["invited"].uuid, "reason" => "already_notified" } ], response.parsed_body["skipped"]
+    assert_equal [ { "uuid" => recipients["invited"].uuid, "reason" => "already_notified" } ], response.parsed_body["skipped"]
     assert_enqueued_jobs 2, only: Notification::RecipientSignatureRequestedJob
     assert recipients["first"].reload.sending?
     assert recipients["second"].reload.sending?
@@ -84,15 +84,15 @@ class Api::V1::BundleNotificationsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal [], response.parsed_body["notified"]
     assert_equal [
-      { "id" => recipients["invited"].uuid, "reason" => "already_notified" },
-      { "id" => recipients["signed"].uuid, "reason" => "signed" },
-      { "id" => recipients["superseded"].uuid, "reason" => "superseded" },
-      { "id" => recipients["withdrawn"].uuid, "reason" => "withdrawn" },
-      { "id" => recipients["no_email"].uuid, "reason" => "no_email" },
-      { "id" => author_proxy.uuid, "reason" => "not_found" },
-      { "id" => other_bundle_recipient.uuid, "reason" => "not_found" },
-      { "id" => unknown, "reason" => "not_found" },
-      { "id" => "not-a-uuid", "reason" => "not_found" }
+      { "uuid" => recipients["invited"].uuid, "reason" => "already_notified" },
+      { "uuid" => recipients["signed"].uuid, "reason" => "signed" },
+      { "uuid" => recipients["superseded"].uuid, "reason" => "superseded" },
+      { "uuid" => recipients["withdrawn"].uuid, "reason" => "withdrawn" },
+      { "uuid" => recipients["no_email"].uuid, "reason" => "no_email" },
+      { "uuid" => author_proxy.uuid, "reason" => "not_found" },
+      { "uuid" => other_bundle_recipient.uuid, "reason" => "not_found" },
+      { "uuid" => unknown, "reason" => "not_found" },
+      { "uuid" => "not-a-uuid", "reason" => "not_found" }
     ], response.parsed_body["skipped"]
     assert recipients["no_email"].reload.not_notified?
     assert other_bundle_recipient.reload.not_notified?
@@ -110,13 +110,13 @@ class Api::V1::BundleNotificationsTest < ActionDispatch::IntegrationTest
       post notify_path(bundle), headers: api_headers
     end
     assert_response :success
-    assert_equal({ "notified" => [], "skipped" => [ { "id" => recipient.uuid, "reason" => "already_notified" } ] }, response.parsed_body)
+    assert_equal({ "notified" => [], "skipped" => [ { "uuid" => recipient.uuid, "reason" => "already_notified" } ] }, response.parsed_body)
 
     perform_enqueued_jobs
     assert_no_enqueued_jobs do
       post notify_path(bundle), params: { recipients: [ recipient.uuid, recipient.uuid ] }, headers: api_headers, as: :json
     end
-    assert_equal({ "notified" => [], "skipped" => [ { "id" => recipient.uuid, "reason" => "already_notified" } ] }, response.parsed_body)
+    assert_equal({ "notified" => [], "skipped" => [ { "uuid" => recipient.uuid, "reason" => "already_notified" } ] }, response.parsed_body)
     assert_equal 1, ActionMailer::Base.deliveries.size
   end
 
@@ -152,9 +152,7 @@ class Api::V1::BundleNotificationsTest < ActionDispatch::IntegrationTest
     body = response.parsed_body
     assert_equal "limit_exceeded", body["code"]
     assert_equal "signature_requests", body["limit"]
-    assert_equal [ PlanLimits::Exceeded.new(limit: :signature_requests, max: 0, used: 0).message ], body["errors"]
-    assert_equal [], body["notified"]
-    assert_equal [], body["skipped"]
+    assert_equal({ "errors" => [ PlanLimits::Exceeded.new(limit: :signature_requests, max: 0, used: 0).message ], "code" => "limit_exceeded", "limit" => "signature_requests" }, body)
     assert bundle.recipients.all?(&:not_notified?)
     assert_equal 0, @tenant.usage_of(:signature_requests)
   end
@@ -168,6 +166,42 @@ class Api::V1::BundleNotificationsTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert bundle.recipients.sole.not_notified?
+  end
+
+  test "notify with an empty list invites nobody" do
+    bundle = create_api_bundle(recipients: [ { email: "first@example.com" } ])
+
+    assert_no_enqueued_jobs do
+      post notify_path(bundle), params: { recipients: [] }, headers: api_headers, as: :json
+    end
+
+    assert_response :success
+    assert_equal({ "notified" => [], "skipped" => [] }, response.parsed_body)
+    assert bundle.recipients.sole.not_notified?
+  end
+
+  test "notify rejects a null recipients value" do
+    bundle = create_api_bundle(recipients: [ { email: "first@example.com" } ])
+
+    assert_no_enqueued_jobs do
+      post notify_path(bundle), params: { recipients: nil }, headers: api_headers, as: :json
+    end
+
+    assert_response :bad_request
+    assert bundle.recipients.sole.not_notified?
+  end
+
+  test "notify rejects a body that is not a JSON object instead of inviting everyone" do
+    bundle = create_api_bundle(recipients: [ { email: "first@example.com" }, { email: "second@example.com" } ])
+    listed = bundle.recipients.find_by!(email: "first@example.com")
+
+    assert_no_enqueued_jobs do
+      post notify_path(bundle), params: [ listed.uuid ].to_json, headers: api_headers.merge("CONTENT_TYPE" => "application/json")
+    end
+
+    assert_response :bad_request
+    assert_equal({ "message" => "the request body must be a JSON object" }, response.parsed_body)
+    assert bundle.recipients.all?(&:not_notified?)
   end
 
   test "notify of an unknown bundle is not found" do

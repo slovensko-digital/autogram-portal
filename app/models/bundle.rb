@@ -157,10 +157,6 @@ class Bundle < ApplicationRecord
     author_notifications_enabled? && webhook.blank?
   end
 
-  def notify_recipients
-    active_recipients.each(&:notify!)
-  end
-
   # Anyone but the tenant itself signing the bundle means it was sent for signature, even when it
   # was shared by a link (public bundle, copied recipient link, API) instead of notifying recipients.
   # Its documents then count towards the monthly limit of the tenant.

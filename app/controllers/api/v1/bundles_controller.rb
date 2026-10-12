@@ -41,6 +41,11 @@ class Api::V1::BundlesController < ApiController
   # Sends the invitation to the listed recipients (`recipients`: UUIDs), or without a list to every
   # active recipient, unless they already got it or cannot get it (see Recipient#notification_skip_reason).
   def notify
+    # A JSON body that is not an object (such as a bare array of UUIDs) lands in `_json` and would invite everyone.
+    if params.key?(:_json)
+      return render status: :bad_request, json: { message: "the request body must be a JSON object" }
+    end
+
     recipient_ids = params[:recipients]
     if params.key?(:recipients) && !(recipient_ids.is_a?(Array) && recipient_ids.all?(String))
       return render status: :bad_request, json: { message: "recipients must be an array of recipient IDs" }
@@ -51,7 +56,7 @@ class Api::V1::BundlesController < ApiController
     notification_candidates(recipient_ids).each do |id, recipient|
       reason = recipient ? recipient.notification_skip_reason : :not_found
       if reason
-        skipped << { id: id, reason: reason.to_s }
+        skipped << { uuid: id, reason: reason.to_s }
       else
         recipient.notify!
         notified << id
@@ -59,8 +64,6 @@ class Api::V1::BundlesController < ApiController
     end
 
     render json: { notified: notified, skipped: skipped }
-  rescue PlanLimits::Exceeded => error
-    render_limit_exceeded(error, notified: notified, skipped: skipped)
   end
 
   private
