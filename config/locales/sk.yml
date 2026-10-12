@@ -952,11 +952,13 @@ sk:
       multiple_files_in_contract_mobile_warning: "Tento dokument obsahuje viac súborov. Podpisovanie takéhoto dokumentu vyžaduje stolný počítač s fyzickou čítačkou kariet. Prosím, použite stolný počítač na podpísanie tohto dokumentu."
       unavailable_reasons:
         multiple_files: "Nepodporuje dokumenty s viacerými súbormi."
+        unsupported_document_type: "Podporuje iba jeden dokument PDF."
         prepared_signature_fields: "Nepodporuje pripravené podpisové polia."
         unsupported_qscd: "Vyžaduje doklad s NFC čipom (napr. slovenský občiansky preukaz vydaný po 1.12.2022)."
         unsupported_signature_level: "Podporuje iba podpisy BASELINE_B."
         desktop_only: "Dostupné iba na počítači."
         method_not_allowed: "Podpisovanie v samostatných aplikáciách nie je pre tento dokument povolené."
+        qualified_signature_not_allowed: "Kvalifikovaný elektronický podpis nie je pre tento dokument povolený."
         timestamp_limit_reached: "Organizácia, ktorej dokument patrí, tento mesiac vyčerpala limit časových pečiatok."
     signature_parameters:
       sign_title: "Podpísať dokument"
@@ -1233,6 +1235,7 @@ sk:
         lead: "Otvorte dokument v Chevron7, skontrolujte ho a podpíšte. Táto stránka sa po podpise sama obnoví."
         open: "Otvoriť v Chevron7"
         waiting: "Čakáme na podpis z aplikácie Chevron7"
+        expiry: "Odkaz platí 30 minút. Ak vyprší, obnovte stránku."
         not_installed: "Nemáte Chevron7?"
         download: "Stiahnuť pre macOS"
       error:

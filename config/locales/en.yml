@@ -1025,11 +1025,13 @@ en:
       multiple_files_in_contract_mobile_warning: "This document contains multiple files. Signing such a document requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
       unavailable_reasons:
         multiple_files: "Does not support documents with multiple files."
+        unsupported_document_type: "Supports a single PDF document only."
         prepared_signature_fields: "Does not support prepared signature fields."
         unsupported_qscd: "Requires a document with an NFC chip (e.g. a Slovak ID card issued after 1.12.2022)."
         unsupported_signature_level: "Supports only BASELINE_B signatures."
         desktop_only: "Available only on a desktop computer."
         method_not_allowed: "Signing in standalone applications is not allowed for this document."
+        qualified_signature_not_allowed: "Qualified electronic signatures are not allowed for this document."
         timestamp_limit_reached: "The organization the document belongs to has used up its monthly limit of timestamps."
     signature_parameters:
       sign_title: "Sign document"
@@ -1303,6 +1305,7 @@ en:
         lead: "Open the document in Chevron7, check it and sign. This page refreshes by itself after signing."
         open: "Open in Chevron7"
         waiting: "Waiting for the signature from Chevron7"
+        expiry: "The link is valid for 30 minutes. If it expires, reload the page."
         not_installed: "No Chevron7?"
         download: "Download for macOS"
       error:

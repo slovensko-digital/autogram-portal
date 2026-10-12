@@ -75,6 +75,14 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
     assert_not Chevron7Session.available?(nil, contract_with_prepared_signature_fields)
   end
 
+  test "chevron7 signs only a pdf document" do
+    contract = xml_contract
+
+    assert_equal [ :unsupported_document_type ], Chevron7Session.unavailability_reasons(nil, contract)
+    assert_not Chevron7Session.available?(nil, contract)
+    assert_includes Session::SIGNATURE_FORMAT_UNAVAILABILITY_REASONS, :unsupported_document_type
+  end
+
   test "chevron7 reads the card itself, so no qscd makes it unavailable" do
     contract = plain_contract
 
@@ -123,6 +131,13 @@ class SessionAvailabilityTest < ActiveSupport::TestCase
         { blob: pdf_blob("second.pdf", "%PDF-1.4 second") }
       ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES" }
+    )
+  end
+
+  def xml_contract
+    Contract.create!(
+      documents_attributes: [ { blob: ActiveStorage::Blob.create_and_upload!(io: StringIO.new("<a/>"), filename: "form.xml", content_type: "application/xml") } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES", container: "ASiC_E" }
     )
   end
 

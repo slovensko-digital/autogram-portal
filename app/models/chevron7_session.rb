@@ -31,10 +31,13 @@ class Chevron7Session < Session
     unavailability_reasons(qscd, contract).empty?
   end
 
-  # Chevron7 signs one document at a time (one PDF, PAdES or ASiC-E) and reads the card itself.
+  # Chevron7 signs a single PDF (PAdES, or XAdES in an ASiC-E container) and reads the card itself,
+  # so no card choice makes it unavailable. The parameters JSON carries only format, level and
+  # container, not the XML data container details other documents need.
   def self.unavailability_reasons(_qscd, contract)
     reasons = []
     reasons << :multiple_files if contract.documents.count > 1
+    reasons << :unsupported_document_type unless contract.documents.first&.is_pdf?
     reasons << :prepared_signature_fields if contract.prepared_signature_fields_source_attached?
     reasons
   end

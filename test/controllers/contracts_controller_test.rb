@@ -322,6 +322,24 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 0
   end
 
+  test "signature apps leave Chevron7 out for a bundle recipient of an xml document" do
+    blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("<a/>"), filename: "form.xml", content_type: "application/xml")
+    contract = Contract.create!(
+      allowed_methods: [ "qes" ],
+      documents_attributes: [ { blob: blob } ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES", container: "ASiC_E" }
+    )
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    get signature_apps_contract_path(contract, recipient: recipient.uuid, qscd: "eid_2024")
+
+    assert_response :success
+    assert_select "input[value='autogram']", count: 1
+    assert_select "input[value='chevron7']", count: 0
+    assert_select "a[data-signing-app-selector-target='chevron7SubmitButton']", count: 0
+  end
+
   test "signature apps offer Chevron7 for a qualified signature of one document on a computer" do
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
 

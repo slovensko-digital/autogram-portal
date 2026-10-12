@@ -730,6 +730,38 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ session ], contract.reload.sessions.to_a
   end
 
+  test "chevron7 session is not created for a document it cannot sign" do
+    contract, recipient = create_bundle_contract_with_recipient
+    contract.documents.create!(blob: ActiveStorage::Blob.create_and_upload!(io: StringIO.new("%PDF-1.4 second"), filename: "second.pdf", content_type: "application/pdf"))
+
+    get chevron7_contract_sessions_path(contract, recipient: recipient.uuid)
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.multiple_files")
+    assert_equal 0, contract.reload.sessions.count
+  end
+
+  test "chevron7 session is not created when qualified signing is not allowed" do
+    contract = create_contract_without_session
+    contract.update!(allowed_methods: [ "ades" ])
+
+    get chevron7_contract_sessions_path(contract)
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.qualified_signature_not_allowed")
+    assert_equal 0, contract.reload.sessions.count
+  end
+
+  test "chevron7 parameters answer not found when there is no document to sign" do
+    contract, recipient = create_bundle_contract_with_recipient
+    session = create_chevron7_session_for(contract: contract, recipient: recipient)
+    Document.where(id: contract.documents.ids).delete_all
+
+    get parameters_contract_session_path(contract, session, format: :json, session_token: SessionAccessToken.generate(contract: contract, session: session))
+
+    assert_response :not_found
+  end
+
   test "chevron7 session page opens Chevron7 and links to its download" do
     contract, recipient = create_bundle_contract_with_recipient
 
@@ -743,6 +775,8 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal parameters_contract_session_path(contract, contract.sessions.sole, format: :json), link_url.path
     assert_select "a[href='https://chevron7.slovensko.app'][target='_blank'][rel~='noopener']", text: I18n.t("contracts.sessions.chevron7.download")
     assert_select "turbo-cable-stream-source[data-controller='session-state']", count: 1
+    assert_includes response.body, I18n.t("contracts.sessions.chevron7.expiry")
+    assert response.body.index(I18n.t("contracts.sessions.chevron7.open")) < response.body.index(I18n.t("contracts.sessions.chevron7.waiting")), "the open button comes before the waiting line"
   end
 
   test "chevron7 parameters describe the document, the upload and the requested signature" do
