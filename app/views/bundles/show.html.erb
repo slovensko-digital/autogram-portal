@@ -39,7 +39,7 @@
 
         <div class="flex flex-col gap-2 sm:flex-row sm:shrink-0">
           <%= link_to t('actions.edit'), edit_bundle_path(@bundle),
-                class: "btn btn-secondary" %>
+                class: "btn btn-second-primary" %>
           <%= link_to t('actions.sign'), sign_bundle_path(@bundle),
                 class: "btn btn-primary" %>
           <%= button_to t('actions.delete'), bundle_path(@bundle),
@@ -92,7 +92,7 @@
                  class="w-full flex-1 rounded-md border border-gray-500 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           <%= button_tag type: "button",
                 data: { action: "clipboard#copyToClipboard" },
-                class: "btn btn-secondary" do %>
+                class: "btn btn-second-primary" do %>
             <span data-clipboard-target="label"><%= t('.copy_link') %></span>
           <% end %>
           <span role="status" class="sr-only" data-clipboard-target="status"></span>

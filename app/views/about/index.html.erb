@@ -21,7 +21,7 @@
           <% end %>
           <% unless @current_user %>
             <%= link_to t('.hero.create_account'), new_user_registration_path,
-                        class: "btn btn-secondary" %>
+                        class: "btn btn-second-primary" %>
           <% end %>
         </div>
       </div>
@@ -164,7 +164,7 @@
         </ul>
         <div class="mt-8">
           <%= link_to t('.start_using.anonymous.upload_document'), new_contract_path,
-                      class: "btn btn-secondary w-full" %>
+                      class: "btn btn-second-primary w-full" %>
         </div>
       </div>
 

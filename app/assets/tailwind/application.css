@@ -54,6 +54,11 @@
 		@apply bg-white text-gray-900 ring-1 ring-gray-500 ring-inset hover:bg-gray-50 disabled:hover:bg-white;
 	}
 
+	/* Blue outline for secondary actions; back and cancel stay .btn-secondary */
+	.btn-second-primary {
+		@apply bg-white text-blue-600 ring-1 ring-blue-600 ring-inset hover:bg-blue-50 hover:text-blue-700 disabled:hover:bg-white;
+	}
+
 	.btn-danger-secondary {
 		@apply bg-white text-red-700 ring-1 ring-red-600 ring-inset hover:bg-red-50 focus-visible:outline-red-600 disabled:hover:bg-white;
 	}
