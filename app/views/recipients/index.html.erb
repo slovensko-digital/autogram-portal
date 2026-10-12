@@ -42,25 +42,28 @@
       </div>
     <% end %>
 
-    <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
-      <div class="flex items-center gap-2 text-gray-700">
-        <svg aria-hidden="true" class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        <span class="font-medium"><%= t('.signing_rule_label') %>:</span>
-        <span>
-          <% if @bundle.signing_rule == "threshold" %>
-            <%= t('.signing_rule_summary_threshold', required: @bundle.required_signatures, count: @bundle.visible_recipients.size) %>
-          <% else %>
-            <%= t(".signing_rule_#{@bundle.signing_rule}") %>
-          <% end %>
-        </span>
+    <%# The rule matters only from two recipients on; the edit form offers it under the same condition. %>
+    <% if @bundle.visible_recipients.active.size >= 2 %>
+      <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+        <div class="flex items-center gap-2 text-gray-700">
+          <svg aria-hidden="true" class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span class="font-medium"><%= t('.signing_rule_label') %>:</span>
+          <span>
+            <% if @bundle.signing_rule == "threshold" %>
+              <%= t('.signing_rule_summary_threshold', required: @bundle.required_signatures, count: @bundle.visible_recipients.size) %>
+            <% else %>
+              <%= t(".signing_rule_#{@bundle.signing_rule}") %>
+            <% end %>
+          </span>
+        </div>
+        <%= link_to t('.change_signing_rule'), edit_bundle_path(@bundle),
+              data: { turbo_frame: "_top" },
+              class: "font-medium text-blue-600 underline hover:text-blue-800" %>
       </div>
-      <%= link_to t('.change_signing_rule'), edit_bundle_path(@bundle),
-            data: { turbo_frame: "_top" },
-            class: "font-medium text-blue-600 underline hover:text-blue-800" %>
-    </div>
+    <% end %>
 
     <% recipients = @bundle.visible_recipients.order(:created_at).select(&:persisted?) %>
     <% if recipients.any? %>

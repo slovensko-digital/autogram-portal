@@ -208,6 +208,26 @@ class RecipientsControllerTest < ActionController::TestCase
     end
   end
 
+  test "index hides the signing rule while the bundle has a single recipient" do
+    bundles(:one).recipients.create!(email: "only@example.com")
+    bundles(:one).recipients.create!(email: "withdrawn@example.com", withdrawn_at: Time.current)
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_select "a[href=?]", edit_bundle_path(bundles(:one)), count: 0
+  end
+
+  test "index shows the signing rule with a link to the edit form from two recipients" do
+    bundles(:one).recipients.create!(email: "first@example.com")
+    bundles(:one).recipients.create!(email: "second@example.com")
+
+    get :index, params: { bundle_id: bundles(:one).uuid }
+
+    assert_response :success
+    assert_select "a[href=?][data-turbo-frame='_top']", edit_bundle_path(bundles(:one)), count: 1
+  end
+
   test "index offers the signing link only to recipients who can still sign" do
     pending = bundles(:one).recipients.create!(email: "pending@example.com")
     signed = bundles(:one).recipients.create!(email: "signed@example.com")

@@ -567,11 +567,24 @@ en:
       signed: "Signed"
     edit:
       title: "Edit bundle"
+      preparing_title: "Prepare the bundle for signing"
+      preparing_subtitle: "Set how recipients will see the bundle. You add the recipients on the next page."
       back: "Back to bundle"
       errors_title: "The bundle could not be saved"
+      invited_warning_title:
+        one: "%{count} recipient has already received the invitation"
+        other: "%{count} recipients have already received the invitation"
+      invited_warning_description:
+        one: "The recipient will see the changed name and message when they open the signing link, but no new email is sent to them. If the change matters, let them know yourself."
+        other: "The recipients will see the changed name and message when they open the signing link, but no new email is sent to them. If the change matters, let them know yourself."
       name_label: "Name"
+      name_help: "Recipients see it in the heading of the invitation and on the signing page."
       note_label: "Message for recipients"
       note_placeholder: "Optional message for recipients"
+      note_help: "The invitation email shows it as “Note from sender”."
+      more_settings: "More settings"
+      more_settings_hint: "public signing link, author notifications"
+      save_and_add_recipients: "Save and add recipients"
       signing_rule_label: "Signing rule"
       required_signatures_label: "Required number of signatures"
       required_signatures_of: "of %{count} recipients"
@@ -2244,7 +2257,10 @@ en:
             description: "On the document page choose Request a signature and click Continue."
           configure:
             title: "Set the signature level"
-            description: "Choose Handwritten Signature or Certified Signature. Advanced settings let you choose the format and the allowed signature methods. After you confirm, the bundle is created and its page opens."
+            description: "Choose Handwritten Signature or Certified Signature. Advanced settings let you choose the format and the allowed signature methods. After you confirm, the bundle is created and its edit form opens."
+          details:
+            title: "Name the bundle and write a message"
+            description: "The name is prefilled from the document name. Recipients see the message in the invitation as the Note from sender. Click Save and add recipients to open the bundle page."
           recipients:
             title: "Add recipients"
             description: "Enter the recipient's email and click Add. Fill in the mobile phone if the recipient should verify a simple electronic signature with an SMS code."
@@ -2262,7 +2278,7 @@ en:
         manage:
           edit:
             label: "Edit"
-            description: "Change the bundle name, the message for recipients (shown in the invitation and when signing), the signing rule, the public signing link and author notifications."
+            description: "Change the bundle name, the message for recipients (shown in the invitation and when signing), the signing rule (when the bundle has at least two recipients), the public signing link and author notifications. Recipients who already received the invitation get no new email – they see the change when they open the link."
           sign:
             label: "Sign"
             description: "You can also sign the bundle's documents yourself as the sender."
@@ -2273,7 +2289,7 @@ en:
             label: "Delete"
             description: "Permanently deletes the bundle including its documents."
         settings_screenshot_caption: "Editing a bundle"
-        settings_screenshot_alt: "The Edit bundle form with the Name and Message for recipients fields, the signing rule choice and the Public signing link and Author notifications options"
+        settings_screenshot_alt: "The Edit bundle form with a warning that one recipient has already received the invitation, the Name and Message for recipients fields, the signing rule choice and the collapsed More settings section"
         states_title: "Bundle statuses"
         states:
           awaiting:
@@ -2317,7 +2333,7 @@ en:
             label: "A specific number of recipients must sign"
             description: "You set how many recipients must sign for the bundle to be completed."
         public_link_title: "Public signing link"
-        public_link_description: "When editing a bundle you can turn on the public signing link. Anyone who has it can then sign the documents in the bundle without an invitation. You copy the link from the bundle page."
+        public_link_description: "When editing a bundle you can turn on the public signing link under More settings. Anyone who has it can then sign the documents in the bundle without an invitation. You copy the link from the bundle page."
         notifications_title: "Notifications"
         notifications_description: "With Author notifications on, whoever sent the bundle for signature receives emails about signatures, declines and the completion of the bundle – but not about their own actions. For bundles sent through the API, the organization's owners receive the emails."
       received:
@@ -2674,7 +2690,7 @@ en:
       documents: "Signed documents (%{count})"
       view_bundle: "View bundle"
     signature_requested:
-      subject: "Documents need your signature"
+      subject: "Request to sign documents"
       badge: "Signature request"
       title: "%{author_name} is asking for your signature"
       message: "You can sign the documents online in Autogram Portal. After clicking the button, the system will guide you through the steps."

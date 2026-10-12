@@ -65,18 +65,68 @@ class BundlesControllerTest < ActionController::TestCase
 
   test "author can open the edit form" do
     bundle = create_bundle_with_contracts(author: @author, count: 1)
+    bundle.recipients.create!(email: "first@example.com")
+    bundle.recipients.create!(email: "second@example.com")
 
     get :edit, params: { id: bundle.uuid }
 
     assert_response :success
+    assert_select "h1", text: I18n.t("bundles.edit.title")
+    assert_select "a[href=?]", bundle_path(bundle), text: I18n.t("bundles.edit.back")
     assert_select "form[action=?]", bundle_path(bundle) do
       assert_select "input[name='bundle[name]'][placeholder=?]", bundle.display_name
       assert_select "textarea[name='bundle[note]']"
       assert_select "input[type='radio'][name='bundle[signing_rule]']", count: 3
-      assert_select "input[name='bundle[required_signatures]']"
-      assert_select "input[type='checkbox'][name='bundle[publicly_visible]']"
-      assert_select "input[type='checkbox'][name='bundle[author_notifications_enabled]']"
+      assert_select "input[name='bundle[required_signatures]'][max='2']"
+      assert_select "details input[type='checkbox'][name='bundle[publicly_visible]']"
+      assert_select "details input[type='checkbox'][name='bundle[author_notifications_enabled]']"
+      assert_select "input[type='submit'][value=?]", I18n.t("actions.save")
     end
+    assert_select "h2", text: I18n.t("bundles.edit.invited_warning_title", count: 1), count: 0
+  end
+
+  test "edit form of a bundle without recipients prepares it for sending" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+
+    get :edit, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "h1", text: I18n.t("bundles.edit.preparing_title")
+    assert_select "a[href=?]", bundles_path, text: I18n.t("bundles.show.all_bundles")
+    assert_includes response.body, "bundle-contract-0.pdf"
+    assert_select "form[action=?]", bundle_path(bundle) do
+      assert_select "input[name='bundle[name]']"
+      assert_select "textarea[name='bundle[note]']"
+      assert_select "input[name='bundle[signing_rule]']", count: 0
+      assert_select "input[name='bundle[required_signatures]']", count: 0
+      assert_select "input[type='submit'][value=?]", I18n.t("bundles.edit.save_and_add_recipients")
+    end
+  end
+
+  test "edit form offers the signing rule only from two active recipients" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    bundle.recipients.create!(email: "only@example.com")
+    bundle.recipients.create!(email: "withdrawn@example.com", withdrawn_at: Time.current)
+
+    get :edit, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "h1", text: I18n.t("bundles.edit.title")
+    assert_select "input[name='bundle[signing_rule]']", count: 0
+  end
+
+  test "edit form warns that invited recipients get no new email" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    bundle.recipients.create!(email: "invited@example.com").notified!
+    bundle.recipients.create!(email: "waiting@example.com")
+
+    get :edit, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "h2", text: I18n.t("bundles.edit.invited_warning_title", count: 1)
+    assert_select "p", text: I18n.t("bundles.edit.invited_warning_description", count: 1)
+    assert_select "p", text: "invited@example.com"
+    assert_not_includes response.body, "waiting@example.com"
   end
 
   test "author can update bundle settings" do

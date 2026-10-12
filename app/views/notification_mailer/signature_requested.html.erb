@@ -1,5 +1,6 @@
 <%= render "mailer/badge", label: t(".badge"), tone: :blue %>
-<%= render "mailer/heading", title: t(".title", author_name: @bundle.sender_display_name), message: t(".message") %>
+<p style="margin: 0 0 6px; font-size: 16px; font-weight: 600; line-height: 1.4; color: #374151;"><%= t(".title", author_name: @bundle.sender_display_name) %></p>
+<%= render "mailer/heading", title: @bundle.display_name, message: t(".message") %>
 
 <% if @bundle.note.present? %>
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FEFCE8" style="background-color: #FEFCE8; border-radius: 10px; margin: 0 0 28px;">

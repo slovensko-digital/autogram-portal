@@ -35,6 +35,29 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
   end
 
+  test "author names the bundle and writes a message before the invitation goes out" do
+    bundle = request_signature_from_web(as: @owner, filename: "zmluva-o-dielo.pdf")
+
+    follow_redirect!
+    assert_select "h1", text: I18n.t("bundles.edit.preparing_title")
+    assert_select "input[name='bundle[name]'][value=?]", "zmluva-o-dielo"
+    assert_select "input[name='bundle[signing_rule]']", count: 0
+
+    patch bundle_path(bundle), params: { bundle: { name: "Zmluva o dielo – kancelária", note: "Prosím o podpis do piatka." } }
+    assert_redirected_to bundle_path(bundle)
+    recipient = add_recipient(bundle, "external@example.com")
+
+    mail = mails_to("external@example.com").sole
+    assert_equal I18n.t("notification_mailer.signature_requested.subject"), mail.subject
+    assert_includes mail.html_part.body.decoded, "Zmluva o dielo – kancelária"
+    assert_includes mail.html_part.body.decoded, "Prosím o podpis do piatka."
+
+    get edit_bundle_path(bundle)
+    assert_select "h1", text: I18n.t("bundles.edit.title")
+    assert_select "h2", text: I18n.t("bundles.edit.invited_warning_title", count: 1)
+    assert_select "p", text: recipient.display_name
+  end
+
   test "colleague from the same organization signs while signed in and sees the request on both sides" do
     colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
     bundle = request_signature_from_web(as: @owner, filename: "interna.pdf")
@@ -440,7 +463,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
       contract: { allowed_methods: [ "qes" ], signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" } }
     }
     bundle = contract.reload.bundle
-    assert_redirected_to bundle_path(bundle)
+    assert_redirected_to edit_bundle_path(bundle)
     assert_equal contract.tenant, bundle.tenant
     bundle
   end

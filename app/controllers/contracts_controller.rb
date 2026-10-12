@@ -283,8 +283,10 @@ class ContractsController < ApplicationController
     if @contract.update(contract_params)
       @contract.save!
       if params[:next_step] == "request_signature"
-        bundle = Bundle.create!(contracts: [ @contract ], tenant: @contract.tenant, author: current_user, author_notifications_enabled: true)
-        redirect_to bundle
+        bundle = Bundle.create!(contracts: [ @contract ], tenant: @contract.tenant, author: current_user, author_notifications_enabled: true,
+                                name: @contract.display_name.base)
+        # The name and the message go into the invitation, so the author sets them before adding recipients.
+        redirect_to edit_bundle_path(bundle)
       elsif params[:next_step] == "sign"
         redirect_to sign_contract_path(@contract)
       else

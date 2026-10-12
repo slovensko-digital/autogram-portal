@@ -493,11 +493,26 @@ sk:
       signed: "Podpísané"
     edit:
       title: "Upraviť balík"
+      preparing_title: "Pripravte balík na podpis"
+      preparing_subtitle: "Nastavte, ako balík uvidia adresáti. Adresátov pridáte na ďalšej stránke."
       back: "Späť na balík"
       errors_title: "Balík sa nepodarilo uložiť"
+      invited_warning_title:
+        one: "Pozvánku už dostal %{count} adresát"
+        few: "Pozvánku už dostali %{count} adresáti"
+        other: "Pozvánku už dostalo %{count} adresátov"
+      invited_warning_description:
+        one: "Zmenený názov a správu uvidí, keď otvorí odkaz na podpis. Nový e-mail mu však neodíde. Ak je zmena dôležitá, dajte mu o nej vedieť sami."
+        few: "Zmenený názov a správu uvidia, keď otvoria odkaz na podpis. Nový e-mail im však neodíde. Ak je zmena dôležitá, dajte im o nej vedieť sami."
+        other: "Zmenený názov a správu uvidia, keď otvoria odkaz na podpis. Nový e-mail im však neodíde. Ak je zmena dôležitá, dajte im o nej vedieť sami."
       name_label: "Názov"
+      name_help: "Adresáti ho uvidia v nadpise pozvánky aj na stránke s podpisom."
       note_label: "Správa pre adresátov"
       note_placeholder: "Voliteľná správa pre adresátov"
+      note_help: "V e-maile s pozvánkou sa zobrazí ako „Poznámka od odosielateľa“."
+      more_settings: "Ďalšie nastavenia"
+      more_settings_hint: "verejný odkaz, notifikácie pre autora"
+      save_and_add_recipients: "Uložiť a pridať adresátov"
       signing_rule_label: "Pravidlo podpisovania"
       required_signatures_label: "Požadovaný počet podpisov"
       required_signatures_of: "z %{count} adresátov"
@@ -2176,7 +2191,10 @@ sk:
             description: "Na detaile dokumentu vyberte akciu Poslať na podpis a kliknite na Pokračovať."
           configure:
             title: "Nastavte typ podpisu"
-            description: "Vyberte Vlastnoručný alebo Osvedčený podpis. V Rozšírených nastaveniach zvolíte formát a povolené metódy podpisu. Po potvrdení sa vytvorí balík a otvorí sa jeho detail."
+            description: "Vyberte Vlastnoručný alebo Osvedčený podpis. V Rozšírených nastaveniach zvolíte formát a povolené metódy podpisu. Po potvrdení sa vytvorí balík a otvorí sa jeho úprava."
+          details:
+            title: "Pomenujte balík a napíšte správu"
+            description: "Názov je predvyplnený z názvu dokumentu. Správu pre adresátov uvidia v pozvánke ako Poznámku od odosielateľa. Kliknite na Uložiť a pridať adresátov – otvorí sa detail balíka."
           recipients:
             title: "Pridajte adresátov"
             description: "Zadajte e-mail adresáta a kliknite na Pridať. Mobilné číslo vyplňte, ak sa má adresát pri jednoduchom elektronickom podpise overiť SMS kódom."
@@ -2194,7 +2212,7 @@ sk:
         manage:
           edit:
             label: "Upraviť"
-            description: "Zmeníte názov balíka, správu pre adresátov (zobrazí sa v pozvánke aj pri podpisovaní), pravidlo podpisovania, verejný odkaz a notifikácie pre autora."
+            description: "Zmeníte názov balíka, správu pre adresátov (zobrazí sa v pozvánke aj pri podpisovaní), pravidlo podpisovania (ak má balík aspoň dvoch adresátov), verejný odkaz a notifikácie pre autora. Adresáti, ktorým už pozvánka odišla, nový e-mail nedostanú – zmenu uvidia po otvorení odkazu."
           sign:
             label: "Podpísať"
             description: "Dokumenty balíka podpíšete aj vy ako odosielateľ."
@@ -2205,7 +2223,7 @@ sk:
             label: "Zmazať"
             description: "Natrvalo zmaže balík aj s jeho dokumentmi."
         settings_screenshot_caption: "Úprava balíka"
-        settings_screenshot_alt: "Formulár Upraviť balík s poliami Názov a Správa pre adresátov, výberom pravidla podpisovania a voľbami Verejný odkaz na podpisovanie a Notifikácie pre autora"
+        settings_screenshot_alt: "Formulár Upraviť balík s upozornením, že pozvánku už dostal jeden adresát, poliami Názov a Správa pre adresátov, výberom pravidla podpisovania a zbalenou časťou Ďalšie nastavenia"
         states_title: "Stavy balíka"
         states:
           awaiting:
@@ -2249,7 +2267,7 @@ sk:
             label: "Určitý počet adresátov musí podpísať"
             description: "Nastavíte, koľko adresátov musí podpísať, aby bol balík dokončený."
         public_link_title: "Verejný odkaz na podpisovanie"
-        public_link_description: "V úprave balíka môžete zapnúť verejný odkaz. Ktokoľvek, kto ho má, potom môže dokumenty v balíku podpísať bez pozvánky. Odkaz skopírujete z detailu balíka."
+        public_link_description: "V úprave balíka v časti Ďalšie nastavenia môžete zapnúť verejný odkaz. Ktokoľvek, kto ho má, potom môže dokumenty v balíku podpísať bez pozvánky. Odkaz skopírujete z detailu balíka."
         notifications_title: "Notifikácie"
         notifications_description: "Ak sú zapnuté Notifikácie pre autora, e-maily o podpisoch, odmietnutiach a dokončení balíka dostáva ten, kto balík poslal na podpis – nie však o tom, čo urobil sám. O balíkoch poslaných cez API dostávajú e-maily vlastníci organizácie."
       received:
@@ -2605,7 +2623,7 @@ sk:
       documents: "Podpísané dokumenty (%{count})"
       view_bundle: "Zobraziť balík"
     signature_requested:
-      subject: "Dokumenty na podpis"
+      subject: "Žiadosť o podpis dokumentov"
       badge: "Žiadosť o podpis"
       title: "%{author_name} vás žiada o podpis"
       message: "Dokumenty podpíšete online v Autogram Portali. Po kliknutí na tlačidlo vás systém prevedie jednotlivými krokmi."
