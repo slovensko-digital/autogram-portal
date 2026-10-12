@@ -22,6 +22,12 @@ class ApiPolicyTest < ActiveSupport::TestCase
     bundle = Bundle.new(tenant: tenants(:two), publicly_visible: true)
     assert_not Api::V1::BundlePolicy.new(@context, bundle).show?
     assert_not Api::V1::BundlePolicy.new(@context, bundle).destroy?
+    assert_not Api::V1::BundlePolicy.new(@context, bundle).notify?
+  end
+
+  test "bundle notification follows the bundle tenant like show" do
+    assert Api::V1::BundlePolicy.new(@context, Bundle.new(tenant: tenants(:one))).notify?
+    assert_not Api::V1::BundlePolicy.new(AuthorizationContext::TenantApi.new(tenant: tenants(:two)), Bundle.new(tenant: tenants(:one))).notify?
   end
 
   test "authenticated tenant API context permits creation without a user" do
@@ -49,6 +55,7 @@ class ApiPolicyTest < ActiveSupport::TestCase
       assert_not Api::V1::ContractPolicy.new(context, contract).show?
       assert_not Api::V1::DocumentPolicy.new(context, document).show?
       assert_not Api::V1::BundlePolicy.new(context, bundles(:one)).show?
+      assert_not Api::V1::BundlePolicy.new(context, bundles(:one)).notify?
       assert_not Api::V1::HelloPolicy.new(context, :hello).show_auth?
       assert_empty Api::V1::ContractPolicy::Scope.new(context, Contract.all).resolve
       assert_empty Api::V1::DocumentPolicy::Scope.new(context, Document.all).resolve

@@ -56,8 +56,6 @@ class Bundle < ApplicationRecord
                                   numericality: { only_integer: true, greater_than: 0 },
                                   if: -> { signing_rule == "threshold" }
 
-  # TODO: add a method to notify recipients later via API
-  # after_create :notify_recipients
   after_save :recompute_superseded_state_if_rules_changed, if: :rules_changed?
 
   scope :publicly_visible, -> { where(publicly_visible: true) }

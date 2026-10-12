@@ -80,8 +80,8 @@ class ApiController < ActionController::API
     attributes
   end
 
-  def render_limit_exceeded(error)
-    render status: :unprocessable_entity, json: { errors: [ error.message ], code: "limit_exceeded", limit: error.limit.to_s }
+  def render_limit_exceeded(error, **details)
+    render status: :unprocessable_entity, json: { errors: [ error.message ], code: "limit_exceeded", limit: error.limit.to_s, **details }
   end
 
   def render_bad_request(exception)
