@@ -44,6 +44,22 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     get api_v1_bundle_path(bundle), headers: api_headers
     assert_response :success
+    assert_equal "completed", response.parsed_body["state"]
+    assert_equal [ [ recipient.uuid, "signed" ] ], response.parsed_body["recipients"].map { |entry| [ entry["uuid"], entry["state"] ] }
+  end
+
+  test "the API reports a recipient who is part way through as awaiting" do
+    bundle = create_bundle_via_api(
+      contracts: [ pdf_contract_payload("prva.pdf"), pdf_contract_payload("druha.pdf") ],
+      recipients: [ { email: "signer@example.com" } ]
+    )
+
+    sign_with_autogram(bundle.contracts.order(:id).first, recipient: bundle.recipients.sole)
+
+    get api_v1_bundle_path(bundle), headers: api_headers
+    assert_response :success
+    assert_equal "awaiting", response.parsed_body["state"]
+    assert_equal [ "awaiting" ], response.parsed_body["recipients"].map { |entry| entry["state"] }
   end
 
   test "contract with several files is signed once as an ASiC-E container" do

@@ -256,6 +256,41 @@ class RecipientTest < ActiveSupport::TestCase
     recipients.singleton_class.remove_method :__original_create_for_race_test
   end
 
+  test "api state is awaiting until the recipient signs or declines" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "awaiting@example.com")
+
+    assert_equal "awaiting", recipient.api_state
+  end
+
+  test "api state is signed once the recipient signed every contract" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "signed@example.com")
+    recipient.signer_contracts.update_all(signed_at: Time.current)
+
+    assert_equal "signed", recipient.api_state
+  end
+
+  test "api state is declined when the recipient declined" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "declined@example.com")
+    recipient.signer_contracts.update_all(declined_at: Time.current)
+
+    assert_equal "declined", recipient.api_state
+  end
+
+  test "api state is superseded, not signed, when the signing rule no longer needs the recipient" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "superseded@example.com")
+    recipient.signer_contracts.update_all(superseded_at: Time.current)
+
+    assert recipient.signed?, "signed? alone also holds for a recipient whose contracts were all superseded"
+    assert_equal "superseded", recipient.api_state
+  end
+
+  test "api state is withdrawn for a withdrawn recipient whatever its contracts say" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "withdrawn@example.com")
+    recipient.withdraw!
+
+    assert_equal "withdrawn", recipient.reload.api_state
+  end
+
   private
 
   def create_bundle_with_contract
