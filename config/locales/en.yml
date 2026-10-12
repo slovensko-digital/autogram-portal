@@ -556,6 +556,7 @@ en:
         signed: "Signed"
         declined: "Declined"
       note_title: "Note"
+      edit_note: "Edit"
       no_note: "No note for recipients"
       created: "Created %{date}"
       loading_documents: "Loading documents..."

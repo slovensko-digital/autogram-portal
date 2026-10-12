@@ -13,7 +13,7 @@
 
     <% if pending_invitations.any? %>
       <div class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-blue-200 bg-blue-50 px-5 py-4">
-        <div class="flex min-w-0 flex-1 basis-80 items-start gap-3">
+        <div class="flex min-w-0 flex-1 basis-80 items-center gap-3">
           <span aria-hidden="true" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
@@ -44,13 +44,13 @@
 
     <%# The rule matters only from two recipients on; the edit form offers it under the same condition. %>
     <% if @bundle.visible_recipients.active.size >= 2 %>
-      <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
-        <div class="flex items-center gap-2 text-gray-700">
-          <svg aria-hidden="true" class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-base">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-gray-800">
+          <svg aria-hidden="true" class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
-          <span class="font-medium"><%= t('.signing_rule_label') %>:</span>
+          <span class="font-medium text-gray-900"><%= t('.signing_rule_label') %>:</span>
           <span>
             <% if @bundle.signing_rule == "threshold" %>
               <%= t('.signing_rule_summary_threshold', required: @bundle.required_signatures, count: @bundle.visible_recipients.size) %>
@@ -59,9 +59,10 @@
             <% end %>
           </span>
         </div>
-        <%= link_to t('.change_signing_rule'), edit_bundle_path(@bundle),
-              data: { turbo_frame: "_top" },
-              class: "font-medium text-blue-600 underline hover:text-blue-800" %>
+        <%= link_to edit_bundle_path(@bundle), data: { turbo_frame: "_top" },
+              class: "inline-flex min-h-6 shrink-0 items-center rounded-sm text-base font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" do %>
+          <%= t('.change_signing_rule') %><span class="sr-only">: <%= t('.signing_rule_label') %></span>
+        <% end %>
       </div>
     <% end %>
 

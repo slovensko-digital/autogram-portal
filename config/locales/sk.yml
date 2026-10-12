@@ -483,6 +483,7 @@ sk:
         declined: "Odmietnuté"
       no_note: "Žiadna poznámka"
       note_title: "Poznámka"
+      edit_note: "Upraviť"
       created: "Vytvorený %{date}"
       loading_documents: "Načítavam dokumenty..."
       loading_recipients: "Načítavam adresátov..."
