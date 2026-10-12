@@ -17,6 +17,14 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the user guide describes Chevron7 among the signing apps" do
+    get docs_path
+
+    assert_response :success
+    assert_includes response.body, I18n.t("docs.index.signing.methods.chevron7.label")
+    assert_select "a[href='https://chevron7.slovensko.app']", count: 1
+  end
+
   private
 
   def with_federation_base_url(value)

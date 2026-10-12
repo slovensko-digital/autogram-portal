@@ -925,6 +925,8 @@ sk:
       add_another_signature: "Pridajte ďalší podpis"
       autogram_desktop_label: "Autogram na počítači"
       autogram_desktop_description: "Desktopová aplikácia pre vytváranie kvalifikovaných elektronických podpisov pomocou eID kariet a iných zariadení"
+      chevron7_label: "Chevron7 (macOS)"
+      chevron7_description: "Podpíšte v aplikácii Chevron7 na Macu kartou alebo mobilom, podpísaný dokument sa odošle späť automaticky"
       autogram_mobile_label: "Autogram v mobile"
       autogram_mobile_description: "Open-source mobilná aplikácia pre Android a iOS - naskenujte QR kód alebo otvorte link"
       eidentita_label: "eIdentita"
@@ -1226,6 +1228,13 @@ sk:
         upload_title: "Nahrajte podpísaný dokument"
         upload_desc: "Po podpísaní nahrajte podpísaný dokument späť."
         upload_dropzone: "Presuňte súbor sem alebo kliknite pre výber"
+      chevron7:
+        title: "Podpísanie v aplikácii Chevron7"
+        lead: "Otvorte dokument v Chevron7, skontrolujte ho a podpíšte. Táto stránka sa po podpise sama obnoví."
+        open: "Otvoriť v Chevron7"
+        waiting: "Čakáme na podpis z aplikácie Chevron7"
+        not_installed: "Nemáte Chevron7?"
+        download: "Stiahnuť pre macOS"
       error:
         title: "Dokument sa nepodarilo podpísať"
         description: "Podpisovanie sa nedokončilo a dokument zostal nepodpísaný."
@@ -2081,7 +2090,7 @@ sk:
         qscd_screenshot_caption: "Výber dokladu alebo zariadenia"
         qscd_screenshot_alt: "Stránka Čím budete podpisovať? so štyrmi typmi slovenského občianskeho preukazu podľa dátumu vydania s označením kompatibility a so skupinami Doklady o povolení na pobyt, Český občiansky preukaz a Kvalifikované čipové karty a USB tokeny"
         apps_screenshot_caption: "Výber podpisovej aplikácie"
-        apps_screenshot_alt: "Stránka Vyberte podpisovú aplikáciu so zvoleným občianskym preukazom a možnosťami Autogram na počítači, Autogram v mobile, eIdentita a Podpisuj alebo iné samostatné aplikácie"
+        apps_screenshot_alt: "Stránka Vyberte podpisovú aplikáciu so zvoleným občianskym preukazom a možnosťami Autogram na počítači, Chevron7 (macOS), Autogram v mobile, eIdentita a Podpisuj alebo iné samostatné aplikácie"
         signature_levels_title: "Typy podpisu"
         signature_levels:
           baseline_b:
@@ -2124,6 +2133,13 @@ sk:
               download:
                 label: "Stiahnuť Autogram"
                 url: "https://autogram.slovensko.digital"
+          chevron7:
+            label: "Chevron7 (macOS)"
+            description: "Aplikácia pre macOS, dostupná pre dokumenty s jedným súborom. Portál otvorí dokument v Chevron7, ktorý ho podpíše občianskym preukazom alebo kvalifikovanou čipovou kartou v čítačke kariet alebo mobilom a podpísaný dokument pošle späť sám."
+            links:
+              download:
+                label: "Stiahnuť Chevron7"
+                url: "https://chevron7.slovensko.app"
           autogram_mobile:
             label: "Autogram v mobile"
             description: "Bezplatná open-source aplikácia pre Android a iOS. Podpisuje občianskym preukazom s NFC čipom, ktorý priložíte k telefónu. Na počítači alebo tablete naskenujete QR kód telefónom, v telefóne sa aplikácia otvorí priamo."

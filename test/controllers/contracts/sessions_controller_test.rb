@@ -730,6 +730,21 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ session ], contract.reload.sessions.to_a
   end
 
+  test "chevron7 session page opens Chevron7 and links to its download" do
+    contract, recipient = create_bundle_contract_with_recipient
+
+    get chevron7_contract_sessions_path(contract, recipient: recipient.uuid)
+
+    assert_response :success
+    assert_includes response.body, I18n.t("contracts.sessions.chevron7.title")
+    open_link = css_select("a[href^='chevron7://sign?linkUrl=']").sole
+    assert_equal I18n.t("contracts.sessions.chevron7.open"), open_link.text.strip
+    link_url = URI(CGI.unescape(open_link["href"].delete_prefix("chevron7://sign?linkUrl=")))
+    assert_equal parameters_contract_session_path(contract, contract.sessions.sole, format: :json), link_url.path
+    assert_select "a[href='https://chevron7.slovensko.app'][target='_blank'][rel~='noopener']", text: I18n.t("contracts.sessions.chevron7.download")
+    assert_select "turbo-cable-stream-source[data-controller='session-state']", count: 1
+  end
+
   test "chevron7 parameters describe the document, the upload and the requested signature" do
     contract, recipient = create_bundle_contract_with_recipient
     contract.signature_parameters.update!(level: "BASELINE_T")

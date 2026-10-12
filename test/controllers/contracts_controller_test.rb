@@ -241,8 +241,8 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get signature_apps_contract_path(contract, qscd: "eid_2021")
 
     assert_response :success
-    assert_equal %w[autogram podpisuj avm eidentita], signature_app_values
-    assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
+    assert_equal %w[autogram chevron7 podpisuj avm eidentita], signature_app_values
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 5
     assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 2
     assert_select "input[value='avm'][disabled]", count: 1
     assert_select "input[value='eidentita'][disabled]", count: 1
@@ -250,6 +250,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     reason_id = css_select("input[value='avm'][disabled]").first["aria-describedby"].split.first
     assert_select "[id='#{reason_id}']", text: /#{Regexp.escape(I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021")))}/, count: 1
     assert_select "a[data-signing-app-selector-target='autogramSubmitButton']", count: 1
+    assert_select "a[data-signing-app-selector-target='chevron7SubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='avmSubmitButton']", count: 0
     assert_select "a[data-signing-app-selector-target='eidentitaSubmitButton']", count: 0
@@ -262,11 +263,11 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get signature_apps_contract_path(contract, qscd: "eid_2024")
 
     assert_response :success
-    assert_equal %w[autogram avm eidentita podpisuj], signature_app_values
-    assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
+    assert_equal %w[autogram chevron7 avm eidentita podpisuj], signature_app_values
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 5
     assert_select "input[data-signing-app-selector-target='appRadio'][disabled]", count: 0
-    assert_select "input[data-desktop-only='true']", count: 2
-    assert_select "a[data-signing-app-selector-target$='SubmitButton']", count: 4
+    assert_select "input[data-desktop-only='true']", count: 3
+    assert_select "a[data-signing-app-selector-target$='SubmitButton']", count: 5
   end
 
   test "signature apps of a standalone contract show apps that cannot sign its level disabled" do
@@ -277,7 +278,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "input[value='podpisuj'][disabled]", count: 1
-    assert_equal %w[autogram avm eidentita podpisuj], signature_app_values
+    assert_equal %w[autogram chevron7 avm eidentita podpisuj], signature_app_values
     assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
   end
 
@@ -288,7 +289,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get signature_apps_contract_path(contract, qscd: "eid_2024", iframe: "true")
 
     assert_response :success
-    assert_select "input[data-signing-app-selector-target='appRadio']", count: 3
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
     assert_select "input[value='podpisuj']", count: 0
     assert_not_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
   end
@@ -302,9 +303,10 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get signature_apps_contract_path(contract, recipient: recipient.uuid, qscd: "eid_2021")
 
     assert_response :success
-    assert_select "input[data-signing-app-selector-target='appRadio']", count: 3
+    assert_select "input[data-signing-app-selector-target='appRadio']", count: 4
     assert_select "input[value='podpisuj']", count: 0
     assert_select "input[value='autogram']:not([disabled])", count: 1
+    assert_select "input[value='chevron7']:not([disabled])", count: 1
     assert_select "input[value='avm'][disabled]", count: 1
     assert_select "input[value='eidentita'][disabled]", count: 1
     assert_not_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
@@ -316,8 +318,20 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     get signature_apps_contract_path(contract, qscd: "eid_2024")
 
     assert_response :success
-    assert_equal %w[autogram avm eidentita], signature_app_values
+    assert_equal %w[autogram chevron7 avm eidentita], signature_app_values
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 0
+  end
+
+  test "signature apps offer Chevron7 for a qualified signature of one document on a computer" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "eid_2021")
+
+    assert_response :success
+    assert_select "input[value='chevron7'][data-desktop-only='true']:not([disabled])", count: 1
+    assert_includes response.body, I18n.t("contracts.signature_apps.chevron7_label")
+    assert_includes response.body, I18n.t("contracts.signature_apps.chevron7_description")
+    assert_select "a[data-signing-app-selector-target='chevron7SubmitButton'][href=?]", chevron7_contract_sessions_path(contract, qscd: "eid_2021"), count: 1
   end
 
   test "signature apps offer only standalone apps when qes is not allowed" do

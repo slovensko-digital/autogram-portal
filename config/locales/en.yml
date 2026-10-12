@@ -998,6 +998,8 @@ en:
       add_another_signature: "Add another signature"
       autogram_desktop_label: "Autogram Desktop"
       autogram_desktop_description: "Desktop application with qualified electronic seal or chip ID card"
+      chevron7_label: "Chevron7 (macOS)"
+      chevron7_description: "Sign in the Chevron7 app on a Mac with a card or a phone; the signed document is sent back automatically"
       autogram_mobile_label: "Autogram Mobile"
       autogram_mobile_description: "Open-source mobile app - scan QR code or open AVM app directly"
       eidentita_label: "eIdentita"
@@ -1296,6 +1298,13 @@ en:
         upload_title: "Upload the signed document"
         upload_desc: "After signing, upload the signed document back."
         upload_dropzone: "Drop a file here or click to select"
+      chevron7:
+        title: "Signing in Chevron7"
+        lead: "Open the document in Chevron7, check it and sign. This page refreshes by itself after signing."
+        open: "Open in Chevron7"
+        waiting: "Waiting for the signature from Chevron7"
+        not_installed: "No Chevron7?"
+        download: "Download for macOS"
       error:
         title: "The document could not be signed"
         description: "Signing did not finish and the document remains unsigned."
@@ -2146,7 +2155,7 @@ en:
         qscd_screenshot_caption: "Choosing an ID card or device"
         qscd_screenshot_alt: "The What will you sign with? page with four kinds of Slovak ID cards by issue date with their compatibility, and the groups for residence permits, Czech ID cards and qualified smart cards and USB tokens"
         apps_screenshot_caption: "Choosing a signing application"
-        apps_screenshot_alt: "The Select Signing Application page with the selected ID card and the options Autogram Desktop, Autogram Mobile, eIdentita and Podpisuj or other standalone applications"
+        apps_screenshot_alt: "The Select Signing Application page with the selected ID card and the options Autogram Desktop, Chevron7 (macOS), Autogram Mobile, eIdentita and Podpisuj or other standalone applications"
         signature_levels_title: "Signature levels"
         signature_levels:
           baseline_b:
@@ -2189,6 +2198,13 @@ en:
               download:
                 label: "Download Autogram"
                 url: "https://autogram.slovensko.digital"
+          chevron7:
+            label: "Chevron7 (macOS)"
+            description: "An application for macOS, available for documents with one file. The portal opens the document in Chevron7, which signs it with an ID card or a qualified smart card in a card reader or with a phone and sends the signed document back by itself."
+            links:
+              download:
+                label: "Download Chevron7"
+                url: "https://chevron7.slovensko.app"
           autogram_mobile:
             label: "Autogram Mobile"
             description: "A free open-source application for Android and iOS. It signs with an ID card with an NFC chip that you hold to the phone. On a computer or tablet you scan a QR code with your phone, on the phone the app opens directly."
