@@ -186,14 +186,14 @@ class Recipient < ApplicationRecord
     signer_contracts.exists? && !pending? && !declined?
   end
 
-  # The state the API reports (`state` of a bundle recipient in public/openapi.yaml). The order
-  # matters: signed? also holds for a recipient whose contracts were all superseded.
-  def api_state
-    if withdrawn? then "withdrawn"
-    elsif superseded? then "superseded"
-    elsif declined? then "declined"
-    elsif signed? then "signed"
-    else "awaiting"
+  # The recipient's signing status, shown by the web badge and reported by the API. The first match
+  # wins: declined? and superseded? can both hold, and signed? also holds once every contract was superseded.
+  def signing_status
+    if withdrawn? then :withdrawn
+    elsif declined? then :declined
+    elsif superseded? then :superseded
+    elsif pending? then :pending
+    else :signed
     end
   end
 

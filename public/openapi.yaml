@@ -860,20 +860,20 @@ components:
         state:
           type: string
           readOnly: true
-          enum: [awaiting, signed, declined, superseded, withdrawn]
+          enum: [withdrawn, declined, superseded, awaiting, signed]
           description: |
-            Signing state of the recipient, returned by `GET /bundles/{id}`. The first matching state applies.
+            Signing state of the recipient, returned by `GET /bundles/{id}`; the same status the web interface shows. The first matching state applies.
             - `withdrawn`: the sender withdrew the request; the recipient can no longer sign.
-            - `superseded`: the signing rule was met without this recipient's signature, so it is no longer needed.
             - `declined`: the recipient declined to sign.
-            - `signed`: the recipient has no document left to sign and declined none.
+            - `superseded`: the signing rule was met without this recipient's signature, so it is no longer needed.
             - `awaiting`: the recipient still has a document to sign.
+            - `signed`: anything else; the recipient has no document left to sign.
         notified_at:
           type: ["string", "null"]
           format: date-time
           readOnly: true
           example: "2026-10-12T08:30:00.000Z"
-          description: When the invitation email (or the invitation on the recipient's portal) was delivered, returned by `GET /bundles/{id}`. Null until then.
+          description: When the invitation email (or the invitation to the recipient's portal) was sent, returned by `GET /bundles/{id}`. Null until then, also while the invitation is queued (still being sent) or if sending it failed.
       required:
         - email
 
