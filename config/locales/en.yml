@@ -1601,7 +1601,7 @@ en:
         opens_in_new_tab: "(opens in a new tab)"
         integration:
           title: "Integration into your own systems"
-          description: "Account setup, configuration, access to the API integration and consultations (3 hours)"
+          description: "Account setup, configuration, access to the API integration and consultations (3 hours). Requires the PRO plan."
           price: "€249"
           price_note: "one-time"
         anonymous:
@@ -1623,6 +1623,8 @@ en:
           included:
             - "Sending documents for signature"
             - "Qualified timestamps"
+          excluded:
+            - "No API access (PRO plan only)"
           limits:
             stored_documents:
               one: "Up to %{count} stored document"
@@ -1641,7 +1643,7 @@ en:
               other: "At most %{count} users"
         pro:
           title: "PRO account"
-          badge: "For businesses"
+          badge: "Legal entities only"
           price_amount: "€19"
           price_period: "/ month"
           audience: "A comprehensive signing tool"
@@ -1651,6 +1653,7 @@ en:
             - "Unlimited users"
             - "Unlimited documents"
             - "Long-term document archiving"
+            - "API and SDK access to connect your systems"
           excluded: []
       document_vs_bundle:
         subtitle: "Documents and bundles"
@@ -1665,7 +1668,7 @@ en:
           description: "Request the other party's signature by email. Track who has already signed the document in real time."
         api_integration:
           title: "Connect Your System via API"
-          description: "Embed signing directly into your own application or company system."
+          description: "Embed signing directly into your own application or company system. Available in the PRO plan."
         qualified_signatures:
           title: "Qualified eIDAS Signatures"
           description: "All you need to create a qualified electronic signature is an electronic ID card with a chip."
@@ -1721,7 +1724,7 @@ en:
           description: "We have nothing to hide. Our code is open, publicly available, and auditable. This gives you complete confidence that we do nothing with your documents behind your back."
         api:
           title: "REST API"
-          description: "Integrate signing directly into your own company systems through the REST API and Standard Webhooks. This makes workflow automation simple and efficient."
+          description: "Integrate signing directly into your own company systems through the REST API and Standard Webhooks. This makes workflow automation simple and efficient. The API is available in the PRO plan."
       how_it_works:
         subtitle: "Process"
         title: "How it works"
@@ -1773,6 +1776,9 @@ en:
           multiple_signers:
             question: "Can I send a document to multiple people for signing?"
             answer: "Yes. You can add any number of recipients. The system will track who has signed the document and notify you when all recipients have signed it. You can also define how many recipients must sign for the bundle to be considered completed."
+          api:
+            question: "Can I connect Autogram Portal to my own system through the API?"
+            answer: "Yes, but the API and SDK are available only in the PRO plan. We offer the PRO plan only to legal entities. Write to us to set up a PRO organization."
           open_source:
             question: "Is Autogram Portal free and open-source?"
             answer: "Yes. Autogram Portal is a fully open-source project (EUPL licence) available on GitHub. You can run it on your own infrastructure. Development is supported by the NLNet organisation."
@@ -2017,7 +2023,7 @@ en:
             description: "Every user has their own organization on the Basic plan. It is created together with the account and stays with you even when you join another organization. The left menu shows it as Personal organization."
           pro:
             label: "PRO organization"
-            description: "An organization for companies and offices with several members. All members see and manage all contracts and bundles of the organization. PRO organizations are set up by the portal administrator, who also manages their name, plan and features (Validation archive, API access)."
+            description: "An organization with several members for legal entities (companies, associations, public authorities). All members see and manage all contracts and bundles of the organization. PRO organizations are set up by the portal administrator, who also manages their name, plan and features (Validation archive, API access)."
           roles:
             label: "Owner and member"
             description: "Owners invite and remove members, manage the API key and receive email notifications about bundles sent through the API. Members work with contracts and bundles the same way as owners."
@@ -2493,7 +2499,7 @@ en:
             description: "Only the portal administrator can change the organization's name and plan. A personal organization is named after your name or email."
           api:
             label: "API token public key"
-            description: "The owner sets the public key used to verify API tokens. The field is available when the organization has API access enabled."
+            description: "The owner sets the public key used to verify API tokens. The field is available only in a PRO organization with API access enabled. The API is not available in the Basic plan."
           usage:
             label: "Plan usage"
             description: "Used limits, the document retention period and the maximum document size."
@@ -2574,7 +2580,7 @@ en:
         current_scope_description: "Today, federation lets a recipient paste and claim a foreign request on their own portal even if the origin portal was not preconfigured locally, but the actual signing still completes on the origin portal."
       integration:
         title: "API & SDK"
-        intro: "Organizations with API access can connect Autogram Portal to their own application. The API accepts JWT tokens signed with your key: an owner enters the public key in the organization settings and the token uses `sub` = the organization ID."
+        intro: "The API is available only in the PRO plan, which is intended for legal entities. PRO organizations with API access can connect Autogram Portal to their own application. The API accepts JWT tokens signed with your key: an owner enters the public key in the organization settings and the token uses `sub` = the organization ID."
         links:
           sdk_example:
             label: "SDK Example"
@@ -2914,6 +2920,8 @@ en:
       api_token_public_key: "API token public key"
       api_token_help: "Public RSA or EC key (PEM) used to verify API tokens. Use sub = %{tenant_id} in the token."
       api_disabled: "API access is not enabled for this organization. Please contact the administrator."
+      api_pro_only_title: "The API is available only in the PRO plan"
+      api_pro_only_html: "We offer the PRO plan only to legal entities (companies, associations, public authorities). If you want a PRO organization for your company, write to us at %{email}."
       update: "Save"
       members: "Members"
       members_limit:
@@ -2926,7 +2934,7 @@ en:
       invite_description: "The invited user gets access to all documents and bundles of the organization."
       invite_email_placeholder: "email@example.com"
       invite: "Invite"
-      upgrade_to_invite: "The Basic plan allows a single user only. Inviting more members requires the PRO plan."
+      upgrade_to_invite: "The Basic plan allows a single user only. Inviting more members requires the PRO plan, which is available to legal entities only."
       leave_title: "Leave organization"
       leave_description: "You will lose access to the documents and bundles of %{name}."
       leave: "Leave organization"

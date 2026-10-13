@@ -319,6 +319,16 @@ class TenantsControllerTest < ActionDispatch::IntegrationTest
     assert_nil @tenant.reload.api_token_public_key
   end
 
+  test "basic tenant settings explain that the api requires the pro plan" do
+    sign_in @owner
+
+    get edit_user_registration_path
+
+    assert_response :success
+    assert_includes response.body, I18n.t("tenants.settings.api_pro_only_title")
+    assert_select "textarea[name='tenant[api_token_public_key]']", count: 0
+  end
+
   test "owner cannot rename the tenant" do
     @tenant.update!(features: [ "api" ])
     sign_in @owner
