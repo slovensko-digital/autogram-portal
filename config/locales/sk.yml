@@ -1530,7 +1530,7 @@ sk:
         opens_in_new_tab: "(otvorí sa v novom okne)"
         integration:
           title: "Integrácia do vlastných systémov"
-          description: "Zapojenie konta, nastavenia, prístup k API integrácii a konzultácie (3 hod.)"
+          description: "Zapojenie konta, nastavenia, prístup k API integrácii a konzultácie (3 hod.). Vyžaduje plán PRO."
           price: "249 €"
           price_note: "jednorazovo"
         anonymous:
@@ -1552,6 +1552,8 @@ sk:
           included:
             - "Odosielanie dokumentov na podpis"
             - "Kvalifikované časové pečiatky"
+          excluded:
+            - "Bez prístupu k API (iba v pláne PRO)"
           limits:
             stored_documents:
               one: "Najviac %{count} uložený dokument"
@@ -1575,7 +1577,7 @@ sk:
               other: "Najviac %{count} používateľov"
         pro:
           title: "PRO účet"
-          badge: "Pre firmy"
+          badge: "Iba pre právnické osoby"
           price_amount: "19 €"
           price_period: "/ mesačne"
           audience: "Komplexný nástroj pre podpisovanie"
@@ -1585,6 +1587,7 @@ sk:
             - "Neobmedzený počet používateľov"
             - "Neobmedzené množstvo dokumentov"
             - "Dlhodobá archivácia dokumentov"
+            - "Prístup k API a SDK na prepojenie s vašimi systémami"
           excluded: []
       document_vs_bundle:
         subtitle: "Dokument a balík"
@@ -1599,7 +1602,7 @@ sk:
           description: "Požiadajte druhú stranu o podpis cez e-mail. Naživo viete sledovať, kto už dokument podpísal."
         api_integration:
           title: "Prepojenie s vaším systémom cez API"
-          description: "Vložte si podpisovanie priamo do vašej vlastnej aplikácie či firemného systému."
+          description: "Vložte si podpisovanie priamo do vašej vlastnej aplikácie či firemného systému. Dostupné v pláne PRO."
         qualified_signatures:
           title: "Kvalifikované eIDAS podpisy"
           description: "Na vytvorenie kvalifikovaného elektronického podpisu vám stačí občiansky preukaz s čipom."
@@ -1655,7 +1658,7 @@ sk:
           description: "Nemáme čo tajiť. Náš kód je otvorený, verejne dostupný a auditovateľný. Vďaka tomu máte absolútnu istotu, že s vašimi dokumentmi nerobíme nič za vaším chrbtom."
         api:
           title: "REST API"
-          description: "Integrujte si podpisovanie priamo do vlastných firemných systémov cez REST API a Standard Webhooks. Automatizácia pracovných postupov je tak jednoduchá a efektívna."
+          description: "Integrujte si podpisovanie priamo do vlastných firemných systémov cez REST API a Standard Webhooks. Automatizácia pracovných postupov je tak jednoduchá a efektívna. API je dostupné v pláne PRO."
       how_it_works:
         subtitle: "Proces"
         title: "Ako to funguje"
@@ -1708,6 +1711,9 @@ sk:
           multiple_signers:
             question: "Môžem poslať dokument na podpis viacerým ľuďom?"
             answer: "Áno. Môžete pridať ľubovoľný počet príjemcov. Systém bude sledovať, kto dokument podpísal, a notifikuje vás, keď dokument podpíšu všetci príjemcovia. Taktiež si môžete nastaviť, koľkí príjemcovia musia balík podpísať, aby bol považovaný za dokončený."
+          api:
+            question: "Môžem Autogram Portal prepojiť s vlastným systémom cez API?"
+            answer: "Áno, ale API a SDK sú dostupné iba v pláne PRO. Plán PRO poskytujeme iba právnickým osobám. O zriadenie organizácie PRO nám napíšte."
           open_source:
             question: "Je Autogram Portal zadarmo a open-source?"
             answer: "Áno. Autogram Portal je plne open-source projekt (licencia EUPL) dostupný na GitHube. Môžete si ho spustiť na vlastnej infraštruktúre. Vývoj je podporovaný organizáciou NLNet."
@@ -1952,7 +1958,7 @@ sk:
             description: "Každý používateľ má vlastnú organizáciu s plánom Basic. Vytvorí sa spolu s účtom a zostáva vám, aj keď sa stanete členom inej organizácie. V ľavom menu sa zobrazuje ako Osobná organizácia."
           pro:
             label: "Organizácia s plánom PRO"
-            description: "Organizácia pre firmy a úrady s viacerými členmi. Všetci členovia vidia a spravujú všetky dokumenty a balíky organizácie. Organizáciu PRO zriaďuje administrátor portálu, ktorý nastavuje aj jej názov, plán a funkcie (Archív podpisov, API prístup)."
+            description: "Organizácia s viacerými členmi pre právnické osoby (obchodné spoločnosti, združenia, úrady). Všetci členovia vidia a spravujú všetky dokumenty a balíky organizácie. Organizáciu PRO zriaďuje administrátor portálu, ktorý nastavuje aj jej názov, plán a funkcie (Archív podpisov, API prístup)."
           roles:
             label: "Vlastník a člen"
             description: "Vlastníci pozývajú a odstraňujú členov, spravujú API kľúč a dostávajú e-mailové notifikácie o balíkoch poslaných cez API. Členovia pracujú s dokumentmi a balíkmi rovnako ako vlastníci."
@@ -2428,7 +2434,7 @@ sk:
             description: "Názov organizácie a jej plán mení iba administrátor portálu. Názov osobnej organizácie sa odvodzuje od vášho mena alebo e-mailu."
           api:
             label: "Verejný kľúč API tokenu"
-            description: "Vlastník tu nastaví verejný kľúč na overovanie API tokenov. Pole je dostupné, ak má organizácia zapnutý API prístup."
+            description: "Vlastník tu nastaví verejný kľúč na overovanie API tokenov. Pole je dostupné iba v organizácii s plánom PRO, ktorá má zapnutý API prístup. V pláne Basic API nie je dostupné."
           usage:
             label: "Využitie plánu"
             description: "Čerpanie limitov, doba uchovávania dokumentov a maximálna veľkosť dokumentu."
@@ -2509,7 +2515,7 @@ sk:
         current_scope_description: "Federácia dnes umožňuje adresátovi vložiť a prevziať cudziu požiadavku na vlastnom portáli aj vtedy, keď pôvodný portál nebol lokálne vopred nastavený, ale samotné podpisovanie sa stále dokončuje na pôvodnom portáli."
       integration:
         title: "API a SDK"
-        intro: "Organizácie so zapnutým API prístupom môžu Autogram Portal prepojiť s vlastnou aplikáciou. API prijíma JWT tokeny podpísané vaším kľúčom: verejný kľúč vloží vlastník v Nastaveniach organizácie a v tokene uvediete `sub` = ID organizácie."
+        intro: "API je dostupné iba v pláne PRO, ktorý je určený pre právnické osoby. Organizácie PRO so zapnutým API prístupom môžu Autogram Portal prepojiť s vlastnou aplikáciou. API prijíma JWT tokeny podpísané vaším kľúčom: verejný kľúč vloží vlastník v Nastaveniach organizácie a v tokene uvediete `sub` = ID organizácie."
         links:
           sdk_example:
             label: "SDK príklad"
@@ -2852,6 +2858,8 @@ sk:
       api_token_public_key: "Verejný kľúč API tokenu"
       api_token_help: "Verejný RSA alebo EC kľúč (PEM) na overenie API tokenov. V tokene použite sub = %{tenant_id}."
       api_disabled: "API prístup nie je pre túto organizáciu zapnutý. Kontaktujte administrátora."
+      api_pro_only_title: "API je dostupné iba v pláne PRO"
+      api_pro_only_html: "Plán PRO poskytujeme iba právnickým osobám (obchodné spoločnosti, združenia, úrady). Ak chcete organizáciu PRO pre svoju firmu, napíšte nám na %{email}."
       update: "Uložiť"
       members: "Členovia"
       members_limit:
@@ -2865,7 +2873,7 @@ sk:
       invite_description: "Pozvaný používateľ získa prístup ku všetkým dokumentom a balíkom organizácie."
       invite_email_placeholder: "email@example.com"
       invite: "Pozvať"
-      upgrade_to_invite: "Plán Basic umožňuje iba jedného používateľa. Pre pozývanie ďalších členov je potrebný plán PRO."
+      upgrade_to_invite: "Plán Basic umožňuje iba jedného používateľa. Pozývať ďalších členov možno v pláne PRO, ktorý je dostupný iba pre právnické osoby."
       leave_title: "Opustiť organizáciu"
       leave_description: "Stratíte prístup k dokumentom a balíkom organizácie %{name}."
       leave: "Opustiť organizáciu"

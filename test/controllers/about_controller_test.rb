@@ -28,6 +28,15 @@ class AboutControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the price list says the API and the PRO plan are only for legal entities" do
+    get about_index_path
+
+    assert_response :success
+    I18n.t("about.index.start_using.basic.excluded").each { |item| assert_includes response.body, item }
+    assert_includes response.body, I18n.t("about.index.start_using.pro.badge")
+    assert_includes response.body, I18n.t("about.index.faq.items.api.question")
+  end
+
   test "the price list links the full pricing page when PRICING_URL is set" do
     original = ENV["PRICING_URL"]
     ENV["PRICING_URL"] = "https://example.com/cennik"

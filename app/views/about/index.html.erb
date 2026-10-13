@@ -197,6 +197,14 @@
               <span><%= members_item %></span>
             </li>
           <% end %>
+          <% t('.start_using.basic.excluded').each do |item| %>
+            <li class="flex gap-x-3 text-gray-600">
+              <svg class="mt-0.5 h-5 w-5 flex-none text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+              <span><%= item %></span>
+            </li>
+          <% end %>
         </ul>
         <div class="mt-8 flex flex-wrap items-center gap-4">
           <% unless @current_user %>
