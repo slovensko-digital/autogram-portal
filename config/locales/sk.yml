@@ -1704,7 +1704,7 @@ sk:
             answer: "Primárne pracujeme s PDF dokumentmi. Okrem toho sú podporované XML dokumenty slovenských elektronických formulárov, ASiC-E kontajnery a ďalšie bežné formáty. Presný zoznam: .pdf, .xml, .xdcf, .asice, .txt, .png, .jpg, .jpeg"
           signature_types:
             question: "Aký je rozdiel medzi kvalifikovaným elektronickým podpisom s časovou pečiatkou a bez nej?"
-            answer: "Kvalifikovaný elektronický podpis bez časovej pečiatky je podľa občianskeho zákonníka ekvivalentom vlastnoručného podpisu. Pridaním časovej pečiatky sa potvrdzuje presný čas podpisu, takže dokument má rovnakú váhu, ako keby ste ho dali úradne overiť."
+            answer: "Kvalifikovaný elektronický podpis bez časovej pečiatky je podľa občianskeho zákonníka ekvivalentom vlastnoručného podpisu. Pridaním časovej pečiatky sa potvrdzuje čas, pred ktorým bol podpis vykonaný, takže dokument má rovnakú váhu, ako keby ste ho dali úradne overiť."
           recipients_install:
             question: "Musia si príjemcovia niečo inštalovať?"
             answer: "Príjemca potrebuje aplikáciu pre vytváranie kvalifikovaných elektronických podpisov ako Autogram na počítači, Autogram v mobile, eIdentita, Podpisuj alebo iné samostatné aplikácie. V závislosti od presnej karty/občianskeho preukazu môže byť nutné použiť počítač a fyzickú čítačku kariet."

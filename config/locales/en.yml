@@ -1769,7 +1769,7 @@ en:
             answer: "We primarily work with PDF documents. XML documents for Slovak electronic forms, ASiC-E containers, and other common formats are also supported. Exact list: .pdf, .xml, .xdcf, .asice, .txt, .png, .jpg, .jpeg"
           signature_types:
             question: "What is the difference between a qualified electronic signature with and without a timestamp?"
-            answer: "A qualified electronic signature without a timestamp is equivalent to a handwritten signature under the Slovak Civil Code. Adding a timestamp confirms the exact time of signing, so the document carries the same weight as if you had it officially certified."
+            answer: "A qualified electronic signature without a timestamp is equivalent to a handwritten signature under the Slovak Civil Code. Adding a timestamp confirms the time before which the signature was made, so the document carries the same weight as if you had it officially certified."
           recipients_install:
             question: "Do recipients need to install anything?"
             answer: "Recipients need an application for creating qualified electronic signatures, such as Autogram Desktop, Autogram Mobile, eIdentita, Podpisuj, or other standalone applications. Depending on the exact card/ID card, using a computer and a physical card reader may be required."
