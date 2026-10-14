@@ -197,6 +197,7 @@ sk:
       received_bundles: "Prijaté na podpis"
       validation_archive: "Archív podpisov"
       settings: "Nastavenia"
+      admin: "Administrácia"
       open_foreign_request: "Otvoriť cudzí odkaz"
       new_contract: "Nový dokument"
       how_to_sign: "Ako podpisovať"
@@ -256,25 +257,7 @@ sk:
         delete_confirmation_placeholder: "Napíšte potvrdzovaciu frázu"
         delete_confirmation_instruction_html: "Pre potvrdenie napíšte %{phrase}."
         delete_confirmation_mismatch: "Potvrdzovacia fráza sa nezhoduje."
-        admin: "Administrácia"
-        manage_portal_instances: "Dôveryhodné portály"
-        manage_portal_instances_description: "Spravujte externé inštancie Autogram Portalu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
-        manage_portal_instances_link: "Spravovať dôveryhodné portály"
-        manage_tenants: "Organizácie"
-        manage_tenants_description: "Spravujte plány (Basic/PRO), funkcie a členov organizácií."
-        manage_tenants_link: "Spravovať organizácie"
         delete_blocked_by_tenants: "Účet momentálne nemožno zmazať, pretože ste jediným vlastníkom organizácie s ďalšími členmi: %{tenants}."
-        features: "Funkcie"
-        features_title: "Funkcie aktuálneho používateľa"
-        features_description: "Ako administrátor môžete zapínať alebo vypínať funkcie dostupné na vašom vlastnom účte. Funkcia administrátora tu zostáva vždy zapnutá."
-        admin_feature_locked: "Funkciu administrátora nie je možné na tomto účte tu odobrať."
-        save_features: "Uložiť funkcie"
-        feature_labels:
-          admin: "Administrátorský prístup"
-          federation: "Federácia"
-        feature_descriptions:
-          admin: "Umožňuje prístup do administrátorských častí, napríklad správy dôveryhodných portálov a administrácie úloh."
-          federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portalu."
     confirmations:
       new:
         resend_confirmation_instructions: "Znovu poslať potvrdzovací e-mail"
@@ -671,6 +654,35 @@ sk:
         sent_at_html: "Pozvánka odoslaná %{time}"
 
   admin:
+    settings:
+      show:
+        title: "Nastavenia administrátora"
+        subtitle: "Správa Autogram Portalu a funkcie vášho účtu."
+        sections: "Správa portálu"
+        tenants:
+          title: "Organizácie"
+          description: "Spravujte plány (Basic/PRO), funkcie, členov a spotrebu organizácií."
+          link: "Spravovať organizácie"
+        portal_instances:
+          title: "Dôveryhodné portály"
+          description: "Spravujte externé inštancie Autogram Portalu, ktoré si môžu s týmto portálom vymieňať federované požiadavky."
+          link: "Spravovať dôveryhodné portály"
+        jobs:
+          title: "Úlohy na pozadí"
+          description: "Sledujte a spravujte úlohy na pozadí (GoodJob), napríklad odosielanie e-mailov a mazanie starých dokumentov."
+          link: "Otvoriť prehľad úloh"
+        features: "Funkcie vášho účtu"
+        features_description: "Zapnite alebo vypnite funkcie dostupné na vašom vlastnom účte. Funkcia administrátora tu zostáva vždy zapnutá."
+        admin_feature_locked: "Funkciu administrátora nie je možné na tomto účte tu odobrať."
+        save_features: "Uložiť funkcie"
+        feature_labels:
+          admin: "Administrátorský prístup"
+          federation: "Federácia"
+        feature_descriptions:
+          admin: "Umožňuje prístup do administrátorských častí, napríklad správy organizácií, dôveryhodných portálov a úloh na pozadí."
+          federation: "Umožňuje spravovať federované požiadavky a integrácie s inými inštanciami Autogram Portalu."
+      update:
+        success: "Funkcie boli uložené"
     tenants:
       usage:
         title: "Spotreba podľa mesiacov"
@@ -693,7 +705,20 @@ sk:
           avm_signing: "Podpis v Autograme v mobile"
       index:
         title: "Organizácie"
-        subtitle: "Prehľad všetkých organizácií, ich plánov a funkcií."
+        subtitle: "Prehľad všetkých organizácií, ich plánov, funkcií a spotreby."
+        filter_plan: "Plán"
+        plan_all: "Všetky"
+        usage_month: "Spotreba za mesiac"
+        filter_sort: "Zoradiť"
+        sort_name: "Podľa názvu"
+        sort_id_asc: "ID vzostupne"
+        sort_id_desc: "ID zostupne"
+        sort_signature_requests: "Najviac dokumentov odoslaných na podpis"
+        sort_timestamps: "Najviac časových pečiatok"
+        caption: "Organizácie a ich spotreba za %{month}"
+        signature_requests: "Na podpis"
+        timestamps: "Pečiatky"
+        empty: "Žiadne organizácie nezodpovedajú filtru."
         search_placeholder: "Názov alebo e-mail člena"
         search: "Hľadať"
         id: "ID"

@@ -19,7 +19,7 @@ Implemented application authorization:
 - Tenant API policies/scopes on the contract tenant (bundled contracts share the bundle tenant).
 - Bound bundle/session signing subjects; UUID-public actions use explicit `skip_authorization`.
 - Federation portal policies/scopes, public preview and authenticated broker claim.
-- Self-account management, admin-only feature editing and permission-bearing views.
+- Self-account management, admin feature editing in the admin settings and permission-bearing views.
 
 `ApplicationController` verifies authorization after every completed web action and
 policy scoping after `index`. The index condition uses `action_name` rather than
@@ -145,6 +145,7 @@ Authentication redirects that halt before an action do not require a policy call
 | `TenantSelections#show` | Signed-in user without selected tenant | `TenantSelection::TenantPolicy#show?` | Signed-out users redirect to login; a selected tenant redirects to the dashboard before authorization |
 | `TenantSelections#update` | Same, `current_user.tenants.find` | `TenantSelection::TenantPolicy#update?`: membership | Foreign tenant 404; existing selection cannot be switched until sign-out |
 | `Admin::Tenants#index/new/create/edit/update/add_member` | Web user, existing admin lookups | `AdminPolicy#access?`: admin feature | Controller 403 and existing route authentication preserved |
+| `Admin::Settings#show/update` | Web user, `current_user` | Same headless admin policy | Updates only the admin's own features; the admin feature stays enabled |
 | `Admin::PortalInstances#index/new/create/edit/update/verify/revoke` | Same | Same headless admin policy | Same; portal/service validation remains unchanged |
 
 The settings view's `manage_memberships?` and `edit_api_key?` predicates are checked
@@ -186,7 +187,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Api::Federation::V1::Requests#show/claim` | Verified Portal and recipient UUID | Federated recipient assigned to caller | Portal mismatch 403, state 409, claimant mismatch 422, bundle mismatch 404; grants unchanged |
 | `Api::Federation::V1::RequestInvitations#create/withdraw` | Portal, caller-bound lookup/scope | Caller portal ownership | Foreign invitation 404; payload/status behavior unchanged |
 | `Federation::Requests#show/claim` | Web public / authenticated user | Preview skips authorization / `FederationRequestPolicy#claim?` | Existing broker URL checks, remote errors and signing continuation |
-| `Users::Registrations#edit/update/destroy` | Authenticated Devise self resource | `UserPolicy#manage_account?`; `edit_features?` for admin | Non-admin features ignored, admin flag retained; confirmation phrase and model deletion errors unchanged |
+| `Users::Registrations#edit/update/destroy` | Authenticated Devise self resource | `UserPolicy#manage_account?` | Features ignored (admins edit theirs in `Admin::Settings`); confirmation phrase and model deletion errors unchanged |
 
 Contract deletion is routed publicly like show/update: anonymous visitors may
 delete anonymous contracts, while tenant contracts require management. Display-only

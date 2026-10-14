@@ -183,6 +183,7 @@ Rails.application.routes.draw do
 
   authenticate(:user, ->(user) { user.admin? }) do
     namespace :admin do
+      resource :settings, only: [ :show, :update ]
       resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
         post :add_member, on: :member
       end

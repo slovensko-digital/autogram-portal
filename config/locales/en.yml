@@ -226,6 +226,7 @@ en:
       received_bundles: "Received for Signing"
       validation_archive: "Validation archive"
       settings: "Settings"
+      admin: "Administration"
       open_foreign_request: "Open foreign request"
       new_contract: "New contract"
       how_to_sign: "How to sign"
@@ -297,25 +298,7 @@ en:
         delete_confirmation_placeholder: "Type confirmation phrase"
         delete_confirmation_instruction_html: "To confirm, type %{phrase}."
         delete_confirmation_mismatch: "Confirmation phrase does not match."
-        admin: "Admin"
-        manage_portal_instances: "Trusted portals"
-        manage_portal_instances_description: "Manage the external Autogram Portal instances that can exchange federated requests with this portal."
-        manage_portal_instances_link: "Manage trusted portals"
-        manage_tenants: "Organizations"
-        manage_tenants_description: "Manage plans (Basic/PRO), features and members of organizations."
-        manage_tenants_link: "Manage organizations"
         delete_blocked_by_tenants: "The account cannot be deleted right now because you are the only owner of an organization with other members: %{tenants}."
-        features: "Features"
-        features_title: "Current user features"
-        features_description: "As an admin, you can enable or disable the features available on your own account. The admin feature is always kept enabled here."
-        admin_feature_locked: "The admin feature cannot be removed from your current account here."
-        save_features: "Save features"
-        feature_labels:
-          admin: "Admin access"
-          federation: "Federation"
-        feature_descriptions:
-          admin: "Allows access to administration-only areas such as trusted portal management and job administration."
-          federation: "Allows managing federated requests and integrations with other Autogram Portal instances."
     confirmations:
       new:
         resend_confirmation_instructions: "Resend confirmation instructions"
@@ -740,6 +723,35 @@ en:
         sent_at_html: "Invitation sent %{time}"
 
   admin:
+    settings:
+      show:
+        title: "Admin settings"
+        subtitle: "Administration of Autogram Portal and the features of your account."
+        sections: "Portal administration"
+        tenants:
+          title: "Organizations"
+          description: "Manage plans (Basic/PRO), features, members and usage of organizations."
+          link: "Manage organizations"
+        portal_instances:
+          title: "Trusted portals"
+          description: "Manage the external Autogram Portal instances that can exchange federated requests with this portal."
+          link: "Manage trusted portals"
+        jobs:
+          title: "Background jobs"
+          description: "Monitor and manage background jobs (GoodJob) such as sending emails and deleting old documents."
+          link: "Open job dashboard"
+        features: "Features of your account"
+        features_description: "Enable or disable the features available on your own account. The admin feature is always kept enabled here."
+        admin_feature_locked: "The admin feature cannot be removed from your current account here."
+        save_features: "Save features"
+        feature_labels:
+          admin: "Admin access"
+          federation: "Federation"
+        feature_descriptions:
+          admin: "Allows access to administration-only areas such as organizations, trusted portals and background jobs."
+          federation: "Allows managing federated requests and integrations with other Autogram Portal instances."
+      update:
+        success: "Features have been saved"
     tenants:
       usage:
         title: "Monthly usage"
@@ -762,7 +774,20 @@ en:
           avm_signing: "Signed in Autogram v mobile"
       index:
         title: "Organizations"
-        subtitle: "All organizations with their plans and features."
+        subtitle: "All organizations with their plans, features and usage."
+        filter_plan: "Plan"
+        plan_all: "All"
+        usage_month: "Usage in month"
+        filter_sort: "Sort"
+        sort_name: "By name"
+        sort_id_asc: "ID ascending"
+        sort_id_desc: "ID descending"
+        sort_signature_requests: "Most documents sent for signature"
+        sort_timestamps: "Most timestamps"
+        caption: "Organizations and their usage in %{month}"
+        signature_requests: "Sent for signature"
+        timestamps: "Timestamps"
+        empty: "No organizations match the filter."
         search_placeholder: "Name or member email"
         search: "Search"
         id: "ID"

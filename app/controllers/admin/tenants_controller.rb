@@ -1,16 +1,27 @@
 class Admin::TenantsController < Admin::BaseController
+  # The usage sorts list the biggest consumers in the selected month first.
+  ORDERS = {
+    "name" => [ :name, :id ],
+    "id_asc" => [ :id ],
+    "id_desc" => [ { id: :desc } ],
+    "signature_requests" => [ Arel.sql("signature_requests_usage DESC"), :name, :id ],
+    "timestamps" => [ Arel.sql("timestamps_usage DESC"), :name, :id ]
+  }.freeze
+
   before_action :set_tenant, only: [ :edit, :update, :add_member ]
 
   def index
-    @tenants = Tenant.includes(:owners).left_joins(:memberships)
-                     .select("tenants.*, COUNT(memberships.id) AS members_count")
-                     .group("tenants.id")
-                     .order(:name)
-    return if params[:q].blank?
+    @plan = params[:plan].presence_in(Tenant.plans.keys)
+    @sort = params[:sort].presence_in(ORDERS.keys) || "name"
+    @usage_month = usage_month
 
-    pattern = "%#{Tenant.sanitize_sql_like(params[:q])}%"
-    member_tenant_ids = Membership.joins(:user).where("users.email ILIKE ?", pattern).select(:tenant_id)
-    @tenants = @tenants.where("tenants.name ILIKE ?", pattern).or(@tenants.where(id: member_tenant_ids))
+    tenants = params[:q].present? ? search_tenants(params[:q]) : Tenant.all
+    tenants = tenants.where(plan: @plan) if @plan
+    @tenants = tenants.includes(:owners).left_joins(:memberships)
+                      .select("tenants.*", "COUNT(memberships.id) AS members_count", *monthly_usage_columns(@usage_month))
+                      .group("tenants.id")
+                      .order(*ORDERS.fetch(@sort))
+                      .load
   end
 
   def new
@@ -66,14 +77,31 @@ class Admin::TenantsController < Admin::BaseController
     @tenant = Tenant.find(params[:id])
   end
 
+  def search_tenants(query)
+    pattern = "%#{Tenant.sanitize_sql_like(query)}%"
+    member_tenant_ids = Membership.joins(:user).where("users.email ILIKE ?", pattern).select(:tenant_id)
+    Tenant.where("tenants.name ILIKE ?", pattern).or(Tenant.where(id: member_tenant_ids))
+  end
+
+  # The usage of every monthly limit (signature_requests_usage, timestamps_usage) in the month.
+  def monthly_usage_columns(month)
+    Tenant::Usage::MONTHLY_LIMIT_KINDS.map do |limit, kind|
+      usage = UsageRecord.where(kind: kind).in_period(month.in_time_zone.all_month).where("usage_records.tenant_id = tenants.id")
+      "(#{usage.select("COALESCE(SUM(usage_records.quantity), 0)").to_sql}) AS #{limit}_usage"
+    end
+  end
+
   # Monthly usage by kind and source, the basis for billing the PRO plan.
   def set_usage
-    @usage_month = begin
-      Date.strptime(params[:month].to_s, "%Y-%m")
-    rescue Date::Error
-      Date.current.beginning_of_month
-    end
-    @usage_by_kind_and_source = @tenant.usage_records.in_period(@usage_month.all_month).group(:kind, :source).sum(:quantity)
+    @usage_month = usage_month
+    @usage_by_kind_and_source = @tenant.usage_records.in_period(@usage_month.in_time_zone.all_month).group(:kind, :source).sum(:quantity)
+  end
+
+  # The first day of the requested month. Query it as month.in_time_zone.all_month: a Date range ends at midnight of the last day.
+  def usage_month
+    Date.strptime(params[:month].to_s, "%Y-%m")
+  rescue Date::Error
+    Date.current.beginning_of_month
   end
 
   def render_new_with_error(message)
