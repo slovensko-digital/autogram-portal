@@ -18,7 +18,7 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - Run the server for other devices with `bin/rails server -b 0.0.0.0`. `bin/dev` exits without a TTY because the tailwind watcher quits; run `bin/rails tailwindcss:watch[always]` separately in that case.
 - Mail in development: `/letter_opener`. Jobs (GoodJob): `/admin/good_job`. In tests GoodJob runs jobs inline.
 - `API_SKIP_AUTH=true` in `.env` skips API JWTs locally (uses `Tenant.second`).
-- Staging (agp.dev.slovensko.digital, `config/deploy.staging.yml`) runs with `RAILS_ENV=staging`, so `Rails.env.production?` checks do not cover it.
+- Staging (agp.dev.slovensko.digital, `config/deploy.staging.yml`) runs with `RAILS_ENV=staging`, so `Rails.env.production?` checks do not cover it. Its `PRODUCTION_URL` (the live agp.slovensko.digital) makes it a test instance (`StagingInstance`): a notice with a link to production on every page except embedded iframes and in every email (subject prefixed `[TEST]`), and sign-up (email and new Google accounts) only for `SIGNUP_ALLOWED_DOMAINS` (default `slovensko.digital`). `config/environments/staging.rb` sends `X-Robots-Tag: noindex, nofollow`, so keep crawlers allowed in `robots.txt`.
 
 ## Domain model
 
@@ -85,4 +85,5 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - List tests must include a matching nonempty record set and foreign-record exclusions. Empty results can hide invalid eager loads, such as the removed `Contract.user` association; `Membership.user` remains valid.
 - Unsaved documents read their content from the upload's tempfile (`Document#content`), so build them from `Rack::Test::UploadedFile` / `ActionDispatch::Http::UploadedFile`; `{ io:, filename: }` attachments raise `ActiveStorage::FileNotFoundError` during validation.
 - Use `bin/rails test` for the full suite; editor discovery may cover only a subset. System tests are separate (`bin/rails test:system`; CI runs both), and files under `test/` not ending in `_test.rb` (e.g. the user guide screenshots) run only when named explicitly. For ActiveJob enqueue assertions, use the test queue adapter locally instead of the default inline GoodJob adapter.
+- The test environment sets dummy Google OAuth credentials (`config/environments/test.rb`), so the Google sign-in routes exist and the sign-in/sign-up pages render; mock the callback with `OmniAuth.config.test_mode` (see `test/integration/staging_notice_test.rb`).
 - Minitest 6 is bundled without `minitest/mock`, so `stub` is unavailable: switch `Rails.env=` or `ENV` inside an `ensure` block instead (see `test/services/autogram_service_test.rb`).

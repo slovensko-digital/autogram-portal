@@ -29,6 +29,19 @@
       <tr>
         <td align="center" class="email-outer" style="padding: 32px 16px;">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; width: 100%;">
+            <% if StagingInstance.active? %>
+              <tr>
+                <td style="padding: 0 0 20px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td bgcolor="#FDE047" style="background-color: #FDE047; border: 2px solid #030712; padding: 16px 20px; font-size: 15px; line-height: 1.5; color: #030712;">
+                        <%= t('.staging_notice_html', link: link_to(StagingInstance.production_host, StagingInstance.production_url, style: "color: #030712; font-weight: 700; text-decoration: underline;")) %>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            <% end %>
             <tr>
               <td style="padding: 0 8px 20px; font-family: 'Source Sans 3', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 22px; line-height: 1.3; color: #111827;">
                 <span style="border-bottom: 3px solid #FDE047; padding: 0 2px;"><strong>Autogram</strong> Portal</span>

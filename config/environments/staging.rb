@@ -15,8 +15,12 @@ Rails.application.configure do
   # Turn on fragment caching in view templates.
   config.action_controller.perform_caching = true
 
+  # Keep staging out of search engines; people found it there and used it as the live portal.
+  # Crawlers must still be allowed in robots.txt, otherwise they never see this header.
+  config.action_dispatch.default_headers["X-Robots-Tag"] = "noindex, nofollow"
+
   # Cache assets for far-future expiry since they are all digest stamped.
-  config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
+  config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}", "x-robots-tag" => "noindex, nofollow" }
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"

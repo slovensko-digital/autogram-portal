@@ -6,6 +6,11 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Google sign-in is configured only with these set (config/initializers/devise.rb, loaded after
+  # this file); without it the sign-in and sign-up pages cannot render their Google buttons.
+  ENV["GOOGLE_CLIENT_ID"] ||= "test-google-client-id"
+  ENV["GOOGLE_CLIENT_SECRET"] ||= "test-google-client-secret"
+
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 

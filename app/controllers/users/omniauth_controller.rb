@@ -7,6 +7,11 @@ class Users::OmniauthController < Devise::OmniauthCallbacksController
     @user = User.find_or_link_from_provider_data(auth, locale: session[:locale])
 
     if @user.nil?
+      unless StagingInstance.signup_allowed?(auth.info.email)
+        flash[:alert] = t("devise.registrations.staging_signup_domain", addresses: StagingInstance.signup_allowed_addresses)
+        redirect_to new_user_registration_url and return
+      end
+
       session[:pending_oauth_identity] = {
         provider: auth.provider,
         uid:      auth.uid,
