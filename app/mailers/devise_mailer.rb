@@ -1,4 +1,6 @@
 class DeviseMailer < Devise::Passwordless::Mailer
+  include MarksStagingMail
+
   layout "mailer"
 
   def magic_link(record, token, opts = {})

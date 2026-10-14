@@ -8,6 +8,9 @@ env:
     RAILS_ENV: staging
     RAILS_LOG_LEVEL: info
     APP_HOST: agp.dev.slovensko.digital
+    # Marks this instance as a test one: notice on pages and in emails, sign-up only for
+    # SIGNUP_ALLOWED_DOMAINS (default slovensko.digital), see app/lib/staging_instance.rb
+    PRODUCTION_URL: https://agp.slovensko.digital
     AUTOGRAM_SERVICE_URL: http://autogram-portal-ag_service:7200
     REDIS_URL: redis://autogram-portal-redis:6379/0
     AVM_URL: https://autogram.slovensko.digital

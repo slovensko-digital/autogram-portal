@@ -270,11 +270,13 @@ en:
         or_continue_with: "Or continue with"
         sign_in_with_google: "Continue with Google"
     registrations:
+      staging_signup_domain: "Only %{addresses} email addresses can sign up in this test environment. Create your account on the live Autogram Portal."
       new:
         sign_up: "Sign up"
         subtitle: "Create a new account to get started."
         or_continue_with: "Or continue with"
         sign_up_with_google: "Continue with Google"
+        staging_notice_html: "This is a test environment and only %{addresses} email addresses can sign up here. Create your account on the live Autogram Portal at %{link}."
       edit:
         delete_confirmation_hint: "The Delete account button becomes available after you type the phrase."
         delete_confirmation_label: "To confirm, type the phrase “%{phrase}”"
@@ -2809,6 +2811,11 @@ en:
       regards: "Best regards,"
       team: "team Autogram Portal"
       operator: "Autogram Portal is operated by"
+      staging_notice_html: "<strong>This email was sent by a test environment of Autogram Portal, not the live service.</strong> Documents there may be deleted at any time. The live Autogram Portal is at %{link}."
+      staging_notice: "TEST ENVIRONMENT: This email was sent by a test environment of Autogram Portal, not the live service. Documents there may be deleted at any time. The live Autogram Portal is at %{url}"
+    staging_notice:
+      label: "Test environment"
+      text_html: "<strong>This is a test environment of Autogram Portal, not the live service.</strong> Documents may be deleted here at any time and validation here also accepts test signatures. The live Autogram Portal is at %{link}."
 
   qscd:
     title:

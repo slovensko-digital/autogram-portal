@@ -7,6 +7,14 @@
           <p class="text-gray-600"><%= t('.subtitle') %></p>
         </div>
 
+        <% if StagingInstance.active? %>
+          <p class="mb-6 rounded-lg border border-yellow-400 bg-yellow-50 p-4 text-sm text-gray-900">
+            <%= t('.staging_notice_html',
+                  addresses: StagingInstance.signup_allowed_addresses,
+                  link: link_to(StagingInstance.production_host, StagingInstance.production_url_for(new_user_registration_path), class: "font-semibold text-blue-700 underline hover:no-underline")) %>
+          </p>
+        <% end %>
+
         <%= form_with url: user_google_oauth2_omniauth_authorize_path, method: :post, data: { turbo: false } do %>
           <button type="submit" class="btn btn-second-primary w-full gap-3">
             <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24">

@@ -8,6 +8,8 @@ class Users::RegistrationsController < Devise::RegistrationsController
   prepend_after_action :pundit_reset!, only: [ :destroy ]
 
   def create
+    return reject_staging_signup unless StagingInstance.signup_allowed?(sign_up_params[:email])
+
     super do |resource|
       UserPolicyConsent.record_current_for(user: resource, source: "email_signup", request: request) if resource.persisted?
     end
@@ -34,6 +36,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   protected
+
+  def reject_staging_signup
+    redirect_to new_user_registration_path, alert: t("devise.registrations.staging_signup_domain", addresses: StagingInstance.signup_allowed_addresses)
+  end
 
   def authorize_account!
     authorize current_user, :manage_account?

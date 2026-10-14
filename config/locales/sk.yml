@@ -229,11 +229,13 @@ sk:
         or_continue_with: "Alebo pokračovať s"
         sign_in_with_google: "Pokračovať cez Google"
     registrations:
+      staging_signup_domain: "Na testovacom prostredí sa môžu registrovať len e-mailové adresy %{addresses}. Účet si vytvorte na ostrom Autogram Portali."
       new:
         sign_up: "Registrovať sa"
         subtitle: "Vytvorte si nový účet."
         or_continue_with: "Alebo pokračovať s"
         sign_up_with_google: "Pokračovať cez Google"
+        staging_notice_html: "Toto je testovacie prostredie a registrovať sa tu môžu len e-mailové adresy %{addresses}. Účet na ostrom Autogram Portali si vytvoríte na %{link}."
       edit:
         delete_confirmation_hint: "Tlačidlo Zmazať účet sa sprístupní po napísaní frázy."
         delete_confirmation_label: "Na potvrdenie napíšte frázu „%{phrase}“"
@@ -2743,6 +2745,11 @@ sk:
       regards: "S pozdravom,"
       team: "tím Autogram Portal"
       operator: "Autogram Portal prevádzkuje"
+      staging_notice_html: "<strong>Tento e-mail odoslalo testovacie prostredie Autogram Portalu, nie ostrá verzia.</strong> Dokumenty v ňom sa môžu kedykoľvek zmazať. Ostrý Autogram Portal nájdete na %{link}."
+      staging_notice: "TESTOVACIE PROSTREDIE: Tento e-mail odoslalo testovacie prostredie Autogram Portalu, nie ostrá verzia. Dokumenty v ňom sa môžu kedykoľvek zmazať. Ostrý Autogram Portal nájdete na %{url}"
+    staging_notice:
+      label: "Testovacie prostredie"
+      text_html: "<strong>Toto je testovacie prostredie Autogram Portalu, nie ostrá verzia.</strong> Dokumenty sa tu môžu kedykoľvek zmazať a overenie tu za platné považuje aj testovacie podpisy. Ostrý Autogram Portal nájdete na %{link}."
 
   qscd:
     title:

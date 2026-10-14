@@ -1,3 +1,7 @@
+<% if StagingInstance.active? %>
+<%= t('.staging_notice', url: StagingInstance.production_url) %>
+
+<% end %>
 <%= yield %>
 
 <%= t('.regards') %>
