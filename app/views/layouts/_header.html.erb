@@ -33,6 +33,11 @@
           <li>
             <%= render "shared/left_menu_item", path: edit_user_registration_path, label: t('header.links.settings'), icon: :settings %>
           </li>
+          <% if policy(:admin).access? %>
+            <li>
+              <%= render "shared/left_menu_item", path: admin_settings_path, label: t('header.links.admin'), icon: :admin, current: controller_path.start_with?("admin/") %>
+            </li>
+          <% end %>
         <% end %>
         <li>
           <%= render "shared/left_menu_item", path: new_contract_path, label: t('header.links.new_contract'), icon: :new_paper %>
@@ -168,6 +173,9 @@
             <li><%= render "shared/mobile_menu_item", path: contract_validation_records_path, label: t('header.links.validation_archive') %></li>
           <% end %>
           <li><%= render "shared/mobile_menu_item", path: edit_user_registration_path, label: t('header.links.settings') %></li>
+          <% if policy(:admin).access? %>
+            <li><%= render "shared/mobile_menu_item", path: admin_settings_path, label: t('header.links.admin'), current: controller_path.start_with?("admin/") %></li>
+          <% end %>
         <% end %>
         <li><%= render "shared/mobile_menu_item", path: new_contract_path, label: t('header.links.new_contract') %></li>
         <li><%= render "shared/mobile_menu_item", path: how_to_sign_index_path, label: t('header.links.how_to_sign') %></li>

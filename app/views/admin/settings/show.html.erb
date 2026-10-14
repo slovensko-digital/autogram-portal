@@ -1,0 +1,65 @@
+<% content_for :title, t('.title') %>
+
+<div class="mx-auto max-w-3xl space-y-6 px-4 py-8">
+  <div>
+    <h1 class="text-2xl font-semibold text-gray-900"><%= t('.title') %></h1>
+    <p class="mt-1 text-sm text-gray-600"><%= t('.subtitle') %></p>
+  </div>
+
+  <section class="rounded-lg border border-gray-200 bg-white" aria-labelledby="admin-sections-heading">
+    <div class="border-b border-gray-100 px-5 py-4">
+      <h2 id="admin-sections-heading" class="text-lg font-semibold text-gray-900"><%= t('.sections') %></h2>
+    </div>
+
+    <ul role="list" class="divide-y divide-gray-100">
+      <% [
+           [ :tenants, admin_tenants_path ],
+           [ :portal_instances, admin_portal_instances_path ],
+           [ :jobs, good_job_path ]
+         ].each do |section, path| %>
+        <li class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 class="text-base font-medium text-gray-900"><%= t(".#{section}.title") %></h3>
+            <p class="mt-1 text-sm text-gray-600"><%= t(".#{section}.description") %></p>
+          </div>
+          <%= link_to t(".#{section}.link"), path, class: "btn btn-second-primary shrink-0 self-start md:self-auto" %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <section class="rounded-lg border border-gray-200 bg-white" aria-labelledby="admin-features-heading">
+    <div class="border-b border-gray-100 px-5 py-4">
+      <h2 id="admin-features-heading" class="text-lg font-semibold text-gray-900"><%= t('.features') %></h2>
+      <p class="mt-1 text-sm text-gray-600"><%= t('.features_description') %></p>
+    </div>
+
+    <%= form_with url: admin_settings_path, method: :patch, class: "space-y-4 px-5 py-4" do |form| %>
+      <% User::AVAILABLE_FEATURES.each do |feature| %>
+        <% locked = feature == "admin" %>
+        <div class="rounded-lg border border-gray-200 px-4 py-3">
+          <div class="flex items-start gap-3">
+            <div class="pt-0.5">
+              <%= check_box_tag "features[]",
+                    feature,
+                    current_user.feature_enabled?(feature),
+                    id: "feature_#{feature}",
+                    disabled: locked,
+                    "aria-describedby": "feature_#{feature}_description",
+                    class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 #{'cursor-not-allowed opacity-60' if locked}" %>
+            </div>
+            <div>
+              <%= label_tag "feature_#{feature}", t(".feature_labels.#{feature}"), class: "text-sm font-semibold text-gray-900" %>
+              <p id="feature_<%= feature %>_description" class="text-sm text-gray-500"><%= t(".feature_descriptions.#{feature}") %></p>
+              <% if locked %>
+                <p class="mt-1 text-xs font-medium text-violet-700"><%= t('.admin_feature_locked') %></p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= form.submit t('.save_features'), class: "btn btn-primary" %>
+    <% end %>
+  </section>
+</div>

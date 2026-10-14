@@ -1,31 +1,58 @@
 <% content_for :title, t('.title') %>
 
-<div class="mx-auto max-w-5xl space-y-6 px-4 py-8">
+<div class="mx-auto max-w-6xl space-y-6 px-4 py-8">
   <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h1 class="text-2xl font-semibold text-gray-900"><%= t('.title') %></h1>
       <p class="mt-1 text-sm text-gray-600"><%= t('.subtitle') %></p>
     </div>
-    <div class="flex flex-col gap-2 sm:flex-row">
-      <%= form_with url: admin_tenants_path, method: :get, class: "flex gap-2" do |form| %>
-        <%= form.search_field :q, value: params[:q], placeholder: t('.search_placeholder'), class: "w-full sm:w-64 rounded-md border border-gray-500 px-3 py-2 text-sm" %>
-        <%= form.submit t('.search'), name: nil, class: "btn btn-second-primary" %>
-      <% end %>
-      <%= link_to t('.new'), new_admin_tenant_path, class: "btn btn-primary" %>
-    </div>
+    <%= link_to t('.new'), new_admin_tenant_path, class: "btn btn-primary self-start sm:self-auto" %>
   </div>
+
+  <%= form_with url: admin_tenants_path, method: :get, class: "flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end" do |form| %>
+    <div>
+      <%= form.label :q, t('.search'), class: "block text-xs font-medium text-gray-700" %>
+      <%= form.search_field :q, value: params[:q], placeholder: t('.search_placeholder'), class: "mt-1 w-full md:w-64 rounded-md border border-gray-500 px-3 py-1.5 text-sm" %>
+    </div>
+    <div>
+      <%= form.label :plan, t('.filter_plan'), class: "block text-xs font-medium text-gray-700" %>
+      <%= form.select :plan,
+            [ [ t('.plan_all'), "" ] ] + Tenant.plans.keys.map { |plan| [ t("tenants.plans.#{plan}"), plan ] },
+            { selected: @plan.to_s },
+            class: "mt-1 w-full rounded-md border border-gray-500 bg-white px-3 py-1.5 text-sm" %>
+    </div>
+    <div>
+      <%= form.label :month, t('.usage_month'), class: "block text-xs font-medium text-gray-700" %>
+      <%= form.month_field :month, value: @usage_month.strftime("%Y-%m"), class: "mt-1 w-full rounded-md border border-gray-500 px-3 py-1.5 text-sm" %>
+    </div>
+    <div>
+      <%= form.label :sort, t('.filter_sort'), class: "block text-xs font-medium text-gray-700" %>
+      <%= form.select :sort,
+            Admin::TenantsController::ORDERS.keys.map { |sort| [ t(".sort_#{sort}"), sort ] },
+            { selected: @sort },
+            class: "mt-1 w-full rounded-md border border-gray-500 bg-white px-3 py-1.5 text-sm" %>
+    </div>
+    <%= form.submit t('actions.apply_filter'), name: nil, class: "btn btn-second-primary self-start md:self-auto" %>
+  <% end %>
 
   <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
     <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <caption class="sr-only"><%= t('.caption', month: @usage_month.strftime("%m/%Y")) %></caption>
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.id') %></th>
-          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.name') %></th>
-          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.plan') %></th>
-          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.owners') %></th>
-          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.members') %></th>
-          <th class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.features') %></th>
-          <th class="px-4 py-3 text-right font-medium text-gray-700"><%= t('.actions') %></th>
+          <th scope="col" class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.id') %></th>
+          <th scope="col" class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.name') %></th>
+          <th scope="col" class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.plan') %></th>
+          <th scope="col" class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.owners') %></th>
+          <th scope="col" class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.members') %></th>
+          <% Tenant::Usage::MONTHLY_LIMIT_KINDS.each_key do |limit| %>
+            <th scope="col" class="px-4 py-3 text-right font-medium text-gray-700">
+              <%= t(".#{limit}") %>
+              <span class="block text-xs font-normal text-gray-500"><%= @usage_month.strftime("%m/%Y") %></span>
+            </th>
+          <% end %>
+          <th scope="col" class="px-4 py-3 text-left font-medium text-gray-700"><%= t('.features') %></th>
+          <th scope="col" class="px-4 py-3 text-right font-medium text-gray-700"><%= t('.actions') %></th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200">
@@ -36,10 +63,18 @@
             <td class="px-4 py-3 text-gray-600"><%= t("tenants.plans.#{tenant.plan}") %></td>
             <td class="px-4 py-3 text-gray-600"><%= tenant.owners.map(&:email).join(", ") %></td>
             <td class="px-4 py-3 text-gray-600"><%= tenant.members_count %></td>
+            <% Tenant::Usage::MONTHLY_LIMIT_KINDS.each_key do |limit| %>
+              <td class="px-4 py-3 text-right text-gray-900"><%= tenant["#{limit}_usage"] %></td>
+            <% end %>
             <td class="px-4 py-3 text-gray-600"><%= tenant.features.map { |feature| t("tenants.feature_labels.#{feature}") }.join(", ") %></td>
             <td class="px-4 py-3 text-right">
               <%= link_to t('.edit'), edit_admin_tenant_path(tenant), class: "text-blue-600 hover:text-blue-800" %>
             </td>
+          </tr>
+        <% end %>
+        <% if @tenants.empty? %>
+          <tr>
+            <td colspan="9" class="px-4 py-6 text-center text-gray-600"><%= t('.empty') %></td>
           </tr>
         <% end %>
       </tbody>

@@ -52,21 +52,12 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :agree_to_policies ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :name, { features: [] } ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name ])
   end
 
+  # Admins edit their features in the admin settings (Admin::SettingsController).
   def update_resource(resource, params)
-    params = params.except(:current_password, :password, :password_confirmation)
-    can_edit_features = policy(resource).edit_features?
-    params = params.except(:features) unless can_edit_features
-
-    if can_edit_features
-      submitted_features = Array(params[:features]).map(&:to_s).reject(&:blank?)
-      submitted_features |= [ "admin" ]
-      params[:features] = submitted_features & User::AVAILABLE_FEATURES
-    end
-
-    resource.update(params)
+    resource.update(params.except(:current_password, :password, :password_confirmation))
   end
 
   def after_update_path_for(resource)

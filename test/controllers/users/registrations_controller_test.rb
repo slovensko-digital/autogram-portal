@@ -22,16 +22,17 @@ class Users::RegistrationsControllerTest < ActionController::TestCase
     @controller.singleton_class.define_method(:resource_name) { :user }
   end
 
-  test "admin can update own features but admin feature remains enabled" do
+  test "admin features are not editable in account settings" do
     put :update, params: {
       user: {
-        name: @user.name,
+        name: "Admin",
         features: [ "federation" ]
       }
     }
 
     assert_redirected_to edit_user_registration_path
-    assert_equal [ "admin", "federation" ], @user.reload.features.sort
+    assert_equal "Admin", @user.reload.name
+    assert_equal [ "admin" ], @user.features
   end
 
   test "non-admin feature updates are ignored" do
