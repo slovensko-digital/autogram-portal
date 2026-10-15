@@ -4,6 +4,7 @@ module SigningHelper
     "AvmSession" => :avm_contract_sessions_path,
     "EidentitaSession" => :eidentita_contract_sessions_path,
     "PodpisujSession" => :podpisuj_contract_sessions_path,
+    "Chevron7Session" => :chevron7_contract_sessions_path,
     "AdesEvidenceSession" => :ades_contract_sessions_path
   }.freeze
 

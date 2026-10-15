@@ -1025,6 +1025,8 @@ en:
       add_another_signature: "Add another signature"
       autogram_desktop_label: "Autogram Desktop"
       autogram_desktop_description: "Desktop application with qualified electronic seal or chip ID card"
+      chevron7_label: "Chevron7 (macOS)"
+      chevron7_description: "Sign in the Chevron7 app on a Mac with a card or a phone; the signed document is sent back automatically"
       autogram_mobile_label: "Autogram Mobile"
       autogram_mobile_description: "Open-source mobile app - scan QR code or open AVM app directly"
       eidentita_label: "eIdentita"
@@ -1050,11 +1052,13 @@ en:
       multiple_files_in_contract_mobile_warning: "This document contains multiple files. Signing such a document requires a desktop computer with a physical card reader. Please use a desktop computer to sign this document."
       unavailable_reasons:
         multiple_files: "Does not support documents with multiple files."
+        unsupported_document_type: "Supports a single PDF document only."
         prepared_signature_fields: "Does not support prepared signature fields."
         unsupported_qscd: "Requires a document with an NFC chip (e.g. a Slovak ID card issued after 1.12.2022)."
         unsupported_signature_level: "Supports only BASELINE_B signatures."
         desktop_only: "Available only on a desktop computer."
         method_not_allowed: "Signing in standalone applications is not allowed for this document."
+        qualified_signature_not_allowed: "Qualified electronic signatures are not allowed for this document."
         timestamp_limit_reached: "The organization the document belongs to has used up its monthly limit of timestamps."
     signature_parameters:
       sign_title: "Sign document"
@@ -1323,6 +1327,14 @@ en:
         upload_title: "Upload the signed document"
         upload_desc: "After signing, upload the signed document back."
         upload_dropzone: "Drop a file here or click to select"
+      chevron7:
+        title: "Signing in Chevron7"
+        lead: "Open the document in Chevron7, check it and sign. This page refreshes by itself after signing."
+        open: "Open in Chevron7"
+        waiting: "Waiting for the signature from Chevron7"
+        expiry: "The link is valid for 30 minutes. If it expires, reload the page."
+        not_installed: "No Chevron7?"
+        download: "Download for macOS"
       error:
         title: "The document could not be signed"
         description: "Signing did not finish and the document remains unsigned."
@@ -2179,7 +2191,7 @@ en:
         qscd_screenshot_caption: "Choosing an ID card or device"
         qscd_screenshot_alt: "The What will you sign with? page with four kinds of Slovak ID cards by issue date with their compatibility, and the groups for residence permits, Czech ID cards and qualified smart cards and USB tokens"
         apps_screenshot_caption: "Choosing a signing application"
-        apps_screenshot_alt: "The Select Signing Application page with the selected ID card and the options Autogram Desktop, Autogram Mobile, eIdentita and Podpisuj or other standalone applications"
+        apps_screenshot_alt: "The Select Signing Application page with the selected ID card and the options Autogram Desktop, Chevron7 (macOS), Autogram Mobile, eIdentita and Podpisuj or other standalone applications"
         signature_levels_title: "Signature levels"
         signature_levels:
           baseline_b:
@@ -2222,6 +2234,13 @@ en:
               download:
                 label: "Download Autogram"
                 url: "https://autogram.slovensko.digital"
+          chevron7:
+            label: "Chevron7 (macOS)"
+            description: "An application for macOS, available for documents with one file. The portal opens the document in Chevron7, which signs it with an ID card or a qualified smart card in a card reader or with a phone and sends the signed document back by itself."
+            links:
+              download:
+                label: "Download Chevron7"
+                url: "https://chevron7.slovensko.app"
           autogram_mobile:
             label: "Autogram Mobile"
             description: "A free open-source application for Android and iOS. It signs with an ID card with an NFC chip that you hold to the phone. On a computer or tablet you scan a QR code with your phone, on the phone the app opens directly."

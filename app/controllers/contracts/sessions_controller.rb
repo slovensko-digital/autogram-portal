@@ -31,6 +31,8 @@ class Contracts::SessionsController < ApplicationController
       create_autogram_session
     when "podpisuj"
       create_podpisuj_session
+    when "chevron7"
+      create_chevron7_session
     else
       return render plain: "Invalid session type", status: :bad_request
     end
@@ -100,6 +102,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def parameters
+    return render_chevron7_parameters if @session.chevron7?
     return render formats: [ :json ], partial: "eidentita" if @session.eidentita?
     return render formats: [ :json ], partial: "autogram" if @session.autogram?
 
@@ -136,7 +139,7 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def upload
-    return head :not_found unless @session.eidentita? || @session.autogram? || @session.podpisuj?
+    return head :not_found unless @session.eidentita? || @session.autogram? || @session.podpisuj? || @session.chevron7?
 
     if params[:file].present?
       @session.accept_signed_file(Base64.strict_encode64(params[:file].tempfile.read))
@@ -362,6 +365,29 @@ class Contracts::SessionsController < ApplicationController
       signing_started_at: Time.current,
       options: session_view_options
     ))
+  end
+
+  def create_chevron7_session
+    unless @contract.allowed_methods.include?("qes")
+      raise SessionCreationError, t("contracts.signature_apps.unavailable_reasons.qualified_signature_not_allowed")
+    end
+    reason = Chevron7Session.unavailability_reasons(nil, @contract).first
+    raise SessionCreationError, t("contracts.signature_apps.unavailable_reasons.#{reason}") if reason
+
+    existing = @signer_contract&.sessions&.pending&.where(type: "Chevron7Session")&.first
+    return persist_session_view_options(existing) if existing
+
+    persist_session_view_options(@signer_contract.sessions.create!(
+      type: "Chevron7Session",
+      signing_started_at: Time.current,
+      options: session_view_options
+    ))
+  end
+
+  def render_chevron7_parameters
+    return head :not_found unless @contract.documents_to_sign_for(signer_contract: @session.signer_contract).first
+
+    render formats: [ :json ], partial: "chevron7"
   end
 
   def authorize_session_operation!

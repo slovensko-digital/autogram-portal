@@ -35,6 +35,20 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
   end
 
+  test "external recipient signs in Chevron7 through the link to its parameters" do
+    bundle = request_signature_from_web(as: @owner, filename: "zmluva.pdf")
+    recipient = add_recipient(bundle, "external@example.com")
+    sign_out @owner
+
+    parameters = sign_with_chevron7(bundle.contracts.sole, recipient: recipient)
+
+    assert_equal 1, parameters["version"]
+    assert_equal "Firma ABC", parameters["sender"]
+    assert_equal "zmluva.pdf", parameters.dig("document", "filename")
+    assert bundle.reload.completed?
+    assert recipient.reload.signed?
+  end
+
   test "author names the bundle and writes a message before the invitation goes out" do
     bundle = request_signature_from_web(as: @owner, filename: "zmluva-o-dielo.pdf")
 
