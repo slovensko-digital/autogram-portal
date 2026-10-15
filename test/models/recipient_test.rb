@@ -256,6 +256,53 @@ class RecipientTest < ActiveSupport::TestCase
     recipients.singleton_class.remove_method :__original_create_for_race_test
   end
 
+  test "notification skip reason is nil exactly when the recipient is notifiable" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "invitee@example.com")
+
+    assert_nil recipient.notification_skip_reason
+    assert recipient.notifiable?
+  end
+
+  test "notification skip reason names why the invitation would not be sent" do
+    bundle = create_bundle_with_contract
+    bundle.allow_blank_recipient_emails = true
+    sending = bundle.recipients.create!(email: "sending@example.com", notification_status: :sending)
+    notified = bundle.recipients.create!(email: "notified@example.com", notification_status: :notified, notified_at: Time.current)
+    no_email = bundle.recipients.create!(email: nil, name: "Without email")
+    signed = bundle.recipients.create!(email: "signed@example.com")
+    signed.signer_contracts.update_all(signed_at: Time.current)
+    superseded = bundle.recipients.create!(email: "superseded@example.com")
+    withdrawn = bundle.recipients.create!(email: "withdrawn@example.com")
+    withdrawn.withdraw!
+    # Last: adding a recipient recomputes the signing rule, which lifts a superseded state it does not justify.
+    superseded.signer_contracts.update_all(superseded_at: Time.current)
+
+    expected = {
+      sending => :already_notified,
+      notified => :already_notified,
+      no_email => :no_email,
+      signed => :signed,
+      superseded => :superseded,
+      withdrawn.reload => :withdrawn
+    }
+    expected.each do |recipient, reason|
+      assert_equal reason, recipient.notification_skip_reason, recipient.display_name
+      assert_not recipient.notifiable?, recipient.display_name
+    end
+  end
+
+  test "notify does nothing for a recipient without an email address" do
+    bundle = create_bundle_with_contract
+    bundle.allow_blank_recipient_emails = true
+    recipient = bundle.recipients.create!(email: nil, name: "Without email")
+
+    assert_no_enqueued_jobs do
+      recipient.notify!
+    end
+
+    assert recipient.reload.not_notified?
+  end
+
   private
 
   def create_bundle_with_contract

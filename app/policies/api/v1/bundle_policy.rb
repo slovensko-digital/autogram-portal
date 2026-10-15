@@ -15,6 +15,10 @@ class Api::V1::BundlePolicy < Api::V1::ApplicationPolicy
     show?
   end
 
+  def notify?
+    show?
+  end
+
   class Scope < Api::V1::ApplicationPolicy::TenantScope
   end
 end
