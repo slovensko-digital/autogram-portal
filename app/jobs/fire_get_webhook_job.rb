@@ -2,6 +2,8 @@ class FireGetWebhookJob < ApplicationJob
   OPEN_TIMEOUT_SECONDS = ENV.fetch("WEBHOOK_OPEN_TIMEOUT", "3").to_i
   REQUEST_TIMEOUT_SECONDS = ENV.fetch("WEBHOOK_TIMEOUT", "5").to_i
 
+  retry_on StandardError, wait: :polynomially_longer, attempts: 10
+
   def perform(url:, webhook_id:, provider: Faraday)
     attempt_timestamp = Time.now.to_i
 

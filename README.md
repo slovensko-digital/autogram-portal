@@ -149,7 +149,7 @@ Autogram Portal provides a complete API solution for applications that need elec
   - You receive UUIDs for the bundle and contracts to track them
 
 2. **Get Notified** - When signing is complete, you're notified via:
-  - **Webhooks** - Receive callbacks at your specified URL (using [Standard Webhooks](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md) specification)
+  - **Webhooks** - Receive callbacks at your specified URL (using [Standard Webhooks](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md) specification); failed deliveries are retried for about 4 hours
   - **Polling** - Check bundle/contract status via API
 
 3. **Download Results** - Retrieve signed files and optionally delete records from the portal

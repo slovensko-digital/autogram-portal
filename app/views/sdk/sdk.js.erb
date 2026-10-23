@@ -1,4 +1,8 @@
 (function() {
+    // Signing in the iframe calls the local Autogram app on the loopback address. Chrome lets a cross-origin
+    // iframe ask for that only when the embedding page delegates the permission: "loopback-network" in current
+    // Chrome, "local-network-access" in the versions (142+) before the permission was split.
+    const IFRAME_ALLOW = 'loopback-network; local-network-access';
     const strings = <%= raw(I18n.available_locales.index_with { |locale| I18n.t("sdk", locale: locale) }.to_json) %>;
     const localized = (locale) => {
         const pageLocale = (document.documentElement.lang || '').slice(0, 2);
@@ -62,7 +66,7 @@
             iframe.style.height = config.height;
             iframe.style.border = config.border;
             iframe.setAttribute('data-agp-session', sessionId);
-            iframe.setAttribute('allow', 'loopback-network');
+            iframe.setAttribute('allow', IFRAME_ALLOW);
             iframe.setAttribute('title', config.title);
 
             // Set up message listener
@@ -206,7 +210,7 @@
                 width: 100%;
             `;
             iframe.setAttribute('data-agp-session', sessionId);
-            iframe.setAttribute('allow', 'loopback-network');
+            iframe.setAttribute('allow', IFRAME_ALLOW);
             iframe.setAttribute('title', config.title);
 
             popupContent.appendChild(header);
