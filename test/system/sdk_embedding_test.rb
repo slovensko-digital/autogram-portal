@@ -279,6 +279,26 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     end
   end
 
+  test "XML form with a plain text schema and transformation goes to Autogram with them in base64" do
+    schema = '<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"/>'
+    transformation = '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"/>'
+    contract = xml_form_contract("formular.xml", xdc_parameters: { schema: schema, schema_mime_type: "application/xml", transformation: transformation })
+    bundle = create_bundle(contracts: [ contract ], publicly_visible: true)
+    install_fake_autogram_app
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_onboarding"
+
+    within_portal_frame do
+      continue_to_signing_apps
+      click_on I18n.t("contracts.signature_apps.continue_to_sign")
+      assert_text I18n.t("contracts.sessions.signed.title")
+
+      parameters = last_autogram_sign_parameters
+      assert_equal Base64.strict_encode64(schema), parameters["schema"]
+      assert_equal Base64.strict_encode64(transformation), parameters["transformation"]
+    end
+  end
+
   test "locale option switches the iframe language" do
     bundle = create_bundle(contracts: [ qes_contract("contract.pdf") ], recipients: [ { email: "signer@example.com" } ])
 
@@ -711,14 +731,14 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     }
   end
 
-  # A form of the financial administration as GovBox sends it: only the form identifier is set of the XDC parameters.
-  def xml_form_contract(filename)
+  # By default a form of the financial administration as GovBox sends it: only the form identifier is set of the XDC parameters.
+  def xml_form_contract(filename, xdc_parameters: { auto_load_eform: true, fs_form_identifier: "833_825" })
     {
       allowed_methods: [ "qes" ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES", container: "ASiC_E" },
       documents_attributes: [ {
         blob: ActiveStorage::Blob.create_and_upload!(io: StringIO.new("<dokument/>"), filename: filename, content_type: "application/xml"),
-        xdc_parameters_attributes: { auto_load_eform: true, fs_form_identifier: "833_825" }
+        xdc_parameters_attributes: xdc_parameters
       } ]
     }
   end
