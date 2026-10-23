@@ -256,24 +256,71 @@ class RecipientTest < ActiveSupport::TestCase
     recipients.singleton_class.remove_method :__original_create_for_race_test
   end
 
+  test "signing status is pending until the recipient signs or declines" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "pending@example.com")
+
+    assert_equal :pending, recipient.signing_status
+  end
+
+  test "signing status is signed once the recipient signed every contract" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "signed@example.com")
+    recipient.signer_contracts.update_all(signed_at: Time.current)
+
+    assert_equal :signed, recipient.signing_status
+  end
+
+  test "signing status is declined when the recipient declined" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "declined@example.com")
+    recipient.signer_contracts.update_all(declined_at: Time.current)
+
+    assert_equal :declined, recipient.signing_status
+  end
+
+  test "signing status is superseded, not signed, when the signing rule no longer needs the recipient" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "superseded@example.com")
+    recipient.signer_contracts.update_all(superseded_at: Time.current)
+
+    assert recipient.signed?, "signed? alone also holds for a recipient whose contracts were all superseded"
+    assert_equal :superseded, recipient.signing_status
+  end
+
+  test "signing status is declined, not superseded, when the recipient declined one contract and the rest were superseded" do
+    recipient = create_bundle_with_contract(contract_count: 2).recipients.create!(email: "declined-superseded@example.com")
+    declined, superseded = recipient.signer_contracts.order(:id).to_a
+    declined.update_columns(declined_at: Time.current)
+    superseded.update_columns(superseded_at: Time.current)
+
+    assert recipient.superseded?, "superseded? alone also holds here"
+    assert_equal :declined, recipient.signing_status
+  end
+
+  test "signing status is withdrawn for a withdrawn recipient whatever its contracts say" do
+    recipient = create_bundle_with_contract.recipients.create!(email: "withdrawn@example.com")
+    recipient.withdraw!
+
+    assert_equal :withdrawn, recipient.reload.signing_status
+  end
+
   private
 
-  def create_bundle_with_contract
-    blob = ActiveStorage::Blob.create_and_upload!(
-      io: StringIO.new("%PDF-1.4 test content"),
-      filename: "recipient-test.pdf",
-      content_type: "application/pdf"
-    )
+  def create_bundle_with_contract(contract_count: 1)
+    contracts = Array.new(contract_count) do
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: StringIO.new("%PDF-1.4 test content"),
+        filename: "recipient-test.pdf",
+        content_type: "application/pdf"
+      )
 
-    contract = Contract.create!(
-      documents_attributes: [ { blob: blob } ],
-      signature_parameters_attributes: {
-        level: "BASELINE_B",
-        format: "PAdES"
-      }
-    )
+      Contract.create!(
+        documents_attributes: [ { blob: blob } ],
+        signature_parameters_attributes: {
+          level: "BASELINE_B",
+          format: "PAdES"
+        }
+      )
+    end
 
-    Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    Bundle.create!(tenant: tenants(:one), contracts: contracts)
   end
 
   def create_recipient(notification_status:, email: nil)

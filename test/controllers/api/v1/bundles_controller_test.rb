@@ -507,7 +507,87 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "bundle show reports each recipient's state and when it was notified" do
+    bundle = create_api_bundle(recipients: %w[awaiting signed declined superseded withdrawn].map { |name| { name: name, email: "#{name}@example.com" } })
+    recipients = bundle.recipients.index_by(&:name)
+    notified_at = Time.zone.parse("2026-10-12T08:30:00Z")
+    recipients["awaiting"].update!(notification_status: :notified, notified_at: notified_at)
+    recipients["signed"].signer_contracts.update_all(signed_at: Time.current)
+    recipients["declined"].signer_contracts.update_all(declined_at: Time.current)
+    recipients["superseded"].signer_contracts.update_all(superseded_at: Time.current)
+    assert recipients["withdrawn"].withdraw!
+
+    get "/api/v1/bundles/#{bundle.uuid}", headers: bearer_headers_for(@owner_tenant, @owner_key)
+
+    assert_response :success
+    body = response.parsed_body
+    assert_equal "declined", body["state"]
+
+    by_uuid = body.fetch("recipients").index_by { |recipient| recipient["uuid"] }
+    assert_equal recipients.values.map(&:uuid).sort, by_uuid.keys.sort, "withdrawn recipients stay listed"
+    %w[awaiting signed declined superseded withdrawn].each do |state|
+      assert_equal state, by_uuid.fetch(recipients[state].uuid)["state"], "recipient #{state}"
+    end
+
+    assert_equal notified_at, Time.iso8601(by_uuid.fetch(recipients["awaiting"].uuid)["notified_at"])
+    assert by_uuid.fetch(recipients["signed"].uuid).key?("notified_at")
+    assert_nil by_uuid.fetch(recipients["signed"].uuid)["notified_at"]
+  end
+
+  test "bundle show reports the bundle state from no recipients to completed" do
+    bundle = create_api_bundle(recipients: [])
+    headers = bearer_headers_for(@owner_tenant, @owner_key)
+
+    get "/api/v1/bundles/#{bundle.uuid}", headers: headers
+    assert_response :success
+    assert_equal "no_recipients", response.parsed_body["state"]
+    assert_not response.parsed_body.key?("recipients")
+
+    recipient = bundle.recipients.create!(email: "signer@example.com")
+
+    get "/api/v1/bundles/#{bundle.uuid}", headers: headers
+    assert_equal "awaiting", response.parsed_body["state"]
+    assert_equal [ "awaiting" ], response.parsed_body["recipients"].map { |entry| entry["state"] }
+
+    recipient.signer_contracts.update_all(signed_at: Time.current)
+
+    get "/api/v1/bundles/#{bundle.uuid}", headers: headers
+    assert_equal "completed", response.parsed_body["state"]
+    assert_equal [ "signed" ], response.parsed_body["recipients"].map { |entry| entry["state"] }
+  end
+
+  test "bundle show keeps the author proxy out of the recipients" do
+    bundle = create_api_bundle(recipients: [ { name: "Visible", email: "visible@example.com" } ])
+    Recipient.find_or_create_author_proxy_for!(bundle: bundle, user: @owner)
+
+    get "/api/v1/bundles/#{bundle.uuid}", headers: bearer_headers_for(@owner_tenant, @owner_key)
+
+    assert_response :success
+    assert_equal [ "visible@example.com" ], response.parsed_body["recipients"].map { |entry| entry["email"] }
+  end
+
   private
+
+  def create_api_bundle(recipients:)
+    post "/api/v1/bundles",
+         params: {
+           id: SecureRandom.uuid,
+           contracts: [
+             {
+               id: SecureRandom.uuid,
+               allowedMethods: [ "qes" ],
+               documents: [ { filename: "contract.txt", content: Base64.strict_encode64("Sample text content"), contentType: "text/plain;base64" } ],
+               signatureParameters: { format: "XAdES", container: "ASiC_E" }
+             }
+           ],
+           recipients: recipients
+         },
+         headers: bearer_headers_for(@owner_tenant, @owner_key),
+         as: :json
+    assert_response :created, -> { response.body }
+
+    Bundle.find_by!(uuid: response.parsed_body.fetch("id"))
+  end
 
   def with_allowed_methods(methods)
     original_allowed_methods = Contract::ALLOWED_METHODS

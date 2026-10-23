@@ -717,6 +717,16 @@ components:
           type: string
           nullable: true
           description: Optional custom name for the bundle.
+        state:
+          type: string
+          readOnly: true
+          enum: [no_recipients, awaiting, declined, completed]
+          description: |
+            Signing state of the bundle, returned by `GET /bundles/{id}`. The first matching state applies.
+            - `no_recipients`: the bundle has no active recipient (withdrawn recipients do not count).
+            - `completed`: the signing rule is met and no active recipient still has a document to sign.
+            - `declined`: an active recipient declined.
+            - `awaiting`: anything else; the bundle still waits for signatures.
         publiclyVisible:
           type: boolean
           default: false
@@ -731,6 +741,7 @@ components:
           $ref: "#/components/schemas/Webhook"
         recipients:
           type: array
+          description: Recipients asked to sign. `GET /bundles/{id}` lists withdrawn recipients too (`state` `withdrawn`) and omits the key when there are none.
           items:
             $ref: "#/components/schemas/Recipient"
 
@@ -847,6 +858,23 @@ components:
           format: uuid
           example: 2ad58f5f-6f56-4ab6-a6df-5b80aa6f4a25
           description: Optional trusted portal instance identifier. When provided, the recipient is treated as federated and is expected to open the request through that remote portal instance.
+        state:
+          type: string
+          readOnly: true
+          enum: [withdrawn, declined, superseded, awaiting, signed]
+          description: |
+            Signing state of the recipient, returned by `GET /bundles/{id}`; the same status the web interface shows. The first matching state applies.
+            - `withdrawn`: the sender withdrew the request; the recipient can no longer sign.
+            - `declined`: the recipient declined to sign.
+            - `superseded`: the signing rule was met without this recipient's signature, so it is no longer needed.
+            - `awaiting`: the recipient still has a document to sign.
+            - `signed`: anything else; the recipient has no document left to sign.
+        notified_at:
+          type: ["string", "null"]
+          format: date-time
+          readOnly: true
+          example: "2026-10-12T08:30:00.000Z"
+          description: When the invitation email (or the invitation to the recipient's portal) was sent, returned by `GET /bundles/{id}`. Null until then, also while the invitation is queued (still being sent) or if sending it failed.
       required:
         - email
 

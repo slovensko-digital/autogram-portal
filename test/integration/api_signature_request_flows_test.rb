@@ -44,6 +44,40 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     get api_v1_bundle_path(bundle), headers: api_headers
     assert_response :success
+    assert_equal "completed", response.parsed_body["state"]
+    assert_equal [ [ recipient.uuid, "signed" ] ], response.parsed_body["recipients"].map { |entry| [ entry["uuid"], entry["state"] ] }
+  end
+
+  test "the API reports a recipient who is part way through as awaiting" do
+    bundle = create_bundle_via_api(
+      contracts: [ pdf_contract_payload("prva.pdf"), pdf_contract_payload("druha.pdf") ],
+      recipients: [ { email: "signer@example.com" } ]
+    )
+
+    sign_with_autogram(bundle.contracts.order(:id).first, recipient: bundle.recipients.sole)
+
+    get api_v1_bundle_path(bundle), headers: api_headers
+    assert_response :success
+    assert_equal "awaiting", response.parsed_body["state"]
+    assert_equal [ "awaiting" ], response.parsed_body["recipients"].map { |entry| entry["state"] }
+  end
+
+  test "the API reports the recipient who was no longer needed under the any rule as superseded" do
+    bundle = create_bundle_via_api(
+      contracts: [ pdf_contract_payload("zmluva.pdf") ],
+      recipients: [ { email: "first@example.com" }, { email: "second@example.com" } ],
+      signing_rule: "any"
+    )
+    first = bundle.recipients.find_by!(email: "first@example.com")
+    second = bundle.recipients.find_by!(email: "second@example.com")
+
+    sign_with_autogram(bundle.contracts.sole, recipient: first)
+
+    get api_v1_bundle_path(bundle), headers: api_headers
+    assert_response :success
+    assert_equal "completed", response.parsed_body["state"]
+    states = response.parsed_body["recipients"].to_h { |entry| [ entry["uuid"], entry["state"] ] }
+    assert_equal({ first.uuid => "signed", second.uuid => "superseded" }, states)
   end
 
   test "contract with several files is signed once as an ASiC-E container" do
@@ -171,8 +205,10 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
   private
 
-  def create_bundle_via_api(contracts:, recipients:)
-    post api_v1_bundles_path, params: { id: SecureRandom.uuid, contracts: contracts, recipients: recipients }, headers: api_headers, as: :json
+  def create_bundle_via_api(contracts:, recipients:, signing_rule: nil)
+    params = { id: SecureRandom.uuid, contracts: contracts, recipients: recipients }
+    params[:signingRule] = signing_rule if signing_rule
+    post api_v1_bundles_path, params: params, headers: api_headers, as: :json
     assert_response :created, -> { response.body }
 
     bundle = Bundle.find_by!(uuid: response.parsed_body.fetch("id"))

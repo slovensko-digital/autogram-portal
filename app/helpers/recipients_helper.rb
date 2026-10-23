@@ -8,17 +8,7 @@ module RecipientsHelper
       withdrawn:  { bg: "bg-amber-100",  text: "text-amber-800" }
     }
 
-    status = if recipient.withdrawn?
-      :withdrawn
-    elsif recipient.declined?
-      :declined
-    elsif recipient.superseded?
-      :superseded
-    elsif recipient.pending?
-      :pending
-    else
-      :signed
-    end
+    status = recipient.signing_status
 
     color = colors[status]
 

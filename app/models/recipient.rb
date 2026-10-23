@@ -186,6 +186,17 @@ class Recipient < ApplicationRecord
     signer_contracts.exists? && !pending? && !declined?
   end
 
+  # The recipient's signing status, shown by the web badge and reported by the API. The first match
+  # wins: declined? and superseded? can both hold, and signed? also holds once every contract was superseded.
+  def signing_status
+    if withdrawn? then :withdrawn
+    elsif declined? then :declined
+    elsif superseded? then :superseded
+    elsif pending? then :pending
+    else :signed
+    end
+  end
+
   def notifiable?
     return false if withdrawn?
     return false if signer_contracts.signed.exists?
