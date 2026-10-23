@@ -329,6 +329,9 @@ export default class extends Controller {
       result.autoLoadEform = true;
     }
 
+    // Autogram rejects null for its optional boolean parameters, leave out the ones the document does not set
+    result = Object.fromEntries(Object.entries(result).filter(([, value]) => value != null));
+
     console.log('Final signature parameters:', result)
     return result;
   }
