@@ -215,7 +215,7 @@ export default class extends Controller {
         if (autogramParameters.documents[0].filename)
           signRequestDocument.filename = autogramParameters.documents[0].filename;
 
-        let signRequestSignatureParameters = this.getOldSignatureParameters(
+        let signRequestSignatureParameters = await this.getOldSignatureParameters(
           autogramParameters.signature_parameters,
           autogramParameters.documents[0].xdc_parameters
         );
@@ -295,7 +295,7 @@ export default class extends Controller {
     }
   }
 
-  getOldSignatureParameters(newParams, xdcParams) {
+  async getOldSignatureParameters(newParams, xdcParams) {
     let result = {
       level: newParams.format + "_" + newParams.level,
       container: newParams.container
@@ -318,9 +318,9 @@ export default class extends Controller {
           result.schema = xdcParams.schema;
           result.transformation = xdcParams.transformation;
         } else {
-          result.schema = this.stringToBase64(xdcParams.schema);
+          result.schema = await this.stringToBase64(xdcParams.schema);
           result.schemaMimeType = xdcParams.schema_mime_type + ';base64';
-          result.transformation = this.stringToBase64(xdcParams.transformation);
+          result.transformation = await this.stringToBase64(xdcParams.transformation);
           result.transformationMimeType = xdcParams.transformation_mime_type + ';base64';
         }
       }
