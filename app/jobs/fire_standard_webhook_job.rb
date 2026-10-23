@@ -2,7 +2,6 @@ class FireStandardWebhookJob < ApplicationJob
   OPEN_TIMEOUT_SECONDS = ENV.fetch("WEBHOOK_OPEN_TIMEOUT", "3").to_i
   REQUEST_TIMEOUT_SECONDS = ENV.fetch("WEBHOOK_TIMEOUT", "5").to_i
 
-  # Integrators may rely on the webhook alone, so a temporarily unreachable endpoint must not lose it (about 4 hours of retries).
   retry_on StandardError, wait: :polynomially_longer, attempts: 10
 
   def perform(url:, webhook_id:, payload:, method: :post, provider: Faraday)
