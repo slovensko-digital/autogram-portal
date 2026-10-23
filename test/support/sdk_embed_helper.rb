@@ -14,14 +14,16 @@ module SdkEmbedHelper
 
   # Stands in for the Autogram desktop app. With a signed result the portal's
   # Autogram signers get a file SigningFlowHelper::FakeAutogramService accepts
-  # as validly signed, otherwise one without signatures.
+  # as validly signed, otherwise one without signatures. The parameters of the
+  # last sign call are kept as the app receives them, see #last_autogram_sign_parameters.
   def self.fake_autogram_app(signed:)
     prefix = signed ? SigningFlowHelper::SIGNED_PREFIX : "unsigned:"
 
     <<~JS
       window.AutogramSDK = {
         DesktopClient: class {
-          async sign(document, _parameters, _contentType, options) {
+          async sign(document, parameters, _contentType, options) {
+            sessionStorage.setItem("fakeAutogramSignParameters", JSON.stringify(parameters));
             options?.onStateChange?.({ type: "waitingForSignature" });
             return { content: btoa("#{prefix}" + (document?.filename || "document")) };
           }
@@ -146,6 +148,12 @@ module SdkEmbedHelper
   # the pages opened afterwards.
   def install_fake_autogram_app(signed: true)
     @fake_autogram_app_script = page.driver.browser.execute_cdp("Page.addScriptToEvaluateOnNewDocument", source: SdkEmbedHelper.fake_autogram_app(signed: signed))["identifier"]
+  end
+
+  # Signature parameters of the last document the fake Autogram app signed, as JSON sent to the app.
+  # Call it within the portal frame.
+  def last_autogram_sign_parameters
+    JSON.parse(page.evaluate_script("sessionStorage.getItem('fakeAutogramSignParameters')") || "null")
   end
 
   # Waits for the integrator page to receive a portal message with +status+

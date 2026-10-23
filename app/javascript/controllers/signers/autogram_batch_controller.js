@@ -301,7 +301,8 @@ export default class extends Controller {
       }
     }
 
-    return result
+    // Autogram rejects null for its optional boolean parameters, leave out the ones the document does not set
+    return Object.fromEntries(Object.entries(result).filter(([, value]) => value != null))
   }
 
   buildVersionedDocument(document) {

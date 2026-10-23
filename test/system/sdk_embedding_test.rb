@@ -245,6 +245,40 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     end
   end
 
+  test "XML form goes to Autogram without the parameters its document does not set" do
+    bundle = create_bundle(contracts: [ xml_form_contract("dpfo.xml") ], publicly_visible: true)
+    install_fake_autogram_app
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_onboarding"
+
+    within_portal_frame do
+      continue_to_signing_apps
+      click_on I18n.t("contracts.signature_apps.continue_to_sign")
+      assert_text I18n.t("contracts.sessions.signed.title")
+
+      # Autogram rejects null for its optional boolean parameters
+      parameters = last_autogram_sign_parameters
+      assert_equal "833_825", parameters["fsFormId"]
+      assert_not_includes parameters.values, nil
+    end
+  end
+
+  test "XML forms signed all at once go to Autogram without the parameters their documents do not set" do
+    bundle = create_bundle(contracts: [ xml_form_contract("prvy.xml"), xml_form_contract("druhy.xml") ], publicly_visible: true)
+    install_fake_autogram_app
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_preview"
+
+    within_portal_frame do
+      click_on I18n.t("bundles.sign.batch_sign_action")
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+
+      parameters = last_autogram_sign_parameters
+      assert_equal "833_825", parameters["fsFormId"]
+      assert_not_includes parameters.values, nil
+    end
+  end
+
   test "locale option switches the iframe language" do
     bundle = create_bundle(contracts: [ qes_contract("contract.pdf") ], recipients: [ { email: "signer@example.com" } ])
 
@@ -674,6 +708,18 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       allowed_methods: [ "qes" ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" },
       documents_attributes: [ { blob: pdf_blob(filename) } ]
+    }
+  end
+
+  # A form of the financial administration as GovBox sends it: only the form identifier is set of the XDC parameters.
+  def xml_form_contract(filename)
+    {
+      allowed_methods: [ "qes" ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES", container: "ASiC_E" },
+      documents_attributes: [ {
+        blob: ActiveStorage::Blob.create_and_upload!(io: StringIO.new("<dokument/>"), filename: filename, content_type: "application/xml"),
+        xdc_parameters_attributes: { auto_load_eform: true, fs_form_identifier: "833_825" }
+      } ]
     }
   end
 
