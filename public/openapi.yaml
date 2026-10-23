@@ -633,6 +633,7 @@ paths:
 webhooks:
   notificationWebhook:
     post:
+      description: A delivery answered with a status other than 2xx (or not answered) is retried with a growing delay, 10 attempts in about 4 hours. Each attempt is signed again with its own `webhook-timestamp` and the same event can arrive more than once, so process deliveries idempotently.
       requestBody:
         content:
           application/json:
