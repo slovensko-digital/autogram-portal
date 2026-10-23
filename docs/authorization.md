@@ -81,7 +81,12 @@ by `SessionAccessToken`. Neither subject stores raw tokens. Session token access
 is evaluated only for parameters/download/upload; destruction checks user access,
 and AdES mutations additionally require the resolved signer/session to match.
 Session permissions require a nonempty contract; missing parents do not establish
-a valid binding.
+a valid binding. The token travels in the URLs a signing app receives. The
+Autogram page passes token parameters and upload URLs to the desktop app; the
+eIDENTITA and Chevron7 links (`EidentitaSession`, `Chevron7Session`) point to the
+token parameters URL, whose JSON carries token download and upload URLs; the
+Podpisuj page uses token download and upload URLs. `upload` accepts only
+eIDENTITA, Autogram, Podpisuj and Chevron7 sessions.
 
 Policies are read-only: they do not create records, send mail, issue grants or
 change signing state. Reuse domain predicates. Capacity, last-owner protections

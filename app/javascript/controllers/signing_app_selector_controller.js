@@ -3,7 +3,7 @@ import { isMobileDevice } from "utils/device_detection"
 import i18n from "i18n"
 
 export default class extends Controller {
-  static targets = ["appRadio", "autogramSubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "podpisujSubmitButton", "signButton", "mobileWarning", "yellowWarning", "appSelectionHeading"]
+  static targets = ["appRadio", "autogramSubmitButton", "chevron7SubmitButton", "avmSubmitButton", "eidentitaSubmitButton", "podpisujSubmitButton", "signButton", "mobileWarning", "yellowWarning", "appSelectionHeading"]
 
   connect() {
     console.log('Signing app selector connected')
@@ -88,6 +88,11 @@ export default class extends Controller {
       if (this.hasAutogramSubmitButtonTarget) {
         this.setSignButtonLoading(true)
         this.autogramSubmitButtonTarget.click()
+      }
+    } else if (selectedApp === 'chevron7') {
+      if (this.hasChevron7SubmitButtonTarget) {
+        this.setSignButtonLoading(true)
+        this.chevron7SubmitButtonTarget.click()
       }
     } else if (selectedApp === 'avm') {
       if (this.hasAvmSubmitButtonTarget) {

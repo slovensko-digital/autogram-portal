@@ -34,6 +34,8 @@
         <%= render "contracts/sessions/ades_evidence" %>
       <% elsif @session.podpisuj? %>
         <%= render "contracts/sessions/podpisuj" %>
+      <% elsif @session.chevron7? %>
+        <%= render "contracts/sessions/chevron7" %>
       <% end %>
       <% unless unsuccessful %>
         <!-- Footer with back button -->

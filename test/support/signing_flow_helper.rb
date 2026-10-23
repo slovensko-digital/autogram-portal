@@ -86,6 +86,30 @@ module SigningFlowHelper
     { parameters: CGI.unescapeHTML(parameters_path), upload: CGI.unescapeHTML(upload_path) }
   end
 
+  # Opens a Chevron7 session the way the signing page does and follows the chevron7:// link as the
+  # app does: fetches the JSON, downloads the document and uploads a signed file to destinationUrl.
+  # Returns the parsed JSON.
+  def sign_with_chevron7(contract, recipient: nil)
+    get chevron7_contract_sessions_path(contract, recipient: recipient&.uuid)
+    assert_response :success
+
+    link = response.body[/href="(chevron7:\/\/sign\?linkUrl=[^"]+)"/, 1]
+    assert link, "signing page does not link to Chevron7"
+    link_url = URI(CGI.unescape(CGI.unescapeHTML(link).delete_prefix("chevron7://sign?linkUrl=")))
+
+    get link_url.request_uri
+    assert_response :success
+    parameters = response.parsed_body
+
+    get URI(parameters.dig("document", "sourceUrl")).request_uri
+    assert_response :success
+
+    upload_signed_file(contract, URI(parameters.fetch("destinationUrl")).request_uri)
+    assert_response :success, -> { "upload failed: #{response.body}" }
+
+    parameters
+  end
+
   def upload_signed_file(contract, upload_path)
     post upload_path, params: { signed_document: Base64.strict_encode64("#{SIGNED_PREFIX}#{contract.uuid}") }
   end

@@ -134,6 +134,7 @@ Rails.application.routes.draw do
       get :eidentita, on: :collection, to: "contracts/sessions#create", defaults: { type: "eidentita" }
       get :avm, on: :collection, to: "contracts/sessions#create", defaults: { type: "avm" }
       get :podpisuj, on: :collection, to: "contracts/sessions#create", defaults: { type: "podpisuj" }
+      get :chevron7, on: :collection, to: "contracts/sessions#create", defaults: { type: "chevron7" }
     end
   end
 
