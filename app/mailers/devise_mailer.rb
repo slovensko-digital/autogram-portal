@@ -1,5 +1,5 @@
 class DeviseMailer < Devise::Passwordless::Mailer
-  include MarksStagingMail
+  include StagingMail
 
   layout "mailer"
 

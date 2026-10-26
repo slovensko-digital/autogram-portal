@@ -1,5 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  include MarksStagingMail
+  include StagingMail
 
   default from: ENV.fetch("MAIL_FROM", "noreply@example.com")
 

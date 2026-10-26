@@ -77,6 +77,18 @@ class TenantTest < ActiveSupport::TestCase
     assert tenant.archivation_enabled?
   end
 
+  test "a test instance enables the api for every tenant" do
+    tenant = tenants(:one)
+    assert_not tenant.api_enabled?
+
+    ENV["PRODUCTION_URL"] = "https://agp.slovensko.digital"
+    assert tenant.api_enabled?
+    assert tenant.basic?
+    assert_empty tenant.features
+  ensure
+    ENV.delete("PRODUCTION_URL")
+  end
+
   test "api token public key must be a valid PEM key" do
     tenant = tenants(:one)
 
