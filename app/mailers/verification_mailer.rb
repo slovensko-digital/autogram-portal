@@ -16,4 +16,9 @@ class VerificationMailer < ApplicationMailer
   def set_locale
     I18n.locale = params[:locale] || I18n.default_locale
   end
+
+  # The code goes to a recipient of a bundle; the context names its contract.
+  def staging_mail_tenant
+    Contract.find_by(uuid: params.dig(:context, :contract_id))&.tenant
+  end
 end

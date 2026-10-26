@@ -18,11 +18,11 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - Run the server for other devices with `bin/rails server -b 0.0.0.0`. `bin/dev` exits without a TTY because the tailwind watcher quits; run `bin/rails tailwindcss:watch[always]` separately in that case.
 - Mail in development: `/letter_opener`. Jobs (GoodJob): `/admin/good_job`. In tests GoodJob runs jobs inline.
 - `API_SKIP_AUTH=true` in `.env` skips API JWTs locally (uses `Tenant.second`).
-- Staging (agp.dev.slovensko.digital, `config/deploy.staging.yml`) runs with `RAILS_ENV=staging`, so `Rails.env.production?` checks do not cover it. Its `PRODUCTION_URL` (the live agp.slovensko.digital) makes it a test instance (`StagingInstance`): a notice with a link to production on every page except embedded iframes and in every email (subject prefixed `[TEST]`), and sign-up (email and new Google accounts) only for `SIGNUP_ALLOWED_DOMAINS` (default `slovensko.digital`). `config/environments/staging.rb` sends `X-Robots-Tag: noindex, nofollow`, so keep crawlers allowed in `robots.txt`.
+- Staging (agp.dev.slovensko.digital, `config/deploy.staging.yml`) runs with `RAILS_ENV=staging`, so `Rails.env.production?` checks do not cover it. Its `PRODUCTION_URL` (the live agp.slovensko.digital) makes it a test instance (`StagingInstance`): a notice with a link to production on every page except embedded iframes and in every email (subject prefixed `[TEST]`), mail for addresses outside the tenant a mail concerns sent to the tenant owners instead (`StagingMail`: mailers name that tenant in `staging_mail_tenant`, subject `[TEST pre <address>]`; admins let a tenant send real emails with its `staging_real_mail` feature), sign-up open to anyone unless `SIGNUP_ALLOWED_DOMAINS` restricts it, and the API free for every tenant, Basic included (`Tenant#api_enabled?`). `config/environments/staging.rb` sends `X-Robots-Tag: noindex, nofollow`, so keep crawlers allowed in `robots.txt`.
 
 ## Domain model
 
-- **Tenant** (UI name: "Organizácia") owns all data: `bundles`, `contracts`, `contract_validation_records`. Plans: `basic` (1 member) and `pro` (unlimited, `Tenant::MAX_MEMBERS`). Features on the tenant: `archivation`, `api`. Plan, features and name are changed only by admins (`Admin::TenantsController`).
+- **Tenant** (UI name: "Organizácia") owns all data: `bundles`, `contracts`, `contract_validation_records`. Plans: `basic` (1 member) and `pro` (unlimited, `Tenant::MAX_MEMBERS`). Features on the tenant: `archivation`, `api`, `staging_real_mail` (only on a test instance). Plan, features and name are changed only by admins (`Admin::TenantsController`).
 - **Membership** joins users and tenants with role `owner` / `member`. All members see all tenant data; owners manage members and the API key. A tenant must keep an owner.
 - **User** is only a person: login, recipients, signers, consents, identities. User features are only `admin` and `federation`. Users have no password (magic link via devise-passwordless or Google); `remember_token` backs "remember me".
   - Every user has a personal Basic tenant (`Tenant.create_personal_for!`, named after the email, not editable by the user), created with the user (also for users invited via `User.find_or_invite!`) and kept when they join organizations. Organization members therefore always pick a tenant after signing in; the UI recognizes it by the Basic plan: the selection page labels Basic tenants "Personal" and the sidebar shows "Personal organization" instead of the name.
@@ -57,7 +57,7 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 
 ## API
 
-- `/api/v1/*`, RS256 JWT with `sub` = tenant id, verified by the tenant's `api_token_public_key`; the tenant needs the `api` feature (`app/lib/api_environment.rb`). Spec: `public/openapi.yaml` — update it with API changes.
+- `/api/v1/*`, RS256 JWT with `sub` = tenant id, verified by the tenant's `api_token_public_key`; the tenant needs `api_enabled?` (`app/lib/api_environment.rb`): the `api` feature, or any tenant on a test instance. Spec: `public/openapi.yaml` — update it with API changes.
 - Federation API under `/api/federation/v1` uses portal-to-portal assertions, not tenant tokens.
 
 ## Embedding (SDK)

@@ -8,10 +8,13 @@
         </div>
 
         <% if StagingInstance.active? %>
+          <% production_link = link_to(StagingInstance.production_host, StagingInstance.production_url_for(new_user_registration_path), class: "font-semibold text-blue-700 underline hover:no-underline") %>
           <p class="mb-6 rounded-lg border border-yellow-400 bg-yellow-50 p-4 text-sm text-gray-900">
-            <%= t('.staging_notice_html',
-                  addresses: StagingInstance.signup_allowed_addresses,
-                  link: link_to(StagingInstance.production_host, StagingInstance.production_url_for(new_user_registration_path), class: "font-semibold text-blue-700 underline hover:no-underline")) %>
+            <% if StagingInstance.signup_restricted? %>
+              <%= t('.staging_notice_html', addresses: StagingInstance.signup_allowed_addresses, link: production_link) %>
+            <% else %>
+              <%= t('.staging_open_notice_html', link: production_link) %>
+            <% end %>
           </p>
         <% end %>
 

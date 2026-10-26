@@ -19,7 +19,7 @@ class Tenant < ApplicationRecord
   include Tenant::Usage
   include Tenant::Retention
 
-  AVAILABLE_FEATURES = %w[archivation api].freeze
+  AVAILABLE_FEATURES = %w[archivation api staging_real_mail].freeze
 
   enum :plan, { basic: "basic", pro: "pro" }, validate: true
 
@@ -56,8 +56,10 @@ class Tenant < ApplicationRecord
     feature_enabled?(:archivation)
   end
 
+  # A test instance offers the API to every organization, Basic ones included, so integrators can
+  # try it for free; elsewhere the administrator enables the api feature.
   def api_enabled?
-    feature_enabled?(:api)
+    feature_enabled?(:api) || StagingInstance.active?
   end
 
   # nil means unlimited

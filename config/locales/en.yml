@@ -278,6 +278,7 @@ en:
         or_continue_with: "Or continue with"
         sign_up_with_google: "Continue with Google"
         staging_notice_html: "This is a test environment and only %{addresses} email addresses can sign up here. Create your account on the live Autogram Portal at %{link}."
+        staging_open_notice_html: "This is a test environment of Autogram Portal, not the live service. Create your account on the live Autogram Portal at %{link}."
       edit:
         delete_confirmation_hint: "The Delete account button becomes available after you type the phrase."
         delete_confirmation_label: "To confirm, type the phrase “%{phrase}”"
@@ -815,6 +816,7 @@ en:
         owner_email_help: "If no account exists for this email, one is created without a personal organization. An empty personal Basic organization of an existing account is deleted."
         plan: "Plan"
         features: "Features"
+        api_on_staging: "On this test instance every organization has the API, even without this feature."
         create: "Create organization"
         save: "Save"
         cancel: "Cancel"
@@ -2608,6 +2610,7 @@ en:
       integration:
         title: "API & SDK"
         intro: "The API is available only in the PRO plan, which is intended for legal entities. PRO organizations with API access can connect Autogram Portal to their own application. The API accepts JWT tokens signed with your key: an owner enters the public key in the organization settings and the token uses `sub` = the organization ID."
+        staging_note: "On this test instance the API is free for every organization, including the Basic plan: the owner enters the public key in the organization settings themselves. The limits of the organization's plan apply."
         links:
           sdk_example:
             label: "SDK Example"
@@ -2827,6 +2830,9 @@ en:
       apology: "We apologize for any confusion this may have caused."
       documents: "Documents in bundle"
   
+  staging_mail:
+    redirected_subject: "[TEST for %{addresses}]"
+
   layouts:
     meta:
       description: "Upload a document, sign it or send it for signature. Qualified electronic signatures made simple and secure with Autogram Portal."
@@ -2841,6 +2847,7 @@ en:
     staging_notice:
       label: "Test environment"
       text_html: "<strong>This is a test environment of Autogram Portal, not the live service.</strong> Documents may be deleted here at any time and validation here also accepts test signatures. The live Autogram Portal is at %{link}."
+      mail_redirect: "Emails for people outside your organization go to its owner instead."
 
   qscd:
     title:
@@ -2937,9 +2944,11 @@ en:
     feature_labels:
       archivation: "Validation archive"
       api: "API access"
+      staging_real_mail: "Real emails on the test instance"
     feature_descriptions:
       archivation: "Enables the validation archive and long-term validation record management features."
       api: "Allows setting the API public key and using authenticated integration endpoints."
+      staging_real_mail: "Emails of the organization go directly to the addressees. Without this feature, the organization owners get emails for people outside the organization instead."
     alerts:
       owner_required: "Only an owner of the organization can do this."
       other_tenant_record: "This record belongs to %{name}. To work with it, sign out and choose that organization when signing in."
@@ -2954,6 +2963,9 @@ en:
       api_disabled: "API access is not enabled for this organization. Please contact the administrator."
       api_pro_only_title: "The API is available only in the PRO plan"
       api_pro_only_html: "We offer the PRO plan only to legal entities (companies, associations, public authorities). If you want a PRO organization for your company, write to us at %{email}."
+      api_staging_title: "The API is free on this test instance"
+      api_staging_html: "Here you can try the API and SDK free of charge in any organization, including the Basic plan. The limits of the organization's plan apply. On the production Autogram Portal %{production} the API is available in the PRO plan. See the %{docs} to get started."
+      api_staging_docs: "user guide"
       update: "Save"
       members: "Members"
       members_limit:

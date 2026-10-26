@@ -237,6 +237,7 @@ sk:
         or_continue_with: "Alebo pokračovať s"
         sign_up_with_google: "Pokračovať cez Google"
         staging_notice_html: "Toto je testovacie prostredie a registrovať sa tu môžu len e-mailové adresy %{addresses}. Účet na ostrom Autogram Portali si vytvoríte na %{link}."
+        staging_open_notice_html: "Toto je testovacie prostredie Autogram Portalu, nie ostrá verzia. Účet na ostrom Autogram Portali si vytvoríte na %{link}."
       edit:
         delete_confirmation_hint: "Tlačidlo Zmazať účet sa sprístupní po napísaní frázy."
         delete_confirmation_label: "Na potvrdenie napíšte frázu „%{phrase}“"
@@ -746,6 +747,7 @@ sk:
         owner_email_help: "Ak účet s týmto e-mailom neexistuje, vytvorí sa bez osobnej organizácie. Prázdna osobná Basic organizácia existujúceho účtu sa zmaže."
         plan: "Plán"
         features: "Funkcie"
+        api_on_staging: "Na testovacom prostredí majú API všetky organizácie aj bez tejto funkcie."
         create: "Založiť organizáciu"
         save: "Uložiť"
         cancel: "Zrušiť"
@@ -2543,6 +2545,7 @@ sk:
       integration:
         title: "API a SDK"
         intro: "API je dostupné iba v pláne PRO, ktorý je určený pre právnické osoby. Organizácie PRO so zapnutým API prístupom môžu Autogram Portal prepojiť s vlastnou aplikáciou. API prijíma JWT tokeny podpísané vaším kľúčom: verejný kľúč vloží vlastník v Nastaveniach organizácie a v tokene uvediete `sub` = ID organizácie."
+        staging_note: "Na tomto testovacom prostredí je API zadarmo pre každú organizáciu, aj v pláne Basic: verejný kľúč si vlastník vloží v Nastaveniach organizácie sám. Platia limity plánu organizácie."
         links:
           sdk_example:
             label: "SDK príklad"
@@ -2761,6 +2764,9 @@ sk:
       apology: "Ospravedlňujeme sa za prípadné komplikácie."
       documents: "Dokumenty v balíku"
 
+  staging_mail:
+    redirected_subject: "[TEST pre %{addresses}]"
+
   layouts:
     meta:
       description: "Nahrajte dokument, podpíšte ho alebo pošlite na podpis. Kvalifikované elektronické podpisy jednoducho a bezpečne s Autogram Portalom."
@@ -2775,6 +2781,7 @@ sk:
     staging_notice:
       label: "Testovacie prostredie"
       text_html: "<strong>Toto je testovacie prostredie Autogram Portalu, nie ostrá verzia.</strong> Dokumenty sa tu môžu kedykoľvek zmazať a overenie tu za platné považuje aj testovacie podpisy. Ostrý Autogram Portal nájdete na %{link}."
+      mail_redirect: "E-maily pre ľudí mimo vašej organizácie dostane namiesto nich jej vlastník."
 
   qscd:
     title:
@@ -2875,9 +2882,11 @@ sk:
     feature_labels:
       archivation: "Archív podpisov"
       api: "API prístup"
+      staging_real_mail: "Skutočné e-maily na testovacom prostredí"
     feature_descriptions:
       archivation: "Zapína archív podpisov a funkcie správy záznamov dlhodobého overovania."
       api: "Umožňuje nastaviť verejný kľúč pre API a používať autentifikované integračné endpointy."
+      staging_real_mail: "E-maily organizácie chodia priamo adresátom. Bez tejto funkcie dostanú e-maily pre ľudí mimo organizácie namiesto nich jej vlastníci."
     alerts:
       owner_required: "Túto akciu môže vykonať iba vlastník organizácie."
       other_tenant_record: "Tento záznam patrí organizácii %{name}. Ak s ním chcete pracovať, odhláste sa a pri prihlásení vyberte túto organizáciu."
@@ -2892,6 +2901,9 @@ sk:
       api_disabled: "API prístup nie je pre túto organizáciu zapnutý. Kontaktujte administrátora."
       api_pro_only_title: "API je dostupné iba v pláne PRO"
       api_pro_only_html: "Plán PRO poskytujeme iba právnickým osobám (obchodné spoločnosti, združenia, úrady). Ak chcete organizáciu PRO pre svoju firmu, napíšte nám na %{email}."
+      api_staging_title: "Na testovacom prostredí je API zadarmo"
+      api_staging_html: "Tu si API a SDK vyskúšate bez poplatku v každej organizácii, aj v pláne Basic. Platia limity plánu organizácie. Na produkčnom Autogram Portali %{production} je API dostupné v pláne PRO. Postup nájdete v %{docs}."
+      api_staging_docs: "používateľskej príručke"
       update: "Uložiť"
       members: "Členovia"
       members_limit:
