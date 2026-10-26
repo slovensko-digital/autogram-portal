@@ -91,7 +91,7 @@ gem "pundit", "~> 2.5"
 
 gem "letter_opener", "~> 1.10", group: :development
 
-gem "omniauth", "~> 2.1"
+gem "omniauth", "~> 2.3"
 gem "omniauth-google-oauth2", "~> 1.2"
 
 gem "omniauth-rails_csrf_protection", "~> 2.0"
