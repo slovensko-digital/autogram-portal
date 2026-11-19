@@ -63,6 +63,15 @@ class Contracts::OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{sign_bundle_path(bundle, iframe: "true")}']", text: I18n.t("actions.back")
   end
 
+  test "first document choice of embedded signing without the signing method choice has no link back to it" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", iframe: "no_preview" }
+
+    assert_response :success
+    assert_select "a[href^=?]", sign_contract_path(contract), count: 0
+  end
+
   test "pin and certificate steps keep qscd in iframe forms" do
     contract = create_contract_without_session
 

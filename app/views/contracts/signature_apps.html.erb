@@ -1,4 +1,5 @@
 <% content_for :title, t('.title') %>
+<% signing_method_choice_skipped = signing_method_choice_skipped?(@contract, recipient: @recipient) %>
 
 <%= turbo_frame_tag "signature_apps_#{@contract.uuid}" do %>
   <%=  turbo_stream_from @contract %>
@@ -8,6 +9,10 @@
         <div class="mb-4 w-full">
           <h1 class="mb-2 text-3xl font-bold text-gray-900"><%= t('.title') %></h1>
           <p class="text-gray-600"><%= t('.subtitle') %></p>
+          <% if signing_method_choice_skipped && @contract.documents.first %>
+            <%# the skipped signing page would name the document %>
+            <p class="mt-2 break-words text-sm text-gray-500"><%= @contract.documents.first.filename %></p>
+          <% end %>
         </div>
 
         <% if @qscd.present? %>
@@ -57,11 +62,13 @@
         <div class="border-b border-gray-200"></div>
 
         <div class="flex gap-8">
-          <%= link_to t('actions.back'),
-            signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe], qscd: @qscd),
-            data: { turbo: false },
-            class: "btn btn-secondary flex-1"
-          %>
+          <% unless signing_method_choice_skipped %>
+            <%= link_to t('actions.back'),
+              signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe], qscd: @qscd),
+              data: { turbo: false },
+              class: "btn btn-secondary flex-1"
+            %>
+          <% end %>
 
           <button type="button"
                   data-signing-app-selector-target="signButton"

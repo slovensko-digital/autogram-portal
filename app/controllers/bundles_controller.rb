@@ -143,6 +143,10 @@ class BundlesController < ApplicationController
   end
 
   def sign
+    contract = @pending_batch_contracts.sole if @bundle.contracts.one? && @pending_batch_contracts.one?
+    return unless contract && helpers.signing_method_choice_skipped?(contract, recipient: @recipient)
+
+    redirect_to helpers.electronic_signing_path(contract, recipient: @recipient)
   end
 
   def autogram_batch
