@@ -272,6 +272,7 @@ agp.initIframe(contractId, options)</code></pre>
     popupTitle: 'AGP Portal',           // Popup title
     recipientId: 'recipient-id',       // Pre-select recipient by ID (optional)
     locale: 'sk',                       // Override UI language, e.g. 'sk' or 'en' (optional)
+    preferBatchSigning: true,           // Bundles only: start signing all documents at once with Autogram Desktop when possible (optional)
     onMessage: function(data, origin, iframe) {}, // Message handler
     onClose: function() {}              // Close handler (popup only)
 });</code></pre>

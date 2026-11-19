@@ -581,6 +581,11 @@ sk:
       error_message: "Pri podpisovaní dávky dokumentov nastala chyba."
       desktop_only: "Hromadné podpisovanie cez Autogram je dostupné iba na počítači."
       back_to_bundle: "Späť na balík"
+      sign_individually: "Podpísať v mobile alebo po jednom"
+      start_title: "Spustite Autogram"
+      start_message: "Autogram na počítači zatiaľ nebeží. Spustite ho a potvrďte v ňom hromadné podpisovanie."
+      start_action: "Spustiť Autogram"
+      retry: "Skúsiť znova"
     sign_withdrawn:
       title: "Požiadavka na podpis bola stiahnutá"
     status:

@@ -44,6 +44,8 @@
                 onClose: options.onClose || null,
                 recipientId: options.recipientId || null,
                 locale: options.locale || null,
+                // a bundle the signer can sign at once with Autogram on the computer opens right on that
+                preferBatchSigning: options.preferBatchSigning || false,
                 resourceType: resourceType
             };
 
@@ -61,6 +63,7 @@
             const params = new URLSearchParams({ iframe: iframeParam });
             if (config.recipientId) params.set('recipient', config.recipientId);
             if (config.locale) params.set('locale', config.locale);
+            if (config.preferBatchSigning) params.set('prefer_batch', 'true');
             iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?${params}`;
             iframe.style.width = config.width;
             iframe.style.height = config.height;
@@ -202,6 +205,7 @@
             const params = new URLSearchParams({ iframe: iframeParam });
             if (config.recipientId) params.set('recipient', config.recipientId);
             if (config.locale) params.set('locale', config.locale);
+            if (config.preferBatchSigning) params.set('prefer_batch', 'true');
             iframe.src = `${config.baseUrl}/${config.resourceType}/${sessionId}/sign?${params}`;
             iframe.style.cssText = `
                 flex: 1;

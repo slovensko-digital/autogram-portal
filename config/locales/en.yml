@@ -653,6 +653,11 @@ en:
       error_message: "An error occurred while signing the document batch."
       desktop_only: "Batch signing with Autogram Desktop is only available on desktop devices."
       back_to_bundle: "Back to bundle"
+      sign_individually: "Sign on a phone or one by one"
+      start_title: "Start Autogram"
+      start_message: "Autogram Desktop is not running yet. Start it and confirm the batch signature in it."
+      start_action: "Start Autogram"
+      retry: "Try again"
     sign_withdrawn:
       title: "Signature request withdrawn"
     status:

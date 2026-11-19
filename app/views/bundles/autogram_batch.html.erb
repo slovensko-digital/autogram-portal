@@ -38,6 +38,14 @@
           </div>
 
           <div class="rounded-lg border border-gray-200 bg-white p-6">
+            <div class="hidden" data-signers--autogram-batch-target="stateStart">
+              <h2 class="text-center text-lg font-semibold text-gray-900"><%= t('.start_title') %></h2>
+              <p class="mt-2 text-center text-sm text-gray-600"><%= t('.start_message') %></p>
+              <div class="mt-4 flex justify-center">
+                <button type="button" class="btn btn-primary" data-action="signers--autogram-batch#retry"><%= t('.start_action') %></button>
+              </div>
+            </div>
+
             <div data-signers--autogram-batch-target="stateNormal">
               <div class="mb-4 flex justify-center">
                 <svg aria-hidden="true" class="animate-spin text-blue-600" style="width: 64px; height: 64px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet">
@@ -122,8 +130,10 @@
             </div>
 
             <div class="mt-6 flex justify-between gap-4">
-              <%= link_to t('.back_to_bundle'), @return_path,
+              <%# started by the integrator, the signer has not seen the bundle with signing one by one, e.g. on a phone %>
+              <%= link_to params[:prefer_batch].present? ? t('.sign_individually') : t('.back_to_bundle'), @return_path,
                     class: "btn btn-secondary" %>
+              <button type="button" class="btn btn-primary hidden" data-signers--autogram-batch-target="retryButton" data-action="signers--autogram-batch#retry"><%= t('.retry') %></button>
             </div>
           </div>
         </div>

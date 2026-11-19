@@ -680,6 +680,50 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     assert bundle.contracts.all?(&:signed_document_attached?)
   end
 
+  test "integrator preferring batch signing has more documents signed with Autogram right away" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+      assert_link I18n.t("bundles.autogram_batch.sign_individually")
+    end
+
+    assert assert_portal_message("document-signed")["close_iframe"]
+    assert bundle.contracts.all?(&:signed_document_attached?)
+  end
+
+  test "embedded batch signing waits for a click to launch Autogram that is not running yet" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app(running: false)
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.start_title")
+      assert_equal 0, autogram_batch_starts
+
+      click_on I18n.t("bundles.autogram_batch.start_action")
+
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+    end
+  end
+
+  test "cancelled batch signing can be started again right away" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app(cancel_first_batch: true)
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.cancelled_title")
+
+      click_on I18n.t("bundles.autogram_batch.retry")
+
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+      assert_equal 2, autogram_batch_starts
+    end
+  end
+
   test "recipient signs with a verified AdES signature inside an iframe on the portal's own site" do
     bundle = create_bundle(
       contracts: [ { allowed_methods: [ "ades" ], documents_attributes: [ { blob: pdf_blob("zmluva.pdf") } ] } ],
