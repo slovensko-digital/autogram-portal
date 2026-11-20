@@ -178,7 +178,7 @@ GEM
       fugit (>= 1.11.0)
       railties (>= 6.1.0)
       thor (>= 1.0.0)
-    hashie (5.1.0)
+    hashie (5.2.0)
       logger
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
@@ -237,6 +237,7 @@ GEM
     matrix (0.4.3)
     method_source (1.1.0)
     mini_mime (1.1.5)
+    mini_portile2 (2.8.9)
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
@@ -260,6 +261,9 @@ GEM
       net-protocol
     net-ssh (7.3.4)
     nio4r (2.7.5)
+    nokogiri (1.19.7)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-musl)
@@ -284,11 +288,11 @@ GEM
       rack (>= 1.2, < 4)
       snaky_hash (~> 2.0, >= 2.0.7)
       version_gem (~> 1.1, >= 1.1.14)
-    omniauth (2.1.4)
-      hashie (>= 3.4.6)
+    omniauth (2.4.1)
+      hashie (>= 3.5.2)
       logger
-      rack (>= 2.2.3)
-      rack-protection
+      rack (>= 2.2.8)
+      rack-protection (>= 2.2.0)
     omniauth-google-oauth2 (1.2.3)
       jwt (>= 2.9.2, < 4)
       oauth2 (~> 2.0)
@@ -331,11 +335,11 @@ GEM
       activesupport (>= 3.0.0)
     raabro (1.5.0)
     racc (1.8.1)
-    rack (3.2.7)
+    rack (3.2.8)
     rack-cors (3.0.0)
       logger
       rack (>= 3.0.14)
-    rack-protection (4.2.1)
+    rack-protection (4.2.2)
       base64 (>= 0.1.0)
       logger (>= 1.6.0)
       rack (>= 3.0.0, < 4)
@@ -543,7 +547,7 @@ DEPENDENCIES
   kamal
   letter_opener (~> 1.10)
   letter_opener_web
-  omniauth (~> 2.1)
+  omniauth (~> 2.4)
   omniauth-google-oauth2 (~> 1.2)
   omniauth-rails_csrf_protection (~> 2.0)
   pg (~> 1.1)
@@ -625,7 +629,7 @@ CHECKSUMS
   fugit (1.14.0) sha256=e311a9cc85a54bb67649df45060e721282a1e2c8ebad40e41874a3a7d576f37e
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   good_job (4.20.0) sha256=cf46198a79b69e08f64ff5e5f6512b024185d110288c1f57619a50b0aaff82b6
-  hashie (5.1.0) sha256=c266471896f323c446ea8207f8ffac985d2718df0a0ba98651a3057096ca3870
+  hashie (5.2.0) sha256=357a22635195c2e3911fbbc3de9a7d528843d1f42ab0aae02171048f16332d72
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   importmap-rails (2.2.3) sha256=7101be2a4dc97cf1558fb8f573a718404c5f6bcfe94f304bf1f39e444feeb16a
   io-console (0.9.4) sha256=a403304f32928ee85e56d457b4612ca43f2703b561a3258844992bd24085fbb1
@@ -647,6 +651,7 @@ CHECKSUMS
   matrix (0.4.3) sha256=a0d5ab7ddcc1973ff690ab361b67f359acbb16958d1dc072b8b956a286564c5b
   method_source (1.1.0) sha256=181301c9c45b731b4769bc81e8860e72f9161ad7d66dd99103c9ab84f560f5c5
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
+  mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   msgpack (1.8.5) sha256=97419eaa7b35dfe3e462c0e6c1a3dfdcbfc8756605c09e46e4c6daef127517ba
   multi_xml (0.9.1) sha256=7ce766b59c17241ed62976caeae1fae9b2431b263398c35396239a68c4a64e57
@@ -659,6 +664,7 @@ CHECKSUMS
   net-smtp (0.5.2) sha256=35103cc04d6b2d94632f9928ede07483c24b70b9c0db1f231fea43909b678f3c
   net-ssh (7.3.4) sha256=59480290bd253321d9a4a90a47cb88fb21ee03a4748c861ea8e88830126391b0
   nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
+  nokogiri (1.19.7) sha256=abe94507c54cb18f872777b16bdca4aad32b1abdc4c52fe843f1c80fbdf992b8
   nokogiri (1.19.7-aarch64-linux-gnu) sha256=8f5e15d299602456406e1f03a9f3456cceb33a0722811e818d2ee2214eb4c84a
   nokogiri (1.19.7-aarch64-linux-musl) sha256=efe0c3602e6e54521bc21c681930ce5568e2d11203de17400710b2b3ca2e4cb4
   nokogiri (1.19.7-arm-linux-gnu) sha256=7fd1907125691aa89e838cc91161761c758b4e17bb32f0dd9b5515a82cc759af
@@ -667,7 +673,7 @@ CHECKSUMS
   nokogiri (1.19.7-x86_64-linux-gnu) sha256=25865ccb462f714e712fdf8906fde07849cb6704a808e3d629d75baa5af5dd3b
   nokogiri (1.19.7-x86_64-linux-musl) sha256=464d1f3dfb0d53cf54c0c6a7e23e8e91cf68ec3cafc2b27dc4a7682f2d9bf546
   oauth2 (2.0.25) sha256=2f736a2f93c2caa67c1b08dc3c9889bb907d62643f3183fefaa1723cba6a82ac
-  omniauth (2.1.4) sha256=42a05b0496f0d22e1dd85d42aaf602f064e36bb47a6826a27ab55e5ba608763c
+  omniauth (2.4.1) sha256=99950c2cf9231d4e960d2bda87e7efec5ace7c3e2d1860016ad3f2e40366489c
   omniauth-google-oauth2 (1.2.3) sha256=bdbab67e64e50b7902eee2dcfc2225575cefba15ab89a3b6e92c8947987c1da9
   omniauth-oauth2 (1.9.0) sha256=ed15f6d9d20991807ce114cc5b9c1453bce3645b64e51c68c90cff5ff153fee8
   omniauth-rails_csrf_protection (2.0.1) sha256=c6e3204d7e3925bb537cb52d50fdfc9f05293f1a9d87c5d4ab4ca3a39ba8c32d
@@ -691,9 +697,9 @@ CHECKSUMS
   pundit (2.5.2) sha256=e374152baa24f90b630428293faf4b4c5468fc3cc010165f7d8fcb44ce108bbd
   raabro (1.5.0) sha256=3f998a7bc84f9c84df3ab580634d2e0a5bda4f0841168d56035f529c9877440a
   racc (1.8.1) sha256=4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f
-  rack (3.2.7) sha256=93e13e1c24f93556671d85d2d79fa228c3485815c50d7e2f265b5330c6528fb7
+  rack (3.2.8) sha256=1fecc85e463ebc7a2a945fff829ffcd549babeb1556384796fad946c28dc4ec7
   rack-cors (3.0.0) sha256=7b95be61db39606906b61b83bd7203fa802b0ceaaad8fcb2fef39e097bf53f68
-  rack-protection (4.2.1) sha256=cf6e2842df8c55f5e4d1a4be015e603e19e9bc3a7178bae58949ccbb58558bac
+  rack-protection (4.2.2) sha256=0e75764dae462c4041544452ce568bb1f1ced556b791cd32ac479d0781065a99
   rack-session (2.1.2) sha256=595434f8c0c3473ae7d7ac56ecda6cc6dfd9d37c0b2b5255330aa1576967ffe8
   rack-test (2.2.0) sha256=005a36692c306ac0b4a9350355ee080fd09ddef1148a5f8b2ac636c720f5c463
   rackup (2.3.1) sha256=6c79c26753778e90983761d677a48937ee3192b3ffef6bc963c0950f94688868
