@@ -55,20 +55,23 @@ class RetentionNoticesTest < ActionDispatch::IntegrationTest
 
   test "lists mark the documents deleted soon" do
     with_plan_limits("BASIC_RETENTION_DAYS" => "60") do
-      create_bundle("Starý balík", created_at: 59.days.ago)
-      create_bundle("Nový balík", created_at: 1.day.ago)
-      create_contract(created_at: 60.days.ago + 1.hour)
+      # at noon, an hour from now is still today whenever the test runs
+      travel_to Time.current.noon do
+        create_bundle("Starý balík", created_at: 59.days.ago)
+        create_bundle("Nový balík", created_at: 1.day.ago)
+        create_contract(created_at: 60.days.ago + 1.hour)
 
-      get bundles_path
+        get bundles_path
 
-      assert_response :success
-      assert_includes response.body, I18n.t("retention.note", plan: "Basic", count: 60)
-      assert_select "span", text: I18n.t("retention.badge", countdown: I18n.t("retention.countdown.tomorrow")), count: 1
+        assert_response :success
+        assert_includes response.body, I18n.t("retention.note", plan: "Basic", count: 60)
+        assert_select "span", text: I18n.t("retention.badge", countdown: I18n.t("retention.countdown.tomorrow")), count: 1
 
-      get contracts_path
+        get contracts_path
 
-      assert_response :success
-      assert_select "span", text: I18n.t("retention.badge", countdown: I18n.t("retention.countdown.today")), count: 1
+        assert_response :success
+        assert_select "span", text: I18n.t("retention.badge", countdown: I18n.t("retention.countdown.today")), count: 1
+      end
     end
   end
 
