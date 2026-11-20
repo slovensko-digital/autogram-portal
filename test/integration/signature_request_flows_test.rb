@@ -278,22 +278,61 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a standalone document counts once when someone outside the organization signs it" do
+  test "a standalone document counts once when someone else than its author signs it" do
+    colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
     sign_in_with_tenant @owner, @organization
     upload_pdf("samostatna.pdf")
     contract = Contract.order(:id).last
     assert_equal @organization, contract.tenant
+    assert_equal @owner, contract.author
     assert_nil contract.bundle
 
     sign_with_autogram(contract)
-    assert_equal 0, @organization.usage_of(:signature_requests), "a member signing the document of the organization"
-
+    assert_equal 0, @organization.usage_of(:signature_requests), "the author signing their own document"
     sign_out @owner
-    sign_with_autogram(contract)
-    assert_equal [ "standalone_signature" ], @organization.usage_records.signature_request.pluck(:source)
 
-    sign_in confirmed_user("outsider@inafirma.sk")
+    sign_in_with_tenant colleague, @organization
     sign_with_autogram(contract)
+    record = @organization.usage_records.signature_request.sole
+    assert_equal "standalone_signature", record.source
+    assert record.signed_at
+    sign_out colleague
+
+    sign_with_autogram(contract)
+    assert_equal 1, @organization.usage_of(:signature_requests), "further signatures do not count again"
+  end
+
+  test "a colleague signing a bundle of the organization counts its document" do
+    colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
+    bundle = request_signature_from_web(as: @owner, filename: "interna.pdf")
+    sign_out @owner
+
+    sign_in_with_tenant colleague, @organization
+    get sign_bundle_path(bundle)
+    assert_response :success
+    sign_with_autogram(bundle.contracts.sole)
+
+    assert_equal colleague, bundle.recipients.author_proxies.sole.user
+    record = @organization.usage_records.signature_request.sole
+    assert_equal "recipient_signature", record.source
+    assert record.signed_at
+  end
+
+  test "asking the author to sign does not count the document, asking a colleague does" do
+    colleague = confirmed_user("colleague@firma-abc.sk", tenant: @organization)
+    bundle = request_signature_from_web(as: @owner, filename: "na-podpis.pdf")
+
+    add_recipient(bundle, @owner.email)
+    assert_equal 0, @organization.usage_of(:signature_requests)
+
+    recipient = add_recipient(bundle, colleague.email)
+    record = @organization.usage_records.signature_request.sole
+    assert_equal "notification", record.source
+    assert_nil record.signed_at
+    sign_out @owner
+
+    sign_with_autogram(bundle.contracts.sole, recipient: recipient)
+    assert record.reload.signed_at, "remembers when the counted document was signed"
     assert_equal 1, @organization.usage_of(:signature_requests)
   end
 

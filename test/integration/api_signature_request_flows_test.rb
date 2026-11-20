@@ -150,13 +150,16 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
       bundle = create_bundle_via_api(contracts: [ pdf_contract_payload("a.pdf"), pdf_contract_payload("b.pdf") ], recipients: [ { email: "signer@example.com" } ])
       assert_equal 0, @organization.usage_of(:signature_requests), "creating a bundle does not send it"
 
-      sign_with_autogram(bundle.contracts.order(:id).first, recipient: bundle.recipients.sole)
+      first, second = bundle.contracts.order(:id).to_a
+      sign_with_autogram(first, recipient: bundle.recipients.sole)
+      assert_equal 1, @organization.usage_of(:signature_requests), "only the signed document counts"
+      sign_with_autogram(second, recipient: bundle.recipients.sole)
 
       get api_v1_usage_path, headers: api_headers
       assert_response :success
       usage = response.parsed_body
       assert_equal "pro", usage["plan"]
-      assert_equal({ "used" => 2, "limit" => 5 }, usage.dig("usage", "signatureRequests"), "the whole bundle counts at the first signature")
+      assert_equal({ "used" => 2, "limit" => 5 }, usage.dig("usage", "signatureRequests"))
       assert_equal({ "used" => 0, "limit" => nil }, usage.dig("usage", "timestamps"))
       assert_equal 2, usage.dig("usage", "storedDocuments", "used")
       assert usage.dig("usage", "storage", "used").positive?

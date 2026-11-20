@@ -117,24 +117,28 @@ class Contract < ApplicationRecord
     tenant.nil? && bundle.nil?
   end
 
-  # Anyone but a member of the tenant signing its standalone document means it was given to them for
-  # signature (a link, an embedded page of an API integrator), so it counts towards the monthly limit of
-  # the tenant like the documents of a bundle (Bundle#signed_as_signature_request?).
-  def signed_as_signature_request?(user)
-    bundle.nil? && tenant.present? && !(user && tenant.users.exists?(user.id))
+  # A document of a tenant counts as sent for signature (monthly limit, PRO billing) once anyone but the
+  # user who uploaded it is asked to sign it or signs it: a colleague, an invited recipient or whoever
+  # opens its link. +user+ is nil for signers without an account; documents without an author (API, older
+  # ones) count for everyone. Signing one's own document is free.
+  def signature_request_for?(user)
+    tenant.present? && (author_id.nil? || user&.id != author_id)
   end
 
   def signature_request_limit_reached_for?(user)
-    return false unless signed_as_signature_request?(user)
+    return false unless signature_request_for?(user)
+    return bundle.signature_request_limit_reached_for?(user) if bundle
 
     !tenant.signature_requests_counted?(self) && !tenant.within_limit?(:signature_requests)
   end
 
-  # The signature is already made, so the document is counted even beyond the limit.
+  # The signature is already made, so the document is counted even beyond the limit. Remembers when a
+  # counted document was first signed by someone else than its author.
   def record_signature_request_on_signing!(user)
-    return unless signed_as_signature_request?(user)
+    return unless signature_request_for?(user)
 
-    tenant.record_signature_requests!(self, source: :standalone_signature, enforce: false)
+    tenant.record_signature_requests!(self, source: bundle ? :recipient_signature : :standalone_signature, enforce: false)
+    UsageRecord.signature_request.where(contract: self, signed_at: nil).update_all(signed_at: Time.current)
   end
 
   # True when +tenant+ (the tenant the user works in) owns the contract.

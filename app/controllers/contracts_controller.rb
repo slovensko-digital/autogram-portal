@@ -390,9 +390,7 @@ class ContractsController < ApplicationController
   end
 
   def render_sign_limit_reached_if_needed
-    bundle = @contract.bundle
-    reached = bundle ? bundle.signature_request_limit_reached_for?(@recipient) : @contract.signature_request_limit_reached_for?(current_user)
-    return unless reached
+    return unless @contract.signature_request_limit_reached_for?(@recipient ? @recipient.user : current_user)
 
     render "bundles/sign_limit_reached", locals: { sender: @contract.tenant.sender_display_name }, status: :forbidden
   end
