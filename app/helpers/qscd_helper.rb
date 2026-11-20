@@ -1,5 +1,7 @@
 module QscdHelper
   QSCD_IMAGES = {
+    "eid_2021" => "qscd/eid_2013.png",
+    "dpb_2022" => "qscd/dpb_2020.png",
     "cz_eid_2012" => "qscd/cz_eid_2012.jpg",
     "cz_eid_2018" => "qscd/cz_eid_2018.jpg",
     "ica_securestore" => "qscd/smart_card_or_token.svg",
@@ -11,11 +13,10 @@ module QscdHelper
   QSCD_BADGES = {
     "eid_2024" => %i[mobile],
     "eid_2022" => %i[mobile],
-    "eid_2021" => %i[card_reader],
     "eid_2013" => %i[unsupported],
     "dpb_2023" => %i[mobile],
-    "dpb_2020" => %i[card_reader],
-    "dpb_2014" => %i[unsupported],
+    "dpb_2022" => %i[card_reader],
+    "dpb_2020" => %i[unsupported],
     "cz_eid_2018" => %i[card_reader certificate],
     "cz_eid_2012" => %i[unsupported],
     "ica_securestore" => %i[driver],

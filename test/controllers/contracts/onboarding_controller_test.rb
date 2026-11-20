@@ -108,6 +108,42 @@ class Contracts::OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name=qscd][checked]", count: 0
   end
 
+  test "qscd check offers slovak id cards issued before december 2022 as one unsupported choice" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic" }
+
+    assert_select "[role=group][aria-labelledby='qscd_group_sk_eid_title'] input[type=radio][name=qscd]", count: 3
+    assert_select "input[type=radio][name=qscd][value='eid_2021']", count: 0
+    radio = css_select("input[type=radio][value='eid_2013']").first
+    assert_select "[id='#{radio['aria-labelledby']}']", text: /1\.12\.2022/
+    assert_select "[id='#{radio['aria-describedby'].split.last}']", text: /#{Regexp.escape(I18n.t("qscd.badges.unsupported"))}/
+  end
+
+  test "qscd check offers residence permits issued before december 2022 as one unsupported choice" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic" }
+
+    assert_equal %w[dpb_2023 dpb_2022 dpb_2020], css_select("#qscd_group_sk_dpb_content input[type=radio][name=qscd]").map { |radio| radio["value"] }
+    assert_select "input[type=radio][name=qscd][value='dpb_2014']", count: 0
+    usable = css_select("input[type=radio][value='dpb_2022']").first
+    assert_select "[id='#{usable['aria-labelledby']}']", text: /1\.12\.2022.*17\.10\.2023/
+    assert_select "[id='#{usable['aria-describedby'].split.last}']", text: /#{Regexp.escape(I18n.t("qscd.badges.card_reader"))}/
+    unsupported = css_select("input[type=radio][value='dpb_2020']").first
+    assert_select "[id='#{unsupported['aria-labelledby']}']", text: /pred 1\.12\.2022/
+    assert_select "[id='#{unsupported['aria-describedby'].split.last}']", text: /#{Regexp.escape(I18n.t("qscd.badges.unsupported"))}/
+  end
+
+  test "signer who picked an id card from 2021 or 2022 earlier has nothing preselected" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/onboarding/qscd_check", params: { method: "electronic", qscd: "eid_2021" }
+
+    assert_response :success
+    assert_select "input[type=radio][name=qscd][checked]", count: 0
+  end
+
   test "qscd check preselects the current choice and expands its group" do
     contract = create_contract_without_session
 

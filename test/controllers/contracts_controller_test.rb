@@ -238,7 +238,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   test "signature apps show incompatible qscd choices disabled without launch links" do
     contract = create_pdf_contract(allowed_methods: [ "qes", "standalone_qes" ])
 
-    get signature_apps_contract_path(contract, qscd: "eid_2021")
+    get signature_apps_contract_path(contract, qscd: "cz_eid_2018")
 
     assert_response :success
     assert_equal %w[autogram podpisuj avm eidentita], signature_app_values
@@ -248,12 +248,12 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[value='eidentita'][disabled]", count: 1
     assert_select "label[tabindex], label[aria-disabled]", count: 0
     reason_id = css_select("input[value='avm'][disabled]").first["aria-describedby"].split.first
-    assert_select "[id='#{reason_id}']", text: /#{Regexp.escape(I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021")))}/, count: 1
+    assert_select "[id='#{reason_id}']", text: /#{Regexp.escape(I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.cz_eid_2018")))}/, count: 1
     assert_select "a[data-signing-app-selector-target='autogramSubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='podpisujSubmitButton']", count: 1
     assert_select "a[data-signing-app-selector-target='avmSubmitButton']", count: 0
     assert_select "a[data-signing-app-selector-target='eidentitaSubmitButton']", count: 0
-    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021"))
+    assert_includes response.body, I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.cz_eid_2018"))
   end
 
   test "signature apps enable all choices compatible with the document" do
@@ -299,7 +299,7 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
     recipient = bundle.recipients.create!(email: "signer@example.com")
 
-    get signature_apps_contract_path(contract, recipient: recipient.uuid, qscd: "eid_2021")
+    get signature_apps_contract_path(contract, recipient: recipient.uuid, qscd: "cz_eid_2018")
 
     assert_response :success
     assert_select "input[data-signing-app-selector-target='appRadio']", count: 3
@@ -364,6 +364,27 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
     get signature_apps_contract_path(contract, qscd: "eid_2013")
     assert_redirected_to contract_onboarding_path(contract, "qscd_check", method: "electronic")
+  end
+
+  test "signature apps send a signer who picked a document issued before december 2022 earlier to pick a usable one" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    %w[eid_2021 dpb_2020].each do |qscd|
+      get signature_apps_contract_path(contract, qscd: qscd)
+
+      assert_redirected_to contract_onboarding_path(contract, "qscd_check", method: "electronic"), qscd
+    end
+  end
+
+  test "signature apps offer only the computer for a residence permit issued from december 2022 to october 2023" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    get signature_apps_contract_path(contract, qscd: "dpb_2022")
+
+    assert_response :success
+    assert_select "input[value='autogram']:not([disabled])", count: 1
+    assert_select "input[value='avm'][disabled]", count: 1
+    assert_select "input[value='eidentita'][disabled]", count: 1
   end
 
   test "signature apps keep the chosen document on the way to signing, back and to changing it" do

@@ -2183,7 +2183,7 @@ en:
         parameters_screenshot_caption: "Choosing the signature level with Advanced settings open"
         parameters_screenshot_alt: "The Sign document step: the signature level Handwritten Signature or Certified Signature, Advanced settings open with the PAdES signature format and the allowed signature methods, and the Back and Continue to signing buttons"
         qscd_screenshot_caption: "Choosing an ID card or device"
-        qscd_screenshot_alt: "The What will you sign with? page with four kinds of Slovak ID cards by issue date with their compatibility, and the groups for residence permits, Czech ID cards and qualified smart cards and USB tokens"
+        qscd_screenshot_alt: "The What will you sign with? page with three kinds of Slovak ID cards by issue date with their compatibility, and the groups for residence permits, Czech ID cards and qualified smart cards and USB tokens"
         apps_screenshot_caption: "Choosing a signing application"
         apps_screenshot_alt: "The Select Signing Application page with the selected ID card and the options Autogram Desktop, Autogram Mobile, eIdentita and Podpisuj or other standalone applications"
         signature_levels_title: "Signature levels"
@@ -2293,12 +2293,8 @@ en:
             label: "Slovak residence permit card issued after 18.10.2023"
             support: "mobile"
             description: "Supports mobile signing via NFC and signing on a computer."
-          eid_2021:
-            label: "Slovak ID card issued after 21.6.2021"
-            support: "desktop"
-            description: "Requires a computer, a card reader and Autogram Desktop. Mobile signing is not available."
-          dpb_2020:
-            label: "Slovak residence permit card issued after 10.7.2020"
+          dpb_2022:
+            label: "Slovak residence permit card issued from 1.12.2022 to 17.10.2023"
             support: "desktop"
             description: "Requires a computer, a card reader and Autogram Desktop. Mobile signing is not available."
           cz_eid_2018:
@@ -2310,11 +2306,11 @@ en:
             support: "desktop"
             description: "Requires Autogram Desktop and the device driver installed."
           eid_2013:
-            label: "Slovak ID card issued before 21.6.2021"
+            label: "Slovak ID card issued before 1.12.2022"
             support: "unsupported"
             description: "This card type is no longer compatible with qualified signing. You need a new ID card to sign electronically."
-          dpb_2014:
-            label: "Slovak residence permit card issued before 10.7.2020"
+          dpb_2020:
+            label: "Slovak residence permit card issued before 1.12.2022"
             support: "unsupported"
             description: "This card type is no longer compatible with qualified signing."
           cz_eid_2012:
@@ -2850,12 +2846,13 @@ en:
 
   qscd:
     title:
-      eid_2013: "Slovak ID card issued before 21.6.2021"
-      eid_2021: "Slovak ID card issued after 21.6.2021"
+      eid_2013: "Slovak ID card issued before 1.12.2022"
+      eid_2021: "Slovak ID card issued from 21.6.2021 to 30.11.2022"
       eid_2022: "Slovak ID card issued after 1.12.2022"
       eid_2024: "Slovak ID card issued after 18.12.2024"
       dpb_2014: "Slovak residence permit card issued before 10.7.2020"
-      dpb_2020: "Slovak residence permit card issued after 10.7.2020"
+      dpb_2020: "Slovak residence permit card issued before 1.12.2022"
+      dpb_2022: "Slovak residence permit card issued from 1.12.2022 to 17.10.2023"
       dpb_2023: "Slovak residence permit card issued after 18.10.2023"
       cz_eid_2012: "Czech ID card issued before 1.7.2018"
       cz_eid_2018: "Czech ID card issued since 1.7.2018"
@@ -2865,11 +2862,10 @@ en:
       pkcs11_other: "Other qualified smart card or USB token"
     description:
       eid_2013: "This ID card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer ID card."
-      eid_2021: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer cards."
       eid_2022: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
       eid_2024: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
-      dpb_2014: "This residence permit card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer residence permit card."
-      dpb_2020: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
+      dpb_2020: "This residence permit card contains a chip that is no longer compatible with qualified electronic signing. To sign documents electronically, you need to request a newer residence permit card."
+      dpb_2022: "To sign, you need a physical card reader connected to a computer and the Autogram desktop app. Mobile signing is available only with newer residence permit cards."
       dpb_2023: "Contains an NFC chip, so signing is also possible via mobile apps Autogram Mobile and eIdentita."
       cz_eid_2012: "This ID card does not support qualified signing. To sign documents electronically, you need a newer ID card or another qualified card or token."
       cz_eid_2018: "You can sign if a qualified certificate from a Czech certification authority (e.g. PostSignum, I.CA) is loaded onto the chip. You need a card reader connected to a computer and the Autogram app."
