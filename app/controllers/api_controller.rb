@@ -3,6 +3,7 @@ class ApiController < ActionController::API
 
   before_action :authenticate_tenant!
   before_action :set_json_format
+  before_action :set_current_channel
   after_action :verify_authorized
 
   rescue_from JWT::DecodeError do |error|
@@ -99,5 +100,9 @@ class ApiController < ActionController::API
 
   def set_json_format
     request.format = :json
+  end
+
+  def set_current_channel
+    Current.channel = "api"
   end
 end

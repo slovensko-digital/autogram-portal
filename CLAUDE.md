@@ -34,6 +34,7 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - When the tenant itself signs its bundle, an **author proxy** recipient is created (`Recipient.find_or_create_author_proxy_for!`); it is not a visible recipient.
 - Author notifications go to the record's `author` while they are a member of the tenant, otherwise (API, older records, author left) to the tenant owners; never to the user who caused them, so an author signing their own document gets no email (`Tenant#notification_recipients`).
 - Plan limits come from ENV through `PlanLimits` (blank = unlimited); `Tenant::Usage` checks them and records monthly usage (documents sent for signature, timestamps) in `UsageRecord`, which also is the PRO billing basis. Raise/rescue `PlanLimits::Exceeded`; retention runs in `TenantRetentionJob` and `AnonymousContractsCleanupJob`.
+- `ActivityEvent` records every document upload (`Contract` create) and signature (`Session` signed) for usage statistics in Metabase: plan at the time, channel (`web`/`api` from `Current.channel`, set in `ApiController`; `embedded` for signing in the SDK iframe) and signing method. It holds no personal data and no foreign keys, so events outlive retention.
 
 ## Current tenant (web)
 

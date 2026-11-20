@@ -92,6 +92,7 @@ class Contract < ApplicationRecord
   before_validation :initialize_signature_parameters
   after_create :associate_with_bundle_recipients
   after_commit :schedule_existing_signed_content_capture, on: :create
+  after_commit :record_upload_activity, on: :create
 
   scope :anonymous, -> { where(tenant_id: nil, bundle_id: nil) }
   scope :awaiting_signature_for, ->(user) {
@@ -692,6 +693,10 @@ class Contract < ApplicationRecord
     return unless latest_content_version.present? || documents.one?
 
     ContractValidationRecordCaptureJob.perform_later(id)
+  end
+
+  def record_upload_activity
+    ActivityEvent.record_upload!(self)
   end
 
   def associate_with_bundle_recipients
