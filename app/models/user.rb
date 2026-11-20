@@ -60,18 +60,25 @@ class User < ApplicationRecord
     eid_2013: 1, eid_2021: 2, eid_2022: 3, eid_2024: 4,
     dpb_2014: 5, dpb_2020: 6, dpb_2023: 7,
     cz_eid_2012: 8, cz_eid_2018: 9,
-    ica_securestore: 10, monet_proid: 11, gemalto_idprime: 12, pkcs11_other: 13
+    ica_securestore: 10, monet_proid: 11, gemalto_idprime: 12, pkcs11_other: 13,
+    dpb_2022: 14
   }, prefix: true
 
   # QSCD choices grouped as offered in onboarding (qscd_check), newest first.
+  # Slovak documents issued before 1.12.2022 cannot create qualified signatures any more (the last of them
+  # since 28.9.2026) and are offered as one choice per kind: eid_2013 and dpb_2020. Residence permits issued
+  # from 1.12.2022 to 17.10.2023, which dpb_2020 used to cover as well, are dpb_2022. The choices for a part
+  # of those documents are no longer offered: eid_2021 (ID cards issued from 21.6.2021 to 30.11.2022) and
+  # dpb_2014 (residence permits issued before 10.7.2020). Users, cookies and signing sessions that still hold
+  # a document that cannot sign are asked for the document again.
   QSCD_GROUPS = {
-    sk_eid: [ "eid_2024", "eid_2022", "eid_2021", "eid_2013" ],
-    sk_dpb: [ "dpb_2023", "dpb_2020", "dpb_2014" ],
+    sk_eid: [ "eid_2024", "eid_2022", "eid_2013" ],
+    sk_dpb: [ "dpb_2023", "dpb_2022", "dpb_2020" ],
     cz_eid: [ "cz_eid_2018", "cz_eid_2012" ],
     tokens: [ "ica_securestore", "monet_proid", "gemalto_idprime", "pkcs11_other" ]
   }.freeze
   MOBILE_QSCDS = [ "eid_2022", "eid_2024", "dpb_2023" ].freeze
-  LEGACY_QSCDS = [ "eid_2013", "dpb_2014", "cz_eid_2012" ].freeze
+  LEGACY_QSCDS = [ "eid_2013", "eid_2021", "dpb_2014", "dpb_2020", "cz_eid_2012" ].freeze
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
   validates :agree_to_policies, acceptance: true, on: :create

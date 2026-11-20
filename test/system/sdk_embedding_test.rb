@@ -218,13 +218,14 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_button I18n.t("contracts.signature_apps.continue_to_sign")
 
       click_on I18n.t("actions.change_selection")
-      choose I18n.t("qscd.title.eid_2021"), allow_label_click: true
+      click_on I18n.t("contracts.onboarding.qscd_group.sk_dpb.title")
+      choose I18n.t("qscd.title.dpb_2022"), allow_label_click: true
       click_on I18n.t("contracts.onboarding.qscd_check.continue")
       click_on I18n.t("contracts.onboarding.pin_check.continue")
       click_on I18n.t("contracts.onboarding.certificate_check.continue")
 
-      assert_text I18n.t("qscd.title.eid_2021")
-      assert_text I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.eid_2021"))
+      assert_text I18n.t("qscd.title.dpb_2022")
+      assert_text I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_qscd", qscd: I18n.t("qscd.title.dpb_2022"))
       assert_button I18n.t("contracts.signature_apps.continue_to_sign")
     end
   end

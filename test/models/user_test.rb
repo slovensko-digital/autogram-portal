@@ -88,11 +88,12 @@ class UserTest < ActiveSupport::TestCase
     assert_not users(:two).accepted_current_policies?
   end
 
-  test "every qscd except none belongs to exactly one onboarding group" do
+  test "every qscd offered in onboarding belongs to exactly one group" do
     grouped = User::QSCD_GROUPS.values.flatten
 
     assert_equal grouped.uniq, grouped
-    assert_equal User.qscds.keys - [ "none" ], grouped.sort_by { |qscd| User.qscds[qscd] }
+    # documents issued before 1.12.2022 are offered as one choice per kind: eid_2013 and dpb_2020
+    assert_equal (User.qscds.keys - [ "none", "eid_2021", "dpb_2014" ]).sort, grouped.sort
   end
 
   test "qscd group and legacy cards" do
@@ -104,6 +105,12 @@ class UserTest < ActiveSupport::TestCase
 
     assert User.legacy_eid_card?("cz_eid_2012")
     assert User.legacy_eid_card?(:eid_2013)
+    assert User.legacy_eid_card?("eid_2021")
+    assert User.legacy_eid_card?("dpb_2020")
+    assert User.legacy_eid_card?("dpb_2014")
+    assert_not User.legacy_eid_card?("dpb_2022")
+    assert_equal :sk_dpb, User.qscd_group("dpb_2022")
+    assert_not User.mobile_qscd?("dpb_2022")
     assert_not User.legacy_eid_card?("cz_eid_2018")
     assert_not User.legacy_eid_card?("pkcs11_other")
   end
