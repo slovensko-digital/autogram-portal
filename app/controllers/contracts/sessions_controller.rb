@@ -304,10 +304,9 @@ class Contracts::SessionsController < ApplicationController
   end
 
   def ensure_signature_request_limit!
-    bundle = @contract.bundle
-    return unless bundle&.signature_request_limit_reached_for?(@signer_contract&.recipient)
+    return unless @contract.signature_request_limit_reached_for?(@signer_contract&.signing_user)
 
-    raise SessionCreationError, t("plan_limits.signing_blocked", sender: bundle.sender_display_name)
+    raise SessionCreationError, t("plan_limits.signing_blocked", sender: @contract.tenant.sender_display_name)
   end
 
   def create_avm_session

@@ -699,7 +699,8 @@ sk:
           timestamp: "Časové pečiatky"
         sources:
           notification: "Odoslanie príjemcovi"
-          recipient_signature: "Podpis cez zdieľaný odkaz"
+          recipient_signature: "Podpis v balíku bez výzvy"
+          standalone_signature: "Podpis dokumentu mimo balíka"
           extension: "Rozšírenie podpisov"
           archivation: "Archivácia"
           avm_signing: "Podpis v Autograme v mobile"
@@ -2009,7 +2010,7 @@ sk:
             description: "Čerpanie limitov, dobu uchovávania dokumentov a maximálnu veľkosť dokumentu vidíte na stránke Domov a v Nastaveniach v časti Organizácia. Mesačné limity sa obnovujú na začiatku kalendárneho mesiaca. Keď limit vyčerpáte, príslušná akcia nie je dostupná a portál vám to oznámi. Ak plán dokumenty po čase maže, dátum zmazania vidíte na detaile dokumentu aj balíka a dokumenty, ktoré sa zmažú do 7 dní, sú označené v zoznamoch. Na stránke Domov vtedy uvidíte, koľko ich je."
           signature_requests:
             label: "Čo sa počíta ako dokument odoslaný na podpis"
-            description: "Dokument sa započíta raz, a to keď prvýkrát odošlete niektorému adresátovi balíka výzvu na podpis alebo keď balík podpíše niekto iný ako vaša organizácia sama, napríklad cez odkaz na balík alebo pri balíku vytvorenom cez API. Vtedy sa započítajú naraz všetky dokumenty balíka. Ďalšie výzvy, adresáti ani podpisy toho istého dokumentu sa už nezapočítajú a zmazanie balíka ani stiahnutie požiadavky spotrebu nevráti. Ten istý súbor nahratý znova je nový dokument. Nezapočíta sa balík, ktorý podpisuje iba vaša organizácia, teda jej člen, ktorý nie je pridaný ako adresát; ak ako adresáta pridáte kolegu, dokument sa započíta ako pri ktoromkoľvek inom adresátovi. Ak organizácia limit vyčerpá, k balíkom, ktoré ešte neboli započítané, nie je možné odoslať výzvu a adresáti ich nemôžu začať podpisovať, kým sa limit neobnoví."
+            description: "Podpis vlastného dokumentu je zadarmo. Dokument sa započíta raz, keď ho dáte podpísať niekomu ďalšiemu než tomu, kto ho nahral – kolegovi z organizácie, klientovi alebo komukoľvek inému. Započíta sa, keď takému adresátovi balíka odošlete výzvu na podpis (vtedy všetky dokumenty balíka), alebo keď dokument niekto ďalší podpíše, napríklad kolega priamo v organizácii alebo adresát cez odkaz – podľa toho, čo nastane skôr. Dokumenty vytvorené cez API nemajú autora, preto sa započítajú pri prvej výzve alebo pri prvom podpise. Ďalšie výzvy, adresáti ani podpisy toho istého dokumentu sa už nezapočítajú a zmazanie dokumentu, stiahnutie požiadavky ani odmietnutie podpisu spotrebu nevráti. Ten istý súbor nahratý znova je nový dokument. Ak organizácia limit vyčerpá, k nezapočítaným dokumentom nie je možné odoslať výzvu a nikto okrem autora ich nemôže začať podpisovať, kým sa limit neobnoví."
       dashboard:
         title: "Domov"
         intro: "Po prihlásení sa zobrazí stránka Domov. Nájdete na nej súhrnné počty, rýchle akcie, balíky čakajúce na váš podpis, posledné balíky a využitie plánu."

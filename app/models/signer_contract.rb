@@ -58,6 +58,11 @@ class SignerContract < ApplicationRecord
     signer.recipient if signer.is_a?(RecipientSigner)
   end
 
+  # The account of the signer, nil for signers without one.
+  def signing_user
+    signer.user || signer.recipient&.user
+  end
+
   def latest_qes_visual_stamp_for(document)
     visual_stamps.qes_preparation.where(document: document).with_attached_file.order(created_at: :desc).first
   end

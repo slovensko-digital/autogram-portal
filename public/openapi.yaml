@@ -81,9 +81,11 @@ paths:
         - `storedDocuments` – documents (contracts) the organization keeps at once
         - `storage` – bytes of all stored documents and their signed versions
         - `signatureRequests` – documents sent for signature this month. A document counts once,
-          when a recipient is notified or, for bundles shared by a link or created through the API,
-          when someone other than the organization signs the bundle (all its documents count then).
-          Once the limit is reached, recipients cannot start signing bundles that were not counted yet.
+          when anyone but the user who uploaded it is asked to sign it (a recipient of its bundle
+          is notified; all documents of the bundle count then) or signs it, whichever comes first.
+          Documents created through the API have no such user, so they count at the first
+          notification or the first signature, in a bundle or outside one. Once the limit is
+          reached, signing of documents that were not counted yet cannot start.
         - `timestamps` – timestamps added this month by extending signatures, by archivation and by
           signing in Autogram v mobile with a timestamped signature level
       responses:

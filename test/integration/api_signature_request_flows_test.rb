@@ -150,17 +150,32 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
       bundle = create_bundle_via_api(contracts: [ pdf_contract_payload("a.pdf"), pdf_contract_payload("b.pdf") ], recipients: [ { email: "signer@example.com" } ])
       assert_equal 0, @organization.usage_of(:signature_requests), "creating a bundle does not send it"
 
-      sign_with_autogram(bundle.contracts.order(:id).first, recipient: bundle.recipients.sole)
+      first, second = bundle.contracts.order(:id).to_a
+      sign_with_autogram(first, recipient: bundle.recipients.sole)
+      assert_equal 1, @organization.usage_of(:signature_requests), "only the signed document counts"
+      sign_with_autogram(second, recipient: bundle.recipients.sole)
 
       get api_v1_usage_path, headers: api_headers
       assert_response :success
       usage = response.parsed_body
       assert_equal "pro", usage["plan"]
-      assert_equal({ "used" => 2, "limit" => 5 }, usage.dig("usage", "signatureRequests"), "the whole bundle counts at the first signature")
+      assert_equal({ "used" => 2, "limit" => 5 }, usage.dig("usage", "signatureRequests"))
       assert_equal({ "used" => 0, "limit" => nil }, usage.dig("usage", "timestamps"))
       assert_equal 2, usage.dig("usage", "storedDocuments", "used")
       assert usage.dig("usage", "storage", "used").positive?
     end
+  end
+
+  test "a contract created through the API outside a bundle counts when someone signs it" do
+    post api_v1_contracts_path, params: pdf_contract_payload("samostatna.pdf"), headers: api_headers, as: :json
+    assert_response :created, -> { response.body }
+    contract = Contract.find_by!(uuid: response.parsed_body.fetch("id"))
+    assert_nil contract.bundle
+    assert_equal 0, @organization.usage_of(:signature_requests)
+
+    sign_with_autogram(contract)
+
+    assert_equal [ "standalone_signature" ], @organization.usage_records.signature_request.pluck(:source)
   end
 
   test "usage is reported only to a tenant with an API token" do

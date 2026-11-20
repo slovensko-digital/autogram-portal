@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -468,6 +468,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
     t.datetime "created_at", null: false
     t.string "kind", null: false
     t.integer "quantity", default: 1, null: false
+    t.datetime "signed_at"
     t.string "source", null: false
     t.bigint "tenant_id", null: false
     t.index ["contract_id"], name: "index_usage_records_on_contract_id"

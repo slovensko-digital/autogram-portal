@@ -768,7 +768,8 @@ en:
           timestamp: "Timestamps"
         sources:
           notification: "Sent to a recipient"
-          recipient_signature: "Signed through a shared link"
+          recipient_signature: "Signed in a bundle without a request"
+          standalone_signature: "Signature of a document outside a bundle"
           extension: "Signature extension"
           archivation: "Archivation"
           avm_signing: "Signed in Autogram v mobile"
@@ -2074,7 +2075,7 @@ en:
             description: "You can see how much of the limits you have used, the retention period and the maximum document size on the Home page and in Settings under Organization. Monthly limits reset at the start of each calendar month. When a limit is used up, the corresponding action is not available and the portal tells you why. If the plan deletes documents after a while, the deletion date is shown on the document and bundle details, and documents deleted within 7 days are marked in the lists. The Home page then shows how many there are."
           signature_requests:
             label: "What counts as a document sent for signature"
-            description: "A document counts once: when you first send a signature request to any recipient of the bundle, or when someone other than your organization itself signs the bundle, for example through a link to the bundle or a bundle created through the API. All documents of the bundle count at that moment. Further requests, recipients and signatures of the same document no longer count, and deleting the bundle or withdrawing the request does not give the quota back. The same file uploaded again is a new document. A bundle signed only by your organization, that is by a member who is not added as a recipient, does not count; if you add a colleague as a recipient, the document counts as with any other recipient. When the organization uses up the limit, signature requests cannot be sent for bundles that have not been counted yet and recipients cannot start signing them until the limit resets."
+            description: "Signing your own document is free. A document counts once, when you have it signed by anyone but the person who uploaded it – a colleague from the organization, a client or anyone else. It counts when you send such a recipient of the bundle a signature request (all documents of the bundle count then), or when someone else signs the document, for example a colleague directly in the organization or a recipient through a link – whichever comes first. Documents created through the API have no author, so they count at the first request or the first signature. Further requests, recipients and signatures of the same document no longer count, and deleting the document, withdrawing the request or declining to sign does not give the quota back. The same file uploaded again is a new document. When the organization uses up the limit, signature requests cannot be sent for documents that have not been counted yet and nobody but their author can start signing them until the limit resets."
       dashboard:
         title: "Home"
         intro: "After signing in you see the Home page. It shows summary counts, quick actions, the bundles awaiting your signature, recent bundles and plan usage."

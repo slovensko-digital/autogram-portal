@@ -5,6 +5,7 @@
 #  id          :bigint           not null, primary key
 #  kind        :string           not null
 #  quantity    :integer          default(1), not null
+#  signed_at   :datetime
 #  source      :string           not null
 #  created_at  :datetime         not null
 #  contract_id :bigint
@@ -29,6 +30,7 @@ class UsageRecord < ApplicationRecord
   enum :source, {
     notification: "notification",
     recipient_signature: "recipient_signature",
+    standalone_signature: "standalone_signature",
     extension: "extension",
     archivation: "archivation",
     avm_signing: "avm_signing"
