@@ -163,6 +163,17 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "documents created through the API and signed on the web are recorded as activity" do
+    bundle = create_bundle_via_api(contracts: [ pdf_contract_payload("a.pdf"), pdf_contract_payload("b.pdf") ], recipients: [ { email: "signer@example.com" } ])
+
+    uploads = ActivityEvent.document_uploaded.where(tenant_id: @organization.id)
+    assert_equal [ [ "api", "pro", 1 ] ] * 2, uploads.pluck(:channel, :plan, :documents_count)
+
+    sign_with_autogram(bundle.contracts.order(:id).first, recipient: bundle.recipients.sole)
+
+    assert_equal [ [ "web", "pro", "autogram" ] ], ActivityEvent.document_signed.pluck(:channel, :plan, :signing_method)
+  end
+
   test "usage is reported only to a tenant with an API token" do
     get api_v1_usage_path
 

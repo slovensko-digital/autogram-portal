@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "activity_events", force: :cascade do |t|
+    t.bigint "byte_size"
+    t.string "channel"
+    t.datetime "created_at", null: false
+    t.integer "documents_count"
+    t.string "kind", null: false
+    t.string "plan", null: false
+    t.string "signing_method"
+    t.bigint "tenant_id"
+    t.index ["kind", "created_at"], name: "index_activity_events_on_kind_and_created_at"
+    t.index ["tenant_id"], name: "index_activity_events_on_tenant_id"
   end
 
   create_table "ades_signature_parameters", force: :cascade do |t|

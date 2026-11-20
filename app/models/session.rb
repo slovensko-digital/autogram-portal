@@ -266,6 +266,7 @@ class Session < ApplicationRecord
 
   def handle_status_change
     mark_signer_contract_signed if signed?
+    ActivityEvent.record_signature!(self) if signed?
     touch(:completed_at) unless pending?
     broadcast_status_change
   end
