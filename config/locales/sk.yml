@@ -2111,7 +2111,7 @@ sk:
             description: "Pri prvom podpise vyberiete svoj doklad alebo zariadenie a potvrdíte, že poznáte BOK alebo PIN a máte vydané podpisové certifikáty. Portál si výber zapamätá a nabudúce ho len zobrazí s možnosťou Zmeniť výber."
           app:
             title: "Vyberte podpisovú aplikáciu"
-            description: "Ponuka aplikácií sa prispôsobí vášmu dokladu. Staršie občianske preukazy a čipové karty vyžadujú počítač s čítačkou kariet a Autogram na počítači."
+            description: "Ponuka aplikácií sa prispôsobí vášmu dokladu. Doklady bez NFC čipu a čipové karty vyžadujú počítač s čítačkou kariet a Autogram na počítači."
           finish:
             title: "Podpíšte a stiahnite dokument"
             description: "Podpis dokončíte v aplikácii zadaním podpisového PIN-u. Portál podpísaný dokument automaticky uloží a stiahnete ho tlačidlom Stiahnuť."

@@ -2176,7 +2176,7 @@ en:
             description: "The first time you sign, you choose your ID card or device and confirm that you know your BOK or PIN and have signing certificates issued. The portal remembers your choice and next time only shows it with a Change selection option."
           app:
             title: "Choose a signing application"
-            description: "The applications offered depend on your ID card. Older ID cards and smart cards require a computer with a card reader and Autogram Desktop."
+            description: "The applications offered depend on your ID card. Documents without an NFC chip and smart cards require a computer with a card reader and Autogram Desktop."
           finish:
             title: "Sign and download the document"
             description: "Finish the signature in the application by entering your signing PIN. The portal saves the signed document automatically and you download it with the Download button."
