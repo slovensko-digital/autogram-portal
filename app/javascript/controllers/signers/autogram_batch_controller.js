@@ -59,7 +59,7 @@ export default class extends Controller {
   }
 
   retry() {
-    // documents signed before an error are not in the batch of the reloaded page
+    // documents signed before an error or a cancel are not in the batch of the reloaded page
     if (this.retryReloads) {
       window.location.reload()
       return
@@ -78,6 +78,7 @@ export default class extends Controller {
     }
 
     this.isSigning = true
+    this.signedCount = 0
     let sdk = null
     let client = null
     let batchId = null
@@ -128,6 +129,7 @@ export default class extends Controller {
             }
           )
         await this.uploadSignedDocument(item.upload_path, signedDocument.content)
+        this.signedCount = index + 1
 
         this.updateProgress(index + 1, this.items.length, item.contract_name)
       }
@@ -142,11 +144,13 @@ export default class extends Controller {
         }
       }
 
-      if (
-        this.isAbortError(error) ||
-        this.isAppNotInstalledError(sdk, error) ||
-        this.isUserCancelledError(sdk, error)
-      ) {
+      if (this.isAbortError(error) || this.isAppNotInstalledError(sdk, error)) {
+        return
+      }
+
+      // signing a single document reports no state of its own, e.g. when the signer skips it in Autogram 2.9
+      if (this.isUserCancelledError(sdk, error)) {
+        this.showCancelledState()
         return
       }
 
@@ -491,7 +495,7 @@ export default class extends Controller {
 
   showCancelledState() {
     this.markStageFailed()
-    this.showState(this.stateCancelledTarget, { retry: true })
+    this.showState(this.stateCancelledTarget, { retry: true, retryReloads: this.signedCount > 0 })
   }
 
   showErrorState(message) {

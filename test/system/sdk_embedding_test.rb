@@ -724,6 +724,24 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     end
   end
 
+  test "signer who skips a document in Autogram is told so and signs again only the documents left" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf"), qes_contract("tretia.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app(skip_document: 2)
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.cancelled_title")
+
+      click_on I18n.t("bundles.autogram_batch.retry")
+
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+      # the first document signed before the skip and the two left after it
+      assert_equal 4, autogram_sign_calls
+    end
+
+    assert bundle.contracts.all?(&:signed_document_attached?)
+  end
+
   test "recipient signs with a verified AdES signature inside an iframe on the portal's own site" do
     bundle = create_bundle(
       contracts: [ { allowed_methods: [ "ades" ], documents_attributes: [ { blob: pdf_blob("zmluva.pdf") } ] } ],
