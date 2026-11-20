@@ -10,15 +10,14 @@ Rollbar.configure do |config|
     config.enabled = false
   end
 
-  # By default, Rollbar will try to call the `current_user` controller method
-  # to fetch the logged-in user object, and then call that object's `id`
-  # method to fetch this property. To customize:
-  # config.person_method = "my_current_user"
-  # config.person_id_method = "my_id"
-
-  # Additionally, you may specify the following:
-  # config.person_username_method = "username"
-  # config.person_email_method = "email"
+  # Reports carry technical data only: the values of parameters, request bodies, cookies, session and
+  # job data are scrubbed, the IP address and the signed-in user are left out. The request id of a
+  # report finds the request in our own logs.
+  config.scrub_fields = :scrub_all
+  config.scrub_whitelist = %i[controller action job job_id]
+  config.scrub_headers |= [ "Referer" ]
+  config.collect_user_ip = false
+  config.person_id_method = nil
 
   # If you want to attach custom data to all exception and message reports,
   # provide a lambda like the following. It should return a hash.

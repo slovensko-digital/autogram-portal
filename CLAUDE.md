@@ -73,6 +73,8 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 - The user guide (`/docs`, `app/views/docs`) takes its texts from `docs.index` in both locales; when a documented screen changes, update the texts and retake the screenshots (command above).
 - External services are behind `AutogramEnvironment` (`autogram_service`, `avm_service`, `eidentita_service`, `ades_signing_service`); stub them there in tests.
 - Keep model annotations (annotaterb) up to date in models, fixtures and model tests.
+- Error reports (Rollbar) carry technical data only: `config/initializers/rollbar.rb` scrubs all parameter, body, cookie, session and job values and leaves out the IP address and the user (`test/lib/error_reporting_test.rb`). Keep personal data and document names out of exception messages and `Rollbar.error` extras; correlate a report with our logs by its request id.
+- Request logs hold no documents, no data of people and no signing links: a new parameter that carries any of them belongs in `config/initializers/filter_parameter_logging.rb` (`test/lib/request_log_filter_test.rb`). The symbols there also hide matching attributes in `#inspect` of records.
 - Broadcast page refreshes with `broadcast_refresh_to`: it carries the request id, so the page that submitted the change ignores its own refresh. `broadcast_action_to(action: :refresh)` makes that page refresh itself and race its own redirect.
 
 ## Tests
