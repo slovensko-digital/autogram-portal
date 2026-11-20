@@ -3,7 +3,7 @@ import i18n from "i18n"
 import { isMobileDevice } from "utils/device_detection"
 
 export default class extends Controller {
-  static targets = ["progressBar", "progressPercent", "progressText", "currentDocumentName", "documentItem", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateAppNotRunning", "stateSuccess", "stateCancelled", "stateError", "errorMessage"]
+  static targets = ["progressBar", "progressPercent", "progressText", "currentDocumentName", "documentItem", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateStart", "stateNormal", "stateAppNotRunning", "stateSuccess", "stateCancelled", "stateError", "errorMessage", "retryButton"]
 
   static values = {
     items: String,
@@ -22,7 +22,7 @@ export default class extends Controller {
     this.updateProgress(0, this.items.length)
     this.currentDocumentNameTarget.textContent = ""
     this.setStatusStage("checking")
-    this.signAll()
+    this.start()
   }
 
   disconnect() {
@@ -33,12 +33,52 @@ export default class extends Controller {
     return JSON.parse(this.itemsValue || "[]")
   }
 
+  // A page embedded in an iframe may launch Autogram only right after the signer clicked in it,
+  // so unless Autogram is running already it asks for the click instead of failing to launch it.
+  async start() {
+    if (this.iframeValue && !isMobileDevice() && !navigator.userActivation?.isActive && !await this.isAutogramRunning()) {
+      this.showStartState()
+      return
+    }
+
+    this.signAll()
+  }
+
+  async isAutogramRunning() {
+    try {
+      const integration = this.buildDesktopClient(await this.loadSDKScript()).clientDesktopIntegration
+      // without the readiness check the SDK launches Autogram as before
+      if (typeof integration?.info !== "function") {
+        return true
+      }
+
+      return (await integration.info()).status === "READY"
+    } catch {
+      return false
+    }
+  }
+
+  retry() {
+    // documents signed before an error or a cancel are not in the batch of the reloaded page
+    if (this.retryReloads) {
+      window.location.reload()
+      return
+    }
+
+    this.updateProgress(0, this.items.length)
+    this.setDocumentItemStates(-1)
+    this.setStatusStage("checking")
+    this.showNormalState()
+    this.signAll()
+  }
+
   async signAll() {
     if (this.isSigning) {
       return
     }
 
     this.isSigning = true
+    this.signedCount = 0
     let sdk = null
     let client = null
     let batchId = null
@@ -89,6 +129,7 @@ export default class extends Controller {
             }
           )
         await this.uploadSignedDocument(item.upload_path, signedDocument.content)
+        this.signedCount = index + 1
 
         this.updateProgress(index + 1, this.items.length, item.contract_name)
       }
@@ -103,11 +144,13 @@ export default class extends Controller {
         }
       }
 
-      if (
-        this.isAbortError(error) ||
-        this.isAppNotInstalledError(sdk, error) ||
-        this.isUserCancelledError(sdk, error)
-      ) {
+      if (this.isAbortError(error) || this.isAppNotInstalledError(sdk, error)) {
+        return
+      }
+
+      // signing a single document reports no state of its own, e.g. when the signer skips it in Autogram 2.9
+      if (this.isUserCancelledError(sdk, error)) {
+        this.showCancelledState()
         return
       }
 
@@ -421,12 +464,20 @@ export default class extends Controller {
     window.location.href = this.returnPathValue
   }
 
+  showState(state, { retry = false, retryReloads = false } = {}) {
+    [this.stateStartTarget, this.stateNormalTarget, this.stateAppNotRunningTarget, this.stateSuccessTarget, this.stateCancelledTarget, this.stateErrorTarget]
+      .forEach((element) => element.classList.toggle("hidden", element !== state))
+    this.retryButtonTarget.classList.toggle("hidden", !retry)
+    this.retryReloads = retryReloads
+  }
+
+  showStartState() {
+    this.setStatusStage("starting")
+    this.showState(this.stateStartTarget)
+  }
+
   showNormalState(message = null) {
-    this.stateNormalTarget.classList.remove("hidden")
-    this.stateAppNotRunningTarget.classList.add("hidden")
-    this.stateSuccessTarget.classList.add("hidden")
-    this.stateCancelledTarget.classList.add("hidden")
-    this.stateErrorTarget.classList.add("hidden")
+    this.showState(this.stateNormalTarget)
 
     if (message) {
       this.progressTextTarget.textContent = message
@@ -435,37 +486,21 @@ export default class extends Controller {
 
   showAppNotRunningState() {
     this.markStageFailed("starting")
-    this.stateNormalTarget.classList.add("hidden")
-    this.stateSuccessTarget.classList.add("hidden")
-    this.stateCancelledTarget.classList.add("hidden")
-    this.stateErrorTarget.classList.add("hidden")
-    this.stateAppNotRunningTarget.classList.remove("hidden")
+    this.showState(this.stateAppNotRunningTarget, { retry: true })
   }
 
   showSuccessState() {
-    this.stateNormalTarget.classList.add("hidden")
-    this.stateAppNotRunningTarget.classList.add("hidden")
-    this.stateCancelledTarget.classList.add("hidden")
-    this.stateErrorTarget.classList.add("hidden")
-    this.stateSuccessTarget.classList.remove("hidden")
+    this.showState(this.stateSuccessTarget)
   }
 
   showCancelledState() {
     this.markStageFailed()
-    this.stateNormalTarget.classList.add("hidden")
-    this.stateAppNotRunningTarget.classList.add("hidden")
-    this.stateSuccessTarget.classList.add("hidden")
-    this.stateErrorTarget.classList.add("hidden")
-    this.stateCancelledTarget.classList.remove("hidden")
+    this.showState(this.stateCancelledTarget, { retry: true, retryReloads: this.signedCount > 0 })
   }
 
   showErrorState(message) {
     this.markStageFailed()
-    this.stateNormalTarget.classList.add("hidden")
-    this.stateAppNotRunningTarget.classList.add("hidden")
-    this.stateSuccessTarget.classList.add("hidden")
-    this.stateCancelledTarget.classList.add("hidden")
-    this.stateErrorTarget.classList.remove("hidden")
+    this.showState(this.stateErrorTarget, { retry: true, retryReloads: true })
     this.errorMessageTarget.textContent = message
   }
 

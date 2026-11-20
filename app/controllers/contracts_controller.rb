@@ -136,6 +136,10 @@ class ContractsController < ApplicationController
   end
 
   def sign
+    return unless @contract.awaiting_signature? && !@signer_contract&.signed?
+    return unless helpers.signing_method_choice_skipped?(@contract, recipient: @recipient)
+
+    redirect_to helpers.electronic_signing_path(@contract, recipient: @recipient)
   end
 
   def signature_apps

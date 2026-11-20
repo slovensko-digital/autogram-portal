@@ -16,13 +16,30 @@ module SdkEmbedHelper
   # Autogram signers get a file SigningFlowHelper::FakeAutogramService accepts
   # as validly signed, otherwise one without signatures. The parameters of the
   # last sign call are kept as the app receives them, see #last_autogram_sign_parameters.
-  def self.fake_autogram_app(signed:)
+  # With running: false the app is not started yet (the readiness check fails until a sign call launches it),
+  # with cancel_first_batch: true the signer cancels the first batch in it, with skip_document: n the signer
+  # skips the n-th document the app is asked to sign (Autogram 2.9 answers it like a cancelled signing).
+  def self.fake_autogram_app(signed:, running: true, cancel_first_batch: false, skip_document: nil)
     prefix = signed ? SigningFlowHelper::SIGNED_PREFIX : "unsigned:"
 
     <<~JS
       window.AutogramSDK = {
         DesktopClient: class {
+          clientDesktopIntegration = {
+            info: async () => {
+              if (!#{running}) throw new TypeError("Failed to fetch");
+              return { status: "READY" };
+            }
+          };
           async sign(document, parameters, _contentType, options) {
+            const calls = Number(sessionStorage.getItem("fakeAutogramSignCalls") || 0) + 1;
+            sessionStorage.setItem("fakeAutogramSignCalls", calls);
+            if (calls === #{skip_document.to_json}) {
+              options?.onStateChange?.({ type: "signingCancelled" });
+              const error = new Error("skipped");
+              error.name = "UserCancelledSigningException";
+              throw error;
+            }
             sessionStorage.setItem("fakeAutogramSignParameters", JSON.stringify(parameters));
             options?.onStateChange?.({ type: "waitingForSignature" });
             return { content: btoa("#{prefix}" + (document?.filename || "document")) };
@@ -31,7 +48,16 @@ module SdkEmbedHelper
             options?.onStateChange?.({ type: "waitingForSignature" });
             return { content: btoa("#{prefix}" + documents.length + " documents") };
           }
-          async startBatch() { return "fake-batch"; }
+          async startBatch(_count, options) {
+            sessionStorage.setItem("fakeAutogramBatchStarts", Number(sessionStorage.getItem("fakeAutogramBatchStarts") || 0) + 1);
+            if (#{cancel_first_batch} && sessionStorage.getItem("fakeAutogramBatchStarts") === "1") {
+              options?.onStateChange?.({ type: "signingCancelled" });
+              const error = new Error("cancelled");
+              error.name = "UserCancelledSigningException";
+              throw error;
+            }
+            return "fake-batch";
+          }
           async endBatch() {}
         }
       };
@@ -146,8 +172,18 @@ module SdkEmbedHelper
 
   # Makes Autogram signing in the portal produce a signed (or unsigned) file for
   # the pages opened afterwards.
-  def install_fake_autogram_app(signed: true)
-    @fake_autogram_app_script = page.driver.browser.execute_cdp("Page.addScriptToEvaluateOnNewDocument", source: SdkEmbedHelper.fake_autogram_app(signed: signed))["identifier"]
+  def install_fake_autogram_app(signed: true, **options)
+    @fake_autogram_app_script = page.driver.browser.execute_cdp("Page.addScriptToEvaluateOnNewDocument", source: SdkEmbedHelper.fake_autogram_app(signed: signed, **options))["identifier"]
+  end
+
+  # How many batches the fake Autogram app was asked to start. Call it within the portal frame.
+  def autogram_batch_starts
+    page.evaluate_script("Number(sessionStorage.getItem('fakeAutogramBatchStarts') || 0)")
+  end
+
+  # How many documents the fake Autogram app was asked to sign with #sign. Call it within the portal frame.
+  def autogram_sign_calls
+    page.evaluate_script("Number(sessionStorage.getItem('fakeAutogramSignCalls') || 0)")
   end
 
   # Signature parameters of the last document the fake Autogram app signed, as JSON sent to the app.

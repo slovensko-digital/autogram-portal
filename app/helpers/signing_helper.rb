@@ -22,4 +22,22 @@ module SigningHelper
       sign_contract_path(contract, recipient: recipient&.uuid, **params)
     end
   end
+
+  # Embedded signing pages without the document preview would show nothing but the choice of a signing method,
+  # so a single document that can be signed only electronically goes straight to the signing apps.
+  # Links back to the signing page are hidden then, the page would only send the signer forward again.
+  def signing_method_choice_skipped?(contract, recipient: nil)
+    params[:iframe].in?(%w[no_preview no_onboarding]) &&
+      (!contract.signed_through_bundle?(recipient: recipient) || contract.bundle.contracts.one?) &&
+      contract.signing_methods_for(recipient: recipient) == [ "electronic" ]
+  end
+
+  def electronic_signing_path(contract, recipient: nil)
+    if contract.prepared_signature_field_appearance_required_for?(recipient: recipient)
+      visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], purpose: "signature_field_appearance")
+    else
+      qscd = params[:qscd].presence || current_user&.qscd || cookies[:qscd]
+      signature_apps_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe], qscd: qscd.presence)
+    end
+  end
 end

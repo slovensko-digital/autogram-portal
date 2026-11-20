@@ -143,6 +143,14 @@ class BundlesController < ApplicationController
   end
 
   def sign
+    if params[:prefer_batch].present? && @batch_autogram_available
+      return redirect_to autogram_batch_bundle_path(@bundle, recipient: @recipient&.uuid, iframe: params[:iframe], prefer_batch: params[:prefer_batch])
+    end
+
+    contract = @pending_batch_contracts.sole if @bundle.contracts.one? && @pending_batch_contracts.one?
+    return unless contract && helpers.signing_method_choice_skipped?(contract, recipient: @recipient)
+
+    redirect_to helpers.electronic_signing_path(contract, recipient: @recipient)
   end
 
   def autogram_batch

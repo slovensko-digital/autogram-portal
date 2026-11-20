@@ -83,12 +83,13 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
   end
 
   test "no_preview shows only the documents to sign" do
-    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ], note: "Prosíme o podpis do piatku.")
+    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf"), qes_contract("dodatok.pdf") ], recipients: [ { email: "signer@example.com" } ], note: "Prosíme o podpis do piatku.")
 
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_preview"
 
     within_portal_frame do
       assert_text "zmluva.pdf"
+      assert_text "dodatok.pdf"
       assert_button I18n.t("contracts.signing_method_choice.continue")
 
       assert_no_text I18n.t("bundles.sender.sender")
@@ -99,20 +100,20 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     end
   end
 
-  test "no_onboarding offers the signing apps without asking for the document" do
+  test "no_onboarding opens a single document right on the signing apps without asking for the document" do
     bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf") ], recipients: [ { email: "signer@example.com" } ])
 
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding"
 
     within_portal_frame do
+      assert_on_signing_apps
       assert_text "zmluva.pdf"
       assert_no_text I18n.t("bundles.sender.sender")
-      continue_to_signing_apps
 
       assert_field I18n.t("contracts.signature_apps.autogram_desktop_label"), checked: true, visible: :all
       assert_text I18n.t("contracts.signature_apps.eidentita_label")
       assert_button I18n.t("contracts.signature_apps.continue_to_sign")
-      assert_no_text "zmluva.pdf"
+      assert_no_link I18n.t("actions.back")
     end
   end
 
@@ -123,7 +124,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding"
 
     within_portal_frame do
-      continue_to_signing_apps
+      assert_on_signing_apps
       assert_text I18n.t("contracts.signature_apps.autogram_desktop_label")
       assert_no_text I18n.t("contracts.signature_apps.podpisuj_label")
       assert_no_text I18n.t("contracts.signature_apps.unavailable_reasons.unsupported_signature_level")
@@ -252,7 +253,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_onboarding"
 
     within_portal_frame do
-      continue_to_signing_apps
+      assert_on_signing_apps
       click_on I18n.t("contracts.signature_apps.continue_to_sign")
       assert_text I18n.t("contracts.sessions.signed.title")
 
@@ -289,7 +290,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_onboarding"
 
     within_portal_frame do
-      continue_to_signing_apps
+      assert_on_signing_apps
       click_on I18n.t("contracts.signature_apps.continue_to_sign")
       assert_text I18n.t("contracts.sessions.signed.title")
 
@@ -501,7 +502,9 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     assert_includes iframe[:src], "/contracts/#{contract.uuid}/sign?iframe=no_preview"
     within_portal_frame do
-      assert_button I18n.t("contracts.signing_method_choice.continue")
+      # with nothing to choose on the signing page, the signer starts with picking the document
+      assert_text I18n.t("contracts.onboarding.qscd_check.title")
+      assert_no_link I18n.t("actions.back")
       assert_no_text I18n.t("contracts.visualization_with_toggle.show_document")
     end
   end
@@ -562,7 +565,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     call_sdk :initBundleIframe, first.uuid, parentElement: "#agp-container", recipientId: first.recipients.sole.uuid, previewLevel: "no_onboarding"
     call_sdk :initBundleIframe, second.uuid, recipientId: second.recipients.sole.uuid, previewLevel: "no_onboarding"
     within_portal_frame(second.uuid) do
-      continue_to_signing_apps
+      assert_on_signing_apps
       click_on I18n.t("contracts.signature_apps.continue_to_sign")
     end
 
@@ -577,7 +580,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: recipient.uuid, previewLevel: "no_onboarding"
     within_portal_frame do
-      continue_to_signing_apps
+      assert_on_signing_apps
       click_on I18n.t("contracts.signature_apps.continue_to_sign")
 
       assert_text I18n.t("contracts.sessions.signed.title")
@@ -594,7 +597,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding"
     within_portal_frame do
-      continue_to_signing_apps
+      assert_on_signing_apps
       click_on I18n.t("contracts.signature_apps.continue_to_sign")
     end
 
@@ -642,7 +645,7 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
 
     embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding"
     within_portal_frame do
-      continue_to_signing_apps
+      assert_on_signing_apps
       click_on I18n.t("contracts.signature_apps.continue_to_sign")
 
       assert_text I18n.t("contracts.sessions.error.title")
@@ -674,6 +677,68 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
     assert message["bundle_completed"]
     assert message["close_iframe"]
     assert recipient.reload.signed?
+    assert bundle.contracts.all?(&:signed_document_attached?)
+  end
+
+  test "integrator preferring batch signing has more documents signed with Autogram right away" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+      assert_link I18n.t("bundles.autogram_batch.sign_individually")
+    end
+
+    assert assert_portal_message("document-signed")["close_iframe"]
+    assert bundle.contracts.all?(&:signed_document_attached?)
+  end
+
+  test "embedded batch signing waits for a click to launch Autogram that is not running yet" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app(running: false)
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.start_title")
+      assert_equal 0, autogram_batch_starts
+
+      click_on I18n.t("bundles.autogram_batch.start_action")
+
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+    end
+  end
+
+  test "cancelled batch signing can be started again right away" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app(cancel_first_batch: true)
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.cancelled_title")
+
+      click_on I18n.t("bundles.autogram_batch.retry")
+
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+      assert_equal 2, autogram_batch_starts
+    end
+  end
+
+  test "signer who skips a document in Autogram is told so and signs again only the documents left" do
+    bundle = create_bundle(contracts: [ qes_contract("prva.pdf"), qes_contract("druha.pdf"), qes_contract("tretia.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    install_fake_autogram_app(skip_document: 2)
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, recipientId: bundle.recipients.sole.uuid, previewLevel: "no_onboarding", preferBatchSigning: true
+    within_portal_frame do
+      assert_text I18n.t("bundles.autogram_batch.cancelled_title")
+
+      click_on I18n.t("bundles.autogram_batch.retry")
+
+      assert_text I18n.t("bundles.autogram_batch.success_title")
+      # the first document signed before the skip and the two left after it
+      assert_equal 4, autogram_sign_calls
+    end
+
     assert bundle.contracts.all?(&:signed_document_attached?)
   end
 
@@ -747,6 +812,11 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
   # when the signer's document is known (or onboarding is turned off).
   def continue_to_signing_apps
     click_on I18n.t("contracts.signing_method_choice.continue")
+    assert_selector "h1", text: I18n.t("contracts.signature_apps.title")
+  end
+
+  # Embedded without the preview, a single document that can be signed only electronically opens right on the signing apps.
+  def assert_on_signing_apps
     assert_selector "h1", text: I18n.t("contracts.signature_apps.title")
   end
 

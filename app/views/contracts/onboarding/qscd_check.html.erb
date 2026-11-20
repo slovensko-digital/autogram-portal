@@ -38,12 +38,14 @@
           <%# Changing the document returns to the signing apps; without one they would send the signer straight back here. %>
           <% back_path = if params[:review] == "true"
             signature_apps_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe], qscd: params[:qscd])
-          else
+          elsif !signing_method_choice_skipped?(@contract, recipient: @recipient)
             signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe])
           end %>
-          <%= link_to back_path,
-              class: "btn btn-secondary flex-1" do %>
-            <%= t('actions.back') %>
+          <% if back_path %>
+            <%= link_to back_path,
+                class: "btn btn-secondary flex-1" do %>
+              <%= t('actions.back') %>
+            <% end %>
           <% end %>
           <%= f.submit t('.continue'), class: "btn btn-primary flex-1" %>
         </div>

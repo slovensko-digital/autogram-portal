@@ -590,6 +590,21 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "embedded signing of a single prepared signature field goes straight to its appearance without a link back" do
+    contract, recipient = create_bundle_contract_with_prepared_signature_field
+
+    with_autogram_service(fake_unsigned_pades_validation_service) do
+      get sign_bundle_path(contract.bundle, recipient: recipient.uuid, iframe: "no_onboarding")
+
+      assert_redirected_to visual_signing_contract_path(contract, recipient: recipient.uuid, iframe: "no_onboarding", purpose: "signature_field_appearance")
+
+      follow_redirect!
+
+      assert_response :success
+      assert_select "a[href^=?]", sign_bundle_path(contract.bundle), count: 0
+    end
+  end
+
   test "prepared signature field redirects signing flow to locked appearance step" do
     contract, recipient = create_bundle_contract_with_prepared_signature_field
 
