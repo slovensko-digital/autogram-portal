@@ -270,17 +270,27 @@ class Session < ApplicationRecord
     broadcast_status_change
   end
 
-  # Shared links must not let a bundle be sent for signature beyond the monthly limit of the tenant.
+  # Shared links must not let a bundle or a standalone document be sent for signature beyond the
+  # monthly limit of the tenant.
   def bundle_within_signature_request_limit
-    bundle = signer_contract&.contract&.bundle
-    return unless bundle&.signature_request_limit_reached_for?(signer_contract.recipient)
+    contract = signer_contract&.contract
+    return unless contract
 
-    errors.add(:base, :signature_request_limit, sender: bundle.sender_display_name)
+    reached = if contract.bundle
+      contract.bundle.signature_request_limit_reached_for?(signer_contract.recipient)
+    else
+      contract.signature_request_limit_reached_for?(signer_contract.signer&.user)
+    end
+    errors.add(:base, :signature_request_limit, sender: contract.tenant.sender_display_name) if reached
   end
 
   def mark_signer_contract_signed
     signer_contract.update_column(:signed_at, completed_at || Time.current)
-    contract.bundle&.record_signature_requests_on_signing!(recipient)
+    if contract.bundle
+      contract.bundle.record_signature_requests_on_signing!(recipient)
+    else
+      contract.record_signature_request_on_signing!(signer&.user)
+    end
   end
 
   def broadcast_status_change

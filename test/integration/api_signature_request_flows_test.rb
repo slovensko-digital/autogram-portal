@@ -163,6 +163,18 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a contract created through the API outside a bundle counts when someone signs it" do
+    post api_v1_contracts_path, params: pdf_contract_payload("samostatna.pdf"), headers: api_headers, as: :json
+    assert_response :created, -> { response.body }
+    contract = Contract.find_by!(uuid: response.parsed_body.fetch("id"))
+    assert_nil contract.bundle
+    assert_equal 0, @organization.usage_of(:signature_requests)
+
+    sign_with_autogram(contract)
+
+    assert_equal [ "standalone_signature" ], @organization.usage_records.signature_request.pluck(:source)
+  end
+
   test "usage is reported only to a tenant with an API token" do
     get api_v1_usage_path
 

@@ -83,7 +83,9 @@ paths:
         - `signatureRequests` – documents sent for signature this month. A document counts once,
           when a recipient is notified or, for bundles shared by a link or created through the API,
           when someone other than the organization signs the bundle (all its documents count then).
-          Once the limit is reached, recipients cannot start signing bundles that were not counted yet.
+          A contract created outside a bundle counts when someone who is not a member of the
+          organization signs it. Once the limit is reached, signing of bundles and contracts that
+          were not counted yet cannot start.
         - `timestamps` – timestamps added this month by extending signatures, by archivation and by
           signing in Autogram v mobile with a timestamped signature level
       responses:

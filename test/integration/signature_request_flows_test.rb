@@ -278,6 +278,46 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a standalone document counts once when someone outside the organization signs it" do
+    sign_in_with_tenant @owner, @organization
+    upload_pdf("samostatna.pdf")
+    contract = Contract.order(:id).last
+    assert_equal @organization, contract.tenant
+    assert_nil contract.bundle
+
+    sign_with_autogram(contract)
+    assert_equal 0, @organization.usage_of(:signature_requests), "a member signing the document of the organization"
+
+    sign_out @owner
+    sign_with_autogram(contract)
+    assert_equal [ "standalone_signature" ], @organization.usage_records.signature_request.pluck(:source)
+
+    sign_in confirmed_user("outsider@inafirma.sk")
+    sign_with_autogram(contract)
+    assert_equal 1, @organization.usage_of(:signature_requests)
+  end
+
+  test "a standalone document cannot be signed from outside the organization beyond the limit" do
+    with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "0") do
+      sign_in_with_tenant @owner, @organization
+      upload_pdf("nad-limit.pdf")
+      contract = Contract.order(:id).last
+      sign_out @owner
+
+      get sign_contract_path(contract)
+      assert_response :forbidden
+      assert_includes response.body, I18n.t("bundles.sign_limit_reached.title")
+
+      get autogram_contract_sessions_path(contract)
+      assert_response :unprocessable_entity
+      assert_equal 0, contract.sessions.count
+
+      sign_in_with_tenant @owner, @organization
+      sign_with_autogram(contract)
+      assert_equal 0, @organization.usage_of(:signature_requests)
+    end
+  end
+
   test "the organization signing its own bundle does not count it as sent" do
     with_plan_limits("PRO_MONTHLY_SIGNATURE_REQUESTS" => "0") do
       bundle = request_signature_from_web(as: @owner, filename: "vlastna.pdf")

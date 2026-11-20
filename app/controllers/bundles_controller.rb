@@ -324,7 +324,7 @@ class BundlesController < ApplicationController
   def render_sign_limit_reached_if_needed
     return unless @bundle.signature_request_limit_reached_for?(@recipient)
 
-    render :sign_limit_reached, locals: { bundle: @bundle }, status: :forbidden
+    render :sign_limit_reached, locals: { sender: @bundle.sender_display_name }, status: :forbidden
   end
 
   def set_batch_autogram_contracts

@@ -29,6 +29,7 @@ class UsageRecord < ApplicationRecord
   enum :source, {
     notification: "notification",
     recipient_signature: "recipient_signature",
+    standalone_signature: "standalone_signature",
     extension: "extension",
     archivation: "archivation",
     avm_signing: "avm_signing"

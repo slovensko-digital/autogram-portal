@@ -117,6 +117,26 @@ class Contract < ApplicationRecord
     tenant.nil? && bundle.nil?
   end
 
+  # Anyone but a member of the tenant signing its standalone document means it was given to them for
+  # signature (a link, an embedded page of an API integrator), so it counts towards the monthly limit of
+  # the tenant like the documents of a bundle (Bundle#signed_as_signature_request?).
+  def signed_as_signature_request?(user)
+    bundle.nil? && tenant.present? && !(user && tenant.users.exists?(user.id))
+  end
+
+  def signature_request_limit_reached_for?(user)
+    return false unless signed_as_signature_request?(user)
+
+    !tenant.signature_requests_counted?(self) && !tenant.within_limit?(:signature_requests)
+  end
+
+  # The signature is already made, so the document is counted even beyond the limit.
+  def record_signature_request_on_signing!(user)
+    return unless signed_as_signature_request?(user)
+
+    tenant.record_signature_requests!(self, source: :standalone_signature, enforce: false)
+  end
+
   # True when +tenant+ (the tenant the user works in) owns the contract.
   def managed_by?(tenant)
     tenant.present? && self.tenant == tenant
