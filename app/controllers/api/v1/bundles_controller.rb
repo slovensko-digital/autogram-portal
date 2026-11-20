@@ -1,5 +1,5 @@
 class Api::V1::BundlesController < ApiController
-  before_action :set_bundle, only: [ :show, :status, :destroy ]
+  before_action :set_bundle, only: [ :show, :status, :destroy, :notify ]
   after_action :verify_policy_scoped, except: [ :create ]
 
   def create
@@ -38,7 +38,44 @@ class Api::V1::BundlesController < ApiController
     end
   end
 
+  # Sends the invitation to the listed recipients (`recipients`: UUIDs), or without a list to every
+  # active recipient, unless they already got it or cannot get it (see Recipient#notification_skip_reason).
+  def notify
+    # A JSON body that is not an object (such as a bare array of UUIDs) lands in `_json` and would invite everyone.
+    if params.key?(:_json)
+      return render status: :bad_request, json: { message: "the request body must be a JSON object" }
+    end
+
+    recipient_ids = params[:recipients]
+    if params.key?(:recipients) && !(recipient_ids.is_a?(Array) && recipient_ids.all?(String))
+      return render status: :bad_request, json: { message: "recipients must be an array of recipient IDs" }
+    end
+
+    notified = []
+    skipped = []
+    notification_candidates(recipient_ids).each do |id, recipient|
+      reason = recipient ? recipient.notification_skip_reason : :not_found
+      if reason
+        skipped << { uuid: id, reason: reason.to_s }
+      else
+        recipient.notify!
+        notified << id
+      end
+    end
+
+    render json: { notified: notified, skipped: skipped }
+  end
+
   private
+
+  # [id, recipient] pairs in the order to notify; the recipient is nil when the bundle has no visible one with that id.
+  def notification_candidates(recipient_ids)
+    return @bundle.active_recipients.order(:created_at, :id).map { |recipient| [ recipient.uuid, recipient ] } if recipient_ids.nil?
+
+    recipient_ids = recipient_ids.uniq
+    recipients = @bundle.visible_recipients.where(uuid: recipient_ids).index_by(&:uuid)
+    recipient_ids.map { |id| [ id, recipients[id.downcase] ] }
+  end
 
   def set_bundle
     @bundle = policy_scope([ :api, :v1, Bundle ]).find_by(uuid: params[:id])

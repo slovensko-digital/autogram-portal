@@ -187,10 +187,17 @@ class Recipient < ApplicationRecord
   end
 
   def notifiable?
-    return false if withdrawn?
-    return false if signer_contracts.signed.exists?
-    return false if superseded?
-    not_notified?
+    notification_skip_reason.nil?
+  end
+
+  # Why notify! would not send the invitation, or nil when it would. The API reports it
+  # (POST /api/v1/bundles/:id/notify), so a new condition here is a new `reason` there.
+  def notification_skip_reason
+    return :withdrawn if withdrawn?
+    return :signed if signer_contracts.signed.exists?
+    return :superseded if superseded?
+    return :already_notified unless not_notified?
+    :no_email if email.blank?
   end
 
   # Sending the bundle counts its documents towards the monthly limit of the tenant;

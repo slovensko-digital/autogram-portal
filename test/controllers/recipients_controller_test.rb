@@ -159,6 +159,20 @@ class RecipientsControllerTest < ActionController::TestCase
     assert_not_nil first.notified_at
   end
 
+  test "notify_all leaves out recipients without an email address" do
+    bundle = bundles(:one)
+    bundle.allow_blank_recipient_emails = true
+    without_email = bundle.recipients.create!(email: nil, name: "API recipient without email")
+    with_email = bundle.recipients.create!(email: "with-email@example.com")
+
+    post :notify_all, params: { bundle_id: bundle.uuid }
+
+    assert_response :success
+    assert_enqueued_with(job: Notification::RecipientSignatureRequestedJob, args: [ with_email ])
+    assert_enqueued_jobs 1, only: Notification::RecipientSignatureRequestedJob
+    assert without_email.reload.not_notified?
+  end
+
   test "notify_all reports when nobody is waiting for an invitation" do
     bundles(:one).recipients.create!(email: "invited@example.com", notification_status: :notified)
 

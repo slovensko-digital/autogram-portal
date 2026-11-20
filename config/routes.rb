@@ -176,6 +176,7 @@ Rails.application.routes.draw do
       resources :bundles, only: [ :create, :show, :destroy ] do
         member do
           get :status
+          post :notify
         end
       end
     end

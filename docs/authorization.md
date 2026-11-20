@@ -182,6 +182,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Api::V1::Contracts#create/show/status/signed_document/destroy` | TenantApi; API contract scope for existing records | Contract tenant | Existing `Contract not found`, CRUD bodies, polling headers and redirects |
 | `Api::V1::Documents#show` | TenantApi, API document scope | Parent contract tenant | Existing `Document not found`; orphan documents excluded |
 | `Api::V1::Bundles#create/show/status/destroy` | TenantApi, tenant bundle scope | Bundle tenant, not public visibility | Existing `Bundle not found`, duplicate UUID conflict, bodies and polling headers |
+| `Api::V1::Bundles#notify` | TenantApi, tenant bundle scope; listed recipients looked up among the bundle's visible recipients | `notify?`: same as `show?` (bundle tenant) | `Bundle not found`; notifiable state (`Recipient#notification_skip_reason`) and the plan limit (422) stay in the model |
 | `Api::V1::Hello#show/show_auth` | Public / TenantApi | Explicit public skip / API hello policy | Existing public message and authenticated tenant message |
 | `Api::V1::Usage#show` | TenantApi | `Api::V1::UsagePolicy#show?` | Limits and usage of the token's tenant only |
 | `Api::Federation::V1::Requests#show/claim` | Verified Portal and recipient UUID | Federated recipient assigned to caller | Portal mismatch 403, state 409, claimant mismatch 422, bundle mismatch 404; grants unchanged |
@@ -232,7 +233,7 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 | Documents preview/download and contract validation/signed download | Existing UUID-accessible behavior; no new blanket tenant scope |
 | Evidence public lookup/download | Public reference access; distinct private-package permission |
 | Tenant API contracts/documents | Contract tenant scope, shared by document scopes |
-| Tenant API bundles and hello | Tenant-owned CRUD/status, API-feature token authentication; hello remains public |
+| Tenant API bundles and hello | Tenant-owned CRUD/status/notify, API-feature token authentication; hello remains public |
 | Federation API requests | Assigned portal binding (403), claimability (409), claimant validation (422), show bundle mismatch (404) |
 | Federation API invitations | Caller-portal-scoped creation/withdrawal; existing assertion scopes and payload responses |
 | Federation web | Preview public, claim authenticated; broker/remote errors and ordinary signing continuation |
