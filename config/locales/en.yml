@@ -166,6 +166,7 @@ en:
               stored_documents_limit: "The organization may store at most %{max} documents at once. Delete documents you no longer need."
               storage_limit: "The organization's storage (%{max}) is full. Delete documents you no longer need."
               signing_unsupported: "The document is signed in a format Autogram Portal cannot add another signature to, so it cannot be sent for signature."
+              damaged_asice_container: "The ASiC-E container cannot be opened. The file is damaged or is not an ASiC-E container."
             tenant:
               bundle_mismatch: "must be the organization of the bundle"
             agree_to_policies:

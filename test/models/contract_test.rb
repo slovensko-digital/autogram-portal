@@ -132,6 +132,21 @@ class ContractTest < ActiveSupport::TestCase
     assert_equal "XAdES", contract.signature_parameters.format
   end
 
+  test "a damaged asice container is not accepted" do
+    tempfile = Tempfile.new([ "poskodeny", ".asice" ])
+    tempfile.binmode
+    tempfile.write("toto nie je kontajner")
+    tempfile.rewind
+    uploaded_file = ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, filename: "poskodeny.asice", type: "application/vnd.etsi.asic-e+zip")
+
+    contract = Contract.new(tenant: @user.tenants.sole, documents: [ Document.new(blob: uploaded_file) ])
+
+    assert_not contract.save
+    assert_includes contract.errors.full_messages, I18n.t("activerecord.errors.models.contract.attributes.base.damaged_asice_container")
+  ensure
+    tempfile&.close!
+  end
+
   test "expands pending uploaded asice container before the contract is saved" do
     uploaded_file = uploaded_asice_file("pending.asice", {
       "contract-a.txt" => "alpha",
