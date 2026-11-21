@@ -346,7 +346,10 @@ class BundlesController < ApplicationController
       end
     end
 
-    @batch_autogram_contracts = @pending_batch_contracts.select { |contract| contract.allowed_methods.include?("qes") }
+    # Autogram signs several documents into one container, but not inside a batch.
+    @batch_autogram_contracts = @pending_batch_contracts.select do |contract|
+      contract.allowed_methods.include?("qes") && contract.documents_to_sign.one?
+    end
     @batch_autogram_available = !mobile_device_request? && @pending_batch_contracts.many? && @batch_autogram_contracts.size == @pending_batch_contracts.size
   end
 
