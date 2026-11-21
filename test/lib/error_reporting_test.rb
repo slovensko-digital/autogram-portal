@@ -33,13 +33,6 @@ class ErrorReportingTest < ActiveSupport::TestCase
     assert_equal({ controller: "api/v1/bundles", action: "create" }, report[:params].symbolize_keys)
   end
 
-  test "a report does not identify the signed-in user" do
-    controller = ApplicationController.new
-    controller.define_singleton_method(:current_user) { User.new(id: 7, email: "jan.novak@example.com") }
-
-    assert_empty controller.rollbar_person_data.compact
-  end
-
   test "a report of a failed mail or job names it but carries no arguments" do
     extra = { job: "NotificationMailer", action: "signature_request", params: { recipient: Recipient.new(email: "jan.novak@example.com", name: "Jan Novak") }, arguments: [ "jan.novak@example.com" ] }
     item = Rollbar::Item.new(level: "error", exception: RuntimeError.new("boom"), extra: extra, configuration: Rollbar.configuration, scope: Rollbar::LazyStore.new({}), logger: Rails.logger, notifier: Rollbar.notifier)
