@@ -3,7 +3,12 @@ module ApiEnvironment
     @token_authenticator ||= use_dummy_authenticator? ? DummyAuthenticator.new : ApiTokenAuthenticator.new(
       public_key_reader: API_TENANT_PUBLIC_KEY_READER,
       return_handler: API_TENANT_BY_IDENTITY_FINDER,
+      first_use_recorder: API_TOKEN_FIRST_USE_RECORDER,
     )
+  end
+
+  API_TOKEN_FIRST_USE_RECORDER = ->(tenant, jti, expires_at) do
+    ApiTokenUse.record_first_use(tenant: tenant, jti: jti, expires_at: expires_at)
   end
 
   API_TENANT_PUBLIC_KEY_READER = ->(sub) { OpenSSL::PKey.read(API_TENANT_BY_IDENTITY_FINDER.call(sub).api_token_public_key) }

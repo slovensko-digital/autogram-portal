@@ -54,14 +54,13 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
 
   test "api bundle access remains tenant scoped even when publicly visible" do
     bundle = Bundle.create!(tenant: @other, contracts: [ @other_contract ], publicly_visible: true)
-    headers = bearer_headers_for(@owner, @owner_key)
 
-    get "/api/v1/bundles/#{bundle.uuid}", headers: headers
+    get "/api/v1/bundles/#{bundle.uuid}", headers: bearer_headers_for(@owner, @owner_key)
     assert_response :not_found
     assert_equal({ "error" => "Bundle not found" }, response.parsed_body)
 
     assert_no_difference -> { Bundle.count } do
-      delete "/api/v1/bundles/#{bundle.uuid}", headers: headers
+      delete "/api/v1/bundles/#{bundle.uuid}", headers: bearer_headers_for(@owner, @owner_key)
     end
     assert_response :not_found
   end
@@ -122,6 +121,36 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     assert_equal "Hello, #{@owner.id}!", response.parsed_body["message"]
   end
 
+  test "api accepts each token only once" do
+    headers = bearer_headers_for(@owner, @owner_key)
+
+    get "/api/v1/hello_auth", headers: headers
+    assert_response :success
+
+    get "/api/v1/hello_auth", headers: headers
+    assert_response :unauthorized
+  end
+
+  test "api accepts the same jti from different tenants" do
+    jti = SecureRandom.hex(16)
+
+    get "/api/v1/hello_auth", headers: bearer_headers_for(@owner, @owner_key, jti: jti)
+    assert_response :success
+
+    get "/api/v1/hello_auth", headers: bearer_headers_for(@other, @other_key, jti: jti)
+    assert_response :success
+  end
+
+  test "api token with an invalid signature does not use up its jti" do
+    jti = SecureRandom.hex(16)
+
+    get "/api/v1/hello_auth", headers: bearer_headers_for(@owner, OpenSSL::PKey::RSA.generate(2048), jti: jti)
+    assert_response :unauthorized
+
+    get "/api/v1/hello_auth", headers: bearer_headers_for(@owner, @owner_key, jti: jti)
+    assert_response :success
+  end
+
   private
 
   def attach_api_public_key!(tenant, algorithm: "RS256")
@@ -138,12 +167,12 @@ class Api::V1::AccessControlTest < ActionDispatch::IntegrationTest
     key
   end
 
-  def bearer_headers_for(tenant, key, algorithm: "RS256")
+  def bearer_headers_for(tenant, key, algorithm: "RS256", jti: SecureRandom.hex(16))
     token = JWT.encode(
       {
         sub: tenant.id.to_s,
         exp: 10.minutes.from_now.to_i,
-        jti: SecureRandom.hex(16)
+        jti: jti
       },
       key,
       algorithm
