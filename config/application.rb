@@ -53,6 +53,10 @@ module AutogramPortal
       contract_validation_records_maintenance: {
         cron: "every monday at 3am",
         class: "ContractValidationRecordsMaintenanceJob"
+      },
+      delete_expired_api_token_uses: {
+        cron: "every hour",
+        class: "ApiTokenUsesCleanupJob"
       }
     }
   end

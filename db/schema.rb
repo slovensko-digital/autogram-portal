@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_20_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_21_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_130000) do
     t.string "level"
     t.datetime "updated_at", null: false
     t.index ["contract_id"], name: "index_ades_signature_parameters_on_contract_id"
+  end
+
+  create_table "api_token_uses", force: :cascade do |t|
+    t.bigint "tenant_id", null: false
+    t.string "jti", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.index ["expires_at"], name: "index_api_token_uses_on_expires_at"
+    t.index ["tenant_id", "jti"], name: "index_api_token_uses_on_tenant_id_and_jti", unique: true
   end
 
   create_table "bundles", force: :cascade do |t|
@@ -574,6 +583,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_130000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ades_signature_parameters", "contracts"
+  add_foreign_key "api_token_uses", "tenants", on_delete: :cascade
   add_foreign_key "bundles", "tenants"
   add_foreign_key "bundles", "users", column: "author_id", on_delete: :nullify
   add_foreign_key "contract_content_versions", "contracts"

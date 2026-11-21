@@ -9,11 +9,11 @@ class Api::V1::BundlesController < ApiController
 
     if @bundle.save
       render status: :created
+    elsif id_taken?(@bundle, :uuid)
+      render json: { error: "Bundle with the given ID already exists" }, status: :conflict
+    elsif id_taken?(@bundle, :"contracts.uuid")
+      render json: { error: "Contract with the given ID already exists" }, status: :conflict
     else
-      if @bundle.errors.details[:uuid]&.any? { |e| e[:error] == :taken }
-        return render json: { error: "Bundle with the given ID already exists" }, status: :conflict
-      end
-
       render json: { errors: @bundle.errors.full_messages }, status: :unprocessable_entity
     end
   end

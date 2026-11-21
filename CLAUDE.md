@@ -57,7 +57,7 @@ bin/rails db:migrate && bundle exec annotaterb models   # re-annotate models/fix
 
 ## API
 
-- `/api/v1/*`, RS256 JWT with `sub` = tenant id, verified by the tenant's `api_token_public_key`; the tenant needs the `api` feature (`app/lib/api_environment.rb`). Spec: `public/openapi.yaml` — update it with API changes.
+- `/api/v1/*`, RS256 JWT with `sub` = tenant id, verified by the tenant's `api_token_public_key`; the tenant needs the `api` feature (`app/lib/api_environment.rb`). Each token's `jti` is accepted once per tenant (`ApiTokenUse`, expired rows deleted hourly by `ApiTokenUsesCleanupJob`), so tests need a new token for every request. Spec: `public/openapi.yaml` — update it with API changes.
 - Federation API under `/api/federation/v1` uses portal-to-portal assertions, not tenant tokens.
 
 ## Embedding (SDK)
