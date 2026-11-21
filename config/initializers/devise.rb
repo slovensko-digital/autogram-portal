@@ -343,3 +343,12 @@ Devise.setup do |config|
   # will be considered invalid.
   # config.passwordless_expire_old_tokens_on_sign_in = false
 end
+
+# Devise finds the mapping of a failed OmniAuth sign-in by its path, which with the "/auth" prefix above does
+# not start with the users scope, so a failed Google sign-in raised an error instead of returning to the sign-in
+# page. Devise sets its handler when it loads devise/omniauth (with the User model); loading it first keeps ours.
+require "devise/omniauth"
+OmniAuth.config.on_failure = ->(env) do
+  env["devise.mapping"] = Devise.mappings[:user]
+  Users::OmniauthController.action(:failure).call(env)
+end

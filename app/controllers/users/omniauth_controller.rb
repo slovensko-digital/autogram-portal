@@ -39,7 +39,7 @@ class Users::OmniauthController < Devise::OmniauthCallbacksController
   end
 
   def failure
-    flash[:error] = "There was a problem signing you in. Please register or try signing in later."
+    flash[:error] = t("consents.google_sign_in_failed")
     redirect_to new_user_registration_url
   end
 end
