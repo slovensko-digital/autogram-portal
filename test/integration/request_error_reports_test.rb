@@ -24,6 +24,13 @@ class RequestErrorReportsTest < ActionDispatch::IntegrationTest
     assert_nil report.dig("data", :person)
   end
 
+  test "a request for a page that does not exist is not reported" do
+    reports = capture_reports { without_detailed_exceptions { get "/config/secrets.yaml" } }
+
+    assert_response :not_found
+    assert_empty reports
+  end
+
   private
 
   # Rollbar is disabled in tests; this turns it on and keeps the reports instead of sending them. Rollbar
@@ -32,5 +39,15 @@ class RequestErrorReportsTest < ActionDispatch::IntegrationTest
     reports = []
     Rollbar.with_config(enabled: true, access_token: "test", endpoint: "http://127.0.0.1:9/", use_async: true, async_handler: ->(payload) { reports << payload }, &)
     reports
+  end
+
+  # Production shows no detailed error pages, and only then Rollbar reports routing errors.
+  def without_detailed_exceptions
+    env_config = Rails.application.env_config
+    detailed = env_config["action_dispatch.show_detailed_exceptions"]
+    env_config["action_dispatch.show_detailed_exceptions"] = false
+    yield
+  ensure
+    env_config["action_dispatch.show_detailed_exceptions"] = detailed
   end
 end
