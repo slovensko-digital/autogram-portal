@@ -80,6 +80,11 @@ class ApiController < ActionController::API
     attributes
   end
 
+  # A record (or a nested one, e.g. :"contracts.uuid") was not saved because its ID is already used.
+  def id_taken?(record, attribute)
+    record.errors.details[attribute]&.any? { |error| error[:error] == :taken }
+  end
+
   def render_limit_exceeded(error)
     render status: :unprocessable_entity, json: { errors: [ error.message ], code: "limit_exceeded", limit: error.limit.to_s }
   end
