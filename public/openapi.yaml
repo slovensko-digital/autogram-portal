@@ -14,6 +14,9 @@ tags:
 
 paths:
   /.well-known/autogram-portal.json:
+    servers:
+      - url: /
+      - url: https://agp.dev.slovensko.digital
     get:
       tags:
         - Federation
@@ -104,8 +107,10 @@ paths:
         - Integration
       security:
         - JWT: []
-      summary: Upload a file
-      description: Uploads a file to the Autogram portal.
+      summary: Create a contract
+      description: |
+        Uploads one or more documents to be signed together. Several documents are signed into one
+        ASiC-E container (XAdES or CAdES). The contract is signed at `/contracts/{id}/sign` on the portal.
       requestBody:
         required: true
         content:
@@ -117,38 +122,49 @@ paths:
                 summary: Minimal QES PAdES
                 value:
                   allowedMethods: [ "qes" ]
-                  file:
-                    content: "base64-encoded-content"
-                    contentType: "application/pdf; base64"
-              minimal-qes-pdf-cades-asice-ts:
-                summary: Minimal QES PDF CAdES ASiC-E with timestamp
+                  documents:
+                    - filename: "contract.pdf"
+                      content: "base64-encoded-content"
+                      contentType: "application/pdf;base64"
+              qes-pdf-cades-asice-ts:
+                summary: QES PDF CAdES ASiC-E with timestamp
                 value:
                   allowedMethods: [ "qes" ]
-                  file:
-                    content: "base64-encoded-content"
-                    contentType: "application/pdf; base64"
-                  SignatureParameters:
-                    level: CAdES_BASELINE_T
-                    container: ASiC-E
-              pdf-url-source:
-                summary: PDF file from URL
+                  documents:
+                    - filename: "contract.pdf"
+                      content: "base64-encoded-content"
+                      contentType: "application/pdf;base64"
+                  signatureParameters:
+                    format: CAdES
+                    level: BASELINE_T
+                    container: ASiC_E
+              several-documents:
+                summary: Several documents signed into one ASiC-E container
                 value:
                   allowedMethods: [ "qes" ]
-                  file:
-                        url: "https://example.com/file.pdf"
-                        hash: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
-                        contentType: "application/pdf"
-              allow-postal-signing:
-                summary: Allow sending notarized bundle by post
+                  documents:
+                    - filename: "contract.pdf"
+                      content: "base64-encoded-content"
+                      contentType: "application/pdf;base64"
+                    - filename: "annex.pdf"
+                      content: "base64-encoded-content"
+                      contentType: "application/pdf;base64"
+                  signatureParameters:
+                    format: XAdES
+                    level: BASELINE_B
+                    container: ASiC_E
+              qes-or-ades:
+                summary: Qualified or advanced electronic signature
                 value:
-                  allowedMethods: [ "qes", "ades", "visual", "scan", "paper" ]
-                  file:
-                    content: "base64-encoded-content"
-                    contentType: "application/pdf; base64"
+                  allowedMethods: [ "qes", "ades" ]
+                  documents:
+                    - filename: "contract.pdf"
+                      content: "base64-encoded-content"
+                      contentType: "application/pdf;base64"
 
       responses:
         "201":
-          description: A successful response with the uploaded file details.
+          description: The contract was created.
           content:
             application/json:
               schema:
@@ -156,16 +172,13 @@ paths:
                 properties:
                   id:
                     type: string
-                    format: uuid
                     example: 69393b49-c34f-438f-ad7c-4b78db3932be
-        "409":
-          description: Conflict - A contract with the same ID already exists.
         "422":
           description: |
-            Unprocessable Entity - The request body is invalid, a document is already signed in a form
-            no signature can be added to (e.g. a PDF in an enveloping CMS/CAdES signature, `.p7m`), or the
-            request does not fit the limits of the organization's plan (`code: limit_exceeded`). Nothing is
-            stored in that case.
+            Unprocessable Entity - The request body is invalid (also when a contract with the same `id`
+            already exists), a document is already signed in a form no signature can be added to (e.g. a
+            PDF in an enveloping CMS/CAdES signature, `.p7m`), or the request does not fit the limits of the
+            organization's plan (`code: limit_exceeded`). Nothing is stored in that case.
           content:
             application/json:
               schema:
@@ -195,7 +208,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Contract"
+                $ref: "#/components/schemas/ContractDetails"
         "404":
           description: Contract not found.
 
@@ -242,28 +255,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  download_url:
-                    type: string
-                    format: uri
-                    example: https://example.com/signed_document.pdf
-                  content_type:
-                    type: string
-                    example: application/pdf
-                  filename:
-                    type: string
-                    example: signed_document.pdf
-                  file_size:
-                    type: integer
-                    example: 204800
-                  checksum:
-                    type: string
-                    example: abcdef1234567890abcdef1234567890abcdef1234567890
-                  signed_at:
-                    type: string
-                    format: date-time
-                    example: '2023-10-01T12:34:56Z'
+                $ref: "#/components/schemas/SignedDocument"
         "404":
           description: Contract or signed document not found.
 
@@ -291,18 +283,44 @@ paths:
               description: Indicates how long the client should wait before making a follow-up request.
               schema:
                 type: integer
-                example: 30
+                example: 10
         "302":
-          description: Found
+          description: Signed. Redirects to the contract details, which include `signed_document`.
           headers:
             Location:
-              description: URL to the signed document.
+              description: URL of the contract details in the API.
               schema:
                 type: string
                 format: uri
                 example: https://example.com/api/v1/contracts/69393b49-c34f-438f-ad7c-4b78db3932be
         "404":
           description: Contract not found.
+
+  /documents/{id}:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Get document details
+      description: Retrieves a document of a contract by its ID (`documents[].id` in the contract details).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 35a22b52-4188-4239-907c-55decca6d3dc
+          description: The unique identifier of the document.
+      responses:
+        "200":
+          description: A successful response with the document details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentDetails"
+        "404":
+          description: Document not found.
 
   /bundles:
     post:
@@ -311,7 +329,11 @@ paths:
       security:
         - JWT: []
       summary: Create a new signing bundle
-      description: Creates a new signing bundle with files to be signed, users to sign, and other metadata.
+      description: |
+        Creates a new signing bundle with contracts to be signed, recipients who sign them, and other metadata.
+        The bundle is signed at `/bundles/{id}/sign` on the portal: a recipient with `?recipient={uuid}`,
+        anyone with the link when the bundle is `publiclyVisible` and has no recipients. Creating the bundle
+        sends no email to the recipients.
       requestBody:
         required: true
         content:
@@ -339,7 +361,8 @@ paths:
                 properties:
                   id:
                     type: string
-                    example: bundle-1
+                    format: uuid
+                    example: 69393b49-c34f-438f-ad7c-4b78db3932be
         "409":
           description: Conflict - A bundle with the same ID already exists.
         "422":
@@ -377,7 +400,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Bundle"
+                $ref: "#/components/schemas/BundleDetails"
         "404":
           description: Bundle not found.
 
@@ -426,12 +449,12 @@ paths:
               description: Indicates how long the client should wait before making a follow-up request.
               schema:
                 type: integer
-                example: 30
+                example: 10
         "302":
-          description: Found
+          description: Completed. Redirects to the bundle details, whose contracts include `signed_document`.
           headers:
             Location:
-              description: URL to the signed documents.
+              description: URL of the bundle details in the API.
               schema:
                 type: string
                 format: uri
@@ -440,6 +463,9 @@ paths:
           description: Bundle not found.
 
   /federation/v1/requests/{id}:
+    servers:
+      - url: /api
+      - url: https://agp.dev.slovensko.digital/api
     get:
       tags:
         - Federation
@@ -482,6 +508,9 @@ paths:
           description: Request is no longer claimable.
 
   /federation/v1/requests/{id}/claim:
+    servers:
+      - url: /api
+      - url: https://agp.dev.slovensko.digital/api
     post:
       tags:
         - Federation
@@ -557,6 +586,9 @@ paths:
           description: Request is no longer claimable.
 
   /federation/v1/request_invitations:
+    servers:
+      - url: /api
+      - url: https://agp.dev.slovensko.digital/api
     post:
       tags:
         - Federation
@@ -589,6 +621,9 @@ paths:
           description: Invalid portal assertion.
 
   /federation/v1/request_invitations/{recipientUuid}/withdraw:
+    servers:
+      - url: /api
+      - url: https://agp.dev.slovensko.digital/api
     post:
       tags:
         - Federation
@@ -713,8 +748,9 @@ components:
       properties:
         id:
           type: string
+          format: uuid
           example: 69393b49-c34f-438f-ad7c-4b78db3932be
-          description: Unique identifier for the bundle. If not provided, a new UUID will be generated.
+          description: Unique identifier for the bundle, a UUID. If not provided, a new UUID will be generated.
         name:
           type: string
           nullable: true
@@ -723,8 +759,25 @@ components:
           type: boolean
           default: false
           description: When true, the bundle sign page can be opened without an AGP recipient or AGP session. Useful for embedded third-party signing flows.
+        signingRule:
+          type: string
+          enum:
+            - all
+            - any
+            - threshold
+          default: all
+          description: When the bundle is completed - once all recipients sign, once any of them signs, or once `requiredSignatures` of them sign.
+        requiredSignatures:
+          type: integer
+          minimum: 1
+          description: Number of recipients who must sign. Required when `signingRule` is `threshold`.
+        authorNotificationsEnabled:
+          type: boolean
+          default: false
+          description: When true and the bundle has no webhook, the organization's owners get email notifications about the signing of the bundle.
         contracts:
           type: array
+          minItems: 1
           items:
             $ref: "#/components/schemas/Contract"
         postalAddress:
@@ -735,25 +788,172 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Recipient"
+      required:
+        - contracts
 
     Contract:
       type: object
       properties:
         id:
           type: string
-          example: contract-1
-          description: Unique identifier for the signature. If not provided, a new UUID will be generated.
+          example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: Unique identifier for the contract. If not provided, a new UUID will be generated.
         allowedMethods:
           type: array
-          default: [ "qes" ]
+          minItems: 1
           items:
             $ref: "#/components/schemas/SignatureMethod"
         documents:
-          $ref: "#/components/schemas/Document"
+          type: array
+          minItems: 1
+          description: Several documents are signed together into one ASiC-E container (XAdES or CAdES).
+          items:
+            $ref: "#/components/schemas/Document"
         signatureParameters:
           $ref: "#/components/schemas/SignatureParameters"
       required:
+        - allowedMethods
         - documents
+
+    BundleDetails:
+      type: object
+      description: A bundle as the API returns it. Unlike requests, responses use snake_case keys.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 69393b49-c34f-438f-ad7c-4b78db3932be
+        name:
+          type:
+            - string
+            - "null"
+        contracts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContractDetails"
+        recipients:
+          type: array
+          description: Present when the bundle has recipients.
+          items:
+            type: object
+            properties:
+              name:
+                type:
+                  - string
+                  - "null"
+              email:
+                type:
+                  - string
+                  - "null"
+              uuid:
+                type: string
+                format: uuid
+        webhook:
+          type: object
+          description: Present when the bundle has a webhook.
+          properties:
+            url:
+              type: string
+              format: uri
+            method:
+              type: string
+              enum:
+                - standard
+                - get
+        postal_address:
+          type: object
+          description: Present when the bundle has a postal address.
+          properties:
+            address:
+              type: string
+            recipient_name:
+              type: string
+        created_at:
+          type: string
+          format: date-time
+
+    ContractDetails:
+      type: object
+      description: A contract as the API returns it. Unlike requests, responses use snake_case keys.
+      properties:
+        id:
+          type: string
+          example: 69393b49-c34f-438f-ad7c-4b78db3932be
+        allowed_methods:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignatureMethod"
+        signature_parameters:
+          type: object
+          properties:
+            format:
+              type:
+                - string
+                - "null"
+              example: XAdES
+            level:
+              type: string
+              example: BASELINE_B
+            container:
+              type:
+                - string
+                - "null"
+              example: ASiC_E
+            en319132:
+              type: boolean
+            add_content_timestamp:
+              type: boolean
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentDetails"
+        signed_document:
+          description: Present once the contract is signed.
+          $ref: "#/components/schemas/SignedDocument"
+
+    DocumentDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 35a22b52-4188-4239-907c-55decca6d3dc
+        filename:
+          type: string
+          example: contract.pdf
+        content_type:
+          type: string
+          example: application/pdf
+        download_url:
+          type: string
+          format: uri
+          example: https://example.com/rails/active_storage/blobs/redirect/abc/contract.pdf
+        xdc_parameters:
+          type: object
+          description: The `xdcParameters` of the document with snake_case keys (e.g. `fs_form_identifier`), null when not set.
+
+    SignedDocument:
+      type: object
+      properties:
+        download_url:
+          type: string
+          format: uri
+          example: https://example.com/signed_document.pdf
+        content_type:
+          type: string
+          example: application/pdf
+        filename:
+          type: string
+          example: signed_document.pdf
+        file_size:
+          type: integer
+          example: 204800
+        checksum:
+          type: string
+          example: abcdef1234567890abcdef1234567890abcdef1234567890
+        signed_at:
+          type: string
+          format: date-time
+          example: '2023-10-01T12:34:56Z'
 
     PostalAddress:
       type: object
@@ -787,6 +987,8 @@ components:
         `qes` signs with a qualified signature through the integrated signing apps (Autogram, Autogram v mobile, eIdentita).
         `standalone_qes` additionally lets the signer download the document, sign it with a qualified signature in a standalone
         desktop application (e.g. Podpisuj) and upload it back. Neither implies the other.
+        Which methods are accepted depends on the configuration of the portal, by default `qes`, `standalone_qes`
+        and `ades`; other values are rejected with 422.
       enum:
         - qes
         - standalone_qes
@@ -800,22 +1002,26 @@ components:
       properties:
         filename:
           type: string
-          example: File 1
+          example: contract.pdf
         content:
           type: string
-          format: binary
+          description: Content of the file, Base64-encoded when `contentType` says so, otherwise plain text.
         contentType:
           type: string
-          example: application/pdf
+          example: application/pdf;base64
+          description: MIME type of the file. Add `;base64` when `content` is Base64-encoded.
         url:
           type: string
           example: https://example.com/doc-1.pdf
+          description: Not supported yet. A document without `content` is left out of the contract.
         hash:
           type: string
           example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
-          description: SHA-256 hash of the file content.
+          description: SHA-256 hash of the file at `url`. Not supported yet, like `url`.
         xdcParameters:
           $ref: "#/components/schemas/XdcParameters"
+      required:
+        - content
 
     Recipient:
       type: object
@@ -827,6 +1033,7 @@ components:
           type: string
           example: john.doe@example.com
           format: email
+          description: Optional. A recipient without an email opens the bundle only through its link with `uuid`.
         mobilePhone:
           type: string
           example: "+421901234567"
@@ -849,24 +1056,25 @@ components:
           format: uuid
           example: 2ad58f5f-6f56-4ab6-a6df-5b80aa6f4a25
           description: Optional trusted portal instance identifier. When provided, the recipient is treated as federated and is expected to open the request through that remote portal instance.
-      required:
-        - email
 
     SignatureParameters:
       type: object
-      description: Signing parameters same as in the Autogram API
+      description: Parameters of the qualified electronic signature.
       properties:
         level:
           type: string
           description: Signature level.
+          default: BASELINE_B
           example: BASELINE_B
           enum:
             - BASELINE_B
             - BASELINE_T
+            - BASELINE_LT
+            - BASELINE_LTA
 
         format:
           type: string
-          description: Signature form. Defaults to PAdES for PDF files, XAdES otherwise.
+          description: Signature form. Defaults to PAdES for a single PDF file, XAdES otherwise. Several documents can be signed only with XAdES or CAdES.
           example: XAdES
           enum:
             - XAdES
@@ -875,11 +1083,20 @@ components:
 
         container:
           type: string
-          description: Type of Advanced Signature Container. Defaults to null - no container.
-          example: ASiC-E
+          description: Signature container. XAdES and CAdES signatures are always in an ASiC-E container, which is set when missing; PAdES signatures have no container.
+          example: ASiC_E
           enum:
-            - ASiC-E
-            - ASiC-S
+            - ASiC_E
+
+        en319132:
+          type: boolean
+          default: false
+          description: Stored and returned in the contract details, but not applied to the signature yet.
+
+        addContentTimestamp:
+          type: boolean
+          default: false
+          description: Stored and returned in the contract details, but not applied to the signature yet.
 
     XdcParameters:
       type: object
@@ -1287,7 +1504,7 @@ components:
       summary: Multiple users and contracts
       value:
         contracts:
-          - allowedMethods: [ "qes", "ades", "visual", "scan", "paper" ]
+          - allowedMethods: [ "qes", "ades" ]
             documents:
               - filename: "contract.txt"
                 content: "Sample text content"
@@ -1295,10 +1512,13 @@ components:
             signatureParameters:
               format: XAdES
               container: ASiC_E
-          - allowedMethods: [ "ts-qes", "notary" ]
+          - allowedMethods: [ "qes" ]
             documents:
               - filename: "mandate.txt"
                 content: "Sample mandate text content"
+                contentType: "text/plain"
+              - filename: "annex.txt"
+                content: "Sample annex text content"
                 contentType: "text/plain"
             signatureParameters:
               level: BASELINE_T
@@ -1317,10 +1537,10 @@ components:
           method: "get"
 
     postal-signing:
-      summary: Postal signing options
+      summary: Bundle with a postal address
       value:
         contracts:
-          - allowedMethods: [ "qes", "notary" ]
+          - allowedMethods: [ "qes" ]
             documents:
               - filename: "contract.txt"
                 content: "Sample text content"
