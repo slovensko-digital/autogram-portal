@@ -376,6 +376,16 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "signature apps send a signer with an unknown document to pick one" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    [ "eid_2024\\", "neexistuje" ].each do |qscd|
+      get signature_apps_contract_path(contract, qscd: qscd)
+
+      assert_redirected_to contract_onboarding_path(contract, "qscd_check", method: "electronic"), qscd
+    end
+  end
+
   test "signature apps offer only the computer for a residence permit issued from december 2022 to october 2023" do
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
 
@@ -422,6 +432,18 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
     get signature_apps_contract_path(contract, iframe: "true")
     assert_redirected_to sign_contract_path(contract, iframe: "true")
+  end
+
+  test "uploading a damaged asice container shows why it was not accepted" do
+    assert_no_difference "Contract.count" do
+      post contracts_path, params: {
+        document: { blob: Rack::Test::UploadedFile.new(StringIO.new("toto nie je kontajner"), "application/vnd.etsi.asic-e+zip", original_filename: "poskodeny.asice") },
+        contract: { agree_to_policies: "1" }
+      }
+    end
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, I18n.t("activerecord.errors.models.contract.attributes.base.damaged_asice_container")
   end
 
   test "uploaded own contract allows standalone apps by default and the author can turn them off" do

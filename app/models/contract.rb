@@ -625,6 +625,8 @@ class Contract < ApplicationRecord
       content_type: container_document.content_type,
       origin: "uploaded_signed"
     )
+  rescue Zip::Error
+    errors.add(:base, :damaged_asice_container)
   end
 
   # The document signed inside an enveloping CMS becomes the contract document (shown and previewed),

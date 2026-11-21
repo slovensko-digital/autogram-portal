@@ -137,6 +137,7 @@ sk:
               stored_documents_limit: "Organizácia môže mať uložených najviac %{max} dokumentov naraz. Zmažte dokumenty, ktoré už nepotrebujete."
               storage_limit: "Úložisko organizácie (%{max}) je plné. Zmažte dokumenty, ktoré už nepotrebujete."
               signing_unsupported: "Dokument je podpísaný vo formáte, do ktorého Autogram Portal nevie pridať ďalší podpis, preto ho nemožno poslať na podpis."
+              damaged_asice_container: "Kontajner ASiC-E sa nedá otvoriť. Súbor je poškodený alebo nejde o kontajner ASiC-E."
             tenant:
               bundle_mismatch: "musí byť organizácia balíka"
             agree_to_policies:
