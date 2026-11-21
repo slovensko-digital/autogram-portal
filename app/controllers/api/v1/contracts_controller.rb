@@ -8,6 +8,8 @@ class Api::V1::ContractsController < ApiController
     @contract.tenant = current_tenant
     if @contract.save
       render status: :created
+    elsif id_taken?(@contract, :uuid)
+      render json: { error: "Contract with the given ID already exists" }, status: :conflict
     else
       render json: { errors: @contract.errors.full_messages }, status: :unprocessable_entity
     end
@@ -38,7 +40,7 @@ class Api::V1::ContractsController < ApiController
       response.headers["Retry-After"] = 10
       render json: nil, status: :ok
     else
-      redirect_to @contract
+      redirect_to api_v1_contract_path(@contract)
     end
   end
 

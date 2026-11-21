@@ -38,9 +38,10 @@ module Ades
       # TODO: handle case with multiple documents with xades/cades signatures without container
       return [ "XAdES", "CAdES" ] if contract.documents.size > 1
 
+      # A contract without documents is invalid anyway (Contract#validate_documents), and there is no PDF to sign with PAdES.
       document = contract.documents.first
       unless contract.validation_result&.has_signatures?
-        return [ document.is_pdf? ? "PAdES" : nil, "XAdES", "CAdES" ].compact
+        return [ document&.is_pdf? ? "PAdES" : nil, "XAdES", "CAdES" ].compact
       end
 
       result = contract.validation_result.documentInfo

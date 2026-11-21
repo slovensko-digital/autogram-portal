@@ -178,6 +178,25 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal [ "standalone_signature" ], @organization.usage_records.signature_request.pluck(:source)
   end
 
+  test "status of a contract created through the API leads to its API details once it is signed" do
+    post api_v1_contracts_path, params: pdf_contract_payload("stav.pdf"), headers: api_headers, as: :json
+    assert_response :created, -> { response.body }
+    contract = Contract.find_by!(uuid: response.parsed_body.fetch("id"))
+
+    get status_api_v1_contract_path(contract), headers: api_headers
+    assert_response :ok
+
+    sign_with_autogram(contract)
+
+    get status_api_v1_contract_path(contract), headers: api_headers
+    assert_redirected_to api_v1_contract_path(contract)
+
+    get response.location, headers: api_headers
+    assert_response :success
+    assert_equal contract.uuid, response.parsed_body.fetch("id")
+    assert response.parsed_body["signed_document"].present?
+  end
+
   test "usage is reported only to a tenant with an API token" do
     get api_v1_usage_path
 
