@@ -17,7 +17,9 @@ Rollbar.configure do |config|
   config.scrub_whitelist = %i[controller action job job_id]
   config.scrub_headers |= [ "Referer" ]
   config.collect_user_ip = false
-  config.person_id_method = nil
+  # The person is dropped from the built report. Setting person_id_method to nil instead makes Rollbar
+  # fail on every report of a request (Rollbar::Item#ignored? calls to_sym on it).
+  config.transform << ->(options) { options[:payload]["data"].delete(:person) }
 
   # If you want to attach custom data to all exception and message reports,
   # provide a lambda like the following. It should return a hash.
