@@ -38,7 +38,7 @@ class Api::V1::ContractsController < ApiController
       response.headers["Retry-After"] = 10
       render json: nil, status: :ok
     else
-      redirect_to @contract
+      redirect_to api_v1_contract_path(@contract)
     end
   end
 
