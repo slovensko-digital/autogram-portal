@@ -44,7 +44,7 @@ class Session < ApplicationRecord
   # Reasons a signing app cannot sign the document as it was requested (its
   # signature level, its files or prepared fields), as opposed to reasons on the
   # signer's side such as the ID card.
-  SIGNATURE_FORMAT_UNAVAILABILITY_REASONS = %i[multiple_files unsupported_signature_level prepared_signature_fields].freeze
+  SIGNATURE_FORMAT_UNAVAILABILITY_REASONS = %i[multiple_files unsupported_document_type unsupported_signature_level prepared_signature_fields].freeze
 
   belongs_to :signer_contract
 
@@ -158,6 +158,10 @@ class Session < ApplicationRecord
 
   def podpisuj?
     is_a?(PodpisujSession)
+  end
+
+  def chevron7?
+    is_a?(Chevron7Session)
   end
 
   def ades_evidence?
