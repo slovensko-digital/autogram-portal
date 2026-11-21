@@ -21,6 +21,8 @@ class ApplicationController < ActionController::Base
     respond_to do |format|
       format.html { render "errors/show", layout: "errors", status: :not_found, locals: { status: 404 } }
       format.json { render json: { error: "Not Found" }, status: :not_found }
+      # e.g. the Turbo Stream of a signing session asked for after the session was deleted
+      format.any { head :not_found }
     end
   end
 

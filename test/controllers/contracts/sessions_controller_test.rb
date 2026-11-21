@@ -413,6 +413,12 @@ class Contracts::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :no_content
   end
 
+  test "state of a session that no longer exists is not found" do
+    get "/contracts/#{@contract.uuid}/sessions/0/state", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :not_found
+  end
+
   test "state is forbidden without token or authorized user" do
     @session.update_columns(status: Session.statuses[:signed], completed_at: Time.current)
 
