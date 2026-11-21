@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
 import { isMobileDevice } from "utils/device_detection"
+import { documentToSign, signatureParameters } from "utils/autogram_sign_request"
 
 export default class extends Controller {
   static targets = ["progressBar", "progressPercent", "progressText", "currentDocumentName", "documentItem", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateStart", "stateNormal", "stateAppNotRunning", "stateSuccess", "stateCancelled", "stateError", "errorMessage", "retryButton"]
@@ -108,26 +109,18 @@ export default class extends Controller {
         this.setDocumentItemStates(index)
 
         const autogramParameters = await this.loadAutogramParameters(item.parameters_path)
-        const signRequest = await this.prepareSigningRequestBody(autogramParameters)
-        const signedDocument = signRequest.useVersionedSigning
-          ? await client.signV1(
-            signRequest.documents,
-            autogramParameters.signature_parameters,
-            {
-              abortController: this.abortController,
-              batchId: batchId,
-              onStateChange: (state) => this.handleDesktopState(state)
-            }
-          )
-          : await client.sign(
-            signRequest.document,
-            signRequest.parameters,
-            signRequest.payloadMimeType,
-            {
-              abortController: this.abortController,
-              batchId: batchId
-            }
-          )
+        const documents = await Promise.all(autogramParameters.documents.map(async (document) => {
+          return documentToSign(document, await this.loadDocumentContent(document))
+        }))
+        // Autogram signs only single documents in a batch, the bundle offers batch signing only for those
+        const signedDocument = await client.sign(
+          documents,
+          signatureParameters(autogramParameters.signature_parameters),
+          {
+            abortController: this.abortController,
+            batchId: batchId
+          }
+        )
         await this.uploadSignedDocument(item.upload_path, signedDocument.content)
         this.signedCount = index + 1
 
@@ -273,29 +266,6 @@ export default class extends Controller {
     return await response.json()
   }
 
-  async prepareSigningRequestBody(autogramParameters) {
-    const documents = await Promise.all(autogramParameters.documents.map(async (document) => {
-      return {
-        ...document,
-        content: await this.loadDocumentContent(document),
-        payloadMimeType: document.content_type.includes("base64") ? document.content_type : `${document.content_type};base64`
-      }
-    }))
-
-    const document = documents[0]
-
-    return {
-      documents: documents.map((document) => this.buildVersionedDocument(document)),
-      document: {
-        filename: document.filename,
-        content: document.content
-      },
-      parameters: await this.signatureParameters(autogramParameters.signature_parameters, document.xdc_parameters),
-      payloadMimeType: document.payloadMimeType,
-      useVersionedSigning: documents.some((item) => item.visible_signature)
-    }
-  }
-
   async loadDocumentContent(document) {
     if (document.content) {
       return document.content
@@ -311,74 +281,6 @@ export default class extends Controller {
     }
 
     return await this.blobToBase64(await response.blob())
-  }
-
-  async signatureParameters(signatureParameters, xdcParameters) {
-    const result = {
-      level: `${signatureParameters.format}_${signatureParameters.level}`,
-      container: signatureParameters.container
-    }
-
-    if (!xdcParameters) {
-      result.autoLoadEform = true
-      return result
-    }
-
-    result.autoLoadEform = xdcParameters.auto_load_eform
-    result.containerXmlns = xdcParameters.container_xmlns
-    result.embedUsedSchemas = xdcParameters.embed_used_schemas
-    result.identifier = xdcParameters.identifier
-    result.fsFormId = xdcParameters.fs_form_identifier
-    result.schemaIdentifier = xdcParameters.schema_identifier
-    result.transformationIdentifier = xdcParameters.transformation_identifier
-
-    if (xdcParameters.schema != null) {
-      if (xdcParameters.schema_mime_type?.includes("base64")) {
-        result.schema = xdcParameters.schema
-        result.transformation = xdcParameters.transformation
-      } else {
-        result.schema = await this.stringToBase64(xdcParameters.schema)
-        result.schemaMimeType = `${xdcParameters.schema_mime_type};base64`
-        result.transformation = await this.stringToBase64(xdcParameters.transformation)
-        result.transformationMimeType = `${xdcParameters.transformation_mime_type};base64`
-      }
-    }
-
-    // Autogram rejects null for its optional boolean parameters, leave out the ones the document does not set
-    return Object.fromEntries(Object.entries(result).filter(([, value]) => value != null))
-  }
-
-  buildVersionedDocument(document) {
-    return {
-      content: document.content,
-      filename: document.filename,
-      mimeType: document.payloadMimeType,
-      xdcParameters: document.xdc_parameters ? {
-        autoLoadEform: document.xdc_parameters.auto_load_eform,
-        containerXmlns: document.xdc_parameters.container_xmlns,
-        embedUsedSchemas: document.xdc_parameters.embed_used_schemas,
-        fsFormIdentifier: document.xdc_parameters.fs_form_identifier,
-        identifier: document.xdc_parameters.identifier,
-        packaging: document.xdc_parameters.packaging,
-        schema: document.xdc_parameters.schema,
-        schemaIdentifier: document.xdc_parameters.schema_identifier,
-        schemaMimeType: document.xdc_parameters.schema_mime_type,
-        transformation: document.xdc_parameters.transformation,
-        transformationIdentifier: document.xdc_parameters.transformation_identifier,
-        transformationLanguage: document.xdc_parameters.transformation_language,
-        transformationMediaDestinationTypeDescription: document.xdc_parameters.transformation_media_destination_type_description,
-        transformationTargetEnvironment: document.xdc_parameters.transformation_target_environment
-      } : undefined,
-      visibleSignature: document.visible_signature ? {
-        fieldId: document.visible_signature.field_id,
-        text: document.visible_signature.text,
-        image: document.visible_signature.image ? {
-          filename: document.visible_signature.image.filename,
-          content: document.visible_signature.image.content,
-          mimeType: document.visible_signature.image.mime_type
-        } : undefined
-      } : undefined
-    }
   }
 
   async uploadSignedDocument(path, content) {
@@ -628,10 +530,6 @@ export default class extends Controller {
         </div>
       `
     }
-  }
-
-  async stringToBase64(content) {
-    return await this.blobToBase64(new File([content], "file"))
   }
 
   blobToBase64(blob) {
