@@ -443,7 +443,8 @@ class ContractsController < ApplicationController
     case action_name
     when "signature_apps"
       @qscd = params[:qscd] || current_user&.qscd || cookies[:qscd]
-      redirect_to contract_onboarding_path(@contract, method: "electronic", step: "qscd_check", recipient: @recipient&.uuid, iframe: params[:iframe]) if @qscd.blank? || User.legacy_eid_card?(@qscd)
+      # an unknown document (e.g. a mistyped link) is picked again like a missing one
+      redirect_to contract_onboarding_path(@contract, method: "electronic", step: "qscd_check", recipient: @recipient&.uuid, iframe: params[:iframe]) if !User.qscds.key?(@qscd.to_s) || User.legacy_eid_card?(@qscd)
     when "physical_signing"
       redirect_to contract_onboarding_path(@contract, method: "physical", step: "physical_signing", recipient: @recipient&.uuid, iframe: params[:iframe]) unless current_user&.onboarding_completed?("physical")
     end

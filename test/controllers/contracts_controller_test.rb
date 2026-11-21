@@ -376,6 +376,16 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "signature apps send a signer with an unknown document to pick one" do
+    contract = create_pdf_contract(allowed_methods: [ "qes" ])
+
+    [ "eid_2024\\", "neexistuje" ].each do |qscd|
+      get signature_apps_contract_path(contract, qscd: qscd)
+
+      assert_redirected_to contract_onboarding_path(contract, "qscd_check", method: "electronic"), qscd
+    end
+  end
+
   test "signature apps offer only the computer for a residence permit issued from december 2022 to october 2023" do
     contract = create_pdf_contract(allowed_methods: [ "qes" ])
 
