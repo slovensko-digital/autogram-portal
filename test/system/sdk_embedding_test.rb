@@ -259,9 +259,11 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       assert_text I18n.t("contracts.sessions.signed.title")
 
       # Autogram rejects null for its optional boolean parameters
-      parameters = last_autogram_sign_parameters
-      assert_equal "833_825", parameters["fsFormId"]
-      assert_not_includes parameters.values, nil
+      body = last_autogram_sign_request["body"]
+      xdc_parameters = body["documents"].sole["xdcParameters"]
+      assert_equal "833_825", xdc_parameters["fsFormIdentifier"]
+      assert_not_includes xdc_parameters.values, nil
+      assert_not_includes body["parameters"].values, nil
     end
   end
 
@@ -275,9 +277,12 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       click_on I18n.t("bundles.sign.batch_sign_action")
       assert_text I18n.t("bundles.autogram_batch.success_title")
 
-      parameters = last_autogram_sign_parameters
-      assert_equal "833_825", parameters["fsFormId"]
-      assert_not_includes parameters.values, nil
+      body = last_autogram_sign_request["body"]
+      assert_equal "fake-batch", body["batchId"]
+      xdc_parameters = body["documents"].sole["xdcParameters"]
+      assert_equal "833_825", xdc_parameters["fsFormIdentifier"]
+      assert_not_includes xdc_parameters.values, nil
+      assert_not_includes body["parameters"].values, nil
     end
   end
 
@@ -295,9 +300,63 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       click_on I18n.t("contracts.signature_apps.continue_to_sign")
       assert_text I18n.t("contracts.sessions.signed.title")
 
-      parameters = last_autogram_sign_parameters
-      assert_equal Base64.strict_encode64(schema), parameters["schema"]
-      assert_equal Base64.strict_encode64(transformation), parameters["transformation"]
+      xdc_parameters = last_autogram_sign_request["body"]["documents"].sole["xdcParameters"]
+      assert_equal Base64.strict_encode64(schema), xdc_parameters["schema"]
+      assert_equal Base64.strict_encode64(transformation), xdc_parameters["transformation"]
+      assert_equal "application/xml;base64", xdc_parameters["schemaMimeType"]
+    end
+  end
+
+  test "contract with several documents is signed into one container by Autogram" do
+    bundle = create_bundle(contracts: [ asice_contract("zmluva.pdf", "priloha.pdf") ], publicly_visible: true)
+    install_fake_autogram_app
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_onboarding"
+
+    within_portal_frame do
+      assert_on_signing_apps
+      click_on I18n.t("contracts.signature_apps.continue_to_sign")
+      assert_text I18n.t("contracts.sessions.signed.title")
+
+      request = last_autogram_sign_request
+      assert_equal "/api/v1/sign", request["path"]
+      assert_equal %w[zmluva.pdf priloha.pdf], request["body"]["documents"].pluck("filename")
+      assert_equal({ "form" => "XAdES", "profile" => "BASELINE_B", "container" => "ASiC_E" }, request["body"]["parameters"])
+    end
+
+    assert bundle.contracts.sole.reload.signed_document.attached?
+  end
+
+  test "contract with several documents asks for a newer Autogram than one that signs one document at a time" do
+    bundle = create_bundle(contracts: [ asice_contract("zmluva.pdf", "priloha.pdf") ], publicly_visible: true)
+    install_fake_autogram_app(version: "2.7.6")
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_onboarding"
+
+    within_portal_frame do
+      assert_on_signing_apps
+      click_on I18n.t("contracts.signature_apps.continue_to_sign")
+
+      assert_text I18n.t("contracts.sessions.autogram.app_version_too_low_title")
+      assert_equal 0, autogram_sign_calls
+    end
+  end
+
+  test "Autogram older than 2.8 signs a single document through its legacy endpoint" do
+    bundle = create_bundle(contracts: [ qes_contract("zmluva.pdf").deep_merge(signature_parameters_attributes: { level: "BASELINE_T" }) ], publicly_visible: true)
+    install_fake_autogram_app(version: "2.7.6")
+
+    embed_with_sdk :initBundleIframe, bundle.uuid, previewLevel: "no_onboarding"
+
+    within_portal_frame do
+      assert_on_signing_apps
+      click_on I18n.t("contracts.signature_apps.continue_to_sign")
+      assert_text I18n.t("contracts.sessions.signed.title")
+
+      request = last_autogram_sign_request
+      assert_equal "/sign", request["path"]
+      assert_equal "application/pdf;base64", request["body"]["payloadMimeType"]
+      assert_equal({ "level" => "PAdES_BASELINE_T", "autoLoadEform" => true }, request["body"]["parameters"])
     end
   end
 
@@ -794,6 +853,15 @@ class SdkEmbeddingTest < ApplicationSystemTestCase
       allowed_methods: [ "qes" ],
       signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" },
       documents_attributes: [ { blob: pdf_blob(filename) } ]
+    }
+  end
+
+  # Several PDFs signed together into one ASiC-E container, as only the API creates them.
+  def asice_contract(*filenames)
+    {
+      allowed_methods: [ "qes" ],
+      signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES", container: "ASiC_E" },
+      documents_attributes: filenames.map { |filename| { blob: pdf_blob(filename) } }
     }
   end
 

@@ -21,6 +21,24 @@ class BundlesControllerTest < ActionController::TestCase
     assert_equal 1, bundle.recipients.active.author_proxies.where(user: @author).count
   end
 
+  # Autogram signs several documents into one container, but not inside a batch.
+  test "author bundle sign route offers no autogram batch signing when a contract has several documents" do
+    bundle = create_bundle_with_contracts(author: @author, count: 1)
+    blobs = %w[zmluva.pdf priloha.pdf].map do |filename|
+      ActiveStorage::Blob.create_and_upload!(io: StringIO.new("%PDF-1.4 #{filename}"), filename: filename, content_type: "application/pdf")
+    end
+    bundle.contracts << Contract.create!(
+      allowed_methods: [ "qes" ],
+      documents_attributes: blobs.map { |blob| { blob: blob } },
+      signature_parameters_attributes: { level: "BASELINE_B", format: "XAdES", container: "ASiC_E" }
+    )
+
+    get :sign, params: { id: bundle.uuid }
+
+    assert_response :success
+    assert_select "a[href^='#{autogram_batch_bundle_path(bundle)}']", count: 0
+  end
+
   test "bundle show renders overview with edit link and lazy frames" do
     bundle = create_bundle_with_contracts(author: @author, count: 2)
     bundle.update!(name: "Employment agreement", note: "Please sign by Friday.", publicly_visible: true)

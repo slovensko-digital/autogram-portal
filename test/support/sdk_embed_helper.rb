@@ -12,55 +12,56 @@ require_relative "signing_flow_helper"
 module SdkEmbedHelper
   INTEGRATOR_PAGE_PATH = "/__integrator_page".freeze
 
-  # Stands in for the Autogram desktop app. With a signed result the portal's
-  # Autogram signers get a file SigningFlowHelper::FakeAutogramService accepts
-  # as validly signed, otherwise one without signatures. The parameters of the
-  # last sign call are kept as the app receives them, see #last_autogram_sign_parameters.
-  # With running: false the app is not started yet (the readiness check fails until a sign call launches it),
-  # with cancel_first_batch: true the signer cancels the first batch in it, with skip_document: n the signer
-  # skips the n-th document the app is asked to sign (Autogram 2.9 answers it like a cancelled signing).
-  def self.fake_autogram_app(signed:, running: true, cancel_first_batch: false, skip_document: nil)
+  # Stands in for the HTTP API of the Autogram desktop app (http://localhost:37200), so the
+  # portal's Autogram signers run the real vendored autogram-sdk.js against it. With a signed
+  # result they get a file SigningFlowHelper::FakeAutogramService accepts as validly signed,
+  # otherwise one without signatures. The last sign request is kept as the app receives it,
+  # see #last_autogram_sign_request.
+  # version is the Autogram version the app reports: before 2.8.0 it has only the legacy POST /sign
+  # for one document, from 2.8.0 also POST /api/v1/sign. With running: false the app is not started
+  # until the signer clicks in the page (a click lets the page launch it), with cancel_first_batch: true
+  # the signer cancels the first batch in it, with skip_document: n the signer skips the n-th document
+  # the app is asked to sign (Autogram 2.9 answers it like a cancelled signing).
+  def self.fake_autogram_app(signed:, version: "2.9.0", running: true, cancel_first_batch: false, skip_document: nil)
     prefix = signed ? SigningFlowHelper::SIGNED_PREFIX : "unsigned:"
 
     <<~JS
-      window.AutogramSDK = {
-        DesktopClient: class {
-          clientDesktopIntegration = {
-            info: async () => {
-              if (!#{running}) throw new TypeError("Failed to fetch");
-              return { status: "READY" };
-            }
-          };
-          async sign(document, parameters, _contentType, options) {
-            const calls = Number(sessionStorage.getItem("fakeAutogramSignCalls") || 0) + 1;
-            sessionStorage.setItem("fakeAutogramSignCalls", calls);
-            if (calls === #{skip_document.to_json}) {
-              options?.onStateChange?.({ type: "signingCancelled" });
-              const error = new Error("skipped");
-              error.name = "UserCancelledSigningException";
-              throw error;
-            }
-            sessionStorage.setItem("fakeAutogramSignParameters", JSON.stringify(parameters));
-            options?.onStateChange?.({ type: "waitingForSignature" });
-            return { content: btoa("#{prefix}" + (document?.filename || "document")) };
+      (() => {
+        const count = (key) => {
+          const value = Number(sessionStorage.getItem(key) || 0) + 1;
+          sessionStorage.setItem(key, value);
+          return value;
+        };
+        const respond = (body, status = 200) =>
+          new Response(body === null ? null : JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+        const versionSupportsSignV1 = #{Gem::Version.new(version) >= Gem::Version.new("2.8.0")};
+        const appFetch = async (url, init) => {
+          if (!#{running} && !navigator.userActivation?.hasBeenActive) throw new TypeError("Failed to fetch");
+
+          const route = `${(init?.method || "GET").toUpperCase()} ${url.pathname}`;
+          if (route === "GET /info") return respond({ status: "READY", version: #{version.to_json} });
+          if (route === "POST /batch") {
+            return #{cancel_first_batch} && count("fakeAutogramBatchStarts") === 1 ? respond(null, 204) : respond({ batchId: "fake-batch" });
           }
-          async signV1(documents, _parameters, options) {
-            options?.onStateChange?.({ type: "waitingForSignature" });
-            return { content: btoa("#{prefix}" + documents.length + " documents") };
+          if (route === "DELETE /batch") return respond({});
+          if (route === "POST /sign" || (route === "POST /api/v1/sign" && versionSupportsSignV1)) {
+            if (count("fakeAutogramSignCalls") === #{skip_document.to_json}) return respond(null, 204);
+
+            const body = JSON.parse(init.body);
+            sessionStorage.setItem("fakeAutogramSignRequest", JSON.stringify({ path: url.pathname, body }));
+            const filenames = (body.documents || [ body.document ]).map((document) => document.filename || "document");
+            return respond({ content: btoa("#{prefix}" + filenames.join(",")), signedBy: "CN=Fake Signer", issuedBy: "CN=Fake CA" });
           }
-          async startBatch(_count, options) {
-            sessionStorage.setItem("fakeAutogramBatchStarts", Number(sessionStorage.getItem("fakeAutogramBatchStarts") || 0) + 1);
-            if (#{cancel_first_batch} && sessionStorage.getItem("fakeAutogramBatchStarts") === "1") {
-              options?.onStateChange?.({ type: "signingCancelled" });
-              const error = new Error("cancelled");
-              error.name = "UserCancelledSigningException";
-              throw error;
-            }
-            return "fake-batch";
-          }
-          async endBatch() {}
-        }
-      };
+          return respond({ code: "NOT_FOUND" }, 404);
+        };
+
+        const fetch = window.fetch.bind(window);
+        window.fetch = (input, init) => {
+          const url = new URL(input instanceof Request ? input.url : String(input), location.href);
+          if (url.origin === "http://localhost:37200") return appFetch(url, init);
+          return fetch(input, init);
+        };
+      })();
     JS
   end
 
@@ -181,15 +182,15 @@ module SdkEmbedHelper
     page.evaluate_script("Number(sessionStorage.getItem('fakeAutogramBatchStarts') || 0)")
   end
 
-  # How many documents the fake Autogram app was asked to sign with #sign. Call it within the portal frame.
+  # How many sign requests the fake Autogram app received. Call it within the portal frame.
   def autogram_sign_calls
     page.evaluate_script("Number(sessionStorage.getItem('fakeAutogramSignCalls') || 0)")
   end
 
-  # Signature parameters of the last document the fake Autogram app signed, as JSON sent to the app.
-  # Call it within the portal frame.
-  def last_autogram_sign_parameters
-    JSON.parse(page.evaluate_script("sessionStorage.getItem('fakeAutogramSignParameters')") || "null")
+  # The last sign request the fake Autogram app answered: its path ("/api/v1/sign", or the
+  # legacy "/sign") and its JSON body. Call it within the portal frame.
+  def last_autogram_sign_request
+    JSON.parse(page.evaluate_script("sessionStorage.getItem('fakeAutogramSignRequest')") || "null")
   end
 
   # Waits for the integrator page to receive a portal message with +status+

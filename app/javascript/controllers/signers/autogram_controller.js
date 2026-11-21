@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import i18n from "i18n"
+import { documentToSign, signatureParameters } from "utils/autogram_sign_request"
 
 export default class extends Controller {
   static targets = ["form", "progressBar", "progressPercent", "statusChecking", "statusStarting", "statusSending", "statusWaiting", "statusSigned", "stateNormal", "stateMaybeNotInstalled", "stateNotInstalled", "stateAppVersionTooLow", "stateCancelled", "stateError", "errorMessage"]
@@ -143,30 +144,9 @@ export default class extends Controller {
 
       const autogramParameters = await autogramParametersResponse.json()
 
-      for (let doc of autogramParameters.documents) {
-        doc.contentPromise = Promise.resolve(doc.content);
-
-        if (doc.download_url) {
-          doc.contentPromise = fetch(doc.download_url)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              return response.blob();
-            });
-        }
-      }
-
-      for (let doc of autogramParameters.documents) {
-        let content = await doc.contentPromise;
-
-        if (doc.content_type.includes('base64')) {
-          doc.content = content
-        } else {
-          doc.content = await this.blobToBase64(content);
-          doc.content_type += ';base64';
-        }
-      }
+      const documents = await Promise.all(autogramParameters.documents.map(async (doc) => {
+        return documentToSign(doc, await this.documentContent(doc))
+      }))
 
       let states = {
         onStateChange: (state) => {
@@ -205,43 +185,22 @@ export default class extends Controller {
         }
       }
 
-      let signResult;
-
-      if (autogramParameters.multiple_documents === false && !this.requiresVersionedSigning(autogramParameters.documents)) {
-        let signRequestDocument = {
-          content: autogramParameters.documents[0].content
-        }
-
-        if (autogramParameters.documents[0].filename)
-          signRequestDocument.filename = autogramParameters.documents[0].filename;
-
-        let signRequestSignatureParameters = await this.getOldSignatureParameters(
-          autogramParameters.signature_parameters,
-          autogramParameters.documents[0].xdc_parameters
-        );
-
-        signResult = await client.sign(
-          signRequestDocument,
-          signRequestSignatureParameters,
-          autogramParameters.documents[0].content_type,
-          states
-        )
-
-      } else {
-        signResult = await client.signV1(
-          autogramParameters.documents.map(doc => this.buildVersionedDocument(doc)),
-          autogramParameters.signature_parameters,
-          states
-        )
-      }
+      // several documents are signed into one ASiC-E container, which needs Autogram 2.8.0 or newer:
+      // with an older one the SDK reports the appVersionTooLow state and throws AutogramAppVersionTooLowException
+      const signResult = await client.sign(
+        documents,
+        signatureParameters(autogramParameters.signature_parameters),
+        states
+      )
 
       this.updateProgress(100, 'signed')
 
       if (signResult && signResult.content) {
+        const signature = signResult.signatures?.at(-1)
         const formData = new FormData()
         formData.append('signed_document', signResult.content)
-        formData.append('signed_by', signResult.signedBy || '')
-        formData.append('issued_by', signResult.issuedBy || '')
+        formData.append('signed_by', signature?.signedBy || '')
+        formData.append('issued_by', signature?.issuedBy || '')
 
         const response = await fetch(this.signedDocumentPathValue, {
           method: 'POST',
@@ -295,50 +254,17 @@ export default class extends Controller {
     }
   }
 
-  async getOldSignatureParameters(newParams, xdcParams) {
-    let result = {
-      level: newParams.format + "_" + newParams.level,
-      container: newParams.container
-    };
-
-    console.log('xdc params:', xdcParams)
-    if (xdcParams) {
-      console.log('Using XDC parameters:', xdcParams)
-      result.autoLoadEform = xdcParams.auto_load_eform;
-      result.containerXmlns = xdcParams.container_xmlns;
-      result.embedUsedSchemas = xdcParams.embed_used_schemas;
-      result.identifier = xdcParams.identifier;
-      result.fsFormId = xdcParams.fs_form_identifier;
-      result.packaging = xdcParams.packaging;
-      result.schemaIdentifier = xdcParams.schema_identifier;
-      result.transformationIdentifier = xdcParams.transformation_identifier;
-
-      if (xdcParams.schema != null) {
-        if (xdcParams.schema_mime_type && xdcParams.schema_mime_type.includes('base64')) {
-          result.schema = xdcParams.schema;
-          result.transformation = xdcParams.transformation;
-        } else {
-          result.schema = await this.stringToBase64(xdcParams.schema);
-          result.schemaMimeType = xdcParams.schema_mime_type + ';base64';
-          result.transformation = await this.stringToBase64(xdcParams.transformation);
-          result.transformationMimeType = xdcParams.transformation_mime_type + ';base64';
-        }
-      }
-    } else {
-      console.log('No XDC parameters found, using defaults')
-      result.autoLoadEform = true;
+  async documentContent(doc) {
+    if (!doc.download_url) {
+      return doc.content
     }
 
-    // Autogram rejects null for its optional boolean parameters, leave out the ones the document does not set
-    result = Object.fromEntries(Object.entries(result).filter(([, value]) => value != null));
+    const response = await fetch(doc.download_url)
+    if (!response.ok) {
+      throw new Error('Network response was not ok')
+    }
 
-    console.log('Final signature parameters:', result)
-    return result;
-  }
-
-  stringToBase64(bytes) {
-    let file = new File([bytes], "file");
-    return this.blobToBase64(file);
+    return await this.blobToBase64(await response.blob())
   }
 
   blobToBase64(blob) {
@@ -356,43 +282,6 @@ export default class extends Controller {
       reader.onerror = () => reject(new Error(i18n.t('errors.file_read_failed')));
       reader.readAsDataURL(blob);
     });
-  }
-
-  requiresVersionedSigning(documents) {
-    return documents.some((document) => document.visible_signature)
-  }
-
-  buildVersionedDocument(document) {
-    return {
-      content: document.content,
-      filename: document.filename,
-      mimeType: document.content_type,
-      xdcParameters: document.xdc_parameters ? {
-        autoLoadEform: document.xdc_parameters.auto_load_eform,
-        containerXmlns: document.xdc_parameters.container_xmlns,
-        embedUsedSchemas: document.xdc_parameters.embed_used_schemas,
-        fsFormIdentifier: document.xdc_parameters.fs_form_identifier,
-        identifier: document.xdc_parameters.identifier,
-        packaging: document.xdc_parameters.packaging,
-        schema: document.xdc_parameters.schema,
-        schemaIdentifier: document.xdc_parameters.schema_identifier,
-        schemaMimeType: document.xdc_parameters.schema_mime_type,
-        transformation: document.xdc_parameters.transformation,
-        transformationIdentifier: document.xdc_parameters.transformation_identifier,
-        transformationLanguage: document.xdc_parameters.transformation_language,
-        transformationMediaDestinationTypeDescription: document.xdc_parameters.transformation_media_destination_type_description,
-        transformationTargetEnvironment: document.xdc_parameters.transformation_target_environment
-      } : undefined,
-      visibleSignature: document.visible_signature ? {
-        fieldId: document.visible_signature.field_id,
-        text: document.visible_signature.text,
-        image: document.visible_signature.image ? {
-          filename: document.visible_signature.image.filename,
-          content: document.visible_signature.image.content,
-          mimeType: document.visible_signature.image.mime_type
-        } : undefined
-      } : undefined
-    }
   }
 
   updateProgress(percent, stage) {
