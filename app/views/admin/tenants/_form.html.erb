@@ -34,12 +34,16 @@
     <%= hidden_field_tag "tenant[features][]", "" %>
     <div class="space-y-3">
       <% Tenant::AVAILABLE_FEATURES.each do |feature| %>
+        <% next if feature == "staging_real_mail" && !StagingInstance.active? %>
         <label class="flex items-start gap-3 rounded-lg border border-gray-200 px-4 py-3">
           <%= check_box_tag "tenant[features][]", feature, @tenant.feature_enabled?(feature), id: "tenant_features_#{feature}",
-                class: "mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+                class: "mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
           <span>
             <span class="block text-sm font-semibold text-gray-900"><%= t("tenants.feature_labels.#{feature}") %></span>
             <span class="block text-sm text-gray-500"><%= t("tenants.feature_descriptions.#{feature}") %></span>
+            <% if feature == "api" && StagingInstance.active? %>
+              <span class="mt-1 block text-sm text-amber-700"><%= t('admin.tenants.form.api_on_staging') %></span>
+            <% end %>
           </span>
         </label>
       <% end %>

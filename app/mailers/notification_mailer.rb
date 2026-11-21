@@ -42,4 +42,8 @@ class NotificationMailer < ApplicationMailer
   def set_locale
     I18n.locale = params[:locale] || @user&.locale || I18n.default_locale
   end
+
+  def staging_mail_tenant
+    (@bundle || @contract)&.tenant
+  end
 end

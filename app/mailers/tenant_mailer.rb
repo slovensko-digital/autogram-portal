@@ -18,4 +18,8 @@ class TenantMailer < ApplicationMailer
   def set_locale
     I18n.locale = params[:locale] || @user.locale.presence || I18n.default_locale
   end
+
+  def staging_mail_tenant
+    @tenant
+  end
 end

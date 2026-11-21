@@ -358,6 +358,9 @@
     <%# ─── API A SDK ──────────────────────────────────────────── %>
     <%= docs_section "integration", title: t('.integration.title'), icon: icons[:integration], color: "bg-slate-700" do %>
       <p class="text-gray-600 leading-7 mb-6"><%= render_inline_code(t('.integration.intro')) %></p>
+      <% if StagingInstance.active? %>
+        <p id="api-staging-note" class="mb-6 rounded-md border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900"><%= t('.integration.staging_note') %></p>
+      <% end %>
 
       <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <% t('.integration.links').each_value do |link| %>

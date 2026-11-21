@@ -61,7 +61,21 @@ class Admin::TenantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "select[name='tenant[plan]']"
-    assert_select "input[type=checkbox][name='tenant[features][]']", count: Tenant::AVAILABLE_FEATURES.size
+    assert_select "input[type=checkbox][name='tenant[features][]']", count: Tenant::AVAILABLE_FEATURES.size - 1
+    assert_select "input[type=checkbox][value=staging_real_mail]", count: 0
+  end
+
+  test "on a test instance admin lets a tenant send real emails" do
+    ENV["PRODUCTION_URL"] = "https://agp.slovensko.digital"
+    sign_in @admin
+
+    get edit_admin_tenant_path(@tenant)
+    assert_select "input[type=checkbox][name='tenant[features][]'][value=staging_real_mail]:not([checked])"
+
+    patch admin_tenant_path(@tenant), params: { tenant: { features: [ "", "staging_real_mail" ] } }
+    assert_equal [ "staging_real_mail" ], @tenant.reload.features
+  ensure
+    ENV.delete("PRODUCTION_URL")
   end
 
   test "admin sees the monthly usage of a tenant for billing" do
