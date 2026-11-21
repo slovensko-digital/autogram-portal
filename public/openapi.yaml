@@ -173,12 +173,14 @@ paths:
                   id:
                     type: string
                     example: 69393b49-c34f-438f-ad7c-4b78db3932be
+        "409":
+          description: Conflict - A contract with the same ID already exists.
         "422":
           description: |
-            Unprocessable Entity - The request body is invalid (also when a contract with the same `id`
-            already exists), a document is already signed in a form no signature can be added to (e.g. a
-            PDF in an enveloping CMS/CAdES signature, `.p7m`), or the request does not fit the limits of the
-            organization's plan (`code: limit_exceeded`). Nothing is stored in that case.
+            Unprocessable Entity - The request body is invalid, a document is already signed in a form
+            no signature can be added to (e.g. a PDF in an enveloping CMS/CAdES signature, `.p7m`), or the
+            request does not fit the limits of the organization's plan (`code: limit_exceeded`). Nothing is
+            stored in that case.
           content:
             application/json:
               schema:
@@ -364,7 +366,7 @@ paths:
                     format: uuid
                     example: 69393b49-c34f-438f-ad7c-4b78db3932be
         "409":
-          description: Conflict - A bundle with the same ID already exists.
+          description: Conflict - A bundle, or a contract of the bundle, with the same ID already exists.
         "422":
           description: |
             Unprocessable Entity - The request body is invalid, a document is already signed in a form
