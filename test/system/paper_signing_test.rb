@@ -119,6 +119,8 @@ class PaperSigningSystemTest < ApplicationSystemTestCase
       assert_text I18n.t("paper_signatures.phone_page.title")
       attach_file "files[]", file_fixture("paper-page.png"), match: :first, make_visible: true
       assert_selector "figure", text: "Strana 1"
+      # The refresh replaced the page; its stream subscription must be back before the computer submits.
+      assert_selector "turbo-cable-stream-source[connected]", visible: :all
     end
 
     assert_selector "figure", text: "Strana 1"
