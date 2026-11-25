@@ -691,6 +691,14 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
       assert_not bundle.reload.completed?, "a scan awaiting review is not a signature"
 
       sign_in_with_tenant @owner, @organization
+      get bundle_paper_signature_path(bundle, paper)
+      assert_response :success
+      signed_version = contract.reload.latest_source_content_version
+      assert signed_version, "the electronic signer added a signed version"
+      assert_select "iframe[src^=?]", rails_blob_path(contract.documents.sole.blob, disposition: "inline"), 1,
+        "the scan is compared with the document the signer printed"
+      assert_select "iframe[src^=?]", rails_blob_path(signed_version.file, disposition: "inline"), 0
+
       post approve_bundle_paper_signature_path(bundle, paper)
 
       assert bundle.reload.completed?
@@ -741,13 +749,13 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
       post approve_bundle_paper_signature_path(bundle, paper)
       assert_redirected_to bundle_path(bundle)
-      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
       post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Neskoro." }
       assert_redirected_to bundle_path(bundle)
-      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
       get bundle_paper_signature_path(bundle, paper)
       assert_redirected_to bundle_path(bundle)
-      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
 
       assert paper.reload.canceled?
       assert_nil paper.reviewed_by
@@ -770,7 +778,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
         post approve_bundle_paper_signature_path(bundle, paper)
       end
       assert_redirected_to bundle_path(bundle)
-      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
       assert_equal 1, UsageRecord.signature_request.where(contract: contract).count
       assert_equal signed_at, recipient.signer_contracts.sole.reload.signed_at
       assert_equal reviewer, paper.reload.reviewed_by

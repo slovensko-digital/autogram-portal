@@ -75,13 +75,10 @@ module PaperSignaturesHelper
       .group_by { |paper_signature| paper_signature.signer.recipient_id }
   end
 
-  # The document the scan is compared with on the review page, as the bundle detail shows it.
+  # The document the scan is compared with on the review page: the one the signer printed („Stiahnuť
+  # na tlač“), without the visible stamps of electronic signatures added since.
   def paper_signature_original_file(contract)
-    if contract.source_document_attached? && contract.source_document_is_pdf?
-      contract.latest_source_content_version.file
-    else
-      contract.documents.first&.blob
-    end
+    contract.documents.first&.blob
   end
 
   def paper_signature_time_tag(time)

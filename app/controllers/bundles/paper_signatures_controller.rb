@@ -26,7 +26,8 @@ class Bundles::PaperSignaturesController < ApplicationController
 
   # The scan awaiting review or approved; the signer's discarded or returned scans stay history.
   def scan
-    raise ActiveRecord::RecordNotFound unless (@paper_signature.submitted? || @paper_signature.approved?) && @paper_signature.scan.attached?
+    return redirect_no_longer_reviewable unless @paper_signature.submitted? || @paper_signature.approved?
+    raise ActiveRecord::RecordNotFound unless @paper_signature.scan.attached?
 
     send_data @paper_signature.scan.download,
       filename: @paper_signature.scan.filename.to_s,
@@ -46,6 +47,6 @@ class Bundles::PaperSignaturesController < ApplicationController
   end
 
   def redirect_no_longer_reviewable
-    redirect_to bundle_path(@bundle), notice: t("bundles.sign.signature_no_longer_required"), status: :see_other
+    redirect_to bundle_path(@bundle), notice: t("paper_signatures.review.no_longer_reviewable"), status: :see_other
   end
 end

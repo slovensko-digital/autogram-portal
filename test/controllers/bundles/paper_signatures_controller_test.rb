@@ -104,8 +104,28 @@ class Bundles::PaperSignaturesControllerTest < ActionDispatch::IntegrationTest
     sign_in_with_tenant @owner, @organization
 
     get scan_bundle_paper_signature_path(@bundle, @paper)
-    assert_response :not_found
+    assert_redirected_to bundle_path(@bundle)
+    assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
     assert_equal @owner, request.env["warden"].user(:user)
+    assert_not_equal "application/pdf", response.media_type
+  end
+
+  test "a member is told when the scan no longer awaits review" do
+    sign_in_with_tenant @owner, @organization
+    post return_scan_bundle_paper_signature_path(@bundle, @paper), params: { return_reason: "Chýba podpis." }
+
+    [
+      -> { get bundle_paper_signature_path(@bundle, @paper) },
+      -> { post approve_bundle_paper_signature_path(@bundle, @paper) },
+      -> { post return_scan_bundle_paper_signature_path(@bundle, @paper), params: { return_reason: "Znova." } },
+      -> { get scan_bundle_paper_signature_path(@bundle, @paper) }
+    ].each do |request_action|
+      request_action.call
+      assert_redirected_to bundle_path(@bundle)
+      assert_equal "Sken už nečaká na kontrolu.", flash[:notice]
+    end
+    assert @paper.reload.returned?
+    assert_equal "Chýba podpis.", @paper.return_reason
   end
 
   private

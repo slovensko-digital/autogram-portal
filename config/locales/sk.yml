@@ -2929,6 +2929,7 @@ sk:
         cancel: "Zrušiť"
       approved: "Podpis na papieri sme schválili."
       returned: "Sken sme vrátili."
+      no_longer_reviewable: "Sken už nečaká na kontrolu."
       alert:
         title: "%{name} nahral(a) sken podpísaného dokumentu"
         message: "Skontrolujte ho, aby sa jeho podpis započítal."

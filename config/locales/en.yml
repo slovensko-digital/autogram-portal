@@ -2989,6 +2989,7 @@ en:
         cancel: "Cancel"
       approved: "The paper signature is approved."
       returned: "The scan was returned."
+      no_longer_reviewable: "The scan no longer awaits review."
       alert:
         title: "%{name} uploaded a scan of the signed document"
         message: "Review it so that their signature counts."
