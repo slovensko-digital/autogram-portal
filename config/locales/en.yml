@@ -2888,6 +2888,8 @@ en:
     errors:
       unsupported_file: "Upload a PDF from a scanner or photos in JPG or PNG format."
       too_large: "The scan is larger than the document size limit allows. Upload smaller photos or a scan with a lower resolution."
+      too_many_pages: "A scan can have at most %{count} pages."
+      file_too_large: "A single file can be at most %{size} MB."
 
   plan_limits:
     exceeded:

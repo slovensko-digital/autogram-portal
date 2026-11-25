@@ -200,6 +200,21 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal 1, second.sessions.count
   end
 
+  test "a recipient who declines the bundle withdraws the scan they submitted for review" do
+    bundle = request_signature_from_web(as: @owner, filename: "papier.pdf")
+    recipient = add_recipient(bundle, "external@example.com")
+    sign_out @owner
+    paper = PaperSignature.open_for!(recipient.recipient_signer.signer_contracts.sole)
+    paper.add_pages!([ Rack::Test::UploadedFile.new(file_fixture("paper-page.jpg"), "image/jpeg") ])
+    assert paper.submit!
+
+    post decline_bundle_path(bundle, recipient: recipient.uuid)
+
+    assert_redirected_to sign_bundle_path(bundle, recipient: recipient.uuid)
+    assert recipient.reload.declined?
+    assert paper.reload.canceled?
+  end
+
   test "owner signs their own request too and nobody is notified about it" do
     co_owner = confirmed_user("co-owner@firma-abc.sk", tenant: @organization, role: :owner)
     bundle = request_signature_from_web(as: @owner, filename: "obojstranna.pdf")

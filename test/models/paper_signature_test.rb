@@ -176,6 +176,54 @@ class PaperSignatureTest < ActiveSupport::TestCase
     assert_empty paper.pages
   end
 
+  test "a draft takes a limited number of pages" do
+    paper = PaperSignature.open_for!(signer_contract)
+    too_many = I18n.t("paper_signatures.errors.too_many_pages", count: PaperSignature::MAX_PAGES)
+
+    error = assert_raises(PaperSignature::InvalidUpload) { paper.add_pages!(Array.new(PaperSignature::MAX_PAGES + 1) { jpeg_upload }) }
+    assert_equal too_many, error.message
+    assert_empty paper.pages
+
+    paper.add_pages!(Array.new(PaperSignature::MAX_PAGES) { jpeg_upload })
+    error = assert_raises(PaperSignature::InvalidUpload) { paper.add_pages!([ jpeg_upload ]) }
+    assert_equal too_many, error.message
+    assert_equal PaperSignature::MAX_PAGES, paper.pages.count
+
+    paper.add_pages!([ pdf_upload(pages: 2) ])
+    assert_equal 1, paper.pages.count
+  end
+
+  test "a file over the size limit is refused before it is read" do
+    paper = PaperSignature.open_for!(signer_contract)
+    huge = jpeg_upload
+    huge.define_singleton_method(:size) { PaperSignature::MAX_FILE_BYTES + 1 }
+    huge.define_singleton_method(:read) { |*| raise "the file was read before its size was checked" }
+
+    error = assert_raises(PaperSignature::InvalidUpload) { paper.add_pages!([ jpeg_upload, huge ]) }
+
+    assert_equal I18n.t("paper_signatures.errors.file_too_large", size: 25), error.message
+    assert_includes error.message, "25 MB"
+    assert_empty paper.pages
+  end
+
+  test "a scan is not submitted when its pages changed while it was being built" do
+    paper = PaperSignature.open_for!(signer_contract)
+    paper.add_pages!([ jpeg_upload ])
+    phone = PaperSignature.find(paper.id)
+    phone_upload = png_upload
+    paper.define_singleton_method(:build_scan) do |snapshot|
+      phone.add_pages!([ phone_upload ])
+      super(snapshot)
+    end
+
+    assert_not paper.submit!
+
+    assert paper.reload.draft?
+    assert_not paper.scan.attached?
+    assert_equal 2, paper.pages.count
+    assert PaperSignature.find(paper.id).submit!
+  end
+
   test "an image the scan cannot be built from is refused on submit" do
     paper = PaperSignature.open_for!(signer_contract)
     paper.add_pages!([ Rack::Test::UploadedFile.new(StringIO.new("\x89PNG\r\n\x1A\n".b + "damaged".b), "image/png", original_filename: "strana.png") ])
@@ -203,7 +251,7 @@ class PaperSignatureTest < ActiveSupport::TestCase
 
   test "a submitted scan takes no more pages and a draft without pages is not submitted" do
     empty = PaperSignature.open_for!(signer_contract)
-    empty.submit!
+    assert_not empty.submit!
     assert empty.reload.draft?
 
     paper = submitted_paper_signature
@@ -283,7 +331,7 @@ class PaperSignatureTest < ActiveSupport::TestCase
   def submitted_paper_signature
     paper = PaperSignature.open_for!(signer_contract)
     paper.add_pages!([ jpeg_upload ])
-    paper.submit!
+    assert paper.submit!
     paper
   end
 

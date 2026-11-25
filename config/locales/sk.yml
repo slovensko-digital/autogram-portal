@@ -2825,6 +2825,8 @@ sk:
     errors:
       unsupported_file: "Nahrajte PDF zo skenera alebo fotky vo formáte JPG alebo PNG."
       too_large: "Sken je väčší, ako dovoľuje limit veľkosti dokumentu. Nahrajte menšie fotky alebo sken s nižším rozlíšením."
+      too_many_pages: "Sken môže mať najviac %{count} strán."
+      file_too_large: "Jeden súbor môže mať najviac %{size} MB."
 
   plan_limits:
     exceeded:

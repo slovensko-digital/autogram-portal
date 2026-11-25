@@ -34,9 +34,9 @@ class PaperSignature < ApplicationRecord
   class InvalidUpload < StandardError
     attr_reader :reason
 
-    def initialize(reason)
+    def initialize(reason, **interpolations)
       @reason = reason
-      super(I18n.t(reason, scope: "paper_signatures.errors"))
+      super(I18n.t(reason, scope: "paper_signatures.errors", **interpolations))
     end
   end
 
@@ -45,6 +45,10 @@ class PaperSignature < ApplicationRecord
   class NoLongerReviewable < StandardError; end
 
   OPEN_STATUSES = %w[draft submitted].freeze
+  # Anyone with the signing link uploads into the sender's storage, so a draft is capped. Phones send
+  # photos downsized by the browser, so the caps are far above a real scan.
+  MAX_PAGES = 50
+  MAX_FILE_BYTES = 25.megabytes
 
   belongs_to :signer_contract
   belongs_to :reviewed_by, class_name: "User", optional: true
@@ -78,10 +82,13 @@ class PaperSignature < ApplicationRecord
 
   # Adds photos (JPEG, PNG) after the current pages, or one PDF, which replaces all pages; photos
   # replace an uploaded PDF in turn. The type is read from the content, not from what the browser
-  # declares. Returns the new pages; none when the paper signature is no longer a draft (e.g. the
-  # phone uploads after the computer submitted).
+  # declares. At most MAX_PAGES pages of at most MAX_FILE_BYTES each. Returns the new pages; none
+  # when the paper signature is no longer a draft (e.g. the phone uploads after the computer submitted).
   def add_pages!(files)
-    uploads = Array(files).select { |file| file.respond_to?(:read) }.map { |file| read_upload(file) }
+    files = Array(files).select { |file| file.respond_to?(:read) }
+    raise too_many_pages if files.size > MAX_PAGES
+
+    uploads = files.map { |file| identify_upload(file) }
     raise InvalidUpload.new(:unsupported_file) unless acceptable_uploads?(uploads)
 
     added = with_lock do
@@ -90,7 +97,10 @@ class PaperSignature < ApplicationRecord
       if uploads.first[:content_type] == PaperScan::PDF_TYPE
         pages.destroy_all
       else
-        pages.select(&:pdf?).each(&:destroy!)
+        pdf_pages, image_pages = pages.partition(&:pdf?)
+        raise too_many_pages if image_pages.size + uploads.size > MAX_PAGES
+
+        pdf_pages.each(&:destroy!)
       end
 
       position = pages.maximum(:position).to_i
@@ -149,15 +159,20 @@ class PaperSignature < ApplicationRecord
     pdf_page ? PaperScan.page_count(pdf_page.file.download) : pages.size
   end
 
-  # Builds the scan from the pages and hands it over for review. Does nothing for a draft without
-  # pages or a paper signature that is no longer a draft.
+  # Builds the scan from the pages and hands it over for review. Returns true when submitted; false
+  # for a draft without pages, a paper signature that is no longer a draft, or one whose pages changed
+  # while the scan was being built (e.g. from the phone), so the signer sees the current state.
   def submit!
-    submitted = with_lock do
-      next false unless draft? && pages.exists?
+    snapshot = pages.reload.to_a
+    return false unless draft? && snapshot.any?
 
-      content = build_scan
-      max = PlanLimits.max_document_bytes
-      raise InvalidUpload.new(:too_large) if max && content.bytesize > max
+    # Built outside the row lock, which cancel! (withdrawal, superseding) must not wait for.
+    content = build_scan(snapshot)
+    max = PlanLimits.max_document_bytes
+    raise InvalidUpload.new(:too_large) if max && content.bytesize > max
+
+    submitted = with_lock do
+      next false unless draft? && pages.ids == snapshot.map(&:id)
 
       self.scan = { io: StringIO.new(content), filename: scan_filename, content_type: PaperScan::PDF_TYPE, identify: false }
       update!(status: :submitted, submitted_at: Time.current)
@@ -165,6 +180,9 @@ class PaperSignature < ApplicationRecord
     end
 
     broadcast_state_change if submitted
+    submitted
+  rescue ActiveStorage::FileNotFoundError
+    false # a page was removed while the scan was being built
   end
 
   # The signer counts as signed from now on; the reviewer gets no mail about it.
@@ -209,14 +227,18 @@ class PaperSignature < ApplicationRecord
     self.uuid ||= SecureRandom.uuid
   end
 
-  def read_upload(file)
-    content = file.read
+  # The size comes from the upload's metadata and Marcel reads only the first bytes, so a refused
+  # file is never read whole.
+  def identify_upload(file)
+    raise InvalidUpload.new(:file_too_large, size: MAX_FILE_BYTES / 1.megabyte) if file.size > MAX_FILE_BYTES
+
+    content_type = Marcel::MimeType.for(file)
     file.rewind
-    {
-      io: StringIO.new(content),
-      filename: file.original_filename.presence || "page",
-      content_type: Marcel::MimeType.for(StringIO.new(content))
-    }
+    { io: file, filename: file.original_filename.presence || "page", content_type: content_type }
+  end
+
+  def too_many_pages
+    InvalidUpload.new(:too_many_pages, count: MAX_PAGES)
   end
 
   # Photos only, or a single PDF.
@@ -233,11 +255,11 @@ class PaperSignature < ApplicationRecord
     end
   end
 
-  def build_scan
-    pdf_page = pages.find(&:pdf?)
+  def build_scan(snapshot)
+    pdf_page = snapshot.find(&:pdf?)
     return pdf_page.file.download if pdf_page
 
-    images = pages.map { |page| [ page.file.download, page.file.content_type ] }
+    images = snapshot.map { |page| [ page.file.download, page.file.content_type ] }
     begin
       PaperScan.combine(images)
     rescue StandardError
