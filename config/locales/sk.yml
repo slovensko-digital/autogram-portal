@@ -2917,7 +2917,7 @@ sk:
       message: "%{sender} skontroluje, či je dokument podpísaný. Keď podpis schváli alebo vráti, pošleme vám e-mail na %{email}."
       message_without_email: "%{sender} skontroluje, či je dokument podpísaný. Výsledok kontroly uvidíte na stránke podpisu."
       scan: "Nahratý sken"
-      submitted_at: "Odoslaný %{time}"
+      submitted_at_html: "Odoslaný %{time}"
       replace: "Nahrať iný sken"
       discard: "Zahodiť sken a podpísať inak"
     draft:
@@ -2925,7 +2925,7 @@ sk:
       message: "Nahraté strany ste ešte neodoslali na kontrolu."
     returned:
       title: "Odosielateľ vrátil váš sken"
-      reviewed: "Vrátil(a) %{name} %{time}"
+      reviewed_html: "Vrátil(a) %{name} %{time}"
     review:
       title: "Kontrola podpisu na papieri"
       back: "Späť na balík"

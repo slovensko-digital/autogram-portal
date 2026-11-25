@@ -2977,7 +2977,7 @@ en:
       message: "%{sender} will check that the document is signed. When they approve or return the signature, we will email you at %{email}."
       message_without_email: "%{sender} will check that the document is signed. You will see the result on the signing page."
       scan: "Uploaded scan"
-      submitted_at: "Submitted %{time}"
+      submitted_at_html: "Submitted %{time}"
       replace: "Upload another scan"
       discard: "Discard the scan and sign another way"
     draft:
@@ -2985,7 +2985,7 @@ en:
       message: "You have not submitted the uploaded pages for review yet."
     returned:
       title: "The sender returned your scan"
-      reviewed: "Returned by %{name}, %{time}"
+      reviewed_html: "Returned by %{name}, %{time}"
     review:
       title: "Review of a paper signature"
       back: "Back to the bundle"

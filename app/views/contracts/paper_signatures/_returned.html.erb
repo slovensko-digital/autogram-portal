@@ -8,7 +8,7 @@
       <p class="mb-1 text-sm font-semibold text-red-900"><%= t('paper_signatures.returned.title') %></p>
       <p class="whitespace-pre-line break-words text-sm text-red-800"><%= paper_signature.return_reason %></p>
       <p class="mt-2 text-xs text-red-700">
-        <%= t('paper_signatures.returned.reviewed', name: paper_signature_reviewer_name(paper_signature), time: l(paper_signature.reviewed_at, format: :short)) %>
+        <%= t('paper_signatures.returned.reviewed_html', name: paper_signature_reviewer_name(paper_signature), time: paper_signature_time_tag(paper_signature.reviewed_at)) %>
       </p>
     </div>
   </div>

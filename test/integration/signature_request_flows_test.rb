@@ -678,6 +678,25 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the signer sees when the scan was submitted and returned in Slovak time" do
+    @owner.update!(name: "Eva Kontrolná")
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = travel_to(Time.utc(2026, 11, 25, 23, 30)) { submit_paper_scan(contract, recipient) }
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_select "time[datetime=?]", paper.submitted_at.iso8601, text: "26. 11. 2026 00:30"
+
+      sign_in_with_tenant @owner, @organization
+      travel_to(Time.utc(2026, 11, 26, 22, 15)) do
+        post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Chýba podpis na strane 2." }
+      end
+      sign_out @owner
+
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_select "time[datetime=?]", paper.reload.reviewed_at.iso8601, text: "26. 11. 2026 23:15"
+      assert_includes response.body, "Vrátil(a) Eva Kontrolná"
+    end
+  end
+
   test "the organization is asked to review a scan even with author notifications off and told nothing else" do
     with_paper_signing_request do |bundle, contract, recipient|
       bundle.update!(author_notifications_enabled: false)

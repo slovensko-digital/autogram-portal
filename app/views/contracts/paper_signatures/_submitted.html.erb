@@ -3,7 +3,7 @@
 
 <section class="rounded-xl border border-gray-200 bg-white p-5" aria-labelledby="paper_signature_scan_title">
   <h2 id="paper_signature_scan_title" class="text-base font-semibold text-gray-900"><%= t('paper_signatures.submitted.scan') %></h2>
-  <p class="mt-1 text-sm text-gray-500"><%= t('paper_signatures.submitted.submitted_at', time: l(paper_signature.submitted_at, format: :short)) %></p>
+  <p class="mt-1 text-sm text-gray-500"><%= t('paper_signatures.submitted.submitted_at_html', time: paper_signature_time_tag(paper_signature.submitted_at)) %></p>
 
   <div class="mt-4">
     <%= render 'contracts/paper_signatures/pages', contract: contract, paper_signature: paper_signature, editable: false %>
