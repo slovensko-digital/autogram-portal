@@ -32,9 +32,11 @@
       <h2 class="text-base font-semibold text-gray-900"><%= t('paper_signatures.steps.upload.title') %></h2>
 
       <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
-        <%= form_with url: contract_paper_signature_pages_path(contract, **paper_signer_link_params), multipart: true, class: "space-y-3" do %>
+        <%= form_with url: contract_paper_signature_pages_path(contract, **paper_signer_link_params), multipart: true, class: "space-y-3",
+                      data: { controller: "paper-pages", action: "change->paper-pages#pick dragover->paper-pages#dragOver dragleave->paper-pages#dragLeave drop->paper-pages#drop" } do %>
           <label for="paper_signature_files"
-                 class="flex min-h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-500 bg-gray-50/30 px-6 py-8 text-center transition-all duration-200 hover:border-gray-600 hover:bg-gray-50/50">
+                 class="flex min-h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-500 bg-gray-50/30 px-6 py-8 text-center transition-all duration-200 hover:border-gray-600 hover:bg-gray-50/50 data-[dragging]:border-blue-600 data-[dragging]:bg-blue-50"
+                 data-paper-pages-target="dropzone">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-10 w-10 text-gray-400">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
@@ -49,9 +51,10 @@
                   multiple: true,
                   accept: "application/pdf,image/jpeg,image/png",
                   aria: { describedby: "paper_signature_files_hint" },
-                  class: "block w-full min-w-0 text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-900 file:ring-1 file:ring-gray-500 file:ring-inset hover:file:bg-gray-50" %>
-            <%= submit_tag t('paper_signatures.steps.upload.button'), name: nil, class: "btn btn-second-primary shrink-0" %>
+                  class: paper_file_input_classes %>
+            <%= submit_tag t('paper_signatures.steps.upload.button'), name: nil, class: "btn btn-second-primary shrink-0", data: { paper_pages_target: "fallback" } %>
           </div>
+          <%= render 'contracts/paper_signatures/upload_feedback' %>
         <% end %>
 
         <%= render 'contracts/paper_signatures/phone', contract: contract, paper_signature: paper_signature %>

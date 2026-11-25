@@ -10,8 +10,13 @@ module Contracts
     def create
       current_paper_signature(open_draft: true).add_pages!(params[:files])
 
+      # The paper-pages JavaScript uploads in the background; the page changes arrive as a Turbo refresh.
+      return head :no_content if request.format.json?
+
       redirect_to paper_signature_page_path, status: :see_other
     rescue PaperSignature::InvalidUpload => e
+      return render json: { error: e.message }, status: :unprocessable_entity if request.format.json?
+
       redirect_to paper_signature_page_path, alert: e.message, status: :see_other
     end
 

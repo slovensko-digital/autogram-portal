@@ -2916,6 +2916,7 @@ en:
         dropzone_subtitle: "or click to choose files"
         file_types: "PDF from a scanner or photos (JPG, PNG, HEIC)"
         button: "Upload"
+        uploading: "Uploading…"
     phone:
       title: "Take photos of the pages with your phone"
       description: "Scan the code with your phone's camera. The pages you photograph appear here by themselves."

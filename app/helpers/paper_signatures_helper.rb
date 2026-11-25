@@ -1,4 +1,11 @@
 module PaperSignaturesHelper
+  # Classes of the file inputs on the desktop and phone upload forms.
+  PAPER_FILE_INPUT_CLASSES = "block w-full min-w-0 text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-900 file:ring-1 file:ring-gray-500 file:ring-inset hover:file:bg-gray-50".freeze
+
+  def paper_file_input_classes
+    PAPER_FILE_INPUT_CLASSES
+  end
+
   # The paper signature that takes the place of the signing method choice on the signing page: a scan
   # awaiting review or a draft with pages. The paper signing page opens a draft before anything is
   # uploaded, so an empty draft leaves the choice in place.

@@ -2853,6 +2853,7 @@ sk:
         dropzone_subtitle: "alebo kliknite a vyberte súbory"
         file_types: "PDF zo skenera alebo fotky (JPG, PNG, HEIC)"
         button: "Nahrať"
+        uploading: "Nahrávam…"
     phone:
       title: "Odfoťte strany mobilom"
       description: "Naskenujte kód fotoaparátom mobilu. Odfotené strany sa tu zobrazia samé."

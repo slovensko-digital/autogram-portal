@@ -6,7 +6,6 @@
 <% document = @contract.documents.first %>
 <% expected = @paper_signature.expected_page_count %>
 <% uploaded = @paper_signature.pages.any? ? @paper_signature.uploaded_page_count.to_i : 0 %>
-<% file_input_classes = "block w-full min-w-0 text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-900 file:ring-1 file:ring-gray-500 file:ring-inset hover:file:bg-gray-50" %>
 
 <div class="mx-auto max-w-4xl px-4 pb-8 pt-6 sm:px-6 sm:pt-10 lg:px-8">
   <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl"><%= t('paper_signatures.phone_page.title') %></h1>
@@ -18,7 +17,7 @@
     <%= render 'contracts/paper_signatures/pages', contract: @contract, paper_signature: @paper_signature, editable: true %>
     <%= render 'contracts/paper_signatures/page_count_warning', paper_signature: @paper_signature %>
 
-    <%= form_with url: contract_paper_signature_pages_path(@contract, **paper_signer_link_params), multipart: true, class: "space-y-3" do %>
+    <%= form_with url: contract_paper_signature_pages_path(@contract, **paper_signer_link_params), multipart: true, class: "space-y-3", data: { controller: "paper-pages", action: "change->paper-pages#pick" } do %>
       <div class="grid gap-3 sm:grid-cols-2">
         <%# The camera opens right away; the "Pridať stranu" tile points here too. %>
         <label for="paper_signature_files"
@@ -30,7 +29,7 @@
             </svg>
             <%= t('paper_signatures.phone_page.take_photo') %>
           </span>
-          <%= file_field_tag "files[]", id: "paper_signature_files", accept: "image/*", capture: "environment", class: file_input_classes %>
+          <%= file_field_tag "files[]", id: "paper_signature_files", accept: "image/*", capture: "environment", class: paper_file_input_classes %>
         </label>
         <%# Phones convert HEIC photos to JPEG for inputs that accept only JPEG and PNG. %>
         <label class="flex cursor-pointer flex-col gap-3 rounded-lg border border-gray-300 bg-white p-4 hover:bg-gray-50">
@@ -40,10 +39,11 @@
             </svg>
             <%= t('paper_signatures.phone_page.choose_from_gallery') %>
           </span>
-          <%= file_field_tag "files[]", id: "paper_signature_gallery_files", multiple: true, accept: "image/jpeg,image/png", class: file_input_classes %>
+          <%= file_field_tag "files[]", id: "paper_signature_gallery_files", multiple: true, accept: "image/jpeg,image/png", class: paper_file_input_classes %>
         </label>
       </div>
-      <%= submit_tag t('paper_signatures.steps.upload.button'), name: nil, class: "btn btn-second-primary w-full sm:w-auto" %>
+      <%= submit_tag t('paper_signatures.steps.upload.button'), name: nil, class: "btn btn-second-primary w-full sm:w-auto", data: { paper_pages_target: "fallback" } %>
+      <%= render 'contracts/paper_signatures/upload_feedback' %>
     <% end %>
 
     <div class="border-t border-gray-200 pt-5">

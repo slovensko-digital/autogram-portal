@@ -115,6 +115,19 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "background uploads of the paper-pages script get no redirect and the refusal as JSON" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }, headers: { "Accept" => "application/json" }
+      assert_response :no_content
+      assert_equal 1, PaperSignature.sole.pages.count
+
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ docx_upload ] }, headers: { "Accept" => "application/json" }
+      assert_response :unprocessable_entity
+      assert_equal I18n.t("paper_signatures.errors.unsupported_file"), response.parsed_body["error"]
+      assert_equal 1, PaperSignature.sole.pages.count
+    end
+  end
+
   test "an unsupported file is refused and the draft stays" do
     with_paper_signing_request do |_bundle, contract, recipient|
       post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ docx_upload ] }
