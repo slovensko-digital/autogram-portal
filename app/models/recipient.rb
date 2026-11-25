@@ -221,6 +221,7 @@ class Recipient < ApplicationRecord
       now = Time.current
       signer_contracts.where(signed_at: nil).update_all(declined_at: nil, superseded_at: now, updated_at: now)
       sessions.pending.find_each(&:canceled!)
+      PaperSignature.open.where(signer_contract_id: signer_contracts.select(:id)).find_each(&:cancel!)
       update!(withdrawn_at: now)
       revoke_active_access_grants!
       Federation::WithdrawRequestInvitationJob.perform_later(self, status: "withdrawn") if federated_recipient? && notified_at.present?

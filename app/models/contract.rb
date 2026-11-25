@@ -57,6 +57,7 @@ class Contract < ApplicationRecord
   has_many :documents, -> { order(:id) }, dependent: :destroy
   has_many :signature_field_preparations, dependent: :destroy
   has_many :sessions, through: :signer_contracts
+  has_many :paper_signatures, through: :signer_contracts
 
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
   accepts_nested_attributes_for :signature_parameters

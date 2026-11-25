@@ -128,6 +128,8 @@ en:
         role: "Role"
       user:
         agree_to_policies: "Terms and Privacy Policy"
+      paper_signature:
+        return_reason: "Return reason"
     errors:
       models:
         visual_stamp:
@@ -176,6 +178,10 @@ en:
           attributes:
             base:
               signature_request_limit: "%{sender} has used up its monthly limit of documents sent for signature."
+        paper_signature:
+          attributes:
+            return_reason:
+              blank: "can't be blank"
 
   errors:
     archivation_disabled: "Document archivation feature is currently disabled for your organization. Please contact the administrator."
@@ -2877,6 +2883,11 @@ en:
       description:
         one: "In the %{plan} plan, documents and bundles are deleted %{count} day after they are created. If you want to keep them, download them before they are deleted."
         other: "In the %{plan} plan, documents and bundles are deleted %{count} days after they are created. If you want to keep them, download them before they are deleted."
+
+  paper_signatures:
+    errors:
+      unsupported_file: "Upload a PDF from a scanner or photos in JPG or PNG format."
+      too_large: "The scan is larger than the document size limit allows. Upload smaller photos or a scan with a lower resolution."
 
   plan_limits:
     exceeded:

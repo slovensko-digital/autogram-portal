@@ -218,6 +218,7 @@ class Bundle < ApplicationRecord
       now = Time.current
       SignerContract.where(id: awaiting_sc_ids).update_all(superseded_at: now, updated_at: now)
       Session.pending.where(signer_contract_id: awaiting_sc_ids).find_each(&:canceled!)
+      PaperSignature.open.where(signer_contract_id: awaiting_sc_ids).find_each(&:cancel!)
 
       affected_recipient_ids = SignerContract
         .joins(signer: :recipient)

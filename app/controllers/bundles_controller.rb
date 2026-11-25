@@ -196,6 +196,7 @@ class BundlesController < ApplicationController
 
     now = Time.current
     SignerContract.where(id: affected_signer_contract_ids).update_all(declined_at: now, updated_at: now)
+    PaperSignature.open.where(signer_contract_id: affected_signer_contract_ids).find_each(&:cancel!)
 
     SignerContract.where(id: affected_signer_contract_ids).includes(:contract).find_each do |signer_contract|
       bundle.webhook&.fire_recipient_declined(recipient, signer_contract.contract)

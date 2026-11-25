@@ -18,6 +18,21 @@ class Tenant::UsageTest < ActiveSupport::TestCase
     assert_equal contract.documents.sole.blob.byte_size + 50 + "%PDF-1.4 ".bytesize + 60, @tenant.usage_of(:storage)
   end
 
+  test "storage includes scans signed on paper and the pages they are made of" do
+    paper = open_paper_signature(@tenant)
+    foreign_paper = open_paper_signature(Tenant.create!(name: "Iná firma"))
+    foreign_paper.add_pages!([ jpeg_upload ])
+    foreign_paper.submit!
+    storage_before = @tenant.usage_of(:storage)
+
+    paper.add_pages!([ jpeg_upload ])
+    page_bytes = paper.pages.sole.file.byte_size
+    assert_equal storage_before + page_bytes, @tenant.usage_of(:storage)
+
+    paper.submit!
+    assert_equal storage_before + page_bytes + paper.scan.byte_size, @tenant.usage_of(:storage)
+  end
+
   test "monthly usage counts only the current month" do
     contract = create_contract(@tenant)
     @tenant.usage_records.create!(kind: :timestamp, source: :extension, contract: contract, created_at: 1.month.ago)
@@ -106,6 +121,15 @@ class Tenant::UsageTest < ActiveSupport::TestCase
   end
 
   private
+
+  def open_paper_signature(tenant)
+    bundle = Bundle.create!(tenant: tenant, contracts: [ create_contract(tenant) ])
+    PaperSignature.open_for!(bundle.recipients.create!(email: "external@example.com", locale: "sk").signer_contracts.sole)
+  end
+
+  def jpeg_upload
+    Rack::Test::UploadedFile.new(file_fixture("paper-page.jpg"), "image/jpeg")
+  end
 
   def create_contract(tenant, bytes: 10)
     blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("%PDF-1.4 #{'a' * bytes}"), filename: "doc.pdf", content_type: "application/pdf")

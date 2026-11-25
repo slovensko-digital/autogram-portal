@@ -30,6 +30,7 @@ class SignerContract < ApplicationRecord
   belongs_to :contract
   has_many :sessions, dependent: :destroy
   has_many :visual_stamps, dependent: :destroy
+  has_many :paper_signatures, dependent: :destroy
 
   validates :signer, uniqueness: { scope: :contract_id }
 

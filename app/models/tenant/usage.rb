@@ -2,7 +2,7 @@
 #
 # Limits:
 # - :stored_documents   – contracts (documents) the tenant keeps at once
-# - :storage            – bytes of all document files and signed versions
+# - :storage            – bytes of all document files, signed versions and paper scans (with their pages)
 # - :signature_requests – documents sent for signature in the current calendar month
 # - :timestamps         – timestamps added in the current calendar month
 #
@@ -89,9 +89,12 @@ module Tenant::Usage
 
   def storage_bytes
     contract_ids = contracts.select(:id)
+    paper_signature_ids = PaperSignature.joins(:signer_contract).where(signer_contracts: { contract_id: contract_ids }).select(:id)
     attachments = ActiveStorage::Attachment
       .where(record_type: "Document", name: "blob", record_id: Document.where(contract_id: contract_ids).select(:id))
       .or(ActiveStorage::Attachment.where(record_type: "ContractContentVersion", name: "file", record_id: ContractContentVersion.where(contract_id: contract_ids).select(:id)))
+      .or(ActiveStorage::Attachment.where(record_type: "PaperSignature", name: "scan", record_id: paper_signature_ids))
+      .or(ActiveStorage::Attachment.where(record_type: "PaperSignaturePage", name: "file", record_id: PaperSignaturePage.where(paper_signature_id: paper_signature_ids).select(:id)))
 
     ActiveStorage::Blob.where(id: attachments.select(:blob_id)).sum(:byte_size)
   end

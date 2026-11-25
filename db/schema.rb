@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_25_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_25_110100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -271,6 +271,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_100000) do
     t.index ["tenant_id", "user_id"], name: "index_memberships_on_tenant_id_and_user_id", unique: true
     t.index ["tenant_id"], name: "index_memberships_on_tenant_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
+
+  create_table "paper_signature_pages", force: :cascade do |t|
+    t.bigint "paper_signature_id", null: false
+    t.integer "position", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["paper_signature_id"], name: "index_paper_signature_pages_on_paper_signature_id"
+  end
+
+  create_table "paper_signatures", force: :cascade do |t|
+    t.bigint "signer_contract_id", null: false
+    t.string "uuid", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "submitted_at"
+    t.datetime "reviewed_at"
+    t.bigint "reviewed_by_id"
+    t.text "return_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reviewed_by_id"], name: "index_paper_signatures_on_reviewed_by_id"
+    t.index ["signer_contract_id"], name: "index_paper_signatures_on_open_signer_contract_id", unique: true, where: "((status)::text = ANY ((ARRAY['draft'::character varying, 'submitted'::character varying])::text[]))"
+    t.index ["signer_contract_id"], name: "index_paper_signatures_on_signer_contract_id"
+    t.index ["uuid"], name: "index_paper_signatures_on_uuid", unique: true
   end
 
   create_table "portal_instances", force: :cascade do |t|
@@ -599,6 +623,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_100000) do
   add_foreign_key "identities", "users"
   add_foreign_key "memberships", "tenants"
   add_foreign_key "memberships", "users"
+  add_foreign_key "paper_signature_pages", "paper_signatures"
+  add_foreign_key "paper_signatures", "signer_contracts"
+  add_foreign_key "paper_signatures", "users", column: "reviewed_by_id", on_delete: :nullify
   add_foreign_key "postal_addresses", "bundles"
   add_foreign_key "recipient_access_grants", "portal_instances"
   add_foreign_key "recipient_access_grants", "recipients"

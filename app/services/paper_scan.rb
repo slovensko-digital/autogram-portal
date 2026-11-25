@@ -16,9 +16,11 @@ module PaperScan
     pdf.render
   end
 
+  # nil when the PDF cannot be read. Scans are untrusted uploads and the count only drives a
+  # warning, so any parser failure means "unknown".
   def self.page_count(pdf_bytes)
     PDF::Reader.new(StringIO.new(pdf_bytes)).page_count
-  rescue PDF::Reader::MalformedPDFError, PDF::Reader::UnsupportedFeatureError
+  rescue StandardError
     nil
   end
 end

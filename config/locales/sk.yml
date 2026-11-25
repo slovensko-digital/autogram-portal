@@ -99,6 +99,8 @@ sk:
         role: "Rola"
       user:
         agree_to_policies: "Podmienky a zásady ochrany súkromia a Všeobecné obchodné podmienky"
+      paper_signature:
+        return_reason: "Dôvod vrátenia"
     errors:
       models:
         visual_stamp:
@@ -147,6 +149,10 @@ sk:
           attributes:
             base:
               signature_request_limit: "Organizácia %{sender} tento mesiac vyčerpala limit dokumentov odoslaných na podpis."
+        paper_signature:
+          attributes:
+            return_reason:
+              blank: "musí byť vyplnený"
 
   errors:
     archivation_disabled: "Funkcia archivácie dokumentov je pre vašu organizáciu momentálne vypnutá. Kontaktujte administrátora."
@@ -2814,6 +2820,11 @@ sk:
         one: "V pláne %{plan} sa dokumenty a balíky mažú %{count} deň po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
         few: "V pláne %{plan} sa dokumenty a balíky mažú %{count} dni po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
         other: "V pláne %{plan} sa dokumenty a balíky mažú %{count} dní po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
+
+  paper_signatures:
+    errors:
+      unsupported_file: "Nahrajte PDF zo skenera alebo fotky vo formáte JPG alebo PNG."
+      too_large: "Sken je väčší, ako dovoľuje limit veľkosti dokumentu. Nahrajte menšie fotky alebo sken s nižším rozlíšením."
 
   plan_limits:
     exceeded:
