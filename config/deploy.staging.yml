@@ -22,7 +22,7 @@ env:
     SMTP_AUTHENTICATION: login
     SMTP_ENABLE_STARTTLS_AUTO: true
     SMTP_TLS: false
-    ALLOWED_METHODS: "qes,ades,visual"
+    ALLOWED_METHODS: "qes,ades,visual,scan"
     ALLOW_TEST_SIGNATURES: true
     AWS_ACCESS_KEY_ID: "<%= ENV['AWS_ACCESS_KEY_ID'] %>"
     AWS_REGION: "<%= ENV['AWS_REGION'] %>"
