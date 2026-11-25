@@ -2909,6 +2909,9 @@ en:
         other: "In the %{plan} plan, documents and bundles are deleted %{count} days after they are created. If you want to keep them, download them before they are deleted."
 
   paper_signatures:
+    document_pages:
+      one: "%{count} page"
+      other: "%{count} pages"
     errors:
       unsupported_file: "Upload a PDF from a scanner or photos in JPG or PNG format."
       too_large: "The scan is larger than the document size limit allows. Upload smaller photos or a scan with a lower resolution."
@@ -2947,9 +2950,6 @@ en:
       qr_label: "QR code with the link for taking photos of the pages with a phone"
     phone_page:
       title: "Take photos of the signed pages"
-      document_pages:
-        one: "%{count} page"
-        other: "%{count} pages"
       take_photo: "Take a photo of the next page"
       choose_from_gallery: "Choose from the gallery"
       submit:

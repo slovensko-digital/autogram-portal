@@ -115,6 +115,25 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the paper signing page names the sender, the pages to print and offers two equal actions" do
+    @organization.update!(name: "Firma ABC, s. r. o.")
+    with_paper_signing_request do |bundle, contract, recipient|
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_response :success
+
+      assert_select "p", text: /Podpis potom skontroluje odosielateľ, Firma ABC, s\. r\. o\.\z/
+      assert_not_includes response.body, "s. r. o.."
+      assert_select "ol > li:first-child p", text: /\Apapier\.pdf · 2 strany\z/
+      assert_select "ol > li > span.h-7.w-7.bg-blue-50.text-blue-700", count: 3
+      # The dropzone is the control; the paper-pages controller hides the native input once it runs.
+      assert_select "label[for=paper_signature_files][data-paper-pages-target=dropzone] input#paper_signature_files[data-paper-pages-target=input]"
+      assert_select "div.grid.grid-cols-2.gap-8" do
+        assert_select "a.btn.btn-secondary[href=?]", sign_bundle_path(bundle, recipient: recipient.uuid), text: "Späť"
+        assert_select "form button.btn.btn-primary.flex-1[disabled]", text: "Odoslať na kontrolu"
+      end
+    end
+  end
+
   test "background uploads of the paper-pages script get no redirect and the refusal as JSON" do
     with_paper_signing_request do |_bundle, contract, recipient|
       post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }, headers: { "Accept" => "application/json" }

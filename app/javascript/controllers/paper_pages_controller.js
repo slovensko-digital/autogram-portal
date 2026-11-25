@@ -11,11 +11,13 @@ const REFRESH_WAIT_MS = 1500
 // orientation, so every photo is redrawn upright. The page changes then arrive as a Turbo refresh; if none does, the
 // controller visits the page itself.
 export default class extends Controller {
-  static targets = [ "fallback", "status", "error", "dropzone" ]
+  static targets = [ "fallback", "status", "error", "dropzone", "input" ]
   static values = { failed: String }
 
   connect() {
     this.fallbackTargets.forEach((button) => { button.style.display = "none" })
+    // The dropzone around it is the visible control; the input stays for keyboards and screen readers.
+    this.inputTargets.forEach((input) => { input.className = "sr-only" })
     this.uploading = 0
     this.queue = Promise.resolve()
     this.refreshed = false

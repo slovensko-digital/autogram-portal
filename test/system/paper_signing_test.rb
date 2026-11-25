@@ -51,6 +51,15 @@ class PaperSigningSystemTest < ApplicationSystemTestCase
     assert PaperSignature.sole.submitted?
   end
 
+  test "the dropzone is the upload control and the native file input stays only for keyboards and screen readers" do
+    visit contract_paper_signature_path(@contract, recipient: @recipient.uuid)
+
+    assert_selector "label[for=paper_signature_files]", text: "Pretiahnite sem sken alebo fotky strán"
+    assert_selector "#paper_signature_files.sr-only", visible: :all
+    assert_equal 1, evaluate_script("document.getElementById('paper_signature_files').getBoundingClientRect().width")
+    assert_equal "paper_signature_files", evaluate_script("(document.getElementById('paper_signature_files').focus(), document.activeElement.id)")
+  end
+
   test "a large photo is downsized before upload" do
     original = file_fixture("paper-page-large.jpg")
     visit contract_paper_signature_path(@contract, recipient: @recipient.uuid)

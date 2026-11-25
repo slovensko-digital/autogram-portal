@@ -27,6 +27,13 @@ module PaperSignaturesHelper
     latest if latest&.returned?
   end
 
+  # The intro ends with the sender's name in Slovak; a name ending with a period („s. r. o.“) ends
+  # the sentence itself.
+  def paper_signature_intro(sender)
+    intro = t("paper_signatures.show.intro", sender: sender)
+    sender.end_with?(".") ? intro.sub("#{sender}.", sender) : intro
+  end
+
   def paper_signer_contract(contract, recipient)
     recipient&.signer_contracts&.find_by(contract: contract)
   end

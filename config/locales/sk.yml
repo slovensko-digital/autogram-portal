@@ -2846,6 +2846,10 @@ sk:
         other: "V pláne %{plan} sa dokumenty a balíky mažú %{count} dní po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
 
   paper_signatures:
+    document_pages:
+      one: "%{count} strana"
+      few: "%{count} strany"
+      other: "%{count} strán"
     errors:
       unsupported_file: "Nahrajte PDF zo skenera alebo fotky vo formáte JPG alebo PNG."
       too_large: "Sken je väčší, ako dovoľuje limit veľkosti dokumentu. Nahrajte menšie fotky alebo sken s nižším rozlíšením."
@@ -2884,10 +2888,6 @@ sk:
       qr_label: "QR kód s odkazom na fotenie strán mobilom"
     phone_page:
       title: "Odfoťte podpísané strany"
-      document_pages:
-        one: "%{count} strana"
-        few: "%{count} strany"
-        other: "%{count} strán"
       take_photo: "Odfotiť ďalšiu stranu"
       choose_from_gallery: "Vybrať z galérie"
       submit:
