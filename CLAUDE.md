@@ -1,6 +1,6 @@
 # Autogram Portal (AGP)
 
-Rails 8 app for eIDAS electronic signatures: upload, sign (Autogram, eIdentita, AVM, Podpisuj, AdES evidence), validate, request signatures from others, API for integrators, federation between portal instances. See README.md for the product overview and docs/federation.md for federation.
+Rails 8 app for eIDAS electronic signatures: upload, sign (Autogram, eIdentita, AVM, Podpisuj, Chevron7, AdES evidence), validate, request signatures from others, API for integrators, federation between portal instances. See README.md for the product overview and docs/federation.md for federation.
 
 ## Commands
 

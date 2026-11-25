@@ -21,7 +21,7 @@ This project is funded through [NGI Zero Core](https://nlnet.nl/core), a fund es
 Autogram Portal provides comprehensive electronic signature management for individuals, organizations, and integrators. The user guide (Slovak and English) is part of the app at [/docs](https://agp.dev.slovensko.digital/docs).
 
 ### Without an Account
-- **Sign Documents** - Upload a document and sign it with a qualified electronic signature using Autogram Desktop, Autogram Mobile, eIdentita or a standalone application such as Podpisuj
+- **Sign Documents** - Upload a document and sign it with a qualified electronic signature using Autogram Desktop, Chevron7 (macOS), Autogram Mobile, eIdentita or a standalone application such as Podpisuj
 - **Verify Signatures** - Validate existing electronic signatures
 - **View Document Contents** - Visualize ASiC-E containers and Slovak XML Datacontainers (special XML format for eGovernment)
 - **Sign Requests** - Sign or decline documents sent to you through an email invitation link
