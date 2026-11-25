@@ -225,13 +225,77 @@ class PaperSignatureTest < ActiveSupport::TestCase
     assert PaperSignature.find(paper.id).submit!
   end
 
-  test "an image the scan cannot be built from is refused on submit" do
+  test "an image the scan cannot be built from is refused on submit and reported" do
     paper = PaperSignature.open_for!(signer_contract)
-    paper.add_pages!([ Rack::Test::UploadedFile.new(StringIO.new("\x89PNG\r\n\x1A\n".b + "damaged".b), "image/png", original_filename: "strana.png") ])
+    # A filter method Prawn does not know: the header and the data look fine at upload.
+    paper.add_pages!([ crafted_png(width: 2, height: 2, filter_method: 1) ])
 
-    error = assert_raises(PaperSignature::InvalidUpload) { paper.submit! }
+    error = nil
+    assert_error_reported(Prawn::Errors::UnsupportedImageType) do
+      error = assert_raises(PaperSignature::InvalidUpload) { paper.submit! }
+    end
     assert_equal I18n.t("paper_signatures.errors.unsupported_file"), error.message
     assert paper.reload.draft?
+  end
+
+  test "a PNG over 12 megapixels is refused before its data is read" do
+    paper = PaperSignature.open_for!(signer_contract)
+
+    error = assert_raises(PaperSignature::InvalidUpload) { paper.add_pages!([ jpeg_upload, crafted_png(width: 4001, height: 3000, raw: "") ]) }
+
+    assert_equal I18n.t("paper_signatures.errors.image_too_large"), error.message
+    assert_empty paper.pages
+    assert_equal 1, paper.add_pages!([ crafted_png(width: 4000, height: 3000, raw: "") ]).size, "12 megapixels are enough for a page"
+  end
+
+  test "a PNG is refused when its data would inflate beyond what its header declares" do
+    paper = PaperSignature.open_for!(signer_contract)
+    unsupported = I18n.t("paper_signatures.errors.unsupported_file")
+    bomb = crafted_png(width: 100, height: 100, raw: "\x00".b * 2.megabytes)
+    second_header = crafted_png(width: 100, height: 100, extra_chunks: [ [ "IHDR", [ 6000, 6000, 8, 6, 0, 0, 0 ].pack("NNCCCCC") ] ])
+    header_not_first = crafted_png(width: 100, height: 100, header_first: false)
+    damaged = Rack::Test::UploadedFile.new(StringIO.new("\x89PNG\r\n\x1A\n".b + "damaged".b), "image/png", original_filename: "strana.png")
+
+    [ bomb, second_header, header_not_first, damaged ].each do |upload|
+      error = assert_raises(PaperSignature::InvalidUpload) { paper.add_pages!([ upload ]) }
+      assert_equal unsupported, error.message
+    end
+    assert_empty paper.pages
+    assert_equal 1, paper.add_pages!([ crafted_png(width: 100, height: 100) ]).size
+  end
+
+  test "pages over the document size limit are refused before the scan is built" do
+    with_plan_limits("MAX_DOCUMENT_SIZE_MB" => "1") do
+      paper = PaperSignature.open_for!(signer_contract)
+      paper.add_pages!(Array.new(2) { Rack::Test::UploadedFile.new(file_fixture("paper-page-large.jpg"), "image/jpeg") })
+      paper.define_singleton_method(:build_scan) { |_snapshot| raise "the scan was built" }
+
+      error = assert_raises(PaperSignature::InvalidUpload) { paper.submit! }
+
+      assert_equal I18n.t("paper_signatures.errors.too_large"), error.message
+      assert paper.reload.draft?
+    end
+  end
+
+  test "page counts are read once and kept with the files" do
+    paper = PaperSignature.open_for!(signer_contract)
+    paper.add_pages!([ pdf_upload(pages: 3) ])
+    page_blob = paper.pages.sole.file.blob
+    assert_equal 3, page_blob.reload.metadata["page_count"], "counted at upload"
+    page_blob.update_columns(metadata: page_blob.metadata.merge("page_count" => 7))
+    assert_equal 7, PaperSignature.find(paper.id).uploaded_page_count, "not parsed again"
+
+    original = @bundle.contracts.sole.documents.first.blob.blob
+    assert_not original.metadata.key?("page_count")
+    assert_equal 2, PaperSignature.find(paper.id).expected_page_count
+    assert_equal 2, original.reload.metadata["page_count"], "counted on first use"
+    original.update_columns(metadata: original.metadata.merge("page_count" => 5))
+    assert_equal 5, PaperSignature.find(paper.id).expected_page_count
+
+    paper.add_pages!([ jpeg_upload, png_upload ])
+    assert paper.submit!
+    assert_equal 2, paper.scan.blob.reload.metadata["page_count"]
+    assert_equal 2, PaperSignature.find(paper.id).uploaded_page_count
   end
 
   test "pages can be removed and reordered while collecting them" do
@@ -385,5 +449,17 @@ class PaperSignatureTest < ActiveSupport::TestCase
 
   def pdf_upload(pages:)
     Rack::Test::UploadedFile.new(StringIO.new(pdf_content(pages: pages)), "application/pdf", original_filename: "sken.pdf")
+  end
+
+  # An RGBA PNG with the given header; its image data inflates to +raw+ (white rows by default).
+  def crafted_png(width:, height:, raw: nil, filter_method: 0, extra_chunks: [], header_first: true)
+    raw ||= ("\x00".b + ("\xFF".b * (width * 4))) * height
+    chunk = ->(type, data) { [ data.bytesize ].pack("N") + type + data + [ Zlib.crc32(type + data) ].pack("N") }
+    header = chunk.call("IHDR", [ width, height, 8, 6, 0, filter_method, 0 ].pack("NNCCCCC"))
+    extra = extra_chunks.map { |type, data| chunk.call(type, data) }.join
+    text = chunk.call("tEXt", "Comment\x00strana".b)
+    chunks = header_first ? header + extra + text : text + header + extra
+    png = "\x89PNG\r\n\x1A\n".b + chunks + chunk.call("IDAT", Zlib::Deflate.deflate(raw, Zlib::BEST_COMPRESSION)) + chunk.call("IEND", "")
+    Rack::Test::UploadedFile.new(StringIO.new(png), "image/png", original_filename: "strana.png")
   end
 end

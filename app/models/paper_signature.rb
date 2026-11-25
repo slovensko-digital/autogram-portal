@@ -97,10 +97,13 @@ class PaperSignature < ApplicationRecord
     uploads = files.map { |file| identify_upload(file) }
     raise InvalidUpload.new(:unsupported_file) unless acceptable_uploads?(uploads)
 
+    pdf_upload = uploads.first if uploads.first[:content_type] == PaperScan::PDF_TYPE
+    pdf_upload[:metadata] = { "page_count" => read_page_count(pdf_upload[:io]) } if pdf_upload
+
     added = with_lock do
       next [] unless draft?
 
-      if uploads.first[:content_type] == PaperScan::PDF_TYPE
+      if pdf_upload
         pages.destroy_all
       else
         pdf_pages, image_pages = pages.partition(&:pdf?)
@@ -149,20 +152,20 @@ class PaperSignature < ApplicationRecord
     broadcast_refresh_to(self) if moved
   end
 
-  # Pages of the document to sign; nil when they cannot be counted.
+  # Pages of the printed document; nil when they cannot be counted.
   def expected_page_count
     return @expected_page_count if defined?(@expected_page_count)
 
-    document = contract.documents_to_sign.first
-    @expected_page_count = (PaperScan.page_count(document.content) if document&.is_pdf?)
+    document = contract.documents.first
+    @expected_page_count = (stored_page_count(document.blob.blob) if document&.is_pdf?)
   end
 
   # Pages of the scan, of the uploaded PDF or the number of photos; nil when a PDF cannot be read.
   def uploaded_page_count
-    return PaperScan.page_count(scan.download) if scan.attached?
+    return stored_page_count(scan.blob) if scan.attached?
 
     pdf_page = pages.find(&:pdf?)
-    pdf_page ? PaperScan.page_count(pdf_page.file.download) : pages.size
+    pdf_page ? stored_page_count(pdf_page.file.blob) : pages.size
   end
 
   # Builds the scan from the pages and hands it over for review. Returns true when submitted; false
@@ -172,15 +175,21 @@ class PaperSignature < ApplicationRecord
     snapshot = pages.reload.to_a
     return false unless draft? && snapshot.any?
 
+    # A scan is about as large as its pages: pages over the limit are refused before they are read.
+    max = PlanLimits.max_document_bytes
+    raise InvalidUpload.new(:too_large) if max && snapshot.sum { |page| page.file.byte_size } > max
+
     # Built outside the row lock, which cancel! (withdrawal, superseding) must not wait for.
     content = build_scan(snapshot)
-    max = PlanLimits.max_document_bytes
     raise InvalidUpload.new(:too_large) if max && content.bytesize > max
+
+    pdf_page = snapshot.find(&:pdf?)
+    page_count = pdf_page ? stored_page_count(pdf_page.file.blob) : snapshot.size
 
     submitted = with_lock do
       next false unless draft? && pages.ids == snapshot.map(&:id)
 
-      self.scan = { io: StringIO.new(content), filename: scan_filename, content_type: PaperScan::PDF_TYPE, identify: false }
+      self.scan = { io: StringIO.new(content), filename: scan_filename, content_type: PaperScan::PDF_TYPE, identify: false, metadata: { "page_count" => page_count } }
       update!(status: :submitted, submitted_at: Time.current)
       true
     end
@@ -241,13 +250,33 @@ class PaperSignature < ApplicationRecord
   end
 
   # The size comes from the upload's metadata and Marcel reads only the first bytes, so a refused
-  # file is never read whole.
+  # file is never read whole. A PNG is checked before Prawn inflates it on submit.
   def identify_upload(file)
     raise InvalidUpload.new(:file_too_large, size: MAX_FILE_BYTES / 1.megabyte) if file.size > MAX_FILE_BYTES
 
     content_type = Marcel::MimeType.for(file)
     file.rewind
+    problem = PaperScan.png_problem(file) if content_type == "image/png"
+    raise InvalidUpload.new(problem) if problem
+
     { io: file, filename: file.original_filename.presence || "page", content_type: content_type }
+  end
+
+  # Uploaded files cannot seek, which the PDF reader needs.
+  def read_page_count(file)
+    PaperScan.page_count(file.read)
+  ensure
+    file.rewind
+  end
+
+  # Counted once and kept in the blob's metadata, so pages render without parsing the PDF again.
+  # Scans and uploaded PDFs are counted when they are stored, the printed document on first use.
+  def stored_page_count(blob)
+    return blob.metadata["page_count"] if blob.metadata.key?("page_count")
+
+    PaperScan.page_count(blob.download).tap do |count|
+      blob.update_columns(metadata: blob.metadata.merge("page_count" => count))
+    end
   end
 
   def too_many_pages
@@ -275,8 +304,9 @@ class PaperSignature < ApplicationRecord
     images = snapshot.map { |page| [ page.file.download, page.file.content_type ] }
     begin
       PaperScan.combine(images)
-    rescue StandardError
+    rescue StandardError => e
       # Prawn::Errors::UnsupportedImageType, or whatever a damaged image makes Prawn raise.
+      Rails.error.report(e, context: { paper_signature_id: id })
       raise InvalidUpload.new(:unsupported_file)
     end
   end

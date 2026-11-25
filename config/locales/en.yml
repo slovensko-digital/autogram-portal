@@ -2914,6 +2914,7 @@ en:
       too_large: "The scan is larger than the document size limit allows. Upload smaller photos or a scan with a lower resolution."
       too_many_pages: "A scan can have at most %{count} pages."
       file_too_large: "A single file can be at most %{size} MB."
+      image_too_large: "The image dimensions are too large. Upload a photo with a lower resolution."
     alerts:
       no_pages: "Upload a scan or photos of the pages first."
       pages_changed: "The pages changed in the meantime. Check them and submit the scan again."

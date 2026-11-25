@@ -2851,6 +2851,7 @@ sk:
       too_large: "Sken je väčší, ako dovoľuje limit veľkosti dokumentu. Nahrajte menšie fotky alebo sken s nižším rozlíšením."
       too_many_pages: "Sken môže mať najviac %{count} strán."
       file_too_large: "Jeden súbor môže mať najviac %{size} MB."
+      image_too_large: "Obrázok má príliš veľké rozmery. Nahrajte fotku s nižším rozlíšením."
     alerts:
       no_pages: "Najprv nahrajte sken alebo fotky strán."
       pages_changed: "Strany sa medzitým zmenili. Skontrolujte ich a odošlite sken znova."
