@@ -142,7 +142,66 @@ class SessionTest < ActiveSupport::TestCase
     assert_nil ContractValidationRecord.find_by(source_contract_uuid: contract.uuid)
   end
 
+  test "accept_signed_file refuses a bundle signature completed while the file was being validated" do
+    contract = create_contract
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    signer_contract = bundle.recipients.create!(email: "signer@example.com", locale: "sk").signer_contracts.sole
+    session = signer_contract.sessions.create!(type: "AutogramSession", signing_started_at: Time.current)
+    valid_result = valid_validation_result
+    # Validation calls Autogram; meanwhile the organization approves the recipient's scan signed on paper.
+    approving_service = Object.new
+    approving_service.define_singleton_method(:validate_signatures) do |_document|
+      SignerContract.find(signer_contract.id).update_column(:signed_at, Time.current)
+      valid_result
+    end
+
+    with_autogram_service(approving_service) do
+      assert_raises(Session::SignatureNoLongerRequiredError) do
+        session.accept_signed_file(Base64.strict_encode64("signed pdf content"))
+      end
+    end
+
+    assert_equal 0, contract.reload.content_versions.count
+    assert session.reload.pending?
+  end
+
+  test "accept_signed_file refuses a bundle signer who already signed, but a standalone document can be signed again" do
+    bundle_contract = create_contract
+    Bundle.create!(tenant: tenants(:one), contracts: [ bundle_contract ])
+    signed_bundle_session = create_session_for(bundle_contract)
+    signed_bundle_session.signer_contract.update_column(:signed_at, 1.minute.ago)
+    standalone_session = create_session_for(create_contract)
+    standalone_session.signer_contract.update_column(:signed_at, 1.minute.ago)
+
+    with_autogram_service(fake_validation_service(valid_validation_result)) do
+      assert_raises(Session::SignatureNoLongerRequiredError) do
+        signed_bundle_session.accept_signed_file(Base64.strict_encode64("signed pdf content"))
+      end
+      standalone_session.accept_signed_file(Base64.strict_encode64("signed pdf content"))
+    end
+
+    assert_equal 0, bundle_contract.reload.content_versions.count
+    assert standalone_session.reload.signed?
+  end
+
   private
+
+  def valid_validation_result
+    AutogramService::ValidationResult.new(
+      hasSignatures: true,
+      signatures: [
+        AutogramService::ValidationSignature.new(
+          signerName: "Autogram Test",
+          signingTime: Time.current,
+          signatureLevel: "BASELINE_B",
+          validationResult: "TOTAL_PASSED",
+          valid: true,
+          certificateInfo: { subject: "CN=Autogram Test", issuer: "CN=Issuer", qualification: "QESIG", notAfter: 2.years.from_now.iso8601 }
+        )
+      ],
+      documentInfo: { containerType: nil, signatureForm: "PAdES", signedObjectsCount: 1, unsignedObjectsCount: 0, signedObjects: [], unsignedObjects: [] }
+    )
+  end
 
   def fake_validation_service(validation_result)
     Struct.new(:validation_result) do

@@ -463,7 +463,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "bundle signing method choice opens the signing apps page in no_onboarding mode" do
-    with_allowed_methods(%w[qes scan]) do
+    with_allowed_methods(%w[qes visual]) do
       post "/api/v1/bundles",
            params: {
              id: SecureRandom.uuid,
@@ -471,7 +471,7 @@ class Api::V1::BundlesControllerTest < ActionDispatch::IntegrationTest
              contracts: [
                {
                  id: SecureRandom.uuid,
-                 allowedMethods: [ "qes", "scan" ],
+                 allowedMethods: [ "qes", "visual" ],
                  documents: [
                    {
                      filename: "contract.txt",

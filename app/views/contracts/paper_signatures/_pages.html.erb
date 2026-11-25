@@ -1,0 +1,74 @@
+<%# locals: (contract:, paper_signature:, editable:) %>
+<% pages = paper_signature.pages.with_attached_file.to_a %>
+<% icon_button_classes = "inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" %>
+
+<% if pages.any? %>
+  <ol class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-label="<%= t('paper_signatures.pages.label') %>">
+    <% pages.each_with_index do |page, index| %>
+      <% page_path = contract_paper_signature_page_path(contract, page, **paper_signer_link_params) %>
+      <% caption = page.pdf? ? t('paper_signatures.pages.pdf') : t('paper_signatures.pages.page', number: page.position) %>
+      <li>
+        <figure class="flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
+          <% if page.image? %>
+            <%= tag.img src: page_path, alt: "", loading: "lazy", class: "aspect-[3/4] w-full bg-gray-100 object-contain" %>
+          <% else %>
+            <%= link_to page_path, target: "_blank", rel: "noopener", data: { turbo: false },
+                  class: "flex aspect-[3/4] w-full items-center justify-center bg-gray-100 text-gray-500 hover:text-gray-700" do %>
+              <svg aria-hidden="true" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              </svg>
+              <span class="sr-only"><%= page.file.filename %></span>
+            <% end %>
+          <% end %>
+          <figcaption class="px-3 py-2 text-sm font-medium text-gray-900"><%= caption %></figcaption>
+
+          <% if editable %>
+            <div class="mt-auto flex items-center justify-between gap-1 border-t border-gray-100 px-2 py-1.5">
+              <div class="flex gap-1">
+                <% if index.positive? %>
+                  <%= button_to page_path, method: :patch, params: { position: page.position - 1 },
+                        class: icon_button_classes, title: t('paper_signatures.pages.move_earlier', number: page.position),
+                        aria: { label: t('paper_signatures.pages.move_earlier', number: page.position) } do %>
+                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                    </svg>
+                  <% end %>
+                <% end %>
+                <% if index < pages.size - 1 %>
+                  <%= button_to page_path, method: :patch, params: { position: page.position + 1 },
+                        class: icon_button_classes, title: t('paper_signatures.pages.move_later', number: page.position),
+                        aria: { label: t('paper_signatures.pages.move_later', number: page.position) } do %>
+                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                  <% end %>
+                <% end %>
+              </div>
+              <% remove_label = page.pdf? ? t('paper_signatures.pages.remove_pdf') : t('paper_signatures.pages.remove', number: page.position) %>
+              <%= button_to page_path, method: :delete,
+                    class: "#{icon_button_classes} text-red-700 hover:bg-red-50", title: remove_label,
+                    aria: { label: remove_label } do %>
+                <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+              <% end %>
+            </div>
+          <% end %>
+        </figure>
+      </li>
+    <% end %>
+
+    <% if editable && pages.none?(&:pdf?) %>
+      <li>
+        <%# Picks more photos with the upload form above. %>
+        <label for="paper_signature_files"
+               class="flex h-full min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 text-sm font-semibold text-gray-700 hover:border-gray-500 hover:bg-gray-50">
+          <svg aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <%= t('paper_signatures.pages.add') %>
+        </label>
+      </li>
+    <% end %>
+  </ol>
+<% end %>

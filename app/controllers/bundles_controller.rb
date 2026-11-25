@@ -196,6 +196,7 @@ class BundlesController < ApplicationController
 
     now = Time.current
     SignerContract.where(id: affected_signer_contract_ids).update_all(declined_at: now, updated_at: now)
+    PaperSignature.open.where(signer_contract_id: affected_signer_contract_ids).find_each(&:cancel!)
 
     SignerContract.where(id: affected_signer_contract_ids).includes(:contract).find_each do |signer_contract|
       bundle.webhook&.fire_recipient_declined(recipient, signer_contract.contract)
@@ -340,7 +341,9 @@ class BundlesController < ApplicationController
       next false unless contract.awaiting_signature?
 
       if @recipient
-        @recipient.pending_contract?(contract)
+        signer_contract = @recipient.signer_contracts.find_by!(contract: contract)
+        # A scan awaiting review is discarded on the signing page before signing another way.
+        signer_contract.awaiting? && !signer_contract.paper_scan_awaiting_review?
       else
         public_signing_available?
       end

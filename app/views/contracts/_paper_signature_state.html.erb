@@ -1,0 +1,27 @@
+<%# locals: (contract:, recipient:) %>
+<%# The recipient's signing on paper in place of the signing method choice (a draft with pages or a scan awaiting review), or above it the scan the sender returned. %>
+<% paper_signature = paper_signature_in_progress(contract, recipient) %>
+<% if paper_signature %>
+  <% submitted = paper_signature.submitted? %>
+  <div class="w-full rounded-xl border p-4 <%= submitted ? 'border-green-200 bg-green-50' : 'border-blue-200 bg-blue-50' %>">
+    <p class="text-sm font-semibold <%= submitted ? 'text-green-900' : 'text-blue-900' %>">
+      <%= submitted ? t('paper_signatures.submitted.title') : t('paper_signatures.draft.title') %>
+    </p>
+    <p class="mt-1 text-sm <%= submitted ? 'text-green-800' : 'text-blue-800' %>">
+      <%= submitted ? paper_signature_submitted_message(paper_signature) : t('paper_signatures.draft.message') %>
+    </p>
+    <%# Embedded pages do not offer signing on paper; the recipient continues on the signing link. %>
+    <% unless params[:iframe].present? %>
+      <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <%= render 'contracts/paper_signatures/discard_actions',
+              contract: contract,
+              recipient: recipient,
+              continue_path: (contract_paper_signature_path(contract, recipient: recipient.uuid) unless submitted) %>
+      </div>
+    <% end %>
+  </div>
+<% elsif (returned = returned_paper_signature(paper_signer_contract(contract, recipient))) %>
+  <div class="mb-4">
+    <%= render 'contracts/paper_signatures/returned', paper_signature: returned %>
+  </div>
+<% end %>

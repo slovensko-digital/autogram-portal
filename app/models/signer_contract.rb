@@ -30,6 +30,7 @@ class SignerContract < ApplicationRecord
   belongs_to :contract
   has_many :sessions, dependent: :destroy
   has_many :visual_stamps, dependent: :destroy
+  has_many :paper_signatures, dependent: :destroy
 
   validates :signer, uniqueness: { scope: :contract_id }
 
@@ -54,6 +55,12 @@ class SignerContract < ApplicationRecord
     signed_at.nil? && declined_at.nil? && superseded_at.nil?
   end
 
+  # The signer submitted a scan of the document signed on paper; signing another way waits until
+  # they discard it.
+  def paper_scan_awaiting_review?
+    paper_signatures.submitted.exists?
+  end
+
   def recipient
     signer.recipient if signer.is_a?(RecipientSigner)
   end
@@ -61,6 +68,17 @@ class SignerContract < ApplicationRecord
   # The account of the signer, nil for signers without one.
   def signing_user
     signer.user || signer.recipient&.user
+  end
+
+  # The one place where a signature becomes complete, whichever way it was made: marks it signed, counts
+  # the signature request and tells the author, except the person who caused the completion.
+  def complete_signature!(at: Time.current, except: signing_user)
+    update_column(:signed_at, at)
+    # Signed another way, e.g. in a signing app opened before a scan was submitted: the draft or the
+    # scan awaiting review is no longer needed. An approved scan is not open any more.
+    paper_signatures.open.find_each(&:cancel!)
+    contract.record_signature_request_on_signing!(signing_user)
+    contract.notify_signed!(signer: signer, except: except)
   end
 
   def latest_qes_visual_stamp_for(document)

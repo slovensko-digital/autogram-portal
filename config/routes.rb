@@ -79,6 +79,13 @@ Rails.application.routes.draw do
           post :notify
         end
       end
+      resources :paper_signatures, only: [ :show ], param: :uuid, controller: "bundles/paper_signatures" do
+        member do
+          post :approve
+          post :return_scan
+          get :scan
+        end
+      end
     end
   end
 
@@ -103,8 +110,6 @@ Rails.application.routes.draw do
       post :extend_signatures
       get :actions
       get :signature_apps
-      get :physical_signing
-      post :physical_signing, action: :create_physical_session
       get :visual_signing
       post :visual_signing, action: :create_visual_session
       get :show_bundle
@@ -112,6 +117,10 @@ Rails.application.routes.draw do
     end
 
     resources :onboarding, only: [ :show, :update ], param: :step, controller: "contracts/onboarding"
+    resource :paper_signature, only: [ :show, :destroy ], controller: "contracts/paper_signatures" do
+      post :submit
+      resources :pages, only: [ :create, :show, :update, :destroy ], controller: "contracts/paper_signature_pages"
+    end
     resources :signature_field_preparations, only: [ :index, :edit, :create, :update, :destroy ], controller: "contracts/signature_field_preparations" do
       post :finalize, on: :collection
     end
@@ -168,6 +177,10 @@ Rails.application.routes.draw do
         member do
           get :signed_document
           get :status
+        end
+
+        resources :paper_signatures, only: [], param: :uuid do
+          get :scan, on: :member
         end
       end
 

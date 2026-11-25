@@ -1,0 +1,11 @@
+<%# locals: (paper_signature:) %>
+<%# Only once something is uploaded: "nahrali ste 0" would be noise. %>
+<% if paper_signature.pages.any? %>
+  <% expected = paper_signature.expected_page_count %>
+  <% actual = paper_signature.uploaded_page_count %>
+  <% if expected && actual && expected != actual %>
+    <%= render 'shared/warning',
+          title: t('paper_signatures.pages.page_count_mismatch.title', count: expected, actual: actual),
+          content: t('paper_signatures.pages.page_count_mismatch.message') %>
+  <% end %>
+<% end %>

@@ -55,26 +55,6 @@ module ApplicationHelper
     content
   end
 
-  def qr_code_svg(text)
-    qr = RQRCode::QRCode.new(text)
-
-    svg = qr.as_svg(
-      color: "black",
-      shape_rendering: "crispEdges",
-      standalone: true,
-      use_path: true,
-      viewbox: true
-    )
-
-    svg.sub("<svg", '<svg aria-hidden="true" focusable="false"').html_safe
-  rescue => e
-    Rails.logger.error "Failed to generate QR code: #{e.message}"
-    %(<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#f3f4f6"/>
-      <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#6b7280" font-size="14">QR code not available</text>
-    </svg>).html_safe
-  end
-
   def signature_format(level, container)
     return t("signature_parameters.format.pades") if level == "PAdES"
 

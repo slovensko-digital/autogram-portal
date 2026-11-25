@@ -18,6 +18,12 @@ class Signing::SigningBundleAccessPolicy < ApplicationPolicy
     accept?
   end
 
+  # Signing on paper is only for the recipient the signing link belongs to, or the recipient of the
+  # paper signature a phone link opens (PaperSignerResolution validates the PaperSignatureAccessToken).
+  def paper_sign?
+    web_context? && bound_recipient?
+  end
+
   private
 
   def web_context?

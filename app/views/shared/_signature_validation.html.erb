@@ -1,6 +1,8 @@
 <div class="w-full">
   <% validation_results = local_assigns[:validation_results] || [ local_assigns[:validation_result] || @validation_result ] %>
   <% visual_signature_stamps = local_assigns[:visual_signature_stamps] || @contract&.latest_visual_signature_stamps || [] %>
+  <%# Approved signatures made on paper; the scan itself is shown only to the sending organization. %>
+  <% paper_signatures = local_assigns[:paper_signatures] || @contract&.paper_signatures&.approved&.includes(signer_contract: { signer: :recipient })&.order(:reviewed_at)&.to_a || [] %>
   <% heading_tag = local_assigns[:heading_level].to_i == 2 ? :h2 : :h3 %>
 
   <% validation_results.each do |validation_entry| %>
@@ -26,7 +28,7 @@
         </ul>
       </div>
     <% elsif !validation_result.has_signatures? %>
-      <% next if visual_signature_stamps.any? || local_assigns[:hide_empty] %>
+      <% next if visual_signature_stamps.any? || paper_signatures.any? || local_assigns[:hide_empty] %>
       <%= render 'shared/info', title: t('.no_signatures_title'), content: t('.no_signatures_message') %>
     <% else %>
       <div class="space-y-3 mb-4 last:mb-0">
@@ -247,6 +249,25 @@
               <img src="<%= rails_blob_path(stamp.image, disposition: 'inline') %>" alt="" class="max-h-36 max-w-full object-contain">
             </div>
           <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if paper_signatures.any? %>
+    <div class="space-y-3 mb-4 last:mb-0">
+      <%= content_tag heading_tag, class: "text-lg font-semibold text-gray-900 mb-4" do %>
+        <%= t('.paper_signatures_found_title') %> (<%= paper_signatures.length %>)
+      <% end %>
+      <% paper_signatures.each do |paper_signature| %>
+        <div class="rounded-lg border border-gray-200 bg-white px-4 py-3">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <div class="break-words text-base font-semibold text-gray-900"><%= paper_signature.signer.display_name %></div>
+              <div class="mt-1 text-sm text-gray-600"><%= t('.paper_signature_verified', date: paper_signature.reviewed_at.in_time_zone("Europe/Bratislava").strftime("%-d. %-m. %Y")) %></div>
+            </div>
+            <%= render 'shared/badge', color: 'blue', label: t('.paper_signature_badge') %>
+          </div>
         </div>
       <% end %>
     </div>

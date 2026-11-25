@@ -57,6 +57,7 @@ class Contract < ApplicationRecord
   has_many :documents, -> { order(:id) }, dependent: :destroy
   has_many :signature_field_preparations, dependent: :destroy
   has_many :sessions, through: :signer_contracts
+  has_many :paper_signatures, through: :signer_contracts
 
   accepts_nested_attributes_for :documents, allow_destroy: true, reject_if: proc { |attributes| attributes["blob"].blank? }
   accepts_nested_attributes_for :signature_parameters
@@ -152,11 +153,11 @@ class Contract < ApplicationRecord
 
   # Signing methods the signer can choose from, in the order they are offered.
   # AdES needs a recipient to verify, so it is not offered to anyone else.
-  def signing_methods_for(recipient: nil)
+  def signing_methods_for(recipient: nil, embedded: false)
     methods = []
     methods << "electronic" if qualified_signing_allowed?
     methods << "ades" if AdesEvidenceSession.available?(self, recipient: recipient)
-    methods << "physical" if allowed_methods.include?("scan")
+    methods << "paper" if paper_signing_available_for?(recipient, embedded: embedded)
     methods << "visual" if allowed_methods.include?("visual") && visual_signing_allowed?
     methods
   end
@@ -167,10 +168,10 @@ class Contract < ApplicationRecord
     bundle.present? && (recipient.present? || bundle.publicly_visible?)
   end
 
-  def notify_signed!(signer: nil)
-    Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_author?
+  def notify_signed!(signer: nil, except: signer&.user)
+    Notification::ContractSignedJob.perform_later(self, signer: signer, except: except) if should_notify_author?
 
-    bundle.notify_contract_signed(self, signer) if bundle.present?
+    bundle.notify_contract_signed(self, signer, except: except) if bundle.present?
 
     Turbo::StreamsChannel.broadcast_refresh_to(self)
   end
@@ -328,6 +329,15 @@ class Contract < ApplicationRecord
     signature_parameters.nil? || signature_parameters.format.present?
   end
 
+  # Signing on paper is for invited local recipients of a single PDF; embedded pages never offer it.
+  def paper_signing_available_for?(recipient, embedded: false)
+    return false if embedded || recipient.nil?
+
+    allowed_methods.include?("scan") &&
+      recipient.active? && recipient.visible? && !recipient.federated_recipient? &&
+      documents.one? && documents.first.is_pdf?
+  end
+
   def ades_allowed?
     allowed_methods.include?("ades")
   end
@@ -357,8 +367,10 @@ class Contract < ApplicationRecord
     [ prepared_stamp.stamped_document ]
   end
 
+  # Signed once no recipient is awaiting and the document carries an electronic signature or a
+  # signature made on paper was approved (a scan never becomes the signed document).
   def awaiting_signature?
-    !signed_document_attached? || bundle&.awaiting_recipients?(contract: self)
+    bundle&.awaiting_recipients?(contract: self) || (!signed_document_attached? && !paper_signatures.approved.exists?)
   end
 
   def visual_signed?

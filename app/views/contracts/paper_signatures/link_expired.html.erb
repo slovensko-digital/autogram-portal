@@ -1,0 +1,29 @@
+<%# locals: (paper_signature:) %>
+<%# The phone link no longer works (410): it expired or its paper signature is no longer a draft. A scan submitted from the phone or meanwhile on the computer is confirmed instead, without the recipient's email. %>
+<% submitted = paper_signature&.submitted? %>
+<% title = submitted ? t('paper_signatures.submitted.title') : t('paper_signatures.link_expired.title') %>
+<% content_for :title, title %>
+
+<div class="mx-auto flex max-w-xl flex-col items-center px-4 pb-8 pt-12 text-center sm:px-6">
+  <% if submitted %>
+    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-700">
+      <svg aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    </span>
+  <% else %>
+    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+      <svg aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+    </span>
+  <% end %>
+  <h1 class="mt-4 text-2xl font-bold text-gray-900"><%= title %></h1>
+  <p class="mt-2 text-gray-600">
+    <% if submitted %>
+      <%= t('paper_signatures.submitted.message_without_email', sender: paper_signature.contract.tenant.sender_display_name) %>
+    <% else %>
+      <%= t('paper_signatures.link_expired.message') %>
+    <% end %>
+  </p>
+</div>

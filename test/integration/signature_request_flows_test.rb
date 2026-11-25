@@ -7,6 +7,7 @@ require_relative "../support/plan_limits_helper"
 class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   include ActionMailer::TestHelper
+  include Turbo::Broadcastable::TestHelper
   include SigningFlowHelper
   include PlanLimitsHelper
 
@@ -33,6 +34,939 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert bundle.reload.completed?
     assert recipient.reload.signed?
     assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+  end
+
+  test "the recipient picks Podpis na papieri on the bundle signing page" do
+    with_allowed_methods(%w[qes standalone_qes ades scan]) do
+      bundle = request_signature_from_web(as: @owner, filename: "papier.pdf", allowed_methods: [ "qes", "scan" ])
+      contract = bundle.contracts.sole
+      recipient = add_recipient(bundle, "paper@example.com")
+      sign_out @owner
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_response :success
+      assert_select "input[value=paper]"
+      assert_includes response.body, "Podpis na papieri"
+      assert_select "a[href=?]", "/contracts/#{contract.uuid}/paper_signature?recipient=#{recipient.uuid}"
+      assert_equal "/contracts/#{contract.uuid}/paper_signature?recipient=#{recipient.uuid}", contract_paper_signature_path(contract, recipient: recipient.uuid)
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_preview")
+      assert_select "input[value=paper]", count: 0
+    end
+  end
+
+  test "paper signing is not offered when the author did not allow scans" do
+    bundle = request_signature_from_web(as: @owner, filename: "bez-papiera.pdf")
+    recipient = add_recipient(bundle, "nopaper@example.com")
+    sign_out @owner
+
+    get sign_bundle_path(bundle, recipient: recipient.uuid)
+    assert_response :success
+    assert_select "input[value=paper]", count: 0
+
+    get contract_paper_signature_path(bundle.contracts.sole, recipient: recipient.uuid)
+    assert_redirected_to sign_bundle_path(bundle, recipient: recipient.uuid)
+    assert_equal 0, PaperSignature.count
+  end
+
+  test "recipient uploads photos of the signed pages and submits them for review" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_response :success
+      assert_select "h1", "Podpis na papieri"
+      assert_includes response.body, "Podpis potom skontroluje odosielateľ, Firma ABC."
+      assert_select "a[href=?]", sign_bundle_path(bundle, recipient: recipient.uuid), text: "Späť na výber spôsobu podpisu"
+      assert_select "a[href=?]", download_document_path(contract.documents.sole), text: "Stiahnuť na tlač"
+      assert_select "input[type=file][name=?][multiple]", "files[]"
+      assert_select "button[disabled]", text: "Odoslať na kontrolu"
+      assert_select "figure", count: 0
+
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      assert_redirected_to contract_paper_signature_path(contract, recipient: recipient.uuid)
+      follow_redirect!
+      assert_select "figure figcaption", "Strana 1"
+      assert_select "img[src*=?]", "/paper_signature/pages/"
+      assert_includes response.body, "Dokument má 2 strany, nahrali ste 1"
+      assert_select "button:not([disabled])", text: "Odoslať na kontrolu"
+
+      page = PaperSignature.sole.pages.sole
+      get contract_paper_signature_page_path(contract, page, recipient: recipient.uuid)
+      assert_response :success
+      assert_equal "image/jpeg", response.media_type
+      assert response.headers["Content-Disposition"].start_with?("inline")
+      assert_equal file_fixture("paper-page.jpg").binread, response.body.b
+
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_redirected_to contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert PaperSignature.sole.submitted?
+      follow_redirect!
+      assert_includes response.body, "Sken sme odoslali na kontrolu"
+      assert_includes response.body, "Keď podpis schváli alebo vráti, pošleme vám e-mail na paper@example.com."
+      assert_select "figure figcaption", "Strana 1"
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_includes response.body, "Sken sme odoslali na kontrolu"
+      assert_select "input[value=paper]", count: 0
+
+      get sign_contract_path(contract, recipient: recipient.uuid)
+      assert_response :success
+      assert_includes response.body, "Sken sme odoslali na kontrolu"
+      assert_select "input[value=paper]", count: 0
+    end
+  end
+
+  test "the paper signing page names the sender, the pages to print and offers two equal actions" do
+    @organization.update!(name: "Firma ABC, s. r. o.")
+    with_paper_signing_request do |bundle, contract, recipient|
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_response :success
+
+      assert_select "p", text: /Podpis potom skontroluje odosielateľ, Firma ABC, s\. r\. o\.\z/
+      assert_not_includes response.body, "s. r. o.."
+      assert_select "ol > li:first-child p", text: /\Apapier\.pdf · 2 strany\z/
+      assert_select "ol > li > span.h-7.w-7.bg-blue-50.text-blue-700", count: 3
+      # The dropzone is the control; the paper-pages controller hides the native input once it runs.
+      assert_select "label[for=paper_signature_files][data-paper-pages-target=dropzone] input#paper_signature_files[data-paper-pages-target=input]"
+      assert_select "div.grid.grid-cols-2.gap-8" do
+        assert_select "a.btn.btn-secondary[href=?]", sign_bundle_path(bundle, recipient: recipient.uuid), text: "Späť"
+        assert_select "form button.btn.btn-primary.flex-1[disabled]", text: "Odoslať na kontrolu"
+      end
+    end
+  end
+
+  test "background uploads of the paper-pages script get no redirect and the refusal as JSON" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }, headers: { "Accept" => "application/json" }
+      assert_response :no_content
+      assert_equal 1, PaperSignature.sole.pages.count
+
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ docx_upload ] }, headers: { "Accept" => "application/json" }
+      assert_response :unprocessable_entity
+      assert_equal I18n.t("paper_signatures.errors.unsupported_file"), response.parsed_body["error"]
+      assert_equal 1, PaperSignature.sole.pages.count
+    end
+  end
+
+  test "an unsupported file is refused and the draft stays" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ docx_upload ] }
+      follow_redirect!
+      assert_includes response.body, I18n.t("paper_signatures.errors.unsupported_file")
+      assert PaperSignature.sole.draft?
+      assert_empty PaperSignature.sole.pages
+
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_redirected_to contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_equal I18n.t("paper_signatures.alerts.no_pages"), flash[:alert]
+      assert PaperSignature.sole.draft?, "a draft without pages is not submitted"
+
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      with_plan_limits("MAX_DOCUMENT_SIZE_MB" => "0") do
+        post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      end
+      assert_redirected_to contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_equal I18n.t("paper_signatures.errors.too_large"), flash[:alert]
+      assert PaperSignature.sole.draft?
+    end
+  end
+
+  test "a second visit reuses the draft" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_response :success
+      assert_select "figure", count: 1
+      assert PaperSignature.sole.draft?
+    end
+  end
+
+  test "recipient reorders and removes pages without JavaScript" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload, png_upload ] }
+      paper = PaperSignature.sole
+      jpeg_page, png_page = paper.pages.to_a
+      follow_redirect!
+      assert_select "figure", count: 2
+      assert_not_includes response.body, "Dokument má 2 strany", "the same number of pages needs no warning"
+      assert_select "form[action=?] input[name=position][value='1']", contract_paper_signature_page_path(contract, png_page, recipient: recipient.uuid)
+      assert_select "form[action=?] input[name=_method][value=delete]", contract_paper_signature_page_path(contract, jpeg_page, recipient: recipient.uuid)
+
+      patch contract_paper_signature_page_path(contract, png_page, recipient: recipient.uuid), params: { position: 1 }
+      assert_redirected_to contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_equal [ png_page, jpeg_page ], paper.pages.reload.to_a
+
+      delete contract_paper_signature_page_path(contract, jpeg_page, recipient: recipient.uuid)
+      assert_redirected_to contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_equal [ png_page ], paper.pages.reload.to_a
+    end
+  end
+
+  test "discarding the scan brings back the method choice" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_select "input[value=paper]", count: 0
+      assert_select "a[href=?]", contract_paper_signature_path(contract, recipient: recipient.uuid), text: "Pokračovať"
+
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_select "form[action=?] button", contract_paper_signature_path(contract, recipient: recipient.uuid), text: "Zahodiť sken a podpísať inak"
+
+      delete contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_redirected_to sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert PaperSignature.sole.canceled?
+      follow_redirect!
+      assert_select "input[value=paper]"
+    end
+  end
+
+  test "uploading another scan replaces the one awaiting review" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      follow_redirect!
+      assert_select "form[action=?] button", contract_paper_signature_path(contract, recipient: recipient.uuid, restart: true), text: "Nahrať iný sken"
+
+      delete contract_paper_signature_path(contract, recipient: recipient.uuid, restart: true)
+      assert_redirected_to contract_paper_signature_path(contract, recipient: recipient.uuid)
+      follow_redirect!
+      assert_select "button[disabled]", text: "Odoslať na kontrolu"
+      assert_equal %w[canceled draft], PaperSignature.order(:id).map(&:status)
+    end
+  end
+
+  test "electronic signing is refused while a scan awaits review" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      get autogram_contract_sessions_path(contract, recipient: recipient.uuid)
+      assert_response :success, "a draft does not stop electronic signing"
+
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      [
+        signature_apps_contract_path(contract, recipient: recipient.uuid),
+        autogram_contract_sessions_path(contract, recipient: recipient.uuid),
+        ades_contract_sessions_path(contract, recipient: recipient.uuid)
+      ].each do |path|
+        get path
+        assert_redirected_to sign_bundle_path(bundle, recipient: recipient.uuid), "#{path} lets the recipient sign while the scan awaits review"
+        assert_equal I18n.t("paper_signatures.notices.awaiting_review"), flash[:notice]
+      end
+      assert_equal 1, recipient.sessions.count
+    end
+  end
+
+  test "an embedded signing page shows the scan awaiting review instead of forwarding to the signing apps" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      get sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_preview")
+      assert_response :redirect
+      assert_includes response.location, signature_apps_contract_path(contract), "a draft lets the embedded page forward to the signing apps"
+
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      [
+        sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_preview"),
+        sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_onboarding"),
+        sign_contract_path(contract, recipient: recipient.uuid, iframe: "no_onboarding")
+      ].each do |path|
+        get path
+        assert_response :success, "#{path} forwards the recipient although the scan awaits review"
+        assert_includes response.body, I18n.t("paper_signatures.submitted.title")
+        assert_select "input[value=paper]", count: 0
+      end
+    end
+  end
+
+  test "a signature made in a signing app opened before the scan was submitted withdraws the scan" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      in_progress = open_autogram_session(contract, recipient: recipient)
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert PaperSignature.sole.submitted?
+
+      upload_signed_file(contract, in_progress[:upload])
+      assert_response :success
+
+      assert recipient.reload.signed?
+      assert bundle.reload.completed?
+      assert PaperSignature.sole.canceled?, "the scan of a signature made another way is no longer reviewed"
+    end
+  end
+
+  test "another recipient cannot see or change the scan" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      other_bundle = request_signature_from_web(as: @owner, filename: "iny.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      stranger = add_recipient(other_bundle, "stranger@example.com")
+      bundle = request_signature_from_web(as: @owner, filename: "papier.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      recipient = add_recipient(bundle, "paper@example.com")
+      colleague = add_recipient(bundle, "colleague@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      page = PaperSignature.sole.pages.sole
+
+      get contract_paper_signature_path(contract, recipient: stranger.uuid)
+      assert_response :not_found
+      post contract_paper_signature_pages_path(contract, recipient: stranger.uuid), params: { files: [ jpeg_upload ] }
+      assert_response :not_found
+      get contract_paper_signature_page_path(contract, page, recipient: stranger.uuid)
+      assert_response :not_found
+      get contract_paper_signature_page_path(contract, page)
+      assert_response :not_found
+
+      get contract_paper_signature_page_path(contract, page, recipient: colleague.uuid)
+      assert_response :not_found
+      delete contract_paper_signature_page_path(contract, page, recipient: colleague.uuid)
+      assert_response :not_found
+      post submit_contract_paper_signature_path(contract, recipient: colleague.uuid)
+      delete contract_paper_signature_path(contract, recipient: colleague.uuid)
+
+      colleague.withdraw!
+      get contract_paper_signature_path(contract, recipient: colleague.uuid)
+      assert_response :not_found
+
+      paper = PaperSignature.find_by!(signer_contract: recipient.signer_contracts.sole)
+      assert paper.draft?
+      assert_equal [ page ], paper.pages.to_a
+      assert_equal 1, PaperSignaturePage.count
+    end
+  end
+
+  test "a released recipient cannot sign on paper any more" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "jeden-staci.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      patch bundle_path(bundle), params: { bundle: { signing_rule: "any" } }
+      first = add_recipient(bundle, "first@example.com")
+      second = add_recipient(bundle, "second@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+
+      sign_with_autogram(contract, recipient: first)
+      assert second.reload.superseded?
+
+      get contract_paper_signature_path(contract, recipient: second.uuid)
+      assert_redirected_to sign_bundle_path(bundle, recipient: second.uuid)
+      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      post contract_paper_signature_pages_path(contract, recipient: second.uuid), params: { files: [ jpeg_upload ] }
+      assert_redirected_to sign_bundle_path(bundle, recipient: second.uuid)
+      assert_equal 0, PaperSignaturePage.count
+    end
+  end
+
+  test "a returned scan shows its reason on the signing pages" do
+    @owner.update!(name: "Eva Kontrolná")
+    with_paper_signing_request do |bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      PaperSignature.sole.return!(@owner, "Chýba podpis na druhej strane.")
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_includes response.body, "Odosielateľ vrátil váš sken"
+      assert_includes response.body, "Chýba podpis na druhej strane."
+      assert_includes response.body, "Vrátil(a) Eva Kontrolná"
+      assert_select "input[value=paper]"
+
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_response :success
+      assert_includes response.body, "Odosielateľ vrátil váš sken"
+      assert_includes response.body, "Chýba podpis na druhej strane."
+      assert_select "figure", count: 0
+      assert_equal %w[returned draft], PaperSignature.order(:id).map(&:status)
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_includes response.body, "Odosielateľ vrátil váš sken", "an empty draft leaves the returned scan in view"
+      assert_select "input[value=paper]"
+    end
+  end
+
+  test "the signing page shows a QR code with the phone link" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      phone_url = URI(phone_link_for(contract, recipient))
+
+      assert_select "#paper_signature_phone" do
+        assert_select "h3", text: "Odfoťte strany mobilom"
+        assert_select "[role=img][aria-label=?][data-phone-url=?]", I18n.t("paper_signatures.phone.qr_label"), phone_url.to_s
+        qr_path = Nokogiri::HTML5.fragment(ApplicationController.helpers.qr_code_svg(phone_url.to_s, level: :m)).at_css("svg path")["d"]
+        assert_select "[data-phone-url] svg path[d=?]", qr_path
+      end
+      assert_equal [ "www.example.com", contract_paper_signature_path(contract) ], [ phone_url.host, phone_url.path ]
+      assert_equal PaperSignature.sole, PaperSignatureAccessToken.verify(phone_token(phone_url))
+      assert_not_includes phone_url.to_s, recipient.uuid
+    end
+  end
+
+  test "the phone link adds pages to the same draft without signing in" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      phone_url = phone_link_for(contract, recipient)
+      token = phone_token(phone_url)
+      draft = PaperSignature.sole
+      assert_select "turbo-cable-stream-source[signed-stream-name=?]", Turbo::StreamsChannel.signed_stream_name(draft)
+
+      get phone_url
+      assert_response :success
+      assert_select "h1", text: "Odfoťte podpísané strany"
+      assert_select "p", text: /papier\.pdf\s*·\s*2 strany/
+      assert_select "label[for=paper_signature_files]", text: /Odfotiť ďalšiu stranu/
+      assert_select "input#paper_signature_files[type=file][name='files[]'][accept='image/*'][capture=environment]"
+      assert_select "label", text: /Vybrať z galérie/ do |labels|
+        assert_select labels.first, "input[type=file][name='files[]'][multiple]:not([capture])"
+      end
+      assert_select "form[action=?] button[disabled]", submit_contract_paper_signature_path(contract, token: token), text: "Odoslať na kontrolu"
+      assert_select "#paper_signature_phone", count: 0
+      assert_select "a", text: "Stiahnuť na tlač", count: 0
+      assert_select "a", text: "Späť na výber spôsobu podpisu", count: 0
+      assert_select "button", text: "Zahodiť sken a podpísať inak", count: 0
+      assert_select "turbo-cable-stream-source[signed-stream-name=?]", Turbo::StreamsChannel.signed_stream_name(draft)
+      assert_not_includes response.body, recipient.uuid
+
+      assert_turbo_stream_broadcasts draft, count: 1 do
+        post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      end
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert_equal 1, draft.reload.pages.count
+      jpeg_page = draft.pages.sole
+
+      follow_redirect!
+      assert_select "figure figcaption", text: "Strana 1"
+      assert_select "img[src=?]", contract_paper_signature_page_path(contract, jpeg_page, token: token)
+      assert_select "form[action=?] button:not([disabled])", submit_contract_paper_signature_path(contract, token: token), text: "Odoslať na kontrolu (1 strana)"
+      assert_includes response.body, "Dokument má 2 strany, nahrali ste 1"
+      assert_not_includes response.body, recipient.uuid
+
+      get contract_paper_signature_page_path(contract, jpeg_page, token: token)
+      assert_response :success
+      assert_equal "image/jpeg", response.media_type
+
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ png_upload ] }
+      png_page = draft.pages.last
+      follow_redirect!
+      assert_select "form[action=?] button", submit_contract_paper_signature_path(contract, token: token), text: "Odoslať na kontrolu (2 strany)"
+      patch contract_paper_signature_page_path(contract, png_page, token: token), params: { position: 1 }
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert_equal [ png_page, jpeg_page ], draft.pages.reload.to_a
+      delete contract_paper_signature_page_path(contract, png_page, token: token)
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert_equal [ jpeg_page ], draft.pages.reload.to_a
+
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_select "figure figcaption", text: "Strana 1"
+
+      post submit_contract_paper_signature_path(contract, token: token)
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert draft.reload.submitted?
+      follow_redirect!
+      assert_response :gone
+      assert_includes response.body, "Sken sme odoslali na kontrolu"
+      assert_not_includes response.body, "Odkaz na fotenie už neplatí"
+      assert_not_includes response.body, recipient.email
+    end
+  end
+
+  test "an expired phone link changes nothing" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      draft = PaperSignature.sole
+      token = PaperSignatureAccessToken.generate(draft, expires_at: 1.minute.ago)
+
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      assert_equal 0, draft.reload.pages.count
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_select "h1", text: "Odkaz na fotenie už neplatí"
+      assert_includes response.body, "Otvorte stránku podpisu na počítači a naskenujte nový kód."
+
+      fresh_token = PaperSignatureAccessToken.generate(draft)
+      travel 61.minutes do
+        post contract_paper_signature_pages_path(contract, token: fresh_token), params: { files: [ jpeg_upload ] }
+        assert_response :gone
+      end
+      get contract_paper_signature_path(contract, token: "#{fresh_token}x")
+      assert_response :gone
+      assert_equal 0, draft.reload.pages.count
+    end
+  end
+
+  test "a phone link of one contract does not open another" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      other_bundle = request_signature_from_web(as: @owner, filename: "iny.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      stranger = add_recipient(other_bundle, "stranger@example.com")
+      bundle = request_signature_from_web(as: @owner, filename: "papier.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      recipient = add_recipient(bundle, "paper@example.com")
+      colleague = add_recipient(bundle, "colleague@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+      other_contract = other_bundle.contracts.sole
+
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      page = PaperSignature.sole.pages.sole
+      post contract_paper_signature_pages_path(other_contract, recipient: stranger.uuid), params: { files: [ jpeg_upload ] }
+      other_page = PaperSignaturePage.where.not(id: page).sole
+      post contract_paper_signature_pages_path(contract, recipient: colleague.uuid), params: { files: [ jpeg_upload ] }
+      colleague_page = PaperSignaturePage.where.not(id: [ page, other_page ]).sole
+
+      get contract_paper_signature_path(other_contract, token: token)
+      assert_response :not_found
+      post contract_paper_signature_pages_path(other_contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :not_found
+      get contract_paper_signature_page_path(other_contract, other_page, token: token)
+      assert_response :not_found
+      post submit_contract_paper_signature_path(other_contract, token: token)
+      assert_response :not_found
+
+      get contract_paper_signature_page_path(contract, colleague_page, token: token)
+      assert_response :not_found
+      delete contract_paper_signature_page_path(contract, colleague_page, token: token)
+      assert_response :not_found
+
+      assert_equal 3, PaperSignaturePage.count
+      assert PaperSignature.all.all?(&:draft?)
+    end
+  end
+
+  test "the phone link stops working after the scan is submitted" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      page = PaperSignature.sole.pages.sole
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert PaperSignature.sole.submitted?
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_includes response.body, "Sken sme odoslali na kontrolu"
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      get contract_paper_signature_page_path(contract, page, token: token)
+      assert_response :gone
+      post submit_contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_equal [ page ], PaperSignature.sole.pages.to_a
+
+      delete contract_paper_signature_path(contract, recipient: recipient.uuid, restart: true)
+      follow_redirect!
+      new_draft = PaperSignature.draft.sole
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_select "h1", text: "Odkaz na fotenie už neplatí"
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      assert_equal 0, new_draft.pages.count
+    end
+  end
+
+  test "a phone link cannot discard the scan" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+
+      delete contract_paper_signature_path(contract, token: token)
+      assert_response :forbidden
+      delete contract_paper_signature_path(contract, token: token, restart: true)
+      assert_response :forbidden
+
+      draft = PaperSignature.sole
+      assert draft.draft?
+      assert_equal 1, draft.pages.count
+    end
+  end
+
+  test "a phone link stops working after the recipient is withdrawn" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_equal 1, PaperSignaturePage.count
+
+      sign_in_with_tenant @owner, @organization
+      delete bundle_recipient_path(bundle, recipient), as: :turbo_stream
+      assert recipient.reload.withdrawn?
+      sign_out @owner
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      assert_equal 0, PaperSignaturePage.count
+    end
+  end
+
+  test "a member approves the scan and the bundle completes" do
+    @owner.update!(name: "Eva Kontrolná")
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+
+      sign_in_with_tenant @owner, @organization
+      get bundle_path(bundle)
+      assert_response :success
+      assert_includes response.body, "paper@example.com nahral(a) sken podpísaného dokumentu"
+      assert_includes response.body, "Skontrolujte ho, aby sa jeho podpis započítal."
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), text: /Skontrolovať sken/
+
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Čaká na kontrolu skenu"
+      assert_select "a[href=?][data-turbo-frame=_top]", bundle_paper_signature_path(bundle, paper), text: /Skontrolovať sken/
+
+      get bundle_paper_signature_path(bundle, paper)
+      assert_response :success
+      assert_select "h1", "Kontrola podpisu na papieri"
+      assert_includes response.body, "Portál nevie overiť, či je na skene naozaj podpis"
+      assert_select "iframe", 2
+      assert_select "iframe[src^=?]", rails_blob_path(contract.documents.sole.blob, disposition: "inline")
+      assert_select "iframe[src^=?]", scan_bundle_paper_signature_path(bundle, paper, disposition: "inline")
+      assert_select "form[action=?] button", approve_bundle_paper_signature_path(bundle, paper), text: "Schváliť podpis"
+      assert_select "dialog form[action=?]", return_scan_bundle_paper_signature_path(bundle, paper) do
+        assert_select "textarea[name=return_reason][required]"
+      end
+
+      get scan_bundle_paper_signature_path(bundle, paper, disposition: "inline")
+      assert_response :success
+      assert_equal "application/pdf", response.media_type
+      assert response.headers["Content-Disposition"].start_with?("inline")
+      assert_equal paper.scan.download.b, response.body.b
+
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      assert paper.reload.approved?
+      assert_equal @owner, paper.reviewed_by
+      assert bundle.reload.completed?
+      assert recipient.reload.signed?
+
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Podpísané"
+      assert_includes response.body, "Podpis na papieri · schválil(a) Eva Kontrolná"
+      assert_select "a[href=?]", scan_bundle_paper_signature_path(bundle, paper, disposition: "attachment"), text: /Stiahnuť sken/
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), count: 0
+
+      get scan_bundle_paper_signature_path(bundle, paper, disposition: "attachment")
+      assert_response :success
+      assert response.headers["Content-Disposition"].start_with?("attachment")
+
+      get bundle_path(bundle)
+      assert_not_includes response.body, "nahral(a) sken podpísaného dokumentu"
+    end
+  end
+
+  test "a recipient who got the signing link another way shows the scan awaiting review" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "odkaz.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      recipient = add_recipient_without_notifying(bundle, "link@example.com")
+      sign_out @owner
+      paper = submit_paper_scan(bundle.contracts.sole, recipient)
+
+      sign_in_with_tenant @owner, @organization
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Čaká na kontrolu skenu"
+      assert_not_includes response.body, I18n.t("recipients.index.delivery.not_sent")
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), text: /Skontrolovať sken/
+    end
+  end
+
+  test "a member returns the scan with a reason" do
+    @owner.update!(name: "Eva Kontrolná")
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      sign_in_with_tenant @owner, @organization
+
+      post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "  " }
+      assert_redirected_to bundle_paper_signature_path(bundle, paper)
+      assert paper.reload.submitted?, "a scan is not returned without a reason"
+      assert_equal "Dôvod vrátenia musí byť vyplnený", flash[:alert]
+
+      post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Chýba podpis na strane 2." }
+      assert_redirected_to bundle_path(bundle)
+      assert paper.reload.returned?
+      assert_equal "Chýba podpis na strane 2.", paper.return_reason
+      assert_equal @owner, paper.reviewed_by
+      assert recipient.reload.pending?
+      assert_not bundle.reload.completed?
+
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Čaká na podpis"
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), count: 0
+      sign_out @owner
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_includes response.body, "Chýba podpis na strane 2."
+      assert_includes response.body, "Vrátil(a) Eva Kontrolná"
+    end
+  end
+
+  test "the signer sees when the scan was submitted and returned in Slovak time" do
+    @owner.update!(name: "Eva Kontrolná")
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = travel_to(Time.utc(2026, 11, 25, 23, 30)) { submit_paper_scan(contract, recipient) }
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_select "time[datetime=?]", paper.submitted_at.iso8601, text: "26. 11. 2026 00:30"
+
+      sign_in_with_tenant @owner, @organization
+      travel_to(Time.utc(2026, 11, 26, 22, 15)) do
+        post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Chýba podpis na strane 2." }
+      end
+      sign_out @owner
+
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_select "time[datetime=?]", paper.reload.reviewed_at.iso8601, text: "26. 11. 2026 23:15"
+      assert_includes response.body, "Vrátil(a) Eva Kontrolná"
+    end
+  end
+
+  test "the organization is asked to review a scan even with author notifications off and told nothing else" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      bundle.update!(author_notifications_enabled: false)
+      ActionMailer::Base.deliveries.clear
+
+      paper = nil
+      perform_enqueued_jobs { paper = submit_paper_scan(contract, recipient) }
+
+      mail = mails_to(@owner.email).sole
+      assert_equal I18n.t("notification_mailer.paper_signature_submitted.subject"), mail.subject
+      assert_equal bundle_paper_signature_path(bundle, paper), link_in(mail, %r{/paper_signatures/})
+      assert_empty mails_to(recipient.email)
+    end
+  end
+
+  test "the signer is told by email when the scan is approved and the reviewer gets no mail" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      ActionMailer::Base.deliveries.clear
+
+      sign_in_with_tenant @owner, @organization
+      perform_enqueued_jobs { post approve_bundle_paper_signature_path(bundle, paper) }
+
+      assert bundle.reload.completed?
+      assert_equal [ I18n.t("notification_mailer.paper_signature_approved.subject") ], mails_to(recipient.email).map(&:subject)
+      assert_empty mails_to(@owner.email)
+    end
+  end
+
+  test "the signer learns why the scan was returned and can sign again from the mail" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      ActionMailer::Base.deliveries.clear
+
+      sign_in_with_tenant @owner, @organization
+      perform_enqueued_jobs { post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Chýba podpis na strane 2." } }
+
+      mail = mails_to(recipient.email).sole
+      assert_equal I18n.t("notification_mailer.paper_signature_returned.subject"), mail.subject
+      assert_includes mail.text_part.body.decoded, "Chýba podpis na strane 2."
+      assert_equal sign_bundle_path(bundle, recipient: recipient.uuid), link_in(mail, %r{/sign\b})
+      assert_empty mails_to(@owner.email)
+    end
+  end
+
+  test "a recipient without an email gets no paper signature mail and nothing fails" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      recipient.update_columns(email: nil)
+      ActionMailer::Base.deliveries.clear
+
+      sign_in_with_tenant @owner, @organization
+      perform_enqueued_jobs { post approve_bundle_paper_signature_path(bundle, paper) }
+
+      assert paper.reload.approved?
+      assert_empty ActionMailer::Base.deliveries
+    end
+  end
+
+  test "a mixed bundle completes with one electronic and one paper signature under the all rule" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "zmiesany.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      electronic = add_recipient(bundle, "electronic@example.com")
+      on_paper = add_recipient(bundle, "paper@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+
+      sign_with_autogram(contract, recipient: electronic)
+      paper = submit_paper_scan(contract, on_paper)
+      assert_not bundle.reload.completed?, "a scan awaiting review is not a signature"
+
+      sign_in_with_tenant @owner, @organization
+      get bundle_paper_signature_path(bundle, paper)
+      assert_response :success
+      signed_version = contract.reload.latest_source_content_version
+      assert signed_version, "the electronic signer added a signed version"
+      assert_select "iframe[src^=?]", rails_blob_path(contract.documents.sole.blob, disposition: "inline"), 1,
+        "the scan is compared with the document the signer printed"
+      assert_select "iframe[src^=?]", rails_blob_path(signed_version.file, disposition: "inline"), 0
+
+      post approve_bundle_paper_signature_path(bundle, paper)
+
+      assert bundle.reload.completed?
+      assert electronic.reload.signed?
+      assert on_paper.reload.signed?
+      assert_not contract.reload.awaiting_signature?
+      assert contract.signed_document_attached?, "the electronically signed version stays the signed document"
+      assert_empty mails_to(@owner.email).select { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") },
+        "the reviewer is not told about the completion they caused"
+    end
+  end
+
+  test "with the any rule an approved scan supersedes the other recipient and cancels their draft" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "jeden-staci.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      patch bundle_path(bundle), params: { bundle: { signing_rule: "any" } }
+      first = add_recipient(bundle, "first@example.com")
+      second = add_recipient(bundle, "second@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+
+      post contract_paper_signature_pages_path(contract, recipient: second.uuid), params: { files: [ jpeg_upload ] }
+      draft = PaperSignature.draft.sole
+      paper = submit_paper_scan(contract, first)
+
+      sign_in_with_tenant @owner, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+
+      assert bundle.reload.completed?
+      assert first.reload.signed?
+      assert second.reload.superseded?
+      assert draft.reload.canceled?
+      assert_equal 0, draft.pages.count
+      assert_equal 1, mails_to(second.email).count { |m| m.subject == I18n.t("notification_mailer.signature_no_longer_required.subject") }
+    end
+  end
+
+  test "approving after the recipient was withdrawn shows that the signature is no longer needed" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      sign_in_with_tenant @owner, @organization
+      get bundle_paper_signature_path(bundle, paper)
+      assert_response :success
+
+      delete bundle_recipient_path(bundle, recipient), as: :turbo_stream
+      assert recipient.reload.withdrawn?
+      assert paper.reload.canceled?
+
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
+      post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Neskoro." }
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
+      get bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
+
+      assert paper.reload.canceled?
+      assert_nil paper.reviewed_by
+      assert_nil recipient.signer_contracts.sole.signed_at
+    end
+  end
+
+  test "approving twice completes the signature once" do
+    reviewer = confirmed_user("reviewer@firma-abc.sk", tenant: @organization)
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      sign_in_with_tenant reviewer, @organization
+
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      signed_at = recipient.signer_contracts.sole.signed_at
+      assert signed_at
+
+      assert_no_difference -> { UsageRecord.signature_request.where(contract: contract).count } do
+        post approve_bundle_paper_signature_path(bundle, paper)
+      end
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("paper_signatures.review.no_longer_reviewable"), flash[:notice]
+      assert_equal 1, UsageRecord.signature_request.where(contract: contract).count
+      assert_equal signed_at, recipient.signer_contracts.sole.reload.signed_at
+      assert_equal reviewer, paper.reload.reviewed_by
+      assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+      assert_empty mails_to(reviewer.email), "the reviewer is not told about their own approval"
+    end
+  end
+
+  test "a signing app opened before the scan was approved cannot sign the recipient again" do
+    reviewer = confirmed_user("reviewer@firma-abc.sk", tenant: @organization)
+    with_paper_signing_request do |bundle, contract, recipient|
+      in_progress = open_autogram_session(contract, recipient: recipient)
+      paper = submit_paper_scan(contract, recipient)
+
+      sign_in_with_tenant reviewer, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert paper.reload.approved?
+      signer_contract = recipient.signer_contracts.sole
+      signed_at = signer_contract.signed_at
+      assert_empty signer_contract.sessions.pending, "the approval cancels the signing in progress"
+      sign_out reviewer
+
+      assert_no_difference -> { contract.reload.content_versions.count } do
+        travel 1.minute do
+          upload_signed_file(contract, in_progress[:upload])
+        end
+      end
+
+      assert_response :bad_request
+      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), response.parsed_body["error"]
+      assert_equal signed_at, signer_contract.reload.signed_at
+      assert paper.reload.approved?
+      assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+    end
+  end
+
+  test "a contract signed only on paper is no longer awaiting and its download gives the original document" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      assert contract.reload.awaiting_signature?, "a scan awaiting review is not a signature"
+
+      sign_in_with_tenant @owner, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+      get bundle_path(bundle)
+      assert_response :success
+      get show_bundle_contract_path(contract)
+      assert_response :success
+      sign_out @owner
+
+      assert_not contract.reload.awaiting_signature?
+      assert_not contract.signed_document_attached?, "a scan never becomes the signed document"
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_response :success
+      assert_includes response.body, I18n.t("contracts.sign.already_signed.title")
+      assert_select "a[href=?]", signed_document_contract_path(contract), text: I18n.t("actions.download_contract")
+      get sign_contract_path(contract, recipient: recipient.uuid)
+      assert_redirected_to sign_bundle_path(bundle, recipient: recipient.uuid)
+
+      get signed_document_contract_path(contract)
+      assert_response :redirect
+      original = contract.documents.sole
+      assert_equal rails_blob_path(original.blob, disposition: "attachment"), URI(response.location).request_uri
+      follow_redirect!
+      follow_redirect! while response.redirect?
+      assert_equal original.content.b, response.body.b
+    end
+  end
+
+  test "the public signature validation lists the paper signature without the scan" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      get validate_contract_path(contract)
+      assert_response :success
+      assert_not_includes response.body, "overené odosielateľom", "a scan awaiting review is not a signature"
+      assert_includes response.body, I18n.t("shared.signature_validation.no_signatures_title")
+
+      sign_in_with_tenant @owner, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+      sign_out @owner
+
+      get validate_contract_path(contract)
+      assert_response :success
+      assert_includes response.body, "Podpis na papieri"
+      assert_includes response.body, "paper@example.com"
+      approved_on = paper.reload.reviewed_at.in_time_zone("Europe/Bratislava").strftime("%-d. %-m. %Y")
+      assert_includes response.body, "#{approved_on} · overené odosielateľom"
+      assert_not_includes response.body, I18n.t("shared.signature_validation.no_signatures_title")
+      assert_not_includes response.body, "paper_signatures/#{paper.uuid}"
+      assert_not_includes response.body, "/rails/active_storage/"
+    end
   end
 
   test "author names the bundle and writes a message before the invitation goes out" do
@@ -98,6 +1032,17 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     assert bundle.reload.completed?
     assert_not outsider.member_of?(@organization)
+  end
+
+  test "whoever completes a bundle for a recipient gets no completion mail" do
+    bundle = request_signature_from_web(as: @owner, filename: "papier.pdf")
+    recipient = add_recipient(bundle, "external@example.com")
+    sign_out @owner
+
+    perform_enqueued_jobs { recipient.recipient_signer.signer_contracts.sole.complete_signature!(except: @owner) }
+
+    assert bundle.reload.completed?
+    assert_empty mails_to(@owner.email).select { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
   end
 
   test "with several recipients the bundle waits for all of them and its author is told about each signature" do
@@ -187,6 +1132,21 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
       assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
     end
     assert_equal 1, second.sessions.count
+  end
+
+  test "a recipient who declines the bundle withdraws the scan they submitted for review" do
+    bundle = request_signature_from_web(as: @owner, filename: "papier.pdf")
+    recipient = add_recipient(bundle, "external@example.com")
+    sign_out @owner
+    paper = PaperSignature.open_for!(recipient.recipient_signer.signer_contracts.sole)
+    paper.add_pages!([ Rack::Test::UploadedFile.new(file_fixture("paper-page.jpg"), "image/jpeg") ])
+    assert paper.submit!
+
+    post decline_bundle_path(bundle, recipient: recipient.uuid)
+
+    assert_redirected_to sign_bundle_path(bundle, recipient: recipient.uuid)
+    assert recipient.reload.declined?
+    assert paper.reload.canceled?
   end
 
   test "owner signs their own request too and nobody is notified about it" do
@@ -517,6 +1477,70 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
   private
 
+  PAPER_ALLOWED_METHODS = %w[qes standalone_qes ades scan].freeze
+
+  # Sends a two-page PDF that may be signed on paper to one recipient and yields to the recipient
+  # without an account (signed out).
+  def with_paper_signing_request
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "papier.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      recipient = add_recipient(bundle, "paper@example.com")
+      sign_out @owner
+
+      yield bundle, bundle.contracts.sole, recipient
+    end
+  end
+
+  # Opens the paper signing page on the computer and returns the phone link from its QR panel.
+  def phone_link_for(contract, recipient)
+    get contract_paper_signature_path(contract, recipient: recipient.uuid)
+    assert_response :success
+    css_select("#paper_signature_phone [data-phone-url]").sole["data-phone-url"]
+  end
+
+  # Uploads a photo of the signed page as the recipient (signed out) and submits it for review.
+  def submit_paper_scan(contract, recipient)
+    post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+    post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+    PaperSignature.submitted.find_by!(signer_contract: recipient.signer_contracts.find_by!(contract: contract))
+  end
+
+  def phone_token(phone_url)
+    Rack::Utils.parse_query(URI(phone_url.to_s).query).fetch("token")
+  end
+
+  def pdf_content(pages:)
+    Prawn::Document.new do |pdf|
+      pages.times do |index|
+        pdf.start_new_page if index.positive?
+        pdf.text "Strana #{index + 1}"
+      end
+    end.render
+  end
+
+  def jpeg_upload
+    Rack::Test::UploadedFile.new(file_fixture("paper-page.jpg"), "image/jpeg")
+  end
+
+  def png_upload
+    Rack::Test::UploadedFile.new(file_fixture("paper-page.png"), "image/png")
+  end
+
+  def docx_upload
+    Rack::Test::UploadedFile.new(StringIO.new("PK\x03\x04 word/document.xml".b), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", original_filename: "zmluva.docx")
+  end
+
+  def with_allowed_methods(methods)
+    original_allowed_methods = Contract::ALLOWED_METHODS
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, methods)
+
+    yield
+  ensure
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, original_allowed_methods)
+  end
+
   def upload_pdf(filename, agree_to_policies: false)
     params = { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 #{filename}"), "application/pdf", original_filename: filename) } }
     params[:contract] = { agree_to_policies: "1" } if agree_to_policies
@@ -530,16 +1554,16 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
   end
 
   # Uploads a PDF, asks for signatures and returns the bundle the web creates.
-  def request_signature_from_web(as:, filename:)
+  def request_signature_from_web(as:, filename:, allowed_methods: [ "qes" ], content: "%PDF-1.4 #{filename}")
     sign_in_with_tenant as, @organization
-    post contracts_path, params: { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 #{filename}"), "application/pdf", original_filename: filename) } }
+    post contracts_path, params: { document: { blob: Rack::Test::UploadedFile.new(StringIO.new(content), "application/pdf", original_filename: filename) } }
     contract = Contract.order(:id).last
     assert_redirected_to contract_path(contract)
     assert_equal @organization, contract.tenant
 
     patch contract_path(contract), params: {
       next_step: "request_signature",
-      contract: { allowed_methods: [ "qes" ], signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" } }
+      contract: { allowed_methods: allowed_methods, signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" } }
     }
     bundle = contract.reload.bundle
     assert_redirected_to edit_bundle_path(bundle)

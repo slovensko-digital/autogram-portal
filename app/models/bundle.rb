@@ -35,6 +35,7 @@ class Bundle < ApplicationRecord
 
   has_many :contracts, dependent: :destroy
   has_many :signature_field_preparations, through: :contracts
+  has_many :paper_signatures, through: :contracts
   has_many :recipients, dependent: :destroy
   has_many :visible_recipients, -> { visible }, class_name: "Recipient", foreign_key: :bundle_id
   has_many :active_recipients, -> { active.visible }, class_name: "Recipient", foreign_key: :bundle_id
@@ -137,15 +138,15 @@ class Bundle < ApplicationRecord
     active_recipients.where.not(id: not_completed_ids)
   end
 
-  def notify_contract_signed(contract, signer)
-    Notification::BundleContractSignedJob.perform_later(self, contract, signer: signer)
+  def notify_contract_signed(contract, signer, except: signer&.user)
+    Notification::BundleContractSignedJob.perform_later(self, contract, signer: signer, except: except)
     withdraw_federation_invitation_for_signed_recipient(signer)
 
     supersede_pending_recipients! if threshold_met? && !completed?
 
     return unless completed?
 
-    Notification::BundleCompletedJob.perform_later(self, signer: signer)
+    Notification::BundleCompletedJob.perform_later(self, signer: signer, except: except)
 
     Turbo::StreamsChannel.broadcast_replace_to(
       self,
@@ -218,6 +219,7 @@ class Bundle < ApplicationRecord
       now = Time.current
       SignerContract.where(id: awaiting_sc_ids).update_all(superseded_at: now, updated_at: now)
       Session.pending.where(signer_contract_id: awaiting_sc_ids).find_each(&:canceled!)
+      PaperSignature.open.where(signer_contract_id: awaiting_sc_ids).find_each(&:cancel!)
 
       affected_recipient_ids = SignerContract
         .joins(signer: :recipient)

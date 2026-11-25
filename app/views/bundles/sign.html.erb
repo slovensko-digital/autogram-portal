@@ -217,7 +217,10 @@
                   <% end %>
                 </div>
               <% elsif contract_signable %>
-                <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient %>
+                <%= render 'contracts/paper_signature_state', contract: contract, recipient: @recipient %>
+                <% unless paper_signature_in_progress(contract, @recipient) %>
+                  <%= render 'contracts/signing_method_choice', contract: contract, recipient: @recipient %>
+                <% end %>
               <% end %>
             </div>
           </section>

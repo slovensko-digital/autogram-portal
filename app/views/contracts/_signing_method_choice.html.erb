@@ -1,6 +1,6 @@
 <%# locals: (contract:, recipient: nil, heading_level: 3) %>
 
-<% signing_methods = contract.signing_methods_for(recipient: recipient) %>
+<% signing_methods = contract.signing_methods_for(recipient: recipient, embedded: params[:iframe].present?) %>
 <% electronic_path = electronic_signing_path(contract, recipient: recipient) %>
 
 <div data-controller="signing-method" class="w-full space-y-4">
@@ -27,22 +27,8 @@
               value: 'ades',
               label: t('.ades_label'),
               description: t('.ades_description'),
-              checked: (signing_methods & %w[electronic physical visual]).empty?,
+              checked: (signing_methods & %w[electronic visual]).empty?,
               icon: 'mobile',
-              data_attributes: {
-                signing_method_target: 'methodRadio',
-                action: 'change->signing-method#handleMethodSelection'
-              } %>
-      <% end %>
-
-      <% if signing_methods.include?("physical") %>
-        <%= render 'shared/radio_button_card',
-              name: "signing_method_#{contract.uuid}",
-              value: 'physical',
-              label: t('.physical_label'),
-              description: t('.physical_description'),
-              checked: false,
-              icon: 'pencil',
               data_attributes: {
                 signing_method_target: 'methodRadio',
                 action: 'change->signing-method#handleMethodSelection'
@@ -55,8 +41,22 @@
               value: 'visual',
               label: t('.visual_label'),
               description: t('.visual_description'),
-              checked: (signing_methods & %w[electronic physical]).empty?,
+              checked: (signing_methods & %w[electronic]).empty?,
               icon: 'pencil',
+              data_attributes: {
+                signing_method_target: 'methodRadio',
+                action: 'change->signing-method#handleMethodSelection'
+              } %>
+      <% end %>
+
+      <% if signing_methods.include?("paper") %>
+        <%= render 'shared/radio_button_card',
+              name: "signing_method_#{contract.uuid}",
+              value: 'paper',
+              label: t('.paper_label'),
+              description: t('.paper_description'),
+              checked: (signing_methods & %w[electronic ades visual]).empty?,
+              icon: 'printer',
               data_attributes: {
                 signing_method_target: 'methodRadio',
                 action: 'change->signing-method#handleMethodSelection'
@@ -78,16 +78,16 @@
           data: { signing_method_target: 'adesButton', turbo_frame: "_top" } %>
     <% end %>
 
-    <% if signing_methods.include?("physical") %>
-      <%= link_to "",
-          physical_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
-          data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
-    <% end %>
-
     <% if signing_methods.include?("visual") %>
       <%= link_to "",
           visual_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
           data: { signing_method_target: 'visualButton', turbo_frame: "_top" } %>
+    <% end %>
+
+    <% if signing_methods.include?("paper") %>
+      <%= link_to "",
+          contract_paper_signature_path(contract, recipient: recipient&.uuid),
+          data: { signing_method_target: 'paperButton', turbo_frame: "_top" } %>
     <% end %>
   </div>
 

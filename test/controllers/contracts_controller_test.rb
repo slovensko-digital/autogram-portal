@@ -1156,6 +1156,19 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
     environment_singleton.send(:remove_method, :__original_autogram_service)
   end
 
+  test "the legacy physical signing pages are gone" do
+    assert_raises(ActionController::RoutingError) { Rails.application.routes.recognize_path("/contracts/x/physical_signing") }
+  end
+
+  test "the signing method choice no longer offers physical signing" do
+    with_allowed_methods(%w[qes scan]) do
+      get sign_contract_path(contract_allowing(%w[qes scan]))
+
+      assert_response :success
+      assert_select "input[value=physical]", count: 0
+    end
+  end
+
   def with_allowed_methods(methods)
     original_allowed_methods = Contract::ALLOWED_METHODS
     Contract.send(:remove_const, :ALLOWED_METHODS)
@@ -1165,5 +1178,9 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
   ensure
     Contract.send(:remove_const, :ALLOWED_METHODS)
     Contract.const_set(:ALLOWED_METHODS, original_allowed_methods)
+  end
+
+  def contract_allowing(methods)
+    create_pdf_contract(allowed_methods: methods)
   end
 end

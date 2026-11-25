@@ -11,7 +11,7 @@ class BundlePolicyTest < ActiveSupport::TestCase
     context = AuthorizationContext::Web.new(user: users(:two), tenant: tenants(:one))
     policy = BundlePolicy.new(context, bundles(:one))
 
-    [ :show?, :edit?, :update?, :destroy?, :manage_recipients? ].each do |query|
+    [ :show?, :edit?, :update?, :destroy?, :manage_recipients?, :review_paper_signatures? ].each do |query|
       assert policy.public_send(query)
     end
   end
@@ -25,6 +25,7 @@ class BundlePolicyTest < ActiveSupport::TestCase
     assert_not policy.update?
     assert_not policy.destroy?
     assert_not policy.manage_recipients?
+    assert_not policy.review_paper_signatures?
   end
 
   test "admin and public visibility do not bypass management ownership" do
@@ -79,6 +80,22 @@ class BundlePolicyTest < ActiveSupport::TestCase
     assert_not policy.sign?
     assert_not policy.accept?
     assert_not policy.decline?
+  end
+
+  test "only the recipient bound to the bundle signs on paper" do
+    recipient = Recipient.new(bundle: bundles(:two))
+    access = SigningBundleAccess.new(bundle: bundles(:two), recipient: recipient)
+    anonymous = AuthorizationContext::Web.new(user: nil, tenant: nil)
+
+    assert Signing::SigningBundleAccessPolicy.new(anonymous, access).paper_sign?
+    assert_not Signing::SigningBundleAccessPolicy.new(anonymous, access.with(bundle: bundles(:one))).paper_sign?
+    assert_not Signing::SigningBundleAccessPolicy.new(anonymous, access.with(bundle: nil)).paper_sign?
+    assert_not Signing::SigningBundleAccessPolicy.new(@context, SigningBundleAccess.new(bundle: bundles(:one), recipient: nil)).paper_sign?,
+               "a manager does not sign on paper without a recipient"
+    bundles(:two).update_column(:publicly_visible, true)
+    assert_not Signing::SigningBundleAccessPolicy.new(anonymous, access.with(recipient: nil)).paper_sign?
+    assert_not Signing::SigningBundleAccessPolicy.new(nil, access).paper_sign?
+    assert_not Signing::SigningBundleAccessPolicy.new(AuthorizationContext::TenantApi.new(tenant: tenants(:two)), access).paper_sign?
   end
 
   test "public bundle signing does not permit recipient accept or decline" do

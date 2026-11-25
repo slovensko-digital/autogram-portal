@@ -1,0 +1,9 @@
+<%= t('.title') %>
+
+<%= t('.message', sender: @bundle.sender_display_name, document: @contract.display_name) %>
+
+<%= @paper_signature.return_reason %>
+
+<%= t('.again') %>
+
+<%= t('.open') %>: <%= sign_bundle_url(@bundle, recipient: @user) %>

@@ -83,6 +83,15 @@ and AdES mutations additionally require the resolved signer/session to match.
 Session permissions require a nonempty contract; missing parents do not establish
 a valid binding.
 
+Paper signing binds `SigningBundleAccess` to the recipient of the signing link or,
+for the phone link, to the recipient of the paper signature that
+`PaperSignatureAccessToken` names (signed with purpose `paper-signature-access`,
+expiring after an hour). `PaperSignerResolution` validates the token; the subject
+never stores it. The token works only for that paper signature while it is a
+draft of the contract in the URL, and only for its pages and submitting it, never
+for discarding the scan. Pages opened with it link with the token, never with the
+recipient UUID.
+
 Policies are read-only: they do not create records, send mail, issue grants or
 change signing state. Reuse domain predicates. Capacity, last-owner protections
 and workflow guards stay in models/services so other callers retain them.
@@ -156,6 +165,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Bundles#index` | Web, `BundlePolicy::Scope` | Selected tenant; `index?` | Existing awaiting/completed/declined/no-recipient filters preserved |
 | `Bundles#show/edit/update/destroy` | Web, global UUID lookup | `BundlePolicy` management queries | Unrelated record 404; another own tenant redirects with guidance, without switching |
 | `Recipients#index/create/notify/notify_all/destroy` | Web, global bundle UUID and parent-scoped recipient UUID | `BundlePolicy#manage_recipients?` | Same management denials; notifiable/removable state and validation errors remain separate |
+| `Bundles::PaperSignatures#show/approve/return_scan/scan` | Web, global bundle UUID, then the paper signature UUID within the bundle's contracts | `BundlePolicy#review_paper_signatures?`: bundle management | Same management denials (unrelated 404, another own tenant redirects with guidance); a paper signature of another bundle 404; one no longer reviewable (not submitted, or its signature signed another way, superseded, declined or withdrawn) redirects to the bundle with `paper_signatures.review.no_longer_reviewable`; a blank return reason redirects back with the error. The scan only of a submitted or approved paper signature (others redirect the same way), via `send_data` (inline or attachment), never blob URLs |
 | `Bundles#received` | Web user, received bundle/invitation scopes | `Received::BundlePolicy#index?` | Person-scoped across selected tenants; state/active/visible filters retained |
 | `Dashboard#index` | Web, multiple policy scopes | `DashboardPolicy#index?` | Sent data uses selected tenant; received counts use person; archivation feature controls archive scope |
 | `Contracts#index` | Web, direct-tenant scope, then `standalone` | `ContractPolicy#index?` | Original direct association and state/order filters |
@@ -166,12 +176,14 @@ in integration tests. They are not a replacement for controller authorization.
 | `Contracts#content_versions` | Web, global UUID | Management AND contract-tenant archivation | 403 |
 | `Contracts::SignatureFieldPreparations#index/edit/create/update/destroy/finalize` | Web, contract UUID and parent-scoped preparation ID | `prepare_signature_fields?`: bundle management | Foreign 403, another own bundle tenant guidance, ineligible format/state 422 |
 | `ContractValidationRecords#index/destroy/refresh` | Web, feature gate and selected-tenant policy scope | Archivation and record tenant | Disabled-feature root redirect; foreign ID 404; refreshability remains workflow rule |
-| `Contracts#show_bundle/actions/sign/signature_apps/physical_signing/create_physical_session/visual_signing/create_visual_session/signed_document/validate` | Web, UUID lookup; existing recipient/preparation resolution | `skip_authorization` (UUID-public) | Existing UUID accessibility, onboarding, signer, appearance and state constraints preserved |
+| `Contracts#show_bundle/actions/sign/signature_apps/visual_signing/create_visual_session/signed_document/validate` | Web, UUID lookup; existing recipient/preparation resolution | `skip_authorization` (UUID-public) | Existing UUID accessibility, onboarding, signer, appearance and state constraints preserved; a paper scan awaiting review sends signing actions other than `sign` back to the signing page; `signed_document` gives the original document of a contract signed only on paper |
 | `Contracts#authenticate_for_actions` | Web, UUID lookup | Signed-in user OR anonymous contract | Existing-user redirect, anonymous pending-claim flow, otherwise 403 |
 | `Contracts::Onboarding#show/update` | Web, UUID and parent-bound active recipient | `skip_authorization` (UUID-public) | Invalid/withdrawn recipient, onboarding state and cookies retain existing behavior |
-| `Bundles#sign/autogram_batch` | Web, bound signing subject | Recipient capability OR public bundle OR selected-tenant manager | Lookup precedence unchanged; invalid grant/mismatch 404, withdrawn signing 410, batch eligibility stays separate |
+| `Bundles#sign/autogram_batch` | Web, bound signing subject | Recipient capability OR public bundle OR selected-tenant manager | Lookup precedence unchanged; invalid grant/mismatch 404, withdrawn signing 410, batch eligibility stays separate (a document whose paper scan awaits review is left out) |
 | `Bundles#accept/decline` | Web, recipient found through bundle | Bound recipient capability | Existing UUID/user lookup retained; withdrawal/completion/superseding responses unchanged |
-| `Contracts::Sessions#create/show` | Web, bound signing subject | Existing signer resolution / nested session | Creation/preparation/completion redirects unchanged; UUID/session display is not hardened |
+| `Contracts::PaperSignatures#show/submit/destroy`, `Contracts::PaperSignaturePages#create/show/update/destroy` | Web, contract UUID and active recipient UUID (`params[:recipient]`) within the contract, then its signer contract (`PaperSignerResolution`) | `Signing::SigningBundleAccessPolicy#paper_sign?`: bound recipient of the contract's bundle | Unknown/withdrawn recipient 404; superseded redirects with notice; signed/declined or paper signing not available (except discarding) returns to the signing page; sign limit 403 page. Pages only of the recipient's open paper signature (others 404), their bytes via `send_data` inline, never blob URLs |
+| Same, opened with the phone link (`params[:token]`) | Web, contract UUID and the paper signature of a valid `PaperSignatureAccessToken`, then its signer contract and recipient | `paper_sign?` for the token's recipient | Expired/invalid token, or its paper signature no longer a draft, the recipient withdrawn, the signer contract no longer awaiting or paper signing not available: 410 `link_expired` page (a submitted scan is confirmed there), never a redirect with the recipient UUID; token of another contract 404; `PaperSignatures#destroy` 403; pages only of the token's draft (others 404); sign limit 403 page |
+| `Contracts::Sessions#create/show` | Web, bound signing subject | Existing signer resolution / nested session | Creation/preparation/completion redirects unchanged; UUID/session display is not hardened; a paper scan awaiting review redirects to the signing page (also for the AdES verification actions) |
 | `Contracts::Sessions#parameters/download/upload/state` | Web, contract UUID and nested session ID | Valid bound token OR allowed user | 403; expiry/withdrawal checked by token service; format/attachment/upload errors unchanged; `state` returns the completed session's broadcast as a Turbo Stream (204 while pending) for pages that missed it |
 | `Contracts::Sessions#destroy` | Same | Allowed user only, never token alone | 403; managers and existing signer ownership/email semantics retained |
 | `Contracts::Sessions#request_verification/verify_verification/complete_signing` | Same, resolved signer contract | Session matches resolved signer | 403 on mismatch; AdES type and service errors remain separate |
@@ -180,6 +192,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `SignatureEvidenceVerifications#show/download` | Web, public reference | `skip_authorization` (public reference) | Missing reference/detail/download outcomes and manifest fallback unchanged |
 | `SignatureEvidenceVerifications#download_private` | Web, public reference | Existing private-evidence predicate | Missing record/attachment 404; denied access 403; absent-record branch explicitly skips authorization |
 | `Api::V1::Contracts#create/show/status/signed_document/destroy` | TenantApi; API contract scope for existing records | Contract tenant | Existing `Contract not found`, CRUD bodies, polling headers and redirects |
+| `Api::V1::PaperSignatures#scan` | TenantApi; API contract scope, then the contract's submitted/approved paper signatures | Contract tenant (`Api::V1::ContractPolicy#show?`) | `Contract not found` / unknown, returned or canceled paper signature is 404; answers the scan PDF, no public blob URL |
 | `Api::V1::Documents#show` | TenantApi, API document scope | Parent contract tenant | Existing `Document not found`; orphan documents excluded |
 | `Api::V1::Bundles#create/show/status/destroy` | TenantApi, tenant bundle scope | Bundle tenant, not public visibility | Existing `Bundle not found`, duplicate UUID conflict, bodies and polling headers |
 | `Api::V1::Hello#show/show_auth` | Public / TenantApi | Explicit public skip / API hello policy | Existing public message and authenticated tenant message |
@@ -223,12 +236,14 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 | Bundle received and dashboard | Person-scoped invitations/received requests; selected-tenant sent records; existing state/count filters |
 | Contracts CRUD/actions | Contract tenant ownership, anonymous permissions, anonymous-claim ordering, per-action denial responses |
 | Contract validation history/records and evidence-private download | Selected tenant and archivation feature; refreshability and attachment errors remain distinct |
-| Contract signing, onboarding and visual/physical signing | Existing user/recipient/anonymous resolution, withdrawal/superseding responses and preparation guards |
+| Contract signing, onboarding and visual signing | Existing user/recipient/anonymous resolution, withdrawal/superseding responses and preparation guards |
 | Session parameters/download/upload/state | Bound, valid session token OR existing allowed-user checks; expiry and withdrawal remain validated by SessionAccessToken |
 | Session destroy | Allowed-user branch only; session token alone never grants deletion |
 | Session create/show/verification/completion | Parent/session/signer matching and existing method/state/preparation checks, not one generic signing permission |
 | Session AVM webhooks | Existing protocol/service checks and CSRF exception, not newly invented user authentication |
 | Bundle sign/batch/accept/decline | Existing grant/UUID/user/public/manager resolution precedence; each action retains its own rules |
+| Paper signing pages and page images | Recipient capability bound to the contract's bundle; page bytes only through the authorized action of the recipient's open paper signature. The phone link token is bound to one draft paper signature and its contract, expires after an hour and never discards |
+| Paper signature review and scans | Management of the bundle's tenant; the paper signature looked up within the bundle; scans only through the authorized action. The public signature validation lists approved paper signatures without the scan |
 | Documents preview/download and contract validation/signed download | Existing UUID-accessible behavior; no new blanket tenant scope |
 | Evidence public lookup/download | Public reference access; distinct private-package permission |
 | Tenant API contracts/documents | Contract tenant scope, shared by document scopes |

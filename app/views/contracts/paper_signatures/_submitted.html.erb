@@ -1,0 +1,15 @@
+<%# locals: (contract:, recipient:, paper_signature:) %>
+<%= render 'shared/success', title: t('paper_signatures.submitted.title'), content: paper_signature_submitted_message(paper_signature) %>
+
+<section class="rounded-xl border border-gray-200 bg-white p-5" aria-labelledby="paper_signature_scan_title">
+  <h2 id="paper_signature_scan_title" class="text-base font-semibold text-gray-900"><%= t('paper_signatures.submitted.scan') %></h2>
+  <p class="mt-1 text-sm text-gray-500"><%= t('paper_signatures.submitted.submitted_at_html', time: paper_signature_time_tag(paper_signature.submitted_at)) %></p>
+
+  <div class="mt-4">
+    <%= render 'contracts/paper_signatures/pages', contract: contract, paper_signature: paper_signature, editable: false %>
+  </div>
+
+  <div class="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+    <%= render 'contracts/paper_signatures/discard_actions', contract: contract, recipient: recipient, continue_path: nil %>
+  </div>
+</section>

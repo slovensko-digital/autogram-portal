@@ -1,11 +1,12 @@
 module RecipientsHelper
   def recipient_status_badge(recipient)
     colors = {
-      pending:    { bg: "bg-yellow-100", text: "text-yellow-800" },
-      signed:     { bg: "bg-green-100",  text: "text-green-800" },
-      declined:   { bg: "bg-red-100",    text: "text-red-800" },
-      superseded: { bg: "bg-gray-100",   text: "text-gray-600" },
-      withdrawn:  { bg: "bg-amber-100",  text: "text-amber-800" }
+      awaiting_review: { bg: "bg-blue-100",   text: "text-blue-800" },
+      pending:         { bg: "bg-yellow-100", text: "text-yellow-800" },
+      signed:          { bg: "bg-green-100",  text: "text-green-800" },
+      declined:        { bg: "bg-red-100",    text: "text-red-800" },
+      superseded:      { bg: "bg-gray-100",   text: "text-gray-600" },
+      withdrawn:       { bg: "bg-amber-100",  text: "text-amber-800" }
     }
 
     status = if recipient.withdrawn?
@@ -14,6 +15,8 @@ module RecipientsHelper
       :declined
     elsif recipient.superseded?
       :superseded
+    elsif recipient.awaiting_paper_review?
+      :awaiting_review
     elsif recipient.pending?
       :pending
     else

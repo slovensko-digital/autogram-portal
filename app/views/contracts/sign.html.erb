@@ -73,7 +73,10 @@
         </div>
       <% elsif @contract.awaiting_signature? || policy(@contract).show? %>
         <div class="w-full">
-          <%= render 'signing_method_choice', contract: @contract, recipient: @recipient, heading_level: 2 %>
+          <%= render 'paper_signature_state', contract: @contract, recipient: @recipient %>
+          <% unless paper_signature_in_progress(@contract, @recipient) %>
+            <%= render 'signing_method_choice', contract: @contract, recipient: @recipient, heading_level: 2 %>
+          <% end %>
         </div>
       <% end %>
     </div>

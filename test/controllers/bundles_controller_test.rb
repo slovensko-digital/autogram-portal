@@ -21,6 +21,27 @@ class BundlesControllerTest < ActionController::TestCase
     assert_equal 1, bundle.recipients.active.author_proxies.where(user: @author).count
   end
 
+  test "batch signing leaves out a document whose scan awaits review" do
+    bundle = create_bundle_with_contracts(author: @author, count: 3)
+    recipient = bundle.recipients.create!(email: "paper@example.com")
+    on_paper, *electronic = bundle.contracts.order(:id).to_a
+    paper = PaperSignature.open_for!(recipient.signer_contracts.find_by!(contract: on_paper))
+    paper.add_pages!([ Rack::Test::UploadedFile.new(file_fixture("paper-page.jpg"), "image/jpeg") ])
+    assert paper.submit!
+
+    get :sign, params: { id: bundle.uuid, recipient: recipient.uuid }
+    assert_response :success
+    assert_select "a[href=?]", autogram_batch_bundle_path(bundle, recipient: recipient.uuid)
+    assert_includes response.body, I18n.t("bundles.sign.batch_sign_description", count: 2)
+
+    get :autogram_batch, params: { id: bundle.uuid, recipient: recipient.uuid }
+    assert_response :success
+    assert_empty recipient.signer_contracts.find_by!(contract: on_paper).sessions
+    electronic.each do |contract|
+      assert recipient.signer_contracts.find_by!(contract: contract).sessions.pending.exists?(type: "AutogramSession")
+    end
+  end
+
   # Autogram signs several documents into one container, but not inside a batch.
   test "author bundle sign route offers no autogram batch signing when a contract has several documents" do
     bundle = create_bundle_with_contracts(author: @author, count: 1)

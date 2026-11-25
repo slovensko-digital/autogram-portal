@@ -37,7 +37,29 @@ class NotificationMailer < ApplicationMailer
     mail(subject: I18n.t("notification_mailer.signature_withdrawn.subject"))
   end
 
+  def paper_signature_submitted(paper_signature)
+    set_paper_signature(paper_signature)
+    mail(subject: I18n.t("notification_mailer.paper_signature_submitted.subject"))
+  end
+
+  def paper_signature_approved(paper_signature)
+    set_paper_signature(paper_signature)
+    mail(subject: I18n.t("notification_mailer.paper_signature_approved.subject"))
+  end
+
+  def paper_signature_returned(paper_signature)
+    set_paper_signature(paper_signature)
+    mail(subject: I18n.t("notification_mailer.paper_signature_returned.subject"))
+  end
+
   private
+
+  def set_paper_signature(paper_signature)
+    @paper_signature = paper_signature
+    @contract = paper_signature.contract
+    @bundle = @contract.bundle
+    @signing_recipient = paper_signature.recipient
+  end
 
   def set_locale
     I18n.locale = params[:locale] || @user&.locale || I18n.default_locale

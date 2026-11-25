@@ -1,0 +1,3 @@
+<%= render "mailer/badge", label: t(".badge"), tone: :blue %>
+<%= render "mailer/heading", title: t(".title"), message: t(".message", name: @signing_recipient.display_name, document: @contract.display_name) %>
+<%= render "mailer/button", label: t(".review"), url: bundle_paper_signature_url(@bundle, @paper_signature) %>

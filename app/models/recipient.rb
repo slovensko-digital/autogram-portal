@@ -176,6 +176,12 @@ class Recipient < ApplicationRecord
     signer_contracts.declined.exists?
   end
 
+  # A scan of a document the recipient signed on paper waits for the organization to review it.
+  def awaiting_paper_review?
+    return false if withdrawn?
+    PaperSignature.submitted.where(signer_contract_id: signer_contracts.awaiting.select(:id)).exists?
+  end
+
   def superseded?
     return false if withdrawn?
     signer_contracts.superseded.exists? && !signer_contracts.signed.exists? && !pending?
@@ -221,6 +227,7 @@ class Recipient < ApplicationRecord
       now = Time.current
       signer_contracts.where(signed_at: nil).update_all(declined_at: nil, superseded_at: now, updated_at: now)
       sessions.pending.find_each(&:canceled!)
+      PaperSignature.open.where(signer_contract_id: signer_contracts.select(:id)).find_each(&:cancel!)
       update!(withdrawn_at: now)
       revoke_active_access_grants!
       Federation::WithdrawRequestInvitationJob.perform_later(self, status: "withdrawn") if federated_recipient? && notified_at.present?

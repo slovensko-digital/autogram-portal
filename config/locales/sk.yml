@@ -99,6 +99,8 @@ sk:
         role: "Rola"
       user:
         agree_to_policies: "Podmienky a zásady ochrany súkromia a Všeobecné obchodné podmienky"
+      paper_signature:
+        return_reason: "Dôvod vrátenia"
     errors:
       models:
         visual_stamp:
@@ -147,6 +149,10 @@ sk:
           attributes:
             base:
               signature_request_limit: "Organizácia %{sender} tento mesiac vyčerpala limit dokumentov odoslaných na podpis."
+        paper_signature:
+          attributes:
+            return_reason:
+              blank: "musí byť vyplnený"
 
   errors:
     archivation_disabled: "Funkcia archivácie dokumentov je pre vašu organizáciu momentálne vypnutá. Kontaktujte administrátora."
@@ -220,6 +226,7 @@ sk:
         declined: "Odmietnuté"
         superseded: "Podpis nie je potrebný"
         withdrawn: "Stiahnuté"
+        awaiting_review: "Čaká na kontrolu skenu"
 
   devise:
     sessions:
@@ -1281,7 +1288,6 @@ sk:
         verify_reference_link: "Overiť túto referenciu"
     onboarding:
       electronic_title: "Nastavenie elektronického podpisovania"
-      physical_title: "Nastavenie fyzického podpisovania"
       subtitle: "Dokončite tieto kroky na prípravu podpisovania"
       qscd_check:
         title: "Čím budete podpisovať?"
@@ -1367,40 +1373,21 @@ sk:
           description: "Váš český občiansky preukaz nepodporuje kvalifikované elektronické podpisovanie. Potrebujete občiansky preukaz vydaný od 1.7.2018 s nahraným kvalifikovaným certifikátom alebo inú kvalifikovanú čipovú kartu či USB token."
           warning_title: "Tento občiansky preukaz nie je možné použiť na kvalifikované podpisovanie"
           warning_description: "Do občianskych preukazov vydaných pred 1.7.2018 nie je možné nahrať kvalifikovaný certifikát. Požiadajte o nový občiansky preukaz alebo použite inú kvalifikovanú čipovú kartu či USB token."
-      physical_instructions:
-        title: "Pokyny pre fyzické podpisovanie"
-        description: "Na fyzické podpísanie tohto dokumentu postupujte podľa týchto krokov:"
-        step1: "Stiahnite a vytlačte dokument"
-        step2: "Podpíšte ho vlastnoručným podpisom"
-        step3: "Naskenujte podpísaný dokument alebo si ponechajte originál"
-        step4: "Pošlite ho poštou odosielateľovi"
-        note: "Po odoslaní podpísaného dokumentu nás prosím informujte kliknutím na tlačidlo nižšie."
-        continue: "Pokračovať na fyzické podpisovanie"
     signing_method_choice:
       title: "Ako by ste chceli podpísať tento dokument?"
       electronic_label: "Elektronické podpisovanie"
       electronic_description: "Podpíšte elektronicky pomocou vášho občianskeho preukazu a podpisovej aplikácie"
       ades_label: "Overené AdES podpisovanie"
       ades_description: "Overte mobilné číslo SMS kódom a nechajte portál vytvoriť elektronický podpis s podporným evidenčným záznamom"
-      physical_label: "Fyzické podpisovanie"
-      physical_description: "Vytlačte, podpíšte ručne a pošlite poštou"
       visual_label: "Vizuálna pečiatka"
       visual_description: "Pridajte do PDF vizuálnu pečiatku bez vytvoreného kvalifikovaného elektronického podpisu"
       qes_visual_stamp_button: "Najprv pridať vizuálnu pečiatku"
       qes_visual_stamp_description: "Podpisovanie cez QES/PAdES môže pred vytvorením kvalifikovaného podpisu obsahovať voliteľnú vizuálnu pečiatku."
       signature_field_appearance_button: "Pridať viditeľnú podobu podpisu"
       signature_field_appearance_description: "V tomto PDF je pre vás pripravené viditeľné podpisové pole. Pred pokračovaním na elektronické podpisovanie doplňte jeho textovú alebo obrázkovú podobu."
+      paper_label: "Podpis na papieri"
+      paper_description: "Vytlačte dokument, podpíšte ho perom a nahrajte sken alebo fotky"
       continue: "Pokračovať"
-    physical_signing:
-      title: "Fyzický podpis"
-      subtitle: "Odošlite informácie o vašom fyzicky podpísanom dokumente"
-      form_title: "Odoslali ste podpísaný dokument?"
-      form_description: "Prosím, dajte nám vedieť, kedy ste odoslali fyzicky podpísaný dokument poštou."
-      date_label: "Dátum odoslania poštou"
-      date_helper: "Vyberte dátum, kedy ste dokument odoslali"
-      confirmation_message: "Po odoslaní dostanete potvrdenie. Odosielateľ dokumentu bude upovedomený o vašom fyzickom podpise."
-      back: "Späť"
-      submit: "Odoslať fyzický podpis"
     visual_signing:
       invalid_document: "Vizuálnu pečiatku je možné vložiť iba do dokumentu PDF."
       draw_canvas_label: "Plocha na nakreslenie podpisu"
@@ -1438,7 +1425,7 @@ sk:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
       standalone_qes: Stiahnutie dokumentu, kvalifikovaný podpis vo vlastnej aplikácii na počítači (napr. Podpisuj) a nahratie podpísaného dokumentu späť
       ades: Elektronický podpis s evidenčným záznamom a overením cez druhý faktor (SMS alebo e-mail)
-      scan: Vytlačiť, ručne podpísať a naskenovať
+      scan: Podpisujúci dokument vytlačí, podpíše perom a nahrá sken alebo fotky. Podpis potom skontrolujete vy.
       visual: Pridať do PDF vizuálnu pečiatku
       notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
@@ -1446,7 +1433,7 @@ sk:
         qes: Kvalifikovaný elektronický podpis
         standalone_qes: Podpisuj alebo iné samostatné aplikácie
         ades: Jednoduchý elektronický podpis
-        scan: Sken podpísaného dokumentu
+        scan: Podpis na papieri
         visual: Vizuálna pečiatka
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
@@ -2154,7 +2141,7 @@ sk:
           standalone_qes:
             label: "Podpisuj alebo iné samostatné aplikácie"
             description: "Adresát si stiahne dokument, podpíše ho kvalifikovaným podpisom vo vlastnej aplikácii na počítači a nahrá ho späť. Pre adresátov je táto metóda predvolene vypnutá."
-        allowed_methods_note: "Prevádzkovateľ portálu môže povoliť aj ďalšie metódy, napríklad vizuálnu pečiatku v PDF alebo sken ručne podpísaného dokumentu."
+        allowed_methods_note: "Prevádzkovateľ portálu môže povoliť aj ďalšie metódy, napríklad vizuálnu pečiatku v PDF alebo podpis na papieri (vytlačenie dokumentu, ručný podpis a nahratie skenu)."
         methods_title: "Podpisové aplikácie"
         methods:
           autogram_desktop:
@@ -2623,6 +2610,9 @@ sk:
       visual_signatures_found_title: "Pridané vizuálne podpisy od"
       visual_signature_badge: "Vizuálny podpis"
       visual_signature_added_at: "Pridané %{time}"
+      paper_signatures_found_title: "Podpísali na papieri"
+      paper_signature_badge: "Podpis na papieri"
+      paper_signature_verified: "%{date} · overené odosielateľom"
       qualified_timestamp: "Kvalifikovaná časová pečiatka"
       no_timestamp: "Žiadna časová pečiatka"
       timestamps_count: "(%{count} časových pečiatok)"
@@ -2749,6 +2739,24 @@ sk:
       step_2_desc: "Použite občiansky preukaz a postupujte podľa pokynov."
       step_3_title: "Hotovo."
       step_3_desc: "Dokument je podpísaný."
+    paper_signature_submitted:
+      subject: "Sken podpisu na papieri čaká na vašu kontrolu"
+      badge: "Čaká na kontrolu"
+      title: "Sken podpisu na papieri čaká na vašu kontrolu"
+      message: "%{name} nahral(a) sken dokumentu %{document} podpísaného na papieri. Skontrolujte ho, aby sa podpis započítal."
+      review: "Skontrolovať sken"
+    paper_signature_approved:
+      subject: "Váš podpis na papieri bol schválený"
+      badge: "Schválené"
+      title: "Váš podpis na papieri bol schválený"
+      message: "%{sender} skontroloval(a) váš sken dokumentu %{document} a podpis schválil(a)."
+    paper_signature_returned:
+      subject: "Váš sken bol vrátený"
+      badge: "Vrátené"
+      title: "Váš sken bol vrátený"
+      message: "%{sender} vrátil(a) váš sken dokumentu %{document}. Dôvod:"
+      again: "Podpíšte dokument znova a nahrajte nový sken."
+      open: "Otvoriť podpisovanie"
     signature_no_longer_required:
       subject: "Váš podpis už nie je potrebný"
       badge: "Bez vášho podpisu"
@@ -2836,6 +2844,117 @@ sk:
         one: "V pláne %{plan} sa dokumenty a balíky mažú %{count} deň po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
         few: "V pláne %{plan} sa dokumenty a balíky mažú %{count} dni po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
         other: "V pláne %{plan} sa dokumenty a balíky mažú %{count} dní po vytvorení. Ak ich chcete mať aj neskôr, stiahnite si ich ešte pred zmazaním."
+
+  paper_signatures:
+    document_pages:
+      one: "%{count} strana"
+      few: "%{count} strany"
+      other: "%{count} strán"
+    errors:
+      unsupported_file: "Nahrajte PDF zo skenera alebo fotky vo formáte JPG alebo PNG."
+      too_large: "Sken je väčší, ako dovoľuje limit veľkosti dokumentu. Nahrajte menšie fotky alebo sken s nižším rozlíšením."
+      too_many_pages: "Sken môže mať najviac %{count} strán."
+      file_too_large: "Jeden súbor môže mať najviac %{size} MB."
+      image_too_large: "Obrázok má príliš veľké rozmery. Nahrajte fotku s nižším rozlíšením."
+    alerts:
+      no_pages: "Najprv nahrajte sken alebo fotky strán."
+      pages_changed: "Strany sa medzitým zmenili. Skontrolujte ich a odošlite sken znova."
+    notices:
+      awaiting_review: "Váš sken čaká na kontrolu. Ak chcete dokument podpísať inak, najprv sken zahoďte."
+      discarded: "Sken sme zahodili. Dokument môžete podpísať inak."
+    show:
+      title: "Podpis na papieri"
+      intro: "Vytlačte dokument, podpíšte ho perom a nahrajte sken alebo fotky strán. Podpis potom skontroluje odosielateľ, %{sender}."
+      back: "Späť na výber spôsobu podpisu"
+      submit: "Odoslať na kontrolu"
+    steps:
+      download:
+        title: "Stiahnite a vytlačte dokument"
+        button: "Stiahnuť na tlač"
+      sign:
+        title: "Podpíšte ho perom"
+        description: "Podpíšte dokument vlastnou rukou na miestach určených na podpis a doplňte, čo sa na nich vypĺňa (napríklad dátum)."
+      upload:
+        title: "Nahrajte sken alebo fotky strán"
+        dropzone_title: "Pretiahnite sem sken alebo fotky strán"
+        dropzone_subtitle: "alebo kliknite a vyberte súbory"
+        file_types: "PDF zo skenera alebo fotky (JPG, PNG, HEIC)"
+        button: "Nahrať"
+        uploading: "Nahrávam…"
+        failed: "Nahrávanie sa nepodarilo. Skúste to znova."
+    phone:
+      title: "Odfoťte strany mobilom"
+      description: "Naskenujte kód fotoaparátom mobilu. Odfotené strany sa tu zobrazia samé."
+      qr_label: "QR kód s odkazom na fotenie strán mobilom"
+    phone_page:
+      title: "Odfoťte podpísané strany"
+      take_photo: "Odfotiť ďalšiu stranu"
+      choose_from_gallery: "Vybrať z galérie"
+      submit:
+        one: "Odoslať na kontrolu (%{count} strana)"
+        few: "Odoslať na kontrolu (%{count} strany)"
+        other: "Odoslať na kontrolu (%{count} strán)"
+    link_expired:
+      title: "Odkaz na fotenie už neplatí"
+      message: "Otvorte stránku podpisu na počítači a naskenujte nový kód."
+    pages:
+      label: "Nahraté strany"
+      page: "Strana %{number}"
+      pdf: "Sken v PDF"
+      add: "Pridať stranu"
+      move_earlier: "Posunúť stranu %{number} dopredu"
+      move_later: "Posunúť stranu %{number} dozadu"
+      remove: "Odstrániť stranu %{number}"
+      remove_pdf: "Odstrániť sken"
+      page_count_mismatch:
+        title:
+          one: "Dokument má %{count} stranu, nahrali ste %{actual}"
+          few: "Dokument má %{count} strany, nahrali ste %{actual}"
+          other: "Dokument má %{count} strán, nahrali ste %{actual}"
+        message: "Nahrajte všetky strany, aby odosielateľ videl celý podpísaný dokument. Odoslať ho môžete aj tak."
+    submitted:
+      title: "Sken sme odoslali na kontrolu"
+      message: "%{sender} skontroluje, či je dokument podpísaný. Keď podpis schváli alebo vráti, pošleme vám e-mail na %{email}."
+      message_without_email: "%{sender} skontroluje, či je dokument podpísaný. Výsledok kontroly uvidíte na stránke podpisu."
+      scan: "Nahratý sken"
+      submitted_at_html: "Odoslaný %{time}"
+      replace: "Nahrať iný sken"
+      discard: "Zahodiť sken a podpísať inak"
+    draft:
+      title: "Podpis na papieri máte rozpracovaný"
+      message: "Nahraté strany ste ešte neodoslali na kontrolu."
+    returned:
+      title: "Odosielateľ vrátil váš sken"
+      reviewed_html: "Vrátil(a) %{name} %{time}"
+    review:
+      title: "Kontrola podpisu na papieri"
+      back: "Späť na balík"
+      submitted_at_html: "Sken nahratý %{time}"
+      info:
+        title: "Portál nevie overiť, či je na skene naozaj podpis"
+        message: "Porovnajte nahraté strany s pôvodným dokumentom. Po schválení sa podpis započíta a balík sa môže dokončiť."
+      original: "Pôvodný dokument"
+      scan: "Nahraný sken"
+      decision:
+        title: "Je dokument podpísaný?"
+        hint: "Schválením sa podpis započíta. Ak niečo chýba, vráťte sken s dôvodom."
+      return: "Vrátiť sken"
+      approve: "Schváliť podpis"
+      return_dialog:
+        title: "Vrátiť sken – %{name}"
+        message: "%{name} dostane e-mail s vaším dôvodom a môže nahrať nový sken. Jeho podpis sa nezapočíta, kým neschválite nový sken."
+        reason: "Dôvod"
+        hint: "Dôvod uvidí v e-maile aj na stránke podpisu."
+        cancel: "Zrušiť"
+      approved: "Podpis na papieri sme schválili."
+      returned: "Sken sme vrátili."
+      no_longer_reviewable: "Sken už nečaká na kontrolu."
+      alert:
+        title: "%{name} nahral(a) sken podpísaného dokumentu"
+        message: "Skontrolujte ho, aby sa jeho podpis započítal."
+      check: "Skontrolovať sken"
+      approved_by_html: "Podpis na papieri · schválil(a) %{name} %{time}"
+      download: "Stiahnuť sken"
 
   plan_limits:
     exceeded:

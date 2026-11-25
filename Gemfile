@@ -101,3 +101,6 @@ gem "dotenv-rails", "~> 3.1", group: :development
 gem "pry", "~> 0.16"
 
 gem "rack-cors", "~> 3.0"
+
+gem "prawn", "~> 2.4"
+gem "pdf-reader", "~> 2.16"

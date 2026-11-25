@@ -35,10 +35,32 @@ class RequestLogFilterTest < ActiveSupport::TestCase
     assert_equal "text", logged.dig("stamp", "content_mode")
   end
 
+  test "photos of signed pages and the reason a scan is returned are not logged" do
+    photo = Rack::Test::UploadedFile.new(StringIO.new("JVBERi0"), "image/jpeg", original_filename: "zmluva-novak.jpg")
+    logged = filter(
+      "files" => [ photo, photo ], "reason" => "Dobry.den", "paper_signature" => { "return_reason" => "Dobry.den" },
+      "recipient" => "tajny-token", "contract_id" => "c-1", "id" => "7", "position" => "2"
+    )
+
+    assert_no_private_values logged
+    assert_equal({ "contract_id" => "c-1", "id" => "7", "position" => "2" }, logged.slice("contract_id", "id", "position"))
+  end
+
   test "the signing link of a recipient is logged without its key" do
     env = Rack::MockRequest.env_for("/bundles/b-1?recipient=tajny-token&locale=sk", "action_dispatch.parameter_filter" => Rails.application.config.filter_parameters)
 
     assert_equal "/bundles/b-1?recipient=[FILTERED]&locale=sk", ActionDispatch::Request.new(env).filtered_path
+  end
+
+  test "the phone link to a paper signature is logged without its token" do
+    env = Rack::MockRequest.env_for("/contracts/c-1/paper_signature?token=tajny-token", "action_dispatch.parameter_filter" => Rails.application.config.filter_parameters)
+    request = ActionDispatch::Request.new(env)
+    response = ActionDispatch::Response.new
+    response.request = request
+    response.location = "http://www.example.com/contracts/c-1/paper_signature/pages/7?token=tajny-token"
+
+    assert_equal "/contracts/c-1/paper_signature?token=[FILTERED]", request.filtered_path
+    assert_equal "http://www.example.com/contracts/c-1/paper_signature/pages/7?token=[FILTERED]", response.filtered_location
   end
 
   private

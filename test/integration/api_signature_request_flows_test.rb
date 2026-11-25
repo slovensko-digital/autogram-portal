@@ -203,6 +203,124 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "a bundle signed on paper shows the approved scan and the integrator downloads it" do
+    with_scan_allowed do
+      bundle = create_bundle_via_api(contracts: [ scan_contract_payload("a.pdf") ], recipients: [ { email: "signer@example.com" } ])
+      recipient = bundle.recipients.sole
+      paper = paper_signature_for(bundle.contracts.sole, recipient, approve: true)
+
+      get api_v1_bundle_path(bundle), headers: api_headers
+      assert_response :success
+      contract_json = response.parsed_body["contracts"].sole
+      assert_nil contract_json["signed_document"]
+      assert contract_json.key?("signed_document")
+      item = contract_json["paper_signatures"].sole
+      assert_equal %w[approved_at recipient scan status submitted_at], item.keys.sort
+      assert_equal [ recipient.uuid, "approved" ], item.values_at("recipient", "status")
+      assert_equal paper.reviewed_at.iso8601(3), Time.zone.parse(item["approved_at"]).iso8601(3)
+      assert_equal scan_api_v1_contract_paper_signature_url(bundle.contracts.sole, paper), item["scan"]
+
+      get URI(item["scan"]).path, headers: api_headers
+      assert_response :success
+      assert_equal "application/pdf", response.media_type
+      assert_match(/attachment/, response.headers["Content-Disposition"])
+      assert_equal paper.scan.download, response.body
+    end
+  end
+
+  test "another organization cannot download the scan" do
+    with_scan_allowed do
+      bundle = create_bundle_via_api(contracts: [ scan_contract_payload("a.pdf") ], recipients: [ { email: "signer@example.com" } ])
+      paper = paper_signature_for(bundle.contracts.sole, bundle.recipients.sole, approve: true)
+      other_key = OpenSSL::PKey::RSA.generate(2048)
+      other = Tenant.create!(name: "Iná", plan: :pro, features: [ "api" ], api_token_public_key: other_key.public_to_pem)
+
+      get scan_api_v1_contract_paper_signature_path(bundle.contracts.sole, paper), headers: api_headers(tenant: other, key: other_key)
+      assert_response :not_found
+    end
+  end
+
+  test "a returned paper signature has no scan endpoint" do
+    with_scan_allowed do
+      bundle = create_bundle_via_api(contracts: [ scan_contract_payload("a.pdf") ], recipients: [ { email: "signer@example.com" } ])
+      paper = paper_signature_for(bundle.contracts.sole, bundle.recipients.sole)
+      paper.return!(@owner, "unreadable")
+
+      get scan_api_v1_contract_paper_signature_path(bundle.contracts.sole, paper), headers: api_headers
+      assert_response :not_found
+      get api_v1_contract_path(bundle.contracts.sole), headers: api_headers
+      assert_equal [], response.parsed_body["paper_signatures"]
+    end
+  end
+
+  test "a submitted scan shows as submitted without approved_at and the contract is still pending" do
+    with_scan_allowed do
+      bundle = create_bundle_via_api(contracts: [ scan_contract_payload("a.pdf") ], recipients: [ { email: "signer@example.com" } ])
+      contract = bundle.contracts.sole
+      paper_signature_for(contract, bundle.recipients.sole)
+
+      get api_v1_contract_path(contract), headers: api_headers
+      assert_response :success
+      assert_not response.parsed_body.key?("signed_document")
+      item = response.parsed_body["paper_signatures"].sole
+      assert_equal "submitted", item["status"]
+      assert_nil item["approved_at"]
+      assert item["submitted_at"].present?
+
+      get status_api_v1_contract_path(contract), headers: api_headers
+      assert_response :ok
+    end
+  end
+
+  test "the status of a contract signed only on paper redirects to details that do not fail" do
+    with_scan_allowed do
+      bundle = create_bundle_via_api(contracts: [ scan_contract_payload("a.pdf") ], recipients: [ { email: "signer@example.com" } ])
+      contract = bundle.contracts.sole
+      paper_signature_for(contract, bundle.recipients.sole, approve: true)
+
+      get status_api_v1_contract_path(contract), headers: api_headers
+      assert_redirected_to api_v1_contract_path(contract)
+      get api_v1_contract_path(contract), headers: api_headers
+      assert_response :success
+      assert_nil response.parsed_body["signed_document"]
+      assert_equal 1, response.parsed_body["paper_signatures"].size
+
+      get signed_document_api_v1_contract_path(contract), headers: api_headers
+      assert_response :not_found
+    end
+  end
+
+  test "paper_signatures is empty for a contract signed electronically" do
+    bundle = create_bundle_via_api(contracts: [ pdf_contract_payload("a.pdf") ], recipients: [ { email: "signer@example.com" } ])
+    contract = bundle.contracts.sole
+    get api_v1_contract_path(contract), headers: api_headers
+    assert_equal [], response.parsed_body["paper_signatures"]
+
+    sign_with_autogram(contract, recipient: bundle.recipients.sole)
+    get api_v1_contract_path(contract), headers: api_headers
+    assert_equal [], response.parsed_body["paper_signatures"]
+    assert response.parsed_body["signed_document"].present?
+  end
+
+  test "a contract signed electronically and on paper has both" do
+    with_scan_allowed do
+      bundle = create_bundle_via_api(
+        contracts: [ scan_contract_payload("a.pdf") ],
+        recipients: [ { email: "first@example.com" }, { email: "second@example.com" } ]
+      )
+      contract = bundle.contracts.sole
+      first, second = bundle.recipients.order(:id).to_a
+      sign_with_autogram(contract, recipient: first)
+      paper_signature_for(contract, second, approve: true)
+
+      get api_v1_bundle_path(bundle), headers: api_headers
+      assert_response :success
+      contract_json = response.parsed_body["contracts"].sole
+      assert contract_json["signed_document"].present?
+      assert_equal [ second.uuid ], contract_json["paper_signatures"].map { |item| item["recipient"] }
+    end
+  end
+
   private
 
   def create_bundle_via_api(contracts:, recipients:)
@@ -225,6 +343,30 @@ class ApiSignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
   def text_document(filename, content)
     { filename: filename, content: Base64.strict_encode64(content), contentType: "text/plain;base64" }
+  end
+
+  def scan_contract_payload(filename)
+    pdf_contract_payload(filename).merge(allowedMethods: [ "qes", "scan" ])
+  end
+
+  def with_scan_allowed
+    original = Contract::ALLOWED_METHODS
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, %w[qes standalone_qes ades scan])
+    yield
+  ensure
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, original)
+  end
+
+  # A paper signature of the recipient as the web flow builds it; submitted, and approved by the owner on request.
+  def paper_signature_for(contract, recipient, approve: false)
+    signer_contract = recipient.recipient_signer.signer_contracts.find_or_create_by!(contract: contract)
+    paper = PaperSignature.open_for!(signer_contract)
+    paper.add_pages!([ Rack::Test::UploadedFile.new(file_fixture("paper-page.jpg"), "image/jpeg") ])
+    assert paper.submit!
+    paper.approve!(@owner) if approve
+    paper.reload
   end
 
   def api_headers(tenant: @organization, key: @api_key)

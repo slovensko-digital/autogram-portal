@@ -1,0 +1,58 @@
+<%# Screen 5: the phone link from the QR code takes photos of the signed pages into the same draft and can submit it. Downloading, discarding and the other signing methods stay with the signing link. %>
+<% content_for :title, t('paper_signatures.phone_page.title') %>
+
+<%= turbo_stream_from @paper_signature %>
+
+<% document = @contract.documents.first %>
+<% expected = @paper_signature.expected_page_count %>
+<% uploaded = @paper_signature.pages.any? ? @paper_signature.uploaded_page_count.to_i : 0 %>
+
+<div class="mx-auto max-w-4xl px-4 pb-8 pt-6 sm:px-6 sm:pt-10 lg:px-8">
+  <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl"><%= t('paper_signatures.phone_page.title') %></h1>
+  <p class="mt-2 break-words text-sm text-gray-600">
+    <span class="font-medium text-gray-900"><%= document.filename %></span><% if expected %> · <%= t('paper_signatures.document_pages', count: expected) %><% end %>
+  </p>
+
+  <div class="mt-6 space-y-5">
+    <%= render 'contracts/paper_signatures/pages', contract: @contract, paper_signature: @paper_signature, editable: true %>
+    <%= render 'contracts/paper_signatures/page_count_warning', paper_signature: @paper_signature %>
+
+    <%= form_with url: contract_paper_signature_pages_path(@contract, **paper_signer_link_params), multipart: true, class: "space-y-3", data: { controller: "paper-pages", paper_pages_failed_value: t('paper_signatures.steps.upload.failed'), action: "change->paper-pages#pick" } do %>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <%# The camera opens right away; the "Pridať stranu" tile points here too. %>
+        <label for="paper_signature_files"
+               class="flex cursor-pointer flex-col gap-3 rounded-lg border-2 border-dashed border-blue-600 bg-blue-50/40 p-4 hover:bg-blue-50">
+          <span class="flex items-center gap-2 text-base font-semibold text-blue-800">
+            <svg aria-hidden="true" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+            </svg>
+            <%= t('paper_signatures.phone_page.take_photo') %>
+          </span>
+          <%= file_field_tag "files[]", id: "paper_signature_files", accept: "image/*", capture: "environment", class: paper_file_input_classes %>
+        </label>
+        <%# Phones convert HEIC photos to JPEG for inputs that accept only JPEG and PNG. %>
+        <label class="flex cursor-pointer flex-col gap-3 rounded-lg border border-gray-300 bg-white p-4 hover:bg-gray-50">
+          <span class="flex items-center gap-2 text-base font-semibold text-gray-900">
+            <svg aria-hidden="true" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+            </svg>
+            <%= t('paper_signatures.phone_page.choose_from_gallery') %>
+          </span>
+          <%= file_field_tag "files[]", id: "paper_signature_gallery_files", multiple: true, accept: "image/jpeg,image/png", class: paper_file_input_classes %>
+        </label>
+      </div>
+      <%= submit_tag t('paper_signatures.steps.upload.button'), name: nil, class: "btn btn-second-primary w-full sm:w-auto", data: { paper_pages_target: "fallback" } %>
+      <%= render 'contracts/paper_signatures/upload_feedback' %>
+    <% end %>
+
+    <div class="border-t border-gray-200 pt-5">
+      <%# Without pages there is nothing to submit; the server refuses it too. %>
+      <%= button_to (uploaded.positive? ? t('paper_signatures.phone_page.submit', count: uploaded) : t('paper_signatures.show.submit')),
+            submit_contract_paper_signature_path(@contract, **paper_signer_link_params),
+            disabled: @paper_signature.pages.none?,
+            form_class: "flex sm:justify-end",
+            class: "btn btn-primary w-full sm:w-auto" %>
+    </div>
+  </div>
+</div>
