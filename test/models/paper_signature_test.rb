@@ -111,6 +111,18 @@ class PaperSignatureTest < ActiveSupport::TestCase
     assert draft.reload.draft?
   end
 
+  test "reviewing locks the bundle, the signer contract and the paper signature in this order" do
+    # The order of Bundle#supersede_pending_recipients! and Recipient#withdraw!, so they cannot deadlock
+    # with a review, and reviews of one bundle wait for each other to see whether it is completed.
+    approved = submitted_paper_signature
+    returned = PaperSignature.open_for!(@bundle.recipients.create!(email: "other@example.com", locale: "sk").signer_contracts.sole)
+    returned.add_pages!([ jpeg_upload ])
+    assert returned.submit!
+
+    assert_equal %w[bundles signer_contracts paper_signatures], locked_tables { approved.approve!(reviewer) }.first(3)
+    assert_equal %w[bundles signer_contracts paper_signatures], locked_tables { returned.return!(reviewer, "Chýba podpis.") }.first(3)
+  end
+
   test "a scan over the document size limit is not submitted" do
     with_plan_limits("MAX_DOCUMENT_SIZE_MB" => "0") do
       paper = PaperSignature.open_for!(signer_contract)
@@ -430,6 +442,14 @@ class PaperSignatureTest < ActiveSupport::TestCase
 
   def signer_contract
     recipient.signer_contracts.sole
+  end
+
+  # Tables of the rows locked (SELECT … FOR UPDATE) in the block, in order.
+  def locked_tables
+    tables = []
+    collect = ->(*, payload) { tables << payload[:sql][/FROM "(\w+)"/, 1] if payload[:sql].include?("FOR UPDATE") }
+    ActiveSupport::Notifications.subscribed(collect, "sql.active_record") { yield }
+    tables
   end
 
   def submitted_paper_signature

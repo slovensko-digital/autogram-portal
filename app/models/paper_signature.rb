@@ -317,9 +317,12 @@ class PaperSignature < ApplicationRecord
     "#{File.basename(contract.documents.first&.filename.to_s, '.*').presence || 'document'}-scan.pdf"
   end
 
+  # In the order of Bundle#supersede_pending_recipients! and Recipient#withdraw!, so a review cannot
+  # deadlock with them; locking the bundle also makes reviews of its scans see each other's signatures.
   def lock_for_review!
-    lock!
+    contract.bundle.lock!
     signer_contract.lock!
+    lock!
     raise NoLongerReviewable unless reviewable?
   end
 
