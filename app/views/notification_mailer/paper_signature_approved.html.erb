@@ -1,0 +1,2 @@
+<%= render "mailer/badge", label: t(".badge"), tone: :green %>
+<%= render "mailer/heading", title: t(".title"), message: t(".message", sender: @bundle.sender_display_name, document: @contract.display_name) %>

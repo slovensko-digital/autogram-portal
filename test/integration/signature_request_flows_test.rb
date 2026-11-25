@@ -678,6 +678,65 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the organization is asked to review a scan even with author notifications off and told nothing else" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      bundle.update!(author_notifications_enabled: false)
+      ActionMailer::Base.deliveries.clear
+
+      paper = nil
+      perform_enqueued_jobs { paper = submit_paper_scan(contract, recipient) }
+
+      mail = mails_to(@owner.email).sole
+      assert_equal I18n.t("notification_mailer.paper_signature_submitted.subject"), mail.subject
+      assert_equal bundle_paper_signature_path(bundle, paper), link_in(mail, %r{/paper_signatures/})
+      assert_empty mails_to(recipient.email)
+    end
+  end
+
+  test "the signer is told by email when the scan is approved and the reviewer gets no mail" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      ActionMailer::Base.deliveries.clear
+
+      sign_in_with_tenant @owner, @organization
+      perform_enqueued_jobs { post approve_bundle_paper_signature_path(bundle, paper) }
+
+      assert bundle.reload.completed?
+      assert_equal [ I18n.t("notification_mailer.paper_signature_approved.subject") ], mails_to(recipient.email).map(&:subject)
+      assert_empty mails_to(@owner.email)
+    end
+  end
+
+  test "the signer learns why the scan was returned and can sign again from the mail" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      ActionMailer::Base.deliveries.clear
+
+      sign_in_with_tenant @owner, @organization
+      perform_enqueued_jobs { post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Chýba podpis na strane 2." } }
+
+      mail = mails_to(recipient.email).sole
+      assert_equal I18n.t("notification_mailer.paper_signature_returned.subject"), mail.subject
+      assert_includes mail.text_part.body.decoded, "Chýba podpis na strane 2."
+      assert_equal sign_bundle_path(bundle, recipient: recipient.uuid), link_in(mail, %r{/sign\b})
+      assert_empty mails_to(@owner.email)
+    end
+  end
+
+  test "a recipient without an email gets no paper signature mail and nothing fails" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      recipient.update_columns(email: nil)
+      ActionMailer::Base.deliveries.clear
+
+      sign_in_with_tenant @owner, @organization
+      perform_enqueued_jobs { post approve_bundle_paper_signature_path(bundle, paper) }
+
+      assert paper.reload.approved?
+      assert_empty ActionMailer::Base.deliveries
+    end
+  end
+
   test "a mixed bundle completes with one electronic and one paper signature under the all rule" do
     with_allowed_methods(PAPER_ALLOWED_METHODS) do
       bundle = request_signature_from_web(as: @owner, filename: "zmiesany.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))

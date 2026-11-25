@@ -1,0 +1,11 @@
+<%= render "mailer/badge", label: t(".badge"), tone: :amber %>
+<%= render "mailer/heading", title: t(".title"), message: t(".message", sender: @bundle.sender_display_name, document: @contract.display_name) %>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FEFCE8" style="background-color: #FEFCE8; border-radius: 10px; margin: 0 0 28px;">
+  <tr>
+    <td style="padding: 16px 18px;">
+      <%= simple_format(ERB::Util.html_escape(@paper_signature.return_reason), { style: "margin: 0; font-size: 16px; line-height: 1.6; color: #1F2937;" }, wrapper_tag: "p") %>
+    </td>
+  </tr>
+</table>
+<p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6; color: #374151;"><%= t(".again") %></p>
+<%= render "mailer/button", label: t(".open"), url: sign_bundle_url(@bundle, recipient: @user) %>

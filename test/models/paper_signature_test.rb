@@ -32,6 +32,7 @@ require_relative "../support/plan_limits_helper"
 class PaperSignatureTest < ActiveSupport::TestCase
   include SigningFlowHelper
   include PlanLimitsHelper
+  include ActiveJob::TestHelper
 
   setup do
     @tenant = Tenant.create!(name: "Firma ABC", plan: :pro)
@@ -318,6 +319,31 @@ class PaperSignatureTest < ActiveSupport::TestCase
 
     assert_equal 0, PaperSignature.count
     assert_equal 0, PaperSignaturePage.count
+  end
+
+  test "submitting, approving and returning enqueue the notification jobs only when they happen" do
+    ActiveJob::Base.queue_adapter = :test
+    paper = PaperSignature.open_for!(signer_contract)
+    paper.add_pages!([ jpeg_upload ])
+
+    assert_enqueued_with(job: Notification::PaperSignatureSubmittedJob, args: [ paper ]) { assert paper.submit! }
+    assert_no_enqueued_jobs(only: Notification::PaperSignatureSubmittedJob) { assert_not paper.submit! }
+    assert_enqueued_with(job: Notification::PaperSignatureReviewedJob, args: [ paper ]) { paper.approve!(reviewer) }
+    assert_no_enqueued_jobs(only: Notification::PaperSignatureReviewedJob) do
+      assert_raises(PaperSignature::NoLongerReviewable) { paper.approve!(reviewer) }
+    end
+
+    other = Bundle.create!(tenant: @tenant, contracts: [ create_contract ])
+    other_contract = other.recipients.create!(email: "other@example.com", locale: "sk").signer_contracts.sole
+    returned = PaperSignature.open_for!(other_contract)
+    returned.add_pages!([ jpeg_upload ])
+    returned.submit!
+    assert_enqueued_with(job: Notification::PaperSignatureReviewedJob, args: [ returned ]) { returned.return!(reviewer, "Chýba podpis.") }
+    assert_no_enqueued_jobs(only: Notification::PaperSignatureReviewedJob) do
+      assert_raises(ActiveRecord::RecordInvalid) { PaperSignature.open_for!(other_contract).tap { |p| p.update!(status: :submitted) }.return!(reviewer, "") }
+    end
+  ensure
+    ActiveJob::Base.queue_adapter = GoodJob::Adapter.new(execution_mode: :inline)
   end
 
   private

@@ -1,0 +1,5 @@
+<%= t('.title') %>
+
+<%= t('.message', name: @signing_recipient.display_name, document: @contract.display_name) %>
+
+<%= t('.review') %>: <%= bundle_paper_signature_url(@bundle, @paper_signature) %>

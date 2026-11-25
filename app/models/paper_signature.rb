@@ -185,7 +185,10 @@ class PaperSignature < ApplicationRecord
       true
     end
 
-    broadcast_state_change if submitted
+    if submitted
+      broadcast_state_change
+      Notification::PaperSignatureSubmittedJob.perform_later(self)
+    end
     submitted
   rescue ActiveStorage::FileNotFoundError
     false # a page was removed while the scan was being built
@@ -201,6 +204,7 @@ class PaperSignature < ApplicationRecord
     end
 
     broadcast_state_change
+    Notification::PaperSignatureReviewedJob.perform_later(self)
   end
 
   # Sends the scan back to the signer, who may upload a new one.
@@ -212,6 +216,7 @@ class PaperSignature < ApplicationRecord
     end
 
     broadcast_state_change
+    Notification::PaperSignatureReviewedJob.perform_later(self)
   end
 
   # The signer discarded the scan or their signature is no longer needed.

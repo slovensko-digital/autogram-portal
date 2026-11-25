@@ -2739,6 +2739,24 @@ sk:
       step_2_desc: "Použite občiansky preukaz a postupujte podľa pokynov."
       step_3_title: "Hotovo."
       step_3_desc: "Dokument je podpísaný."
+    paper_signature_submitted:
+      subject: "Sken podpisu na papieri čaká na vašu kontrolu"
+      badge: "Čaká na kontrolu"
+      title: "Sken podpisu na papieri čaká na vašu kontrolu"
+      message: "%{name} nahral(a) sken dokumentu %{document} podpísaného na papieri. Skontrolujte ho, aby sa podpis započítal."
+      review: "Skontrolovať sken"
+    paper_signature_approved:
+      subject: "Váš podpis na papieri bol schválený"
+      badge: "Schválené"
+      title: "Váš podpis na papieri bol schválený"
+      message: "%{sender} skontroloval(a) váš sken dokumentu %{document} a podpis schválil(a)."
+    paper_signature_returned:
+      subject: "Váš sken bol vrátený"
+      badge: "Vrátené"
+      title: "Váš sken bol vrátený"
+      message: "%{sender} vrátil(a) váš sken dokumentu %{document}. Dôvod:"
+      again: "Podpíšte dokument znova a nahrajte nový sken."
+      open: "Otvoriť podpisovanie"
     signature_no_longer_required:
       subject: "Váš podpis už nie je potrebný"
       badge: "Bez vášho podpisu"

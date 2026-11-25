@@ -2805,6 +2805,24 @@ en:
       step_2_desc: "Use your eID card or mobile key and follow the instructions."
       step_3_title: "Done."
       step_3_desc: "The document is signed."
+    paper_signature_submitted:
+      subject: "A paper signature scan is waiting for your review"
+      badge: "Awaiting review"
+      title: "A paper signature scan is waiting for your review"
+      message: "%{name} uploaded a scan of the document %{document} signed on paper. Review it so that the signature counts."
+      review: "Review scan"
+    paper_signature_approved:
+      subject: "Your paper signature was approved"
+      badge: "Approved"
+      title: "Your paper signature was approved"
+      message: "%{sender} reviewed your scan of the document %{document} and approved the signature."
+    paper_signature_returned:
+      subject: "Your scan was returned"
+      badge: "Returned"
+      title: "Your scan was returned"
+      message: "%{sender} returned your scan of the document %{document}. Reason:"
+      again: "Sign the document again and upload a new scan."
+      open: "Open signing"
     signature_no_longer_required:
       subject: "Your signature is no longer required"
       badge: "Without your signature"
