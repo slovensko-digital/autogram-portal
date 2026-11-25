@@ -226,6 +226,7 @@ sk:
         declined: "Odmietnuté"
         superseded: "Podpis nie je potrebný"
         withdrawn: "Stiahnuté"
+        awaiting_review: "Čaká na kontrolu skenu"
 
   devise:
     sessions:
@@ -2609,6 +2610,9 @@ sk:
       visual_signatures_found_title: "Pridané vizuálne podpisy od"
       visual_signature_badge: "Vizuálny podpis"
       visual_signature_added_at: "Pridané %{time}"
+      paper_signatures_found_title: "Podpísali na papieri"
+      paper_signature_badge: "Podpis na papieri"
+      paper_signature_verified: "%{date} · overené odosielateľom"
       qualified_timestamp: "Kvalifikovaná časová pečiatka"
       no_timestamp: "Žiadna časová pečiatka"
       timestamps_count: "(%{count} časových pečiatok)"
@@ -2903,6 +2907,34 @@ sk:
     returned:
       title: "Odosielateľ vrátil váš sken"
       reviewed: "Vrátil(a) %{name} %{time}"
+    review:
+      title: "Kontrola podpisu na papieri"
+      back: "Späť na balík"
+      submitted_at_html: "Sken nahratý %{time}"
+      info:
+        title: "Portál nevie overiť, či je na skene naozaj podpis"
+        message: "Porovnajte nahraté strany s pôvodným dokumentom. Po schválení sa podpis započíta a balík sa môže dokončiť."
+      original: "Pôvodný dokument"
+      scan: "Nahraný sken"
+      decision:
+        title: "Je dokument podpísaný?"
+        hint: "Schválením sa podpis započíta. Ak niečo chýba, vráťte sken s dôvodom."
+      return: "Vrátiť sken"
+      approve: "Schváliť podpis"
+      return_dialog:
+        title: "Vrátiť sken – %{name}"
+        message: "%{name} dostane e-mail s vaším dôvodom a môže nahrať nový sken. Jeho podpis sa nezapočíta, kým neschválite nový sken."
+        reason: "Dôvod"
+        hint: "Dôvod uvidí v e-maile aj na stránke podpisu."
+        cancel: "Zrušiť"
+      approved: "Podpis na papieri sme schválili."
+      returned: "Sken sme vrátili."
+      alert:
+        title: "%{name} nahral(a) sken podpísaného dokumentu"
+        message: "Skontrolujte ho, aby sa jeho podpis započítal."
+      check: "Skontrolovať sken"
+      approved_by_html: "Podpis na papieri · schválil(a) %{name} %{time}"
+      download: "Stiahnuť sken"
 
   plan_limits:
     exceeded:

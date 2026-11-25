@@ -80,6 +80,12 @@ class PaperSignature < ApplicationRecord
     OPEN_STATUSES.include?(status)
   end
 
+  # The scan awaits review and the signature is still needed (not signed another way, superseded,
+  # declined or withdrawn).
+  def reviewable?
+    submitted? && signer_contract.awaiting?
+  end
+
   # Adds photos (JPEG, PNG) after the current pages, or one PDF, which replaces all pages; photos
   # replace an uploaded PDF in turn. The type is read from the content, not from what the browser
   # declares. At most MAX_PAGES pages of at most MAX_FILE_BYTES each. Returns the new pages; none
@@ -275,7 +281,7 @@ class PaperSignature < ApplicationRecord
   def lock_for_review!
     lock!
     signer_contract.lock!
-    raise NoLongerReviewable unless submitted? && signer_contract.awaiting?
+    raise NoLongerReviewable unless reviewable?
   end
 
   def broadcast_state_change

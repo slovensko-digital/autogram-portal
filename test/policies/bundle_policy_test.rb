@@ -11,7 +11,7 @@ class BundlePolicyTest < ActiveSupport::TestCase
     context = AuthorizationContext::Web.new(user: users(:two), tenant: tenants(:one))
     policy = BundlePolicy.new(context, bundles(:one))
 
-    [ :show?, :edit?, :update?, :destroy?, :manage_recipients? ].each do |query|
+    [ :show?, :edit?, :update?, :destroy?, :manage_recipients?, :review_paper_signatures? ].each do |query|
       assert policy.public_send(query)
     end
   end
@@ -25,6 +25,7 @@ class BundlePolicyTest < ActiveSupport::TestCase
     assert_not policy.update?
     assert_not policy.destroy?
     assert_not policy.manage_recipients?
+    assert_not policy.review_paper_signatures?
   end
 
   test "admin and public visibility do not bypass management ownership" do

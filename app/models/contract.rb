@@ -367,8 +367,10 @@ class Contract < ApplicationRecord
     [ prepared_stamp.stamped_document ]
   end
 
+  # Signed once no recipient is awaiting and the document carries an electronic signature or a
+  # signature made on paper was approved (a scan never becomes the signed document).
   def awaiting_signature?
-    !signed_document_attached? || bundle&.awaiting_recipients?(contract: self)
+    bundle&.awaiting_recipients?(contract: self) || (!signed_document_attached? && !paper_signatures.approved.exists?)
   end
 
   def visual_signed?

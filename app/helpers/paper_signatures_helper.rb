@@ -51,4 +51,40 @@ module PaperSignaturesHelper
   def paper_signature_reviewer_name(paper_signature)
     paper_signature.reviewed_by&.name.presence || paper_signature.contract.tenant.sender_display_name
   end
+
+  # The reviewer as the organization's members know them: name or email.
+  def paper_signature_approver_name(paper_signature)
+    reviewer = paper_signature.reviewed_by
+    reviewer&.name.presence || reviewer&.email || paper_signature.contract.tenant.sender_display_name
+  end
+
+  # Scans the organization has yet to review, oldest first.
+  def paper_signatures_awaiting_review(bundle)
+    bundle.paper_signatures.submitted
+      .includes(signer_contract: [ { signer: :recipient }, { contract: { documents: { blob_attachment: :blob } } } ])
+      .order(:submitted_at)
+      .select(&:reviewable?)
+  end
+
+  # Submitted and approved paper signatures of the bundle by recipient id, for the recipient cards.
+  def submitted_and_approved_paper_signatures_by_recipient(bundle)
+    bundle.paper_signatures
+      .where(status: %w[submitted approved])
+      .includes(:reviewed_by, signer_contract: [ :signer, { contract: { documents: { blob_attachment: :blob } } } ])
+      .order(:submitted_at)
+      .group_by { |paper_signature| paper_signature.signer.recipient_id }
+  end
+
+  # The document the scan is compared with on the review page, as the bundle detail shows it.
+  def paper_signature_original_file(contract)
+    if contract.source_document_attached? && contract.source_document_is_pdf?
+      contract.latest_source_content_version.file
+    else
+      contract.documents.first&.blob
+    end
+  end
+
+  def paper_signature_time_tag(time)
+    tag.time(time.in_time_zone("Europe/Bratislava").strftime("%-d. %-m. %Y %H:%M"), datetime: time.iso8601)
+  end
 end

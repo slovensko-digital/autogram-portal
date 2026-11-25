@@ -255,6 +255,7 @@ en:
         declined: "Declined"
         superseded: "Signature no longer required"
         withdrawn: "Withdrawn"
+        awaiting_review: "Awaiting scan review"
     application:
       signature_levels:
         pades: "PAdES"
@@ -2674,6 +2675,9 @@ en:
       visual_signatures_found_title: "Visual signatures added by"
       visual_signature_badge: "Visual signature"
       visual_signature_added_at: "Added on %{time}"
+      paper_signatures_found_title: "Signed on paper by"
+      paper_signature_badge: "Paper signature"
+      paper_signature_verified: "%{date} · verified by the sender"
       qualified_timestamp: "Qualified Timestamp"
       no_timestamp: "No timestamp"
       timestamps_count: "(%{count} timestamps)"
@@ -2963,6 +2967,34 @@ en:
     returned:
       title: "The sender returned your scan"
       reviewed: "Returned by %{name}, %{time}"
+    review:
+      title: "Review of a paper signature"
+      back: "Back to the bundle"
+      submitted_at_html: "Scan uploaded %{time}"
+      info:
+        title: "The portal cannot verify that the scan really carries a signature"
+        message: "Compare the uploaded pages with the original document. Once you approve it, the signature counts and the bundle can be completed."
+      original: "Original document"
+      scan: "Uploaded scan"
+      decision:
+        title: "Is the document signed?"
+        hint: "Approving counts the signature. If something is missing, return the scan with a reason."
+      return: "Return scan"
+      approve: "Approve signature"
+      return_dialog:
+        title: "Return scan – %{name}"
+        message: "%{name} will get an email with your reason and can upload a new scan. Their signature does not count until you approve a new scan."
+        reason: "Reason"
+        hint: "They will see the reason in the email and on the signing page."
+        cancel: "Cancel"
+      approved: "The paper signature is approved."
+      returned: "The scan was returned."
+      alert:
+        title: "%{name} uploaded a scan of the signed document"
+        message: "Review it so that their signature counts."
+      check: "Review scan"
+      approved_by_html: "Signed on paper · approved by %{name} %{time}"
+      download: "Download scan"
 
   plan_limits:
     exceeded:

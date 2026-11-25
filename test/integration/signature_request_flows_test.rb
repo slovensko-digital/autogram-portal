@@ -577,6 +577,265 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a member approves the scan and the bundle completes" do
+    @owner.update!(name: "Eva Kontrolná")
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+
+      sign_in_with_tenant @owner, @organization
+      get bundle_path(bundle)
+      assert_response :success
+      assert_includes response.body, "paper@example.com nahral(a) sken podpísaného dokumentu"
+      assert_includes response.body, "Skontrolujte ho, aby sa jeho podpis započítal."
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), text: /Skontrolovať sken/
+
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Čaká na kontrolu skenu"
+      assert_select "a[href=?][data-turbo-frame=_top]", bundle_paper_signature_path(bundle, paper), text: /Skontrolovať sken/
+
+      get bundle_paper_signature_path(bundle, paper)
+      assert_response :success
+      assert_select "h1", "Kontrola podpisu na papieri"
+      assert_includes response.body, "Portál nevie overiť, či je na skene naozaj podpis"
+      assert_select "iframe", 2
+      assert_select "iframe[src^=?]", rails_blob_path(contract.documents.sole.blob, disposition: "inline")
+      assert_select "iframe[src^=?]", scan_bundle_paper_signature_path(bundle, paper, disposition: "inline")
+      assert_select "form[action=?] button", approve_bundle_paper_signature_path(bundle, paper), text: "Schváliť podpis"
+      assert_select "dialog form[action=?]", return_scan_bundle_paper_signature_path(bundle, paper) do
+        assert_select "textarea[name=return_reason][required]"
+      end
+
+      get scan_bundle_paper_signature_path(bundle, paper, disposition: "inline")
+      assert_response :success
+      assert_equal "application/pdf", response.media_type
+      assert response.headers["Content-Disposition"].start_with?("inline")
+      assert_equal paper.scan.download.b, response.body.b
+
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      assert paper.reload.approved?
+      assert_equal @owner, paper.reviewed_by
+      assert bundle.reload.completed?
+      assert recipient.reload.signed?
+
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Podpísané"
+      assert_includes response.body, "Podpis na papieri · schválil(a) Eva Kontrolná"
+      assert_select "a[href=?]", scan_bundle_paper_signature_path(bundle, paper, disposition: "attachment"), text: /Stiahnuť sken/
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), count: 0
+
+      get scan_bundle_paper_signature_path(bundle, paper, disposition: "attachment")
+      assert_response :success
+      assert response.headers["Content-Disposition"].start_with?("attachment")
+
+      get bundle_path(bundle)
+      assert_not_includes response.body, "nahral(a) sken podpísaného dokumentu"
+    end
+  end
+
+  test "a recipient who got the signing link another way shows the scan awaiting review" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "odkaz.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      recipient = add_recipient_without_notifying(bundle, "link@example.com")
+      sign_out @owner
+      paper = submit_paper_scan(bundle.contracts.sole, recipient)
+
+      sign_in_with_tenant @owner, @organization
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Čaká na kontrolu skenu"
+      assert_not_includes response.body, I18n.t("recipients.index.delivery.not_sent")
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), text: /Skontrolovať sken/
+    end
+  end
+
+  test "a member returns the scan with a reason" do
+    @owner.update!(name: "Eva Kontrolná")
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      sign_in_with_tenant @owner, @organization
+
+      post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "  " }
+      assert_redirected_to bundle_paper_signature_path(bundle, paper)
+      assert paper.reload.submitted?, "a scan is not returned without a reason"
+      assert_equal "Dôvod vrátenia musí byť vyplnený", flash[:alert]
+
+      post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Chýba podpis na strane 2." }
+      assert_redirected_to bundle_path(bundle)
+      assert paper.reload.returned?
+      assert_equal "Chýba podpis na strane 2.", paper.return_reason
+      assert_equal @owner, paper.reviewed_by
+      assert recipient.reload.pending?
+      assert_not bundle.reload.completed?
+
+      get bundle_recipients_path(bundle)
+      assert_select "span", text: "Čaká na podpis"
+      assert_select "a[href=?]", bundle_paper_signature_path(bundle, paper), count: 0
+      sign_out @owner
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_includes response.body, "Chýba podpis na strane 2."
+      assert_includes response.body, "Vrátil(a) Eva Kontrolná"
+    end
+  end
+
+  test "a mixed bundle completes with one electronic and one paper signature under the all rule" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "zmiesany.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      electronic = add_recipient(bundle, "electronic@example.com")
+      on_paper = add_recipient(bundle, "paper@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+
+      sign_with_autogram(contract, recipient: electronic)
+      paper = submit_paper_scan(contract, on_paper)
+      assert_not bundle.reload.completed?, "a scan awaiting review is not a signature"
+
+      sign_in_with_tenant @owner, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+
+      assert bundle.reload.completed?
+      assert electronic.reload.signed?
+      assert on_paper.reload.signed?
+      assert_not contract.reload.awaiting_signature?
+      assert contract.signed_document_attached?, "the electronically signed version stays the signed document"
+      assert_empty mails_to(@owner.email).select { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") },
+        "the reviewer is not told about the completion they caused"
+    end
+  end
+
+  test "with the any rule an approved scan supersedes the other recipient and cancels their draft" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      bundle = request_signature_from_web(as: @owner, filename: "jeden-staci.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      patch bundle_path(bundle), params: { bundle: { signing_rule: "any" } }
+      first = add_recipient(bundle, "first@example.com")
+      second = add_recipient(bundle, "second@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+
+      post contract_paper_signature_pages_path(contract, recipient: second.uuid), params: { files: [ jpeg_upload ] }
+      draft = PaperSignature.draft.sole
+      paper = submit_paper_scan(contract, first)
+
+      sign_in_with_tenant @owner, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+
+      assert bundle.reload.completed?
+      assert first.reload.signed?
+      assert second.reload.superseded?
+      assert draft.reload.canceled?
+      assert_equal 0, draft.pages.count
+      assert_equal 1, mails_to(second.email).count { |m| m.subject == I18n.t("notification_mailer.signature_no_longer_required.subject") }
+    end
+  end
+
+  test "approving after the recipient was withdrawn shows that the signature is no longer needed" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      sign_in_with_tenant @owner, @organization
+      get bundle_paper_signature_path(bundle, paper)
+      assert_response :success
+
+      delete bundle_recipient_path(bundle, recipient), as: :turbo_stream
+      assert recipient.reload.withdrawn?
+      assert paper.reload.canceled?
+
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      post return_scan_bundle_paper_signature_path(bundle, paper), params: { return_reason: "Neskoro." }
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      get bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+
+      assert paper.reload.canceled?
+      assert_nil paper.reviewed_by
+      assert_nil recipient.signer_contracts.sole.signed_at
+    end
+  end
+
+  test "approving twice completes the signature once" do
+    reviewer = confirmed_user("reviewer@firma-abc.sk", tenant: @organization)
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      sign_in_with_tenant reviewer, @organization
+
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert_redirected_to bundle_path(bundle)
+      signed_at = recipient.signer_contracts.sole.signed_at
+      assert signed_at
+
+      assert_no_difference -> { UsageRecord.signature_request.where(contract: contract).count } do
+        post approve_bundle_paper_signature_path(bundle, paper)
+      end
+      assert_redirected_to bundle_path(bundle)
+      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), flash[:notice]
+      assert_equal 1, UsageRecord.signature_request.where(contract: contract).count
+      assert_equal signed_at, recipient.signer_contracts.sole.reload.signed_at
+      assert_equal reviewer, paper.reload.reviewed_by
+      assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+      assert_empty mails_to(reviewer.email), "the reviewer is not told about their own approval"
+    end
+  end
+
+  test "a contract signed only on paper is no longer awaiting and its download gives the original document" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      assert contract.reload.awaiting_signature?, "a scan awaiting review is not a signature"
+
+      sign_in_with_tenant @owner, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+      get bundle_path(bundle)
+      assert_response :success
+      get show_bundle_contract_path(contract)
+      assert_response :success
+      sign_out @owner
+
+      assert_not contract.reload.awaiting_signature?
+      assert_not contract.signed_document_attached?, "a scan never becomes the signed document"
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_response :success
+      assert_includes response.body, I18n.t("contracts.sign.already_signed.title")
+      assert_select "a[href=?]", signed_document_contract_path(contract), text: I18n.t("actions.download_contract")
+      get sign_contract_path(contract, recipient: recipient.uuid)
+      assert_redirected_to sign_bundle_path(bundle, recipient: recipient.uuid)
+
+      get signed_document_contract_path(contract)
+      assert_response :redirect
+      original = contract.documents.sole
+      assert_equal rails_blob_path(original.blob, disposition: "attachment"), URI(response.location).request_uri
+      follow_redirect!
+      follow_redirect! while response.redirect?
+      assert_equal original.content.b, response.body.b
+    end
+  end
+
+  test "the public signature validation lists the paper signature without the scan" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      paper = submit_paper_scan(contract, recipient)
+      get validate_contract_path(contract)
+      assert_response :success
+      assert_not_includes response.body, "overené odosielateľom", "a scan awaiting review is not a signature"
+      assert_includes response.body, I18n.t("shared.signature_validation.no_signatures_title")
+
+      sign_in_with_tenant @owner, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+      sign_out @owner
+
+      get validate_contract_path(contract)
+      assert_response :success
+      assert_includes response.body, "Podpis na papieri"
+      assert_includes response.body, "paper@example.com"
+      approved_on = paper.reload.reviewed_at.in_time_zone("Europe/Bratislava").strftime("%-d. %-m. %Y")
+      assert_includes response.body, "#{approved_on} · overené odosielateľom"
+      assert_not_includes response.body, I18n.t("shared.signature_validation.no_signatures_title")
+      assert_not_includes response.body, "paper_signatures/#{paper.uuid}"
+      assert_not_includes response.body, "/rails/active_storage/"
+    end
+  end
+
   test "author names the bundle and writes a message before the invitation goes out" do
     bundle = request_signature_from_web(as: @owner, filename: "zmluva-o-dielo.pdf")
 
@@ -1104,6 +1363,13 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     get contract_paper_signature_path(contract, recipient: recipient.uuid)
     assert_response :success
     css_select("#paper_signature_phone [data-phone-url]").sole["data-phone-url"]
+  end
+
+  # Uploads a photo of the signed page as the recipient (signed out) and submits it for review.
+  def submit_paper_scan(contract, recipient)
+    post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+    post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+    PaperSignature.submitted.find_by!(signer_contract: recipient.signer_contracts.find_by!(contract: contract))
   end
 
   def phone_token(phone_url)

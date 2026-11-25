@@ -221,8 +221,13 @@ class ContractsController < ApplicationController
                 alert: e.message
   end
 
+  # A contract signed only on paper has no electronically signed version; its original document is
+  # what was signed.
   def signed_document
-    redirect_to rails_blob_url(@contract.signed_document, disposition: "attachment"), allow_other_host: true
+    file = @contract.signed_document_attached? ? @contract.signed_document : @contract.documents.first&.blob
+    raise ActiveRecord::RecordNotFound unless file&.attached?
+
+    redirect_to rails_blob_url(file, disposition: "attachment"), allow_other_host: true
   end
 
   def validate

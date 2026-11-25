@@ -79,6 +79,13 @@ Rails.application.routes.draw do
           post :notify
         end
       end
+      resources :paper_signatures, only: [ :show ], param: :uuid, controller: "bundles/paper_signatures" do
+        member do
+          post :approve
+          post :return_scan
+          get :scan
+        end
+      end
     end
   end
 

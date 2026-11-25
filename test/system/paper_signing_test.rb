@@ -6,6 +6,7 @@ require_relative "../support/signing_flow_helper"
 # on, as in production, so the upload must send the CSRF token of the page.
 class PaperSigningSystemTest < ApplicationSystemTestCase
   include SigningFlowHelper
+  include Devise::Test::IntegrationHelpers
 
   setup do
     @original_allowed_methods = Contract::ALLOWED_METHODS
@@ -16,9 +17,9 @@ class PaperSigningSystemTest < ApplicationSystemTestCase
     @original_allow_forgery_protection = ActionController::Base.allow_forgery_protection
     ActionController::Base.allow_forgery_protection = true
 
-    organization = Tenant.create!(name: "Firma ABC", plan: :pro)
+    @organization = Tenant.create!(name: "Firma ABC", plan: :pro)
     @bundle = Bundle.create!(
-      tenant: organization,
+      tenant: @organization,
       contracts_attributes: [ {
         allowed_methods: [ "qes", "scan" ],
         signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" },
@@ -124,7 +125,49 @@ class PaperSigningSystemTest < ApplicationSystemTestCase
     Capybara.using_session(:phone) { Capybara.current_session.quit }
   end
 
+  test "a member returns a scan with a reason in the dialog and approves the next one" do
+    owner = confirmed_user("owner@firma-abc.sk", tenant: @organization, role: :owner)
+    returned = submitted_paper_signature
+    sign_in owner
+
+    visit bundle_paper_signature_path(@bundle, returned)
+    click_on "Firma ABC"
+    assert_selector "h1", text: "Kontrola podpisu na papieri"
+    assert_selector "iframe", count: 2
+    assert_no_selector "dialog[open]"
+
+    click_on "Vrátiť sken"
+    within "dialog[open]" do
+      assert_text "paper@example.com dostane e-mail s vaším dôvodom"
+      click_on "Zrušiť"
+    end
+    assert_no_selector "dialog[open]"
+
+    click_on "Vrátiť sken"
+    within "dialog[open]" do
+      fill_in "Dôvod", with: "Chýba podpis na strane 2."
+      click_on "Vrátiť sken"
+    end
+    assert_text "Sken sme vrátili."
+    assert returned.reload.returned?
+    assert_equal "Chýba podpis na strane 2.", returned.return_reason
+
+    approved = submitted_paper_signature
+    visit bundle_paper_signature_path(@bundle, approved)
+    click_on "Schváliť podpis"
+    assert_text "Podpis na papieri sme schválili."
+    assert approved.reload.approved?
+    assert @bundle.reload.completed?
+  end
+
   private
+
+  def submitted_paper_signature
+    paper = PaperSignature.open_for!(@recipient.recipient_signer.signer_contracts.sole)
+    paper.add_pages!([ Rack::Test::UploadedFile.new(file_fixture("paper-page.jpg"), "image/jpeg") ])
+    assert paper.submit!
+    paper
+  end
 
   def two_page_pdf_content
     Prawn::Document.new { |pdf| pdf.text "Strana 1"; pdf.start_new_page; pdf.text "Strana 2" }.render

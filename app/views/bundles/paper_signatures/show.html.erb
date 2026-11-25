@@ -1,0 +1,91 @@
+<% content_for :title, t('paper_signatures.review.title') %>
+<%= turbo_stream_from @paper_signature %>
+
+<% recipient_name = @paper_signature.signer.display_name %>
+<% contract = @paper_signature.contract %>
+<% original = paper_signature_original_file(contract) %>
+<% original_name = original&.filename.to_s %>
+
+<%# The dialog closes before Turbo caches the page, so going back does not show it open. %>
+<div data-controller="dialog" data-action="turbo:before-cache@document->dialog#close">
+  <div class="mx-auto max-w-7xl space-y-6 px-6 pt-10 lg:px-8">
+    <div>
+      <%= link_to bundle_path(@bundle), class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline" do %>
+        <svg aria-hidden="true" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        <%= t('paper_signatures.review.back') %>
+      <% end %>
+
+      <h1 class="mt-4 text-3xl font-bold text-gray-900"><%= t('paper_signatures.review.title') %></h1>
+      <p class="mt-1 break-words text-sm text-gray-600">
+        <span class="font-medium text-gray-900"><%= recipient_name %></span>
+        &middot; <%= contract.display_name %>
+        &middot; <%= t('paper_signatures.review.submitted_at_html', time: paper_signature_time_tag(@paper_signature.submitted_at)) %>
+      </p>
+    </div>
+
+    <div class="[&>div]:mb-0">
+      <%= render 'shared/info', title: t('paper_signatures.review.info.title'), content: t('paper_signatures.review.info.message') %>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      <% [
+           [ t('paper_signatures.review.original'), original_name, (rails_blob_path(original, disposition: "inline") if original) ],
+           [ t('paper_signatures.review.scan'), @paper_signature.scan.filename.to_s, scan_bundle_paper_signature_path(@bundle, @paper_signature, disposition: "inline") ]
+         ].each do |label, filename, path| %>
+        <section class="min-w-0">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-base font-semibold text-gray-900"><%= label %></h2>
+            <% if path %>
+              <%= link_to path, target: "_blank", rel: "noopener", data: { turbo: false },
+                    class: "text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900" do %>
+                <%= t('actions.view') %><span class="sr-only">: <%= label %> (<%= t('upload_form.opens_in_new_tab') %>)</span>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="mt-2 rounded-lg border border-gray-200 bg-white p-2">
+            <% if path %>
+              <iframe src="<%= path %>#navpanes=0&view=FitH" title="<%= label %>: <%= filename %>" class="h-[720px] w-full rounded border-0"></iframe>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="sticky bottom-0 z-10 mt-8 border-t border-gray-200 bg-white/95 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+      <div>
+        <h2 class="text-base font-semibold text-gray-900"><%= t('paper_signatures.review.decision.title') %></h2>
+        <p class="mt-1 text-sm text-gray-600"><%= t('paper_signatures.review.decision.hint') %></p>
+      </div>
+      <div class="flex flex-col gap-2 sm:flex-row sm:shrink-0">
+        <button type="button" class="btn btn-danger-secondary" aria-haspopup="dialog" data-action="dialog#open">
+          <%= t('paper_signatures.review.return') %>
+        </button>
+        <%= button_to t('paper_signatures.review.approve'), approve_bundle_paper_signature_path(@bundle, @paper_signature),
+              method: :post, class: "btn btn-primary w-full sm:w-auto" %>
+      </div>
+    </div>
+  </div>
+
+  <dialog data-dialog-target="dialog" aria-labelledby="paper_signature_return_title"
+          class="m-auto w-[calc(100%-2rem)] max-w-lg rounded-lg bg-white p-0 shadow-xl backdrop:bg-gray-900/50">
+    <%= form_with url: return_scan_bundle_paper_signature_path(@bundle, @paper_signature), method: :post, class: "space-y-4 p-6" do |form| %>
+      <h2 id="paper_signature_return_title" class="text-lg font-semibold text-gray-900"><%= t('paper_signatures.review.return_dialog.title', name: recipient_name) %></h2>
+      <p class="text-sm text-gray-600"><%= t('paper_signatures.review.return_dialog.message', name: recipient_name) %></p>
+      <div>
+        <%= form.label :return_reason, t('paper_signatures.review.return_dialog.reason'), class: "block text-sm font-medium text-gray-900" %>
+        <%= form.text_area :return_reason, required: true, rows: 4,
+              "aria-describedby": "paper_signature_return_reason_hint",
+              class: "mt-2 w-full rounded-md border border-gray-500 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" %>
+        <p id="paper_signature_return_reason_hint" class="mt-2 text-sm text-gray-600"><%= t('paper_signatures.review.return_dialog.hint') %></p>
+      </div>
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <button type="button" class="btn btn-secondary" data-action="dialog#close"><%= t('paper_signatures.review.return_dialog.cancel') %></button>
+        <%= form.submit t('paper_signatures.review.return'), class: "btn btn-danger" %>
+      </div>
+    <% end %>
+  </dialog>
+</div>

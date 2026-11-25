@@ -7,6 +7,7 @@
   <% pending_invitations = @bundle.active_recipients.select(&:notifiable?) %>
   <% signature_field_contracts = @bundle.contracts.select(&:prepared_signature_fields_source_attached?) %>
   <% signature_fields_by_recipient_id = signature_field_contracts.any? ? @bundle.signature_field_preparations.where(contract: signature_field_contracts).index_by(&:recipient_id) : {} %>
+  <% paper_signatures_by_recipient_id = submitted_and_approved_paper_signatures_by_recipient(@bundle) %>
   <div class="space-y-6">
     <div>
       <h2 class="text-xl font-semibold text-gray-900"><%= t('.title') %></h2>
@@ -79,7 +80,9 @@
     <% if recipients.any? %>
       <ul role="list" class="space-y-3">
         <% recipients.each do |recipient| %>
-          <% unsent = recipient.pending? && recipient.notifiable? %>
+          <% recipient_paper_signatures = recipient.active? ? paper_signatures_by_recipient_id.fetch(recipient.id, []) : [] %>
+          <%# A recipient who got the link another way and uploaded a scan shows that it awaits review. %>
+          <% unsent = recipient.pending? && recipient.notifiable? && recipient_paper_signatures.none?(&:submitted?) %>
           <li class="rounded-lg border border-gray-200 bg-white px-4 py-3.5">
             <div class="flex items-start gap-3">
               <div aria-hidden="true" class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
@@ -118,6 +121,36 @@
                     </span>
                   <% end %>
                 </div>
+
+                <% if recipient_paper_signatures.any? %>
+                  <ul role="list" class="mt-2 space-y-2 text-sm text-gray-700">
+                    <% recipient_paper_signatures.each do |paper_signature| %>
+                      <li class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                        <span class="min-w-0 break-words">
+                          <% if @bundle.contracts.size > 1 %>
+                            <span class="font-medium text-gray-900"><%= paper_signature.contract.display_name %></span> &middot;
+                          <% end %>
+                          <% if paper_signature.approved? %>
+                            <%= t('paper_signatures.review.approved_by_html', name: paper_signature_approver_name(paper_signature), time: paper_signature_time_tag(paper_signature.reviewed_at)) %>
+                          <% else %>
+                            <%= t('paper_signatures.review.submitted_at_html', time: paper_signature_time_tag(paper_signature.submitted_at)) %>
+                          <% end %>
+                        </span>
+                        <% if paper_signature.approved? %>
+                          <%= link_to scan_bundle_paper_signature_path(@bundle, paper_signature, disposition: "attachment"), data: { turbo: false },
+                                class: "inline-flex min-h-10 items-center font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900" do %>
+                            <%= t('paper_signatures.review.download') %><span class="sr-only">: <%= recipient.display_name %></span>
+                          <% end %>
+                        <% elsif paper_signature.reviewable? %>
+                          <%= link_to bundle_paper_signature_path(@bundle, paper_signature), data: { turbo_frame: "_top" },
+                                class: "btn btn-primary" do %>
+                            <%= t('paper_signatures.review.check') %><span class="sr-only">: <%= recipient.display_name %></span>
+                          <% end %>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
 
                 <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                   <% if recipient.active? %>

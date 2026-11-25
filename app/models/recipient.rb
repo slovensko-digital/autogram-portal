@@ -176,6 +176,12 @@ class Recipient < ApplicationRecord
     signer_contracts.declined.exists?
   end
 
+  # A scan of a document the recipient signed on paper waits for the organization to review it.
+  def awaiting_paper_review?
+    return false if withdrawn?
+    PaperSignature.submitted.where(signer_contract_id: signer_contracts.awaiting.select(:id)).exists?
+  end
+
   def superseded?
     return false if withdrawn?
     signer_contracts.superseded.exists? && !signer_contracts.signed.exists? && !pending?
