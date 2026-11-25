@@ -1,17 +1,17 @@
 class ContractsController < ApplicationController
   before_action :set_contract, except: [ :new, :index, :create ]
   # Anyone with the contract UUID may view and sign it.
-  before_action :skip_authorization, only: [ :show_bundle, :actions, :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session, :signed_document, :validate ]
+  before_action :skip_authorization, only: [ :show_bundle, :actions, :sign, :signature_apps, :visual_signing, :create_visual_session, :signed_document, :validate ]
   before_action :claim_pending_anonymous_contract, only: [ :show, :actions ]
   before_action :authorize_contract!, only: [ :show, :update, :destroy ]
-  before_action :ensure_signing_supported, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
-  before_action :set_recipient, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
-  before_action :render_sign_limit_reached_if_needed, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
-  before_action :set_signer_contract, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
-  before_action :allow_iframe, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ]
-  skip_before_action :ensure_tenant_selected, only: [ :sign, :signature_apps, :physical_signing, :create_physical_session, :visual_signing, :create_visual_session ], if: -> { params[:iframe].present? }
+  before_action :ensure_signing_supported, only: [ :sign, :signature_apps, :visual_signing, :create_visual_session ]
+  before_action :set_recipient, only: [ :sign, :signature_apps, :visual_signing, :create_visual_session ]
+  before_action :render_sign_limit_reached_if_needed, only: [ :sign, :signature_apps, :visual_signing, :create_visual_session ]
+  before_action :set_signer_contract, only: [ :sign, :signature_apps, :visual_signing, :create_visual_session ]
+  before_action :allow_iframe, only: [ :sign, :signature_apps, :visual_signing, :create_visual_session ]
+  skip_before_action :ensure_tenant_selected, only: [ :sign, :signature_apps, :visual_signing, :create_visual_session ], if: -> { params[:iframe].present? }
   before_action :ensure_prepared_signature_field_appearance_completed, only: [ :sign, :signature_apps ]
-  before_action :ensure_onboarding, only: [ :signature_apps, :physical_signing ]
+  before_action :ensure_onboarding, only: [ :signature_apps ]
   before_action :ensure_visual_signing_allowed, only: [ :visual_signing, :create_visual_session ]
   before_action :ensure_signature_field_appearance_assignment, only: [ :visual_signing, :create_visual_session ]
 
@@ -145,9 +145,6 @@ class ContractsController < ApplicationController
   def signature_apps
   end
 
-  def physical_signing
-  end
-
   def visual_signing
     @visual_stamp_purpose = visual_stamp_purpose
     @visual_stamp_document = visual_stamp_source_document(@visual_stamp_purpose)
@@ -155,20 +152,6 @@ class ContractsController < ApplicationController
     @visual_stamp_locked = @assigned_signature_field_preparation.present?
     @visual_stamp = latest_visual_stamp_for(visual_stamp_record_document, @visual_stamp_purpose) if %w[qes_preparation signature_field_appearance].include?(@visual_stamp_purpose)
     @visual_stamp_custom_text = @visual_stamp&.custom_text.presence || current_user&.name.to_s
-  end
-
-  def create_physical_session
-    physical_session = PhysicalSession.create!(
-      signer_contract: @signer_contract,
-      status: :pending
-    )
-    physical_session.submitted_date = params[:submitted_date]
-    physical_session.save!
-
-    redirect_to sign_contract_path(@contract, recipient: @recipient&.uuid)
-  rescue ActiveRecord::RecordInvalid => e
-    redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid),
-                alert: t("contracts.submit_failed", errors: e.record&.errors&.full_messages&.to_sentence.presence || e.message)
   end
 
   def create_visual_session
@@ -445,8 +428,6 @@ class ContractsController < ApplicationController
       @qscd = params[:qscd] || current_user&.qscd || cookies[:qscd]
       # an unknown document (e.g. a mistyped link) is picked again like a missing one
       redirect_to contract_onboarding_path(@contract, method: "electronic", step: "qscd_check", recipient: @recipient&.uuid, iframe: params[:iframe]) if !User.qscds.key?(@qscd.to_s) || User.legacy_eid_card?(@qscd)
-    when "physical_signing"
-      redirect_to contract_onboarding_path(@contract, method: "physical", step: "physical_signing", recipient: @recipient&.uuid, iframe: params[:iframe]) unless current_user&.onboarding_completed?("physical")
     end
   end
 

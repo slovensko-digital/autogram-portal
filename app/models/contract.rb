@@ -156,7 +156,6 @@ class Contract < ApplicationRecord
     methods = []
     methods << "electronic" if qualified_signing_allowed?
     methods << "ades" if AdesEvidenceSession.available?(self, recipient: recipient)
-    methods << "physical" if allowed_methods.include?("scan")
     methods << "visual" if allowed_methods.include?("visual") && visual_signing_allowed?
     methods
   end

@@ -997,7 +997,6 @@ components:
         - ades
         - visual
         - scan
-        - paper
 
     Document:
       type: object

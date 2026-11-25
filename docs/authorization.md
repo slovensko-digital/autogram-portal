@@ -166,7 +166,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Contracts#content_versions` | Web, global UUID | Management AND contract-tenant archivation | 403 |
 | `Contracts::SignatureFieldPreparations#index/edit/create/update/destroy/finalize` | Web, contract UUID and parent-scoped preparation ID | `prepare_signature_fields?`: bundle management | Foreign 403, another own bundle tenant guidance, ineligible format/state 422 |
 | `ContractValidationRecords#index/destroy/refresh` | Web, feature gate and selected-tenant policy scope | Archivation and record tenant | Disabled-feature root redirect; foreign ID 404; refreshability remains workflow rule |
-| `Contracts#show_bundle/actions/sign/signature_apps/physical_signing/create_physical_session/visual_signing/create_visual_session/signed_document/validate` | Web, UUID lookup; existing recipient/preparation resolution | `skip_authorization` (UUID-public) | Existing UUID accessibility, onboarding, signer, appearance and state constraints preserved |
+| `Contracts#show_bundle/actions/sign/signature_apps/visual_signing/create_visual_session/signed_document/validate` | Web, UUID lookup; existing recipient/preparation resolution | `skip_authorization` (UUID-public) | Existing UUID accessibility, onboarding, signer, appearance and state constraints preserved |
 | `Contracts#authenticate_for_actions` | Web, UUID lookup | Signed-in user OR anonymous contract | Existing-user redirect, anonymous pending-claim flow, otherwise 403 |
 | `Contracts::Onboarding#show/update` | Web, UUID and parent-bound active recipient | `skip_authorization` (UUID-public) | Invalid/withdrawn recipient, onboarding state and cookies retain existing behavior |
 | `Bundles#sign/autogram_batch` | Web, bound signing subject | Recipient capability OR public bundle OR selected-tenant manager | Lookup precedence unchanged; invalid grant/mismatch 404, withdrawn signing 410, batch eligibility stays separate |
@@ -223,7 +223,7 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 | Bundle received and dashboard | Person-scoped invitations/received requests; selected-tenant sent records; existing state/count filters |
 | Contracts CRUD/actions | Contract tenant ownership, anonymous permissions, anonymous-claim ordering, per-action denial responses |
 | Contract validation history/records and evidence-private download | Selected tenant and archivation feature; refreshability and attachment errors remain distinct |
-| Contract signing, onboarding and visual/physical signing | Existing user/recipient/anonymous resolution, withdrawal/superseding responses and preparation guards |
+| Contract signing, onboarding and visual signing | Existing user/recipient/anonymous resolution, withdrawal/superseding responses and preparation guards |
 | Session parameters/download/upload/state | Bound, valid session token OR existing allowed-user checks; expiry and withdrawal remain validated by SessionAccessToken |
 | Session destroy | Allowed-user branch only; session token alone never grants deletion |
 | Session create/show/verification/completion | Parent/session/signer matching and existing method/state/preparation checks, not one generic signing permission |

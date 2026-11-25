@@ -27,22 +27,8 @@
               value: 'ades',
               label: t('.ades_label'),
               description: t('.ades_description'),
-              checked: (signing_methods & %w[electronic physical visual]).empty?,
+              checked: (signing_methods & %w[electronic visual]).empty?,
               icon: 'mobile',
-              data_attributes: {
-                signing_method_target: 'methodRadio',
-                action: 'change->signing-method#handleMethodSelection'
-              } %>
-      <% end %>
-
-      <% if signing_methods.include?("physical") %>
-        <%= render 'shared/radio_button_card',
-              name: "signing_method_#{contract.uuid}",
-              value: 'physical',
-              label: t('.physical_label'),
-              description: t('.physical_description'),
-              checked: false,
-              icon: 'pencil',
               data_attributes: {
                 signing_method_target: 'methodRadio',
                 action: 'change->signing-method#handleMethodSelection'
@@ -55,7 +41,7 @@
               value: 'visual',
               label: t('.visual_label'),
               description: t('.visual_description'),
-              checked: (signing_methods & %w[electronic physical]).empty?,
+              checked: (signing_methods & %w[electronic]).empty?,
               icon: 'pencil',
               data_attributes: {
                 signing_method_target: 'methodRadio',
@@ -76,12 +62,6 @@
       <%= link_to "",
           ades_contract_sessions_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
           data: { signing_method_target: 'adesButton', turbo_frame: "_top" } %>
-    <% end %>
-
-    <% if signing_methods.include?("physical") %>
-      <%= link_to "",
-          physical_signing_contract_path(contract, recipient: recipient&.uuid, iframe: params[:iframe]),
-          data: { signing_method_target: 'physicalButton', turbo_frame: "_top" } %>
     <% end %>
 
     <% if signing_methods.include?("visual") %>

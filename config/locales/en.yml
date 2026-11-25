@@ -1351,7 +1351,6 @@ en:
         verify_reference_link: "Verify this reference"
     onboarding:
       electronic_title: "Electronic Signing Setup"
-      physical_title: "Physical Signing Setup"
       subtitle: "Complete these steps to prepare for signing"
       qscd_check:
         title: "What will you sign with?"
@@ -1438,23 +1437,12 @@ en:
           description: "Your Czech ID card does not support qualified electronic signatures. You need an ID card issued since 1.7.2018 with a qualified certificate loaded, or another qualified smart card or USB token."
           warning_title: "This ID card cannot be used for qualified signing"
           warning_description: "A qualified certificate cannot be loaded onto ID cards issued before 1.7.2018. Request a new ID card or use another qualified smart card or USB token."
-      physical_instructions:
-        title: "Physical Signing Instructions"
-        description: "To sign this document physically, please follow these steps:"
-        step1: "Download and print the document"
-        step2: "Sign it with your handwritten signature"
-        step3: "Scan the signed document or keep the original"
-        step4: "Send it via post office to the sender"
-        note: "After you send the signed document, please let us know by clicking the button below."
-        continue: "Continue to physical signing"
     signing_method_choice:
       title: "How would you like to sign this document?"
       electronic_label: "Electronic Signing"
       electronic_description: "Sign digitally using your eID card and a signing application"
       ades_label: "Verified AdES signing"
       ades_description: "Verify your mobile number with an SMS code and let the portal create an evidence-backed electronic signature"
-      physical_label: "Physical Signing"
-      physical_description: "Print, sign by hand, and send via post office"
       visual_label: "Visual stamp"
       visual_description: "Add a visual stamp to the PDF without creating a qualified electronic signature"
       qes_visual_stamp_button: "Add visual stamp first"
@@ -1462,16 +1450,6 @@ en:
       signature_field_appearance_button: "Add visible signature appearance"
       signature_field_appearance_description: "A visible signature field is prepared for you in this PDF. Add your text or image appearance before continuing to electronic signing."
       continue: "Continue"
-    physical_signing:
-      title: "Physical Signing"
-      subtitle: "Submit information about your physically signed document"
-      form_title: "Have you sent the signed document?"
-      form_description: "Please let us know when you sent the physically signed document via post office."
-      date_label: "Date sent via post office"
-      date_helper: "Select the date when you sent the document"
-      confirmation_message: "After submitting, you will receive a confirmation. The document sender will be notified about your physical signature."
-      back: "Back"
-      submit: "Submit Physical Signing"
     visual_signing:
       invalid_document: "A visual stamp can only be added to a PDF document."
       draw_canvas_label: "Signature drawing area"

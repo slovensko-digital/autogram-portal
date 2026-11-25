@@ -1281,7 +1281,6 @@ sk:
         verify_reference_link: "Overiť túto referenciu"
     onboarding:
       electronic_title: "Nastavenie elektronického podpisovania"
-      physical_title: "Nastavenie fyzického podpisovania"
       subtitle: "Dokončite tieto kroky na prípravu podpisovania"
       qscd_check:
         title: "Čím budete podpisovať?"
@@ -1367,23 +1366,12 @@ sk:
           description: "Váš český občiansky preukaz nepodporuje kvalifikované elektronické podpisovanie. Potrebujete občiansky preukaz vydaný od 1.7.2018 s nahraným kvalifikovaným certifikátom alebo inú kvalifikovanú čipovú kartu či USB token."
           warning_title: "Tento občiansky preukaz nie je možné použiť na kvalifikované podpisovanie"
           warning_description: "Do občianskych preukazov vydaných pred 1.7.2018 nie je možné nahrať kvalifikovaný certifikát. Požiadajte o nový občiansky preukaz alebo použite inú kvalifikovanú čipovú kartu či USB token."
-      physical_instructions:
-        title: "Pokyny pre fyzické podpisovanie"
-        description: "Na fyzické podpísanie tohto dokumentu postupujte podľa týchto krokov:"
-        step1: "Stiahnite a vytlačte dokument"
-        step2: "Podpíšte ho vlastnoručným podpisom"
-        step3: "Naskenujte podpísaný dokument alebo si ponechajte originál"
-        step4: "Pošlite ho poštou odosielateľovi"
-        note: "Po odoslaní podpísaného dokumentu nás prosím informujte kliknutím na tlačidlo nižšie."
-        continue: "Pokračovať na fyzické podpisovanie"
     signing_method_choice:
       title: "Ako by ste chceli podpísať tento dokument?"
       electronic_label: "Elektronické podpisovanie"
       electronic_description: "Podpíšte elektronicky pomocou vášho občianskeho preukazu a podpisovej aplikácie"
       ades_label: "Overené AdES podpisovanie"
       ades_description: "Overte mobilné číslo SMS kódom a nechajte portál vytvoriť elektronický podpis s podporným evidenčným záznamom"
-      physical_label: "Fyzické podpisovanie"
-      physical_description: "Vytlačte, podpíšte ručne a pošlite poštou"
       visual_label: "Vizuálna pečiatka"
       visual_description: "Pridajte do PDF vizuálnu pečiatku bez vytvoreného kvalifikovaného elektronického podpisu"
       qes_visual_stamp_button: "Najprv pridať vizuálnu pečiatku"
@@ -1391,16 +1379,6 @@ sk:
       signature_field_appearance_button: "Pridať viditeľnú podobu podpisu"
       signature_field_appearance_description: "V tomto PDF je pre vás pripravené viditeľné podpisové pole. Pred pokračovaním na elektronické podpisovanie doplňte jeho textovú alebo obrázkovú podobu."
       continue: "Pokračovať"
-    physical_signing:
-      title: "Fyzický podpis"
-      subtitle: "Odošlite informácie o vašom fyzicky podpísanom dokumente"
-      form_title: "Odoslali ste podpísaný dokument?"
-      form_description: "Prosím, dajte nám vedieť, kedy ste odoslali fyzicky podpísaný dokument poštou."
-      date_label: "Dátum odoslania poštou"
-      date_helper: "Vyberte dátum, kedy ste dokument odoslali"
-      confirmation_message: "Po odoslaní dostanete potvrdenie. Odosielateľ dokumentu bude upovedomený o vašom fyzickom podpise."
-      back: "Späť"
-      submit: "Odoslať fyzický podpis"
     visual_signing:
       invalid_document: "Vizuálnu pečiatku je možné vložiť iba do dokumentu PDF."
       draw_canvas_label: "Plocha na nakreslenie podpisu"

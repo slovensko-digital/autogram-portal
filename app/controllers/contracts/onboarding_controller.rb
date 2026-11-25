@@ -10,11 +10,11 @@ module Contracts
     skip_before_action :verify_authenticity_token
     skip_before_action :ensure_tenant_selected, if: -> { params[:iframe].present? }
 
-    VALID_STEPS = %w[qscd_check legacy_eid_card pin_check certificate_check physical_instructions].freeze
+    VALID_STEPS = %w[qscd_check legacy_eid_card pin_check certificate_check].freeze
 
     def show
       @step = step_param || first_step
-      @method = params[:method] # 'electronic' or 'physical'
+      @method = params[:method] # 'electronic'
       @selected_qscd = flow_qscd.presence_in(User.qscds.keys)
 
       render @step
@@ -31,8 +31,6 @@ module Contracts
         handle_pin_check
       when "certificate_check"
         handle_certificate_check
-      when "physical_instructions"
-        handle_physical_instructions
       else
         redirect_to contract_onboarding_path(@contract, step: first_step, method: @method, iframe: params[:iframe])
       end
@@ -64,7 +62,7 @@ module Contracts
 
     def validate_method_param
       @method = params[:method]
-      unless %w[electronic physical].include?(@method)
+      unless @method == "electronic"
         redirect_to sign_contract_path(@contract, iframe: params[:iframe])
       end
     end
@@ -111,23 +109,10 @@ module Contracts
       redirect_to_next_page
     end
 
-    def handle_physical_instructions
-      if current_user
-        current_user.mark_onboarding_complete!(@method)
-      else
-        cookies[:completed_onboardings] ||= { value: [], expires: 1.year.from_now, secure: Rails.env.production?, httponly: true }
-        cookies[:completed_onboardings] << @method unless cookies[:completed_onboardings].include?(@method)
-      end
-
-      redirect_to_next_page
-    end
-
     def redirect_to_next_page
       case @method
       when "electronic"
         redirect_to signature_apps_contract_path(@contract, **redirect_to_signature_apps_params)
-      when "physical"
-        redirect_to physical_signing_contract_path(@contract, recipient: @recipient&.uuid, iframe: params[:iframe])
       end
     end
 
@@ -135,8 +120,6 @@ module Contracts
       case @method
       when "electronic"
         "qscd_check"
-      when "physical"
-        "physical_instructions"
       end
     end
 

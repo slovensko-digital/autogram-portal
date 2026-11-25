@@ -1,6 +1,14 @@
 require "test_helper"
 
 class Contracts::OnboardingControllerTest < ActionDispatch::IntegrationTest
+  test "onboarding for the physical method sends the signer back to the document" do
+    contract = create_contract_without_session
+
+    get "/contracts/#{contract.uuid}/onboarding/physical_instructions", params: { method: "physical" }
+
+    assert_redirected_to "/contracts/#{contract.uuid}/sign"
+  end
+
   test "anonymous iframe electronic onboarding keeps qscd in redirect chain" do
     contract = create_contract_without_session
 
