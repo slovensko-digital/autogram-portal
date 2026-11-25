@@ -911,6 +911,7 @@ components:
     ContractDetails:
       type: object
       description: A contract as the API returns it. Unlike requests, responses use snake_case keys.
+      required: [paper_signatures]
       properties:
         id:
           type: string
@@ -959,10 +960,13 @@ components:
 
     PaperSignature:
       type: object
+      description: A signature made on paper by a recipient, with the scan of the signed pages.
       required: [recipient, status, submitted_at, approved_at, scan]
       properties:
         recipient:
           type: string
+          format: uuid
+          example: 8d1c1a59-3f0e-4f5c-9a55-5a3d0c2b7e11
           description: The unique identifier of the recipient who signed on paper.
         status:
           type: string
