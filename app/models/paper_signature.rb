@@ -194,13 +194,15 @@ class PaperSignature < ApplicationRecord
     false # a page was removed while the scan was being built
   end
 
-  # The signer counts as signed from now on; the reviewer gets no mail about it.
+  # The signer counts as signed from now on; the reviewer gets no mail about it. A signing app the
+  # signer opened before submitting the scan can no longer sign for them.
   def approve!(reviewer)
     transaction do
       lock_for_review!
       update!(status: :approved, reviewed_by: reviewer, reviewed_at: Time.current)
       pages.destroy_all
       signer_contract.complete_signature!(at: reviewed_at, except: reviewer)
+      signer_contract.sessions.pending.find_each(&:canceled!)
     end
 
     broadcast_state_change

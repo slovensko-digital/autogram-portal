@@ -33,6 +33,25 @@ class AvmDownloadSignedFileJobTest < ActiveJob::TestCase
     assert_equal "Stiahnutie podpísaného dokumentu zlyhalo: connection reset", session.error_message
   end
 
+  test "a bundle signature completed another way meanwhile fails the session instead of signing again" do
+    session = create_avm_session
+    bundle = Bundle.create!(tenant: tenants(:one), contracts: [ session.contract ])
+    signer_contract = bundle.recipients.create!(email: "signer@example.com", locale: "sk").signer_contracts.sole
+    session.update!(signer_contract: signer_contract)
+    signer_contract.update_column(:signed_at, 1.minute.ago) # e.g. the organization approved their scan signed on paper
+    avm_service = Struct.new(:document) do
+      def download_signed_document(_document_identifier, _encryption_key)
+        document
+      end
+    end.new(Base64.strict_encode64("signed"))
+
+    assert_raises(UncaughtThrowError) { Avm::DownloadSignedFileJob.perform_now(session, avm_service: avm_service) }
+
+    assert session.reload.failed?
+    assert_equal I18n.t("bundles.sign.signature_no_longer_required"), session.error_message
+    assert_equal 0, session.contract.content_versions.count
+  end
+
   private
 
   def create_avm_session

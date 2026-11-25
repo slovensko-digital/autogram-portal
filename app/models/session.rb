@@ -182,12 +182,18 @@ class Session < ApplicationRecord
   end
 
   def accept_signed_file(signed_file)
-    raise SignatureNoLongerRequiredError if signer_contract.reload.superseded?
+    signer_contract.reload
+    ensure_signature_still_required!
 
     decoded_signed_file = decode_signed_file!(signed_file)
     validation_result = validate_signed_file!(decoded_signed_file)
 
     ActiveRecord::Base.transaction do
+      # Validation takes a while: the signature may have been completed meanwhile, e.g. by approving
+      # a scan the signer submitted after opening this signing app.
+      signer_contract.lock!
+      ensure_signature_still_required!
+
       new_filename = generate_signed_filename
       new_content_type = new_filename.ends_with?(".asice") ? "application/vnd.etsi.asic-e+zip" : "application/pdf"
       version = contract.add_signed_content_version!(
@@ -209,6 +215,13 @@ class Session < ApplicationRecord
 
     signed!
     contract.sessions.pending.where.not(id: id).each(&:canceled!)
+  end
+
+  # A bundle signer signs once, and only while they are still asked to (not released, declined or
+  # withdrawn); a standalone document can be signed again.
+  def ensure_signature_still_required!
+    required = contract.bundle.present? ? signer_contract.awaiting? : !signer_contract.superseded?
+    raise SignatureNoLongerRequiredError unless required
   end
 
   def generate_signed_filename

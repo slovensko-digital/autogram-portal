@@ -846,6 +846,34 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a signing app opened before the scan was approved cannot sign the recipient again" do
+    reviewer = confirmed_user("reviewer@firma-abc.sk", tenant: @organization)
+    with_paper_signing_request do |bundle, contract, recipient|
+      in_progress = open_autogram_session(contract, recipient: recipient)
+      paper = submit_paper_scan(contract, recipient)
+
+      sign_in_with_tenant reviewer, @organization
+      post approve_bundle_paper_signature_path(bundle, paper)
+      assert paper.reload.approved?
+      signer_contract = recipient.signer_contracts.sole
+      signed_at = signer_contract.signed_at
+      assert_empty signer_contract.sessions.pending, "the approval cancels the signing in progress"
+      sign_out reviewer
+
+      assert_no_difference -> { contract.reload.content_versions.count } do
+        travel 1.minute do
+          upload_signed_file(contract, in_progress[:upload])
+        end
+      end
+
+      assert_response :bad_request
+      assert_equal I18n.t("bundles.sign.signature_no_longer_required"), response.parsed_body["error"]
+      assert_equal signed_at, signer_contract.reload.signed_at
+      assert paper.reload.approved?
+      assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+    end
+  end
+
   test "a contract signed only on paper is no longer awaiting and its download gives the original document" do
     with_paper_signing_request do |bundle, contract, recipient|
       paper = submit_paper_scan(contract, recipient)
