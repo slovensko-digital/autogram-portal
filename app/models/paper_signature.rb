@@ -230,13 +230,15 @@ class PaperSignature < ApplicationRecord
     Notification::PaperSignatureReviewedJob.perform_later(self)
   end
 
-  # The signer discarded the scan or their signature is no longer needed.
+  # The signer discarded the scan or their signature is no longer needed. Nothing shows a canceled
+  # scan, so its file goes too; a returned scan keeps it as the record of what was returned.
   def cancel!
     canceled = with_lock do
       next false unless open?
 
       update!(status: :canceled)
       pages.destroy_all
+      scan.purge_later if scan.attached?
       true
     end
 

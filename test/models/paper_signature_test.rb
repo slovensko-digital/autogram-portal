@@ -364,6 +364,20 @@ class PaperSignatureTest < ActiveSupport::TestCase
     assert_equal 0, PaperSignaturePage.count
   end
 
+  test "a discarded scan is deleted with its file and no longer counts towards storage" do
+    paper = submitted_paper_signature
+    scan_blob = paper.scan.blob
+    page_bytes = paper.pages.sum { |page| page.file.byte_size }
+    storage_before = @tenant.usage_of(:storage)
+
+    paper.cancel!
+
+    assert paper.reload.canceled?
+    assert_not paper.scan.attached?
+    assert_not ActiveStorage::Blob.exists?(scan_blob.id)
+    assert_equal storage_before - scan_blob.byte_size - page_bytes, @tenant.usage_of(:storage)
+  end
+
   test "an approved scan stays approved when its reviewer deletes their account" do
     colleague = confirmed_user("colleague@firma-abc.sk", tenant: @tenant)
     paper = submitted_paper_signature
