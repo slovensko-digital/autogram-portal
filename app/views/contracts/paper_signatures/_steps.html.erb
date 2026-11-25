@@ -33,7 +33,7 @@
 
       <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
         <%= form_with url: contract_paper_signature_pages_path(contract, **paper_signer_link_params), multipart: true, class: "space-y-3",
-                      data: { controller: "paper-pages", action: "change->paper-pages#pick dragover->paper-pages#dragOver dragleave->paper-pages#dragLeave drop->paper-pages#drop" } do %>
+                      data: { controller: "paper-pages", paper_pages_failed_value: t('paper_signatures.steps.upload.failed'), action: "change->paper-pages#pick dragover->paper-pages#dragOver dragleave->paper-pages#dragLeave drop->paper-pages#drop" } do %>
           <label for="paper_signature_files"
                  class="flex min-h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-500 bg-gray-50/30 px-6 py-8 text-center transition-all duration-200 hover:border-gray-600 hover:bg-gray-50/50 data-[dragging]:border-blue-600 data-[dragging]:bg-blue-50"
                  data-paper-pages-target="dropzone">

@@ -17,7 +17,7 @@
     <%= render 'contracts/paper_signatures/pages', contract: @contract, paper_signature: @paper_signature, editable: true %>
     <%= render 'contracts/paper_signatures/page_count_warning', paper_signature: @paper_signature %>
 
-    <%= form_with url: contract_paper_signature_pages_path(@contract, **paper_signer_link_params), multipart: true, class: "space-y-3", data: { controller: "paper-pages", action: "change->paper-pages#pick" } do %>
+    <%= form_with url: contract_paper_signature_pages_path(@contract, **paper_signer_link_params), multipart: true, class: "space-y-3", data: { controller: "paper-pages", paper_pages_failed_value: t('paper_signatures.steps.upload.failed'), action: "change->paper-pages#pick" } do %>
       <div class="grid gap-3 sm:grid-cols-2">
         <%# The camera opens right away; the "Pridať stranu" tile points here too. %>
         <label for="paper_signature_files"

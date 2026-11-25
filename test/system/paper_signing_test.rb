@@ -16,10 +16,6 @@ class PaperSigningSystemTest < ApplicationSystemTestCase
     @original_allow_forgery_protection = ActionController::Base.allow_forgery_protection
     ActionController::Base.allow_forgery_protection = true
 
-    # Page changes reach the open pages as Turbo refreshes, so the cable delivers for real.
-    ActionCable.server.config.cable = { "adapter" => "async" }
-    ActionCable.server.restart
-
     organization = Tenant.create!(name: "Firma ABC", plan: :pro)
     @bundle = Bundle.create!(
       tenant: organization,
@@ -35,8 +31,6 @@ class PaperSigningSystemTest < ApplicationSystemTestCase
   end
 
   teardown do
-    ActionCable.server.config.cable = { "adapter" => "test" }
-    ActionCable.server.restart
     ActionController::Base.allow_forgery_protection = @original_allow_forgery_protection
     Contract.send(:remove_const, :ALLOWED_METHODS)
     Contract.const_set(:ALLOWED_METHODS, @original_allowed_methods)
@@ -70,6 +64,18 @@ class PaperSigningSystemTest < ApplicationSystemTestCase
 
     width, height = jpeg_dimensions(blob.download)
     assert_equal 2400, [ width, height ].max
+  end
+
+  test "a small photo is redrawn upright, without its EXIF orientation" do
+    # Stored as 800x600 landscape with Orientation=6, so it displays as 600x800 portrait.
+    visit contract_paper_signature_path(@contract, recipient: @recipient.uuid)
+
+    attach_file "files[]", file_fixture("paper-page-rotated.jpg"), make_visible: true
+
+    assert_selector "figure", text: "Strana 1"
+    bytes = PaperSignature.sole.pages.sole.file.download
+    assert_equal [ 600, 800 ], jpeg_dimensions(bytes)
+    assert_not_includes bytes.b, "Exif\x00\x00".b, "the upright copy carries no EXIF orientation"
   end
 
   test "a PDF scan is uploaded unchanged" do

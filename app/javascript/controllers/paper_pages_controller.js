@@ -2,21 +2,33 @@ import { Controller } from "@hotwired/stimulus"
 
 const MAX_SIDE = 2400
 const JPEG_QUALITY = 0.85
-const MAX_UNCHANGED_BYTES = 1.5 * 1024 * 1024
 const REFRESH_WAIT_MS = 1500
 
 // Uploads the photos and scans of a paper signature as soon as they are picked or dropped, instead
 // of waiting for the "Nahrať" button (which stays for browsers without JavaScript). Photos are
-// scaled down and re-encoded as JPEG first: phone cameras take 10+ MB pictures, and HEIC is not
-// accepted by the server. The page changes then arrive as a Turbo refresh; if none does, the
+// scaled down and re-encoded as JPEG first: phone cameras take 10+ MB pictures, HEIC is not
+// accepted by the server, and the server joins photos into a PDF without honouring the EXIF
+// orientation, so every photo is redrawn upright. The page changes then arrive as a Turbo refresh; if none does, the
 // controller visits the page itself.
 export default class extends Controller {
   static targets = [ "fallback", "status", "error", "dropzone" ]
+  static values = { failed: String }
 
   connect() {
     this.fallbackTargets.forEach((button) => { button.style.display = "none" })
     this.uploading = 0
     this.queue = Promise.resolve()
+    this.refreshed = false
+    this.markRefreshed = () => { this.refreshed = true }
+    // A refresh replaces the page (this controller disconnects) or morphs it (it stays).
+    document.addEventListener("turbo:render", this.markRefreshed)
+    document.addEventListener("turbo:morph", this.markRefreshed)
+  }
+
+  disconnect() {
+    clearTimeout(this.refreshTimer)
+    document.removeEventListener("turbo:render", this.markRefreshed)
+    document.removeEventListener("turbo:morph", this.markRefreshed)
   }
 
   pick(event) {
@@ -54,13 +66,20 @@ export default class extends Controller {
   enqueue(files) {
     if (files.length === 0) return
 
+    clearTimeout(this.refreshTimer)
+    this.refreshed = false
     this.uploading += 1
     this.showStatus()
     this.hideError()
-    this.queue = this.queue.then(() => this.upload(files)).finally(() => {
-      this.uploading -= 1
-      this.showStatus()
-    })
+    // A failing upload must not stop the later ones: the queue itself never rejects.
+    this.queue = this.queue
+      .then(() => this.upload(files))
+      .catch(() => this.showError(this.failedValue))
+      .finally(() => {
+        this.uploading -= 1
+        this.showStatus()
+        if (this.uploading === 0 && this.pendingRefresh) this.waitForRefresh()
+      })
   }
 
   async upload(files) {
@@ -79,11 +98,12 @@ export default class extends Controller {
         headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken() }
       })
     } catch (error) {
+      this.pendingRefresh = false
       return this.visitPage()
     }
 
     if (response.ok) {
-      this.waitForRefresh()
+      this.pendingRefresh = true
     } else if (response.status === 422) {
       const body = await response.json().catch(() => ({}))
       body.error ? this.showError(body.error) : this.visitPage()
@@ -93,49 +113,66 @@ export default class extends Controller {
     }
   }
 
-  // Scales photos down to MAX_SIDE and converts them to JPEG; everything else is sent unchanged.
+  // Redraws photos upright, at most MAX_SIDE on the longest side, as JPEG; everything else (PDFs,
+  // images the browser cannot decode) is sent unchanged.
   async prepare(file) {
     if (!file.type.startsWith("image/")) return file
 
-    const bitmap = await this.decode(file)
-    if (!bitmap) return file
+    try {
+      const image = await this.decode(file)
+      if (!image) return file
 
-    const longest = Math.max(bitmap.width, bitmap.height)
-    const scale = Math.min(1, MAX_SIDE / longest)
-    const convertible = file.type === "image/jpeg" || file.type === "image/png"
-    if (scale === 1 && convertible && file.size <= MAX_UNCHANGED_BYTES) {
-      bitmap.close?.()
+      const scale = Math.min(1, MAX_SIDE / Math.max(image.width, image.height))
+      const canvas = document.createElement("canvas")
+      canvas.width = Math.max(1, Math.round(image.width * scale))
+      canvas.height = Math.max(1, Math.round(image.height * scale))
+      const context = canvas.getContext("2d")
+      if (!context) return file
+
+      context.fillStyle = "#fff"
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image.source, 0, 0, canvas.width, canvas.height)
+      image.release()
+
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY))
+      if (!blob) return file
+
+      return new File([ blob ], file.name.replace(/\.[^.]*$/, "") + ".jpg", { type: "image/jpeg", lastModified: file.lastModified })
+    } catch (error) {
       return file
     }
-
-    const canvas = document.createElement("canvas")
-    canvas.width = Math.round(bitmap.width * scale)
-    canvas.height = Math.round(bitmap.height * scale)
-    const context = canvas.getContext("2d")
-    context.fillStyle = "#fff"
-    context.fillRect(0, 0, canvas.width, canvas.height)
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-    bitmap.close?.()
-
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY))
-    if (!blob || (scale === 1 && convertible && blob.size >= file.size)) return file
-
-    return new File([ blob ], file.name.replace(/\.[^.]*$/, "") + ".jpg", { type: "image/jpeg", lastModified: file.lastModified })
   }
 
+  // Decodes with the EXIF orientation applied. Browsers without the createImageBitmap options
+  // (older Safari) decode through an <img>, which is drawn upright by modern browsers.
   async decode(file) {
     try {
-      return await createImageBitmap(file, { imageOrientation: "from-image" })
+      const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" })
+      return { source: bitmap, width: bitmap.width, height: bitmap.height, release: () => bitmap.close?.() }
     } catch (error) {
+      // fall through to the image element
+    }
+
+    const url = URL.createObjectURL(file)
+    try {
+      const element = new Image()
+      element.src = url
+      await element.decode()
+      return { source: element, width: element.naturalWidth, height: element.naturalHeight, release: () => URL.revokeObjectURL(url) }
+    } catch (error) {
+      URL.revokeObjectURL(url)
       return null
     }
   }
 
-  // The model broadcasts a refresh after a change. It replaces the page, which disconnects this
-  // controller; when nothing arrived (no cable connection) the page is visited here.
+  // The model broadcasts a refresh after a change. When none was applied shortly after the last
+  // upload (no cable connection), the page is visited here. One timer at a time; a new upload
+  // cancels it.
   waitForRefresh() {
-    setTimeout(() => {
-      if (this.element.isConnected) this.visitPage()
+    this.pendingRefresh = false
+    clearTimeout(this.refreshTimer)
+    this.refreshTimer = setTimeout(() => {
+      if (this.uploading === 0 && !this.refreshed && this.element.isConnected) this.visitPage()
     }, REFRESH_WAIT_MS)
   }
 

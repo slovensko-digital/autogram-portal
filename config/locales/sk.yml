@@ -2854,6 +2854,7 @@ sk:
         file_types: "PDF zo skenera alebo fotky (JPG, PNG, HEIC)"
         button: "Nahrať"
         uploading: "Nahrávam…"
+        failed: "Nahrávanie sa nepodarilo. Skúste to znova."
     phone:
       title: "Odfoťte strany mobilom"
       description: "Naskenujte kód fotoaparátom mobilu. Odfotené strany sa tu zobrazia samé."

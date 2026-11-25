@@ -2917,6 +2917,7 @@ en:
         file_types: "PDF from a scanner or photos (JPG, PNG, HEIC)"
         button: "Upload"
         uploading: "Uploading…"
+        failed: "The upload failed. Please try again."
     phone:
       title: "Take photos of the pages with your phone"
       description: "Scan the code with your phone's camera. The pages you photograph appear here by themselves."
