@@ -259,7 +259,41 @@ paths:
               schema:
                 $ref: "#/components/schemas/SignedDocument"
         "404":
-          description: Contract or signed document not found.
+          description: Contract not found, or it has no electronically signed version (e.g. it was signed only on paper; see `paper_signatures` of the contract details).
+
+  /contracts/{contract_id}/paper_signatures/{id}/scan:
+    get:
+      tags:
+        - Integration
+      security:
+        - JWT: []
+      summary: Download the scan of a paper signature
+      description: Returns the PDF scan of a paper signature that is `submitted` or `approved`. The `scan` URL of the contract details points here.
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 69393b49-c34f-438f-ad7c-4b78db3932be
+          description: The unique identifier of the contract.
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The unique identifier of the paper signature (the last but one path segment of its `scan` URL).
+      responses:
+        "200":
+          description: The scan as a PDF attachment.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Contract or paper signature not found, or the paper signature has no scan (returned and canceled attempts are not exposed).
 
   /contracts/{id}/status:
     get:
@@ -910,8 +944,43 @@ components:
           items:
             $ref: "#/components/schemas/DocumentDetails"
         signed_document:
-          description: Present once the contract is signed.
-          $ref: "#/components/schemas/SignedDocument"
+          description: >-
+            The electronically signed file; absent while the contract awaits signatures. It is `null` once the contract is
+            complete but no electronic signature exists, i.e. it was signed only on paper (see `paper_signatures`). In a
+            contract signed in both ways it carries the electronic signatures only.
+          oneOf:
+            - $ref: "#/components/schemas/SignedDocument"
+            - type: "null"
+        paper_signatures:
+          type: array
+          description: Signatures made on paper that are submitted or approved, ordered by submission time. Empty when there are none.
+          items:
+            $ref: "#/components/schemas/PaperSignature"
+
+    PaperSignature:
+      type: object
+      required: [recipient, status, submitted_at, approved_at, scan]
+      properties:
+        recipient:
+          type: string
+          description: The unique identifier of the recipient who signed on paper.
+        status:
+          type: string
+          enum: [submitted, approved]
+          description: "`submitted` awaits approval by the organization, `approved` counts as a signature."
+        submitted_at:
+          type: string
+          format: date-time
+        approved_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When the scan was approved; null while submitted.
+        scan:
+          type: string
+          format: uri
+          description: URL of the scan endpoint, called with the same JWT as the rest of the API.
 
     DocumentDetails:
       type: object

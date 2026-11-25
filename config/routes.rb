@@ -178,6 +178,10 @@ Rails.application.routes.draw do
           get :signed_document
           get :status
         end
+
+        resources :paper_signatures, only: [], param: :uuid do
+          get :scan, on: :member
+        end
       end
 
       resources :documents, only: [ :show ]

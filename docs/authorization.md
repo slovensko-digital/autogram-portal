@@ -192,6 +192,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `SignatureEvidenceVerifications#show/download` | Web, public reference | `skip_authorization` (public reference) | Missing reference/detail/download outcomes and manifest fallback unchanged |
 | `SignatureEvidenceVerifications#download_private` | Web, public reference | Existing private-evidence predicate | Missing record/attachment 404; denied access 403; absent-record branch explicitly skips authorization |
 | `Api::V1::Contracts#create/show/status/signed_document/destroy` | TenantApi; API contract scope for existing records | Contract tenant | Existing `Contract not found`, CRUD bodies, polling headers and redirects |
+| `Api::V1::PaperSignatures#scan` | TenantApi; API contract scope, then the contract's submitted/approved paper signatures | Contract tenant (`Api::V1::ContractPolicy#show?`) | `Contract not found` / unknown, returned or canceled paper signature is 404; answers the scan PDF, no public blob URL |
 | `Api::V1::Documents#show` | TenantApi, API document scope | Parent contract tenant | Existing `Document not found`; orphan documents excluded |
 | `Api::V1::Bundles#create/show/status/destroy` | TenantApi, tenant bundle scope | Bundle tenant, not public visibility | Existing `Bundle not found`, duplicate UUID conflict, bodies and polling headers |
 | `Api::V1::Hello#show/show_auth` | Public / TenantApi | Explicit public skip / API hello policy | Existing public message and authenticated tenant message |
