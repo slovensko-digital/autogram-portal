@@ -55,6 +55,12 @@ class SignerContract < ApplicationRecord
     signed_at.nil? && declined_at.nil? && superseded_at.nil?
   end
 
+  # The signer submitted a scan of the document signed on paper; signing another way waits until
+  # they discard it.
+  def paper_scan_awaiting_review?
+    paper_signatures.submitted.exists?
+  end
+
   def recipient
     signer.recipient if signer.is_a?(RecipientSigner)
   end
@@ -68,6 +74,9 @@ class SignerContract < ApplicationRecord
   # the signature request and tells the author, except the person who caused the completion.
   def complete_signature!(at: Time.current, except: signing_user)
     update_column(:signed_at, at)
+    # Signed another way, e.g. in a signing app opened before a scan was submitted: the draft or the
+    # scan awaiting review is no longer needed. An approved scan is not open any more.
+    paper_signatures.open.find_each(&:cancel!)
     contract.record_signature_request_on_signing!(signing_user)
     contract.notify_signed!(signer: signer, except: except)
   end

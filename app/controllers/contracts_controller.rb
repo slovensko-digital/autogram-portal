@@ -409,7 +409,7 @@ class ContractsController < ApplicationController
     end
 
     # The signing page shows the scan awaiting review; signing another way needs it discarded first.
-    if action_name != "sign" && @signer_contract&.paper_signatures&.submitted&.exists?
+    if action_name != "sign" && @signer_contract&.paper_scan_awaiting_review?
       redirect_to helpers.signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe]),
                   notice: t("paper_signatures.notices.awaiting_review")
       return

@@ -232,7 +232,7 @@ class Contracts::SessionsController < ApplicationController
     end
 
     # A scan awaiting review is discarded on the signing page before signing another way.
-    if @signer_contract&.paper_signatures&.submitted&.exists?
+    if @signer_contract&.paper_scan_awaiting_review?
       redirect_to helpers.signing_page_path(@contract, recipient: @recipient, iframe: params[:iframe]),
                   notice: t("paper_signatures.notices.awaiting_review")
       return

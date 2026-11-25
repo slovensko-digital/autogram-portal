@@ -225,6 +225,43 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "an embedded signing page shows the scan awaiting review instead of forwarding to the signing apps" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      get sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_preview")
+      assert_response :redirect
+      assert_includes response.location, signature_apps_contract_path(contract), "a draft lets the embedded page forward to the signing apps"
+
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      [
+        sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_preview"),
+        sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_onboarding"),
+        sign_contract_path(contract, recipient: recipient.uuid, iframe: "no_onboarding")
+      ].each do |path|
+        get path
+        assert_response :success, "#{path} forwards the recipient although the scan awaits review"
+        assert_includes response.body, I18n.t("paper_signatures.submitted.title")
+        assert_select "input[value=paper]", count: 0
+      end
+    end
+  end
+
+  test "a signature made in a signing app opened before the scan was submitted withdraws the scan" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      post contract_paper_signature_pages_path(contract, recipient: recipient.uuid), params: { files: [ jpeg_upload ] }
+      in_progress = open_autogram_session(contract, recipient: recipient)
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert PaperSignature.sole.submitted?
+
+      upload_signed_file(contract, in_progress[:upload])
+      assert_response :success
+
+      assert recipient.reload.signed?
+      assert bundle.reload.completed?
+      assert PaperSignature.sole.canceled?, "the scan of a signature made another way is no longer reviewed"
+    end
+  end
+
   test "another recipient cannot see or change the scan" do
     with_allowed_methods(PAPER_ALLOWED_METHODS) do
       other_bundle = request_signature_from_web(as: @owner, filename: "iny.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))

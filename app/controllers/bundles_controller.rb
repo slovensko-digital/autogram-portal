@@ -341,7 +341,9 @@ class BundlesController < ApplicationController
       next false unless contract.awaiting_signature?
 
       if @recipient
-        @recipient.pending_contract?(contract)
+        signer_contract = @recipient.signer_contracts.find_by!(contract: contract)
+        # A scan awaiting review is discarded on the signing page before signing another way.
+        signer_contract.awaiting? && !signer_contract.paper_scan_awaiting_review?
       else
         public_signing_available?
       end
