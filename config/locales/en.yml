@@ -1455,6 +1455,8 @@ en:
       qes_visual_stamp_description: "Signing with QES/PAdES can include an optional visual stamp before the qualified signature is created."
       signature_field_appearance_button: "Add visible signature appearance"
       signature_field_appearance_description: "A visible signature field is prepared for you in this PDF. Add your text or image appearance before continuing to electronic signing."
+      paper_label: "Signing on paper"
+      paper_description: "Print the document, sign it with a pen and upload a scan or photos"
       continue: "Continue"
     visual_signing:
       invalid_document: "A visual stamp can only be added to a PDF document."
@@ -1493,7 +1495,7 @@ en:
       qes: Qualified electronic signature
       standalone_qes: Download the document, sign it with a qualified signature in your own desktop application (e.g. Podpisuj) and upload the signed document back
       ades: Simple electronic signature
-      scan: Print, sign by hand, and scan
+      scan: The signer prints the document, signs it with a pen and uploads a scan or photos. You then review the signature.
       visual: Add a visual stamp to the PDF
       notary-post: Document signed at a notary and original sent via post office
       notary-conversion: Document signed at a notary and then scanned and converted to qualified electronic signature by the notary
@@ -1501,7 +1503,7 @@ en:
         qes: Qualified electronic signature
         standalone_qes: Podpisuj or other standalone applications
         ades: Simple electronic signature with second factor verification via SMS or email
-        scan: Print, sign by hand, and scan
+        scan: Signing on paper
         visual: Visual stamp
         notary-post: Notary signature with postal delivery
         notary-conversion: Notary signature with conversion to QES
@@ -2203,7 +2205,7 @@ en:
           standalone_qes:
             label: "Podpisuj or other standalone applications"
             description: "The recipient downloads the document, signs it with a qualified signature in their own desktop application and uploads it back. This method is off for recipients by default."
-        allowed_methods_note: "The portal operator may also enable other methods, such as a visual stamp in the PDF or a scan of a document signed by hand."
+        allowed_methods_note: "The portal operator may also enable other methods, such as a visual stamp in the PDF or signing on paper (printing the document, signing it by hand and uploading a scan)."
         methods_title: "Signing applications"
         methods:
           autogram_desktop:

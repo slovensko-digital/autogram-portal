@@ -153,10 +153,11 @@ class Contract < ApplicationRecord
 
   # Signing methods the signer can choose from, in the order they are offered.
   # AdES needs a recipient to verify, so it is not offered to anyone else.
-  def signing_methods_for(recipient: nil)
+  def signing_methods_for(recipient: nil, embedded: false)
     methods = []
     methods << "electronic" if qualified_signing_allowed?
     methods << "ades" if AdesEvidenceSession.available?(self, recipient: recipient)
+    methods << "paper" if paper_signing_available_for?(recipient, embedded: embedded)
     methods << "visual" if allowed_methods.include?("visual") && visual_signing_allowed?
     methods
   end
@@ -326,6 +327,15 @@ class Contract < ApplicationRecord
   # format spares the signing pages a validation.
   def signing_supported?
     signature_parameters.nil? || signature_parameters.format.present?
+  end
+
+  # Signing on paper is for invited local recipients of a single PDF; embedded pages never offer it.
+  def paper_signing_available_for?(recipient, embedded: false)
+    return false if embedded || recipient.nil?
+
+    allowed_methods.include?("scan") &&
+      recipient.active? && recipient.visible? && !recipient.federated_recipient? &&
+      documents.one? && documents.first.is_pdf?
   end
 
   def ades_allowed?

@@ -29,7 +29,7 @@ module SigningHelper
   def signing_method_choice_skipped?(contract, recipient: nil)
     params[:iframe].in?(%w[no_preview no_onboarding]) &&
       (!contract.signed_through_bundle?(recipient: recipient) || contract.bundle.contracts.one?) &&
-      contract.signing_methods_for(recipient: recipient) == [ "electronic" ]
+      contract.signing_methods_for(recipient: recipient, embedded: true) == [ "electronic" ]
   end
 
   def electronic_signing_path(contract, recipient: nil)

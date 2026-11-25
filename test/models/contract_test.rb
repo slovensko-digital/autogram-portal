@@ -275,6 +275,40 @@ class ContractTest < ActiveSupport::TestCase
     end
   end
 
+  test "paper signing is offered to a bundle recipient when the author allowed scans" do
+    with_scan_allowed do
+      contract = scan_contract
+      recipient = Recipient.new(bundle: contract.bundle, email: "r@example.com")
+
+      assert_includes contract.signing_methods_for(recipient: recipient), "paper"
+      assert_equal %w[electronic paper], contract.signing_methods_for(recipient: recipient)
+    end
+  end
+
+  test "paper signing is not offered in embedded signing, to the author proxy, to federated or withdrawn recipients or for several documents" do
+    with_scan_allowed do
+      contract = scan_contract
+      recipient = Recipient.new(bundle: contract.bundle, email: "r@example.com")
+
+      assert_not_includes contract.signing_methods_for(recipient: recipient, embedded: true), "paper"
+      assert_not_includes contract.signing_methods_for(recipient: Recipient.new(bundle: contract.bundle, author_proxy: true)), "paper"
+      assert_not_includes contract.signing_methods_for(recipient: Recipient.new(bundle: contract.bundle, federation_mode: "federated")), "paper"
+      assert_not_includes contract.signing_methods_for(recipient: Recipient.new(bundle: contract.bundle, withdrawn_at: Time.current)), "paper"
+      assert_not_includes contract.signing_methods_for(recipient: nil), "paper"
+
+      two_documents = Contract.create!(allowed_methods: [ "qes", "scan" ], documents_attributes: [ { blob: pdf_blob("a.pdf", "%PDF-1.4 a") }, { blob: pdf_blob("b.pdf", "%PDF-1.4 b") } ])
+      assert_not_includes two_documents.signing_methods_for(recipient: recipient), "paper"
+    end
+  end
+
+  test "paper signing is not offered unless the author allowed scans" do
+    with_scan_allowed do
+      contract = scan_contract(allowed_methods: [ "qes" ])
+
+      assert_not_includes contract.signing_methods_for(recipient: Recipient.new(bundle: contract.bundle, email: "r@example.com")), "paper"
+    end
+  end
+
   test "ades is allowed only when it is among the allowed methods" do
     assert_not Contract.new(allowed_methods: [ "qes" ]).ades_allowed?
     assert Contract.new(allowed_methods: [ "ades" ]).ades_allowed?
@@ -442,6 +476,22 @@ class ContractTest < ActiveSupport::TestCase
   end
 
   private
+
+  def with_scan_allowed
+    original = Contract::ALLOWED_METHODS
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, %w[qes ades scan])
+    yield
+  ensure
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, original)
+  end
+
+  def scan_contract(allowed_methods: [ "qes", "scan" ])
+    contract = Contract.create!(allowed_methods: allowed_methods, documents_attributes: [ { blob: pdf_blob("paper.pdf", "%PDF-1.4 paper") } ])
+    Bundle.create!(tenant: tenants(:one), contracts: [ contract ])
+    contract.reload
+  end
 
   def pdf_blob(filename, content)
     ActiveStorage::Blob.create_and_upload!(

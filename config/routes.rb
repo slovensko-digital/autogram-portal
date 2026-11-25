@@ -110,6 +110,7 @@ Rails.application.routes.draw do
     end
 
     resources :onboarding, only: [ :show, :update ], param: :step, controller: "contracts/onboarding"
+    resource :paper_signature, only: [ :show ], controller: "contracts/paper_signatures"
     resources :signature_field_preparations, only: [ :index, :edit, :create, :update, :destroy ], controller: "contracts/signature_field_preparations" do
       post :finalize, on: :collection
     end

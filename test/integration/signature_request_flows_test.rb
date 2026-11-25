@@ -35,6 +35,35 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_equal 1, mails_to(@owner.email).count { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
   end
 
+  test "the recipient picks Podpis na papieri on the bundle signing page" do
+    with_allowed_methods(%w[qes standalone_qes ades scan]) do
+      bundle = request_signature_from_web(as: @owner, filename: "papier.pdf", allowed_methods: [ "qes", "scan" ])
+      contract = bundle.contracts.sole
+      recipient = add_recipient(bundle, "paper@example.com")
+      sign_out @owner
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid)
+      assert_response :success
+      assert_select "input[value=paper]"
+      assert_includes response.body, "Podpis na papieri"
+      assert_select "a[href=?]", "/contracts/#{contract.uuid}/paper_signature?recipient=#{recipient.uuid}"
+      assert_equal "/contracts/#{contract.uuid}/paper_signature?recipient=#{recipient.uuid}", contract_paper_signature_path(contract, recipient: recipient.uuid)
+
+      get sign_bundle_path(bundle, recipient: recipient.uuid, iframe: "no_preview")
+      assert_select "input[value=paper]", count: 0
+    end
+  end
+
+  test "paper signing is not offered when the author did not allow scans" do
+    bundle = request_signature_from_web(as: @owner, filename: "bez-papiera.pdf")
+    recipient = add_recipient(bundle, "nopaper@example.com")
+    sign_out @owner
+
+    get sign_bundle_path(bundle, recipient: recipient.uuid)
+    assert_response :success
+    assert_select "input[value=paper]", count: 0
+  end
+
   test "author names the bundle and writes a message before the invitation goes out" do
     bundle = request_signature_from_web(as: @owner, filename: "zmluva-o-dielo.pdf")
 
@@ -543,6 +572,17 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
   private
 
+  def with_allowed_methods(methods)
+    original_allowed_methods = Contract::ALLOWED_METHODS
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, methods)
+
+    yield
+  ensure
+    Contract.send(:remove_const, :ALLOWED_METHODS)
+    Contract.const_set(:ALLOWED_METHODS, original_allowed_methods)
+  end
+
   def upload_pdf(filename, agree_to_policies: false)
     params = { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 #{filename}"), "application/pdf", original_filename: filename) } }
     params[:contract] = { agree_to_policies: "1" } if agree_to_policies
@@ -556,7 +596,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
   end
 
   # Uploads a PDF, asks for signatures and returns the bundle the web creates.
-  def request_signature_from_web(as:, filename:)
+  def request_signature_from_web(as:, filename:, allowed_methods: [ "qes" ])
     sign_in_with_tenant as, @organization
     post contracts_path, params: { document: { blob: Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 #{filename}"), "application/pdf", original_filename: filename) } }
     contract = Contract.order(:id).last
@@ -565,7 +605,7 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
     patch contract_path(contract), params: {
       next_step: "request_signature",
-      contract: { allowed_methods: [ "qes" ], signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" } }
+      contract: { allowed_methods: allowed_methods, signature_parameters_attributes: { level: "BASELINE_B", format: "PAdES" } }
     }
     bundle = contract.reload.bundle
     assert_redirected_to edit_bundle_path(bundle)

@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["methodRadio", "continueButton", "electronicButton", "adesButton", "visualButton"]
+  static targets = ["methodRadio", "continueButton", "electronicButton", "adesButton", "visualButton", "paperButton"]
 
   connect() {
     console.log('Signing method controller connected')
@@ -33,6 +33,10 @@ export default class extends Controller {
     } else if (selectedMethod === 'visual') {
       if (this.hasVisualButtonTarget) {
         this.visualButtonTarget.click()
+      }
+    } else if (selectedMethod === 'paper') {
+      if (this.hasPaperButtonTarget) {
+        this.paperButtonTarget.click()
       }
     }
   }

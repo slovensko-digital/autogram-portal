@@ -1384,6 +1384,8 @@ sk:
       qes_visual_stamp_description: "Podpisovanie cez QES/PAdES môže pred vytvorením kvalifikovaného podpisu obsahovať voliteľnú vizuálnu pečiatku."
       signature_field_appearance_button: "Pridať viditeľnú podobu podpisu"
       signature_field_appearance_description: "V tomto PDF je pre vás pripravené viditeľné podpisové pole. Pred pokračovaním na elektronické podpisovanie doplňte jeho textovú alebo obrázkovú podobu."
+      paper_label: "Podpis na papieri"
+      paper_description: "Vytlačte dokument, podpíšte ho perom a nahrajte sken alebo fotky"
       continue: "Pokračovať"
     visual_signing:
       invalid_document: "Vizuálnu pečiatku je možné vložiť iba do dokumentu PDF."
@@ -1422,7 +1424,7 @@ sk:
       qes: Elektronický podpis kvalifikovaným certifikátom na občianskom preukaze alebo inom kompatibilnom zariadení
       standalone_qes: Stiahnutie dokumentu, kvalifikovaný podpis vo vlastnej aplikácii na počítači (napr. Podpisuj) a nahratie podpísaného dokumentu späť
       ades: Elektronický podpis s evidenčným záznamom a overením cez druhý faktor (SMS alebo e-mail)
-      scan: Vytlačiť, ručne podpísať a naskenovať
+      scan: Podpisujúci dokument vytlačí, podpíše perom a nahrá sken alebo fotky. Podpis potom skontrolujete vy.
       visual: Pridať do PDF vizuálnu pečiatku
       notary-post: Dokument podpísaný u notára a originál následne zaslaný poštou
       notary-conversion: Dokument podpísaný u notára a následne notárom naskenovaný a prevedený na kvalifikovaný elektronický podpis
@@ -1430,7 +1432,7 @@ sk:
         qes: Kvalifikovaný elektronický podpis
         standalone_qes: Podpisuj alebo iné samostatné aplikácie
         ades: Jednoduchý elektronický podpis
-        scan: Sken podpísaného dokumentu
+        scan: Podpis na papieri
         visual: Vizuálna pečiatka
         notary-post: Osvedčený podpis u notára
         notary-conversion: Zaručená konverzia osvedčeného podpisu
@@ -2138,7 +2140,7 @@ sk:
           standalone_qes:
             label: "Podpisuj alebo iné samostatné aplikácie"
             description: "Adresát si stiahne dokument, podpíše ho kvalifikovaným podpisom vo vlastnej aplikácii na počítači a nahrá ho späť. Pre adresátov je táto metóda predvolene vypnutá."
-        allowed_methods_note: "Prevádzkovateľ portálu môže povoliť aj ďalšie metódy, napríklad vizuálnu pečiatku v PDF alebo sken ručne podpísaného dokumentu."
+        allowed_methods_note: "Prevádzkovateľ portálu môže povoliť aj ďalšie metódy, napríklad vizuálnu pečiatku v PDF alebo podpis na papieri (vytlačenie dokumentu, ručný podpis a nahratie skenu)."
         methods_title: "Podpisové aplikácie"
         methods:
           autogram_desktop:
