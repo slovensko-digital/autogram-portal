@@ -2919,6 +2919,20 @@ en:
     phone:
       title: "Take photos of the pages with your phone"
       description: "Scan the code with your phone's camera. The pages you photograph appear here by themselves."
+      qr_label: "QR code with the link for taking photos of the pages with a phone"
+    phone_page:
+      title: "Take photos of the signed pages"
+      document_pages:
+        one: "%{count} page"
+        other: "%{count} pages"
+      take_photo: "Take a photo of the next page"
+      choose_from_gallery: "Choose from the gallery"
+      submit:
+        one: "Submit for review (%{count} page)"
+        other: "Submit for review (%{count} pages)"
+    link_expired:
+      title: "The photo link no longer works"
+      message: "Open the signing page on your computer and scan the new code."
     pages:
       label: "Uploaded pages"
       page: "Page %{number}"

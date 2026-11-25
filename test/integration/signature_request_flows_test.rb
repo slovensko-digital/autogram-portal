@@ -7,6 +7,7 @@ require_relative "../support/plan_limits_helper"
 class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   include ActionMailer::TestHelper
+  include Turbo::Broadcastable::TestHelper
   include SigningFlowHelper
   include PlanLimitsHelper
 
@@ -346,6 +347,220 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
       get sign_bundle_path(bundle, recipient: recipient.uuid)
       assert_includes response.body, "Odosielateľ vrátil váš sken", "an empty draft leaves the returned scan in view"
       assert_select "input[value=paper]"
+    end
+  end
+
+  test "the signing page shows a QR code with the phone link" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      phone_url = URI(phone_link_for(contract, recipient))
+
+      assert_select "#paper_signature_phone" do
+        assert_select "h3", text: "Odfoťte strany mobilom"
+        assert_select "[role=img][aria-label=?][data-phone-url=?]", I18n.t("paper_signatures.phone.qr_label"), phone_url.to_s
+        qr_path = Nokogiri::HTML5.fragment(ApplicationController.helpers.qr_code_svg(phone_url.to_s, level: :m)).at_css("svg path")["d"]
+        assert_select "[data-phone-url] svg path[d=?]", qr_path
+      end
+      assert_equal [ "www.example.com", contract_paper_signature_path(contract) ], [ phone_url.host, phone_url.path ]
+      assert_equal PaperSignature.sole, PaperSignatureAccessToken.verify(phone_token(phone_url))
+      assert_not_includes phone_url.to_s, recipient.uuid
+    end
+  end
+
+  test "the phone link adds pages to the same draft without signing in" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      phone_url = phone_link_for(contract, recipient)
+      token = phone_token(phone_url)
+      draft = PaperSignature.sole
+      assert_select "turbo-cable-stream-source[signed-stream-name=?]", Turbo::StreamsChannel.signed_stream_name(draft)
+
+      get phone_url
+      assert_response :success
+      assert_select "h1", text: "Odfoťte podpísané strany"
+      assert_select "p", text: /papier\.pdf\s*·\s*2 strany/
+      assert_select "label[for=paper_signature_files]", text: /Odfotiť ďalšiu stranu/
+      assert_select "input#paper_signature_files[type=file][name='files[]'][accept='image/*'][capture=environment]"
+      assert_select "label", text: /Vybrať z galérie/ do |labels|
+        assert_select labels.first, "input[type=file][name='files[]'][multiple]:not([capture])"
+      end
+      assert_select "form[action=?] button[disabled]", submit_contract_paper_signature_path(contract, token: token), text: "Odoslať na kontrolu"
+      assert_select "#paper_signature_phone", count: 0
+      assert_select "a", text: "Stiahnuť na tlač", count: 0
+      assert_select "a", text: "Späť na výber spôsobu podpisu", count: 0
+      assert_select "button", text: "Zahodiť sken a podpísať inak", count: 0
+      assert_select "turbo-cable-stream-source[signed-stream-name=?]", Turbo::StreamsChannel.signed_stream_name(draft)
+      assert_not_includes response.body, recipient.uuid
+
+      assert_turbo_stream_broadcasts draft, count: 1 do
+        post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      end
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert_equal 1, draft.reload.pages.count
+      jpeg_page = draft.pages.sole
+
+      follow_redirect!
+      assert_select "figure figcaption", text: "Strana 1"
+      assert_select "img[src=?]", contract_paper_signature_page_path(contract, jpeg_page, token: token)
+      assert_select "form[action=?] button:not([disabled])", submit_contract_paper_signature_path(contract, token: token), text: "Odoslať na kontrolu (1 strana)"
+      assert_includes response.body, "Dokument má 2 strany, nahrali ste 1"
+      assert_not_includes response.body, recipient.uuid
+
+      get contract_paper_signature_page_path(contract, jpeg_page, token: token)
+      assert_response :success
+      assert_equal "image/jpeg", response.media_type
+
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ png_upload ] }
+      png_page = draft.pages.last
+      follow_redirect!
+      assert_select "form[action=?] button", submit_contract_paper_signature_path(contract, token: token), text: "Odoslať na kontrolu (2 strany)"
+      patch contract_paper_signature_page_path(contract, png_page, token: token), params: { position: 1 }
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert_equal [ png_page, jpeg_page ], draft.pages.reload.to_a
+      delete contract_paper_signature_page_path(contract, png_page, token: token)
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert_equal [ jpeg_page ], draft.pages.reload.to_a
+
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert_select "figure figcaption", text: "Strana 1"
+
+      post submit_contract_paper_signature_path(contract, token: token)
+      assert_redirected_to contract_paper_signature_path(contract, token: token)
+      assert draft.reload.submitted?
+      follow_redirect!
+      assert_response :gone
+      assert_includes response.body, "Sken sme odoslali na kontrolu"
+      assert_not_includes response.body, "Odkaz na fotenie už neplatí"
+      assert_not_includes response.body, recipient.email
+    end
+  end
+
+  test "an expired phone link changes nothing" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      get contract_paper_signature_path(contract, recipient: recipient.uuid)
+      draft = PaperSignature.sole
+      token = PaperSignatureAccessToken.generate(draft, expires_at: 1.minute.ago)
+
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      assert_equal 0, draft.reload.pages.count
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_select "h1", text: "Odkaz na fotenie už neplatí"
+      assert_includes response.body, "Otvorte stránku podpisu na počítači a naskenujte nový kód."
+
+      fresh_token = PaperSignatureAccessToken.generate(draft)
+      travel 61.minutes do
+        post contract_paper_signature_pages_path(contract, token: fresh_token), params: { files: [ jpeg_upload ] }
+        assert_response :gone
+      end
+      get contract_paper_signature_path(contract, token: "#{fresh_token}x")
+      assert_response :gone
+      assert_equal 0, draft.reload.pages.count
+    end
+  end
+
+  test "a phone link of one contract does not open another" do
+    with_allowed_methods(PAPER_ALLOWED_METHODS) do
+      other_bundle = request_signature_from_web(as: @owner, filename: "iny.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      stranger = add_recipient(other_bundle, "stranger@example.com")
+      bundle = request_signature_from_web(as: @owner, filename: "papier.pdf", allowed_methods: [ "qes", "scan" ], content: pdf_content(pages: 2))
+      recipient = add_recipient(bundle, "paper@example.com")
+      colleague = add_recipient(bundle, "colleague@example.com")
+      sign_out @owner
+      contract = bundle.contracts.sole
+      other_contract = other_bundle.contracts.sole
+
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      page = PaperSignature.sole.pages.sole
+      post contract_paper_signature_pages_path(other_contract, recipient: stranger.uuid), params: { files: [ jpeg_upload ] }
+      other_page = PaperSignaturePage.where.not(id: page).sole
+      post contract_paper_signature_pages_path(contract, recipient: colleague.uuid), params: { files: [ jpeg_upload ] }
+      colleague_page = PaperSignaturePage.where.not(id: [ page, other_page ]).sole
+
+      get contract_paper_signature_path(other_contract, token: token)
+      assert_response :not_found
+      post contract_paper_signature_pages_path(other_contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :not_found
+      get contract_paper_signature_page_path(other_contract, other_page, token: token)
+      assert_response :not_found
+      post submit_contract_paper_signature_path(other_contract, token: token)
+      assert_response :not_found
+
+      get contract_paper_signature_page_path(contract, colleague_page, token: token)
+      assert_response :not_found
+      delete contract_paper_signature_page_path(contract, colleague_page, token: token)
+      assert_response :not_found
+
+      assert_equal 3, PaperSignaturePage.count
+      assert PaperSignature.all.all?(&:draft?)
+    end
+  end
+
+  test "the phone link stops working after the scan is submitted" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      page = PaperSignature.sole.pages.sole
+      post submit_contract_paper_signature_path(contract, recipient: recipient.uuid)
+      assert PaperSignature.sole.submitted?
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_includes response.body, "Sken sme odoslali na kontrolu"
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      get contract_paper_signature_page_path(contract, page, token: token)
+      assert_response :gone
+      post submit_contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_equal [ page ], PaperSignature.sole.pages.to_a
+
+      delete contract_paper_signature_path(contract, recipient: recipient.uuid, restart: true)
+      follow_redirect!
+      new_draft = PaperSignature.draft.sole
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      assert_select "h1", text: "Odkaz na fotenie už neplatí"
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      assert_equal 0, new_draft.pages.count
+    end
+  end
+
+  test "a phone link cannot discard the scan" do
+    with_paper_signing_request do |_bundle, contract, recipient|
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+
+      delete contract_paper_signature_path(contract, token: token)
+      assert_response :forbidden
+      delete contract_paper_signature_path(contract, token: token, restart: true)
+      assert_response :forbidden
+
+      draft = PaperSignature.sole
+      assert draft.draft?
+      assert_equal 1, draft.pages.count
+    end
+  end
+
+  test "a phone link stops working after the recipient is withdrawn" do
+    with_paper_signing_request do |bundle, contract, recipient|
+      token = phone_token(phone_link_for(contract, recipient))
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_equal 1, PaperSignaturePage.count
+
+      sign_in_with_tenant @owner, @organization
+      delete bundle_recipient_path(bundle, recipient), as: :turbo_stream
+      assert recipient.reload.withdrawn?
+      sign_out @owner
+
+      get contract_paper_signature_path(contract, token: token)
+      assert_response :gone
+      post contract_paper_signature_pages_path(contract, token: token), params: { files: [ jpeg_upload ] }
+      assert_response :gone
+      assert_equal 0, PaperSignaturePage.count
     end
   end
 
@@ -869,6 +1084,17 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
 
       yield bundle, bundle.contracts.sole, recipient
     end
+  end
+
+  # Opens the paper signing page on the computer and returns the phone link from its QR panel.
+  def phone_link_for(contract, recipient)
+    get contract_paper_signature_path(contract, recipient: recipient.uuid)
+    assert_response :success
+    css_select("#paper_signature_phone [data-phone-url]").sole["data-phone-url"]
+  end
+
+  def phone_token(phone_url)
+    Rack::Utils.parse_query(URI(phone_url.to_s).query).fetch("token")
   end
 
   def pdf_content(pages:)

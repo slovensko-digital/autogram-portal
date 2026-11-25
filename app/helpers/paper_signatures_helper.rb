@@ -35,6 +35,11 @@ module PaperSignaturesHelper
     end
   end
 
+  # The phone link in the QR code of the paper signing page, with a new token on every render.
+  def paper_signature_phone_url(contract, paper_signature)
+    contract_paper_signature_url(contract, token: PaperSignatureAccessToken.generate(paper_signature))
+  end
+
   # Members of the sending organization are named only by their name, otherwise by the organization.
   def paper_signature_reviewer_name(paper_signature)
     paper_signature.reviewed_by&.name.presence || paper_signature.contract.tenant.sender_display_name

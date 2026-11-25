@@ -1,6 +1,11 @@
 <%# locals: (contract:, paper_signature:) %>
-<%# Continuing on a phone: the QR code with a link to this draft goes into this panel. Touch devices take the photos themselves. %>
+<%# Continuing on a phone: the QR code opens this draft without signing in, for an hour (PaperSignatureAccessToken). Touch devices take the photos themselves. %>
+<% phone_url = paper_signature_phone_url(contract, paper_signature) %>
 <div id="paper_signature_phone" class="rounded-lg border border-gray-200 bg-gray-50 p-4 pointer-coarse:hidden">
   <h3 class="text-sm font-semibold text-gray-900"><%= t('paper_signatures.phone.title') %></h3>
   <p class="mt-1 text-sm text-gray-600"><%= t('paper_signatures.phone.description') %></p>
+  <%= tag.div role: "img", aria: { label: t('paper_signatures.phone.qr_label') }, data: { phone_url: phone_url },
+        class: "mx-auto mt-4 w-full max-w-56 rounded-md border border-gray-200 bg-white p-3" do %>
+    <%= qr_code_svg(phone_url, level: :m) %>
+  <% end %>
 </div>

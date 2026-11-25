@@ -83,6 +83,15 @@ and AdES mutations additionally require the resolved signer/session to match.
 Session permissions require a nonempty contract; missing parents do not establish
 a valid binding.
 
+Paper signing binds `SigningBundleAccess` to the recipient of the signing link or,
+for the phone link, to the recipient of the paper signature that
+`PaperSignatureAccessToken` names (signed with purpose `paper-signature-access`,
+expiring after an hour). `PaperSignerResolution` validates the token; the subject
+never stores it. The token works only for that paper signature while it is a
+draft of the contract in the URL, and only for its pages and submitting it, never
+for discarding the scan. Pages opened with it link with the token, never with the
+recipient UUID.
+
 Policies are read-only: they do not create records, send mail, issue grants or
 change signing state. Reuse domain predicates. Capacity, last-owner protections
 and workflow guards stay in models/services so other callers retain them.
@@ -172,6 +181,7 @@ in integration tests. They are not a replacement for controller authorization.
 | `Bundles#sign/autogram_batch` | Web, bound signing subject | Recipient capability OR public bundle OR selected-tenant manager | Lookup precedence unchanged; invalid grant/mismatch 404, withdrawn signing 410, batch eligibility stays separate (a document whose paper scan awaits review is left out) |
 | `Bundles#accept/decline` | Web, recipient found through bundle | Bound recipient capability | Existing UUID/user lookup retained; withdrawal/completion/superseding responses unchanged |
 | `Contracts::PaperSignatures#show/submit/destroy`, `Contracts::PaperSignaturePages#create/show/update/destroy` | Web, contract UUID and active recipient UUID (`params[:recipient]`) within the contract, then its signer contract (`PaperSignerResolution`) | `Signing::SigningBundleAccessPolicy#paper_sign?`: bound recipient of the contract's bundle | Unknown/withdrawn recipient 404; superseded redirects with notice; signed/declined or paper signing not available (except discarding) returns to the signing page; sign limit 403 page. Pages only of the recipient's open paper signature (others 404), their bytes via `send_data` inline, never blob URLs |
+| Same, opened with the phone link (`params[:token]`) | Web, contract UUID and the paper signature of a valid `PaperSignatureAccessToken`, then its signer contract and recipient | `paper_sign?` for the token's recipient | Expired/invalid token, or its paper signature no longer a draft, the recipient withdrawn, the signer contract no longer awaiting or paper signing not available: 410 `link_expired` page (a submitted scan is confirmed there), never a redirect with the recipient UUID; token of another contract 404; `PaperSignatures#destroy` 403; pages only of the token's draft (others 404); sign limit 403 page |
 | `Contracts::Sessions#create/show` | Web, bound signing subject | Existing signer resolution / nested session | Creation/preparation/completion redirects unchanged; UUID/session display is not hardened; a paper scan awaiting review redirects to the signing page (also for the AdES verification actions) |
 | `Contracts::Sessions#parameters/download/upload/state` | Web, contract UUID and nested session ID | Valid bound token OR allowed user | 403; expiry/withdrawal checked by token service; format/attachment/upload errors unchanged; `state` returns the completed session's broadcast as a Turbo Stream (204 while pending) for pages that missed it |
 | `Contracts::Sessions#destroy` | Same | Allowed user only, never token alone | 403; managers and existing signer ownership/email semantics retained |
@@ -230,7 +240,7 @@ tests; verification hooks alone cannot prove the correct policy or scope was use
 | Session create/show/verification/completion | Parent/session/signer matching and existing method/state/preparation checks, not one generic signing permission |
 | Session AVM webhooks | Existing protocol/service checks and CSRF exception, not newly invented user authentication |
 | Bundle sign/batch/accept/decline | Existing grant/UUID/user/public/manager resolution precedence; each action retains its own rules |
-| Paper signing pages and page images | Recipient capability bound to the contract's bundle; page bytes only through the authorized action of the recipient's open paper signature |
+| Paper signing pages and page images | Recipient capability bound to the contract's bundle; page bytes only through the authorized action of the recipient's open paper signature. The phone link token is bound to one draft paper signature and its contract, expires after an hour and never discards |
 | Documents preview/download and contract validation/signed download | Existing UUID-accessible behavior; no new blanket tenant scope |
 | Evidence public lookup/download | Public reference access; distinct private-package permission |
 | Tenant API contracts/documents | Contract tenant scope, shared by document scopes |

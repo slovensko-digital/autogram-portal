@@ -59,15 +59,7 @@
 
       <%= render 'contracts/paper_signatures/pages', contract: contract, paper_signature: paper_signature, editable: true %>
 
-      <% if paper_signature.pages.any? %>
-        <% expected = paper_signature.expected_page_count %>
-        <% actual = paper_signature.uploaded_page_count %>
-        <% if expected && actual && expected != actual %>
-          <%= render 'shared/warning',
-                title: t('paper_signatures.pages.page_count_mismatch.title', count: expected, actual: actual),
-                content: t('paper_signatures.pages.page_count_mismatch.message') %>
-        <% end %>
-      <% end %>
+      <%= render 'contracts/paper_signatures/page_count_warning', paper_signature: paper_signature %>
     </div>
   </li>
 </ol>

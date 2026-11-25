@@ -1,16 +1,18 @@
 module Contracts
   # The page where a recipient signs on paper (screens 2–4 and 6): they download the document to print
   # it, upload photos or a scan of the signed pages into a draft and submit it for the sender's review.
+  # Opened with the phone link, the same draft takes photos on a phone (screen 5).
   class PaperSignaturesController < ApplicationController
     include PaperSignerResolution
 
     # Opens a draft right away, so pages can come from a phone before anything is uploaded here.
     def show
-      @paper_signature = PaperSignature.open_for!(@signer_contract)
+      @paper_signature = current_paper_signature(open_draft: true)
+      render :phone if phone_link?
     end
 
     def submit
-      paper_signature = @signer_contract.paper_signatures.open.first
+      paper_signature = current_paper_signature
       submitted = paper_signature&.submit!
 
       redirect_to paper_signature_page_path, alert: (not_submitted_alert(paper_signature) unless submitted), status: :see_other
@@ -31,6 +33,10 @@ module Contracts
     end
 
     private
+
+    def discarding_paper_signature?
+      action_name == "destroy"
+    end
 
     # Nothing when the scan was submitted meanwhile (e.g. from a phone).
     def not_submitted_alert(paper_signature)

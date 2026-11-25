@@ -2856,6 +2856,22 @@ sk:
     phone:
       title: "Odfoťte strany mobilom"
       description: "Naskenujte kód fotoaparátom mobilu. Odfotené strany sa tu zobrazia samé."
+      qr_label: "QR kód s odkazom na fotenie strán mobilom"
+    phone_page:
+      title: "Odfoťte podpísané strany"
+      document_pages:
+        one: "%{count} strana"
+        few: "%{count} strany"
+        other: "%{count} strán"
+      take_photo: "Odfotiť ďalšiu stranu"
+      choose_from_gallery: "Vybrať z galérie"
+      submit:
+        one: "Odoslať na kontrolu (%{count} strana)"
+        few: "Odoslať na kontrolu (%{count} strany)"
+        other: "Odoslať na kontrolu (%{count} strán)"
+    link_expired:
+      title: "Odkaz na fotenie už neplatí"
+      message: "Otvorte stránku podpisu na počítači a naskenujte nový kód."
     pages:
       label: "Nahraté strany"
       page: "Strana %{number}"

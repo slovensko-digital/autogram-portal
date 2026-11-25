@@ -1,14 +1,14 @@
 module Contracts
   # Pages of a recipient's paper signature: photos or a PDF scan added to the draft, their order and
   # their content for the thumbnails. Pages are private, so they are served only here, to the recipient
-  # of the signing link, and only while their paper signature is open.
+  # of the signing link while their paper signature is open, or to its phone link while it is a draft.
   class PaperSignaturePagesController < ApplicationController
     include PaperSignerResolution
 
     before_action :set_page, only: [ :show, :update, :destroy ]
 
     def create
-      PaperSignature.open_for!(@signer_contract).add_pages!(params[:files])
+      current_paper_signature(open_draft: true).add_pages!(params[:files])
 
       redirect_to paper_signature_page_path, status: :see_other
     rescue PaperSignature::InvalidUpload => e
@@ -37,7 +37,7 @@ module Contracts
     private
 
     def set_page
-      @paper_signature = @signer_contract.paper_signatures.open.first
+      @paper_signature = current_paper_signature
       raise ActiveRecord::RecordNotFound unless @paper_signature
 
       @page = @paper_signature.pages.find(params[:id])
