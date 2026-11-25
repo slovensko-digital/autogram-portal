@@ -18,6 +18,11 @@ class Signing::SigningBundleAccessPolicy < ApplicationPolicy
     accept?
   end
 
+  # Signing on paper is only for the recipient the signing link belongs to.
+  def paper_sign?
+    web_context? && bound_recipient?
+  end
+
   private
 
   def web_context?

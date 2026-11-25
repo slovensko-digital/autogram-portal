@@ -1,0 +1,37 @@
+<% content_for :title, t('paper_signatures.show.title') %>
+
+<%= turbo_stream_from @paper_signature %>
+
+<div class="mx-auto max-w-4xl px-6 pb-8 pt-10 lg:px-8">
+  <%= link_to signing_page_path(@contract, recipient: @recipient),
+        class: "mb-3 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline" do %>
+    <svg aria-hidden="true" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+    </svg>
+    <%= t('paper_signatures.show.back') %>
+  <% end %>
+
+  <h1 class="text-3xl font-bold text-gray-900"><%= t('paper_signatures.show.title') %></h1>
+  <p class="mt-2 text-gray-600"><%= t('paper_signatures.show.intro', sender: @contract.tenant.sender_display_name) %></p>
+
+  <div class="mt-8 space-y-6">
+    <% if @paper_signature.submitted? %>
+      <%= render 'contracts/paper_signatures/submitted', contract: @contract, recipient: @recipient, paper_signature: @paper_signature %>
+    <% else %>
+      <% returned = returned_paper_signature(@signer_contract) %>
+      <%= render 'contracts/paper_signatures/returned', paper_signature: returned if returned %>
+
+      <%= render 'contracts/paper_signatures/steps', contract: @contract, paper_signature: @paper_signature %>
+
+      <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-between">
+        <%= link_to t('actions.back'), signing_page_path(@contract, recipient: @recipient), class: "btn btn-secondary" %>
+        <%# Without pages there is nothing to submit; the server refuses it too. %>
+        <%= button_to t('paper_signatures.show.submit'),
+              submit_contract_paper_signature_path(@contract, **paper_signer_link_params),
+              disabled: @paper_signature.pages.none?,
+              form_class: "flex",
+              class: "btn btn-primary w-full sm:w-auto" %>
+      </div>
+    <% end %>
+  </div>
+</div>

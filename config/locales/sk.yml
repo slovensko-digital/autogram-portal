@@ -2829,6 +2829,62 @@ sk:
       too_large: "Sken je väčší, ako dovoľuje limit veľkosti dokumentu. Nahrajte menšie fotky alebo sken s nižším rozlíšením."
       too_many_pages: "Sken môže mať najviac %{count} strán."
       file_too_large: "Jeden súbor môže mať najviac %{size} MB."
+    alerts:
+      no_pages: "Najprv nahrajte sken alebo fotky strán."
+      pages_changed: "Strany sa medzitým zmenili. Skontrolujte ich a odošlite sken znova."
+    notices:
+      awaiting_review: "Váš sken čaká na kontrolu. Ak chcete dokument podpísať inak, najprv sken zahoďte."
+      discarded: "Sken sme zahodili. Dokument môžete podpísať inak."
+    show:
+      title: "Podpis na papieri"
+      intro: "Vytlačte dokument, podpíšte ho perom a nahrajte sken alebo fotky strán. Podpis potom skontroluje odosielateľ, %{sender}."
+      back: "Späť na výber spôsobu podpisu"
+      submit: "Odoslať na kontrolu"
+    steps:
+      download:
+        title: "Stiahnite a vytlačte dokument"
+        button: "Stiahnuť na tlač"
+      sign:
+        title: "Podpíšte ho perom"
+        description: "Podpíšte dokument vlastnou rukou na miestach určených na podpis a doplňte, čo sa na nich vypĺňa (napríklad dátum)."
+      upload:
+        title: "Nahrajte sken alebo fotky strán"
+        dropzone_title: "Pretiahnite sem sken alebo fotky strán"
+        dropzone_subtitle: "alebo kliknite a vyberte súbory"
+        file_types: "PDF zo skenera alebo fotky (JPG, PNG, HEIC)"
+        button: "Nahrať"
+    phone:
+      title: "Odfoťte strany mobilom"
+      description: "Naskenujte kód fotoaparátom mobilu. Odfotené strany sa tu zobrazia samé."
+    pages:
+      label: "Nahraté strany"
+      page: "Strana %{number}"
+      pdf: "Sken v PDF"
+      add: "Pridať stranu"
+      move_earlier: "Posunúť stranu %{number} dopredu"
+      move_later: "Posunúť stranu %{number} dozadu"
+      remove: "Odstrániť stranu %{number}"
+      remove_pdf: "Odstrániť sken"
+      page_count_mismatch:
+        title:
+          one: "Dokument má %{count} stranu, nahrali ste %{actual}"
+          few: "Dokument má %{count} strany, nahrali ste %{actual}"
+          other: "Dokument má %{count} strán, nahrali ste %{actual}"
+        message: "Nahrajte všetky strany, aby odosielateľ videl celý podpísaný dokument. Odoslať ho môžete aj tak."
+    submitted:
+      title: "Sken sme odoslali na kontrolu"
+      message: "%{sender} skontroluje, či je dokument podpísaný. Keď podpis schváli alebo vráti, pošleme vám e-mail na %{email}."
+      message_without_email: "%{sender} skontroluje, či je dokument podpísaný. Výsledok kontroly uvidíte na stránke podpisu."
+      scan: "Nahratý sken"
+      submitted_at: "Odoslaný %{time}"
+      replace: "Nahrať iný sken"
+      discard: "Zahodiť sken a podpísať inak"
+    draft:
+      title: "Podpis na papieri máte rozpracovaný"
+      message: "Nahraté strany ste ešte neodoslali na kontrolu."
+    returned:
+      title: "Odosielateľ vrátil váš sken"
+      reviewed: "Vrátil(a) %{name} %{time}"
 
   plan_limits:
     exceeded:

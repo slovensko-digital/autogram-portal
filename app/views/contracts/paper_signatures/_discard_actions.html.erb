@@ -1,0 +1,16 @@
+<%# locals: (contract:, recipient:, continue_path:) %>
+<%# A draft continues on the paper signing page; a scan awaiting review is replaced by another one. Discarding either brings back the other signing methods. %>
+<% if continue_path %>
+  <%= link_to t('actions.continue'), continue_path, data: { turbo_frame: "_top" }, class: "btn btn-primary" %>
+<% else %>
+  <%= button_to t('paper_signatures.submitted.replace'),
+        contract_paper_signature_path(contract, recipient: recipient.uuid, restart: true),
+        method: :delete,
+        data: { turbo_frame: "_top" },
+        class: "btn btn-second-primary w-full sm:w-auto" %>
+<% end %>
+<%= button_to t('paper_signatures.submitted.discard'),
+      contract_paper_signature_path(contract, recipient: recipient.uuid),
+      method: :delete,
+      data: { turbo_frame: "_top" },
+      class: "btn btn-secondary w-full sm:w-auto" %>

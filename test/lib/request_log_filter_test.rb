@@ -35,6 +35,17 @@ class RequestLogFilterTest < ActiveSupport::TestCase
     assert_equal "text", logged.dig("stamp", "content_mode")
   end
 
+  test "photos of signed pages and the reason a scan is returned are not logged" do
+    photo = Rack::Test::UploadedFile.new(StringIO.new("JVBERi0"), "image/jpeg", original_filename: "zmluva-novak.jpg")
+    logged = filter(
+      "files" => [ photo, photo ], "reason" => "Dobry.den", "paper_signature" => { "return_reason" => "Dobry.den" },
+      "recipient" => "tajny-token", "contract_id" => "c-1", "id" => "7", "position" => "2"
+    )
+
+    assert_no_private_values logged
+    assert_equal({ "contract_id" => "c-1", "id" => "7", "position" => "2" }, logged.slice("contract_id", "id", "position"))
+  end
+
   test "the signing link of a recipient is logged without its key" do
     env = Rack::MockRequest.env_for("/bundles/b-1?recipient=tajny-token&locale=sk", "action_dispatch.parameter_filter" => Rails.application.config.filter_parameters)
 

@@ -11,6 +11,6 @@ Rails.application.config.filter_parameters += [
 # parameter name (and hide such attributes in #inspect of records), the patterns only the whole name,
 # so that identifiers such as recipient_uuid or document_id stay readable.
 Rails.application.config.filter_parameters += [
-  :name, :phone, :code, :url, :note, :signed_id, :custom_text, :drawing_data,
-  /\A(signed_)?documents?\z/, /\Arecipients?\z/, /\A(content|file|blob|image|text|q)\z/
+  :name, :phone, :code, :url, :note, :reason, :signed_id, :custom_text, :drawing_data,
+  /\A(signed_)?documents?\z/, /\Arecipients?\z/, /\A(content|files?|blob|image|text|q)\z/
 ]

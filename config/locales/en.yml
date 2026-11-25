@@ -2892,6 +2892,61 @@ en:
       too_large: "The scan is larger than the document size limit allows. Upload smaller photos or a scan with a lower resolution."
       too_many_pages: "A scan can have at most %{count} pages."
       file_too_large: "A single file can be at most %{size} MB."
+    alerts:
+      no_pages: "Upload a scan or photos of the pages first."
+      pages_changed: "The pages changed in the meantime. Check them and submit the scan again."
+    notices:
+      awaiting_review: "Your scan is awaiting review. To sign the document another way, discard the scan first."
+      discarded: "The scan was discarded. You can sign the document another way."
+    show:
+      title: "Signing on paper"
+      intro: "Print the document, sign it with a pen and upload a scan or photos of the pages. The sender, %{sender}, then checks the signature."
+      back: "Back to the choice of a signing method"
+      submit: "Submit for review"
+    steps:
+      download:
+        title: "Download and print the document"
+        button: "Download for printing"
+      sign:
+        title: "Sign it with a pen"
+        description: "Sign the document by hand where a signature is required and fill in what goes there (for example the date)."
+      upload:
+        title: "Upload a scan or photos of the pages"
+        dropzone_title: "Drop a scan or photos of the pages here"
+        dropzone_subtitle: "or click to choose files"
+        file_types: "PDF from a scanner or photos (JPG, PNG, HEIC)"
+        button: "Upload"
+    phone:
+      title: "Take photos of the pages with your phone"
+      description: "Scan the code with your phone's camera. The pages you photograph appear here by themselves."
+    pages:
+      label: "Uploaded pages"
+      page: "Page %{number}"
+      pdf: "PDF scan"
+      add: "Add a page"
+      move_earlier: "Move page %{number} earlier"
+      move_later: "Move page %{number} later"
+      remove: "Remove page %{number}"
+      remove_pdf: "Remove the scan"
+      page_count_mismatch:
+        title:
+          one: "The document has %{count} page, you uploaded %{actual}"
+          other: "The document has %{count} pages, you uploaded %{actual}"
+        message: "Upload all pages so that the sender sees the whole signed document. You can submit it anyway."
+    submitted:
+      title: "Your scan was sent for review"
+      message: "%{sender} will check that the document is signed. When they approve or return the signature, we will email you at %{email}."
+      message_without_email: "%{sender} will check that the document is signed. You will see the result on the signing page."
+      scan: "Uploaded scan"
+      submitted_at: "Submitted %{time}"
+      replace: "Upload another scan"
+      discard: "Discard the scan and sign another way"
+    draft:
+      title: "You have started signing on paper"
+      message: "You have not submitted the uploaded pages for review yet."
+    returned:
+      title: "The sender returned your scan"
+      reviewed: "Returned by %{name}, %{time}"
 
   plan_limits:
     exceeded:
