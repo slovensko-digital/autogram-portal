@@ -265,7 +265,7 @@ class Session < ApplicationRecord
   end
 
   def handle_status_change
-    mark_signer_contract_signed if signed?
+    signer_contract.complete_signature!(at: completed_at || Time.current) if signed?
     touch(:completed_at) unless pending?
     broadcast_status_change
   end
@@ -280,11 +280,6 @@ class Session < ApplicationRecord
     errors.add(:base, :signature_request_limit, sender: contract.tenant.sender_display_name)
   end
 
-  def mark_signer_contract_signed
-    signer_contract.update_column(:signed_at, completed_at || Time.current)
-    contract.record_signature_request_on_signing!(signer_contract.signing_user)
-  end
-
   def broadcast_status_change
     case status
     when "failed"
@@ -292,7 +287,6 @@ class Session < ApplicationRecord
     when "expired"
       broadcast_signing_error("Signing expired")
     when "signed"
-      contract.notify_signed!(signer: signer)
       Turbo::StreamsChannel.broadcast_replace_to(
         self,
         target: "signature_apps_#{contract.uuid}",

@@ -63,6 +63,14 @@ class SignerContract < ApplicationRecord
     signer.user || signer.recipient&.user
   end
 
+  # The one place where a signature becomes complete, whichever way it was made: marks it signed, counts
+  # the signature request and tells the author, except the person who caused the completion.
+  def complete_signature!(at: Time.current, except: signing_user)
+    update_column(:signed_at, at)
+    contract.record_signature_request_on_signing!(signing_user)
+    contract.notify_signed!(signer: signer, except: except)
+  end
+
   def latest_qes_visual_stamp_for(document)
     visual_stamps.qes_preparation.where(document: document).with_attached_file.order(created_at: :desc).first
   end

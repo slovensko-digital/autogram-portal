@@ -167,10 +167,10 @@ class Contract < ApplicationRecord
     bundle.present? && (recipient.present? || bundle.publicly_visible?)
   end
 
-  def notify_signed!(signer: nil)
-    Notification::ContractSignedJob.perform_later(self, signer: signer) if should_notify_author?
+  def notify_signed!(signer: nil, except: signer&.user)
+    Notification::ContractSignedJob.perform_later(self, signer: signer, except: except) if should_notify_author?
 
-    bundle.notify_contract_signed(self, signer) if bundle.present?
+    bundle.notify_contract_signed(self, signer, except: except) if bundle.present?
 
     Turbo::StreamsChannel.broadcast_refresh_to(self)
   end

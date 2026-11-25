@@ -100,6 +100,17 @@ class SignatureRequestFlowsTest < ActionDispatch::IntegrationTest
     assert_not outsider.member_of?(@organization)
   end
 
+  test "whoever completes a bundle for a recipient gets no completion mail" do
+    bundle = request_signature_from_web(as: @owner, filename: "papier.pdf")
+    recipient = add_recipient(bundle, "external@example.com")
+    sign_out @owner
+
+    perform_enqueued_jobs { recipient.recipient_signer.signer_contracts.sole.complete_signature!(except: @owner) }
+
+    assert bundle.reload.completed?
+    assert_empty mails_to(@owner.email).select { |m| m.subject == I18n.t("notification_mailer.bundle_completed.subject") }
+  end
+
   test "with several recipients the bundle waits for all of them and its author is told about each signature" do
     co_owner = confirmed_user("co-owner@firma-abc.sk", tenant: @organization, role: :owner)
     bundle = request_signature_from_web(as: @owner, filename: "spolocna.pdf")
